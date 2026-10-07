@@ -53,6 +53,10 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   y `QueryClientProvider` en `app/` (`query-client.ts`, `providers.tsx`, `router.tsx`);
   `routeTree.gen.ts` versionado e ignorado por linter/formatter. Pruebas de "/" y de ruta
   inexistente.
+- **Automatización de la compuerta**: Husky (`.husky/pre-commit` → `lint-staged`,
+  `.husky/commit-msg` → `commitlint`), lint-staged (Prettier + ESLint sobre lo preparado) y
+  commitlint (Conventional Commits); CI en `.github/workflows/ci.yml` que instala con pnpm y
+  ejecuta `pnpm check`.
 
 ## Siguiente
 
@@ -77,7 +81,7 @@ migración van después, sobre un núcleo ya estable.
       (incluye los nombres de este proyecto de origen) y rutas permitidas
 - [ ] Vitest, Playwright y prueba pgTAP de humo
 - [ ] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic + test + db:test + build)
-- [ ] CI que ejecuta la compuerta completa
+- [x] CI que ejecuta la compuerta completa
 - [ ] `README.md` (levantar el proyecto en 10 minutos), `.env.example`, `.gitignore`
 - [ ] ADR iniciales en `docs/decisions/`: Vite + React como SPA, Supabase, Recharts en lugar
       de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos, independencia
@@ -186,6 +190,11 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   `apps/web`.
 - TypeScript 6 **deprecó `baseUrl`** (error TS5101): el alias `@/*` se define solo con `paths`,
   que resuelve relativo al `tsconfig` de cada paquete.
+- Husky 9 + lint-staged 17 (recibe rutas absolutas): el hook formatea con Prettier y lint-ea
+  `apps/web` con ESLint, filtrando `routeTree.gen.ts`; commitlint 21 con
+  `@commitlint/config-conventional`.
+- CI (`.github/workflows/ci.yml`): checkout + `pnpm/action-setup` + `setup-node` (caché pnpm) +
+  `pnpm install --frozen-lockfile` + `pnpm check`. La versión de pnpm sale de `packageManager`.
 
 ## Registro de sesiones
 
@@ -209,3 +218,5 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: enrutado por carpetas (TanStack Router) y TanStack Query con `QueryClientProvider`
   en `app/`; rutas `__root`, `/` y no encontrado; pruebas de "/" y de ruta inexistente; las reglas
   de fronteras siguen en verde.
+- 2026-10-07: automatización de la compuerta (Husky + lint-staged + commitlint) y CI que ejecuta
+  `pnpm check`; se comprobó que un mensaje de commit inválido es rechazado.
