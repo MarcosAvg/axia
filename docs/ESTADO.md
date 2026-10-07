@@ -21,7 +21,7 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   de ninguna plataforma externa; las integraciones son adaptadores opcionales y aislados.
 - **Proyecto base (Fase 0)**: monorepo pnpm con `apps/web` (`@axia/web`, Vite + React +
   TypeScript) y `packages/shared` (`@axia/shared`); pantalla de inicio "Axia"; scripts raíz
-  `dev`, `build`, `lint`, `typecheck`, `format` y `check`; `.gitignore` y `.env.example`.
+  `dev`, `build`, `lint`, `typecheck`, `test`, `format` y `check`; `.gitignore` y `.env.example`.
 - **React Compiler activo** en Vite con `reactCompilerPreset()` + `@rolldown/plugin-babel`
   (integración oficial para `@vitejs/plugin-react` v6).
 - **Herramientas de cumplimiento activas** (`docs/convenciones-codigo.md`): TypeScript estricto
@@ -34,6 +34,9 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   sin distinguir mayúsculas, y falla si aparecen fuera de `features/integrations/`,
   `supabase/functions/integration-*/`, `docs/integraciones-y-migracion.md`, `docs/ESTADO.md`,
   `docs/decisions/` y `scripts/`. Ya está dentro de `pnpm check`.
+- **Pruebas de frontend (Vitest)**: Vitest + Testing Library + `jest-dom` con entorno jsdom;
+  prueba de humo de la pantalla de inicio (`src/App.test.tsx`, "muestra el nombre de la
+  aplicación"); `pnpm test` en `apps/web` y en la raíz, e incluido en `pnpm check`.
 
 ## Siguiente
 
@@ -136,7 +139,9 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - Versiones (oct 2026): Node 24.14.1, pnpm 12.8.1, Vite 8.3.3, `@vitejs/plugin-react` 6.1.2,
   React 19.3.0, TypeScript `~6.0.2`, ESLint 9.39.5, `eslint-plugin-react-hooks` 7.1.1,
   `eslint-plugin-jsx-a11y` 6.10.2, `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel`
-  0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9.
+  0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9, Vitest 5.0.3, `@testing-library/react` 16.3.3,
+  `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1.
+- **jsdom fijado en `^29`**: jsdom 30 exige Node `^24.15.0` y el equipo tiene 24.14.1.
 - **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
   para ESLint 10; con ESLint 9 todos los plugins tienen sus peers satisfechos.
 - **Prettier ignora `*.md`**: los documentos escritos a mano no se reformatean; `pnpm format`
@@ -163,3 +168,5 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: verificación de independencia del núcleo (`scripts/check-agnostic.mjs` +
   `pnpm check:agnostic`) integrada a `pnpm check`. Se probó el fallo con un nombre prohibido
   temporal en `apps/web/src/App.tsx` y se revirtió.
+- 2026-10-07: pruebas de frontend (Vitest + Testing Library + `jest-dom`, entorno jsdom) con
+  prueba real de la pantalla de inicio; `pnpm test` agregado a `pnpm check`.

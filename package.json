@@ -8,9 +8,10 @@
     "build": "pnpm --filter @axia/web build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
     "format": "prettier --write .",
     "check:agnostic": "node scripts/check-agnostic.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm build"
+    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm test && pnpm build"
   },
   "devDependencies": {
     "prettier": "^3.9.9"
