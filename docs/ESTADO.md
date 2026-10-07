@@ -37,6 +37,13 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
 - **Pruebas de frontend (Vitest)**: Vitest + Testing Library + `jest-dom` con entorno jsdom;
   prueba de humo de la pantalla de inicio (`src/App.test.tsx`, "muestra el nombre de la
   aplicación"); `pnpm test` en `apps/web` y en la raíz, e incluido en `pnpm check`.
+- **Estructura por features** en `apps/web/src` (`app/`, `features/` con `features/integrations/`,
+  `components/ui`, `components/shared`, `lib/`; carpetas vacías con `.gitkeep`) y **reglas de
+  dependencia** con dependency-cruiser (`.dependency-cruiser.cjs` → `pnpm check:boundaries`):
+  features solo importan el `index.ts` de otro feature; `components/` y `lib/` no importan de
+  `features/`/`routes/`; el núcleo no importa de `features/integrations/`; sin ciclos; el cliente
+  de Supabase solo desde `features/*/api` y `lib/`; `domain/` sin React/TanStack/Supabase/Dexie.
+  Ya está dentro de `pnpm check`.
 
 ## Siguiente
 
@@ -156,6 +163,10 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   config con `typescript-eslint`, `@eslint/js` y `eslint-plugin-react-hooks` (`recommended-latest`).
 - `pnpm check:agnostic` recorre el árbol (omite `node_modules`, `.git`, `dist`, etc.), salta
   binarios por byte nulo y reporta `archivo:línea` junto con el nombre encontrado.
+- dependency-cruiser 18.5.0 (raíz) con `typescript` 6.0.3 a su lado (lo usa como transpiler);
+  `tsPreCompilationDeps: true`. Las reglas de dependencias npm coinciden también con la ruta
+  resuelta bajo `node_modules` (React, TanStack...), no solo con el nombre del módulo.
+- Todavía **no** se creó `routes/` (llega con TanStack Router); la regla que la menciona ya está.
 
 ## Registro de sesiones
 
@@ -170,3 +181,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   temporal en `apps/web/src/App.tsx` y se revirtió.
 - 2026-10-07: pruebas de frontend (Vitest + Testing Library + `jest-dom`, entorno jsdom) con
   prueba real de la pantalla de inicio; `pnpm test` agregado a `pnpm check`.
+- 2026-10-07: estructura por features y reglas de dependencia (dependency-cruiser,
+  `pnpm check:boundaries`) integradas a `pnpm check`. Las seis reglas se probaron con violaciones
+  temporales (fallan) y se revirtieron.

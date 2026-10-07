@@ -11,9 +11,12 @@
     "test": "pnpm -r --if-present test",
     "format": "prettier --write .",
     "check:agnostic": "node scripts/check-agnostic.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm test && pnpm build"
+    "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm check:boundaries && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "prettier": "^3.9.9"
+    "dependency-cruiser": "^18.5.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3"
   }
 }
