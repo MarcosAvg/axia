@@ -1,0 +1,28 @@
+# Dependencias y compilación
+node_modules
+dist
+dist-ssr
+*.local
+
+# Variables de entorno (la clave pública va en .env.local; nunca se sube)
+.env
+.env.*
+!.env.example
+
+# Supabase
+supabase/.branches
+supabase/.temp
+deploy/supabase/.env
+deploy/supabase/volumes
+
+# Registros y reportes
+*.log
+pnpm-debug.log*
+playwright-report
+test-results
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

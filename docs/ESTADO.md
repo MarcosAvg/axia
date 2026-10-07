@@ -19,10 +19,16 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   autoalojado), Recharts vía shadcn/ui, Dexie para modo sin conexión, monorepo pnpm.
 - Decisión de arquitectura: **Axia es una plataforma propia y agnóstica**. El núcleo no depende
   de ninguna plataforma externa; las integraciones son adaptadores opcionales y aislados.
+- **Proyecto base (Fase 0)**: monorepo pnpm con `apps/web` (`@axia/web`, Vite + React +
+  TypeScript) y `packages/shared` (`@axia/shared`); pantalla de inicio "Axia"; scripts raíz
+  `dev`, `build`, `lint` y `typecheck`; `.gitignore` y `.env.example`.
+- **React Compiler activo** en Vite con `reactCompilerPreset()` + `@rolldown/plugin-babel`
+  (integración oficial para `@vitejs/plugin-react` v6); ESLint 10 con `eslint-plugin-react-hooks`.
 
 ## Siguiente
 
-Fase 0, tarea 1: crear el monorepo siguiendo `docs/configuracion-inicial.md`.
+Fase 0, tarea 2: Tailwind y shadcn/ui (incluido `chart`/Recharts), TanStack Router (rutas por
+carpetas) y TanStack Query sobre el proyecto base ya creado.
 
 ## Hoja de ruta
 
@@ -117,8 +123,20 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 
 ## Notas de entorno
 
-_(el agente anota aquí comandos que funcionan, versiones instaladas y particularidades del equipo)_
+- Versiones (oct 2026): Node 24.14.1, pnpm 12.8.1, Vite 8.3.3, `@vitejs/plugin-react` 6.1.2,
+  React 19.3.0, TypeScript `~6.0.2`, ESLint 10.12.0, `eslint-plugin-react-hooks` 7.1.1,
+  `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel` 0.2.4, `@babel/core` 8.0.6.
+- **TypeScript fijado en `~6.0.2`**: `typescript-eslint` 8.71.1 aún no soporta TS 7. Revisar
+  cuando haya una versión de `typescript-eslint` compatible con TS 7.
+- `@vitejs/plugin-react` v6 **quitó la opción `babel` en línea**: el compilador se integra con
+  `reactCompilerPreset()` + `@rolldown/plugin-babel` (guía oficial de React Compiler para Vite).
+- Verificación del compilador: en dev, el módulo transformado importa de `react/compiler-runtime`
+  y usa `Symbol.for("react.memo_cache_sentinel")`; en el build empaquetado aparece el mismo patrón.
+- La plantilla de `create-vite` v9 trae **oxlint**, no ESLint: se reemplazó por ESLint 10 flat
+  config con `typescript-eslint`, `@eslint/js` y `eslint-plugin-react-hooks` (`recommended-latest`).
 
 ## Registro de sesiones
 
-_(una línea por sesión: fecha, qué se hizo, qué quedó pendiente)_
+- 2026-10-07: proyecto base (monorepo pnpm, Vite + React + TypeScript, React Compiler, ESLint).
+  `pnpm lint`, `pnpm typecheck` y `pnpm build` en verde; `pnpm dev` sirve "Axia". Rama
+  `chore/proyecto-base` (sin integrar a `main`: la compuerta `pnpm check` aún no existe).
