@@ -2,5 +2,8 @@ node_modules
 dist
 pnpm-lock.yaml
 
+# Generado por TanStack Router
+apps/web/src/routeTree.gen.ts
+
 # Documentación escrita a mano: no se reformatea automáticamente
 *.md

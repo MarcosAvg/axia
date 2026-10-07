@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -8,7 +9,11 @@ import {
 } from '@/components/ui/card'
 import { messages } from '@/lib/i18n'
 
-export function App() {
+export const Route = createFileRoute('/')({
+  component: HomePage,
+})
+
+function HomePage() {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 text-foreground">
       <header className="flex flex-col items-center gap-1 text-center">

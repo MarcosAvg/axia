@@ -8,4 +8,9 @@ export const messages = {
     description: 'Aquí verás el estado de cada tiquet y en qué se detiene.',
     action: 'Comenzar',
   },
+  notFound: {
+    title: 'No encontrado',
+    description: 'La página que buscas no existe o se movió.',
+    action: 'Volver al inicio',
+  },
 } as const

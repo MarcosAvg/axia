@@ -48,11 +48,16 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `@tailwindcss/vite`; alias `@` → `src` en TypeScript, Vite y Vitest; componentes `button`,
   `card`, `input` y `label` en `components/ui/`; pantalla de inicio con `Card` y `Button` y textos
   en `lib/i18n.ts` (es-MX). **Sin `chart`/Recharts** todavía.
+- **Enrutado por carpetas + TanStack Query**: `@tanstack/router-plugin` (antes que el de React);
+  rutas `__root` (con `notFoundComponent`), `index` ("/") y el caso de no encontrado; `QueryClient`
+  y `QueryClientProvider` en `app/` (`query-client.ts`, `providers.tsx`, `router.tsx`);
+  `routeTree.gen.ts` versionado e ignorado por linter/formatter. Pruebas de "/" y de ruta
+  inexistente.
 
 ## Siguiente
 
-Fase 0, tarea 3: TanStack Router (rutas por carpetas) y TanStack Query. Tailwind y shadcn/ui ya
-están; el componente `chart`/Recharts llegará con las métricas.
+Fase 0, tarea 4: Supabase local (`supabase start`, `pnpm db:start`/`db:reset`), cliente tipado y
+`pnpm db:types`.
 
 ## Hoja de ruta
 
@@ -170,7 +175,12 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - dependency-cruiser 18.5.0 (raíz) con `typescript` 6.0.3 a su lado (lo usa como transpiler);
   `tsPreCompilationDeps: true`. Las reglas de dependencias npm coinciden también con la ruta
   resuelta bajo `node_modules` (React, TanStack...), no solo con el nombre del módulo.
-- Todavía **no** se creó `routes/` (llega con TanStack Router); la regla que la menciona ya está.
+- `routeTree.gen.ts` se versiona (como en el quickstart oficial) para que `pnpm typecheck` y CI
+  funcionen sin ejecutar Vite; está en los ignores de ESLint y Prettier y no se edita a mano.
+- El plugin `@tanstack/router-plugin` va **antes** del plugin de React en `vite.config.ts`; las
+  rutas viven en `src/routes/` (los archivos de prueba no pueden ir ahí: serían rutas).
+- Las pruebas definen `window.scrollTo` en `src/test/setup.ts` (jsdom no lo implementa) para
+  silenciar el aviso de TanStack Router.
 - shadcn/ui preset `radix-nova` (base radix) agrega `cn`, `radix-ui`, `shadcn` (por
   `shadcn/tailwind.css`), `@fontsource-variable/geist` y `tw-animate-css`; `components.json` en
   `apps/web`.
@@ -196,3 +206,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: Tailwind (plugin de Vite) y shadcn/ui con el preset `radix-nova`; alias `@` en
   TypeScript/Vite/Vitest; componentes `button`, `card`, `input` y `label`; pantalla de inicio con
   `Card`/`Button` y textos en `lib/i18n.ts`; prueba actualizada. `pnpm check` en verde.
+- 2026-10-07: enrutado por carpetas (TanStack Router) y TanStack Query con `QueryClientProvider`
+  en `app/`; rutas `__root`, `/` y no encontrado; pruebas de "/" y de ruta inexistente; las reglas
+  de fronteras siguen en verde.
