@@ -44,11 +44,15 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `features/`/`routes/`; el núcleo no importa de `features/integrations/`; sin ciclos; el cliente
   de Supabase solo desde `features/*/api` y `lib/`; `domain/` sin React/TanStack/Supabase/Dexie.
   Ya está dentro de `pnpm check`.
+- **Tailwind + shadcn/ui** (guía oficial para Vite, preset `radix-nova`): plugin
+  `@tailwindcss/vite`; alias `@` → `src` en TypeScript, Vite y Vitest; componentes `button`,
+  `card`, `input` y `label` en `components/ui/`; pantalla de inicio con `Card` y `Button` y textos
+  en `lib/i18n.ts` (es-MX). **Sin `chart`/Recharts** todavía.
 
 ## Siguiente
 
-Fase 0, tarea 2: Tailwind y shadcn/ui (incluido `chart`/Recharts), TanStack Router (rutas por
-carpetas) y TanStack Query sobre el proyecto base ya creado.
+Fase 0, tarea 3: TanStack Router (rutas por carpetas) y TanStack Query. Tailwind y shadcn/ui ya
+están; el componente `chart`/Recharts llegará con las métricas.
 
 ## Hoja de ruta
 
@@ -167,6 +171,11 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   `tsPreCompilationDeps: true`. Las reglas de dependencias npm coinciden también con la ruta
   resuelta bajo `node_modules` (React, TanStack...), no solo con el nombre del módulo.
 - Todavía **no** se creó `routes/` (llega con TanStack Router); la regla que la menciona ya está.
+- shadcn/ui preset `radix-nova` (base radix) agrega `cn`, `radix-ui`, `shadcn` (por
+  `shadcn/tailwind.css`), `@fontsource-variable/geist` y `tw-animate-css`; `components.json` en
+  `apps/web`.
+- TypeScript 6 **deprecó `baseUrl`** (error TS5101): el alias `@/*` se define solo con `paths`,
+  que resuelve relativo al `tsconfig` de cada paquete.
 
 ## Registro de sesiones
 
@@ -184,3 +193,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: estructura por features y reglas de dependencia (dependency-cruiser,
   `pnpm check:boundaries`) integradas a `pnpm check`. Las seis reglas se probaron con violaciones
   temporales (fallan) y se revirtieron.
+- 2026-10-07: Tailwind (plugin de Vite) y shadcn/ui con el preset `radix-nova`; alias `@` en
+  TypeScript/Vite/Vitest; componentes `button`, `card`, `input` y `label`; pantalla de inicio con
+  `Card`/`Button` y textos en `lib/i18n.ts`; prueba actualizada. `pnpm check` en verde.
