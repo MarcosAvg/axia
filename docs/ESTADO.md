@@ -57,6 +57,10 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `.husky/commit-msg` → `commitlint`), lint-staged (Prettier + ESLint sobre lo preparado) y
   commitlint (Conventional Commits); CI en `.github/workflows/ci.yml` que instala con pnpm y
   ejecuta `pnpm check`.
+- **Documentación de arranque**: `README.md` (qué es Axia, requisitos, arranque en 10 minutos y
+  comandos) y seis ADR iniciales en `docs/decisions/` (Vite + React con React Compiler, Supabase,
+  Recharts en lugar de ECharts, cola offline con Dexie, bloqueos dirigidos por datos e
+  independencia del núcleo).
 
 ## Siguiente
 
@@ -70,23 +74,30 @@ migración van después, sobre un núcleo ya estable.
 
 ### Fase 0 — Arranque (sin dependencias de negocio)
 - [ ] Monorepo pnpm: `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`, `scripts/`
+      (faltan `supabase/` y `deploy/`)
 - [ ] App Vite + React + TypeScript con Tailwind, shadcn/ui (incluido `chart`/Recharts),
-      TanStack Router (rutas por carpetas) y TanStack Query
+      TanStack Router (rutas por carpetas) y TanStack Query (falta el componente `chart`/Recharts,
+      que llega con las métricas)
 - [ ] Supabase local funcionando, cliente tipado, `pnpm db:types`
 - [ ] PWA configurada (manifest, iconos, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
       límites de tamaño, `dependency-cruiser` o `eslint-plugin-boundaries`, Prettier, knip,
-      Husky + lint-staged, commitlint
+      Husky + lint-staged, commitlint (falta `knip`)
 - [x] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
       (incluye los nombres de este proyecto de origen) y rutas permitidas
-- [ ] Vitest, Playwright y prueba pgTAP de humo
-- [ ] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic + test + db:test + build)
+- [ ] Vitest, Playwright y prueba pgTAP de humo (hecho: Vitest; faltan Playwright y pgTAP)
+- [x] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic +
+      check:boundaries + test + build; `db:test` se sumará con Supabase)
 - [x] CI que ejecuta la compuerta completa
-- [ ] `README.md` (levantar el proyecto en 10 minutos), `.env.example`, `.gitignore`
-- [ ] ADR iniciales en `docs/decisions/`: Vite + React como SPA, Supabase, Recharts en lugar
+- [x] `README.md` (levantar el proyecto en 10 minutos), `.env.example`, `.gitignore`
+- [x] ADR iniciales en `docs/decisions/`: Vite + React como SPA, Supabase, Recharts en lugar
       de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos, independencia
       del núcleo
-- [ ] Pantalla de inicio "Axia" visible y `pnpm check` en verde
+- [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
+
+**Falta para cerrar la Fase 0:** Supabase local y `pnpm db:types`, PWA (manifest e iconos) y
+esqueleto Dexie (`outbox`, `evidencias`), Playwright y prueba pgTAP de humo, `knip`, los
+directorios `supabase/` y `deploy/`, y el componente `chart`/Recharts (llega con las métricas).
 
 ### Fase 1 — Base de datos núcleo
 - [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
@@ -220,3 +231,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   de fronteras siguen en verde.
 - 2026-10-07: automatización de la compuerta (Husky + lint-staged + commitlint) y CI que ejecuta
   `pnpm check`; se comprobó que un mensaje de commit inválido es rechazado.
+- 2026-10-07: documentación de arranque: `README.md` y seis ADR iniciales en `docs/decisions/`;
+  Fase 0 marcada y con lo pendiente explícito (Supabase local, PWA, Dexie, Playwright, pgTAP,
+  `knip`, `supabase/`/`deploy/` y `chart`/Recharts).
