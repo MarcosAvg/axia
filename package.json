@@ -7,6 +7,11 @@
     "dev": "pnpm --filter @axia/web dev",
     "build": "pnpm --filter @axia/web build",
     "lint": "pnpm -r --if-present lint",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "format": "prettier --write .",
+    "check": "pnpm lint && pnpm typecheck && pnpm build"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9"
   }
 }

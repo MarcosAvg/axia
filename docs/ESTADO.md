@@ -21,9 +21,14 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   de ninguna plataforma externa; las integraciones son adaptadores opcionales y aislados.
 - **Proyecto base (Fase 0)**: monorepo pnpm con `apps/web` (`@axia/web`, Vite + React +
   TypeScript) y `packages/shared` (`@axia/shared`); pantalla de inicio "Axia"; scripts raíz
-  `dev`, `build`, `lint` y `typecheck`; `.gitignore` y `.env.example`.
+  `dev`, `build`, `lint`, `typecheck`, `format` y `check`; `.gitignore` y `.env.example`.
 - **React Compiler activo** en Vite con `reactCompilerPreset()` + `@rolldown/plugin-babel`
-  (integración oficial para `@vitejs/plugin-react` v6); ESLint 10 con `eslint-plugin-react-hooks`.
+  (integración oficial para `@vitejs/plugin-react` v6).
+- **Herramientas de cumplimiento activas** (`docs/convenciones-codigo.md`): TypeScript estricto
+  (`strict`, `noUncheckedIndexedAccess`, `noFallthroughCasesInSwitch`) en un `tsconfig.base.json`
+  compartido por todos los paquetes; ESLint con `typescript-eslint`, `eslint-plugin-react-hooks`
+  y `eslint-plugin-jsx-a11y`, más los límites de tamaño/complejidad y `no-console`,
+  `no-explicit-any` y `ban-ts-comment`; Prettier con el script `pnpm format`.
 
 ## Siguiente
 
@@ -124,19 +129,27 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 ## Notas de entorno
 
 - Versiones (oct 2026): Node 24.14.1, pnpm 12.8.1, Vite 8.3.3, `@vitejs/plugin-react` 6.1.2,
-  React 19.3.0, TypeScript `~6.0.2`, ESLint 10.12.0, `eslint-plugin-react-hooks` 7.1.1,
-  `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel` 0.2.4, `@babel/core` 8.0.6.
+  React 19.3.0, TypeScript `~6.0.2`, ESLint 9.39.5, `eslint-plugin-react-hooks` 7.1.1,
+  `eslint-plugin-jsx-a11y` 6.10.2, `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel`
+  0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9.
+- **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
+  para ESLint 10; con ESLint 9 todos los plugins tienen sus peers satisfechos.
+- **Prettier ignora `*.md`**: los documentos escritos a mano no se reformatean; `pnpm format`
+  actúa solo sobre código y configuración.
 - **TypeScript fijado en `~6.0.2`**: `typescript-eslint` 8.71.1 aún no soporta TS 7. Revisar
   cuando haya una versión de `typescript-eslint` compatible con TS 7.
 - `@vitejs/plugin-react` v6 **quitó la opción `babel` en línea**: el compilador se integra con
   `reactCompilerPreset()` + `@rolldown/plugin-babel` (guía oficial de React Compiler para Vite).
 - Verificación del compilador: en dev, el módulo transformado importa de `react/compiler-runtime`
   y usa `Symbol.for("react.memo_cache_sentinel")`; en el build empaquetado aparece el mismo patrón.
-- La plantilla de `create-vite` v9 trae **oxlint**, no ESLint: se reemplazó por ESLint 10 flat
+- La plantilla de `create-vite` v9 trae **oxlint**, no ESLint: se reemplazó por ESLint flat
   config con `typescript-eslint`, `@eslint/js` y `eslint-plugin-react-hooks` (`recommended-latest`).
 
 ## Registro de sesiones
 
 - 2026-10-07: proyecto base (monorepo pnpm, Vite + React + TypeScript, React Compiler, ESLint).
   `pnpm lint`, `pnpm typecheck` y `pnpm build` en verde; `pnpm dev` sirve "Axia". Rama
-  `chore/proyecto-base` (sin integrar a `main`: la compuerta `pnpm check` aún no existe).
+  `chore/proyecto-base`.
+- 2026-10-07: herramientas de cumplimiento (TypeScript estricto, ESLint con los límites de la
+  sección 14 y `jsx-a11y`, Prettier y `pnpm check`). Cada límite se verificó con archivos de
+  prueba temporales (lint/typecheck fallan) que luego se borraron; `pnpm check` en verde.

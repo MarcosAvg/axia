@@ -1,7 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    "docs/convenciones-codigo.md",
-    "docs/dominio.md"
-  ]
+  "instructions": ["docs/convenciones-codigo.md", "docs/dominio.md"]
 }
