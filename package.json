@@ -9,7 +9,8 @@
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "format": "prettier --write .",
-    "check": "pnpm lint && pnpm typecheck && pnpm build"
+    "check:agnostic": "node scripts/check-agnostic.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm build"
   },
   "devDependencies": {
     "prettier": "^3.9.9"

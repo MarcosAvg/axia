@@ -29,6 +29,11 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   compartido por todos los paquetes; ESLint con `typescript-eslint`, `eslint-plugin-react-hooks`
   y `eslint-plugin-jsx-a11y`, más los límites de tamaño/complejidad y `no-console`,
   `no-explicit-any` y `ban-ts-comment`; Prettier con el script `pnpm format`.
+- **Independencia del núcleo verificable** (`pnpm check:agnostic`): `scripts/check-agnostic.mjs`
+  busca la lista de `scripts/agnostic-names.json` (`atenda`, `google sheets`, `google drive`),
+  sin distinguir mayúsculas, y falla si aparecen fuera de `features/integrations/`,
+  `supabase/functions/integration-*/`, `docs/integraciones-y-migracion.md`, `docs/ESTADO.md`,
+  `docs/decisions/` y `scripts/`. Ya está dentro de `pnpm check`.
 
 ## Siguiente
 
@@ -49,7 +54,7 @@ migración van después, sobre un núcleo ya estable.
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
       límites de tamaño, `dependency-cruiser` o `eslint-plugin-boundaries`, Prettier, knip,
       Husky + lint-staged, commitlint
-- [ ] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
+- [x] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
       (incluye los nombres de este proyecto de origen) y rutas permitidas
 - [ ] Vitest, Playwright y prueba pgTAP de humo
 - [ ] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic + test + db:test + build)
@@ -144,6 +149,8 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   y usa `Symbol.for("react.memo_cache_sentinel")`; en el build empaquetado aparece el mismo patrón.
 - La plantilla de `create-vite` v9 trae **oxlint**, no ESLint: se reemplazó por ESLint flat
   config con `typescript-eslint`, `@eslint/js` y `eslint-plugin-react-hooks` (`recommended-latest`).
+- `pnpm check:agnostic` recorre el árbol (omite `node_modules`, `.git`, `dist`, etc.), salta
+  binarios por byte nulo y reporta `archivo:línea` junto con el nombre encontrado.
 
 ## Registro de sesiones
 
@@ -153,3 +160,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: herramientas de cumplimiento (TypeScript estricto, ESLint con los límites de la
   sección 14 y `jsx-a11y`, Prettier y `pnpm check`). Cada límite se verificó con archivos de
   prueba temporales (lint/typecheck fallan) que luego se borraron; `pnpm check` en verde.
+- 2026-10-07: verificación de independencia del núcleo (`scripts/check-agnostic.mjs` +
+  `pnpm check:agnostic`) integrada a `pnpm check`. Se probó el fallo con un nombre prohibido
+  temporal en `apps/web/src/App.tsx` y se revirtió.
