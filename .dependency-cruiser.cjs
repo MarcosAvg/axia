@@ -11,8 +11,12 @@ module.exports = {
     {
       name: 'no-core-to-integrations',
       severity: 'error',
+      // El núcleo (features, lib, components) no importa de features/integrations/; las rutas
+      // son la capa de composición y sí pueden montar la interfaz del adaptador aislado.
       comment: 'El núcleo no importa de features/integrations/ (sección 4).',
-      from: { pathNot: '^apps/web/src/features/integrations/' },
+      from: {
+        pathNot: '^(apps/web/src/features/integrations/|apps/web/src/routes/)',
+      },
       to: { path: '^apps/web/src/features/integrations/' },
     },
     {

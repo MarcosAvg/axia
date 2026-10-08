@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 6A cerrada (infraestructura de importación) — siguiente: 6B (adaptador CSV/Excel)
+**Fase actual:** 6B cerrada (adaptador CSV/Excel) — siguiente: 6C (verificación) y Fase 7
 
 ## En curso
 
-_(vacío)_ — La **Fase 6A** quedó cerrada: infraestructura genérica de importación, permiso
-`data.import` y administración (`/admin/integraciones`). Siguen **6B** (adaptador CSV/Excel; requiere
-las respuestas #6–#9), **6C** (verificación de métricas) y **Fase 7** (producción). Sin push a `origin`.
+_(vacío)_ — La **Fase 6B** quedó cerrada: adaptador CSV/Excel aislado, dry run con reporte de calidad,
+resolución de alias/estatus e importación idempotente con asignación de técnico. Siguen **6C**
+(verificación de métricas) y **Fase 7** (producción). Sin push a `origin`.
 
 ## Hecho
 
@@ -199,13 +199,19 @@ las respuestas #6–#9), **6C** (verificación de métricas) y **Fase 7** (produ
     el número original y continúa la secuencia); evento `imported` (`source='import'`).
   - Administración `/admin/integraciones` (mapeo de estatus y lotes). ADR 0029.
   - Compuerta completa en verde: 372 pgTAP, 120 Vitest, 12 Playwright.
+- **Fase 6B — adaptador CSV/Excel (2026-10-08)**, rama `feat/fase-6b-adaptador` (fusionada
+  localmente a `main`; **sin push**):
+  - Feature `integrations` aislada: lectura (papaparse/exceljs), normalización pura (cabeceras,
+    fechas en la zona configurada, marcadores → `NULL`), dry run con reporte de calidad, resolución
+    de alias/estatus e importación idempotente; asignación del técnico con `import_ticket_assign`.
+  - Se permite a `routes/` importar integrations (frontera ajustada). ADR 0030.
+  - Compuerta completa en verde: 377 pgTAP, 125 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Fase 6B — adaptador CSV/Excel** de la fuente heredada (lectura, normalización, dry run con
-reporte de calidad, resolución de alias y upsert), en `features/integrations/**`; requiere las
-respuestas #6–#9. Después, **6C** (verificación de métricas contra la fuente) y **6D** (convivencia,
-opcional). Al final, **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación).
+**Fase 6C — verificación**: que las **métricas base** de Axia coincidan con las cifras actuales de la
+fuente para el mismo conjunto (con datos ficticios equivalentes). Después, **6D** (convivencia,
+opcional) y **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación).
 
 ## Hoja de ruta
 
@@ -299,8 +305,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] **6A** Infraestructura genérica de importación: `import_batches`, `import_records`,
       `catalog_aliases`, `import_status_map`, RPCs y permiso `data.import`; administración
       (`/admin/integraciones`) — ADR 0029
-- [ ] **6B** Adaptador CSV/Excel de la fuente heredada (dry run, alias y reporte de calidad);
-      requiere las respuestas #6–#9
+- [x] **6B** Adaptador CSV/Excel de la fuente heredada: dry run con reporte de calidad, resolución
+      de alias y estatus, e importación idempotente con asignación del técnico — ADR 0030
 - [ ] **6C** Verificación: las métricas base coinciden con las cifras actuales de la fuente
 - [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
 
@@ -321,10 +327,10 @@ concreta, opciones y recomendación.
 | 3 | Zona horaria de la institución y horario laboral para métricas | Fase 5 | **Resuelta (diseño)**: una zona para la instancia (`America/Mexico_City`; confirmar si difiere), cobertura por equipo (Mantenimiento 06:00–20:00; resto 08:00–17:00 L–V), extra separado y festivos oficiales MX editables (ADR 0022) |
 | 4 | Formato del número de tiquet | Fase 1 | **Resuelta**: RN-25 (UUID interno + consecutivo global + folio por patrón) |
 | 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 5 | **Resuelta**: configurables por prioridad y tipo de servicio (el tipo sobrescribe), medidos sobre la resolución en el reloj de la instancia; `NULL` = sin SLA (ADR 0027) |
-| 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 6 | Pendiente |
-| 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 6 | Pendiente |
-| 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 6 (hay supuesto provisional) | Pendiente |
-| 9 | ¿Más de una pestaña o año en la hoja? ¿Volumen aproximado? | Fase 6 | Pendiente |
+| 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 6 | **Resuelta (parcial)**: se mapean desde `/admin/integraciones` (`import_status_map`); se afina con los valores reales |
+| 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 6 | **Resuelta**: archivo **CSV/Excel** (adaptador en la Fase 6B) |
+| 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 6 | **Resuelta**: asignación al técnico |
+| 9 | ¿Más de una pestaña o año en la hoja? ¿Volumen aproximado? | Fase 6 | Pendiente (el adaptador lee la primera hoja) |
 | 10 | ¿La recaptura del técnico exige aceptación de supervisor **y** solicitante? | Fase 1 | **Resuelta**: sin aprobación; se aplica, se avisa y la disconformidad va por reclamación |
 | 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | **Resuelta**: "primero gana" |
 | 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | **Resuelta**: una instancia por base |

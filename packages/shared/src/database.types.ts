@@ -3833,6 +3833,14 @@ export type Database = {
         Returns: undefined
       }
       import_system: { Args: { p_system: string }; Returns: undefined }
+      import_ticket_assign: {
+        Args: {
+          p_assigned_at?: string
+          p_technician_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       import_ticket_upsert: {
         Args: { p_data: Json; p_external_id: string; p_system: string }
         Returns: string
