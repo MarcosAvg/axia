@@ -7,6 +7,7 @@ export const authMessages = {
     tickets: 'Tiquets',
     myWork: 'Mi trabajo',
     inbox: 'Bandeja',
+    metrics: 'Métricas',
     profile: 'Mi perfil',
     admin: 'Administración',
   },

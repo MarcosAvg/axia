@@ -8,9 +8,11 @@
 
 ## En curso
 
-_(vacío)_ — La administración de calendarios y la zona horaria en pantalla quedaron cerradas.
-La siguiente tarea es la **Fase 5B**: feature `metrics` (tableros con Recharts, filtros y
-exportación) sobre las vistas de indicadores ya existentes. Sin push a `origin`.
+**Fase 5B — Tableros y exportación** (rama `feat/fase-5b-tableros`).
+1. Base: Recharts (MIT) y componente `chart`; feature `metrics`; ruta `/metricas` con permiso `metrics.view`.
+2. Datos: API sobre `v_ticket_metrics_base` y vistas agregadas; filtros de fecha y dimensión; agregación con funciones puras.
+3. Tablero: KPI, volumen en el tiempo, por dimensión, pausas por motivo y aging.
+4. Exportación CSV. ADR, docs y `pnpm check`. Sin push.
 
 ## Hecho
 

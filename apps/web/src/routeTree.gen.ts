@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
+import { Route as AuthenticatedMetricasRouteImport } from './routes/_authenticated/metricas'
 import { Route as AuthenticatedMiTrabajoRouteImport } from './routes/_authenticated/mi-trabajo'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -49,6 +50,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMetricasRoute = AuthenticatedMetricasRouteImport.update({
+  id: '/metricas',
+  path: '/metricas',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedMiTrabajoRoute = AuthenticatedMiTrabajoRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/inbox': typeof AuthenticatedInboxRoute
+  '/metricas': typeof AuthenticatedMetricasRoute
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/metricas': typeof AuthenticatedMetricasRoute
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/': typeof AuthenticatedIndexRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
+  '/_authenticated/metricas': typeof AuthenticatedMetricasRoute
   '/_authenticated/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin'
     | '/inbox'
+    | '/metricas'
     | '/mi-trabajo'
     | '/perfil'
     | '/admin/ambitos'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/inbox'
+    | '/metricas'
     | '/mi-trabajo'
     | '/perfil'
     | '/'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/admin'
     | '/_authenticated/inbox'
+    | '/_authenticated/metricas'
     | '/_authenticated/mi-trabajo'
     | '/_authenticated/perfil'
     | '/_authenticated/'
@@ -272,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox'
       preLoaderRoute: typeof AuthenticatedInboxRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/metricas': {
+      id: '/_authenticated/metricas'
+      path: '/metricas'
+      fullPath: '/metricas'
+      preLoaderRoute: typeof AuthenticatedMetricasRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/mi-trabajo': {
@@ -387,6 +406,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
+  AuthenticatedMetricasRoute: typeof AuthenticatedMetricasRoute
   AuthenticatedMiTrabajoRoute: typeof AuthenticatedMiTrabajoRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -398,6 +418,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
+  AuthenticatedMetricasRoute: AuthenticatedMetricasRoute,
   AuthenticatedMiTrabajoRoute: AuthenticatedMiTrabajoRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

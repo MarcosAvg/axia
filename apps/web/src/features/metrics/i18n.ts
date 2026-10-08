@@ -1,0 +1,64 @@
+// Textos de métricas (es-MX).
+
+import type { Dimension } from './domain/metrics'
+
+export const dimensionLabels: Record<Dimension, string> = {
+  team: 'Equipo',
+  building: 'Edificio',
+  category: 'Categoría',
+  dependency: 'Dependencia',
+}
+
+export const metricsMessages = {
+  title: 'Métricas',
+  subtitle: 'Indicadores de los tiquets que puedes ver.',
+  loading: 'Cargando…',
+  error: 'No se pudieron cargar las métricas.',
+  empty: 'No hay datos con estos filtros.',
+  filters: {
+    title: 'Filtros',
+    from: 'Desde',
+    to: 'Hasta',
+    building: 'Edificio',
+    team: 'Equipo',
+    category: 'Categoría',
+    dependency: 'Dependencia',
+    all: 'Todos',
+    clear: 'Limpiar',
+  },
+  kpi: {
+    tickets: 'Tiquets',
+    active: 'Trabajo activo',
+    activeExtra: 'Fuera de horario',
+    total: 'Tiempo total',
+    net: 'Tiempo neto',
+    response: 'Respuesta',
+    assignment: 'Asignación',
+    validation: 'Validación',
+    reassignment: 'Reasignación',
+    recapture: 'Recaptura',
+    reopen: 'Reapertura',
+    firstFix: 'Primera resolución',
+  },
+  charts: {
+    volume: 'Tiquets por día',
+    byDimension: 'Promedio por dimensión',
+    pauses: 'Pausas por motivo',
+  },
+  table: {
+    dimension: 'Dimensión',
+    tickets: 'Tiquets',
+    avgActive: 'Trabajo activo',
+    avgTotal: 'Tiempo total',
+    extra: 'Fuera de horario',
+    reassignment: 'Reasignación',
+    recapture: 'Recaptura',
+  },
+  aging: {
+    title: 'Antigüedad de pendientes',
+    ticket: 'Folio',
+    status: 'Estado',
+    age: 'Antigüedad',
+  },
+  export: 'Exportar CSV',
+} as const

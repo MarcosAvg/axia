@@ -35,6 +35,11 @@ export function AppShell() {
             <Link to="/inbox" className={navLinkClass}>
               {authMessages.nav.inbox}
             </Link>
+            {can(identity, 'metrics.view') && (
+              <Link to="/metricas" className={navLinkClass}>
+                {authMessages.nav.metrics}
+              </Link>
+            )}
             <Link to="/perfil" className={navLinkClass}>
               {authMessages.nav.profile}
             </Link>
