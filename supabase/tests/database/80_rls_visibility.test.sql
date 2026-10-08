@@ -10,16 +10,15 @@ select cmp_ok((select count(*)::int from public.reasons), '>', 0, 'se sembraron 
 select cmp_ok((select count(*)::int from public.priorities), '>=', 4, 'se sembraron prioridades');
 
 -- Fixtures.
-insert into auth.users (id) values
-  ('00000000-0000-0000-0000-000000000001'),
-  ('00000000-0000-0000-0000-000000000002'),
-  ('00000000-0000-0000-0000-000000000003'),
-  ('00000000-0000-0000-0000-000000000004');
-insert into public.profiles (id, full_name) values
-  ('00000000-0000-0000-0000-000000000001', 'Admin'),
-  ('00000000-0000-0000-0000-000000000002', 'Supervisor'),
-  ('00000000-0000-0000-0000-000000000003', 'Solicitante'),
-  ('00000000-0000-0000-0000-000000000004', 'Otro');
+-- El perfil lo crea el disparador on_auth_user_created (Fase 2) desde los metadatos.
+insert into auth.users (id, email, raw_user_meta_data)
+select v.id, v.email, jsonb_build_object('full_name', v.full_name)
+from (values
+  ('00000000-0000-0000-0000-000000000001'::uuid, 'admin@prueba.test', 'Admin'),
+  ('00000000-0000-0000-0000-000000000002'::uuid, 'supervisor@prueba.test', 'Supervisor'),
+  ('00000000-0000-0000-0000-000000000003'::uuid, 'solicitante@prueba.test', 'Solicitante'),
+  ('00000000-0000-0000-0000-000000000004'::uuid, 'otro@prueba.test', 'Otro')
+) as v (id, email, full_name);
 insert into public.user_roles (user_id, role_id)
 select v.uid, r.id from (values
   ('00000000-0000-0000-0000-000000000001'::uuid, 'administrator'),

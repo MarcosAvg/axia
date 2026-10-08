@@ -8,7 +8,15 @@
 
 ## En curso
 
-_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
+**Fase 2 — Tramo 1: base de autenticación** (rama `feat/fase-2-auth-db`).
+1. Migración `auth_profiles_and_identity`: `handle_new_user()` + disparador sobre `auth.users`
+   que crea `profiles`; RPC `me()` (perfil, roles y permisos en una llamada) y `profile_update()`.
+2. Semilla de usuarios demo ficticios (admin, supervisor, técnico, solicitante) con contraseña
+   local documentada; `enable_signup = false`.
+3. Pruebas pgTAP (`90_auth_profiles.test.sql`): alta de perfil, `me()`, `profile_update` y
+   denegaciones.
+4. `pnpm db:reset` limpio y `pnpm db:types`; después, Tramo 2 (feature `auth` y rutas protegidas)
+   en `feat/fase-2-auth-app`.
 
 ## Hecho
 
