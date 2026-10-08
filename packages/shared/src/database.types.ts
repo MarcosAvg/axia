@@ -145,6 +145,105 @@ export type Database = {
         }
         Relationships: []
       }
+      evidence: {
+        Row: {
+          captured_by_technician_id: string | null
+          captured_by_user_id: string | null
+          client_request_id: string | null
+          created_at: string
+          cycle: number
+          event_id: number | null
+          id: string
+          mime_type: string | null
+          occurred_at: string
+          recorded_at: string
+          size_bytes: number | null
+          storage_path: string | null
+          ticket_id: string
+          type: Database['public']['Enums']['evidence_type']
+          uploaded_by: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          captured_by_technician_id?: string | null
+          captured_by_user_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle: number
+          event_id?: number | null
+          id?: string
+          mime_type?: string | null
+          occurred_at?: string
+          recorded_at?: string
+          size_bytes?: number | null
+          storage_path?: string | null
+          ticket_id: string
+          type: Database['public']['Enums']['evidence_type']
+          uploaded_by?: string | null
+        }
+        Update: {
+          captured_by_technician_id?: string | null
+          captured_by_user_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle?: number
+          event_id?: number | null
+          id?: string
+          mime_type?: string | null
+          occurred_at?: string
+          recorded_at?: string
+          size_bytes?: number | null
+          storage_path?: string | null
+          ticket_id?: string
+          type?: Database['public']['Enums']['evidence_type']
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'evidence_captured_by_technician_id_fkey'
+            columns: ['captured_by_technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'evidence_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'ticket_events'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'evidence_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      idempotency_keys: {
+        Row: {
+          actor_id: string | null
+          client_request_id: string
+          created_at: string
+          operation: string
+        }
+        ComputedFields: never
+        Insert: {
+          actor_id?: string | null
+          client_request_id: string
+          created_at?: string
+          operation: string
+        }
+        Update: {
+          actor_id?: string | null
+          client_request_id?: string
+          created_at?: string
+          operation?: string
+        }
+        Relationships: []
+      }
       instance_settings: {
         Row: {
           auto_validation_days: number | null
@@ -739,6 +838,447 @@ export type Database = {
           },
         ]
       }
+      ticket_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          assignee_technician_id: string | null
+          assignee_user_id: string | null
+          client_request_id: string | null
+          created_at: string
+          cycle: number
+          ended_at: string | null
+          id: string
+          note: string | null
+          reason_id: string | null
+          stage: Database['public']['Enums']['assignment_stage']
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assignee_technician_id?: string | null
+          assignee_user_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle: number
+          ended_at?: string | null
+          id?: string
+          note?: string | null
+          reason_id?: string | null
+          stage: Database['public']['Enums']['assignment_stage']
+          ticket_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assignee_technician_id?: string | null
+          assignee_user_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle?: number
+          ended_at?: string | null
+          id?: string
+          note?: string | null
+          reason_id?: string | null
+          stage?: Database['public']['Enums']['assignment_stage']
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_assignments_assignee_technician_id_fkey'
+            columns: ['assignee_technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_captures: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changes: NonNullable<Json>
+          created_at: string
+          cycle: number
+          id: string
+          reason_id: string | null
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changes: NonNullable<Json>
+          created_at?: string
+          cycle: number
+          id?: string
+          reason_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changes?: NonNullable<Json>
+          created_at?: string
+          cycle?: number
+          id?: string
+          reason_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_captures_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_captures_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_events: {
+        Row: {
+          actor_id: string | null
+          client_request_id: string | null
+          created_at: string
+          cycle: number
+          id: number
+          occurred_at: string
+          payload: NonNullable<Json>
+          reason_id: string | null
+          recorded_at: string
+          source: Database['public']['Enums']['event_source']
+          subject_technician_id: string | null
+          subject_user_id: string | null
+          ticket_id: string
+          type: Database['public']['Enums']['event_type']
+        }
+        ComputedFields: never
+        Insert: {
+          actor_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle: number
+          id?: never
+          occurred_at?: string
+          payload?: NonNullable<Json>
+          reason_id?: string | null
+          recorded_at?: string
+          source?: Database['public']['Enums']['event_source']
+          subject_technician_id?: string | null
+          subject_user_id?: string | null
+          ticket_id: string
+          type: Database['public']['Enums']['event_type']
+        }
+        Update: {
+          actor_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle?: number
+          id?: never
+          occurred_at?: string
+          payload?: NonNullable<Json>
+          reason_id?: string | null
+          recorded_at?: string
+          source?: Database['public']['Enums']['event_source']
+          subject_technician_id?: string | null
+          subject_user_id?: string | null
+          ticket_id?: string
+          type?: Database['public']['Enums']['event_type']
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_subject_technician_id_fkey'
+            columns: ['subject_technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_participants: {
+        Row: {
+          category_id: string | null
+          client_request_id: string | null
+          created_at: string
+          cycle: number
+          ended_at: string | null
+          id: string
+          origin: Database['public']['Enums']['span_origin']
+          participation_type: Database['public']['Enums']['participation_type']
+          recorded_by: string | null
+          started_at: string
+          technician_id: string
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          category_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle: number
+          ended_at?: string | null
+          id?: string
+          origin?: Database['public']['Enums']['span_origin']
+          participation_type: Database['public']['Enums']['participation_type']
+          recorded_by?: string | null
+          started_at?: string
+          technician_id: string
+          ticket_id: string
+        }
+        Update: {
+          category_id?: string | null
+          client_request_id?: string | null
+          created_at?: string
+          cycle?: number
+          ended_at?: string | null
+          id?: string
+          origin?: Database['public']['Enums']['span_origin']
+          participation_type?: Database['public']['Enums']['participation_type']
+          recorded_by?: string | null
+          started_at?: string
+          technician_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_participants_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_participants_technician_id_fkey'
+            columns: ['technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      tickets: {
+        Row: {
+          building_id: string
+          category_id: string
+          channel_id: string
+          closed_at: string | null
+          created_at: string
+          cycle: number
+          dependency_id: string
+          description: string
+          duplicate_of_id: string | null
+          folio: string
+          id: string
+          location_id: string
+          possible_duplicate: boolean
+          priority_id: string
+          problem_id: string | null
+          registered_by: string | null
+          reported_at: string
+          requester_contact: string | null
+          requester_id: string
+          requester_name: string
+          service_type_id: string
+          status: Database['public']['Enums']['ticket_status']
+          status_before_discard:
+            Database['public']['Enums']['ticket_status'] | null
+          subcategory_id: string | null
+          team_id: string
+          ticket_number: number
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          building_id: string
+          category_id: string
+          channel_id: string
+          closed_at?: string | null
+          created_at?: string
+          cycle?: number
+          dependency_id: string
+          description: string
+          duplicate_of_id?: string | null
+          folio: string
+          id?: string
+          location_id: string
+          possible_duplicate?: boolean
+          priority_id: string
+          problem_id?: string | null
+          registered_by?: string | null
+          reported_at?: string
+          requester_contact?: string | null
+          requester_id: string
+          requester_name: string
+          service_type_id: string
+          status?: Database['public']['Enums']['ticket_status']
+          status_before_discard?:
+            Database['public']['Enums']['ticket_status'] | null
+          subcategory_id?: string | null
+          team_id: string
+          ticket_number?: number
+          updated_at?: string
+        }
+        Update: {
+          building_id?: string
+          category_id?: string
+          channel_id?: string
+          closed_at?: string | null
+          created_at?: string
+          cycle?: number
+          dependency_id?: string
+          description?: string
+          duplicate_of_id?: string | null
+          folio?: string
+          id?: string
+          location_id?: string
+          possible_duplicate?: boolean
+          priority_id?: string
+          problem_id?: string | null
+          registered_by?: string | null
+          reported_at?: string
+          requester_contact?: string | null
+          requester_id?: string
+          requester_name?: string
+          service_type_id?: string
+          status?: Database['public']['Enums']['ticket_status']
+          status_before_discard?:
+            Database['public']['Enums']['ticket_status'] | null
+          subcategory_id?: string | null
+          team_id?: string
+          ticket_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tickets_building_id_fkey'
+            columns: ['building_id']
+            isOneToOne: false
+            referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_channel_id_fkey'
+            columns: ['channel_id']
+            isOneToOne: false
+            referencedRelation: 'channels'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_dependency_id_fkey'
+            columns: ['dependency_id']
+            isOneToOne: false
+            referencedRelation: 'dependencies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_duplicate_of_id_fkey'
+            columns: ['duplicate_of_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_location_id_fkey'
+            columns: ['location_id']
+            isOneToOne: false
+            referencedRelation: 'locations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_priority_id_fkey'
+            columns: ['priority_id']
+            isOneToOne: false
+            referencedRelation: 'priorities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_problem_id_fkey'
+            columns: ['problem_id']
+            isOneToOne: false
+            referencedRelation: 'problems'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_requester_id_fkey'
+            columns: ['requester_id']
+            isOneToOne: false
+            referencedRelation: 'requesters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_service_type_id_fkey'
+            columns: ['service_type_id']
+            isOneToOne: false
+            referencedRelation: 'service_types'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_subcategory_id_fkey'
+            columns: ['subcategory_id']
+            isOneToOne: false
+            referencedRelation: 'subcategories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -865,7 +1405,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      assignment_stage: 'supervisor' | 'technician'
       clock_class: 'counted' | 'not_counted'
+      event_source: 'app' | 'import' | 'integration'
       event_type:
         | 'created'
         | 'offered'
@@ -892,6 +1434,9 @@ export type Database = {
         | 'comment'
         | 'evidence_added'
         | 'imported'
+      evidence_type:
+        'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
+      participation_type: 'leader' | 'auxiliary'
       permission_scope: 'own' | 'team' | 'buildings' | 'all'
       reason_use:
         | 'pause'
@@ -904,6 +1449,19 @@ export type Database = {
         | 'claim_outcome'
         | 'reactivation'
         | 'auxiliary_support'
+      span_origin: 'system' | 'manual'
+      ticket_status:
+        | 'registered'
+        | 'with_supervisor'
+        | 'assigned'
+        | 'in_progress'
+        | 'paused'
+        | 'attended'
+        | 'under_claim'
+        | 'closed'
+        | 'rejected'
+        | 'cancelled'
+        | 'duplicate'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1031,7 +1589,9 @@ export const Constants = {
   },
   public: {
     Enums: {
+      assignment_stage: ['supervisor', 'technician'],
       clock_class: ['counted', 'not_counted'],
+      event_source: ['app', 'import', 'integration'],
       event_type: [
         'created',
         'offered',
@@ -1059,6 +1619,8 @@ export const Constants = {
         'evidence_added',
         'imported',
       ],
+      evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
+      participation_type: ['leader', 'auxiliary'],
       permission_scope: ['own', 'team', 'buildings', 'all'],
       reason_use: [
         'pause',
@@ -1071,6 +1633,20 @@ export const Constants = {
         'claim_outcome',
         'reactivation',
         'auxiliary_support',
+      ],
+      span_origin: ['system', 'manual'],
+      ticket_status: [
+        'registered',
+        'with_supervisor',
+        'assigned',
+        'in_progress',
+        'paused',
+        'attended',
+        'under_claim',
+        'closed',
+        'rejected',
+        'cancelled',
+        'duplicate',
       ],
     },
   },
