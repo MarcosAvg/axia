@@ -4,13 +4,14 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 7C cerrada (PWA) — siguiente: 7D (push, CI/CD, Capacitor)
+**Fase actual:** todas las fases (0–7) cerradas — proyecto completo en lo preparable desde el repo
 
 ## En curso
 
-_(vacío)_ — La **PWA** quedó afinada (manifest e iconos genéricos). Sigue **7D** (notificaciones push,
-CI/CD de despliegue y Capacitor), implementando lo que no dependa de infraestructura real. Sin push a
-`origin`.
+_(vacío)_ — **Todas las fases (0–7) están cerradas.** Queda, cuando la persona lo pida: aplicar los
+despliegues reales (`deploy/README.md`), activar push/correo/escalamiento
+(`docs/notificaciones-push.md`) y los pendientes de negocio (calificación… ya está; quedan
+zona horaria real confirmada, y mejoras futuras). Sin push a `origin`.
 
 ## Hecho
 
@@ -234,13 +235,18 @@ CI/CD de despliegue y Capacitor), implementando lo que no dependa de infraestruc
 - **Fase 7C — PWA (2026-10-08)**, rama `feat/fase-7c-pwa` (fusionada localmente a `main`; **sin push**):
   - Manifest completo (`id`, `orientation`, `categories`, `purpose` de los iconos) **conservando los
     iconos genéricos**; caché del service worker revisada (app shell, sin cachear API). Sin arte nuevo.
+- **Fase 7D — push, CI/CD y Capacitor (2026-10-08)**, rama `feat/fase-7d-produccion` (fusionada
+  localmente a `main`; **sin push**):
+  - `push_subscriptions` (RLS por usuario) y guía de activación en `docs/notificaciones-push.md`;
+    workflow **manual** `deploy.yml` guardado por secretos; Capacitor documentado. ADR 0035.
+  - Compuerta completa en verde: 404 pgTAP, 125 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Fase 7C — PWA final** con el logo definitivo (iconos) y la revisión de la caché del service worker.
-Opcionales: **7D** (notificaciones push, CI/CD de despliegue, Capacitor), **6C-2** (reconstruir la
-línea de tiempo al importar) y **6D** (convivencia). Los pasos de despliegue y respaldo están en
-`deploy/README.md`.
+No hay fases pendientes. Lo que queda es **operativo** y lo hace la persona: desplegar
+(`deploy/README.md`), aplicar migraciones, activar correo/push/escalamiento
+(`docs/notificaciones-push.md`) y, si se quiere, Capacitor. Mejoras futuras posibles: iconos con el
+logo definitivo, bandeja de notificaciones in-app y afinado de parámetros por la operación real.
 
 ## Hoja de ruta
 
@@ -352,7 +358,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       restauración documentada (verificada en local)
 - [x] **7C** PWA final: manifest completo (`id`, orientación, categorías, propósito de los iconos) con
       los iconos genéricos actuales y caché del service worker revisada
-- [ ] **7D** (Opcional) Notificaciones push (VAPID + envío); CI/CD de despliegue; Capacitor
+- [x] **7D** Push (`push_subscriptions` + guía de activación), **CI/CD manual** (`.github/workflows/
+      deploy.yml`, guardado por secretos) y Capacitor documentado — ADR 0035
 
 ## Bloqueos y preguntas para la persona
 

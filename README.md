@@ -55,12 +55,14 @@ aislados.
   fuentes externas viven **aislados** del núcleo.
 - **Despliegue** (Fase 7): `deploy/` con Caddy, compose de Supabase autoalojado, scripts de
   migración/publicación y respaldo/restauración, y un runbook; **tú lo ejecutas**. Ver
-  [`deploy/README.md`](deploy/README.md).
+  [`deploy/README.md`](deploy/README.md). Guía de correo/push/escalamiento en
+  [`docs/notificaciones-push.md`](docs/notificaciones-push.md).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **PWA final (iconos)**; opcionalmente notificaciones push, CI/CD, Capacitor y los
-restos de la Fase 6. Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+**Todas las fases (0–7) están cerradas.** Lo que queda es operativo: desplegar y activar
+correo/push/escalamiento cuando haya infraestructura. Ver la hoja de ruta en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
