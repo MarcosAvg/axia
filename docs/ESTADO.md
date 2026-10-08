@@ -4,17 +4,11 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-07
-**Fase actual:** 1 — Base de datos núcleo
+**Fase actual:** 2 — Autenticación y estructura de la app
 
 ## En curso
 
-Fase 1, Etapa B — migraciones por tramos (rama `feat/fase-1-db`), cada uno con pgTAP y `pnpm check`.
-**Hechos:** tramos 1-7 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
-historial/evidencias; ruteo/ofertas/duplicados/RPC; pausas/recaptura/reclamaciones/duplicados/
-reactivación; tramos de tiempo y cálculo; notificaciones y escalamiento).
-**Falta:** 8. RLS completa, visibilidad, semillas y vistas de indicadores. Decisión abierta: las RPC
-son `security invoker`; para que la RLS quede fina hay que decidir entre pasar las RPC a
-`security definer` (con `search_path = ''` y grants) o escribir políticas de escritura por tabla.
+_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
 
 ## Hecho
 
@@ -115,9 +109,10 @@ son `security invoker`; para que la RLS quede fina hay que decidir entre pasar l
 
 ## Siguiente
 
-Fase 1 — Base de datos núcleo. **Etapa A** entregada (`docs/modelo-datos.md`) y ajustada con las
-decisiones confirmadas; **se espera la aprobación de negocio**. Con ella, la **Etapa B** implementa
-los 8 tramos de la hoja de ruta, cada uno con pgTAP y `pnpm check` en verde.
+## Siguiente
+
+**Fase 2 — Autenticación y estructura de la app**: inicio de sesión, perfiles y layout con rutas
+protegidas por rol (la seguridad real es RLS). La **Fase 1 (base de datos núcleo) quedó cerrada**.
 
 ## Hoja de ruta
 
@@ -158,7 +153,10 @@ Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** s
 5. [x] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
 6. [x] Tiempos: calendarios, tramos y funciones de cálculo
 7. [x] Notificaciones, reglas y escalamiento
-8. [ ] RLS completa, visibilidad, semillas y vistas de indicadores
+8. [x] RLS completa, visibilidad, semillas y vistas de indicadores
+
+**Fase 1 cerrada el 2026-10-07**: `pnpm db:reset` reconstruye todo desde cero con semillas, 175
+pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0007-0014.
 
 ### Fase 2 — Autenticación y estructura de la app
 - [ ] Inicio de sesión, perfiles, layout con rutas protegidas por rol (la seguridad real es RLS)
@@ -370,3 +368,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   bitácora y funciones `ticket_time_total`/`ticket_time_net`/`ticket_time_by_kind` y registro
   manual; `notification_rules`, `notifications` y `escalation_rules` con encolado por evento y
   lectura. 165 pruebas pgTAP en verde. Rama `feat/fase-1-tramo6`.
+- 2026-10-07: Fase 1, Etapa B, tramo 8 y cierre: RPC a `security definer` con `search_path` fijo
+  (opción a), políticas RLS de lectura, vista de visibilidad al solicitante, vista base de
+  indicadores, integración genérica (`external_systems`, `ticket_external_refs`) y semillas de
+  catálogos/motivos/calendario. **175 pruebas pgTAP** y `pnpm check` en verde; **Fase 1 cerrada**.
+  Rama `feat/fase-1-tramo8`.

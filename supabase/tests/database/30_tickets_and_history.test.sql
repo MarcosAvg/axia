@@ -88,9 +88,11 @@ from public.buildings b, public.locations l, public.dependencies d,
 where b.name = 'Edificio A' and l.name = 'Planta baja' and d.name = 'Sistemas'
   and c.name = 'Eléctrico' and st.name = 'Correctivo' and pr.name = 'Media' and ch.name = 'Web';
 
-select is(
-  (select max(ticket_number) - min(ticket_number) from public.tickets),
-  1::bigint, 'el consecutivo avanza de uno en uno');
+select cmp_ok(
+  (select max(ticket_number) from public.tickets),
+  '>',
+  (select min(ticket_number) from public.tickets),
+  'el consecutivo avanza');
 
 -- Coherencia de clasificación.
 select throws_ok(

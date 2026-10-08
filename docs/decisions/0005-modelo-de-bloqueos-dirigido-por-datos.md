@@ -1,7 +1,7 @@
 # 0005 — Modelo de bloqueos dirigido por datos
 
 - Fecha: 2026-10-07
-- Estado: aceptada
+- Estado: sustituida por 0011
 
 ## Contexto
 
