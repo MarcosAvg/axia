@@ -24,8 +24,8 @@ Fase 0 (arranque). Ya funciona:
   build).
 - CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
 
-Todavía **no** está: Playwright, `knip`, `deploy/` y el componente de gráficas. Ver la hoja de
-ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Todavía **no** está: el componente de gráficas (llega con las métricas, Fase 6). Ver la hoja
+de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
@@ -42,6 +42,8 @@ corepack enable
 git clone <url-del-repositorio> axia
 cd axia
 pnpm install      # instala dependencias y configura los hooks de git (Husky)
+pnpm db:start      # levanta Supabase local (la primera vez descarga las imágenes)
+pnpm --filter @axia/web exec playwright install chromium   # navegador para la prueba E2E
 pnpm dev          # abre http://localhost:5173
 ```
 
@@ -70,7 +72,7 @@ institución entregue el logo.
 | `pnpm build` | Compila la app a `apps/web/dist` |
 | `pnpm lint` | ESLint (incluye los límites de tamaño y `react-hooks`/`jsx-a11y`) |
 | `pnpm typecheck` | Verificación de tipos de todo el monorepo |
-| `pnpm test` | Pruebas de frontend con Vitest |
+| `pnpm test` | Pruebas: Vitest (unitarias/frontend) + Playwright (humo E2E) |
 | `pnpm format` | Formatea con Prettier |
 | `pnpm db:start` / `pnpm db:stop` | Levanta/apaga el Supabase local |
 | `pnpm db:reset` | Reconstruye la base local (migraciones + semilla) |
@@ -97,6 +99,7 @@ axia/
 │       └── lib/       → cliente de datos, offline, i18n y utilidades
 ├── packages/shared/   → tipos y esquemas compartidos (incluye database.types.ts)
 ├── supabase/          → migraciones, semillas, funciones y pruebas pgTAP
+├── deploy/            → despliegue en producción (se puebla en la Fase 8)
 ├── scripts/           → verificaciones (p. ej. check:agnostic)
 ├── docs/              → dominio, convenciones, estado y decisiones (ADR)
 └── .github/workflows/ → CI

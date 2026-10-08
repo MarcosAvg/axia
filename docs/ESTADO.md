@@ -4,7 +4,7 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-07
-**Fase actual:** 0 — Arranque del entorno
+**Fase actual:** 1 — Base de datos núcleo
 
 ## En curso
 
@@ -88,24 +88,29 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `apps/web/src/lib/utils.ts` (shim de `cn` sin importadores) y se quitaron `lucide-react` y
   `dexie-react-hooks` (se re-agregan cuando se usen); se mantienen `@axia/shared` y
   `@supabase/supabase-js` (los usa `lib/supabase.ts`). `pnpm knip` limpio. Rama `feat/knip`.
+- **Cierre de Fase 0**: Playwright en `apps/web` (`@playwright/test` 1.64.0, Apache-2.0):
+  `playwright.config.ts` (Chromium, `webServer` con `pnpm dev`) y humo `e2e/home.spec.ts` (la
+  pantalla de inicio muestra "Axia" y "Comenzar"); `test` ahora corre Vitest + Playwright y el
+  CI instala Chromium con `--with-deps`. Directorio `deploy/` creado con `README.md` de alcance
+  (se puebla en la Fase 8). Con esto la Fase 0 queda cerrada con `pnpm check` en verde.
+  Rama `chore/cierre-fase-0`.
 
 ## Siguiente
 
-Fase 0, tareas restantes: Playwright (prueba de humo; el flujo del técnico sin conexión
-llega en la Fase 5) y el directorio `deploy/`; el componente `chart`/Recharts llega con las
-métricas (Fase 6).
+Fase 1 — Base de datos núcleo: catálogos, `tickets`, `ticket_assignments`, `ticket_events`,
+`attachments`, `ticket_external_refs`, `user_roles`, con RLS y pruebas pgTAP (ver la hoja de
+ruta). Antes de diseñarla conviene responder las preguntas 2 (solicitantes con o sin cuenta) y
+4 (formato del número de tiquet), que condicionan el esquema.
 
 ## Hoja de ruta
 
 El núcleo se construye y se puede usar **sin ninguna integración**. Las integraciones y la
 migración van después, sobre un núcleo ya estable.
 
-### Fase 0 — Arranque (sin dependencias de negocio)
-- [ ] Monorepo pnpm: `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`, `scripts/`
-      (falta `deploy/`)
-- [ ] App Vite + React + TypeScript con Tailwind, shadcn/ui (incluido `chart`/Recharts),
-      TanStack Router (rutas por carpetas) y TanStack Query (falta el componente `chart`/Recharts,
-      que llega con las métricas)
+### Fase 0 — Arranque (sin dependencias de negocio) — **cerrada el 2026-10-07**
+- [x] Monorepo pnpm: `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`, `scripts/`
+- [x] App Vite + React + TypeScript con Tailwind, shadcn/ui, TanStack Router (rutas por carpetas)
+      y TanStack Query (el componente `chart`/Recharts llega con las métricas, Fase 6)
 - [x] Supabase local funcionando, cliente tipado, `pnpm db:types`
 - [x] PWA configurada (manifest, iconos provisionales, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
@@ -113,7 +118,7 @@ migración van después, sobre un núcleo ya estable.
       Husky + lint-staged, commitlint
 - [x] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
       (incluye los nombres de este proyecto de origen) y rutas permitidas
-- [ ] Vitest, Playwright y prueba pgTAP de humo (hecho: Vitest y pgTAP; falta Playwright)
+- [x] Vitest, Playwright y prueba pgTAP de humo
 - [x] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic +
       check:boundaries + knip + test + db:test + build)
 - [x] CI que ejecuta la compuerta completa (levanta Supabase antes)
@@ -123,8 +128,8 @@ migración van después, sobre un núcleo ya estable.
       del núcleo
 - [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
 
-**Falta para cerrar la Fase 0:** Playwright (humo) y el directorio `deploy/`; el componente
-`chart`/Recharts llega con las métricas (Fase 6).
+**Fase 0 cerrada el 2026-10-07** con `pnpm check` en verde. El componente `chart`/Recharts
+llega con las métricas (Fase 6) y `deploy/` se puebla en producción (Fase 8).
 
 ### Fase 1 — Base de datos núcleo
 - [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
@@ -201,7 +206,7 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1, `supabase` (CLI) 2.120.0,
   `@supabase/supabase-js` 2.117.2, `vite-plugin-pwa` 2.0.0, `workbox-build`/`workbox-window`
   7.4.1, `dexie` 4.4.6, `dexie-react-hooks` 4.4.0, `fake-indexeddb` 6.2.5 (solo pruebas),
-  `knip` 6.40.0.
+  `knip` 6.40.0, `@playwright/test` 1.64.0.
 - **jsdom fijado en `^29`**: se fijó cuando el equipo tenía Node 24.14.1 (jsdom 30 exige
   `^24.15.0`). Ahora el equipo usa Node 24.18.0; revisar el salto a jsdom 30 en otra tarea.
 - **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
@@ -260,6 +265,11 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - En dev, `/manifest.webmanifest` cae al fallback de la SPA (el manifest solo se genera en el
   build); los iconos y el HTML con `theme-color` sí se sirven. El aviso de actualización no
   aparece en dev/test porque `useRegisterSW` es un no-op fuera del build.
+- **Playwright**: `playwright.config.ts` (Chromium, `webServer` con `pnpm dev`) y humo en
+  `apps/web/e2e/`; `test` corre Vitest y luego Playwright. Vitest excluye `e2e/**` en
+  `vite.config.ts` (cada corredor corre lo suyo). Los navegadores se instalan aparte
+  (`playwright install chromium`, con `--with-deps` en el CI) y viven en `~/.cache`, fuera del
+  repositorio.
 - **knip**: el `knip.json` acepta comentarios (verificado con `prettier --check`, que también
   lo acepta). Las entradas de `apps/web` (`main.tsx`, `vite.config.ts`, `test/setup.ts`) las
   detecta knip solo con sus plugins — solo hizo falta declarar `src/lib/supabase.ts`. Los
@@ -304,3 +314,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: `knip` (Fase 0, tarea 7): `knip.json` con la entrada de `lib/supabase.ts` y la
   excepción documentada del kit shadcn; se borró `lib/utils.ts` y se quitaron `lucide-react` y
   `dexie-react-hooks`. `pnpm knip` limpio y `pnpm check` en verde. Rama `feat/knip`.
+- 2026-10-07: cierre de Fase 0: Playwright (`@playwright/test`, humo de la pantalla de inicio
+  en `e2e/home.spec.ts`, Chromium instalado en el CI) y `deploy/` con `README.md` de alcance.
+  `pnpm check` en verde; la siguiente es la Fase 1. Rama `chore/cierre-fase-0`.

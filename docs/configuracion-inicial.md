@@ -570,8 +570,12 @@ Script en `apps/web/package.json`: `"test": "vitest run"`.
 
 ```bash
 cd apps/web
-pnpm create playwright
+pnpm exec playwright install chromium   # una vez por equipo; en el CI lleva --with-deps
 ```
+
+La configuración vive en `apps/web/playwright.config.ts` (Chromium, `webServer` con
+`pnpm dev`) y las pruebas en `apps/web/e2e/`. `pnpm test` corre Vitest y luego Playwright;
+Vitest excluye `e2e/**` en `vite.config.ts`.
 
 Incluye desde temprano un caso con la red cortada (`context.setOffline(true)`) para el flujo del técnico.
 
@@ -731,7 +735,7 @@ El mismo repositorio sirve para ambos entornos. Mantén cada uno con su propio a
 - [ ] Prueba pgTAP de humo pasando
 
 **Calidad**
-- [ ] Vitest y Playwright instalados
+- [x] Vitest y Playwright instalados
 - [ ] CI corriendo en cada cambio
 
 **Producción (cuando toque)**
