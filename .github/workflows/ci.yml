@@ -15,4 +15,7 @@ jobs:
           node-version: lts/*
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Levanta Supabase local con la CLI fijada en el repositorio; `pnpm check`
+      # incluye la prueba pgTAP (`db:test`).
+      - run: pnpm db:start
       - run: pnpm check
