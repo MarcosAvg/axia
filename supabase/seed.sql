@@ -1,0 +1,2 @@
+-- Semilla de datos ficticios de catálogos. Se carga con `pnpm db:reset`.
+-- El núcleo aún no tiene tablas; se poblará en las fases siguientes.

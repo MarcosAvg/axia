@@ -16,19 +16,22 @@ Fase 0 (arranque). Ya funciona:
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas) y TanStack Query.
 - Pantalla de inicio "Axia" y una página de "no encontrado".
-- Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, pruebas y build).
-- CI en GitHub Actions que ejecuta la compuerta.
+- **Supabase local** (Postgres, Auth, Storage y Studio), cliente tipado (`lib/supabase.ts`) y
+  tipos generados con `pnpm db:types`; prueba pgTAP de humo.
+- Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, pruebas, pgTAP y
+  build).
+- CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
 
-Todavía **no** está: Supabase local y `pnpm db:types`, PWA/Dexie (modo sin conexión), Playwright,
-pgTAP, `knip` y el componente de gráficas. Ver la hoja de ruta y lo pendiente en
-[`docs/ESTADO.md`](docs/ESTADO.md).
+Todavía **no** está: PWA/Dexie (modo sin conexión), Playwright, `knip` y el componente de
+gráficas. Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
 - **Node.js LTS** (probado con Node 24).
 - **pnpm 12** (se activa con `corepack enable`; la versión está fijada en `package.json`).
 - **Git**.
-- **Docker** — solo más adelante, para el Supabase local.
+- **Docker** — necesario para el Supabase local (`pnpm db:start`). En Linux, tu usuario debe
+  pertenecer al grupo `docker`.
 
 ## Levantar el proyecto en 10 minutos
 
@@ -43,6 +46,16 @@ pnpm dev          # abre http://localhost:5173
 `pnpm install` ejecuta el script `prepare` de Husky y deja listos los hooks de commit. No hace
 falta Supabase para ver la pantalla de inicio.
 
+Para trabajar con la base de datos local:
+
+```bash
+pnpm db:start     # levanta Supabase local (la primera vez descarga las imágenes)
+pnpm db:reset     # aplica migraciones y semilla
+```
+
+Copia `VITE_SUPABASE_URL` y la clave pública (`ANON_KEY`) que imprime `pnpm db:start` a
+`apps/web/.env.local`, que no se sube al repositorio (ver `apps/web/.env.example`).
+
 ## Comandos
 
 | Comando | Qué hace |
@@ -53,12 +66,16 @@ falta Supabase para ver la pantalla de inicio.
 | `pnpm typecheck` | Verificación de tipos de todo el monorepo |
 | `pnpm test` | Pruebas de frontend con Vitest |
 | `pnpm format` | Formatea con Prettier |
+| `pnpm db:start` / `pnpm db:stop` | Levanta/apaga el Supabase local |
+| `pnpm db:reset` | Reconstruye la base local (migraciones + semilla) |
+| `pnpm db:test` | Pruebas de base de datos con pgTAP |
+| `pnpm db:types` | Regenera los tipos de TypeScript desde la base local |
 | `pnpm check:agnostic` | Falla si el núcleo menciona plataformas externas |
 | `pnpm check:boundaries` | Reglas de dependencia entre capas (dependency-cruiser) |
-| **`pnpm check`** | **Compuerta completa**: lint + typecheck + check:agnostic + check:boundaries + test + build |
+| **`pnpm check`** | **Compuerta completa**: lint + typecheck + check:agnostic + check:boundaries + test + db:test + build |
 
-`pnpm check` es la fuente única de verdad; el CI y los hooks la usan. Los cambios en la base de
-datos (`db:start`, `db:reset`, `db:test`, `db:types`) se añadirán cuando se integre Supabase.
+`pnpm check` es la fuente única de verdad; el CI y los hooks la usan. Como incluye `db:test`,
+requiere que el Supabase local esté levantado (`pnpm db:start`).
 
 ## Estructura del repositorio
 
@@ -71,7 +88,8 @@ axia/
 │       ├── features/  → funcionalidad por dominio (incluye integrations/)
 │       ├── components/→ ui (shadcn/ui) y shared
 │       └── lib/       → cliente de datos, offline, i18n y utilidades
-├── packages/shared/   → tipos y esquemas compartidos
+├── packages/shared/   → tipos y esquemas compartidos (incluye database.types.ts)
+├── supabase/          → migraciones, semillas, funciones y pruebas pgTAP
 ├── scripts/           → verificaciones (p. ej. check:agnostic)
 ├── docs/              → dominio, convenciones, estado y decisiones (ADR)
 └── .github/workflows/ → CI
