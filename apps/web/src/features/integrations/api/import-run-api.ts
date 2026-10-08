@@ -127,6 +127,26 @@ export async function assignTicket(
   if (error) throw error
 }
 
+/** Reconstruye la historia del tiquet importado con las marcas de la fuente. */
+export async function importTimeline(
+  ticketId: string,
+  input: {
+    reportedAt: string | null
+    assignedAt: string | null
+    finishedAt: string | null
+    closedAt: string | null
+  },
+): Promise<void> {
+  const { error } = await supabase.rpc('import_ticket_timeline', {
+    p_ticket_id: ticketId,
+    p_reported_at: input.reportedAt ?? undefined,
+    p_assigned_at: input.assignedAt ?? undefined,
+    p_finished_at: input.finishedAt ?? undefined,
+    p_closed_at: input.closedAt ?? undefined,
+  })
+  if (error) throw error
+}
+
 /** Zona horaria configurada de la instancia (para interpretar las fechas de la fuente). */
 export async function fetchInstanceTimezone(): Promise<string> {
   const { data, error } = await supabase

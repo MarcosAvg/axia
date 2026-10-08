@@ -3841,6 +3841,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      import_ticket_timeline: {
+        Args: {
+          p_assigned_at?: string
+          p_closed_at?: string
+          p_finished_at?: string
+          p_reported_at?: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       import_ticket_upsert: {
         Args: { p_data: Json; p_external_id: string; p_system: string }
         Returns: string

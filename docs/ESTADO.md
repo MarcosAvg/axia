@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 7A/7B cerradas (despliegue y respaldos) — siguiente: 7C (PWA) o 7D (opcional)
+**Fase actual:** 6C-2 cerrada (historia al importar) — siguiente: 6D (convivencia)
 
 ## En curso
 
-_(vacío)_ — Se preparó el **despliegue autoalojado** y los **respaldos** (scripts + runbook, ADR 0032);
-la persona los ejecuta. Quedan **7C** (iconos/PWA), **7D** (push, CI/CD, Capacitor) y los opcionales
-6C-2/6D. Sin push a `origin`.
+_(vacío)_ — La **Fase 6C-2** quedó cerrada: los tiquets importados reconstruyen su historia y sus tres
+intervalos coinciden con la fuente. Siguen **6D** (convivencia), **7C** (PWA) y **7D** (push, CI/CD,
+Capacitor). Sin push a `origin`.
 
 ## Hecho
 
@@ -219,6 +219,12 @@ la persona los ejecuta. Quedan **7C** (iconos/PWA), **7D** (push, CI/CD, Capacit
     `DB_CONTAINER`, retención y drill). Sin secretos en el repo. ADR 0032.
   - Verificado en local: `backup.sh` genera el dump y `restore.sh` lo restaura en una base
     desechable (conteos comprobados). Compuerta sin cambios (391 pgTAP, 125 Vitest, 12 Playwright).
+- **Fase 6C-2 — historia al importar (2026-10-08)**, rama `feat/fase-6c2-historia` (fusionada
+  localmente a `main`; **sin push**):
+  - `import_ticket_timeline` reconstruye los tramos del importado (atención = reporte→asignación,
+    trabajo = asignación→finalización, total = reporte→finalización), idempotente y solo con las
+    marcas de la fuente; el adaptador la invoca tras el upsert. ADR 0033.
+  - Compuerta completa en verde: 397 pgTAP, 125 Vitest, 12 Playwright.
 
 ## Siguiente
 
@@ -325,8 +331,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] **6C-1** Verificación de las **fórmulas** de métricas con datos ficticios equivalentes (respuesta,
       asignación, espera, trabajo activo, pausa, validación, total y neto; duplicados excluidos;
       puente de importación por el tiempo total) — ADR 0031
-- [ ] **6C-2** (Opcional) Reconstruir la línea de tiempo al importar para que los tres intervalos de
-      los importados coincidan con la fuente
+- [x] **6C-2** Reconstruir la línea de tiempo al importar para que los tres intervalos de los
+      importados coincidan con la fuente (`import_ticket_timeline`) — ADR 0033
 - [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
 
 ### Fase 7 — Producción

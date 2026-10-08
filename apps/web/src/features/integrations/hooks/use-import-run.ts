@@ -4,6 +4,7 @@ import {
   assignTicket,
   fetchInstanceTimezone,
   finishBatch,
+  importTimeline,
   resolveAlias,
   resolveStatus,
   startBatch,
@@ -253,6 +254,12 @@ async function commit(
         row.candidate.assignedAt,
       )
     }
+    await importTimeline(ticketId, {
+      reportedAt: row.candidate.reportedAt,
+      assignedAt: row.candidate.assignedAt,
+      finishedAt: row.candidate.finishedAt,
+      closedAt: row.candidate.finishedAt,
+    })
     inserted += 1
     await addRecord({
       batchId,
