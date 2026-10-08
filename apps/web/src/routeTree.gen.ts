@@ -17,7 +17,11 @@ import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMiTrabajoRouteImport } from './routes/_authenticated/mi-trabajo'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminAmbitosRouteImport } from './routes/_authenticated/admin/ambitos'
 import { Route as AuthenticatedAdminCatalogosRouteImport } from './routes/_authenticated/admin/catalogos'
+import { Route as AuthenticatedAdminConfiguracionRouteImport } from './routes/_authenticated/admin/configuracion'
+import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
+import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets/index'
 import { Route as AuthenticatedTicketsTicketIdRouteImport } from './routes/_authenticated/tickets/$ticketId'
 import { Route as AuthenticatedTicketsNuevoRouteImport } from './routes/_authenticated/tickets/nuevo'
@@ -61,10 +65,33 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAmbitosRoute =
+  AuthenticatedAdminAmbitosRouteImport.update({
+    id: '/ambitos',
+    path: '/ambitos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCatalogosRoute =
   AuthenticatedAdminCatalogosRouteImport.update({
     id: '/catalogos',
     path: '/catalogos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminConfiguracionRoute =
+  AuthenticatedAdminConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUsuariosRoute =
+  AuthenticatedAdminUsuariosRouteImport.update({
+    id: '/usuarios',
+    path: '/usuarios',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedTicketsIndexRoute =
@@ -93,7 +120,11 @@ export interface FileRoutesByFullPath {
   '/inbox': typeof AuthenticatedInboxRoute
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -105,7 +136,11 @@ export interface FileRoutesByTo {
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -120,7 +155,11 @@ export interface FileRoutesById {
   '/_authenticated/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/_authenticated/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/_authenticated/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
+  '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/_authenticated/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -135,7 +174,11 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/mi-trabajo'
     | '/perfil'
+    | '/admin/ambitos'
     | '/admin/catalogos'
+    | '/admin/configuracion'
+    | '/admin/roles'
+    | '/admin/usuarios'
     | '/tickets/$ticketId'
     | '/tickets/nuevo'
     | '/admin/'
@@ -147,7 +190,11 @@ export interface FileRouteTypes {
     | '/mi-trabajo'
     | '/perfil'
     | '/'
+    | '/admin/ambitos'
     | '/admin/catalogos'
+    | '/admin/configuracion'
+    | '/admin/roles'
+    | '/admin/usuarios'
     | '/tickets/$ticketId'
     | '/tickets/nuevo'
     | '/admin'
@@ -161,7 +208,11 @@ export interface FileRouteTypes {
     | '/_authenticated/mi-trabajo'
     | '/_authenticated/perfil'
     | '/_authenticated/'
+    | '/_authenticated/admin/ambitos'
     | '/_authenticated/admin/catalogos'
+    | '/_authenticated/admin/configuracion'
+    | '/_authenticated/admin/roles'
+    | '/_authenticated/admin/usuarios'
     | '/_authenticated/tickets/$ticketId'
     | '/_authenticated/tickets/nuevo'
     | '/_authenticated/admin/'
@@ -231,11 +282,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ambitos': {
+      id: '/_authenticated/admin/ambitos'
+      path: '/ambitos'
+      fullPath: '/admin/ambitos'
+      preLoaderRoute: typeof AuthenticatedAdminAmbitosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/catalogos': {
       id: '/_authenticated/admin/catalogos'
       path: '/catalogos'
       fullPath: '/admin/catalogos'
       preLoaderRoute: typeof AuthenticatedAdminCatalogosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/configuracion': {
+      id: '/_authenticated/admin/configuracion'
+      path: '/configuracion'
+      fullPath: '/admin/configuracion'
+      preLoaderRoute: typeof AuthenticatedAdminConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/roles': {
+      id: '/_authenticated/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AuthenticatedAdminRolesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/usuarios': {
+      id: '/_authenticated/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/tickets/': {
@@ -263,12 +342,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAmbitosRoute: typeof AuthenticatedAdminAmbitosRoute
   AuthenticatedAdminCatalogosRoute: typeof AuthenticatedAdminCatalogosRoute
+  AuthenticatedAdminConfiguracionRoute: typeof AuthenticatedAdminConfiguracionRoute
+  AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
+  AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAmbitosRoute: AuthenticatedAdminAmbitosRoute,
   AuthenticatedAdminCatalogosRoute: AuthenticatedAdminCatalogosRoute,
+  AuthenticatedAdminConfiguracionRoute: AuthenticatedAdminConfiguracionRoute,
+  AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
+  AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 

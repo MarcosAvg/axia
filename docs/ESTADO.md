@@ -4,7 +4,7 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 3B — Administración (catálogos y motivos hechos; roles, usuarios y configuración pendientes)
+**Fase actual:** 4 — Evidencias y modo sin conexión (Fase 3B cerrada)
 
 ## En curso
 
@@ -109,10 +109,9 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
 
 ## Siguiente
 
-**Fase 3B (resto)** — Tramos 3 a 5: roles y permisos (matriz permiso × rol con ámbito),
-usuarios (roles, activar/desactivar y vínculos), ámbitos de supervisor y designaciones de técnicos,
-configuración esencial de la instancia, y cierre (Playwright de roles, docs y compuerta). Quedan
-hechos los tramos 1 (RLS de escritura) y 2 (catálogos y motivos).
+**Fase 4 — Evidencias y modo sin conexión**: captura y compresión de fotos, subida reanudable, cola
+`outbox` con Dexie y sincronización; registro de tiempos manuales (interfaz) y actos en nombre de
+otro (proxy); prueba Playwright del flujo del técnico sin conexión. La **Fase 3B quedó cerrada**.
 
 ## Hoja de ruta
 
@@ -173,11 +172,12 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       reasignar/auxiliares/duplicados ya existen; la captura offline y los tiempos manuales son
       Fase 4)
 
-**Fase 3B — Administración (en curso):**
+**Fase 3B — Administración — cerrada el 2026-10-08:**
 - [x] Catálogos maestros y motivos jerárquicos (feature `admin`, `/admin/catalogos`)
-- [ ] Roles y permisos (matriz permiso × rol con ámbito), usuarios y ámbitos/designaciones
-- [ ] Configuración esencial de la instancia
-- [ ] Cierre (Playwright de roles, docs y compuerta)
+- [x] Roles y permisos (matriz permiso × rol con ámbito), usuarios y ámbitos/designaciones
+- [x] Configuración esencial de la instancia (`/admin/configuracion`)
+- [ ] (Fuera de 3B) Alta/invitación de cuentas (Edge Function), calendarios laborales, reglas de
+      notificación/escalamiento y parámetros finos de duplicados
 
 ### Fase 4 — Evidencias y modo sin conexión
 - [ ] Captura y compresión de fotos, subida reanudable, cola `outbox`, sincronización
@@ -448,6 +448,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: Fase 3B, tramo 2: feature `admin` con `CatalogManager` dirigido por configuración
   (13 catálogos y motivos) y layout `/admin/catalogos`; Vitest y Playwright del alta de un catálogo;
   `pnpm check` completo en verde. Rama `feat/fase-3b-admin`.
+- 2026-10-08: Fase 3B, tramo 3: `access-api` y hooks; rutas `/admin/roles` (matriz de permisos con
+  ámbito), `/admin/usuarios` (roles, activo/desactivar y vínculos) y `/admin/ambitos` (ámbitos de
+  supervisor y designaciones); Playwright de crear un rol; `pnpm check` completo en verde. Rama
+  `feat/fase-3b-access`.
+- 2026-10-08: Fase 3B, tramo 4: `/admin/configuracion` (configuración esencial de la instancia) y
+  pruebas Vitest del dominio. `pnpm check` completo en verde. **Fase 3B cerrada**.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -488,3 +494,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   configuración (tabla, columnas, campos y selects de tablas relacionadas) para los 13 catálogos y el
   árbol de motivos; layout `/admin` con `/admin/catalogos`. Pruebas Vitest (`form-values`) y
   Playwright (crear un equipo). `pnpm check` en verde. Rama `feat/fase-3b-admin`.
+- **Fase 3B, Tramo 3 (roles, usuarios y ámbitos)**: rutas `/admin/roles` (alta/edición de roles y
+  **matriz de permisos con ámbito**), `/admin/usuarios` (roles, activar/desactivar y **vínculos** con
+  solicitantes/técnicos) y `/admin/ambitos` (ámbitos de supervisor con edificios y designaciones de
+  técnicos). Prueba Playwright de crear un rol. `pnpm check` en verde. Rama `feat/fase-3b-access`.
+- **Fase 3B, Tramo 4 (configuración)**: `/admin/configuracion` edita la configuración esencial de la
+  instancia (etiqueta de equipo, política de validación, validación automática, ventana de
+  reclamación, política de evidencia, patrón de folio y zona horaria). Pruebas Vitest del dominio.
+  **Fase 3B cerrada** con tramos 1-4; quedan fuera (documentados) alta de cuentas por Edge Function,
+  calendarios laborales, reglas de notificación/escalamiento y parámetros finos de duplicados.
