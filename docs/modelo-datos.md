@@ -49,7 +49,6 @@ erDiagram
   ticket_pauses ||--o{ ticket_pause_steps : subestados
   tickets ||--o{ ticket_claims : reclamaciones
   tickets ||--o{ ticket_links : enlaces
-  tickets ||--o{ ticket_followers : seguidores
   tickets ||--o{ evidence : evidencias
   ticket_events ||--o{ evidence : origina
   tickets ||--o{ time_spans : tramos
@@ -69,14 +68,13 @@ erDiagram
 
 | Enum | Valores |
 |---|---|
-| `ticket_status` | `registered`, `with_supervisor`, `assigned`, `pending_recapture`, `in_progress`, `paused`, `attended`, `under_claim`, `closed`, `rejected`, `cancelled`, `duplicate` |
+| `ticket_status` | `registered`, `with_supervisor`, `assigned`, `in_progress`, `paused`, `attended`, `under_claim`, `closed`, `rejected`, `cancelled`, `duplicate` |
 | `assignment_stage` | `supervisor`, `technician` |
 | `participation_type` | `leader`, `auxiliary` |
 | `evidence_type` | `request`, `before`, `during`, `after`, `claim`, `other` |
-| `event_type` | `created`, `offered`, `taken`, `reassigned_supervisor`, `assigned_technician`, `reassigned_technician`, `auxiliary_added`, `capture_recaptured`, `capture_proposed`, `capture_approved`, `capture_rejected`, `started`, `paused`, `pause_advanced`, `resumed`, `attended`, `validated`, `claim_opened`, `claim_resolved`, `reopened`, `rejected`, `cancelled`, `duplicate_marked`, `reactivated`, `priority_changed`, `comment`, `evidence_added`, `imported` |
+| `event_type` | `created`, `offered`, `taken`, `reassigned_supervisor`, `assigned_technician`, `reassigned_technician`, `auxiliary_added`, `capture_recaptured`, `started`, `paused`, `pause_advanced`, `resumed`, `attended`, `validated`, `claim_opened`, `claim_resolved`, `reopened`, `rejected`, `cancelled`, `duplicate_marked`, `reactivated`, `priority_changed`, `comment`, `evidence_added`, `imported` |
 | `event_source` | `app`, `import`, `integration` |
 | `offer_status` | `offered`, `taken`, `withdrawn` |
-| `capture_status` | `pending`, `approved`, `rejected` |
 | `claim_status` | `open`, `resolved` |
 | `link_type` | `duplicate_of`, `derived_from`, `related_to`, `blocked_by` |
 | `reason_use` | `pause`, `rejection`, `cancellation`, `supervisor_reassignment`, `technician_reassignment`, `recapture`, `claim`, `claim_outcome`, `reactivation`, `auxiliary_support` |
@@ -103,10 +101,10 @@ disparador) y `active` cuando es catálogo. RLS en todas.
 - **`instance_settings`** (fila única, `singleton boolean unique default true`):
   `team_label text`, `validation_policy text` (`requester`|`supervisor`|`both`),
   `auto_validation_days int null` (nulo = apagado), `claim_window interval` (semilla `1 day`),
-  `recapture_approval_roles text[]` (p. ej. `{supervisor,requester}`),
   `duplicate_window interval`, `duplicate_similarity numeric` (umbral `pg_trgm`),
-  `duplicate_shown_fields text[]`, `folio_pattern text` (semilla `AX-{yyyy}-{num}`),
-  `timezone text`, `default_calendar_id uuid`, `rating_required boolean`,
+  `duplicate_shown_fields text[]` (por defecto folio, estado, fecha, ubicación, problema y
+  contacto), `folio_pattern text` (semilla `AX-{yyyy}-{num}`), `timezone text`,
+  `default_calendar_id uuid`,
   `request_evidence_policy text` (`optional`|`recommended`|`required`, semilla `recommended`),
   `requester_visible_event_types event_type[]`.
 - **`work_calendars`**: `name text`, `timezone text`, `active boolean`.
@@ -157,7 +155,8 @@ disparador) y `active` cuando es catálogo. RLS en todas.
   `channel_id`, `description text`, `requester_id → requesters`, `requester_name text`,
   `requester_contact text` (instantánea), `registered_by uuid → auth.users`,
   `reported_at timestamptz not null default now()`, `closed_at timestamptz null`,
-  `possible_duplicate boolean default false`, `duplicate_of_id → tickets null`.
+  `possible_duplicate boolean default false`, `duplicate_of_id → tickets null`,
+  `status_before_discard ticket_status null` (para la reactivación).
   Restricciones: `problem_id` coherente con `subcategory_id` y esta con `category_id`;
   `folio` inmutable (disparador).
 - **`ticket_events`** (solo agregar): `ticket_id`, `cycle int`, `type event_type`, `actor_id uuid null`
@@ -175,11 +174,10 @@ disparador) y `active` cuando es catálogo. RLS en todas.
 - **`ticket_participants`**: `ticket_id`, `cycle`, `technician_id → technicians`,
   `participation_type participation_type`, `category_id` (instantánea), `started_at`, `ended_at null`,
   `origin span_origin`, `recorded_by uuid null`, `client_request_id uuid null unique`.
-- **`ticket_captures`**: `ticket_id`, `cycle`, `proposed_by uuid`, `proposed_at`, `reason_id → reasons`,
-  `changes jsonb` (campo → `{from,to}`), `status capture_status`, `decided_at null`,
-  `decision_note text`.
-- **`ticket_capture_approvals`**: `capture_id → ticket_captures`, `approver_role text`,
-  `approver_user_id uuid`, `decision text`, `decided_at`, `note text`.
+- **`ticket_captures`**: `ticket_id`, `cycle`, `changed_by uuid → auth.users`,
+  `changed_at timestamptz`, `reason_id → reasons`, `changes jsonb` (campo → `{from,to}`).
+  Cada fila es una **versión aplicada**; el original y cada versión se conservan. No hay
+  aprobaciones: se aplica y se notifica (la disconformidad va por reclamación).
 - **`ticket_pauses`**: `ticket_id`, `cycle`, `reason_id → reasons` (nodo actual), `opened_by uuid`,
   `opened_at`, `closed_at null`, `note text`, `estimated_date date null`, `origin span_origin`,
   `recorded_by uuid null`. Restricción: **una pausa abierta por tiquet** (`unique partial index`
@@ -191,8 +189,6 @@ disparador) y `active` cuando es catálogo. RLS en todas.
   `resolved_by uuid null`, `resolved_at null`, `resolution_note text`.
 - **`ticket_links`**: `ticket_id`, `linked_ticket_id`, `link_type link_type`, `created_by uuid`,
   `created_at`. `unique (ticket_id, linked_ticket_id, link_type)`.
-- **`ticket_followers`**: `ticket_id`, `user_id uuid null`, `requester_id → requesters null`,
-  `added_by uuid null`, `created_at`. `check`: exactamente uno de `user_id`/`requester_id`.
 - **`ticket_duplicate_candidates`**: `ticket_id`, `candidate_ticket_id`, `similarity numeric`,
   `shown_at timestamptz`, `decision text` (`ignored`|`linked`|`dismissed` null).
 - **`evidence`**: `ticket_id`, `event_id → ticket_events`, `cycle`, `type evidence_type`,
@@ -235,26 +231,29 @@ Estados: los de `ticket_status` (§2). `registered` es el inicial. Finales: `clo
 | `registered`/`with_supervisor` | `assign_technician` | `ticket.assign_technician` (supervisor/admin) | técnico del catálogo; implica tomar | `assigned`; asignación `stage=technician`; evento |
 | `with_supervisor` | `reassign_supervisor` | `ticket.assign_supervisor` | motivo del catálogo | recalcula ofertas; `registered`; tramo `reassignment` |
 | `assigned` | `start` | `ticket.start` (técnico o proxy) | evidencia `before` del ciclo | `in_progress`; tramo `active_work` |
-| `assigned`/`in_progress`/`paused` | `propose_recapture` | `ticket.propose_recapture` (técnico) | captura correcta, motivo | `pending_recapture`; evento; aprobaciones |
-| `pending_recapture` | `approve_recapture` | política (`approve_recapture`) | aprobaciones requeridas | aplica cambios; `assigned` o `with_supervisor`/`registered` si cambió equipo/edificio |
-| `pending_recapture` | `reject_recapture` | `approve_recapture` | — | conserva original; `assigned` |
+| `assigned`/`in_progress`/`paused` | `recapture` | `ticket.recapture` (técnico, supervisor o admin) | motivo del catálogo | aplica la nueva captura (conserva original y versiones); evento; **avisa** a solicitante y supervisor. Si cambió el equipo/edificio o el técnico ya no corresponde, vuelve a `with_supervisor`/`registered` |
 | `in_progress` | `pause` | `ticket.pause` (técnico/supervisor/admin o proxy) | motivo del catálogo | `paused`; abre pausa; tramo `pause` |
 | `paused` | `advance_pause` | `ticket.pause` | nodo hijo válido | avanza nodo; cierra/abre tramo del subestado |
 | `paused` | `resume` | `ticket.resume` | — | `in_progress`; cierra pausa |
 | `in_progress` | `attend` | `ticket.attend` (técnico o proxy) | evidencia `after`; descripción | `attended`; tramo `validation` |
-| `attended` | `validate` | según política (`validate` o `validate_on_behalf`) | validaciones requeridas | `closed`; `closed_at` |
+| `attended` | `validate` | según política (`validate` o `validate_on_behalf`) | validaciones requeridas; **"primero gana"** | `closed`; `closed_at` |
 | `attended`/`closed` (dentro de ventana) | `open_claim` | `ticket.open_claim` o `open_claim_on_behalf` | motivo + descripción + evidencia `claim` | `under_claim`; notifica supervisor |
-| `under_claim` | `resolve_claim` procedente | `ticket.resolve_claim` | deja captura correcta (RN-11) | **nuevo ciclo**: `assigned` (mismo técnico salvo cambio); evento `reopened` |
+| `under_claim` | `resolve_claim` procedente | `ticket.resolve_claim` | deja captura correcta | **nuevo ciclo**: `assigned` (mismo técnico salvo cambio); evento `reopened` |
 | `under_claim` | `resolve_claim` improcedente | `ticket.resolve_claim` | — | `closed` |
 | `under_claim` | `resolve_claim` requiere nuevo | `ticket.resolve_claim` | — | vuelve al estado previo; crea tiquet enlazado (`derived_from`) |
-| varios | `reject` | `ticket.reject` | motivo del catálogo | `rejected`; evento |
-| varios | `cancel` | `ticket.cancel` o `cancel_on_behalf` | motivo; condiciones configurables | `cancelled`; evento |
-| varios | `mark_duplicate` | `ticket.mark_duplicate` (participante del flujo) | enlaza original | `duplicate`; solicitante queda seguidor del original |
-| `rejected`/`cancelled`/`duplicate` | `reactivate` | `ticket.reactivate` (admin) | motivo | vuelve a estado operativo (ver pregunta abierta 6) |
+| varios | `reject` | `ticket.reject` | motivo del catálogo | `rejected`; guarda `status_before_discard` |
+| varios | `cancel` | `ticket.cancel` o `cancel_on_behalf` | motivo; condiciones configurables | `cancelled`; guarda `status_before_discard` |
+| varios | `mark_duplicate` | `ticket.mark_duplicate` (participante del flujo) | enlaza original | `duplicate`; guarda `status_before_discard`; **avisa al solicitante** (sin seguidores) |
+| `rejected`/`cancelled`/`duplicate` | `reactivate` | `ticket.reactivate` (admin) | motivo del catálogo | vuelve a `status_before_discard`; evento `reactivated`; el intervalo descartado es tramo `not_counted` |
 | cualquiera no final | `change_priority` | `ticket.prioritize` | — | actualiza prioridad; evento `priority_changed` |
-| — | `rate` | `ticket.rate` o `rate_on_behalf` | tiquet `closed` | guarda satisfacción 1–5 + comentario |
+| — | `rate` | `ticket.rate` o `rate_on_behalf` | tiquet `closed`; **siempre opcional** | guarda satisfacción 1–5 + comentario |
 | — | `comment` | `ticket.view` (con ámbito) | — | evento `comment` (visible según política) |
 | — | `record_manual_time` | `time.record_manual` | validaciones (§7) | tramo `manual` + evento |
+
+**Concurrencia y acciones tardías ("primero gana").** Si dos usuarios ejecutan la misma acción de
+avance, gana la primera y la segunda no surte efecto. Una acción que llega tarde (sin conexión)
+sobre un estado ya resuelto se **registra** en el historial, pero no cambia el estado; se informa a
+quien la envió. La idempotencia se apoya en `client_request_id` (`idempotency_keys`).
 
 ## 5. Matriz de permisos (conjunto fijo) y roles semilla
 
@@ -270,8 +269,7 @@ Estados: los de `ticket_status` (§2). `registered` es el inicial. Finales: `clo
 | `ticket.assign_supervisor` | — | ✔ | — | ✔ |
 | `ticket.assign_technician` | — | ✔ `team` | — | ✔ |
 | `ticket.add_auxiliary` | — | ✔ `team` | — | ✔ |
-| `ticket.propose_recapture` | — | ✔ | ✔ `own` | ✔ |
-| `ticket.approve_recapture` | ✔ (si política) | ✔ | — | ✔ |
+| `ticket.recapture` | — | ✔ | ✔ `own` | ✔ |
 | `ticket.start` / `ticket.attend` | — | — | ✔ `own` | ✔ |
 | `ticket.pause` / `ticket.resume` | — | ✔ `team` | ✔ `own` | ✔ |
 | `ticket.validate` | ✔ (si política) | ✔ (si política) | — | ✔ |
@@ -319,7 +317,9 @@ manual), con `recorded_by`. Marcas `occurred_at`/`recorded_at` (offline, RN-27).
 - **Tiempo neto** = total − tramos con `clock_class = not_counted`.
 - **Versión laboral** = intersección de cada tramo con `work_calendar_intervals` del calendario
   (del equipo o de la persona), restando `work_calendar_holidays`, en la zona del calendario.
-- Los **duplicados** quedan fuera de los indicadores de desempeño.
+- Los **duplicados** quedan fuera de los indicadores de desempeño. Tras una **reactivación**, el
+  intervalo en que el tiquet estuvo descartado se registra como tramo `not_counted`; los tiempos
+  siguen según el estado al que volvió.
 
 **Ejemplos resueltos** (horas, calendario continuo; A=respuesta supervisor, B=asignación,
 C=espera inicio, D=trabajo activo, E=pausa, F=validación, G=reclamación/reasignación):
@@ -333,8 +333,8 @@ C=espera inicio, D=trabajo activo, E=pausa, F=validación, G=reclamación/reasig
 3. **Reasignación.** 08:00 registro; 08:20 el supervisor equivocado lo toma; 09:00 reasigna a otro
    equipo (G=0.666 h, aparte); 09:10 el nuevo lo toma; 09:30 asigna técnico (B=0.25 h)… El tramo
    de reasignación se reporta **aparte** de A, pero **suma al total**.
-4. **Recaptura.** 09:15 inicia; 09:40 propone recaptura; 10:00 se aprueba (tramo `recapture` =
-   0.333 h); continúa. El tramo de recaptura se reporta aparte y suma al total (clasificación).
+4. **Recaptura.** 09:15 inicia; 09:40 recaptura (aplicada; avisa a solicitante y supervisor);
+   10:00 continúa (tramo `recapture` = 0.333 h). El tramo se reporta aparte y suma al total.
 5. **Reclamación con reapertura.** Cierra 11:30; reclama 12:00 (dentro de la ventana de 1 día);
    `under_claim`; 12:30 el supervisor resuelve **procedente** → nuevo ciclo (`assigned`), el tiempo
    sigue corriendo. `claim` = 0.5 h, aparte pero suma al total; `reopened` inicia ciclo 2 con nuevas
@@ -399,6 +399,13 @@ laboral, excluyendo duplicados de los de desempeño.
 
 ## 11. Decisiones, ADR, riesgos y preguntas abiertas
 
+**Decisiones confirmadas** (además de las §14 de la especificación): recaptura **sin aprobación**
+(se aplica y se avisa; la disconformidad va por reclamación); concurrencia y acciones tardías
+**"primero gana"** (una acción tardía se registra pero no surte efecto); **una fila de
+configuración** por base; **reactivación** al estado previo al descarte (`status_before_discard`);
+**calificación siempre opcional**; **duplicados sin seguidores** (solo enlace y aviso); y el
+concepto de **seguidor eliminado** por ahora.
+
 **ADR a crear** (la implementación los escribe):
 - 0007 Solicitante mixto (catálogo con vínculo opcional a cuenta).
 - 0008 Técnicos de catálogo con cuenta opcional y **proxy** (actor/sujeto).
@@ -411,19 +418,11 @@ laboral, excluyendo duplicados de los de desempeño.
 
 **Riesgos:** (a) complejidad del modelo de tiempos y del cálculo laboral; (b) doble conteo entre
 tramos del sistema y manuales; (c) rendimiento de RLS con muchas políticas y subconsultas; (d)
-madurez del flujo de reclamación/reapertura con múltiples ciclos; (e) el modelo de ofertas requiere
-pruebas de concurrencia.
+madurez del flujo de reclamación/reapertura con múltiples ciclos; (e) el modelo de ofertas y la
+regla "primero gana" requieren pruebas de concurrencia.
 
-**Preguntas abiertas para la persona** (además de §14 de la especificación y de `ESTADO.md`):
-1. Recaptura: ¿exige aceptación de supervisor **y** solicitante a la vez, y si uno rechaza decide
-   el supervisor? (supuesto 1)
-2. Reglas concretas de **acciones tardías sin conexión** y de **concurrencia** (dos supervisores
-   toman; dos validaciones simultáneas).
-3. ¿Basta **una sola fila** de configuración por base (una instancia por despliegue)?
-4. Contenido por defecto de la **alerta de duplicados** (supuesto 8).
-5. Al **reactivar** un tiquet de descarte, ¿a qué estado vuelve y cómo se tratan sus tiempos?
-6. ¿Un tiquet puede tener **varios seguidores contactos** sin cuenta dados de alta por el admin?
-7. La **calificación** de satisfacción: ¿obligatoria alguna vez (configurable) o siempre opcional?
+**Preguntas abiertas:** ninguna de la Fase 1 queda sin responder. Las de fases posteriores (zona
+horaria y horario laboral, tiempos objetivo) siguen en `docs/ESTADO.md`.
 
 ## 12. Plan de migraciones (Etapa B, tras aprobación)
 
@@ -434,7 +433,7 @@ Un archivo por tramo, con pgTAP y `pnpm check` en verde, en este orden:
 2. `..._users_roles_and_scopes.sql` — `profiles`, permisos, roles, ámbitos, designaciones,
    solicitantes y técnicos.
 3. `..._tickets_and_history.sql` — `tickets`, folio, `ticket_events`, asignaciones,
-   participantes, capturas, seguidores, `evidence`, `idempotency_keys`.
+   participantes, capturas, `evidence`, `idempotency_keys`.
 4. `..._routing_offers_and_transitions.sql` — ofertas, duplicados y RPC del flujo núcleo.
 5. `..._pauses_recaptures_claims.sql` — pausas/subestados, recaptura, reclamaciones, reapertura,
    duplicados y reactivación (RPC).

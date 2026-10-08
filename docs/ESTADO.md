@@ -100,13 +100,18 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   consistente; `AGENTS.md` §11 actualizado; hoja de ruta de la Fase 1 con sus 8 tramos; y
   `docs/modelo-datos.md` con los 11 entregables de §15. **Sin migraciones**: la Etapa A termina en
   el punto de control, a la espera de aprobación. Rama `docs/fase-1-modelo-datos`.
+- **Fase 1, Etapa A (ajustes)**: recaptura **sin aprobación** (se aplica y se avisa; la disconformidad
+  va por reclamación), concurrencia y acciones tardías **"primero gana"**, **reactivación** al estado
+  previo al descarte (`status_before_discard`), **calificación siempre opcional**, **duplicados sin
+  seguidores** (solo enlace y aviso) y **concepto de seguidor eliminado**. Reflejado en
+  `docs/especificacion-negocio.md`, `docs/dominio.md` y `docs/modelo-datos.md`; sin migraciones.
+  Rama `docs/fase-1-ajustes`.
 
 ## Siguiente
 
-Fase 1 — Base de datos núcleo. **Etapa A** (documentación y diseño): entregar
-`docs/modelo-datos.md` y **detenerse** para aprobación de negocio antes de escribir migraciones.
-Con la aprobación, la **Etapa B** implementa los 8 tramos de la hoja de ruta, cada uno con pgTAP y
-`pnpm check` en verde.
+Fase 1 — Base de datos núcleo. **Etapa A** entregada (`docs/modelo-datos.md`) y ajustada con las
+decisiones confirmadas; **se espera la aprobación de negocio**. Con ella, la **Etapa B** implementa
+los 8 tramos de la hoja de ruta, cada uno con pgTAP y `pnpm check` en verde.
 
 ## Hoja de ruta
 
@@ -142,7 +147,7 @@ Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** s
 `docs/modelo-datos.md` antes de escribir ninguna migración. Cada tramo con pgTAP y `pnpm check`:
 1. [ ] Configuración de la instancia, catálogos maestros y motivos jerárquicos
 2. [ ] Usuarios, perfiles, roles, permisos y ámbitos (equipo, edificios, categorías)
-3. [ ] Tiquets, folio, historial, participantes, seguidores y evidencias
+3. [ ] Tiquets, folio, historial, participantes y evidencias
 4. [ ] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
 5. [ ] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
 6. [ ] Tiempos: calendarios, tramos y funciones de cálculo
@@ -193,13 +198,13 @@ concreta, opciones y recomendación.
 | 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 6 | Pendiente |
 | 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 6 (hay supuesto provisional) | Pendiente |
 | 9 | ¿Más de una pestaña o año en la hoja? ¿Volumen aproximado? | Fase 6 | Pendiente |
-| 10 | ¿La recaptura del técnico exige aceptación de supervisor **y** solicitante? | Fase 1 | Pendiente (supuesto 1 de §14) |
-| 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | Pendiente |
-| 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | Pendiente |
-| 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | Pendiente (supuesto 8 de §14) |
+| 10 | ¿La recaptura del técnico exige aceptación de supervisor **y** solicitante? | Fase 1 | **Resuelta**: sin aprobación; se aplica, se avisa y la disconformidad va por reclamación |
+| 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | **Resuelta**: "primero gana" |
+| 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | **Resuelta**: una instancia por base |
+| 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | **Resuelta**: folio, estado, fecha, ubicación, problema y contacto |
 
-Las preguntas de negocio de la Fase 1 viven también en las preguntas abiertas de
-`docs/modelo-datos.md`; esa es la revisión de negocio previa a las migraciones.
+Las preguntas de la Fase 1 quedaron resueltas; las decisiones están en el bloque de correcciones de
+`docs/especificacion-negocio.md` y en `docs/modelo-datos.md`.
 
 ## Decisiones registradas
 
@@ -344,3 +349,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (secciones 1-14 + correcciones confirmadas), `docs/dominio.md` reescrito, `AGENTS.md` §11,
   hoja de ruta de la Fase 1 y `docs/modelo-datos.md` (11 entregables). Se **detiene** a la espera
   de aprobación; sin migraciones. Rama `docs/fase-1-modelo-datos`.
+- 2026-10-07: Fase 1, Etapa A (ajustes): recaptura sin aprobación, concurrencia "primero gana",
+  reactivación al estado previo, calificación opcional, duplicados sin seguidores y seguidor
+  eliminado; documentos actualizados. `pnpm check` en verde. Rama `docs/fase-1-ajustes`.

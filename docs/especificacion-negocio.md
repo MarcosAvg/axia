@@ -5,7 +5,7 @@
 > léelo (ver `AGENTS.md`, sección 11). `docs/dominio.md` es su resumen consistente; si algo
 > contradice a este documento, manda este.
 
-## Correcciones confirmadas por la persona
+## Correcciones y decisiones confirmadas por la persona
 
 Estas decisiones **sustituyen** lo que diga el texto de abajo y todavía no están incorporadas a
 sus secciones; se reflejan en `docs/dominio.md` y `docs/modelo-datos.md`.
@@ -33,6 +33,25 @@ sus secciones; se reflejan en `docs/dominio.md` y `docs/modelo-datos.md`.
    solicitante sin cuenta.
 6. **Notificaciones a contactos sin cuenta.** La notificación queda "para el contacto"; su
    entrega es externa o la realiza quien lleva el seguimiento (no hay bandeja en la app).
+7. **Recaptura sin aprobación** (sustituye RN-11 y el supuesto 1 de §14). La recaptura se
+   **aplica** sobre el mismo tiquet conservando el original y cada versión; se **avisa** al
+   solicitante y al supervisor, y **no hay aprobaciones**. Quien no esté de acuerdo **abre una
+   reclamación** (RN-16).
+8. **Concurrencia y acciones tardías** (RN-27). "La primera es verdad": gana la primera acción.
+   Una acción que llega tarde (sin conexión) sobre un estado ya resuelto se **registra** pero
+   **no surte efecto**, y se informa a quien la envió.
+9. **Una sola instancia por base** (§1): una fila de configuración; en la misma base conviven
+   varias dependencias solicitantes.
+10. **Reactivación** (RN-30): un tiquet descartado **vuelve al estado que tenía justo antes de
+    descartarse**; se conserva ese estado y los tiempos siguen según él.
+11. **Calificación de satisfacción: siempre opcional.**
+12. **Duplicados** (RN-29): marcar un duplicado **enlaza al original y avisa al solicitante**; no
+    se crea ninguna relación de seguidor.
+13. **Seguidores: se eliminan.** No se modela el concepto de "seguidor" de §2 y §9. Las
+    notificaciones quedan abiertas a añadirlo con una migración pequeña si aparece una necesidad
+    real.
+14. **Contenido de la alerta de duplicados**: folio, estado, fecha, ubicación, problema y contacto
+    de quien registró (configurable).
 
 ---
 
