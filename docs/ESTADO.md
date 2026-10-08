@@ -94,13 +94,19 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   CI instala Chromium con `--with-deps`. Directorio `deploy/` creado con `README.md` de alcance
   (se puebla en la Fase 8). Con esto la Fase 0 queda cerrada con `pnpm check` en verde.
   Rama `chore/cierre-fase-0`.
+- **Fase 1, Etapa A (documentación y diseño)**: se adoptó la especificación de negocio de la
+  persona. `docs/especificacion-negocio.md` (secciones 1-14 íntegras + correcciones confirmadas:
+  solicitante mixto, técnicos de catálogo, proxy, tiempos manuales); `docs/dominio.md` reescrito y
+  consistente; `AGENTS.md` §11 actualizado; hoja de ruta de la Fase 1 con sus 8 tramos; y
+  `docs/modelo-datos.md` con los 11 entregables de §15. **Sin migraciones**: la Etapa A termina en
+  el punto de control, a la espera de aprobación. Rama `docs/fase-1-modelo-datos`.
 
 ## Siguiente
 
-Fase 1 — Base de datos núcleo: catálogos, `tickets`, `ticket_assignments`, `ticket_events`,
-`attachments`, `ticket_external_refs`, `user_roles`, con RLS y pruebas pgTAP (ver la hoja de
-ruta). Antes de diseñarla conviene responder las preguntas 2 (solicitantes con o sin cuenta) y
-4 (formato del número de tiquet), que condicionan el esquema.
+Fase 1 — Base de datos núcleo. **Etapa A** (documentación y diseño): entregar
+`docs/modelo-datos.md` y **detenerse** para aprobación de negocio antes de escribir migraciones.
+Con la aprobación, la **Etapa B** implementa los 8 tramos de la hoja de ruta, cada uno con pgTAP y
+`pnpm check` en verde.
 
 ## Hoja de ruta
 
@@ -131,44 +137,42 @@ migración van después, sobre un núcleo ya estable.
 **Fase 0 cerrada el 2026-10-07** con `pnpm check` en verde. El componente `chart`/Recharts
 llega con las métricas (Fase 6) y `deploy/` se puebla en producción (Fase 8).
 
-### Fase 1 — Base de datos núcleo
-- [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
-      tipos de servicio, prioridades, canales, técnicos, sistemas externos (`external_systems`)
-- [ ] `tickets` (con `ticket_number`), `ticket_assignments`, `ticket_events` (solo agregar),
-      `attachments`, `ticket_external_refs`, `user_roles`
-- [ ] RLS por rol en todas las tablas, con pruebas pgTAP
-- [ ] Vistas de métricas base (`v_ticket_metrics_base`)
+### Fase 1 — Base de datos núcleo (modelo de datos)
+Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** se aprueba
+`docs/modelo-datos.md` antes de escribir ninguna migración. Cada tramo con pgTAP y `pnpm check`:
+1. [ ] Configuración de la instancia, catálogos maestros y motivos jerárquicos
+2. [ ] Usuarios, perfiles, roles, permisos y ámbitos (equipo, edificios, categorías)
+3. [ ] Tiquets, folio, historial, participantes, seguidores y evidencias
+4. [ ] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
+5. [ ] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
+6. [ ] Tiempos: calendarios, tramos y funciones de cálculo
+7. [ ] Notificaciones, reglas y escalamiento
+8. [ ] RLS completa, visibilidad, semillas y vistas de indicadores
 
-### Fase 2 — Transiciones y bloqueos
-- [ ] Funciones RPC: crear tiquet, asignar a supervisor, asignar a técnico (autoriza), iniciar,
-      resolver, cerrar, rechazar, cancelar, con idempotencia (`client_request_id`)
-- [ ] Modelo de bloqueos: tipos, estados, transiciones, campos dinámicos; `on_hold` calculado
-- [ ] Pruebas pgTAP de rol incorrecto, transición inválida y repetición idempotente
-- [ ] Semilla provisional y ficticia de tipos de bloqueo (ver pregunta 1)
-
-### Fase 3 — Autenticación, roles y estructura de la app
+### Fase 2 — Autenticación y estructura de la app
 - [ ] Inicio de sesión, perfiles, layout con rutas protegidas por rol (la seguridad real es RLS)
 
-### Fase 4 — Pantallas principales
+### Fase 3 — Pantallas principales
 - [ ] Alta de tiquets con catálogos, lista y detalle con línea de tiempo
-- [ ] Vista del técnico (móvil primero), bandeja del supervisor y del encargado
-- [ ] Administración de catálogos y de flujos de bloqueo
+- [ ] Vista del técnico (móvil primero), bandejas del supervisor y del administrador
+- [ ] Administración de catálogos, roles/permisos y motivos
 
-### Fase 5 — Evidencias y modo sin conexión
+### Fase 4 — Evidencias y modo sin conexión
 - [ ] Captura y compresión de fotos, subida reanudable, cola `outbox`, sincronización
+- [ ] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy)
 - [ ] Prueba Playwright del flujo del técnico sin conexión
 
-### Fase 6 — Métricas y reportes
-- [ ] Vistas avanzadas, tableros con Recharts, exportación CSV/XLSX
+### Fase 5 — Métricas y reportes
+- [ ] Indicadores de la especificación §11, tableros con Recharts, exportación CSV/XLSX
 
-### Fase 7 — Integraciones y migración (opcional, aislada del núcleo)
+### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,
       `catalog_aliases`, `import_status_map`, dry run y reporte de calidad de datos
 - [ ] Adaptador de importación CSV/Excel de la hoja heredada
 - [ ] Verificación: las métricas base coinciden con las cifras actuales de la hoja
 - [ ] Otros adaptadores y tareas de sincronización saliente, solo si la persona los pide
 
-### Fase 8 — Producción
+### Fase 7 — Producción
 - [ ] PWA completa, notificaciones push, despliegue autoalojado (Docker Compose + Caddy),
       respaldos y restauración de prueba, documentación de despliegue
 - [ ] (Solo si hace falta) envoltura nativa con Capacitor
@@ -180,22 +184,41 @@ concreta, opciones y recomendación.
 
 | # | Pregunta | Bloquea | Estado |
 |---|---|---|---|
-| 1 | Lista inicial de tipos de bloqueo, subestados y campos | Fase 2 (semilla definitiva) | Pendiente |
-| 2 | ¿Los solicitantes tendrán cuenta o serán contactos sin cuenta? | Fases 1 y 3 (hay decisión provisional) | Pendiente |
-| 3 | Zona horaria de la institución y horario laboral para métricas | Fase 6 | Pendiente |
-| 4 | Formato del número de tiquet (consecutivo, con prefijo o año) | Fase 1 | Pendiente |
-| 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 6 | Pendiente |
-| 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 7 | Pendiente |
-| 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 7 | Pendiente |
-| 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 7 (hay supuesto provisional) | Pendiente |
-| 9 | ¿Más de una pestaña o año en la hoja? ¿Volumen aproximado? | Fase 7 | Pendiente |
+| 1 | Lista inicial de motivos, subestados y campos | Fase 1 (semilla) | **Resuelta**: §6 de la especificación trae las semillas ficticias |
+| 2 | ¿Los solicitantes tendrán cuenta o serán contactos sin cuenta? | Fase 1 | **Resuelta**: modelo mixto (catálogo con vínculo opcional) |
+| 3 | Zona horaria de la institución y horario laboral para métricas | Fase 5 | Pendiente |
+| 4 | Formato del número de tiquet | Fase 1 | **Resuelta**: RN-25 (UUID interno + consecutivo global + folio por patrón) |
+| 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 5 | Pendiente |
+| 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 6 | Pendiente |
+| 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 6 | Pendiente |
+| 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 6 (hay supuesto provisional) | Pendiente |
+| 9 | ¿Más de una pestaña o año en la hoja? ¿Volumen aproximado? | Fase 6 | Pendiente |
+| 10 | ¿La recaptura del técnico exige aceptación de supervisor **y** solicitante? | Fase 1 | Pendiente (supuesto 1 de §14) |
+| 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | Pendiente |
+| 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | Pendiente |
+| 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | Pendiente (supuesto 8 de §14) |
+
+Las preguntas de negocio de la Fase 1 viven también en las preguntas abiertas de
+`docs/modelo-datos.md`; esa es la revisión de negocio previa a las migraciones.
 
 ## Decisiones registradas
 
-Decisiones provisionales (pendientes de ADR): varios bloqueos simultáneos por tiquet; `on_hold`
-calculado; la autorización es la asignación del supervisor al técnico; el solicitante puede ser
-usuario o contacto sin cuenta; la prioridad la ajusta el encargado o el supervisor con evento;
-al importar, el `ticket_number` conserva el ID original y la secuencia continúa después del mayor.
+Confirmadas (se registran como ADR al implementar la Fase 1; ver `docs/modelo-datos.md`):
+
+- **Solicitante mixto**: catálogo de solicitantes con vínculo opcional a una cuenta; se distingue
+  `registered_by` (actor) del solicitante.
+- **Técnicos de catálogo**: un técnico puede existir sin cuenta; la asignación apunta al catálogo.
+- **Proxy**: el administrador actúa en nombre de cualquiera; el supervisor, sobre sus técnicos. El
+  historial distingue actor y sujeto.
+- **Tiempos manuales**: supervisor/admin los registra y corrige, con origen, autor y validaciones.
+- **Roles y permisos configurables**: los permisos son un conjunto fijo; los roles se arman con
+  permisos y ámbito.
+- **Calidad de captura**: la recaptura conserva original y versiones (mide la calidad de captura).
+- **Folio**: UUID interno + consecutivo global + folio legible por patrón (RN-25).
+
+Sustituidas por la especificación (pendientes de ADR que las reemplace): el modelo de bloqueos
+`blocker_types`/`blocker_states`/`blocker_transitions`/`blocker_fields` (ADR 0005), el rol
+`dispatcher`, el `on_hold` calculado con varios bloqueos simultáneos y el tiquet sustituto.
 
 ## Notas de entorno
 
@@ -317,3 +340,7 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: cierre de Fase 0: Playwright (`@playwright/test`, humo de la pantalla de inicio
   en `e2e/home.spec.ts`, Chromium instalado en el CI) y `deploy/` con `README.md` de alcance.
   `pnpm check` en verde; la siguiente es la Fase 1. Rama `chore/cierre-fase-0`.
+- 2026-10-07: Fase 1, Etapa A (documentación y diseño): `docs/especificacion-negocio.md`
+  (secciones 1-14 + correcciones confirmadas), `docs/dominio.md` reescrito, `AGENTS.md` §11,
+  hoja de ruta de la Fase 1 y `docs/modelo-datos.md` (11 entregables). Se **detiene** a la espera
+  de aprobación; sin migraciones. Rama `docs/fase-1-modelo-datos`.
