@@ -7,6 +7,7 @@ import {
 import { render, screen } from '@testing-library/react'
 import { AuthContext, authMessages } from '@/features/auth'
 import type { AuthContextValue } from '@/features/auth'
+import { adminMessages } from '@/features/admin'
 import { messages } from '@/lib/i18n'
 import { routeTree } from '@/routeTree.gen'
 
@@ -33,7 +34,10 @@ const administrator = {
   phone: null,
   active: true,
   roles: ['administrator'],
-  permissions: [{ permission: 'user.manage', scope: 'all' as const }],
+  permissions: [
+    { permission: 'user.manage', scope: 'all' as const },
+    { permission: 'catalog.manage', scope: 'all' as const },
+  ],
 }
 
 const supervisor = {
@@ -85,9 +89,7 @@ describe('enrutado y sesión', () => {
       makeAuthValue({ status: 'signed-in', identity: administrator }),
     )
 
-    expect(
-      await screen.findByText(authMessages.admin.description),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(adminMessages.subtitle)).toBeInTheDocument()
   })
 
   it('sin el permiso, "/admin" avisa que no hay acceso', async () => {

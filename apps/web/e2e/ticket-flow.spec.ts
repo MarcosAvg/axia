@@ -25,7 +25,19 @@ async function uploadEvidence(page: Page, type: string) {
     mimeType: 'image/jpeg',
     buffer: Buffer.from('foto'),
   })
+  const done = page.waitForResponse((response) =>
+    response.url().includes('/rpc/evidence_add'),
+  )
   await page.getByRole('button', { name: 'Subir evidencia' }).click()
+  await done
+}
+
+async function clickAndWait(page: Page, name: string, rpc: string) {
+  const done = page.waitForResponse((response) =>
+    response.url().includes(`/rpc/${rpc}`),
+  )
+  await page.getByRole('button', { name }).click()
+  await done
 }
 
 test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
@@ -64,7 +76,7 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await page
     .getByLabel('Técnico')
     .selectOption({ label: 'Luis Gómez (ejemplo)' })
-  await page.getByRole('button', { name: 'Confirmar' }).click()
+  await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
   await expect(page.getByText('Asignado', { exact: true })).toBeVisible()
   await signOut(page)
 
@@ -73,7 +85,7 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await page.goto('/mi-trabajo')
   await page.getByText(description).click()
   await uploadEvidence(page, 'Antes')
-  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await clickAndWait(page, 'Iniciar', 'ticket_start')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 
   // Sube la evidencia de cierre y marca atendido.
@@ -82,7 +94,7 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await page
     .getByLabel('Descripción del trabajo')
     .fill('Se revisó la instalación y quedó funcionando')
-  await page.getByRole('button', { name: 'Confirmar' }).click()
+  await clickAndWait(page, 'Confirmar', 'ticket_attend')
   await expect(
     page.getByText('Atendido', { exact: true }).first(),
   ).toBeVisible()

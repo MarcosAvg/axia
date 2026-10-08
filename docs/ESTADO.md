@@ -4,17 +4,11 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 3 — Pantallas principales (3A operación cerrada; 3B administración pendiente)
+**Fase actual:** 3B — Administración (catálogos y motivos hechos; roles, usuarios y configuración pendientes)
 
 ## En curso
 
-**Fase 3B — Tramo 1: backend de administración** (rama `feat/fase-3b-admin-db`).
-1. Políticas RLS de escritura con `has_permission(...)`: `catalog.manage` (catálogos, motivos,
-   solicitantes, técnicos), `role.manage` (roles/permisos/usuario-rol), `assignment.manage` (ámbitos
-   y designaciones), `user.manage` (perfiles) y `catalog.manage` para `instance_settings`.
-2. `DELETE` solo en tablas de relación; los catálogos se desactivan (`active=false`).
-3. ADR 0018 (ajusta el alcance del ADR 0015) y pgTAP de las políticas.
-4. `pnpm db:reset`, `pnpm db:test`. Luego Tramo 2 (`feat/fase-3b-catalogs`).
+_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
 
 ## Hecho
 
@@ -115,10 +109,10 @@
 
 ## Siguiente
 
-**Fase 3B — Administración**: catálogos maestros y motivos jerárquicos, matriz de roles/permisos,
-usuarios y roles (alta/invitación), ámbitos de supervisor y designaciones de técnicos, con escritura
-por políticas RLS gobernadas por `has_permission(...)` (ADR pendiente). La **Fase 3A (operación)
-quedó cerrada**: alta de tiquets, lista, detalle con línea de tiempo, bandejas y vista del técnico.
+**Fase 3B (resto)** — Tramos 3 a 5: roles y permisos (matriz permiso × rol con ámbito),
+usuarios (roles, activar/desactivar y vínculos), ámbitos de supervisor y designaciones de técnicos,
+configuración esencial de la instancia, y cierre (Playwright de roles, docs y compuerta). Quedan
+hechos los tramos 1 (RLS de escritura) y 2 (catálogos y motivos).
 
 ## Hoja de ruta
 
@@ -179,8 +173,11 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       reasignar/auxiliares/duplicados ya existen; la captura offline y los tiempos manuales son
       Fase 4)
 
-**Fase 3B — Administración (pendiente):**
-- [ ] Catálogos maestros y motivos jerárquicos, roles/permisos, usuarios, ámbitos y designaciones
+**Fase 3B — Administración (en curso):**
+- [x] Catálogos maestros y motivos jerárquicos (feature `admin`, `/admin/catalogos`)
+- [ ] Roles y permisos (matriz permiso × rol con ámbito), usuarios y ámbitos/designaciones
+- [ ] Configuración esencial de la instancia
+- [ ] Cierre (Playwright de roles, docs y compuerta)
 
 ### Fase 4 — Evidencias y modo sin conexión
 - [ ] Captura y compresión de fotos, subida reanudable, cola `outbox`, sincronización
@@ -356,6 +353,13 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - **Fase 3A — pruebas pgTAP y datos de la app**: los tiquets que deja la app o Playwright rompían
   las pruebas que asumían la tabla vacía (`order by ticket_number limit 1`); cada prueba de tiquets
   hace `truncate public.tickets cascade` dentro de su transacción.
+- **Fase 3B — escritura por RLS**: las tablas de configuración admiten escritura directa mediante
+  políticas gobernadas por `has_permission((select auth.uid()), …)`; los catálogos se desactivan
+  (`active=false`), nunca se borran, y solo las tablas de relación admiten `DELETE` (ADR 0018).
+- **Fase 3B — gestor de catálogos genérico**: `CatalogManager` se maneja por configuración
+  (`domain/catalogs.ts`); el acceso usa una lista blanca de tablas (`AdminTable`) y `@ts-expect-error`
+  documentado para las escrituras dinámicas, porque el cliente tipado no puede estrechar una tabla
+  dinámica. Los datos se validan con las funciones puras de `domain/form-values.ts`.
 
 ## Registro de sesiones
 
@@ -438,6 +442,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: Fase 3A, tramo 3: acciones por estado/permiso, mutaciones de transición, evidencia en
   línea, `/inbox` (supervisor) y `/mi-trabajo` (técnico); Playwright del flujo del técnico. 239
   pgTAP, 63 Vitest y 6 Playwright en verde; `pnpm check` completo en verde. **Fase 3A cerrada**.
+- 2026-10-08: Fase 3B, tramo 1: políticas RLS de escritura por `has_permission` para catálogos,
+  motivos, roles/permisos, usuarios, ámbitos y designaciones; DELETE solo en relaciones; 257 pgTAP en
+  verde. ADR 0018. Rama `feat/fase-3b-admin-db`.
+- 2026-10-08: Fase 3B, tramo 2: feature `admin` con `CatalogManager` dirigido por configuración
+  (13 catálogos y motivos) y layout `/admin/catalogos`; Vitest y Playwright del alta de un catálogo;
+  `pnpm check` completo en verde. Rama `feat/fase-3b-catalogs`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -469,3 +479,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   bandeja del supervisor (`/inbox`, ofertas + tiquets del equipo) y vista del técnico
   (`/mi-trabajo`). Prueba Playwright del flujo completo del técnico (asignar → evidencia `before` →
   iniciar → evidencia `after` → atender). 63 pruebas Vitest y 6 Playwright. `pnpm check` en verde.
+- **Fase 3B, Tramo 1 (backend de administración)**: políticas RLS de escritura con
+  `has_permission(...)` (`catalog.manage`, `role.manage`, `assignment.manage`, `user.manage`);
+  `DELETE` solo en tablas de relación y catálogos que se desactivan, no se borran. **ADR 0018**
+  (acota el ADR 0015: la RLS sigue para lectura y transiciones; la administración escribe por RLS).
+  pgTAP `97_admin_writes.test.sql`. Rama `feat/fase-3b-admin-db`.
+- **Fase 3B, Tramo 2 (catálogos y motivos)**: feature `admin` con un `CatalogManager` dirigido por
+  configuración (tabla, columnas, campos y selects de tablas relacionadas) para los 13 catálogos y el
+  árbol de motivos; layout `/admin` con `/admin/catalogos`. Pruebas Vitest (`form-values`) y
+  Playwright (crear un equipo). `pnpm check` en verde. Rama `feat/fase-3b-catalogs`.
