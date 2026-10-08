@@ -140,6 +140,8 @@ Breve y en español:
 ## 11. Documentos del proyecto
 
 - `docs/ESTADO.md`: estado, hoja de ruta y bloqueos. Se lee siempre al iniciar.
+- `docs/empezar-aqui.md`: guía para llegar a un equipo nuevo o retomar el proyecto (requisitos,
+  arranque, continuidad entre equipos y solución de problemas).
 - `docs/especificacion-negocio.md`: **fuente de verdad del negocio** (flujo, estados, reglas,
   tiempos y permisos). **Léela antes de tocar cualquiera de esos temas.** Si algo contradice a la
   especificación, manda la especificación.
