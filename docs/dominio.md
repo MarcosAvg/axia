@@ -1,193 +1,199 @@
 # Axia — Dominio (núcleo)
 
 Contexto de negocio que el agente necesita para programar sin intervención humana. Describe
-**Axia como plataforma propia**: no menciona ni depende de ningún otro sistema. Lo relativo a
-sistemas externos y a la migración de datos vive en `docs/integraciones-y-migracion.md`.
+**Axia como plataforma propia**: no menciona ni depende de ningún otro sistema.
 
-Si algo aquí es ambiguo o falta, **no lo inventes**: regístralo en `docs/ESTADO.md` como
-pregunta para la persona (la sección 11 lista decisiones provisionales y preguntas abiertas).
+> **Fuente de verdad:** `docs/especificacion-negocio.md` (secciones 1 a 14, de la persona). Este
+> documento es un **resumen consistente**; si algo aquí contradice a la especificación, manda la
+> especificación. Antes de tocar flujo, estados, tiempos o permisos, léela.
+
+Si algo es ambiguo o falta, **no lo inventes**: regístralo en `docs/ESTADO.md` y en las preguntas
+abiertas de `docs/modelo-datos.md`.
 
 ## 1. Propósito
 
-Dar seguimiento exacto a los tiquets de mantenimiento: en qué paso está cada uno y, si no
-avanza, **por qué** y en qué estado está ese motivo (por ejemplo, si falta material: si ya se
-pidió, si está en cotización, si ya llegó, por qué medio se compró). Cada paso puede llevar
-evidencias (fotos, archivos). Funciona en escritorio y móvil (PWA), con uso sin conexión para
-los técnicos, autoalojada o en la nube, y open source.
+Dar seguimiento exacto a las solicitudes de mantenimiento (tiquets): en qué paso está cada una y,
+si no avanza, **por qué** y en qué estado está ese motivo, con evidencia (foto o archivo) en cada
+paso. Sobre todo, **medir**: tiempos, causas de retraso, calidad de la captura y carga de trabajo.
+Multiusuario, con roles y permisos configurables; PWA de escritorio y móvil, con uso sin conexión
+para los técnicos; autoalojada o en la nube, y open source.
 
-## 2. Roles
+Cada **instancia** es un despliegue con su propia configuración y catálogos. En una misma base
+conviven varias dependencias solicitantes. Todo lo que dependa de la instancia es configurable:
+catálogos, motivos, roles, permisos, políticas y hasta los nombres con que se muestran los
+conceptos.
 
-| Rol (código) | Quién es | Puede |
-|---|---|---|
-| `requester` | Quien reporta el problema | Crear tiquets y ver los suyos |
-| `dispatcher` | Encargado de la plataforma | Registrar tiquets en nombre de otros, ajustar prioridad, asignar a un supervisor |
-| `supervisor` | Supervisor | Asignar (autorizar) a un técnico, reasignar, ver su ámbito |
-| `technician` | Técnico de mantenimiento | Iniciar, pausar con bloqueo, avanzar bloqueos, resolver, subir evidencias |
-| `admin` | Administrador | Todo, incluidos catálogos, flujos de bloqueo y usuarios |
+## 2. Roles y permisos (configurables)
 
-Los permisos se imponen con RLS y funciones RPC, nunca solo en la interfaz.
+- Los **roles son datos** (no código): un usuario puede tener varios. Se arman con un conjunto
+  **fijo de permisos** del sistema más un **ámbito** (`propios`, `equipo`, `edificios`, `todos`).
+- Roles semilla: **solicitante**, **supervisor**, **técnico** y **administrador**. El
+  administrador puede todo y sustituye al antiguo "encargado de plataforma" (ese rol ya no existe).
+- Los permisos nunca se leen de metadatos que el usuario pueda editar; se imponen con RLS y RPC.
+- Un **solicitante** puede tener cuenta o ser un **contacto sin cuenta** (modelo mixto): en ese
+  caso, sus acciones las ejerce quien tenga el permiso, **en su nombre** (ver §13).
 
-## 3. Flujo de trabajo
+## 3. Flujo de negocio (resumen)
 
 ```
-Solicitante ─► Axia (alta) ─► Encargado ─► Supervisor ─► Técnico ─► ejecuta o no
- (catálogos)                  (dispatcher)  (autoriza)             (aquí vive todo el
-                                                                    seguimiento detallado)
+Registro ─► Oferta a supervisores ─► Supervisor toma/asigna ─► Técnico revisa
+(cobertura)   (candidatos por          (autoriza)                (captura, recaptura
+               equipo y edificio)                                  o duplicado)
+
+─► Evidencia "antes" ─► Inicia ─► [pausas con motivo] ─► Atendido (evidencia "después")
+                                                              │
+                     Reclamación ◄──── Validación (solicitante y/o supervisor)
+                          │                        │
+                    procede: reabre          cumplida: cerrado
 ```
 
-1. Un **solicitante** crea el tiquet en Axia usando los catálogos (edificio, ubicación,
-   dependencia, categoría, subcategoría, problema, tipo de servicio, prioridad) y una
-   descripción. El **encargado** también puede registrarlo en nombre de alguien (llamada,
-   correo, visita). El tiquet nace en `received` con su fecha y hora de reporte.
-2. El **encargado** lo asigna a un **supervisor**.
-3. El **supervisor** lo asigna a un **técnico**. **Esa asignación es la autorización.**
-4. El **técnico** lo realiza o no. Ahí se registra el seguimiento: inicio, pausas con
-   bloqueos, evidencias y resolución. A partir de esto se actualiza el estatus.
+El sistema **ofrece** el tiquet a los supervisores candidatos (los del **equipo** del tiquet que
+cubren su **edificio**); cuando uno lo toma o asigna técnico, la oferta desaparece para los demás
+(queda en el historial). Sin candidatos, va a la cola de administradores como "sin ruteo".
 
-### Estados del tiquet (macro)
+Reglas de negocio completas: `docs/especificacion-negocio.md` §3 y §5 (RN-01 a RN-30).
 
-`received` → `with_supervisor` → `with_technician` → `in_progress` → `resolved` → `closed`
+## 4. Estados (lógica fija, no catálogo)
 
-Con desvíos: `on_hold` (pausa, con al menos un bloqueo activo), `rejected`, `cancelled`.
+`registered` → `with_supervisor` → `assigned` → `in_progress` → `attended` → `closed`, con
+`pending_recapture`, `paused`, `under_claim` y los finales de descarte `rejected`, `cancelled` y
+`duplicate`.
 
-Etiquetas en español para la interfaz: Recibido, Con supervisor, Con técnico, En proceso,
-En pausa, Resuelto, Cerrado, Rechazado, Cancelado.
+Todo movimiento relevante es un **registro explícito del historial** (tipo, motivo, quién, cuándo
+y duración); cambiar una columna no basta. Los cambios de estado ocurren **solo** por funciones
+RPC de transición, que validan permiso, estado y precondiciones y escriben el historial en la
+misma transacción. La matriz de transiciones se detalla en `docs/modelo-datos.md`.
 
-Los cambios de estado solo ocurren mediante funciones RPC de transición que validan rol y
-transición permitida y escriben un evento en `ticket_events`.
+## 5. Captura y recaptura
 
-## 4. Asignaciones
+- **Captura**: lo que registra quien crea el tiquet (edificio, ubicación, dependencia, categoría,
+  subcategoría, problema, tipo de servicio, prioridad, descripción y contacto). **Mala captura**:
+  captura incorrecta.
+- **Recaptura**: corrección de la captura **sobre el mismo tiquet**; se conservan los valores
+  originales y cada versión. Si la propone el técnico, requiere aprobación (política configurable)
+  y puede devolver el tiquet al supervisor si ya no corresponde al área. Si la hace un supervisor,
+  se registra y se notifica. Sirve para medir la **calidad de la captura**.
+- La **foto al registrar** es **opcional pero muy recomendada** (política configurable; semilla:
+  recomendada); el sistema invita a adjuntarla sin bloquear el registro.
 
-Cada salto de la cadena es un registro en `ticket_assignments` (no una columna):
+## 6. Pausas y motivos jerárquicos
 
-- `stage`: `supervisor` o `technician` (la cadena podrá hacerse configurable en el futuro).
-- `assignee_id`, `assigned_by`, `assigned_at`, `ended_at` (si se reasigna), `reason`.
+Cuando el tiquet no puede avanzar, se **pausa** eligiendo un **motivo del catálogo jerárquico**
+(profundidad ilimitada) con subestados por los que avanza; cada paso queda registrado con su
+fecha. Un tiquet tiene **como máximo una pausa abierta**. Los motivos (pausa, rechazo,
+cancelación, reasignación, recaptura, reclamación y su resultado, reactivación, apoyo auxiliar…)
+son **catálogo con activar/desactivar**, no código. Cada nodo puede definir si exige nota, si
+admite fecha estimada y su **clasificación de reloj** (cómo cuenta para el tiempo).
 
-Permite reasignaciones sin perder historia y medir cuánto tarda cada salto. El tiquet registra
-además `started_at` (cuándo el técnico empezó realmente) y `finished_at` (cuándo se resolvió),
-separados de la asignación.
+## 7. Evidencias y bitácora
 
-## 5. Bloqueos (motivos de pausa) — dirigidos por datos
+- Tipos de evidencia **fijos**: `request`, `before`, `during`, `after`, `claim`, `other`.
+  `before` y `after` son **obligatorias en cada ciclo de atención**; `claim` en la reclamación.
+- Cada evidencia cuelga del **evento** que la originó, con autor, fecha y metadatos.
+  Almacenamiento privado con URL firmadas y límites de tipo y tamaño configurables. Nunca se
+  borran.
+- **Bitácora de solo agregar**: cada cambio de estado, asignación, pausa, recaptura, reclamación,
+  comentario o evidencia genera un evento con actor, tipo, datos, origen y marcas de tiempo. El
+  origen (`source`) distingue `app`, `import` o `integration` sin nombrar sistemas.
 
-Cuando un tiquet no puede avanzar, el técnico abre un **bloqueo** con un **tipo** (motivo). Cada
-tipo tiene su propio flujo de subestados, **definido en catálogos, no en código**, para que el
-administrador dé de alta motivos nuevos sin desplegar.
+## 8. Catálogos
 
-Tablas conceptuales:
+Administrables, con activar/desactivar en lugar de borrar. Todo lo que se use en un tiquet
+**conserva el valor que tenía en ese momento** aunque el catálogo cambie después.
 
-- `blocker_types`: motivo (falta de material, técnico no capacitado, sin técnico disponible,
-  espera de proveedor…).
-- `blocker_states`: estados por tipo (orden, si es final).
-- `blocker_transitions`: de qué estado a cuáles se puede pasar y qué rol puede hacerlo.
-- `blocker_fields`: campos adicionales que pide cada estado (proveedor, medio de compra,
-  fecha estimada de entrega, número de cotización…).
-- `ticket_blockers`: bloqueo concreto de un tiquet: tipo, estado actual, `data jsonb` con los
-  valores de los campos dinámicos, `opened_at`, `resolved_at`.
+- **Maestros**: edificios → ubicaciones, dependencias, **equipos** (la categoría pertenece a un
+  equipo), categorías → subcategorías → problemas, tipos de servicio, prioridades, canales de
+  registro, **solicitantes** (con vínculo opcional a una cuenta) y **técnicos** (con vínculo
+  opcional a una cuenta).
+- **Motivos jerárquicos** por tipo de uso (ver §6).
+- **Operación**: designación de técnicos a categorías, ámbito de supervisores (equipo y
+  edificios), roles, permisos, reglas de notificación y escalamiento, políticas de tiempos
+  objetivo y calendarios laborales.
 
-Ejemplos de flujos:
+## 9. Orígenes e integraciones (visión del núcleo)
 
-- **Falta de material:** por cotizar → en cotización → aprobado → ordenado → en tránsito → entregado.
-- **Sin técnico disponible:** buscando técnico → contactando proveedor → proveedor confirmó → programado.
+- El núcleo no sabe de qué sistema vienen los datos importados. Solo conoce: el **canal** de
+  registro del tiquet, `ticket_external_refs(ticket_id, system, external_id)` con
+  `unique(system, external_id)` (`system` es texto validado por el catálogo `external_systems`) y
+  eventos con `source = 'import'` o `'integration'`.
+- Las integraciones son adaptadores **opcionales** en `features/integrations/` y
+  `supabase/functions/integration-*`. Axia se despliega y se usa sin ninguno.
 
-Un tiquet puede tener **varios bloqueos activos** a la vez. Mientras haya al menos uno activo, el
-estado macro es `on_hold` (se calcula, no lo cambia una persona a mano). Al resolverse el último,
-vuelve a `in_progress`.
+## 10. Tiempos
 
-## 6. Evidencias y bitácora
+Los tiempos son un objetivo central. **Corren 24 horas** (calendario continuo), además de poder
+medirse el **tiempo laboral** con jornadas configurables (turnos). El historial se guarda como
+**tramos con inicio y fin**, y cada tramo copia la **clasificación de reloj** del momento en que
+se creó (si el catálogo cambia después, el histórico no se altera). Los tramos pueden originarse
+en el **sistema** (una transición) o capturarse **manualmente** (ver §13). Los indicadores se
+**calculan** desde el historial, nunca se almacenan como cifras sueltas.
 
-- `ticket_events` es la **bitácora de solo agregar**: cada cambio de estado, asignación, bloqueo,
-  comentario o nota genera un evento con `actor_id`, `type`, `payload`, `source` y `created_at`.
-  `source` indica el origen del evento (`app`, `import`, `integration`) sin nombrar sistemas.
-- `attachments` cuelga del **evento**, así cada paso tiene sus propias fotos o archivos.
-  Almacenamiento privado con URL firmadas, con límites de tipo y tamaño.
+## 11. Indicadores
 
-## 7. Catálogos
+Con vistas o funciones, en versión calendario y laboral y **excluyendo duplicados** de los de
+desempeño: tiempos de respuesta, asignación, reasignación, recaptura, inicio, trabajo y pausa,
+validación, reclamación y reapertura; tasas de reasignación, recaptura, reapertura y reclamación;
+cumplimiento de tiempos objetivo; carga por técnico y equipo; horas de apoyo auxiliar por persona
+y categoría; antigüedad de pendientes; resolución a la primera; satisfacción; tiquets sin tomar o
+sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
+`docs/modelo-datos.md`.
 
-Administrables por el rol `admin`, con activar/desactivar en lugar de borrar:
+## 12. Duplicados y enlaces entre tiquets
 
-- `buildings` → `locations` (ubicaciones dentro de un edificio).
-- `dependencies` (unidades que solicitan).
-- `categories` → `subcategories` → `problems` (jerarquía de tres niveles).
-- `service_types` (correctivo, preventivo…), `priorities` (con orden), `channels` (canal por
-  el que se registra el tiquet: web, teléfono, importación…).
-- `technicians` (pueden existir sin cuenta de usuario y vincularse después).
-- `blocker_types`, `blocker_states`, `blocker_transitions`, `blocker_fields`.
+- **Detección al registrar**: alerta que **no bloquea**, mostrando datos del otro tiquet; se
+  guarda qué candidatos se mostraron y qué decidió la persona.
+- **Marcar duplicado**: cualquier persona que **participe en el flujo** del tiquet (solicitante
+  sobre lo suyo, supervisores candidatos o que lo tomaron, técnico y auxiliares, administradores);
+  exige enlazar al original. Un duplicado queda **cerrado y fuera de los indicadores de
+  desempeño**.
+- **Enlaces** entre tiquets: `duplicate_of`, `derived_from`, `related_to`, `blocked_by`.
 
-Todo catálogo tiene `id`, `name` único (dentro de su padre), `active` y marcas de tiempo.
+## 13. Modelo mixto: cuentas, proxy y tiempos manuales
 
-## 8. Orígenes e integraciones (visión del núcleo)
+- **Solicitante**: del **catálogo de solicitantes**, con **vínculo opcional** a una cuenta. Un
+  administrador (o quien tenga el permiso) registra **a nombre de** un solicitante sin cuenta; el
+  tiquet guarda instantánea del contacto.
+- **Técnico**: del **catálogo de técnicos**, con **vínculo opcional** a una cuenta. Puede existir
+  sin cuenta; quien lleva el seguimiento ejecuta sus acciones y registra sus tiempos.
+- **Proxy ("actuar en nombre de")**: el administrador puede actuar en nombre de cualquiera; el
+  supervisor, sobre sus técnicos (asignados o auxiliares). El historial distingue siempre
+  **actor** (quién lo hizo) de **sujeto** (a nombre de quién).
+- **Tiempos manuales**: el supervisor o el administrador que lleva el seguimiento registra y
+  corrige tramos a mano, con origen `manual`, autor y validaciones; las correcciones quedan como
+  historial y no cuentan doble.
 
-- El núcleo no sabe de qué sistema vienen los datos importados. Solo conoce:
-  - `channels`: canal de registro del tiquet.
-  - `ticket_external_refs(ticket_id, system, external_id)` con `unique(system, external_id)`:
-    identificadores en otros sistemas, con `system` como texto libre validado por un catálogo
-    `external_systems`.
-  - Eventos con `source = 'import'` o `'integration'` para dejar rastro de procedencia.
-- Las integraciones son **adaptadores opcionales** en `features/integrations/` y
-  `supabase/functions/integration-*`. Axia debe poder desplegarse y usarse sin ninguno.
-- Los números de tiquet (`ticket_number`) son un entero único de Axia; un importador puede
-  conservar numeraciones previas (ver `docs/integraciones-y-migracion.md`).
-
-## 9. Métricas
-
-**Base (calculables con cualquier tiquet):**
-
-- Volumen por edificio, dependencia, categoría, tipo de servicio, prioridad y estado.
-- Intervalo de atención = primera asignación a técnico − `reported_at`.
-- Intervalo de trabajo = `finished_at` − primera asignación a técnico.
-- Intervalo total = `finished_at` − `reported_at`.
-- Solo se calculan cuando ambas fechas existen. El mes se calcula desde `reported_at`.
-
-**Avanzadas (solo tiquets con asignaciones, bloqueos y eventos detallados):** tiempo por tramo
-de la cadena (registro → supervisor → técnico → inicio → fin), tiempo en pausa por motivo,
-causas de pausa más frecuentes, inicio → fin descontando pausas y antigüedad de pendientes.
-
-Implementación: **vistas SQL** (`v_ticket_metrics_base`, `v_ticket_metrics_advanced`). Los
-intervalos y el mes **se calculan, no se almacenan**. Donde falte información, la métrica es
-`NULL`; nunca la inventes ni la rellenes con cero. No mezcles ambos niveles en un tablero sin
-indicar a qué tiquets aplican. Las gráficas usan Recharts. Debe existir exportación a CSV/XLSX
-de las vistas.
-
-## 10. Glosario (negocio ↔ código)
+## 14. Glosario (negocio ↔ código)
 
 | Español | Código |
 |---|---|
 | Tiquet | `ticket` |
-| Número de tiquet / folio | `ticket_number` |
-| Edificio | `building` |
-| Ubicación | `location` |
-| Dependencia | `dependency` |
+| Folio legible / número consecutivo | `folio` / `ticket_number` |
+| Captura / recaptura | `capture` / `recapture` |
+| Edificio / Ubicación | `building` / `location` |
+| Equipo (atiende) | `team` |
+| Dependencia (solicita) | `dependency` |
 | Categoría / Subcategoría / Problema | `category` / `subcategory` / `problem` |
-| Tipo de servicio | `service_type` |
-| Prioridad | `priority` |
-| Canal | `channel` |
+| Tipo de servicio / Prioridad / Canal | `service_type` / `priority` / `channel` |
 | Solicitante | `requester` |
-| Encargado de plataforma | `dispatcher` |
+| Técnico | `technician` |
+| Auxiliar | `auxiliary` |
+| Seguidor | `follower` |
 | Supervisor | `supervisor` |
-| Técnico (de mantenimiento) | `technician` |
-| Autorización | asignación del supervisor al técnico (`stage = 'supervisor'`) |
-| Bloqueo / motivo de pausa | `blocker` |
+| Administrador | `administrator` |
+| Ciclo de atención | `care_cycle` |
+| Pausa / motivo | `pause` / `reason` |
+| Reclamación | `claim` |
+| Evidencia | `evidence` |
 | Bitácora | `ticket_events` |
-| Evidencia | `attachment` |
+| Tramo de tiempo | `time_span` |
 
-Valores de enum en inglés (`on_hold`, `with_supervisor`…) con etiquetas en español en la interfaz.
+Valores de enum y nombres de tabla/columna en inglés; etiquetas de interfaz en español (es-MX).
 
-## 11. Decisiones provisionales y preguntas abiertas
+## 15. Decisiones y preguntas
 
-Decisiones provisionales (avanza con ellas; son reversibles y deben quedar en un ADR):
-
-1. Un tiquet puede tener **varios bloqueos simultáneos**.
-2. `on_hold` se **calcula** a partir de los bloqueos activos.
-3. La **autorización** es la asignación del supervisor al técnico.
-4. El solicitante puede ser un **usuario con cuenta o un contacto sin cuenta** (nombre y
-   teléfono/extensión en el tiquet).
-5. La prioridad la propone el solicitante y la pueden ajustar el encargado o el supervisor,
-   con un evento en la bitácora.
-
-Preguntas para la persona (regístralas en `docs/ESTADO.md` cuando la tarea dependa de ellas):
-
-1. Lista inicial de tipos de bloqueo, sus subestados y campos adicionales.
-2. ¿Los solicitantes tendrán cuenta en Axia o serán contactos sin cuenta?
-3. Zona horaria de la institución y si hay horario laboral que afecte las métricas.
-4. ¿Qué formato debe tener el número de tiquet (entero consecutivo, con prefijo o año)?
-5. ¿Se requieren reglas de tiempo objetivo (SLA) por prioridad o tipo de servicio?
+- **Decisiones confirmadas** (además de las §14 de la especificación): modelo mixto de
+  solicitante (catálogo con vínculo opcional), técnicos de catálogo con cuenta opcional, proxy
+  para técnicos y solicitantes sin cuenta, y tiempos manuales. Detalle y ADR en
+  `docs/modelo-datos.md`.
+- **Preguntas abiertas**: las de la especificación (§14, supuestos) y las recogidas en
+  `docs/ESTADO.md` y `docs/modelo-datos.md`. No se resuelven en silencio.

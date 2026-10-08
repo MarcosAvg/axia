@@ -140,7 +140,12 @@ Breve y en español:
 ## 11. Documentos del proyecto
 
 - `docs/ESTADO.md`: estado, hoja de ruta y bloqueos. Se lee siempre al iniciar.
-- `docs/dominio.md`: flujo de trabajo, modelo conceptual y glosario del núcleo.
+- `docs/especificacion-negocio.md`: **fuente de verdad del negocio** (flujo, estados, reglas,
+  tiempos y permisos). **Léela antes de tocar cualquiera de esos temas.** Si algo contradice a la
+  especificación, manda la especificación.
+- `docs/dominio.md`: resumen consistente del núcleo (flujo, modelo conceptual y glosario).
+- `docs/modelo-datos.md`: diseño de la base del núcleo (ER, estados, transiciones, permisos,
+  tiempos, RLS e indicadores). Se aprueba antes de escribir migraciones.
 - `docs/convenciones-codigo.md`: estructura, estilo, pruebas, SQL, git, herramientas.
 - `docs/configuracion-inicial.md`: guía de arranque del entorno (Fase 0) y despliegue.
 - `docs/integraciones-y-migracion.md`: **solo léelo al trabajar en importadores o
