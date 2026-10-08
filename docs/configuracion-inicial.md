@@ -616,7 +616,7 @@ jobs:
 ### 10.1 Servidor
 
 - Linux con Docker, un dominio (por ejemplo `axia.tuinstitucion.mx` y `api.axia.tuinstitucion.mx`) y puertos 80/443 abiertos.
-- **Advertencia:** Docker publica puertos saltándose algunos firewalls (como `ufw`). Enlaza los puertos internos a `127.0.0.1` o usa reglas en la cadena `DOCKER-USER`, y no expongas Postgres a internet.
+- **Advertencia:** Docker publica puertos omitiendo algunos cortafuegos (como `ufw`). Los puertos internos deben enlazarse a `127.0.0.1` o regularse en la cadena `DOCKER-USER`. La base de datos no debe exponerse a internet.
 
 ### 10.2 Stack de Supabase
 
@@ -628,7 +628,7 @@ cp supabase/docker/.env.example deploy/supabase/docker/.env
 cd deploy/supabase/docker
 ```
 
-Edita `deploy/supabase/docker/.env` y **cambia todos los secretos**: contraseña de Postgres, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, credenciales del dashboard, claves internas, SMTP, `SITE_URL`, `API_EXTERNAL_URL` y `SUPABASE_PUBLIC_URL`. La guía oficial de autoalojamiento con Docker explica cómo generar las claves JWT. **Nunca dejes los valores de ejemplo y nunca subas este archivo al repositorio.**
+Editar `deploy/supabase/docker/.env` y reemplazar **todos** los secretos: contraseña de Postgres, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, credenciales del panel, claves internas, SMTP, `SITE_URL`, `API_EXTERNAL_URL` y `SUPABASE_PUBLIC_URL`. La guía oficial de autoalojamiento con Docker explica cómo generar las claves JWT. **Ningún valor de ejemplo debe conservarse ni incorporarse al repositorio.**
 
 ```bash
 docker compose pull
@@ -636,21 +636,25 @@ docker compose up -d
 docker compose ps
 ```
 
-### 10.3 Reverse proxy (el que elijas)
+### 10.3 Reverse proxy
 
-Axia **no impone** un proxy. Cualquiera sirve; solo debe cumplir el **contrato**:
+Axia no impone un proxy. Cualquier solución es válida; debe cumplir el **contrato**:
 
-1. Servir los estáticos de `apps/web/dist` con *fallback* a `index.html` (SPA).
-2. Hacer proxy a **Kong** (API de Supabase, por defecto `127.0.0.1:8000`) **permitiendo WebSocket** (Realtime).
-3. Poner `no-cache` a `sw.js`, `registerSW.js` y `manifest.webmanifest` (que los móviles no queden con versiones viejas de la PWA).
-4. Permitir el tamaño de las **evidencias** (subida de fotos).
-5. Terminar **TLS** donde tú decidas.
+1. Servir los archivos estáticos de `apps/web/dist` con *fallback* a `index.html` (SPA).
+2. Enrutar hacia **Kong** (API de Supabase, por defecto `127.0.0.1:8000`) **permitiendo WebSocket** (Realtime).
+3. Aplicar `no-cache` a `config.js`, `sw.js`, `registerSW.js` y `manifest.webmanifest`.
+4. Permitir el tamaño de subida de las **evidencias** (fotos).
+5. Terminar **TLS**.
 
 El detalle está en `deploy/README.md` y hay **ejemplos opcionales** en `deploy/examples/` (nginx y Traefik).
 
 ### 10.4 Aplicar migraciones
 
-Con Docker Compose (ver `deploy/docker-compose.yml`): `docker compose run --rm migrate`.
+Con Docker Compose (ver `deploy/docker-compose.yml`):
+
+```bash
+docker compose run --rm migrate
+```
 
 Sin contenedores:
 
@@ -658,15 +662,15 @@ Sin contenedores:
 pnpm supabase db push --db-url "postgresql://<usuario>:<clave>@localhost:5432/postgres"
 ```
 
-> En las versiones actuales del compose oficial, el puerto 5432 pasa por Supavisor y el usuario lleva un sufijo del tenant (`postgres.<POOLER_TENANT_ID>`). Verifica la cadena correcta en la guía oficial.
+> En las versiones actuales del compose oficial, el puerto 5432 pasa por Supavisor y el usuario lleva un sufijo del tenant (`postgres.<POOLER_TENANT_ID>`). La cadena correcta debe verificarse en la guía oficial.
 
 ### 10.5 Publicar el frontend
 
-Dos formas:
+Dos modalidades:
 
-**Con Docker Compose** (recomendado): copia `deploy/docker-compose.yml` y `deploy/.env.example`, edita el `.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL`) y ejecuta `docker compose up -d`. El contenedor genera la configuración **en runtime** (`config.js`), así que la misma imagen sirve para cualquier instalación.
+**Con Docker Compose** (recomendado): copiar `deploy/docker-compose.yml` y `deploy/.env.example`, crear el `.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL`) y ejecutar `docker compose up -d`. El contenedor genera la configuración **en runtime** (`config.js`), de modo que la misma imagen sirve para cualquier instalación.
 
-**Estáticos a tu proxy**: build con las variables y copia `apps/web/dist` al servidor:
+**Estáticos a un reverse proxy**: compilar con las variables y copiar `apps/web/dist` al servidor:
 
 ```
 VITE_SUPABASE_URL=https://api.axia.tuinstitucion.mx
@@ -689,7 +693,7 @@ pnpm supabase db push
 pnpm supabase functions deploy
 ```
 
-El mismo repositorio sirve para ambos entornos. Mantén cada uno con su propio archivo de variables (`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`).
+El mismo repositorio sirve para ambos entornos. Cada entorno debe mantener su propio archivo de variables (`VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`).
 
 ---
 
@@ -703,7 +707,7 @@ El mismo repositorio sirve para ambos entornos. Mantén cada uno con su propio a
 
 - **Respaldo de archivos (evidencias):** copia del volumen de Storage con restic o rsync.
 - **Restauración de prueba** periódica: una copia que nunca se ha restaurado no es una garantía.
-- **Errores:** GlitchTip (compatible con el SDK de Sentry) si quieres centralizarlos.
+- **Errores:** GlitchTip (compatible con el SDK de Sentry) para centralizarlos.
 - **Reportes libres:** Metabase conectado a Postgres con un usuario de solo lectura.
 - **Notificaciones push:** claves VAPID guardadas como secretos de las Edge Functions.
 - **App nativa (solo si hace falta):** Capacitor sobre el mismo build.

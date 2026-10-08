@@ -1,10 +1,12 @@
-# Axia — ejemplo OPCIONAL con Traefik
+# Axia — ejemplo opcional con Traefik
 #
-# Traefik no sirve archivos estáticos: necesita algo que los sirva. Aquí usamos un nginx mínimo
-# que monta `apps/web/dist`. La API (Kong) ya la expone el stack de Supabase; solo hay que enrutarla.
+# Traefik no sirve archivos estáticos; requiere un servidor que los sirva. Este ejemplo usa un nginx
+# mínimo que monta `apps/web/dist`. La API (Kong) ya la expone el stack de Supabase y solo requiere
+# enrutarla.
 #
-# Este archivo es un punto de partida, NO parte del stack de Axia. Ajusta dominios, red y TLS.
-# Se conecta a la red del compose oficial de Supabase para alcanzar Kong por su nombre de servicio.
+# Es un punto de partida y no forma parte del stack de Axia. Los dominios, la red y TLS deben
+# ajustarse a cada infraestructura. Se conecta a la red del compose oficial para alcanzar Kong por
+# su nombre de servicio.
 
 services:
   traefik:
@@ -13,7 +15,7 @@ services:
       - --providers.docker=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      # TLS: añade un resolver ACME o usa tu terminación TLS existente.
+      # TLS: añadir un resolver ACME o usar la terminación TLS existente.
     ports:
       - '80:80'
       - '443:443'
@@ -23,7 +25,7 @@ services:
 
   web:
     image: nginx:alpine
-    # Publica el build aquí antes: DEPLOY_TARGET=... ./deploy/scripts/publish-web.sh
+    # Publicar el build antes: DEPLOY_TARGET=... ./deploy/scripts/publish-web.sh
     volumes:
       - /srv/axia/web:/usr/share/nginx/html:ro
       - ./nginx-static.conf:/etc/nginx/conf.d/default.conf:ro
@@ -35,8 +37,8 @@ services:
       - traefik.http.services.axia-web.loadbalancer.server.port=80
     networks: [supabase_default]
 
-  # La API: añade estas etiquetas al servicio `kong` del compose oficial (o define un router
-  # apuntando a `kong:8000`). Referencia:
+  # La API: añadir estas etiquetas al servicio `kong` del compose oficial, o definir un router que
+  # apunte a `kong:8000`. Referencia:
   #
   #   labels:
   #     - traefik.enable=true
@@ -48,7 +50,7 @@ services:
 networks:
   supabase_default:
     external: true
-    # Nombre real de la red del compose oficial (ajústalo): `docker network ls`.
+    # Nombre real de la red del compose oficial (ajustar): `docker network ls`.
     name: docker_default
 
 # --- nginx-static.conf (referenciado arriba) ---

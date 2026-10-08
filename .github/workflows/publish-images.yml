@@ -1,7 +1,7 @@
 name: Publicar imágenes
 
 # Construye y publica las imágenes de Axia en GHCR (manual o al etiquetar `v*`).
-# El push real usa el token del repositorio (`packages: write`); tú lo disparas.
+# El push usa el token del repositorio (`packages: write`) y se dispara de forma manual.
 on:
   workflow_dispatch:
   push:

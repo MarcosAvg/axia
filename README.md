@@ -9,12 +9,12 @@ El núcleo es **agnóstico**: funciona completo por sí solo y ninguna plataform
 requisito, fuente de verdad ni parte de su diseño. Las integraciones son adaptadores opcionales y
 aislados.
 
-> **¿Primera vez en este equipo?** Lee [`docs/empezar-aqui.md`](docs/empezar-aqui.md): requisitos,
-> arranque en 5 minutos, cómo continuar entre equipos y solución de problemas.
+> **Puesta en marcha y trabajo en equipo:** ver [`docs/empezar-aqui.md`](docs/empezar-aqui.md)
+> (requisitos, arranque, continuidad entre equipos y solución de problemas).
 
 ## Estado del proyecto
 
-**Fases 1 a 5 cerradas.** Ya funciona:
+**Todas las fases (0–7) están cerradas.** Incluye:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
@@ -53,17 +53,17 @@ aislados.
 - **Importación** (Fase 6A/6B): infraestructura genérica (`/admin/integraciones`) y **adaptador
   CSV/Excel** con dry run, resolución de alias/estatus e importación idempotente; los adaptadores de
   fuentes externas viven **aislados** del núcleo.
-- **Despliegue** (Fase 7): `deploy/` con un **`docker-compose.yml`** de la app (frontend + 
+- **Despliegue** (Fase 7): `deploy/` con un **`docker-compose.yml`** de la app (frontend y
   migraciones, con **configuración en runtime** e imágenes publicables), scripts de
   respaldo/restauración, un runbook y un **contrato de reverse proxy** (con ejemplos opcionales;
-  Axia **no impone** ninguno). El backend Supabase va aparte (Cloud o autoalojado); **tú lo
-  ejecutas**. Ver [`deploy/README.md`](deploy/README.md). Guía de correo/push/escalamiento en
+  Axia no impone ninguno). El backend Supabase se despliega aparte (Cloud o autoalojado). Ver
+  [`deploy/README.md`](deploy/README.md). Guía de correo, push y escalamiento en
   [`docs/notificaciones-push.md`](docs/notificaciones-push.md).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-**Todas las fases (0–7) están cerradas.** Lo que queda es operativo: desplegar y activar
-correo/push/escalamiento cuando haya infraestructura. Ver la hoja de ruta en
+El trabajo pendiente es operativo: despliegue y activación de correo, push y escalamiento cuando
+exista la infraestructura. La hoja de ruta y el estado detallado están en
 [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
@@ -71,10 +71,10 @@ correo/push/escalamiento cuando haya infraestructura. Ver la hoja de ruta en
 - **Node.js LTS** (probado con Node 24).
 - **pnpm 12** (se activa con `corepack enable`; la versión está fijada en `package.json`).
 - **Git**.
-- **Docker** — necesario para el Supabase local (`pnpm db:start`). En Linux, tu usuario debe
+- **Docker** — necesario para el Supabase local (`pnpm db:start`). En Linux, el usuario debe
   pertenecer al grupo `docker`.
 
-## Levantar el proyecto en 10 minutos
+## Puesta en marcha
 
 ```bash
 corepack enable
@@ -95,12 +95,12 @@ Para trabajar con la base de datos local:
 ```bash
 pnpm db:start     # levanta Supabase local (la primera vez descarga las imágenes)
 pnpm db:reset     # aplica migraciones y semilla
-pnpm env:local    # regenera apps/web/.env.local (o hazlo a mano, ver .env.example)
+pnpm env:local    # regenera apps/web/.env.local (alternativa manual en .env.example)
 ```
 
-`pnpm env:local` escribe `apps/web/.env.local` (que no se sube al repositorio) a partir de
-`pnpm db:start`; también puedes copiar `VITE_SUPABASE_URL` y la clave pública a mano
-(ver `apps/web/.env.example`).
+`pnpm env:local` escribe `apps/web/.env.local` (no se incorpora al repositorio) a partir de
+`pnpm db:start`. Como alternativa, es posible copiar `VITE_SUPABASE_URL` y la clave pública
+manualmente (ver `apps/web/.env.example`).
 
 **Usuarios demo** (solo entorno local, ficticios; contraseña `AxiaDemo2026!`):
 `admin@axia.test`, `supervisor@axia.test`, `tecnico@axia.test` y `solicitante@axia.test`. El alta de
@@ -146,7 +146,7 @@ axia/
 │       └── lib/       → cliente de datos, offline, i18n y utilidades
 ├── packages/shared/   → tipos y esquemas compartidos (incluye database.types.ts)
 ├── supabase/          → migraciones, semillas, funciones y pruebas pgTAP
-├── deploy/            → despliegue en producción (se puebla en la Fase 7)
+├── deploy/            → despliegue en producción (Docker Compose, respaldos y runbook)
 ├── scripts/           → verificaciones (p. ej. check:agnostic)
 ├── docs/              → dominio, convenciones, estado y decisiones (ADR)
 └── .github/workflows/ → CI
@@ -157,6 +157,8 @@ axia/
 - [`docs/dominio.md`](docs/dominio.md) — flujo de trabajo, modelo conceptual y glosario.
 - [`docs/convenciones-codigo.md`](docs/convenciones-codigo.md) — estructura, estilo, pruebas y
   reglas de dependencia (obligatorias).
+- [`docs/estilo-documentacion.md`](docs/estilo-documentacion.md) — normas de redacción de la
+  documentación (impersonal, estructurada).
 - [`docs/configuracion-inicial.md`](docs/configuracion-inicial.md) — arranque del entorno y guía de
   despliegue.
 - [`docs/ESTADO.md`](docs/ESTADO.md) — estado, hoja de ruta y bloqueos.

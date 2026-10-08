@@ -55,7 +55,7 @@ fi
 
 if [[ ! -f "$COMPOSE_DIR/.env" && -f "$COMPOSE_DIR/.env.example" ]]; then
   run cp "$COMPOSE_DIR/.env.example" "$COMPOSE_DIR/.env"
-  echo "AVISO: edita $COMPOSE_DIR/.env y cambia TODOS los secretos antes de exponerlo."
+  echo "AVISO: editar $COMPOSE_DIR/.env y reemplazar todos los secretos antes de exponerlo."
 fi
 
 echo "Levantando el stack…"
@@ -69,7 +69,7 @@ if [[ -n "${DATABASE_URL:-}" ]]; then
   echo "Aplicando migraciones…"
   run "$ROOT_DIR/deploy/scripts/migrate.sh"
 else
-  echo "Sin DATABASE_URL: no se migra (hazlo luego con deploy/scripts/migrate.sh)."
+  echo "Sin DATABASE_URL: no se migra (puede hacerse después con deploy/scripts/migrate.sh)."
 fi
 
 echo "Listo. Comprueba con: (cd $COMPOSE_DIR && docker compose ps)"
