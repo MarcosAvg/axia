@@ -1,6 +1,12 @@
 // Textos del feature de tiquets (es-MX).
 
-import type { EvidenceType, EventType, TicketStatus } from './domain/types'
+import type {
+  ClockClass,
+  EvidenceType,
+  EventType,
+  TicketStatus,
+  TimeSpanKind,
+} from './domain/types'
 
 export const statusLabels: Record<TicketStatus, string> = {
   registered: 'Registrado',
@@ -41,6 +47,7 @@ export const eventLabels: Record<EventType, string> = {
   priority_changed: 'Prioridad ajustada',
   comment: 'Comentario',
   evidence_added: 'Evidencia agregada',
+  manual_time_recorded: 'Tiempo manual',
   imported: 'Importado',
 }
 
@@ -52,6 +59,48 @@ export const evidenceTypeLabels: Record<EvidenceType, string> = {
   claim: 'Reclamación',
   other: 'Otra',
 }
+
+export const timeSpanKindLabels: Record<TimeSpanKind, string> = {
+  supervisor_response: 'Respuesta del supervisor',
+  reassignment: 'Reasignación',
+  technician_assignment: 'Asignación de técnico',
+  recapture: 'Recaptura',
+  wait_start: 'Espera de inicio',
+  active_work: 'Trabajo efectivo',
+  pause: 'Pausa',
+  validation: 'Validación',
+  claim: 'Reclamación',
+  duplicate_review: 'Revisión de duplicado',
+}
+
+export const clockClassLabels: Record<ClockClass, string> = {
+  counted: 'Cuenta en los indicadores',
+  not_counted: 'No cuenta',
+}
+
+export const manualTimeMessages = {
+  title: 'Tiempos manuales',
+  help: 'Registra tramos trabajados que no se capturaron en automático.',
+  empty: 'Sin tiempos manuales registrados.',
+  add: 'Registrar tramo',
+  submit: 'Guardar tramo',
+  submitting: 'Guardando…',
+  void: 'Anular',
+  voided: 'Anulado',
+  fields: {
+    kind: 'Tipo de tramo',
+    technician: 'Técnico (opcional)',
+    startedAt: 'Inicio',
+    endedAt: 'Fin',
+    clockClass: 'Clasificación',
+    selectPlaceholder: 'Selecciona…',
+    noTechnician: 'Sin técnico asignado',
+  },
+  errors: {
+    required: 'Completa tipo, inicio y fin.',
+    order: 'El fin debe ser posterior al inicio.',
+  },
+} as const
 
 export const ticketMessages = {
   loading: 'Cargando…',

@@ -51,9 +51,38 @@ export const EVENT_TYPES = [
   'priority_changed',
   'comment',
   'evidence_added',
+  'manual_time_recorded',
   'imported',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
+
+export const TIME_SPAN_KINDS = [
+  'supervisor_response',
+  'reassignment',
+  'technician_assignment',
+  'recapture',
+  'wait_start',
+  'active_work',
+  'pause',
+  'validation',
+  'claim',
+  'duplicate_review',
+] as const
+export type TimeSpanKind = (typeof TIME_SPAN_KINDS)[number]
+
+export const CLOCK_CLASSES = ['counted', 'not_counted'] as const
+export type ClockClass = (typeof CLOCK_CLASSES)[number]
+
+/** Tramo de tiempo registrado a mano por supervisor o administrador (RN §13). */
+export interface ManualTimeSpan {
+  id: string
+  kind: TimeSpanKind
+  startedAt: string
+  endedAt: string | null
+  clockClass: ClockClass
+  subjectTechnicianName: string | null
+  voidedAt: string | null
+}
 
 export type ClaimResolution = 'upheld' | 'dismissed' | 'new_ticket'
 export const CLAIM_RESOLUTIONS: ClaimResolution[] = [

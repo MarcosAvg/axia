@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/features/auth'
+import { can, useAuth } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
 import {
   useTicket,
@@ -7,8 +7,9 @@ import {
   useTicketParticipants,
   useTicketTimeline,
 } from '../hooks/use-tickets'
-import { ticketMessages } from '../i18n'
+import { manualTimeMessages, ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
+import { ManualTimePanel } from './manual-time-panel'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketEvidenceList } from './ticket-evidence-list'
@@ -62,6 +63,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   }
 
   const actions = allowedActions({ identity, status: ticket.data.status })
+  const canRecordTime = can(identity, 'time.record_manual')
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,6 +88,11 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
           <TicketEvidenceList items={evidence.data ?? []} />
         </div>
       </Section>
+      {canRecordTime ? (
+        <Section title={manualTimeMessages.title}>
+          <ManualTimePanel ticketId={ticketId} />
+        </Section>
+      ) : null}
     </div>
   )
 }

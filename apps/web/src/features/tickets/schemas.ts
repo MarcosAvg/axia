@@ -1,7 +1,14 @@
 import { z } from 'zod'
-import { EVIDENCE_TYPES, EVENT_TYPES, TICKET_STATUSES } from './domain/types'
+import {
+  CLOCK_CLASSES,
+  EVIDENCE_TYPES,
+  EVENT_TYPES,
+  TICKET_STATUSES,
+  TIME_SPAN_KINDS,
+} from './domain/types'
 import type {
   DuplicateCandidate,
+  ManualTimeSpan,
   TicketDetail,
   TicketEvidenceItem,
   TicketListItem,
@@ -158,6 +165,43 @@ export function parseEvidence(raw: unknown): TicketEvidenceItem {
     occurredAt: row.occurred_at,
   }
 }
+
+const manualTimeSpanRowSchema = z.object({
+  id: z.string(),
+  kind: z.enum(TIME_SPAN_KINDS),
+  started_at: z.string(),
+  ended_at: z.string().nullable(),
+  clock_class: z.enum(CLOCK_CLASSES),
+  voided_at: z.string().nullable(),
+  technician: z.object({ full_name: z.string() }).nullable(),
+})
+
+export function parseManualTimeSpan(raw: unknown): ManualTimeSpan {
+  const row = manualTimeSpanRowSchema.parse(raw)
+  return {
+    id: row.id,
+    kind: row.kind,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+    clockClass: row.clock_class,
+    subjectTechnicianName: row.technician?.full_name ?? null,
+    voidedAt: row.voided_at,
+  }
+}
+
+export const manualTimeSchema = z
+  .object({
+    kind: z.enum(TIME_SPAN_KINDS),
+    clockClass: z.enum(CLOCK_CLASSES),
+    technicianId: z.string().optional(),
+    startedAt: z.string().min(1),
+    endedAt: z.string().min(1),
+  })
+  .refine((value) => new Date(value.endedAt) > new Date(value.startedAt), {
+    path: ['endedAt'],
+    message: 'El fin debe ser posterior al inicio.',
+  })
+export type ManualTimeInput = z.infer<typeof manualTimeSchema>
 
 export const createTicketSchema = z.object({
   buildingId: z.string().min(1, 'Selecciona un edificio.'),
