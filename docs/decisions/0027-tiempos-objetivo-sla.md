@@ -14,7 +14,7 @@ medición y las vistas de cumplimiento.
 
 - **Objetivos configurables como datos.** Se agrega `service_types.target_minutes` (opcional) y se
   mantiene `priorities.target_minutes`. `NULL` = sin objetivo (no cuenta). Se editan en
-  `/admin/catalogos`.
+  `/admin/catalogos`, capturando la cantidad en **minutos, horas o días** (se guarda en minutos).
 - **Regla de aplicación**: el objetivo del **tipo de servicio** sobrescribe al de la **prioridad**;
   si falta el del tipo, se usa el de la prioridad; si ninguno existe, el tiquet no tiene SLA.
 - **Medición**: **resolución** (registro → cierre) sobre tiquets **cerrados** y sin duplicados.

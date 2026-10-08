@@ -154,6 +154,7 @@ export const adminMessages = {
     active: 'Activo',
     position: 'Orden',
     target_minutes: 'Tiempo objetivo (min)',
+    target_unit: 'Unidad',
     building_id: 'Edificio',
     team_id: 'Equipo',
     category_id: 'Categoría',
@@ -181,5 +182,10 @@ export const adminMessages = {
   clockClass: {
     counted: 'Cuenta',
     not_counted: 'No cuenta',
+  },
+  targetUnits: {
+    minutes: 'Minutos',
+    hours: 'Horas',
+    days: 'Días',
   },
 } as const

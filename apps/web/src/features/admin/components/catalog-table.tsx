@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminColumn } from '../domain/catalogs'
+import { formatTargetMinutes } from '../domain/target'
 import type { AdminOption } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 
@@ -28,6 +29,10 @@ function columnText(
       (candidate) => candidate.id === String(row[column.key]),
     )
     return option ? option.label : '—'
+  }
+  if (column.format === 'minutes') {
+    const value = row[column.key]
+    return formatTargetMinutes(typeof value === 'number' ? value : null)
   }
   return cellText(row[column.key])
 }

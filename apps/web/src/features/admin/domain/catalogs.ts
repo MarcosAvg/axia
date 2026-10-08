@@ -83,12 +83,16 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
     title: titles.service_types,
     columns: [
       nameColumn,
-      { key: 'target_minutes', label: fields.target_minutes },
+      {
+        key: 'target_minutes',
+        label: fields.target_minutes,
+        format: 'minutes',
+      },
       activeColumn,
     ],
     fields: [
       nameField,
-      { name: 'target_minutes', label: fields.target_minutes, kind: 'number' },
+      { name: 'target_minutes', label: fields.target_minutes, kind: 'minutes' },
       activeField,
     ],
   },
@@ -100,12 +104,17 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
     columns: [
       nameColumn,
       { key: 'position', label: fields.position },
+      {
+        key: 'target_minutes',
+        label: fields.target_minutes,
+        format: 'minutes',
+      },
       activeColumn,
     ],
     fields: [
       nameField,
       { name: 'position', label: fields.position, kind: 'number' },
-      { name: 'target_minutes', label: fields.target_minutes, kind: 'number' },
+      { name: 'target_minutes', label: fields.target_minutes, kind: 'minutes' },
       activeField,
     ],
   },

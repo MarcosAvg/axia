@@ -183,6 +183,8 @@ orden. Quedan menores de UI (`Progress`, `Tooltip`/`Skeleton`) y XLSX. Sin push 
     de instancia (`sla_clock_mode`), vistas `v_ticket_sla` / `v_metrics_sla` /
     `v_metrics_sla_by_priority` (medición de resolución) y KPI + sección por prioridad en `/metricas`.
   - Configurable desde administración; `NULL` = sin objetivo. ADR 0027.
+  - Selector de unidad (**minutos, horas o días**) en el formulario de administración; la tabla
+    muestra el objetivo de forma legible (p. ej. `4 h`).
   - Compuerta completa en verde: 358 pgTAP, 116 Vitest, 12 Playwright.
 
 ## Siguiente

@@ -1,7 +1,7 @@
 import type { AdminTable } from '../api/admin-api'
 
 type AdminFieldKind =
-  'text' | 'number' | 'boolean' | 'select-table' | 'select-fixed'
+  'text' | 'number' | 'minutes' | 'boolean' | 'select-table' | 'select-fixed'
 
 export interface AdminField {
   name: string
@@ -16,6 +16,8 @@ export interface AdminColumn {
   key: string
   label: string
   optionsTable?: AdminTable
+  /** Formato de presentación del valor (`minutes` = tiempo objetivo). */
+  format?: 'minutes'
 }
 
 export interface AdminCatalogConfig {

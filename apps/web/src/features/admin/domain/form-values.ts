@@ -33,7 +33,7 @@ function valueFor(
 ): { value: string | number | boolean | null } | { error: true } {
   if (field.kind === 'boolean') return { value: Boolean(raw) }
   const text = textOf(raw)
-  if (field.kind === 'number') {
+  if (field.kind === 'number' || field.kind === 'minutes') {
     return { value: text === '' ? null : Number(text) }
   }
   if (field.required && text === '') return { error: true }
