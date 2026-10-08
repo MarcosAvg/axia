@@ -935,6 +935,7 @@ export type Database = {
           id: string
           name: string
           updated_at: string
+          work_calendar_id: string | null
         }
         ComputedFields: never
         Insert: {
@@ -943,6 +944,7 @@ export type Database = {
           id?: string
           name: string
           updated_at?: string
+          work_calendar_id?: string | null
         }
         Update: {
           active?: boolean
@@ -950,8 +952,17 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+          work_calendar_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'teams_work_calendar_id_fkey'
+            columns: ['work_calendar_id']
+            isOneToOne: false
+            referencedRelation: 'work_calendars'
+            referencedColumns: ['id']
+          },
+        ]
       }
       technician_categories: {
         Row: {
@@ -2399,6 +2410,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      ticket_calendar: { Args: { p_ticket_id: string }; Returns: string }
       ticket_cancel: {
         Args: {
           p_client_request_id?: string
@@ -2527,8 +2539,23 @@ export type Database = {
         }
         Returns: string
       }
+      ticket_time_by_kind_laboral: {
+        Args: {
+          p_kind: Database['public']['Enums']['time_span_kind']
+          p_ticket_id: string
+        }
+        Returns: string
+      }
       ticket_time_net: { Args: { p_ticket_id: string }; Returns: string }
+      ticket_time_net_laboral: {
+        Args: { p_ticket_id: string }
+        Returns: string
+      }
       ticket_time_total: { Args: { p_ticket_id: string }; Returns: string }
+      ticket_time_total_laboral: {
+        Args: { p_ticket_id: string }
+        Returns: string
+      }
       ticket_validate: {
         Args: { p_client_request_id?: string; p_ticket_id: string }
         Returns: undefined
@@ -2552,6 +2579,10 @@ export type Database = {
           p_ticket_id: string
         }
         Returns: undefined
+      }
+      work_calendar_overlap: {
+        Args: { p_calendar_id: string; p_end: string; p_start: string }
+        Returns: string
       }
       write_event: {
         Args: {

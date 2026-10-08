@@ -34,6 +34,7 @@ insert into public.permissions (id, description) values
   ('ticket.rate', 'Calificar la satisfacción'),
   ('ticket.rate_on_behalf', 'Calificar a nombre del solicitante'),
   ('time.record_manual', 'Registrar o corregir tiempos manuales'),
+  ('metrics.view', 'Ver métricas e indicadores'),
   ('act_on_behalf', 'Actuar en nombre de otro'),
   ('catalog.manage', 'Administrar catálogos'),
   ('user.manage', 'Administrar usuarios'),
@@ -82,6 +83,7 @@ from (
     ('supervisor', 'ticket.prioritize', 'team'),
     ('supervisor', 'ticket.rate_on_behalf', 'team'),
     ('supervisor', 'time.record_manual', 'team'),
+    ('supervisor', 'metrics.view', 'buildings'),
     ('supervisor', 'act_on_behalf', 'team'),
     ('technician', 'ticket.view', 'own'),
     ('technician', 'ticket.recapture', 'own'),
@@ -249,6 +251,14 @@ select c.id, d.weekday, '09:00', '18:00'
 from public.work_calendars c, (values (1), (2), (3), (4), (5)) as d (weekday)
 where c.name = 'Laboral (ejemplo)'
   and not exists (select 1 from public.work_calendar_intervals i where i.calendar_id = c.id);
+
+-- El calendario de ejemplo es el de la instancia y el del equipo de mantenimiento.
+update public.instance_settings
+  set default_calendar_id = (select id from public.work_calendars where name = 'Laboral (ejemplo)')
+  where default_calendar_id is null;
+update public.teams
+  set work_calendar_id = (select id from public.work_calendars where name = 'Laboral (ejemplo)')
+  where name = 'Mantenimiento (ejemplo)' and work_calendar_id is null;
 
 -- Motivos jerárquicos (especificación §6; sufijo "(ejemplo)").
 insert into public.reasons (use, name) values

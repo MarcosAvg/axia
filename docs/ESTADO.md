@@ -8,8 +8,13 @@
 
 ## En curso
 
-_(vacío)_ — La Fase 4B quedó cerrada. La siguiente tarea es la Fase 5 (indicadores y tableros),
-aún sin empezar. Sin push a `origin` por indicación de la persona.
+**Fase 5A — Métricas (cálculo backend + pgTAP)** (rama `feat/fase-5a-metricas`).
+1. Migración: `teams.work_calendar_id` (respaldo al calendario por defecto) y permiso `metrics.view`
+   (admin `all`; supervisor `team`/`buildings`).
+2. Tiempo laboral: recorte de intervalos por calendario (franjas, días no laborables y zona horaria)
+   para total, neto y por tipo; pgTAP con los ejemplos de la especificación §7.
+3. Vistas/funciones de indicadores (calendario y laboral, sin duplicados) e índices; pgTAP.
+4. SLA queda como tramo aparte. Sin push.
 
 ## Hecho
 
