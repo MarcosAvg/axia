@@ -9,11 +9,12 @@
 ## En curso
 
 Fase 1, Etapa B — migraciones por tramos (rama `feat/fase-1-db`), cada uno con pgTAP y `pnpm check`.
-**Hechos:** tramos 1-5 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
+**Hechos:** tramos 1-7 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
 historial/evidencias; ruteo/ofertas/duplicados/RPC; pausas/recaptura/reclamaciones/duplicados/
-reactivación).
-**Faltan:** 6. tiempos (calendarios, tramos y cálculo); 7. notificaciones y escalamiento; 8. RLS
-completa, visibilidad, semillas y vistas de indicadores.
+reactivación; tramos de tiempo y cálculo; notificaciones y escalamiento).
+**Falta:** 8. RLS completa, visibilidad, semillas y vistas de indicadores. Decisión abierta: las RPC
+son `security invoker`; para que la RLS quede fina hay que decidir entre pasar las RPC a
+`security definer` (con `search_path = ''` y grants) o escribir políticas de escritura por tabla.
 
 ## Hecho
 
@@ -155,8 +156,8 @@ Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** s
 3. [x] Tiquets, folio, historial, participantes y evidencias
 4. [x] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
 5. [x] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
-6. [ ] Tiempos: calendarios, tramos y funciones de cálculo
-7. [ ] Notificaciones, reglas y escalamiento
+6. [x] Tiempos: calendarios, tramos y funciones de cálculo
+7. [x] Notificaciones, reglas y escalamiento
 8. [ ] RLS completa, visibilidad, semillas y vistas de indicadores
 
 ### Fase 2 — Autenticación y estructura de la app
@@ -365,3 +366,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-07: Fase 1, Etapa B, tramo 5: pausas y subestados, recaptura, reclamaciones
   (procedente/improcedente/requiere tiquet nuevo), duplicados y reactivación, con sus RPC y
   pruebas pgTAP. `pnpm check` en verde. Rama `feat/fase-1-tramos-5-8`.
+- 2026-10-07: Fase 1, Etapa B, tramos 6-7: `time_spans` con disparador que deriva los tramos de la
+  bitácora y funciones `ticket_time_total`/`ticket_time_net`/`ticket_time_by_kind` y registro
+  manual; `notification_rules`, `notifications` y `escalation_rules` con encolado por evento y
+  lectura. 165 pruebas pgTAP en verde. Rama `feat/fase-1-tramo6`.
