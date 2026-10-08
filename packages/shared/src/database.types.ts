@@ -34,7 +34,514 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      buildings: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          team_id: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'categories_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dependencies: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      instance_settings: {
+        Row: {
+          auto_validation_days: number | null
+          claim_window: string
+          created_at: string
+          default_calendar_id: string | null
+          duplicate_shown_fields: string[]
+          duplicate_similarity: number
+          duplicate_window: string
+          folio_pattern: string
+          id: string
+          request_evidence_policy: string
+          requester_visible_event_types: Database['public']['Enums']['event_type'][]
+          singleton: boolean
+          team_label: string
+          timezone: string
+          updated_at: string
+          validation_policy: string
+        }
+        ComputedFields: never
+        Insert: {
+          auto_validation_days?: number | null
+          claim_window?: string
+          created_at?: string
+          default_calendar_id?: string | null
+          duplicate_shown_fields?: string[]
+          duplicate_similarity?: number
+          duplicate_window?: string
+          folio_pattern?: string
+          id?: string
+          request_evidence_policy?: string
+          requester_visible_event_types?: Database['public']['Enums']['event_type'][]
+          singleton?: boolean
+          team_label?: string
+          timezone?: string
+          updated_at?: string
+          validation_policy?: string
+        }
+        Update: {
+          auto_validation_days?: number | null
+          claim_window?: string
+          created_at?: string
+          default_calendar_id?: string | null
+          duplicate_shown_fields?: string[]
+          duplicate_similarity?: number
+          duplicate_window?: string
+          folio_pattern?: string
+          id?: string
+          request_evidence_policy?: string
+          requester_visible_event_types?: Database['public']['Enums']['event_type'][]
+          singleton?: boolean
+          team_label?: string
+          timezone?: string
+          updated_at?: string
+          validation_policy?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'instance_settings_default_calendar_id_fkey'
+            columns: ['default_calendar_id']
+            isOneToOne: false
+            referencedRelation: 'work_calendars'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          active: boolean
+          building_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          building_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          building_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'locations_building_id_fkey'
+            columns: ['building_id']
+            isOneToOne: false
+            referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      priorities: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          position: number
+          target_minutes: number | null
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          target_minutes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          target_minutes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      problems: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          subcategory_id: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          subcategory_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          subcategory_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'problems_subcategory_id_fkey'
+            columns: ['subcategory_id']
+            isOneToOne: false
+            referencedRelation: 'subcategories'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      reasons: {
+        Row: {
+          active: boolean
+          allows_estimated_date: boolean
+          clock_class: Database['public']['Enums']['clock_class']
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          position: number
+          requires_note: boolean
+          updated_at: string
+          use: Database['public']['Enums']['reason_use']
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          allows_estimated_date?: boolean
+          clock_class?: Database['public']['Enums']['clock_class']
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          position?: number
+          requires_note?: boolean
+          updated_at?: string
+          use: Database['public']['Enums']['reason_use']
+        }
+        Update: {
+          active?: boolean
+          allows_estimated_date?: boolean
+          clock_class?: Database['public']['Enums']['clock_class']
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          position?: number
+          requires_note?: boolean
+          updated_at?: string
+          use?: Database['public']['Enums']['reason_use']
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'reasons_parent_id_fkey'
+            columns: ['parent_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      service_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subcategories: {
+        Row: {
+          active: boolean
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'subcategories_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      work_calendar_holidays: {
+        Row: {
+          calendar_id: string
+          holiday: string
+          id: string
+          name: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          calendar_id: string
+          holiday: string
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          holiday?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'work_calendar_holidays_calendar_id_fkey'
+            columns: ['calendar_id']
+            isOneToOne: false
+            referencedRelation: 'work_calendars'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      work_calendar_intervals: {
+        Row: {
+          calendar_id: string
+          end_time: string
+          id: string
+          start_time: string
+          weekday: number
+        }
+        ComputedFields: never
+        Insert: {
+          calendar_id: string
+          end_time: string
+          id?: string
+          start_time: string
+          weekday: number
+        }
+        Update: {
+          calendar_id?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'work_calendar_intervals_calendar_id_fkey'
+            columns: ['calendar_id']
+            isOneToOne: false
+            referencedRelation: 'work_calendars'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      work_calendars: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          timezone: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          timezone: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -43,7 +550,44 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      clock_class: 'counted' | 'not_counted'
+      event_type:
+        | 'created'
+        | 'offered'
+        | 'taken'
+        | 'reassigned_supervisor'
+        | 'assigned_technician'
+        | 'reassigned_technician'
+        | 'auxiliary_added'
+        | 'capture_recaptured'
+        | 'started'
+        | 'paused'
+        | 'pause_advanced'
+        | 'resumed'
+        | 'attended'
+        | 'validated'
+        | 'claim_opened'
+        | 'claim_resolved'
+        | 'reopened'
+        | 'rejected'
+        | 'cancelled'
+        | 'duplicate_marked'
+        | 'reactivated'
+        | 'priority_changed'
+        | 'comment'
+        | 'evidence_added'
+        | 'imported'
+      reason_use:
+        | 'pause'
+        | 'rejection'
+        | 'cancellation'
+        | 'supervisor_reassignment'
+        | 'technician_reassignment'
+        | 'recapture'
+        | 'claim'
+        | 'claim_outcome'
+        | 'reactivation'
+        | 'auxiliary_support'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -170,6 +714,47 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      clock_class: ['counted', 'not_counted'],
+      event_type: [
+        'created',
+        'offered',
+        'taken',
+        'reassigned_supervisor',
+        'assigned_technician',
+        'reassigned_technician',
+        'auxiliary_added',
+        'capture_recaptured',
+        'started',
+        'paused',
+        'pause_advanced',
+        'resumed',
+        'attended',
+        'validated',
+        'claim_opened',
+        'claim_resolved',
+        'reopened',
+        'rejected',
+        'cancelled',
+        'duplicate_marked',
+        'reactivated',
+        'priority_changed',
+        'comment',
+        'evidence_added',
+        'imported',
+      ],
+      reason_use: [
+        'pause',
+        'rejection',
+        'cancellation',
+        'supervisor_reassignment',
+        'technician_reassignment',
+        'recapture',
+        'claim',
+        'claim_outcome',
+        'reactivation',
+        'auxiliary_support',
+      ],
+    },
   },
 } as const
