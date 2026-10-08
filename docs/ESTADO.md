@@ -165,8 +165,8 @@ formularios secundarios del detalle) y después la **Fase 6**. Sin push a `origi
   - Ola 1: insignia → `Badge`, métricas → `Table`, acciones del tiquet → `Sheet`, catálogos →
     `Dialog`, toasts al guardar. Decisiones en el ADR 0025.
   - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
-  - **Ola 2 pendiente:** `user-menu` (`DropdownMenu`, ajusta E2E), roles/usuarios (`Tabs`/`Table`/
-    `Checkbox`), login/perfil (`Form`), formularios secundarios del detalle, `Tooltip`/`Skeleton`.
+  - **Ola 2 pendiente:** roles/usuarios (`Tabs`/`Table`/`Checkbox`), login/perfil (`Form`),
+    formularios secundarios del detalle, `Tooltip`/`Skeleton`. El `user-menu` ya usa `DropdownMenu`.
 
 ## Siguiente
 

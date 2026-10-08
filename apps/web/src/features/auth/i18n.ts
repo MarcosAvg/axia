@@ -12,6 +12,9 @@ export const authMessages = {
     admin: 'Administración',
   },
   signOut: 'Cerrar sesión',
+  userMenu: {
+    label: 'Menú de usuario',
+  },
   loading: 'Cargando…',
   login: {
     title: 'Inicia sesión',

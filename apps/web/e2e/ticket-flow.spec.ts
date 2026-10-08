@@ -9,12 +9,13 @@ async function signIn(page: Page, email: string) {
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
-    page.getByRole('button', { name: 'Cerrar sesión' }),
+    page.getByRole('button', { name: 'Menú de usuario' }),
   ).toBeVisible()
 }
 
 async function signOut(page: Page) {
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await page.getByRole('button', { name: 'Menú de usuario' }).click()
+  await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 }
 

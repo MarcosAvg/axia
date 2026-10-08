@@ -38,7 +38,7 @@ también a `components/ui/**` y varios los exceden.
 ## Consecuencias
 
 - La base permite adoptar shadcn de forma orgánica en las siguientes pantallas.
-- **Olas pendientes:** `user-menu` con `DropdownMenu` (implica ajustar las E2E), roles/usuarios con
-  `Tabs`/`Table`/`Checkbox`, login/perfil con `Form` de shadcn, formularios secundarios del detalle
-  (recaptura, duplicado, supervisor, tiempos, evidencia), `Tooltip`/`Skeleton`/`Alert` donde aporten.
+- **Olas pendientes:** roles/usuarios con `Tabs`/`Table`/`Checkbox`, login/perfil con `Form` de
+  shadcn, formularios secundarios del detalle (recaptura, duplicado, supervisor, tiempos, evidencia),
+  `Tooltip`/`Skeleton`/`Alert` donde aporten. El `user-menu` ya usa `DropdownMenu`.
 - Los componentes ya migrados se prueban con las E2E existentes (12 en verde).

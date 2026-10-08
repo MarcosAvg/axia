@@ -28,7 +28,8 @@ test('cerrar sesión vuelve al acceso', async ({ page }) => {
   await signIn(page, 'admin@axia.test')
   await expect(page.getByText(/Hola, Admin Demo/)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await page.getByRole('button', { name: 'Menú de usuario' }).click()
+  await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
 
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 })
