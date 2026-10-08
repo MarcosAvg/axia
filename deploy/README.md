@@ -1,6 +1,6 @@
 # Axia — Despliegue (producción autoalojada)
 
-Este directorio contendrá la infraestructura de producción. **Se puebla en la Fase 8**;
+Este directorio contendrá la infraestructura de producción. **Se puebla en la Fase 7**;
 hoy solo reserva la estructura del monorepo.
 
 Contenido previsto (ver `docs/configuracion-inicial.md`, sección 10):

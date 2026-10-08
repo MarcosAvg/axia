@@ -27,4 +27,4 @@ tramos con el calendario.
 
 - Los indicadores se calculan desde el historial; nada se duplica como cifra.
 - La corrección de un tiempo es un tramo nuevo (historial), no una edición.
-- El modo laboral se completa en la Fase 6.
+- El modo laboral se completa en la Fase 5 (implementado en 5A; corrección de la referencia previa a la Fase 6).

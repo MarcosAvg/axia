@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5 cerrada (incluye duplicados y satisfacción) — siguiente: SLA (con valores) o Fase 6
+**Fase actual:** 5 en cierre (SLA pendiente de valores) — después: Fase 6 (opcional) y Fase 7
 
 ## En curso
 
-_(vacío)_ — Se cerraron los indicadores de duplicados y la calificación de satisfacción (ADR 0026),
-y se confirmó la zona horaria (`America/Mexico_City`). Lo siguiente es el **SLA** cuando la persona
-defina los valores, o la **Fase 6** (integraciones). Sin push a `origin`.
+_(vacío)_ — Las Fases 0-4 están cerradas. La **Fase 5** está cerrada salvo el **SLA** (objetivos por
+prioridad/tipo), pendiente de que la persona defina los valores y el reloj. Después siguen **Fase 6
+(Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese orden. Sin push a `origin`.
 
 ## Hecho
 
@@ -94,7 +94,7 @@ defina los valores, o la **Fase 6** (integraciones). Sin push a `origin`.
   `playwright.config.ts` (Chromium, `webServer` con `pnpm dev`) y humo `e2e/home.spec.ts` (la
   pantalla de inicio muestra "Axia" y "Comenzar"); `test` ahora corre Vitest + Playwright y el
   CI instala Chromium con `--with-deps`. Directorio `deploy/` creado con `README.md` de alcance
-  (se puebla en la Fase 8). Con esto la Fase 0 queda cerrada con `pnpm check` en verde.
+  (se puebla en la Fase 7). Con esto la Fase 0 queda cerrada con `pnpm check` en verde.
   Rama `chore/cierre-fase-0`.
 - **Fase 1, Etapa A (documentación y diseño)**: se adoptó la especificación de negocio de la
   persona. `docs/especificacion-negocio.md` (secciones 1-14 íntegras + correcciones confirmadas:
@@ -156,7 +156,7 @@ defina los valores, o la **Fase 6** (integraciones). Sin push a `origin`.
   - Agregación en el frontend con funciones puras probadas. Decisiones en el ADR 0024.
   - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
   - Pendientes del tablero: indicadores de duplicados, satisfacción (sin tabla) y SLA (tramo aparte).
-- **Fase 5C — fundación de interfaz con shadcn/ui (ola 1, 2026-10-08)**, rama `feat/fase-5c-ui`
+- **Fase 5, sub-fase 5C — fundación de interfaz con shadcn/ui (ola 1, 2026-10-08)**, rama `feat/fase-5c-ui`
   (fusionada localmente a `main`; **sin push**):
   - Instala las primitivas de shadcn/ui (dialog, sheet, table, tabs, badge, checkbox, switch,
     radio-group, alert, separator, skeleton, tooltip, dropdown-menu, pagination, progress, sonner y
@@ -181,11 +181,12 @@ defina los valores, o la **Fase 6** (integraciones). Sin push a `origin`.
 ## Siguiente
 
 **Tiempos objetivo (SLA)** por prioridad y tipo de servicio cuando la persona defina los valores y
-el reloj (calendario o laboral): tabla de objetivos, cumplimiento en las vistas e indicador.
-Después, **Fase 6 — Integraciones y migración**: infraestructura genérica de importación
-(`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y
-adaptadores, aislada del núcleo. Quedan menores de UI oportunistas (`Progress` en evidencia, más
-`Tooltip`/`Skeleton`) y la exportación XLSX.
+el reloj (calendario o laboral): tabla de objetivos, cumplimiento en las vistas e indicador; cierra
+la Fase 5. Después, **Fase 6 — Integraciones y migración** (opcional): infraestructura genérica de
+importación (`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y
+reporte) y adaptadores, aislada del núcleo. Al final, **Fase 7 — Producción** (despliegue
+autoalojado, respaldos y documentación). Quedan menores de UI oportunistas (`Progress` en evidencia,
+más `Tooltip`/`Skeleton`) y la exportación XLSX.
 
 ## Hoja de ruta
 
@@ -195,7 +196,7 @@ migración van después, sobre un núcleo ya estable.
 ### Fase 0 — Arranque (sin dependencias de negocio) — **cerrada el 2026-10-07**
 - [x] Monorepo pnpm: `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`, `scripts/`
 - [x] App Vite + React + TypeScript con Tailwind, shadcn/ui, TanStack Router (rutas por carpetas)
-      y TanStack Query (el componente `chart`/Recharts llega con las métricas, Fase 6)
+      y TanStack Query (el componente `chart`/Recharts llega con las métricas, Fase 5)
 - [x] Supabase local funcionando, cliente tipado, `pnpm db:types`
 - [x] PWA configurada (manifest, iconos provisionales, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
@@ -214,7 +215,7 @@ migración van después, sobre un núcleo ya estable.
 - [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
 
 **Fase 0 cerrada el 2026-10-07** con `pnpm check` en verde. El componente `chart`/Recharts
-llega con las métricas (Fase 6) y `deploy/` se puebla en producción (Fase 8).
+llega con las métricas (Fase 5) y `deploy/` se puebla en producción (Fase 7).
 
 ### Fase 1 — Base de datos núcleo (modelo de datos)
 Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** se aprueba
@@ -259,16 +260,19 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy) — ADR 0020
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
-### Fase 5 — Métricas y reportes — **cerrada el 2026-10-08**
+### Fase 5 — Métricas y reportes — **cerrada salvo el SLA (pendiente de valores)**
 - [x] **5A** Indicadores de la especificación §11 calculados en la base (calendario y laboral,
       sin duplicados) con vistas y pgTAP — ADR 0021
 - [x] **5B-0** Administración de calendarios (franjas y festivos) y fechas en la zona de la
       institución — ADR 0023
 - [x] **5B** Tablero con Recharts (KPI, dimensiones, pausas, aging), filtros y exportación CSV —
       ADR 0024
-- [ ] (Pendiente) Tiempos objetivo (SLA) por prioridad y tipo de servicio; exportación XLSX
+- [x] **5C** Fundación de interfaz con shadcn/ui (sheet/dialog, table, tabs, badge, `field`,
+      toasts, skeleton/alert) — ADR 0025
 - [x] Indicadores de **duplicados** en el tablero (tiempo hasta marcarse y alertas) y **satisfacción**
       (tabla `ticket_ratings`, RPC `ticket_rate`, KPI y formulario) — ADR 0026
+- [ ] **Pendiente de la Fase 5:** tiempos objetivo (**SLA**) por prioridad y tipo de servicio
+      (valores y reloj por definir); exportación XLSX
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,

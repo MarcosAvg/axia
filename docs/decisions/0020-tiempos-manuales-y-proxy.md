@@ -42,4 +42,4 @@ supervisor/admin y una sección de tiempos manuales en el detalle.
 - El sujeto de un tramo manual y de un evento es rastreable; el actor nunca se pierde.
 - Los tramos anulados permanecen por auditoría pero no inflan los indicadores.
 - `ticket_advance_pause` no se expone aún en la interfaz; el backend ya admite proxy.
-- El modo laboral de los tiempos se completa en la Fase 6.
+- El modo laboral de los tiempos se completa en la Fase 5 (implementado en 5A; corrección de la referencia previa a la Fase 6).

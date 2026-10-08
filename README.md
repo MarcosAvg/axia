@@ -47,15 +47,15 @@ aislados.
 - **Tablero de métricas** (Fase 5B): `/metricas` con KPI, volumen por día, promedio por dimensión,
   pausas por motivo, aging, **duplicados** (tiempo hasta marcarse, alertas y tasa) y **satisfacción**
   promedio, con filtros de fecha/dimensión y exportación CSV (Recharts).
-- **Fundación de interfaz** (Fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`, `Table`,
-  `Tabs`, `Badge`, `Switch`/`Checkbox`), primitivas `field` para formularios, iconos `lucide` y
-  avisos con `sonner`.
+- **Fundación de interfaz** (Fase 5, sub-fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`,
+  `Table`, `Tabs`, `Badge`, `Switch`/`Checkbox`), primitivas `field` para formularios, iconos
+  `lucide` y avisos con `sonner`.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es los **tiempos objetivo (SLA)** cuando se definan los valores, y después la **Fase 6
-(integraciones y migración)**, aislada del núcleo. Ver la hoja de ruta y lo pendiente en
-[`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es cerrar la **Fase 5 con el SLA** (tiempos objetivo) cuando se definan los valores;
+después, la **Fase 6 (integraciones y migración)** —opcional— y la **Fase 7 (producción)**. Ver la
+hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
@@ -137,7 +137,7 @@ axia/
 │       └── lib/       → cliente de datos, offline, i18n y utilidades
 ├── packages/shared/   → tipos y esquemas compartidos (incluye database.types.ts)
 ├── supabase/          → migraciones, semillas, funciones y pruebas pgTAP
-├── deploy/            → despliegue en producción (se puebla en la Fase 8)
+├── deploy/            → despliegue en producción (se puebla en la Fase 7)
 ├── scripts/           → verificaciones (p. ej. check:agnostic)
 ├── docs/              → dominio, convenciones, estado y decisiones (ADR)
 └── .github/workflows/ → CI
