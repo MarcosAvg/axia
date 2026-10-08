@@ -4,15 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5B-0 cerrada (administración de calendarios y zona horaria) — siguiente: 5B (tableros)
+**Fase actual:** 5 cerrada — siguiente: Fase 6 (integraciones y migración)
 
 ## En curso
 
-**Fase 5B — Tableros y exportación** (rama `feat/fase-5b-tableros`).
-1. Base: Recharts (MIT) y componente `chart`; feature `metrics`; ruta `/metricas` con permiso `metrics.view`.
-2. Datos: API sobre `v_ticket_metrics_base` y vistas agregadas; filtros de fecha y dimensión; agregación con funciones puras.
-3. Tablero: KPI, volumen en el tiempo, por dimensión, pausas por motivo y aging.
-4. Exportación CSV. ADR, docs y `pnpm check`. Sin push.
+_(vacío)_ — El tablero de métricas cerró la Fase 5. La siguiente tarea es la **Fase 6**
+(infraestructura de importación y adaptadores, aislada del núcleo), cuando la persona la pida.
+Sin push a `origin`.
 
 ## Hecho
 
@@ -150,13 +148,21 @@
   - `me()` devuelve la zona horaria y la interfaz muestra las fechas en la zona de la institución.
   - Decisiones en el ADR 0023.
   - Compuerta completa en verde: 336 pgTAP, 103 Vitest, 11 Playwright.
+- **Fase 5B — tablero de métricas (cerrada el 2026-10-08)**, rama `feat/fase-5b-tableros`
+  (fusionada localmente a `main`; **sin push**):
+  - Sección `/metricas` con el permiso `metrics.view`, Recharts (MIT) y un componente `chart` propio
+    con la API de shadcn/ui; KPI, volumen por día, promedio por dimensión, pausas por motivo, aging
+    y exportación CSV, con filtros de fecha y dimensión.
+  - Agregación en el frontend con funciones puras probadas. Decisiones en el ADR 0024.
+  - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
+  - Pendientes del tablero: indicadores de duplicados, satisfacción (sin tabla) y SLA (tramo aparte).
 
 ## Siguiente
 
-**Fase 5B — Tableros y exportación**: feature `metrics` (`api/` + hooks), tableros con Recharts
-(componente `chart` de shadcn/ui), filtros por fecha/dimensión, gating con `metrics.view` y
-exportación. La administración de calendarios y la zona horaria en pantalla ya quedaron cerradas
-(ADR 0023). La satisfacción espera a la tabla de calificación y el SLA a sus valores.
+**Fase 6 — Integraciones y migración**: infraestructura genérica de importación (`import_batches`,
+`import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada
+del núcleo y solo cuando la persona la pida. Antes conviene cerrar pendientes de la Fase 5
+(duplicados en el tablero, satisfacción y SLA) y confirmar la zona horaria real.
 
 ## Hoja de ruta
 
@@ -230,14 +236,15 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy) — ADR 0020
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
-### Fase 5 — Métricas y reportes
+### Fase 5 — Métricas y reportes — **cerrada el 2026-10-08**
 - [x] **5A** Indicadores de la especificación §11 calculados en la base (calendario y laboral,
       sin duplicados) con vistas y pgTAP — ADR 0021
 - [x] **5B-0** Administración de calendarios (franjas y festivos) y fechas en la zona de la
       institución — ADR 0023
-- [ ] **5A (pendiente)** Tiempos objetivo (SLA) por prioridad y tipo de servicio; satisfacción
-      (requiere la tabla de calificación)
-- [ ] **5B** Tableros con Recharts, filtros y exportación CSV/XLSX
+- [x] **5B** Tablero con Recharts (KPI, dimensiones, pausas, aging), filtros y exportación CSV —
+      ADR 0024
+- [ ] (Pendiente) Tiempos objetivo (SLA) por prioridad y tipo de servicio; satisfacción (requiere
+      la tabla de calificación); indicadores de duplicados en el tablero; XLSX
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,

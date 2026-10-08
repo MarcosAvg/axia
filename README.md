@@ -14,7 +14,7 @@ aislados.
 
 ## Estado del proyecto
 
-**Fases 1 a 5A cerradas.** Ya funciona:
+**Fases 1 a 5 cerradas.** Ya funciona:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
@@ -44,11 +44,13 @@ aislados.
   (extra) y vistas de indicadores por dimensión, técnico, motivo, antigüedad, ruteo y duplicados.
 - **Calendarios** (Fase 5B-0): administración en `/admin/calendarios` (franjas semanales y festivos),
   calendario por equipo y por defecto, y las fechas de la interfaz en la zona de la institución.
+- **Tablero de métricas** (Fase 5B): `/metricas` con KPI, volumen por día, promedio por dimensión,
+  pausas por motivo y aging, con filtros de fecha/dimensión y exportación CSV (Recharts).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 5B (tableros y exportación)**. Ver la hoja de ruta y lo pendiente en
-[`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 6 (integraciones y migración)**, aislada del núcleo. Ver la hoja de ruta y
+lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
