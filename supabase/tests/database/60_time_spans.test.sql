@@ -4,6 +4,9 @@ set search_path = extensions, public;
 
 select plan(12);
 
+-- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
+truncate table public.tickets cascade;
+
 select has_table('public', 'time_spans', 'existe public.time_spans');
 select is(
   (select relrowsecurity from pg_class where oid = 'public.time_spans'::regclass),

@@ -249,6 +249,13 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'evidence_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_timeline'
+            referencedColumns: ['id']
+          },
+          {
             foreignKeyName: 'evidence_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
@@ -492,6 +499,13 @@ export type Database = {
             columns: ['event_id']
             isOneToOne: false
             referencedRelation: 'v_ticket_events_requester'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_timeline'
             referencedColumns: ['id']
           },
           {
@@ -2222,6 +2236,56 @@ export type Database = {
             columns: ['team_id']
             isOneToOne: false
             referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      v_ticket_timeline: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          cycle: number | null
+          id: number | null
+          occurred_at: string | null
+          payload: Json | null
+          reason_id: string | null
+          reason_name: string | null
+          recorded_at: string | null
+          subject_technician_id: string | null
+          subject_technician_name: string | null
+          subject_user_id: string | null
+          subject_user_name: string | null
+          ticket_id: string | null
+          type: Database['public']['Enums']['event_type'] | null
+        }
+        ComputedFields: never
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_subject_technician_id_fkey'
+            columns: ['subject_technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
         ]

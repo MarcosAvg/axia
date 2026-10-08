@@ -2,12 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { TextField } from '@/components/shared/form-fields'
 import { isInvalidCredentials } from '../domain/auth-error'
 import { useAuth } from '../hooks/auth-context'
 import { authMessages } from '../i18n'
 import { loginSchema } from '../schemas'
 import type { LoginInput } from '../schemas'
-import { TextField } from './text-field'
 
 /** Formulario de acceso con correo y contraseña. */
 export function LoginForm() {

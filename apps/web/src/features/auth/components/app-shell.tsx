@@ -32,6 +32,9 @@ export function AppShell() {
             <Link to="/" className={navLinkClass}>
               {authMessages.nav.home}
             </Link>
+            <Link to="/tickets" search={{ page: 1 }} className={navLinkClass}>
+              {authMessages.nav.tickets}
+            </Link>
             <Link to="/perfil" className={navLinkClass}>
               {authMessages.nav.profile}
             </Link>

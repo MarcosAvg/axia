@@ -4,6 +4,10 @@ set search_path = extensions, public;
 
 select plan(20);
 
+-- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E:
+-- se vacía el grafo de tiquets dentro de la transacción (se revierte al final).
+truncate table public.tickets cascade;
+
 -- Tablas del tramo 4.
 select has_table('public', 'ticket_offers', 'existe public.ticket_offers');
 select has_table('public', 'ticket_duplicate_candidates', 'existe public.ticket_duplicate_candidates');

@@ -4,6 +4,9 @@ set search_path = extensions, public;
 
 select plan(10);
 
+-- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
+truncate table public.tickets cascade;
+
 -- Semillas.
 select cmp_ok((select count(*)::int from public.teams), '>=', 2, 'se sembraron equipos');
 select cmp_ok((select count(*)::int from public.reasons), '>', 0, 'se sembraron motivos');

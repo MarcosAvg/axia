@@ -4,6 +4,7 @@ export const authMessages = {
   nav: {
     label: 'Navegación principal',
     home: 'Panel',
+    tickets: 'Tiquets',
     profile: 'Mi perfil',
     admin: 'Administración',
   },
