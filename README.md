@@ -9,23 +9,28 @@ El núcleo es **agnóstico**: funciona completo por sí solo y ninguna plataform
 requisito, fuente de verdad ni parte de su diseño. Las integraciones son adaptadores opcionales y
 aislados.
 
+> **¿Primera vez en este equipo?** Lee [`docs/empezar-aqui.md`](docs/empezar-aqui.md): requisitos,
+> arranque en 5 minutos, cómo continuar entre equipos y solución de problemas.
+
 ## Estado del proyecto
 
-Fase 0 (arranque). Ya funciona:
+**Fase 1 (base de datos núcleo) cerrada.** Ya funciona:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas) y TanStack Query.
 - Pantalla de inicio "Axia" y una página de "no encontrado".
-- **Supabase local** (Postgres, Auth, Storage y Studio), cliente tipado (`lib/supabase.ts`) y
-  tipos generados con `pnpm db:types`; prueba pgTAP de humo.
+- **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
+  tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 175 pruebas pgTAP.
+- **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
 - **PWA instalable** (manifest, iconos y `registerType: 'prompt'` con aviso de actualización) y
   esqueleto offline con Dexie (`outbox`, `evidencias`).
-- Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, pruebas, pgTAP y
-  build).
+- Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
+  pgTAP y build).
 - CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
 
-Todavía **no** está: el componente de gráficas (llega con las métricas, Fase 6). Ver la hoja
-de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 2 (autenticación y estructura de la app)**. Ver la hoja de ruta y lo
+pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
