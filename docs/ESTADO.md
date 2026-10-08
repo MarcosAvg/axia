@@ -4,7 +4,7 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 3 — Pantallas principales
+**Fase actual:** 3 — Pantallas principales (3A operación cerrada; 3B administración pendiente)
 
 ## En curso
 
@@ -109,10 +109,10 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
 
 ## Siguiente
 
-**Fase 3 — Pantallas principales**: alta de tiquets con catálogos, lista y detalle con línea de
-tiempo; vista del técnico (móvil primero) y bandejas del supervisor y del administrador;
-administración de catálogos, roles/permisos y motivos. La **Fase 2 quedó cerrada** (login, perfiles
-y layout con rutas protegidas por permiso; la seguridad real es RLS).
+**Fase 3B — Administración**: catálogos maestros y motivos jerárquicos, matriz de roles/permisos,
+usuarios y roles (alta/invitación), ámbitos de supervisor y designaciones de técnicos, con escritura
+por políticas RLS gobernadas por `has_permission(...)` (ADR pendiente). La **Fase 3A (operación)
+quedó cerrada**: alta de tiquets, lista, detalle con línea de tiempo, bandejas y vista del técnico.
 
 ## Hoja de ruta
 
@@ -164,9 +164,17 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       permiso (la seguridad real es RLS). ADR 0016.
 
 ### Fase 3 — Pantallas principales
-- [ ] Alta de tiquets con catálogos, lista y detalle con línea de tiempo
-- [ ] Vista del técnico (móvil primero), bandejas del supervisor y del administrador
-- [ ] Administración de catálogos, roles/permisos y motivos
+**Fase 3A — Operación (cerrada el 2026-10-08):**
+- [x] Alta de tiquets con catálogos, lista y detalle con línea de tiempo
+- [x] Vista del técnico (móvil primero) y bandejas del supervisor
+- [x] Evidencia en línea mínima (bucket privado, `evidence_add`, subida y URL firmada) — ADR 0017
+- [ ] (Diferido a otra tarea) Interfaz de: reasignar supervisor, agregar auxiliares, recaptura,
+      marcar duplicado, reclamaciones, reactivación y calificación de satisfacción (los RPC de
+      reasignar/auxiliares/duplicados ya existen; la captura offline y los tiempos manuales son
+      Fase 4)
+
+**Fase 3B — Administración (pendiente):**
+- [ ] Catálogos maestros y motivos jerárquicos, roles/permisos, usuarios, ámbitos y designaciones
 
 ### Fase 4 — Evidencias y modo sin conexión
 - [ ] Captura y compresión de fotos, subida reanudable, cola `outbox`, sincronización
@@ -331,6 +339,17 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - **Fase 2 — fronteras**: como `@supabase/supabase-js` solo puede importarse desde `features/*/api`
   y `lib/`, el tipo `Session` se reexporta como `AuthSession` desde `features/auth/api`; los hooks
   importan de ahí.
+- **Fase 3A — evidencia y Storage**: bucket privado `evidence` (imágenes/PDF, 20 MiB) con ruta
+  `tickets/<id>/<ciclo>/<uuid>.<ext>` y políticas de `storage.objects` ligadas a `can_see_ticket`.
+  La subida es en línea (Fase 4 añade cámara, compresión, reanudable y offline). `can_see_ticket`
+  ahora incluye a los participantes auxiliares.
+- **Fase 3A — acciones**: la UI muestra acciones contextuales por estado y permiso
+  (`domain/actions.ts`); las mutaciones por RPC invalidan la caché `['tickets']`. Interfaz diferida
+  (documentada arriba): reasignar supervisor, auxiliares, recaptura, duplicado, reclamaciones,
+  reactivación y calificación.
+- **Fase 3A — pruebas pgTAP y datos de la app**: los tiquets que deja la app o Playwright rompían
+  las pruebas que asumían la tabla vacía (`order by ticket_number limit 1`); cada prueba de tiquets
+  hace `truncate public.tickets cascade` dentro de su transacción.
 
 ## Registro de sesiones
 
@@ -404,6 +423,15 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: Fase 2, tramo 2: feature `auth` (sesión con `AuthProvider`, guard por permiso,
   `AppShell`, acceso, panel, perfil y administración reservada), script `pnpm env:local`, pruebas
   Vitest (32) y Playwright (4) en verde. `pnpm check` completo en verde. Rama `feat/fase-2-auth`.
+- 2026-10-08: Fase 3A, tramo 1: bucket `evidence` + RPC `evidence_add`, `ticket_assign_supervisor`,
+  `ticket_add_auxiliary` y `ticket_check_duplicates`; `can_see_ticket` incluye auxiliares; 234 pruebas
+  pgTAP en verde. ADR 0017. Rama `feat/fase-3a-operacion`.
+- 2026-10-08: Fase 3A, tramo 2: features `catalogs` y `tickets`; alta con aviso de duplicados, lista
+  con filtros en la URL, detalle con línea de tiempo (`v_ticket_timeline`); campos de formulario
+  compartidos; Playwright del alta. Las pruebas pgTAP de tiquets se aíslan con `truncate`.
+- 2026-10-08: Fase 3A, tramo 3: acciones por estado/permiso, mutaciones de transición, evidencia en
+  línea, `/inbox` (supervisor) y `/mi-trabajo` (técnico); Playwright del flujo del técnico. 239
+  pgTAP, 63 Vitest y 6 Playwright en verde; `pnpm check` completo en verde. **Fase 3A cerrada**.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -420,3 +448,18 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `@hookform/resolvers`, MIT); script `pnpm env:local` (`scripts/write-local-env.mjs`); pruebas:
   Vitest (dominio, esquemas, enrutado con sesión simulada) y Playwright (acceso, panel, salir,
   `/admin` restringido). `pnpm check` en verde. Rama `feat/fase-2-auth`.
+- **Fase 3A, Tramo 1 (backend de operación)**: bucket privado `evidence` con políticas ligadas a
+  `can_see_ticket` y RPC `evidence_add` (idempotente); RPC `ticket_assign_supervisor` (RN-06),
+  `ticket_add_auxiliary` (RN-07) y `ticket_check_duplicates` (RN-29, sin crear); `can_see_ticket`
+  incluye a los auxiliares y la reasignación genera su tramo de tiempo. Pruebas pgTAP
+  (`95_flow_completion.test.sql`). ADR 0017. Rama `feat/fase-3a-operacion`.
+- **Fase 3A, Tramo 2 (tiquets)**: features `catalogs` (lectura con selects dependientes) y `tickets`
+  (acceso a datos, dominio, esquemas Zod, hooks); alta con **aviso de duplicados**, lista con
+  filtros/paginación en la URL y detalle con **línea de tiempo** (`v_ticket_timeline` con
+  visibilidad al solicitante), participantes y evidencias. Pruebas Vitest, pgTAP y Playwright. Las
+  pruebas pgTAP de tiquets se aíslan con `truncate` transaccional. Rama `feat/fase-3a-operacion`.
+- **Fase 3A, Tramo 3 (bandejas y técnico)**: acciones contextuales por estado y permiso
+  (`allowedActions`), mutaciones de transición por RPC, evidencia en línea (subida + URL firmada),
+  bandeja del supervisor (`/inbox`, ofertas + tiquets del equipo) y vista del técnico
+  (`/mi-trabajo`). Prueba Playwright del flujo completo del técnico (asignar → evidencia `before` →
+  iniciar → evidencia `after` → atender). 63 pruebas Vitest y 6 Playwright. `pnpm check` en verde.

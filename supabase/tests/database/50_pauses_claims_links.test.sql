@@ -4,6 +4,9 @@ set search_path = extensions, public;
 
 select plan(24);
 
+-- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
+truncate table public.tickets cascade;
+
 select has_table('public', 'ticket_pauses', 'existe public.ticket_pauses');
 select has_table('public', 'ticket_pause_steps', 'existe public.ticket_pause_steps');
 select has_table('public', 'ticket_claims', 'existe public.ticket_claims');

@@ -4,6 +4,9 @@ set search_path = extensions, public;
 
 select plan(13);
 
+-- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
+truncate table public.tickets cascade;
+
 select has_table('public', 'notification_rules', 'existe public.notification_rules');
 select has_table('public', 'notifications', 'existe public.notifications');
 select has_table('public', 'escalation_rules', 'existe public.escalation_rules');

@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { TextField } from '@/components/shared/form-fields'
 import type { Identity } from '../domain/identity'
 import { useUpdateProfile } from '../hooks/use-update-profile'
 import { authMessages } from '../i18n'
 import { profileSchema } from '../schemas'
 import type { ProfileInput } from '../schemas'
-import { TextField } from './text-field'
 
 /** Formulario para editar el nombre y el teléfono del perfil propio. */
 export function ProfileForm({ identity }: { identity: Identity }) {

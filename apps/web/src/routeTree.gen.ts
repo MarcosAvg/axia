@@ -13,7 +13,12 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
+import { Route as AuthenticatedMiTrabajoRouteImport } from './routes/_authenticated/mi-trabajo'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets/index'
+import { Route as AuthenticatedTicketsTicketIdRouteImport } from './routes/_authenticated/tickets/$ticketId'
+import { Route as AuthenticatedTicketsNuevoRouteImport } from './routes/_authenticated/tickets/nuevo'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -34,44 +39,110 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMiTrabajoRoute = AuthenticatedMiTrabajoRouteImport.update({
+  id: '/mi-trabajo',
+  path: '/mi-trabajo',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTicketsIndexRoute =
+  AuthenticatedTicketsIndexRouteImport.update({
+    id: '/tickets/',
+    path: '/tickets/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTicketsTicketIdRoute =
+  AuthenticatedTicketsTicketIdRouteImport.update({
+    id: '/tickets/$ticketId',
+    path: '/tickets/$ticketId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTicketsNuevoRoute =
+  AuthenticatedTicketsNuevoRouteImport.update({
+    id: '/tickets/nuevo',
+    path: '/tickets/nuevo',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/inbox': typeof AuthenticatedInboxRoute
+  '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
+  '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
+  '/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/inbox': typeof AuthenticatedInboxRoute
+  '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/': typeof AuthenticatedIndexRoute
+  '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
+  '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
+  '/tickets': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/inbox': typeof AuthenticatedInboxRoute
+  '/_authenticated/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
+  '/_authenticated/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
+  '/_authenticated/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/admin' | '/perfil'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/admin'
+    | '/inbox'
+    | '/mi-trabajo'
+    | '/perfil'
+    | '/tickets/$ticketId'
+    | '/tickets/nuevo'
+    | '/tickets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/admin' | '/perfil' | '/'
+  to:
+    | '/login'
+    | '/admin'
+    | '/inbox'
+    | '/mi-trabajo'
+    | '/perfil'
+    | '/'
+    | '/tickets/$ticketId'
+    | '/tickets/nuevo'
+    | '/tickets'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
     | '/_authenticated/admin'
+    | '/_authenticated/inbox'
+    | '/_authenticated/mi-trabajo'
     | '/_authenticated/perfil'
     | '/_authenticated/'
+    | '/_authenticated/tickets/$ticketId'
+    | '/_authenticated/tickets/nuevo'
+    | '/_authenticated/tickets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -109,6 +180,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/inbox': {
+      id: '/_authenticated/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof AuthenticatedInboxRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/mi-trabajo': {
+      id: '/_authenticated/mi-trabajo'
+      path: '/mi-trabajo'
+      fullPath: '/mi-trabajo'
+      preLoaderRoute: typeof AuthenticatedMiTrabajoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
@@ -116,19 +201,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tickets/': {
+      id: '/_authenticated/tickets/'
+      path: '/tickets'
+      fullPath: '/tickets/'
+      preLoaderRoute: typeof AuthenticatedTicketsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tickets/$ticketId': {
+      id: '/_authenticated/tickets/$ticketId'
+      path: '/tickets/$ticketId'
+      fullPath: '/tickets/$ticketId'
+      preLoaderRoute: typeof AuthenticatedTicketsTicketIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tickets/nuevo': {
+      id: '/_authenticated/tickets/nuevo'
+      path: '/tickets/nuevo'
+      fullPath: '/tickets/nuevo'
+      preLoaderRoute: typeof AuthenticatedTicketsNuevoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
+  AuthenticatedMiTrabajoRoute: typeof AuthenticatedMiTrabajoRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedTicketsTicketIdRoute: typeof AuthenticatedTicketsTicketIdRoute
+  AuthenticatedTicketsNuevoRoute: typeof AuthenticatedTicketsNuevoRoute
+  AuthenticatedTicketsIndexRoute: typeof AuthenticatedTicketsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedInboxRoute: AuthenticatedInboxRoute,
+  AuthenticatedMiTrabajoRoute: AuthenticatedMiTrabajoRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedTicketsTicketIdRoute: AuthenticatedTicketsTicketIdRoute,
+  AuthenticatedTicketsNuevoRoute: AuthenticatedTicketsNuevoRoute,
+  AuthenticatedTicketsIndexRoute: AuthenticatedTicketsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
