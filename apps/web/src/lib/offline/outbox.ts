@@ -1,5 +1,6 @@
 import { db } from './db'
 import type { OutboxItem } from './db'
+import { isNetworkError } from './errors'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
 
@@ -10,19 +11,40 @@ export function registerOutboxHandler(type: string, handler: OutboxHandler) {
   handlers.set(type, handler)
 }
 
-/** Encola una operación y devuelve su identificador. */
-export async function enqueue(type: string, payload: unknown): Promise<string> {
-  const id = crypto.randomUUID()
-  await db.outbox.add({
-    id,
-    type,
-    payload,
-    state: 'pending',
-    attempts: 0,
-    lastError: null,
-    createdAt: Date.now(),
+let seqCounter = 0
+
+/** Secuencia monótona para ordenar la cola de forma determinista. */
+function nextSeq(): number {
+  seqCounter += 1
+  return Date.now() * 1000 + (seqCounter % 1000)
+}
+
+// Serializa las operaciones sobre IndexedDB para que encolar y procesar no se pisen
+// (procesar puede tardar en subir la evidencia y bloquearía una escritura concurrente).
+let chain: Promise<unknown> = Promise.resolve()
+function exclusive<T>(task: () => Promise<T>): Promise<T> {
+  const run = chain.then(task, task)
+  chain = run.then(
+    () => undefined,
+    () => undefined,
+  )
+  return run
+}
+
+/** Encola una operación (primero lo que se encoló antes). */
+export async function enqueue(type: string, payload: unknown): Promise<void> {
+  await exclusive(async () => {
+    await db.outbox.add({
+      id: crypto.randomUUID(),
+      seq: nextSeq(),
+      type,
+      payload,
+      state: 'pending',
+      attempts: 0,
+      lastError: null,
+      createdAt: Date.now(),
+    })
   })
-  return id
 }
 
 const MAX_ATTEMPTS = 5
@@ -36,13 +58,18 @@ export function onOutboxProcessed(callback: () => void) {
 
 /** Procesa la cola en orden; reintenta los fallos hasta el límite. */
 export async function processOutbox(): Promise<void> {
+  // Sin conexión no hay nada que enviar; se reintenta al recuperar la red.
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return
   if (isProcessing) return
   isProcessing = true
   try {
-    const items = await db.outbox.orderBy('createdAt').toArray()
-    for (const item of items) {
-      await processItem(item)
-    }
+    await exclusive(async () => {
+      const items = await db.outbox.toArray()
+      items.sort((a, b) => a.seq - b.seq)
+      for (const item of items) {
+        await processItem(item)
+      }
+    })
   } finally {
     isProcessing = false
     afterProcess?.()
@@ -64,8 +91,9 @@ async function processItem(item: OutboxItem): Promise<void> {
     await db.outbox.delete(item.id)
   } catch (error) {
     const attempts = item.attempts + 1
+    const permanent = !isNetworkError(error)
     await db.outbox.update(item.id, {
-      state: attempts >= MAX_ATTEMPTS ? 'error' : 'pending',
+      state: permanent || attempts >= MAX_ATTEMPTS ? 'error' : 'pending',
       attempts,
       lastError: error instanceof Error ? error.message : String(error),
     })

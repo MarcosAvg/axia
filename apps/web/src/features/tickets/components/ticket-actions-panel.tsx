@@ -43,9 +43,9 @@ export function TicketActionsPanel({
   const [formAction, setFormAction] = useState<ActionKey | null>(null)
 
   const oneClick: Partial<Record<ActionKey, () => void>> = {
-    start: () => mutations.start.mutate(undefined),
-    resume: () => mutations.resume.mutate(undefined),
-    validate: () => mutations.validate.mutate(undefined),
+    start: () => mutations.start.mutate({}),
+    resume: () => mutations.resume.mutate({}),
+    validate: () => mutations.validate.mutate({}),
   }
 
   const visible = actions.filter(

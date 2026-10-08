@@ -24,9 +24,9 @@ describe('cola de salida (outbox)', () => {
     expect(await db.outbox.count()).toBe(0)
   })
 
-  it('reintenta un ítem que falla y lleva el conteo', async () => {
+  it('reintenta un ítem que falla por red', async () => {
     registerOutboxHandler('test_fail', async () => {
-      throw new Error('fallo de prueba')
+      throw new TypeError('Failed to fetch')
     })
     await enqueue('test_fail', {})
 
@@ -36,6 +36,20 @@ describe('cola de salida (outbox)', () => {
     expect(items).toHaveLength(1)
     expect(items[0]?.state).toBe('pending')
     expect(items[0]?.attempts).toBe(1)
-    expect(items[0]?.lastError).toBe('fallo de prueba')
+  })
+
+  it('no reintenta un error de dominio', async () => {
+    registerOutboxHandler('test_domain', async () => {
+      throw new Error('El tiquet ya cambió')
+    })
+    await enqueue('test_domain', {})
+
+    await processOutbox()
+
+    const items = await db.outbox.toArray()
+    expect(items).toHaveLength(1)
+    expect(items[0]?.state).toBe('error')
+    expect(items[0]?.attempts).toBe(1)
+    expect(items[0]?.lastError).toBe('El tiquet ya cambió')
   })
 })

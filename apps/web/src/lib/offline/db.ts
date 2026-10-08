@@ -6,6 +6,9 @@ import Dexie, { type EntityTable } from 'dexie'
 // Ver docs/decisions/0004-cola-offline-con-dexie.md.
 export interface OutboxItem {
   id: string
+  // Secuencia monótona (sin índice): da un orden determinista al procesar la cola, para que
+  // la evidencia "antes" se suba antes que la acción de iniciar.
+  seq: number
   type: string
   payload: unknown
   state: 'pending' | 'sending' | 'error'
@@ -33,11 +36,6 @@ export const db = new Dexie('axia') as Dexie & {
 }
 
 db.version(1).stores({
-  outbox: 'id, type, state, createdAt',
-  evidences: 'id, ticketId, state',
-})
-
-db.version(2).stores({
   outbox: 'id, type, state, createdAt',
   evidences: 'id, ticketId, state',
 })

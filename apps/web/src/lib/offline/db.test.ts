@@ -4,6 +4,7 @@ import { db } from './db'
 function outboxItem() {
   return {
     id: crypto.randomUUID(),
+    seq: 1,
     type: 'ticket-start',
     payload: { ticketId: 'ticket-1' },
     state: 'pending' as const,
@@ -25,11 +26,10 @@ describe('base local (Dexie)', () => {
 
   it('guarda y lee un elemento de la cola de salida', async () => {
     const item = outboxItem()
-    await db.outbox.add(item)
+    const id = await db.outbox.add(item)
 
-    const stored = await db.outbox.get(item.id)
+    const stored = await db.outbox.get(id)
     expect(stored).toMatchObject({
-      id: item.id,
       type: 'ticket-start',
       state: 'pending',
       attempts: 0,
@@ -46,7 +46,7 @@ describe('base local (Dexie)', () => {
       .equals('pending')
       .sortBy('createdAt')
 
-    expect(pending.map((item) => item.id)).toEqual([first.id, second.id])
+    expect(pending.map((item) => item.createdAt)).toEqual([1000, 2000])
   })
 
   it('guarda y lee una evidencia', async () => {

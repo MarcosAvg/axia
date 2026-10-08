@@ -37,6 +37,6 @@ la evidencia funcione sin conexión.
 ## Consecuencias
 
 - El técnico puede tomar la evidencia sin conexión; se sube al recuperar la red.
-- Pendiente (resto de la Fase 4A): enrutar las **acciones del tiquet** (iniciar, pausar, atender…) por
-  la misma cola cuando no hay conexión; hoy solo la evidencia está offline.
+- También puede **iniciar, pausar, avanzar, reanudar, atender y recapturar** sin conexión: esas
+  acciones se encolan y se reenvían al reconectar (idempotentes por `client_request_id`).
 - Los archivos `blob` no se conservan en `fake-indexeddb` (solo pruebas); en el navegador real sí.
