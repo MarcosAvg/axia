@@ -17,28 +17,35 @@ const validationOptions = (
 const evidenceOptions = (
   Object.keys(evidencePolicies) as (keyof typeof evidencePolicies)[]
 ).map((value) => ({ value, label: evidencePolicies[value] }))
+const slaClockModes = adminMessages.slaClockModes
+const slaClockOptions = (
+  Object.keys(slaClockModes) as (keyof typeof slaClockModes)[]
+).map((value) => ({ value, label: slaClockModes[value] }))
 
-function CalendarSelect({
-  register,
-  error,
-}: {
-  register: UseFormRegister<SettingsFormValues>
-  error?: string
-}) {
+function ScheduleSelects({ register, errors }: SettingsFieldsProps) {
   const calendars = useCalendars()
   const options = (calendars.data ?? []).map((calendar) => ({
     value: calendar.id,
     label: calendar.name,
   }))
   return (
-    <SelectField
-      id="settings-default-calendar"
-      label={settings.defaultCalendar}
-      placeholder={adminMessages.actions.selectPlaceholder}
-      options={options}
-      error={error}
-      {...register('defaultCalendarId')}
-    />
+    <>
+      <SelectField
+        id="settings-default-calendar"
+        label={settings.defaultCalendar}
+        placeholder={adminMessages.actions.selectPlaceholder}
+        options={options}
+        error={errors.defaultCalendarId?.message}
+        {...register('defaultCalendarId')}
+      />
+      <SelectField
+        id="settings-sla-clock"
+        label={settings.slaClockMode}
+        options={slaClockOptions}
+        error={errors.slaClockMode?.message}
+        {...register('slaClockMode')}
+      />
+    </>
   )
 }
 
@@ -92,10 +99,7 @@ export function SettingsFields({ register, errors }: SettingsFieldsProps) {
         error={errors.timezone?.message}
         {...register('timezone')}
       />
-      <CalendarSelect
-        register={register}
-        error={errors.defaultCalendarId?.message}
-      />
+      <ScheduleSelects register={register} errors={errors} />
     </>
   )
 }

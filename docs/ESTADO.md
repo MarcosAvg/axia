@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5 en cierre (SLA pendiente de valores) — después: Fase 6 (opcional) y Fase 7
+**Fase actual:** 5 cerrada — siguiente: Fase 6 (opcional) y Fase 7 (producción)
 
 ## En curso
 
-_(vacío)_ — Las Fases 0-4 están cerradas. La **Fase 5** está cerrada salvo el **SLA** (objetivos por
-prioridad/tipo), pendiente de que la persona defina los valores y el reloj. Después siguen **Fase 6
-(Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese orden. Sin push a `origin`.
+_(vacío)_ — La Fase 5 quedó **cerrada** al implementar los tiempos objetivo (SLA) configurables
+(ADR 0027). Siguen **Fase 6 (Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese
+orden. Quedan menores de UI (`Progress`, `Tooltip`/`Skeleton`) y XLSX. Sin push a `origin`.
 
 ## Hecho
 
@@ -177,16 +177,21 @@ prioridad/tipo), pendiente de que la persona defina los valores y el reloj. Desp
     `v_metrics_satisfaction`, formulario de estrellas en el tiquet cerrado y KPI en el tablero.
   - Zona horaria confirmada: `America/Mexico_City`. Decisiones en el ADR 0026.
   - Compuerta completa en verde: 348 pgTAP, 116 Vitest, 12 Playwright.
+- **Tiempos objetivo (SLA) — cierre de la Fase 5 (2026-10-08)**, rama `feat/fase-5-sla` (fusionada
+  localmente a `main`; **sin push**):
+  - `service_types.target_minutes` (el tipo de servicio sobrescribe a la prioridad), modo de reloj
+    de instancia (`sla_clock_mode`), vistas `v_ticket_sla` / `v_metrics_sla` /
+    `v_metrics_sla_by_priority` (medición de resolución) y KPI + sección por prioridad en `/metricas`.
+  - Configurable desde administración; `NULL` = sin objetivo. ADR 0027.
+  - Compuerta completa en verde: 358 pgTAP, 116 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Tiempos objetivo (SLA)** por prioridad y tipo de servicio cuando la persona defina los valores y
-el reloj (calendario o laboral): tabla de objetivos, cumplimiento en las vistas e indicador; cierra
-la Fase 5. Después, **Fase 6 — Integraciones y migración** (opcional): infraestructura genérica de
-importación (`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y
-reporte) y adaptadores, aislada del núcleo. Al final, **Fase 7 — Producción** (despliegue
-autoalojado, respaldos y documentación). Quedan menores de UI oportunistas (`Progress` en evidencia,
-más `Tooltip`/`Skeleton`) y la exportación XLSX.
+**Fase 6 — Integraciones y migración** (opcional): infraestructura genérica de importación
+(`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y
+adaptadores, aislada del núcleo; requiere confirmar el formato de origen (preguntas #6–#9). Al
+final, **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación). Quedan menores
+de UI oportunistas (`Progress` en evidencia, más `Tooltip`/`Skeleton`) y la exportación XLSX.
 
 ## Hoja de ruta
 
@@ -260,7 +265,7 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy) — ADR 0020
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
-### Fase 5 — Métricas y reportes — **cerrada salvo el SLA (pendiente de valores)**
+### Fase 5 — Métricas y reportes — **cerrada el 2026-10-08**
 - [x] **5A** Indicadores de la especificación §11 calculados en la base (calendario y laboral,
       sin duplicados) con vistas y pgTAP — ADR 0021
 - [x] **5B-0** Administración de calendarios (franjas y festivos) y fechas en la zona de la
@@ -271,8 +276,9 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       toasts, skeleton/alert) — ADR 0025
 - [x] Indicadores de **duplicados** en el tablero (tiempo hasta marcarse y alertas) y **satisfacción**
       (tabla `ticket_ratings`, RPC `ticket_rate`, KPI y formulario) — ADR 0026
-- [ ] **Pendiente de la Fase 5:** tiempos objetivo (**SLA**) por prioridad y tipo de servicio
-      (valores y reloj por definir); exportación XLSX
+- [x] **Tiempos objetivo (SLA)** por prioridad y tipo de servicio, configurables, con modo de reloj y
+      cumplimiento en el tablero — ADR 0027
+- [ ] (Menor) exportación XLSX
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,
@@ -297,7 +303,7 @@ concreta, opciones y recomendación.
 | 2 | ¿Los solicitantes tendrán cuenta o serán contactos sin cuenta? | Fase 1 | **Resuelta**: modelo mixto (catálogo con vínculo opcional) |
 | 3 | Zona horaria de la institución y horario laboral para métricas | Fase 5 | **Resuelta (diseño)**: una zona para la instancia (`America/Mexico_City`; confirmar si difiere), cobertura por equipo (Mantenimiento 06:00–20:00; resto 08:00–17:00 L–V), extra separado y festivos oficiales MX editables (ADR 0022) |
 | 4 | Formato del número de tiquet | Fase 1 | **Resuelta**: RN-25 (UUID interno + consecutivo global + folio por patrón) |
-| 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 5 | Pendiente |
+| 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 5 | **Resuelta**: configurables por prioridad y tipo de servicio (el tipo sobrescribe), medidos sobre la resolución en el reloj de la instancia; `NULL` = sin SLA (ADR 0027) |
 | 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 6 | Pendiente |
 | 7 | ¿La plataforma de origen exporta (CSV/Excel), tiene API o envía correos? | Fase 6 | Pendiente |
 | 8 | ¿"Asignación de trabajo" es asignación al técnico o inicio del trabajo? | Fase 6 (hay supuesto provisional) | Pendiente |

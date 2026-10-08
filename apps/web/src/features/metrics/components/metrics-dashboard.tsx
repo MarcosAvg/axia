@@ -25,6 +25,8 @@ import type {
   MetricsTicket,
   PauseReasonRow,
   SatisfactionSummary,
+  SlaPriorityRow,
+  SlaSummary,
 } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import {
@@ -32,6 +34,7 @@ import {
   usePausesByReason,
   useDuplicates,
   useSatisfaction,
+  useSla,
 } from '../hooks/use-metrics'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
@@ -42,6 +45,7 @@ import { MetricsFilters } from './metrics-filters'
 import type { FilterCatalogs } from './metrics-filters'
 import { MetricsKpis } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
+import { SlaSection } from './sla-section'
 import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
@@ -71,6 +75,14 @@ function buildDuplicates(
     alerts: alerts ?? [],
     rows: rows ?? [],
   }
+}
+
+const EMPTY_SLA: SlaSummary = {
+  withTarget: 0,
+  met: 0,
+  complianceRate: null,
+  avgTargetMinutes: null,
+  avgResolutionMinutes: null,
 }
 
 function MetricsStatus({
@@ -111,6 +123,7 @@ function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
 function MetricsTail({
   filtered,
   duplicates,
+  slaRows,
 }: {
   filtered: MetricsTicket[]
   duplicates: {
@@ -118,9 +131,13 @@ function MetricsTail({
     alerts: DuplicateAlert[]
     rows: DuplicateDimensionRow[]
   }
+  slaRows: SlaPriorityRow[]
 }) {
   return (
     <>
+      <ChartCard title={metricsMessages.sla.title}>
+        <SlaSection rows={slaRows} />
+      </ChartCard>
       <ChartCard title={metricsMessages.aging.title}>
         <AgingList
           rows={openAging(filtered, new Date())}
@@ -134,6 +151,35 @@ function MetricsTail({
   )
 }
 
+function MetricsCharts({
+  filtered,
+  dimension,
+  nameOf,
+  pauses,
+}: {
+  filtered: MetricsTicket[]
+  dimension: Dimension
+  nameOf: (id: string) => string
+  pauses: PauseReasonRow[]
+}) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <ChartCard title={metricsMessages.charts.volume}>
+        <VolumeChart data={volumeByDate(filtered)} />
+      </ChartCard>
+      <ChartCard title={metricsMessages.charts.byDimension}>
+        <DimensionChart
+          rows={byDimension(filtered, dimension)}
+          nameOf={nameOf}
+        />
+      </ChartCard>
+      <ChartCard title={metricsMessages.charts.pauses}>
+        <PausesChart data={pauses} />
+      </ChartCard>
+    </div>
+  )
+}
+
 function MetricsContent({
   filtered,
   dimension,
@@ -141,6 +187,8 @@ function MetricsContent({
   pauses,
   duplicates,
   satisfaction,
+  sla,
+  slaRows,
   onDimensionChange,
 }: {
   filtered: MetricsTicket[]
@@ -153,6 +201,8 @@ function MetricsContent({
     rows: DuplicateDimensionRow[]
   }
   satisfaction: SatisfactionSummary | undefined
+  sla: SlaSummary | undefined
+  slaRows: SlaPriorityRow[]
   onDimensionChange: (dimension: Dimension) => void
 }) {
   return (
@@ -160,21 +210,14 @@ function MetricsContent({
       <MetricsKpis
         summary={summarize(filtered)}
         satisfaction={satisfaction ?? { average: null, ratings: 0 }}
+        sla={sla ?? EMPTY_SLA}
       />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title={metricsMessages.charts.volume}>
-          <VolumeChart data={volumeByDate(filtered)} />
-        </ChartCard>
-        <ChartCard title={metricsMessages.charts.byDimension}>
-          <DimensionChart
-            rows={byDimension(filtered, dimension)}
-            nameOf={nameOf}
-          />
-        </ChartCard>
-        <ChartCard title={metricsMessages.charts.pauses}>
-          <PausesChart data={pauses} />
-        </ChartCard>
-      </div>
+      <MetricsCharts
+        filtered={filtered}
+        dimension={dimension}
+        nameOf={nameOf}
+        pauses={pauses}
+      />
       <ChartCard title={metricsMessages.table.dimension}>
         <DimensionTable
           dimension={dimension}
@@ -183,7 +226,11 @@ function MetricsContent({
           onDimensionChange={onDimensionChange}
         />
       </ChartCard>
-      <MetricsTail filtered={filtered} duplicates={duplicates} />
+      <MetricsTail
+        filtered={filtered}
+        duplicates={duplicates}
+        slaRows={slaRows}
+      />
     </>
   )
 }
@@ -196,6 +243,7 @@ export function MetricsDashboard() {
   const pauses = usePausesByReason()
   const duplicates = useDuplicates()
   const satisfaction = useSatisfaction()
+  const sla = useSla()
   const buildings = useBuildings()
   const teams = useTeams()
   const categories = useCategories()
@@ -240,6 +288,8 @@ export function MetricsDashboard() {
           pauses={pauses.data ?? []}
           duplicates={duplicatesData}
           satisfaction={satisfaction.data}
+          sla={sla.summary.data}
+          slaRows={sla.byPriority.data ?? []}
           onDimensionChange={setDimension}
         />
       ) : null}

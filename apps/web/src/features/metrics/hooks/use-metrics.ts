@@ -6,6 +6,8 @@ import {
   fetchMetricsTickets,
   fetchPausesByReason,
   fetchSatisfaction,
+  fetchSla,
+  fetchSlaByPriority,
 } from '../api/metrics-api'
 
 const metricsKeys = {
@@ -15,6 +17,8 @@ const metricsKeys = {
   duplicateAlerts: ['metrics', 'duplicate-alerts'] as const,
   duplicatesByDimension: ['metrics', 'duplicates-by-dimension'] as const,
   satisfaction: ['metrics', 'satisfaction'] as const,
+  sla: ['metrics', 'sla'] as const,
+  slaByPriority: ['metrics', 'sla-by-priority'] as const,
 }
 
 export function useMetricsTickets() {
@@ -52,4 +56,16 @@ export function useSatisfaction() {
     queryKey: metricsKeys.satisfaction,
     queryFn: fetchSatisfaction,
   })
+}
+
+export function useSla() {
+  const summary = useQuery({
+    queryKey: metricsKeys.sla,
+    queryFn: fetchSla,
+  })
+  const byPriority = useQuery({
+    queryKey: metricsKeys.slaByPriority,
+    queryFn: fetchSlaByPriority,
+  })
+  return { summary, byPriority }
 }

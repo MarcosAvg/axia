@@ -9,6 +9,8 @@ import type {
   MetricsTicket,
   PauseReasonRow,
   SatisfactionSummary,
+  SlaPriorityRow,
+  SlaSummary,
 } from '../domain/metrics'
 
 const TICKET_SELECT =
@@ -134,4 +136,65 @@ export async function fetchSatisfaction(): Promise<SatisfactionSummary> {
     average: data?.average_score ?? null,
     ratings: data?.ratings ?? 0,
   }
+}
+
+export async function fetchSla(): Promise<SlaSummary> {
+  const { data, error } = await supabase
+    .from('v_metrics_sla')
+    .select(
+      'with_target, met, compliance_rate, avg_target_minutes, avg_resolution_minutes',
+    )
+    .maybeSingle()
+  if (error) throw error
+  return parseSla(data)
+}
+
+interface SlaRow {
+  with_target: number | null
+  met: number | null
+  compliance_rate: number | null
+  avg_target_minutes: number | null
+  avg_resolution_minutes: number | null
+}
+
+const EMPTY_SLA_ROW: SlaRow = {
+  with_target: 0,
+  met: 0,
+  compliance_rate: null,
+  avg_target_minutes: null,
+  avg_resolution_minutes: null,
+}
+
+function parseSla(data: SlaRow | null): SlaSummary {
+  const row = data ?? EMPTY_SLA_ROW
+  return {
+    withTarget: row.with_target ?? 0,
+    met: row.met ?? 0,
+    complianceRate: row.compliance_rate,
+    avgTargetMinutes: row.avg_target_minutes,
+    avgResolutionMinutes: row.avg_resolution_minutes,
+  }
+}
+
+export async function fetchSlaByPriority(): Promise<SlaPriorityRow[]> {
+  const { data, error } = await supabase
+    .from('v_metrics_sla_by_priority')
+    .select('priority_id, priority_name, with_target, met, compliance_rate')
+    .order('priority_name')
+  if (error) throw error
+  return (
+    (data ?? []) as unknown as {
+      priority_id: string
+      priority_name: string
+      with_target: number
+      met: number
+      compliance_rate: number | null
+    }[]
+  ).map((row) => ({
+    priorityId: row.priority_id,
+    priorityName: row.priority_name,
+    withTarget: row.with_target,
+    met: row.met,
+    complianceRate: row.compliance_rate,
+  }))
 }

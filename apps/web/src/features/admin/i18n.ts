@@ -24,7 +24,12 @@ export const adminMessages = {
     folioPattern: 'Patrón de folio',
     timezone: 'Zona horaria',
     defaultCalendar: 'Calendario laboral por defecto',
+    slaClockMode: 'Modo de reloj de los objetivos (SLA)',
     saved: 'Configuración guardada.',
+  },
+  slaClockModes: {
+    calendar: 'Calendario (continuo)',
+    laboral: 'Laboral (según calendario)',
   },
   calendar: {
     title: 'Calendarios laborales',

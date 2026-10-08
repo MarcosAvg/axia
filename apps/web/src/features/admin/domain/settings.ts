@@ -1,5 +1,12 @@
 export type ValidationPolicy = 'requester' | 'supervisor' | 'both'
 export type EvidencePolicy = 'optional' | 'recommended' | 'required'
+export type SlaClockMode = 'calendar' | 'laboral'
+
+const SLAL_CLOCK_MODES: SlaClockMode[] = ['calendar', 'laboral']
+
+export function isSlaClockMode(value: string): value is SlaClockMode {
+  return (SLAL_CLOCK_MODES as readonly string[]).includes(value)
+}
 
 const VALIDATION_POLICIES: ValidationPolicy[] = [
   'requester',
@@ -29,6 +36,7 @@ export interface InstanceSettings {
   folioPattern: string
   timezone: string
   defaultCalendarId: string | null
+  slaClockMode: SlaClockMode
 }
 
 /** Días a partir de un intervalo de Postgres (p. ej. `1 day`). */
@@ -47,6 +55,7 @@ export interface SettingsFormValues {
   folioPattern: string
   timezone: string
   defaultCalendarId?: string
+  slaClockMode: SlaClockMode
 }
 
 export interface SettingsUpdate {
@@ -58,6 +67,7 @@ export interface SettingsUpdate {
   folio_pattern: string
   timezone: string
   default_calendar_id: string | null
+  sla_clock_mode: SlaClockMode
 }
 
 export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
@@ -70,5 +80,6 @@ export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
     folio_pattern: settings.folioPattern,
     timezone: settings.timezone,
     default_calendar_id: settings.defaultCalendarId,
+    sla_clock_mode: settings.slaClockMode,
   }
 }

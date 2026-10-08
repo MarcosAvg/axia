@@ -40,6 +40,15 @@ export const metricsMessages = {
     reopen: 'Reapertura',
     firstFix: 'Primera resolución',
     satisfaction: 'Satisfacción',
+    sla: 'Cumplimiento de SLA',
+  },
+  sla: {
+    title: 'Tiempos objetivo (SLA)',
+    priority: 'Prioridad',
+    withTarget: 'Con objetivo',
+    met: 'Cumplidos',
+    rate: 'Cumplimiento',
+    empty: 'Sin tiquets con objetivo.',
   },
   charts: {
     volume: 'Tiquets por día',

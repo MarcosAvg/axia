@@ -15,6 +15,7 @@ const schema = z.object({
   folioPattern: z.string().trim().min(1),
   timezone: z.string().trim().min(1),
   defaultCalendarId: z.string().optional(),
+  slaClockMode: z.enum(['calendar', 'laboral']),
 })
 
 interface SettingsFormProps {
@@ -47,6 +48,7 @@ export function SettingsForm({
       folioPattern: settings.folioPattern,
       timezone: settings.timezone,
       defaultCalendarId: settings.defaultCalendarId ?? '',
+      slaClockMode: settings.slaClockMode,
     },
   })
 
@@ -62,6 +64,7 @@ export function SettingsForm({
       folioPattern: values.folioPattern,
       timezone: values.timezone,
       defaultCalendarId: values.defaultCalendarId || null,
+      slaClockMode: values.slaClockMode,
     })
   })
 

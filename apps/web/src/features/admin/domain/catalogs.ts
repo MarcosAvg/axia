@@ -1,5 +1,6 @@
 import type { AdminTable } from '../api/admin-api'
 import { adminMessages } from '../i18n'
+import { reasonsCatalog } from './catalogs-reasons'
 import type {
   AdminCatalogConfig,
   AdminColumn,
@@ -12,16 +13,7 @@ export type {
   AdminField,
 } from './catalog-types'
 
-const { titles, fields, list, reasonUse, clockClass } = adminMessages
-
-const reasonUseOptions = Object.entries(reasonUse).map(([value, label]) => ({
-  value,
-  label,
-}))
-const clockClassOptions = Object.entries(clockClass).map(([value, label]) => ({
-  value,
-  label,
-}))
+const { titles, fields, list } = adminMessages
 
 const nameField: AdminField = {
   name: 'name',
@@ -85,7 +77,21 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
   teamsCatalog,
   simpleCatalog('buildings', 'buildings', titles.buildings),
   simpleCatalog('dependencies', 'dependencies', titles.dependencies),
-  simpleCatalog('service_types', 'service_types', titles.service_types),
+  {
+    key: 'service_types',
+    table: 'service_types',
+    title: titles.service_types,
+    columns: [
+      nameColumn,
+      { key: 'target_minutes', label: fields.target_minutes },
+      activeColumn,
+    ],
+    fields: [
+      nameField,
+      { name: 'target_minutes', label: fields.target_minutes, kind: 'number' },
+      activeField,
+    ],
+  },
   simpleCatalog('channels', 'channels', titles.channels),
   {
     key: 'priorities',
@@ -258,47 +264,7 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
       activeField,
     ],
   },
-  {
-    key: 'reasons',
-    table: 'reasons',
-    title: titles.reasons,
-    columns: [nameColumn, { key: 'use', label: fields.use }, activeColumn],
-    fields: [
-      {
-        name: 'use',
-        label: fields.use,
-        kind: 'select-fixed',
-        options: reasonUseOptions,
-        required: true,
-      },
-      nameField,
-      {
-        name: 'parent_id',
-        label: fields.parent_id,
-        kind: 'select-table',
-        optionsTable: 'reasons',
-      },
-      {
-        name: 'requires_note',
-        label: fields.requires_note,
-        kind: 'boolean',
-      },
-      {
-        name: 'allows_estimated_date',
-        label: fields.allows_estimated_date,
-        kind: 'boolean',
-      },
-      {
-        name: 'clock_class',
-        label: fields.clock_class,
-        kind: 'select-fixed',
-        options: clockClassOptions,
-        required: true,
-      },
-      { name: 'position', label: fields.position, kind: 'number' },
-      activeField,
-    ],
-  },
+  reasonsCatalog,
 ]
 
 export function catalogByKey(key: string): AdminCatalogConfig {

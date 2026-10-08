@@ -274,6 +274,28 @@ export function formatScore(average: number | null): string {
   return `${average.toFixed(1)} / 5`
 }
 
+export interface SlaSummary {
+  withTarget: number
+  met: number
+  complianceRate: number | null
+  avgTargetMinutes: number | null
+  avgResolutionMinutes: number | null
+}
+
+export interface SlaPriorityRow {
+  priorityId: string
+  priorityName: string
+  withTarget: number
+  met: number
+  complianceRate: number | null
+}
+
+/** Texto de una tasa (o `—` sin datos). */
+export function formatRate(rate: number | null): string {
+  if (rate === null || !Number.isFinite(rate)) return '—'
+  return formatPercent(rate)
+}
+
 const OPEN_STATUSES = new Set([
   'registered',
   'with_supervisor',
