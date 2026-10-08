@@ -1966,7 +1966,10 @@ export type Database = {
           recorded_by: string | null
           ref_id: string | null
           started_at: string
+          subject_technician_id: string | null
           ticket_id: string
+          voided_at: string | null
+          voided_by: string | null
         }
         ComputedFields: never
         Insert: {
@@ -1981,7 +1984,10 @@ export type Database = {
           recorded_by?: string | null
           ref_id?: string | null
           started_at: string
+          subject_technician_id?: string | null
           ticket_id: string
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           client_request_id?: string | null
@@ -1995,9 +2001,19 @@ export type Database = {
           recorded_by?: string | null
           ref_id?: string | null
           started_at?: string
+          subject_technician_id?: string | null
           ticket_id?: string
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'time_spans_subject_technician_id_fkey'
+            columns: ['subject_technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'time_spans_ticket_id_fkey'
             columns: ['ticket_id']
@@ -2502,9 +2518,18 @@ export type Database = {
           p_ended_at: string
           p_kind: Database['public']['Enums']['time_span_kind']
           p_started_at: string
+          p_subject_technician_id?: string
           p_ticket_id: string
         }
         Returns: string
+      }
+      time_span_void: {
+        Args: {
+          p_client_request_id?: string
+          p_span_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
       }
       write_event: {
         Args: {
@@ -2557,6 +2582,7 @@ export type Database = {
         | 'comment'
         | 'evidence_added'
         | 'imported'
+        | 'manual_time_recorded'
       evidence_type:
         'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
       link_type: 'duplicate_of' | 'derived_from' | 'related_to' | 'blocked_by'
@@ -2764,6 +2790,7 @@ export const Constants = {
         'comment',
         'evidence_added',
         'imported',
+        'manual_time_recorded',
       ],
       evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
       link_type: ['duplicate_of', 'derived_from', 'related_to', 'blocked_by'],
