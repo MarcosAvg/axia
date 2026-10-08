@@ -247,6 +247,25 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          description: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+        }
+        Relationships: []
+      }
       priorities: {
         Row: {
           active: boolean
@@ -314,6 +333,34 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          active: boolean
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          full_name: string
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reasons: {
         Row: {
           active: boolean
@@ -364,6 +411,110 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      requesters: {
+        Row: {
+          active: boolean
+          contact: string | null
+          created_at: string
+          dependency_id: string | null
+          full_name: string
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          contact?: string | null
+          created_at?: string
+          dependency_id?: string | null
+          full_name: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          contact?: string | null
+          created_at?: string
+          dependency_id?: string | null
+          full_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'requesters_dependency_id_fkey'
+            columns: ['dependency_id']
+            isOneToOne: false
+            referencedRelation: 'dependencies'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          permission_id: string
+          role_id: string
+          scope: Database['public']['Enums']['permission_scope']
+        }
+        ComputedFields: never
+        Insert: {
+          permission_id: string
+          role_id: string
+          scope: Database['public']['Enums']['permission_scope']
+        }
+        Update: {
+          permission_id?: string
+          role_id?: string
+          scope?: Database['public']['Enums']['permission_scope']
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'role_permissions_permission_id_fkey'
+            columns: ['permission_id']
+            isOneToOne: false
+            referencedRelation: 'permissions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'role_permissions_role_id_fkey'
+            columns: ['role_id']
+            isOneToOne: false
+            referencedRelation: 'roles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          label: string
+          name: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       service_types: {
         Row: {
@@ -426,6 +577,73 @@ export type Database = {
           },
         ]
       }
+      supervisor_scope_buildings: {
+        Row: {
+          building_id: string
+          scope_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          building_id: string
+          scope_id: string
+        }
+        Update: {
+          building_id?: string
+          scope_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'supervisor_scope_buildings_building_id_fkey'
+            columns: ['building_id']
+            isOneToOne: false
+            referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'supervisor_scope_buildings_scope_id_fkey'
+            columns: ['scope_id']
+            isOneToOne: false
+            referencedRelation: 'supervisor_scopes'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      supervisor_scopes: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'supervisor_scopes_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       teams: {
         Row: {
           active: boolean
@@ -450,6 +668,103 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      technician_categories: {
+        Row: {
+          category_id: string
+          technician_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          category_id: string
+          technician_id: string
+        }
+        Update: {
+          category_id?: string
+          technician_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'technician_categories_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'technician_categories_technician_id_fkey'
+            columns: ['technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      technicians: {
+        Row: {
+          active: boolean
+          created_at: string
+          full_name: string
+          id: string
+          team_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          created_at?: string
+          full_name: string
+          id?: string
+          team_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          full_name?: string
+          id?: string
+          team_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'technicians_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          role_id: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'user_roles_role_id_fkey'
+            columns: ['role_id']
+            isOneToOne: false
+            referencedRelation: 'roles'
+            referencedColumns: ['id']
+          },
+        ]
       }
       work_calendar_holidays: {
         Row: {
@@ -577,6 +892,7 @@ export type Database = {
         | 'comment'
         | 'evidence_added'
         | 'imported'
+      permission_scope: 'own' | 'team' | 'buildings' | 'all'
       reason_use:
         | 'pause'
         | 'rejection'
@@ -743,6 +1059,7 @@ export const Constants = {
         'evidence_added',
         'imported',
       ],
+      permission_scope: ['own', 'team', 'buildings', 'all'],
       reason_use: [
         'pause',
         'rejection',
