@@ -28,6 +28,7 @@ export interface InstanceSettings {
   requestEvidencePolicy: EvidencePolicy
   folioPattern: string
   timezone: string
+  defaultCalendarId: string | null
 }
 
 /** Días a partir de un intervalo de Postgres (p. ej. `1 day`). */
@@ -45,6 +46,7 @@ export interface SettingsFormValues {
   requestEvidencePolicy: EvidencePolicy
   folioPattern: string
   timezone: string
+  defaultCalendarId?: string
 }
 
 export interface SettingsUpdate {
@@ -55,6 +57,7 @@ export interface SettingsUpdate {
   request_evidence_policy: EvidencePolicy
   folio_pattern: string
   timezone: string
+  default_calendar_id: string | null
 }
 
 export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
@@ -66,5 +69,6 @@ export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
     request_evidence_policy: settings.requestEvidencePolicy,
     folio_pattern: settings.folioPattern,
     timezone: settings.timezone,
+    default_calendar_id: settings.defaultCalendarId,
   }
 }

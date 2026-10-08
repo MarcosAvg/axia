@@ -1,5 +1,6 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { SelectField, TextField } from '@/components/shared/form-fields'
+import { useCalendars } from '../hooks/use-calendars'
 import type { SettingsFormValues } from '../domain/settings'
 import { adminMessages } from '../i18n'
 
@@ -8,17 +9,41 @@ interface SettingsFieldsProps {
   errors: FieldErrors<SettingsFormValues>
 }
 
+const { settings, validationPolicies, evidencePolicies } = adminMessages
+
+const validationOptions = (
+  Object.keys(validationPolicies) as (keyof typeof validationPolicies)[]
+).map((value) => ({ value, label: validationPolicies[value] }))
+const evidenceOptions = (
+  Object.keys(evidencePolicies) as (keyof typeof evidencePolicies)[]
+).map((value) => ({ value, label: evidencePolicies[value] }))
+
+function CalendarSelect({
+  register,
+  error,
+}: {
+  register: UseFormRegister<SettingsFormValues>
+  error?: string
+}) {
+  const calendars = useCalendars()
+  const options = (calendars.data ?? []).map((calendar) => ({
+    value: calendar.id,
+    label: calendar.name,
+  }))
+  return (
+    <SelectField
+      id="settings-default-calendar"
+      label={settings.defaultCalendar}
+      placeholder={adminMessages.actions.selectPlaceholder}
+      options={options}
+      error={error}
+      {...register('defaultCalendarId')}
+    />
+  )
+}
+
 /** Campos del formulario de configuración. */
 export function SettingsFields({ register, errors }: SettingsFieldsProps) {
-  const { settings, validationPolicies, evidencePolicies } = adminMessages
-
-  const validationOptions = (
-    Object.keys(validationPolicies) as (keyof typeof validationPolicies)[]
-  ).map((value) => ({ value, label: validationPolicies[value] }))
-  const evidenceOptions = (
-    Object.keys(evidencePolicies) as (keyof typeof evidencePolicies)[]
-  ).map((value) => ({ value, label: evidencePolicies[value] }))
-
   return (
     <>
       <TextField
@@ -66,6 +91,10 @@ export function SettingsFields({ register, errors }: SettingsFieldsProps) {
         label={settings.timezone}
         error={errors.timezone?.message}
         {...register('timezone')}
+      />
+      <CalendarSelect
+        register={register}
+        error={errors.defaultCalendarId?.message}
       />
     </>
   )

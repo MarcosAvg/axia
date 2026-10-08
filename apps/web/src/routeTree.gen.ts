@@ -18,6 +18,7 @@ import { Route as AuthenticatedMiTrabajoRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAmbitosRouteImport } from './routes/_authenticated/admin/ambitos'
+import { Route as AuthenticatedAdminCalendariosRouteImport } from './routes/_authenticated/admin/calendarios'
 import { Route as AuthenticatedAdminCatalogosRouteImport } from './routes/_authenticated/admin/catalogos'
 import { Route as AuthenticatedAdminConfiguracionRouteImport } from './routes/_authenticated/admin/configuracion'
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
@@ -71,6 +72,12 @@ const AuthenticatedAdminAmbitosRoute =
     path: '/ambitos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCalendariosRoute =
+  AuthenticatedAdminCalendariosRouteImport.update({
+    id: '/calendarios',
+    path: '/calendarios',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminCatalogosRoute =
   AuthenticatedAdminCatalogosRouteImport.update({
     id: '/catalogos',
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
+  '/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
@@ -137,6 +145,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
+  '/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
@@ -156,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
+  '/_authenticated/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/_authenticated/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/_authenticated/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/mi-trabajo'
     | '/perfil'
     | '/admin/ambitos'
+    | '/admin/calendarios'
     | '/admin/catalogos'
     | '/admin/configuracion'
     | '/admin/roles'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/'
     | '/admin/ambitos'
+    | '/admin/calendarios'
     | '/admin/catalogos'
     | '/admin/configuracion'
     | '/admin/roles'
@@ -209,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/perfil'
     | '/_authenticated/'
     | '/_authenticated/admin/ambitos'
+    | '/_authenticated/admin/calendarios'
     | '/_authenticated/admin/catalogos'
     | '/_authenticated/admin/configuracion'
     | '/_authenticated/admin/roles'
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAmbitosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/calendarios': {
+      id: '/_authenticated/admin/calendarios'
+      path: '/calendarios'
+      fullPath: '/admin/calendarios'
+      preLoaderRoute: typeof AuthenticatedAdminCalendariosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/catalogos': {
       id: '/_authenticated/admin/catalogos'
       path: '/catalogos'
@@ -343,6 +363,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAmbitosRoute: typeof AuthenticatedAdminAmbitosRoute
+  AuthenticatedAdminCalendariosRoute: typeof AuthenticatedAdminCalendariosRoute
   AuthenticatedAdminCatalogosRoute: typeof AuthenticatedAdminCatalogosRoute
   AuthenticatedAdminConfiguracionRoute: typeof AuthenticatedAdminConfiguracionRoute
   AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
@@ -352,6 +373,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAmbitosRoute: AuthenticatedAdminAmbitosRoute,
+  AuthenticatedAdminCalendariosRoute: AuthenticatedAdminCalendariosRoute,
   AuthenticatedAdminCatalogosRoute: AuthenticatedAdminCatalogosRoute,
   AuthenticatedAdminConfiguracionRoute: AuthenticatedAdminConfiguracionRoute,
   AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,

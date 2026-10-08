@@ -56,7 +56,30 @@ function simpleCatalog(
 }
 
 /** Catálogos administrables (Tramo 2). Todos usan el permiso `catalog.manage`. */
-const teamsCatalog = simpleCatalog('teams', 'teams', titles.teams)
+const teamsCatalog: AdminCatalogConfig = {
+  key: 'teams',
+  table: 'teams',
+  title: titles.teams,
+  columns: [
+    nameColumn,
+    {
+      key: 'work_calendar_id',
+      label: fields.work_calendar_id,
+      optionsTable: 'work_calendars',
+    },
+    activeColumn,
+  ],
+  fields: [
+    nameField,
+    {
+      name: 'work_calendar_id',
+      label: fields.work_calendar_id,
+      kind: 'select-table',
+      optionsTable: 'work_calendars',
+    },
+    activeField,
+  ],
+}
 
 export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
   teamsCatalog,
@@ -280,28 +303,4 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
 
 export function catalogByKey(key: string): AdminCatalogConfig {
   return ADMIN_CATALOGS.find((catalog) => catalog.key === key) ?? teamsCatalog
-}
-
-/** Columna que da el nombre legible de una tabla (los catálogos de personas usan `full_name`). */
-function labelColumnFor(table: AdminTable): string {
-  return table === 'requesters' || table === 'technicians'
-    ? 'full_name'
-    : 'name'
-}
-
-/** Fuentes de opciones (tablas referenciadas) que un catálogo necesita para sus selects. */
-export function optionSourcesFor(
-  config: AdminCatalogConfig,
-): { table: AdminTable; labelColumn: string }[] {
-  const tables = new Set<AdminTable>()
-  for (const field of config.fields) {
-    if (field.optionsTable) tables.add(field.optionsTable)
-  }
-  for (const column of config.columns) {
-    if (column.optionsTable) tables.add(column.optionsTable)
-  }
-  return [...tables].map((table) => ({
-    table,
-    labelColumn: labelColumnFor(table),
-  }))
 }

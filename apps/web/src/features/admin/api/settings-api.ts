@@ -11,7 +11,7 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
   const { data, error } = await supabase
     .from('instance_settings')
     .select(
-      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone',
+      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone, default_calendar_id',
     )
     .limit(1)
     .single()
@@ -28,6 +28,7 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
       : 'recommended',
     folioPattern: data.folio_pattern,
     timezone: data.timezone,
+    defaultCalendarId: data.default_calendar_id,
   }
 }
 

@@ -14,6 +14,7 @@ const schema = z.object({
   requestEvidencePolicy: z.enum(['optional', 'recommended', 'required']),
   folioPattern: z.string().trim().min(1),
   timezone: z.string().trim().min(1),
+  defaultCalendarId: z.string().optional(),
 })
 
 interface SettingsFormProps {
@@ -45,6 +46,7 @@ export function SettingsForm({
       requestEvidencePolicy: settings.requestEvidencePolicy,
       folioPattern: settings.folioPattern,
       timezone: settings.timezone,
+      defaultCalendarId: settings.defaultCalendarId ?? '',
     },
   })
 
@@ -59,6 +61,7 @@ export function SettingsForm({
       requestEvidencePolicy: values.requestEvidencePolicy,
       folioPattern: values.folioPattern,
       timezone: values.timezone,
+      defaultCalendarId: values.defaultCalendarId || null,
     })
   })
 

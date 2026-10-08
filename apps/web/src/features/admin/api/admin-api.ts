@@ -19,6 +19,7 @@ export type AdminTable =
   | 'requesters'
   | 'technicians'
   | 'reasons'
+  | 'work_calendars'
 
 export type AdminRow = Record<string, unknown>
 export type AdminValues = Record<string, string | number | boolean | null>

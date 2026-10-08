@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { AdminTable } from '../api/admin-api'
-import { optionSourcesFor } from '../domain/catalogs'
+import { optionSourcesFor } from '../domain/catalog-options'
 import type { AdminCatalogConfig } from '../domain/catalogs'
 import {
   useAdminOptions,

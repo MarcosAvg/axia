@@ -39,6 +39,9 @@ function AdminLayout() {
           <Link to="/admin/ambitos" className={linkClass}>
             {adminMessages.nav.scopes}
           </Link>
+          <Link to="/admin/calendarios" className={linkClass}>
+            {adminMessages.nav.calendars}
+          </Link>
           <Link to="/admin/configuracion" className={linkClass}>
             {adminMessages.nav.settings}
           </Link>
