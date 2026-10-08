@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 6B cerrada (adaptador CSV/Excel) — siguiente: 6C (verificación) y Fase 7
+**Fase actual:** 6C-1 cerrada (verificación de métricas) — siguiente: Fase 7 (producción)
 
 ## En curso
 
-_(vacío)_ — La **Fase 6B** quedó cerrada: adaptador CSV/Excel aislado, dry run con reporte de calidad,
-resolución de alias/estatus e importación idempotente con asignación de técnico. Siguen **6C**
-(verificación de métricas) y **Fase 7** (producción). Sin push a `origin`.
+_(vacío)_ — La **Fase 6C-1** quedó cerrada: las fórmulas de métricas se verifican con datos ficticios
+equivalentes (y el tiempo total de un importado). Quedan **6C-2** (reconstruir la línea de tiempo al
+importar, opcional), **6D** (convivencia, opcional) y **Fase 7** (producción). Sin push a `origin`.
 
 ## Hecho
 
@@ -206,12 +206,18 @@ resolución de alias/estatus e importación idempotente con asignación de técn
     de alias/estatus e importación idempotente; asignación del técnico con `import_ticket_assign`.
   - Se permite a `routes/` importar integrations (frontera ajustada). ADR 0030.
   - Compuerta completa en verde: 377 pgTAP, 125 Vitest, 12 Playwright.
+- **Fase 6C-1 — verificación de métricas (2026-10-08)**, rama `feat/fase-6c-verificacion` (fusionada
+  localmente a `main`; **sin push**):
+  - Prueba pgTAP con un conjunto ficticio equivalente (marcas fijas) y valores calculados a mano de
+    cada tramo, total y neto; pausa no contable, exclusión de duplicados, conteos y tiempo total de
+    un importado. ADR 0031.
+  - Compuerta completa en verde: 391 pgTAP, 125 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Fase 6C — verificación**: que las **métricas base** de Axia coincidan con las cifras actuales de la
-fuente para el mismo conjunto (con datos ficticios equivalentes). Después, **6D** (convivencia,
-opcional) y **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación).
+**Fase 7 — Producción** (despliegue autoalojado con Docker Compose + Caddy, respaldos y
+documentación). Opcionalmente antes: **6C-2** (reconstruir la línea de tiempo al importar) y **6D**
+(convivencia).
 
 ## Hoja de ruta
 
@@ -308,6 +314,11 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] **6B** Adaptador CSV/Excel de la fuente heredada: dry run con reporte de calidad, resolución
       de alias y estatus, e importación idempotente con asignación del técnico — ADR 0030
 - [ ] **6C** Verificación: las métricas base coinciden con las cifras actuales de la fuente
+- [x] **6C-1** Verificación de las **fórmulas** de métricas con datos ficticios equivalentes (respuesta,
+      asignación, espera, trabajo activo, pausa, validación, total y neto; duplicados excluidos;
+      puente de importación por el tiempo total) — ADR 0031
+- [ ] **6C-2** (Opcional) Reconstruir la línea de tiempo al importar para que los tres intervalos de
+      los importados coincidan con la fuente
 - [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
 
 ### Fase 7 — Producción

@@ -20,7 +20,7 @@ aislados.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 377 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 391 pruebas pgTAP.
 - **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
   RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
@@ -56,8 +56,9 @@ aislados.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **verificación de métricas de la importación (Fase 6C)** y la **Fase 7
-(producción)**. Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 7 (producción)**; opcionalmente antes, reconstruir la línea de tiempo al
+importar (6C-2) y la convivencia (6D). Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
