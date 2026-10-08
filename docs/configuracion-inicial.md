@@ -460,50 +460,65 @@ Para probar en un celular durante el desarrollo, usa un túnel HTTPS o un certif
 
 ### 7.2 Base local con Dexie
 
-`src/lib/offline/db.ts`:
+`src/lib/offline/db.ts` (campos en inglés, como exige `docs/convenciones-codigo.md`):
 
 ```ts
 import Dexie, { type EntityTable } from 'dexie'
 
 export interface OutboxItem {
   id: string // UUID generado en el cliente = clave de idempotencia
-  tipo: string
+  type: string
   payload: unknown
-  estado: 'pendiente' | 'enviando' | 'error'
-  intentos: number
-  creadoEn: number
+  state: 'pending' | 'sending' | 'error'
+  attempts: number
+  createdAt: number
 }
 
-export interface Evidencia {
+export interface Evidence {
   id: string
   ticketId: string
   blob: Blob // foto ya comprimida
-  estado: 'pendiente' | 'subiendo' | 'subida' | 'error'
-  creadoEn: number
+  state: 'pending' | 'uploading' | 'uploaded' | 'error'
+  createdAt: number
 }
 
 export const db = new Dexie('axia') as Dexie & {
   outbox: EntityTable<OutboxItem, 'id'>
-  evidencias: EntityTable<Evidencia, 'id'>
+  evidences: EntityTable<Evidence, 'id'>
 }
 
 db.version(1).stores({
-  outbox: 'id, tipo, estado, creadoEn',
-  evidencias: 'id, ticketId, estado',
+  outbox: 'id, type, state, createdAt',
+  evidences: 'id, ticketId, state',
 })
 ```
 
 ### 7.3 Disparadores de sincronización
 
+`src/lib/offline/sync.ts` (devuelve una función para detenerlos; útil en pruebas y al cerrar
+sesión):
+
 `src/lib/offline/sync.ts`:
 
 ```ts
-export function iniciarSincronizacion(procesar: () => Promise<void>) {
-  window.addEventListener('online', procesar)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') void procesar()
-  })
-  void procesar() // al abrir la app
+export function startSync(process: () => Promise<void>): () => void {
+  const onOnline = () => {
+    void process()
+  }
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      void process()
+    }
+  }
+
+  window.addEventListener('online', onOnline)
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  void process() // al abrir la app
+
+  return () => {
+    window.removeEventListener('online', onOnline)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+  }
 }
 ```
 

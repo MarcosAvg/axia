@@ -18,12 +18,14 @@ Fase 0 (arranque). Ya funciona:
 - Pantalla de inicio "Axia" y una página de "no encontrado".
 - **Supabase local** (Postgres, Auth, Storage y Studio), cliente tipado (`lib/supabase.ts`) y
   tipos generados con `pnpm db:types`; prueba pgTAP de humo.
+- **PWA instalable** (manifest, iconos y `registerType: 'prompt'` con aviso de actualización) y
+  esqueleto offline con Dexie (`outbox`, `evidencias`).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, pruebas, pgTAP y
   build).
 - CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
 
-Todavía **no** está: PWA/Dexie (modo sin conexión), Playwright, `knip` y el componente de
-gráficas. Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Todavía **no** está: Playwright, `knip`, `deploy/` y el componente de gráficas. Ver la hoja de
+ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
@@ -55,6 +57,10 @@ pnpm db:reset     # aplica migraciones y semilla
 
 Copia `VITE_SUPABASE_URL` y la clave pública (`ANON_KEY`) que imprime `pnpm db:start` a
 `apps/web/.env.local`, que no se sube al repositorio (ver `apps/web/.env.example`).
+
+El build de producción (`pnpm build`) genera el service worker y el manifest en
+`apps/web/dist`; los iconos de `apps/web/public/` son **provisionales** hasta que la
+institución entregue el logo.
 
 ## Comandos
 
