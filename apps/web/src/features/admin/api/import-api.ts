@@ -80,3 +80,46 @@ export async function fetchImportBatches(): Promise<ImportBatchRow[]> {
     finishedAt: row.finished_at,
   }))
 }
+
+export interface IntegrationTaskRow {
+  id: string
+  system: string
+  description: string
+  dueDate: string | null
+  status: string
+  folio: string | null
+}
+
+export async function fetchIntegrationTasks(): Promise<IntegrationTaskRow[]> {
+  const { data, error } = await supabase
+    .from('integration_tasks')
+    .select('id, system, description, due_date, status, ticket:tickets(folio)')
+    .order('status')
+    .order('created_at')
+  if (error) throw error
+  return (
+    (data ?? []) as unknown as {
+      id: string
+      system: string
+      description: string
+      due_date: string | null
+      status: string
+      ticket: { folio: string } | null
+    }[]
+  ).map((row) => ({
+    id: row.id,
+    system: row.system,
+    description: row.description,
+    dueDate: row.due_date,
+    status: row.status,
+    folio: row.ticket?.folio ?? null,
+  }))
+}
+
+export async function resolveIntegrationTask(taskId: string): Promise<void> {
+  const { error } = await supabase.rpc('integration_task_resolve', {
+    p_task_id: taskId,
+    p_status: 'done',
+  })
+  if (error) throw error
+}

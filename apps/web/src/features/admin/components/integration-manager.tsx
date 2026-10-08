@@ -15,9 +15,15 @@ import {
 import { TICKET_STATUSES, statusLabels } from '@/features/tickets'
 import type { TicketStatus } from '@/features/tickets'
 import { formatDateTime } from '@/lib/format'
-import type { ImportBatchRow, StatusMapRow } from '../api/import-api'
+import type {
+  ImportBatchRow,
+  IntegrationTaskRow,
+  StatusMapRow,
+} from '../api/import-api'
 import {
   useImportBatches,
+  useIntegrationTasks,
+  useResolveIntegrationTask,
   useSetStatusMap,
   useStatusMaps,
 } from '../hooks/use-imports'
@@ -170,7 +176,74 @@ function BatchesTable({ rows }: { rows: ImportBatchRow[] }) {
   )
 }
 
-/** Administración de la importación: mapeo de estatus y lotes. */
+function taskStateLabel(status: string): string {
+  const states = t.taskStates as Record<string, string>
+  return states[status] ?? status
+}
+
+function TasksTable({
+  rows,
+  onResolve,
+}: {
+  rows: IntegrationTaskRow[]
+  onResolve: (id: string) => void
+}) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-muted-foreground">{t.empty}</p>
+  }
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t.taskTicket}</TableHead>
+          <TableHead>{t.taskDescription}</TableHead>
+          <TableHead>{t.taskDue}</TableHead>
+          <TableHead>{t.taskStatus}</TableHead>
+          <TableHead />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.id}>
+            <TableCell>{row.folio ?? '—'}</TableCell>
+            <TableCell>{row.description}</TableCell>
+            <TableCell>{row.dueDate ?? '—'}</TableCell>
+            <TableCell>{taskStateLabel(row.status)}</TableCell>
+            <TableCell>
+              {row.status === 'open' ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => onResolve(row.id)}
+                >
+                  {t.resolve}
+                </Button>
+              ) : null}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
+
+function IntegrationTasks() {
+  const tasks = useIntegrationTasks()
+  const resolve = useResolveIntegrationTask()
+  return (
+    <section className="flex flex-col gap-3">
+      <h3 className="text-sm font-medium">{t.tasks}</h3>
+      {tasks.isLoading ? <LoadingList rows={2} /> : null}
+      {tasks.isError ? <ErrorAlert message={adminMessages.list.error} /> : null}
+      {tasks.data ? (
+        <TasksTable rows={tasks.data} onResolve={(id) => resolve.mutate(id)} />
+      ) : null}
+    </section>
+  )
+}
+
+/** Administración de la importación: mapeo de estatus, lotes y convivencia. */
 export function IntegrationManager() {
   const statusMaps = useStatusMaps()
   const batches = useImportBatches()
@@ -198,6 +271,7 @@ export function IntegrationManager() {
         ) : null}
         {batches.data ? <BatchesTable rows={batches.data} /> : null}
       </section>
+      <IntegrationTasks />
     </div>
   )
 }

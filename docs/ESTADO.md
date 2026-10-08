@@ -4,13 +4,12 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 6C-2 cerrada (historia al importar) — siguiente: 6D (convivencia)
+**Fase actual:** 6 cerrada (implementación) — siguiente: 7C (PWA) y 7D (push, CI/CD, Capacitor)
 
 ## En curso
 
-_(vacío)_ — La **Fase 6C-2** quedó cerrada: los tiquets importados reconstruyen su historia y sus tres
-intervalos coinciden con la fuente. Siguen **6D** (convivencia), **7C** (PWA) y **7D** (push, CI/CD,
-Capacitor). Sin push a `origin`.
+_(vacío)_ — La **Fase 6** quedó cerrada (6C-2 y 6D incluidos). Siguen **7C** (PWA con los iconos
+genéricos) y **7D** (push, CI/CD, Capacitor). Sin push a `origin`.
 
 ## Hecho
 
@@ -225,6 +224,12 @@ Capacitor). Sin push a `origin`.
     trabajo = asignación→finalización, total = reporte→finalización), idempotente y solo con las
     marcas de la fuente; el adaptador la invoca tras el upsert. ADR 0033.
   - Compuerta completa en verde: 397 pgTAP, 125 Vitest, 12 Playwright.
+- **Fase 6D — convivencia (2026-10-08)**, rama `feat/fase-6d-convivencia` (fusionada localmente a
+  `main`; **sin push**):
+  - `integration_tasks` (tareas con responsable y fecha), `ticket_external_refs.external_status` y
+    `external_systems.authority`; RPCs `integration_task_create/resolve` y `external_status_set`; UI
+    de tareas en `/admin/integraciones`. ADR 0034.
+  - Compuerta completa en verde: 404 pgTAP, 125 Vitest, 12 Playwright.
 
 ## Siguiente
 
@@ -333,7 +338,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       puente de importación por el tiempo total) — ADR 0031
 - [x] **6C-2** Reconstruir la línea de tiempo al importar para que los tres intervalos de los
       importados coincidan con la fuente (`import_ticket_timeline`) — ADR 0033
-- [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
+- [x] **6D** Convivencia: `integration_tasks`, `external_status` y `authority` del origen, con RPCs y
+      UI (tareas abiertas) — ADR 0034
 
 ### Fase 7 — Producción
 - [x] **7A** Despliegue autoalojado: `deploy/` con Caddy, ejemplos de entorno, `supabase/` (compose

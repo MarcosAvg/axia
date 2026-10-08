@@ -327,6 +327,7 @@ export type Database = {
       external_systems: {
         Row: {
           active: boolean
+          authority: string
           created_at: string
           id: string
           name: string
@@ -335,6 +336,7 @@ export type Database = {
         ComputedFields: never
         Insert: {
           active?: boolean
+          authority?: string
           created_at?: string
           id?: string
           name: string
@@ -342,6 +344,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          authority?: string
           created_at?: string
           id?: string
           name?: string
@@ -598,6 +601,96 @@ export type Database = {
             columns: ['default_calendar_id']
             isOneToOne: false
             referencedRelation: 'work_calendars'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      integration_tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          id: string
+          status: string
+          system: string
+          ticket_id: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          due_date?: string | null
+          id?: string
+          status?: string
+          system: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          status?: string
+          system?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'integration_tasks_system_fkey'
+            columns: ['system']
+            isOneToOne: false
+            referencedRelation: 'external_systems'
+            referencedColumns: ['name']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_metrics_base'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'integration_tasks_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_sla'
             referencedColumns: ['id']
           },
         ]
@@ -1898,6 +1991,7 @@ export type Database = {
         Row: {
           created_at: string
           external_id: string
+          external_status: string | null
           id: string
           system: string
           ticket_id: string
@@ -1906,6 +2000,7 @@ export type Database = {
         Insert: {
           created_at?: string
           external_id: string
+          external_status?: string | null
           id?: string
           system: string
           ticket_id: string
@@ -1913,6 +2008,7 @@ export type Database = {
         Update: {
           created_at?: string
           external_id?: string
+          external_status?: string | null
           id?: string
           system?: string
           ticket_id?: string
@@ -3789,6 +3885,14 @@ export type Database = {
         }
         Returns: string
       }
+      external_status_set: {
+        Args: {
+          p_external_id: string
+          p_external_status: string
+          p_system: string
+        }
+        Returns: undefined
+      }
       has_permission: {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
@@ -3854,6 +3958,20 @@ export type Database = {
       import_ticket_upsert: {
         Args: { p_data: Json; p_external_id: string; p_system: string }
         Returns: string
+      }
+      integration_task_create: {
+        Args: {
+          p_assigned_to?: string
+          p_description: string
+          p_due_date?: string
+          p_system: string
+          p_ticket_id: string
+        }
+        Returns: string
+      }
+      integration_task_resolve: {
+        Args: { p_status?: string; p_task_id: string }
+        Returns: undefined
       }
       me: { Args: Record<PropertyKey, never>; Returns: Json }
       notification_mark_read: {

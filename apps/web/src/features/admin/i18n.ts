@@ -208,5 +208,16 @@ export const adminMessages = {
       dry_run: 'Dry run',
       commit: 'Confirmado',
     },
+    tasks: 'Tareas de convivencia',
+    taskTicket: 'Tiquet',
+    taskDescription: 'Descripción',
+    taskDue: 'Fecha',
+    taskStatus: 'Estado',
+    resolve: 'Listo',
+    taskStates: {
+      open: 'Abierta',
+      done: 'Hecha',
+      cancelled: 'Cancelada',
+    },
   },
 } as const
