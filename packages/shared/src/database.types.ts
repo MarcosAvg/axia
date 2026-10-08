@@ -2233,11 +2233,16 @@ export type Database = {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
       }
+      me: { Args: Record<PropertyKey, never>; Returns: Json }
       notification_mark_read: {
         Args: { p_notification_id: string }
         Returns: undefined
       }
       notify_event: { Args: { p_event_id: number }; Returns: undefined }
+      profile_update: {
+        Args: { p_full_name: string; p_phone?: string }
+        Returns: undefined
+      }
       request_already_handled: {
         Args: { p_client_request_id: string }
         Returns: boolean

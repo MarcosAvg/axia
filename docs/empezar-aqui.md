@@ -31,8 +31,8 @@ cd axia
 bash scripts/bootstrap.sh
 ```
 
-El script es **idempotente**: instala dependencias, levanta Supabase, aplica migraciones + semilla
-e instala Chromium para Playwright. Al final te recuerda crear `apps/web/.env.local`.
+El script es **idempotente**: instala dependencias, levanta Supabase, aplica migraciones + semilla,
+genera `apps/web/.env.local` e instala Chromium para Playwright.
 
 **Opción B — manual:**
 
@@ -43,18 +43,23 @@ cd axia
 pnpm install          # dependencias y hooks de git (Husky)
 pnpm db:start         # Supabase local (la primera vez descarga las imágenes)
 pnpm db:reset         # aplica migraciones y semilla
+pnpm env:local        # escribe apps/web/.env.local desde el Supabase local
 pnpm --filter @axia/web exec playwright install chromium   # navegador de la prueba E2E
 pnpm dev              # http://localhost:5173
 ```
 
-No hace falta Supabase para ver la pantalla de inicio; sí para trabajar con la base o correr
-`pnpm check` (que incluye las pruebas pgTAP).
+No hace falta Supabase para ver la pantalla de acceso; sí para iniciar sesión, trabajar con la base
+o correr `pnpm check` (que incluye las pruebas pgTAP y de sesión).
+
+**Usuarios demo** (ficticios, solo entorno local; contraseña `AxiaDemo2026!`): `admin@axia.test`,
+`supervisor@axia.test`, `tecnico@axia.test` y `solicitante@axia.test`. El alta de cuentas es solo por
+administrador o invitación: no hay auto-registro.
 
 ## 3. Variables de entorno (`apps/web/.env.local`)
 
-Copia `VITE_SUPABASE_URL` y la clave pública (`ANON_KEY`/`PUBLISHABLE_KEY`) que imprime
-`pnpm db:start` a `apps/web/.env.local`. Ese archivo **no se sube** (ver `apps/web/.env.example`).
-No es obligatorio para la pantalla de inicio; sí cuando el cliente de datos se empiece a usar.
+Genéralo con **`pnpm env:local`** (lee la URL y la clave pública de `pnpm db:start`). También puedes
+copiarlas a mano a `apps/web/.env.local`; ese archivo **no se sube** (ver `apps/web/.env.example`).
+Hace falta para iniciar sesión, compilar la app y correr Playwright.
 
 ## 4. Verificación
 
@@ -82,6 +87,7 @@ fronteras entre capas (`check:boundaries`), knip, Vitest, Playwright, pgTAP y bu
 | `pnpm db:reset` | Reconstruye la base local (migraciones + semilla) |
 | `pnpm db:test` | Pruebas pgTAP |
 | `pnpm db:types` | Regenera los tipos de TypeScript desde la base |
+| `pnpm env:local` | Escribe `apps/web/.env.local` desde el Supabase local |
 | **`pnpm check`** | **Compuerta completa** (todo lo anterior + `db:test` + build) |
 
 ## 6. ¿Tengo que bajar el repo otra vez?
@@ -100,7 +106,7 @@ fronteras entre capas (`check:boundaries`), knip, Vitest, Playwright, pgTAP y bu
 |---|---|
 | `node_modules` | `pnpm install` |
 | Base de datos local (volúmenes Docker) | `pnpm db:reset` (migraciones + semilla) |
-| `apps/web/.env.local` y claves | copiar de `pnpm db:start` (ver `.env.example`) |
+| `apps/web/.env.local` y claves | generar con `pnpm env:local` (o copiar de `pnpm db:start`) |
 | Imágenes de Docker y navegadores de Playwright | se descargan la primera vez por equipo |
 | `supabase/.temp` | se regenera solo |
 
@@ -141,6 +147,7 @@ Y al irte: `git push` (cada sesión termina publicada, para que el otro equipo s
 | `pnpm db:start` falla por puertos | 54321-54323 ocupados; libera o detén otro Supabase (`pnpm db:stop`) |
 | pnpm bloquea el postinstall de Supabase | `pnpm approve-builds` y autorízalo |
 | `pnpm check` falla en `db:test` | Supabase no está levantado (`pnpm db:start`) o hay que `pnpm db:reset` |
+| No puedo iniciar sesión en local | Los usuarios demo se siembran con `pnpm db:reset`; verifica `apps/web/.env.local` (`pnpm env:local`) |
 | Playwright no encuentra el navegador | `pnpm --filter @axia/web exec playwright install chromium` (en CI: `--with-deps`) |
 | Avisos de versiones | Fijadas a propósito: jsdom `^29`, TypeScript `~6.0.2`, ESLint 9 (ver notas en `docs/ESTADO.md`) |
 
@@ -153,5 +160,6 @@ Y al irte: `git push` (cada sesión termina publicada, para que el otro equipo s
 
 ## 11. Estado actual y siguiente
 
-La **Fase 1 (base de datos núcleo)** quedó cerrada. Lo siguiente es la **Fase 2
-(autenticación y estructura de la app)**. Detalle, hoja de ruta y bloqueos: `docs/ESTADO.md`.
+Las **Fases 1 (base de datos núcleo) y 2 (autenticación y estructura de la app)** quedaron cerradas.
+Lo siguiente es la **Fase 3 (pantallas principales)**. Detalle, hoja de ruta y bloqueos:
+`docs/ESTADO.md`.

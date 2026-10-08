@@ -5,10 +5,47 @@ import {
   createRouter,
 } from '@tanstack/react-router'
 import { render, screen } from '@testing-library/react'
+import { AuthContext, authMessages } from '@/features/auth'
+import type { AuthContextValue } from '@/features/auth'
 import { messages } from '@/lib/i18n'
 import { routeTree } from '@/routeTree.gen'
 
-function renderAtPath(path: string) {
+const noopAsync = () => Promise.resolve()
+
+function makeAuthValue(
+  overrides: Partial<AuthContextValue> = {},
+): AuthContextValue {
+  return {
+    status: 'signed-out',
+    session: null,
+    identity: null,
+    isIdentityLoading: false,
+    signIn: noopAsync,
+    signOut: noopAsync,
+    refreshIdentity: noopAsync,
+    ...overrides,
+  }
+}
+
+const administrator = {
+  userId: 'a1',
+  fullName: 'Admin Demo',
+  phone: null,
+  active: true,
+  roles: ['administrator'],
+  permissions: [{ permission: 'user.manage', scope: 'all' as const }],
+}
+
+const supervisor = {
+  userId: 'a2',
+  fullName: 'Supervisor Demo',
+  phone: null,
+  active: true,
+  roles: ['supervisor'],
+  permissions: [{ permission: 'ticket.view', scope: 'buildings' as const }],
+}
+
+function renderAtPath(path: string, auth: AuthContextValue) {
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [path] }),
@@ -16,25 +53,56 @@ function renderAtPath(path: string) {
 
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <RouterProvider router={router} />
+      <AuthContext.Provider value={auth}>
+        <RouterProvider router={router} />
+      </AuthContext.Provider>
     </QueryClientProvider>,
   )
 }
 
-describe('enrutado', () => {
-  it('renderiza la pantalla de inicio en "/"', async () => {
-    renderAtPath('/')
+describe('enrutado y sesión', () => {
+  it('sin sesión, "/" redirige a la pantalla de acceso', async () => {
+    renderAtPath('/', makeAuthValue())
 
     expect(
-      await screen.findByRole('heading', { name: messages.app.name }),
+      await screen.findByText(authMessages.login.title),
     ).toBeInTheDocument()
+  })
+
+  it('con sesión, "/" muestra el panel con el nombre y los roles', async () => {
+    renderAtPath(
+      '/',
+      makeAuthValue({ status: 'signed-in', identity: administrator }),
+    )
+
+    expect(await screen.findByText(/Hola, Admin Demo/)).toBeInTheDocument()
+    expect(screen.getByText('Administrador')).toBeInTheDocument()
+  })
+
+  it('con permiso, "/admin" muestra la administración', async () => {
+    renderAtPath(
+      '/admin',
+      makeAuthValue({ status: 'signed-in', identity: administrator }),
+    )
+
     expect(
-      screen.getByRole('button', { name: messages.home.action }),
+      await screen.findByText(authMessages.admin.description),
+    ).toBeInTheDocument()
+  })
+
+  it('sin el permiso, "/admin" avisa que no hay acceso', async () => {
+    renderAtPath(
+      '/admin',
+      makeAuthValue({ status: 'signed-in', identity: supervisor }),
+    )
+
+    expect(
+      await screen.findByText(authMessages.forbidden.title),
     ).toBeInTheDocument()
   })
 
   it('muestra "no encontrado" en una ruta inexistente', async () => {
-    renderAtPath('/ruta-que-no-existe')
+    renderAtPath('/ruta-que-no-existe', makeAuthValue())
 
     expect(await screen.findByText(messages.notFound.title)).toBeInTheDocument()
   })

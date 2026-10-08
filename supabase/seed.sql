@@ -174,6 +174,72 @@ from public.dependencies d,
 where d.name = 'Sistemas (ejemplo)'
   and not exists (select 1 from public.requesters where full_name = v.name);
 
+-- Usuarios demo ficticios (solo entorno local). La contraseña local está documentada en README.md.
+-- El perfil lo crea el disparador on_auth_user_created (Fase 2) desde raw_user_meta_data.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+)
+select
+  '00000000-0000-0000-0000-000000000000', v.id, 'authenticated', 'authenticated',
+  v.email, extensions.crypt('AxiaDemo2026!', extensions.gen_salt('bf')), now(),
+  '', '', '', '',
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  jsonb_build_object('full_name', v.full_name),
+  now(), now()
+from (values
+  ('a0000000-0000-4000-8000-000000000001'::uuid, 'admin@axia.test', 'Admin Demo'),
+  ('a0000000-0000-4000-8000-000000000002'::uuid, 'supervisor@axia.test', 'Supervisor Demo'),
+  ('a0000000-0000-4000-8000-000000000003'::uuid, 'tecnico@axia.test', 'Técnico Demo'),
+  ('a0000000-0000-4000-8000-000000000004'::uuid, 'solicitante@axia.test', 'Solicitante Demo')
+) as v (id, email, full_name)
+on conflict (id) do nothing;
+
+insert into auth.identities (
+  id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+)
+select
+  gen_random_uuid(), v.id, v.id::text,
+  jsonb_build_object('sub', v.id::text, 'email', v.email, 'email_verified', true),
+  'email', now(), now(), now()
+from (values
+  ('a0000000-0000-4000-8000-000000000001'::uuid, 'admin@axia.test'),
+  ('a0000000-0000-4000-8000-000000000002'::uuid, 'supervisor@axia.test'),
+  ('a0000000-0000-4000-8000-000000000003'::uuid, 'tecnico@axia.test'),
+  ('a0000000-0000-4000-8000-000000000004'::uuid, 'solicitante@axia.test')
+) as v (id, email)
+on conflict (provider_id, provider) do nothing;
+
+insert into public.user_roles (user_id, role_id)
+select v.id, r.id
+from (values
+  ('a0000000-0000-4000-8000-000000000001'::uuid, 'administrator'),
+  ('a0000000-0000-4000-8000-000000000002'::uuid, 'supervisor'),
+  ('a0000000-0000-4000-8000-000000000003'::uuid, 'technician'),
+  ('a0000000-0000-4000-8000-000000000004'::uuid, 'requester')
+) as v (id, role_name)
+join public.roles r on r.name = v.role_name
+on conflict do nothing;
+
+-- Vínculos de los usuarios demo con los catálogos (técnico y solicitante).
+update public.technicians set user_id = 'a0000000-0000-4000-8000-000000000003'
+where full_name = 'Luis Gómez (ejemplo)' and user_id is null;
+update public.requesters set user_id = 'a0000000-0000-4000-8000-000000000004'
+where full_name = 'Ana Pérez (ejemplo)' and user_id is null;
+
+-- Ámbito del supervisor demo: equipo de mantenimiento y edificio central.
+insert into public.supervisor_scopes (user_id, team_id)
+select 'a0000000-0000-4000-8000-000000000002', t.id
+from public.teams t where t.name = 'Mantenimiento (ejemplo)'
+on conflict (user_id, team_id) do nothing;
+insert into public.supervisor_scope_buildings (scope_id, building_id)
+select ss.id, b.id
+from public.supervisor_scopes ss, public.buildings b
+where ss.user_id = 'a0000000-0000-4000-8000-000000000002'
+  and b.name = 'Edificio Central (ejemplo)'
+on conflict do nothing;
+
 -- Calendario laboral.
 insert into public.work_calendars (name, timezone)
 values ('Laboral (ejemplo)', 'America/Mexico_City')

@@ -3,8 +3,8 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-07
-**Fase actual:** 2 — Autenticación y estructura de la app
+**Última actualización:** 2026-10-08
+**Fase actual:** 3 — Pantallas principales
 
 ## En curso
 
@@ -109,10 +109,10 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
 
 ## Siguiente
 
-## Siguiente
-
-**Fase 2 — Autenticación y estructura de la app**: inicio de sesión, perfiles y layout con rutas
-protegidas por rol (la seguridad real es RLS). La **Fase 1 (base de datos núcleo) quedó cerrada**.
+**Fase 3 — Pantallas principales**: alta de tiquets con catálogos, lista y detalle con línea de
+tiempo; vista del técnico (móvil primero) y bandejas del supervisor y del administrador;
+administración de catálogos, roles/permisos y motivos. La **Fase 2 quedó cerrada** (login, perfiles
+y layout con rutas protegidas por permiso; la seguridad real es RLS).
 
 ## Hoja de ruta
 
@@ -158,8 +158,10 @@ Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** s
 **Fase 1 cerrada el 2026-10-07**: `pnpm db:reset` reconstruye todo desde cero con semillas, 175
 pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0007-0014.
 
-### Fase 2 — Autenticación y estructura de la app
-- [ ] Inicio de sesión, perfiles, layout con rutas protegidas por rol (la seguridad real es RLS)
+### Fase 2 — Autenticación y estructura de la app — **cerrada el 2026-10-08**
+- [x] Inicio de sesión (correo y contraseña, sin auto-registro), perfil automático al dar de alta
+      la cuenta, `me()` con perfil/roles/permisos, "Mi perfil" y layout con rutas protegidas por
+      permiso (la seguridad real es RLS). ADR 0016.
 
 ### Fase 3 — Pantallas principales
 - [ ] Alta de tiquets con catálogos, lista y detalle con línea de tiempo
@@ -307,6 +309,28 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   detecta knip solo con sus plugins — solo hizo falta declarar `src/lib/supabase.ts`. Los
   imports desde archivos bajo `ignore` siguen contando para el uso de dependencias (verificado:
   `cn`, `class-variance-authority` y `radix-ui` no se marcan aunque el kit esté ignorado).
+- **Fase 2 — usuarios demo**: se siembran en `supabase/seed.sql` insertando en `auth.users` +
+  `auth.identities` (contraseña `AxiaDemo2026!`, solo local) porque `supabase db reset` es
+  reproducible y no depende de la Admin API. GoTrue exige que `confirmation_token`,
+  `recovery_token`, `email_change_token_new` y `email_change` **no sean nulos** al iniciar sesión
+  (con nulos falla con "converting NULL to string is unsupported"); la semilla los pone en `''`.
+- **Fase 2 — privilegios por defecto de Supabase**: las funciones nuevas en `public` se conceden a
+  `anon`, `authenticated` y `service_role` (no solo a `PUBLIC`), así que `revoke ... from public`
+  no bastaba. La migración de la Fase 2 retira `EXECUTE` a `anon` de todas las funciones del
+  esquema y ajusta los privilegios por defecto; el cliente anónimo no ejecuta ninguna RPC.
+- **Fase 2 — entorno del cliente**: `apps/web/.env.local` se genera con `pnpm env:local`
+  (`scripts/write-local-env.mjs`, lee `supabase status -o json`); el CI lo ejecuta tras
+  `pnpm db:start`. Vitest define `test.env` con valores ficticios para que `createClient` no falle
+  al importar (las pruebas sustituyen los hooks; no hay red).
+- **Fase 2 — dependencias de formularios**: `react-hook-form` 7.89, `zod` 4.6.5 y
+  `@hookform/resolvers` 5.9.1 (MIT). Zod 4 usa `z.email()` (no `z.string().email()`).
+- **Fase 2 — rutas sin ruta**: el layout protegido es `routes/_authenticated.tsx` y sus hijas viven
+  en `routes/_authenticated/` (`index.tsx` = `/`). El guard es un componente (`RequireAuth`) que
+  usa el contexto de sesión; no se pasó la sesión por el contexto del router para no acoplar el
+  árbol de rutas a la suscripción de Supabase.
+- **Fase 2 — fronteras**: como `@supabase/supabase-js` solo puede importarse desde `features/*/api`
+  y `lib/`, el tipo `Session` se reexporta como `AuthSession` desde `features/auth/api`; los hooks
+  importan de ahí.
 
 ## Registro de sesiones
 
@@ -373,3 +397,26 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   indicadores, integración genérica (`external_systems`, `ticket_external_refs`) y semillas de
   catálogos/motivos/calendario. **175 pruebas pgTAP** y `pnpm check` en verde; **Fase 1 cerrada**.
   Rama `feat/fase-1-tramo8`.
+- 2026-10-08: Fase 2, tramo 1: migración `auth_profiles_and_identity` (disparador de perfil, `me()`,
+  `profile_update()` y endurecimiento de permisos de ejecución), semilla de usuarios demo y
+  `enable_signup = false`; `90_auth_profiles.test.sql` (25 pruebas) y 200 pgTAP en verde;
+  `pnpm db:reset` limpio y `pnpm db:types`. ADR 0016. Rama `feat/fase-2-auth`.
+- 2026-10-08: Fase 2, tramo 2: feature `auth` (sesión con `AuthProvider`, guard por permiso,
+  `AppShell`, acceso, panel, perfil y administración reservada), script `pnpm env:local`, pruebas
+  Vitest (32) y Playwright (4) en verde. `pnpm check` completo en verde. Rama `feat/fase-2-auth`.
+- **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
+  disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
+  `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
+  el **endurecimiento de permisos** (se retira `EXECUTE` a `anon`/`PUBLIC` de las funciones del
+  núcleo, que los privilegios por defecto de Supabase concedían). Sin auto-registro
+  (`enable_signup = false`) y cuatro **usuarios demo** ficticios en `seed.sql`. Pruebas pgTAP
+  `90_auth_profiles.test.sql`; 200 pruebas en verde y `pnpm db:types`. Rama `feat/fase-2-auth`.
+- **Fase 2, Tramo 2 (estructura de la app)**: feature `auth` (`api`, `domain`, `hooks`,
+  `components`, `schemas`, `i18n`, `index`), `AuthProvider` (sesión + identidad con TanStack Query),
+  guard `RequireAuth`/`RequirePermission` **por permiso**, layout `AppShell`, pantalla de acceso
+  `/login`, panel `/`, "Mi perfil" `/perfil` y administración `/admin` (reservada a `user.manage`).
+  Rutas protegidas con rutas sin ruta (`_authenticated`); `routes/index.tsx` pasa a
+  `_authenticated/index.tsx`. React Hook Form + Zod (`react-hook-form`, `zod`,
+  `@hookform/resolvers`, MIT); script `pnpm env:local` (`scripts/write-local-env.mjs`); pruebas:
+  Vitest (dominio, esquemas, enrutado con sesión simulada) y Playwright (acceso, panel, salir,
+  `/admin` restringido). `pnpm check` en verde. Rama `feat/fase-2-auth`.
