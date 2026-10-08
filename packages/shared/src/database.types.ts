@@ -958,6 +958,49 @@ export type Database = {
           },
         ]
       }
+      ticket_duplicate_candidates: {
+        Row: {
+          candidate_ticket_id: string
+          decision: string | null
+          id: string
+          shown_at: string
+          similarity: number
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          candidate_ticket_id: string
+          decision?: string | null
+          id?: string
+          shown_at?: string
+          similarity: number
+          ticket_id: string
+        }
+        Update: {
+          candidate_ticket_id?: string
+          decision?: string | null
+          id?: string
+          shown_at?: string
+          similarity?: number
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
+            columns: ['candidate_ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ticket_events: {
         Row: {
           actor_id: string | null
@@ -1032,6 +1075,45 @@ export type Database = {
           },
         ]
       }
+      ticket_offers: {
+        Row: {
+          cycle: number
+          id: string
+          offered_at: string
+          resolved_at: string | null
+          status: Database['public']['Enums']['offer_status']
+          supervisor_user_id: string
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          cycle: number
+          id?: string
+          offered_at?: string
+          resolved_at?: string | null
+          status?: Database['public']['Enums']['offer_status']
+          supervisor_user_id: string
+          ticket_id: string
+        }
+        Update: {
+          cycle?: number
+          id?: string
+          offered_at?: string
+          resolved_at?: string | null
+          status?: Database['public']['Enums']['offer_status']
+          supervisor_user_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_offers_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ticket_participants: {
         Row: {
           category_id: string | null
@@ -1093,6 +1175,42 @@ export type Database = {
           },
           {
             foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_validations: {
+        Row: {
+          cycle: number
+          id: string
+          ticket_id: string
+          validated_at: string
+          validator_role: string
+          validator_user_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          cycle: number
+          id?: string
+          ticket_id: string
+          validated_at?: string
+          validator_role: string
+          validator_user_id?: string | null
+        }
+        Update: {
+          cycle?: number
+          id?: string
+          ticket_id?: string
+          validated_at?: string
+          validator_role?: string
+          validator_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_validations_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
@@ -1402,7 +1520,100 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_permission: {
+        Args: { p_permission: string; p_user_id: string }
+        Returns: boolean
+      }
+      request_already_handled: {
+        Args: { p_client_request_id: string }
+        Returns: boolean
+      }
+      require_permission: { Args: { p_permission: string }; Returns: undefined }
+      ticket_assign_technician: {
+        Args: {
+          p_client_request_id?: string
+          p_reason_id?: string
+          p_technician_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_attend: {
+        Args: {
+          p_client_request_id?: string
+          p_ticket_id: string
+          p_work_description: string
+        }
+        Returns: undefined
+      }
+      ticket_cancel: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_change_priority: {
+        Args: {
+          p_client_request_id?: string
+          p_priority_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_comment: {
+        Args: {
+          p_client_request_id?: string
+          p_is_internal?: boolean
+          p_text: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_create: {
+        Args: { p_client_request_id?: string; p_data: Json }
+        Returns: string
+      }
+      ticket_detect_duplicates: {
+        Args: { p_ticket_id: string }
+        Returns: undefined
+      }
+      ticket_reject: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_route: { Args: { p_ticket_id: string }; Returns: undefined }
+      ticket_start: {
+        Args: { p_client_request_id?: string; p_ticket_id: string }
+        Returns: undefined
+      }
+      ticket_take: {
+        Args: { p_client_request_id?: string; p_ticket_id: string }
+        Returns: undefined
+      }
+      ticket_validate: {
+        Args: { p_client_request_id?: string; p_ticket_id: string }
+        Returns: undefined
+      }
+      write_event: {
+        Args: {
+          p_client_request_id?: string
+          p_payload?: Json
+          p_reason_id?: string
+          p_subject_technician_id?: string
+          p_subject_user_id?: string
+          p_ticket_id: string
+          p_type: Database['public']['Enums']['event_type']
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       assignment_stage: 'supervisor' | 'technician'
@@ -1436,6 +1647,7 @@ export type Database = {
         | 'imported'
       evidence_type:
         'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
+      offer_status: 'offered' | 'taken' | 'withdrawn'
       participation_type: 'leader' | 'auxiliary'
       permission_scope: 'own' | 'team' | 'buildings' | 'all'
       reason_use:
@@ -1620,6 +1832,7 @@ export const Constants = {
         'imported',
       ],
       evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
+      offer_status: ['offered', 'taken', 'withdrawn'],
       participation_type: ['leader', 'auxiliary'],
       permission_scope: ['own', 'team', 'buildings', 'all'],
       reason_use: [
