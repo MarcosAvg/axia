@@ -1,3 +1,5 @@
+import type { Database } from '@axia/shared'
+
 export interface Option {
   id: string
   name: string
@@ -25,4 +27,19 @@ export interface RequesterOption {
   contact: string | null
   dependencyId: string | null
   userId: string | null
+}
+
+export interface TechnicianOption {
+  id: string
+  fullName: string
+  teamId: string
+}
+
+export type ReasonUse = Database['public']['Enums']['reason_use']
+
+export interface ReasonOption {
+  id: string
+  name: string
+  use: ReasonUse
+  parentId: string | null
 }

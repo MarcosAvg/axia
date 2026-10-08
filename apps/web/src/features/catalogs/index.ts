@@ -8,14 +8,19 @@ export {
   useLocations,
   usePriorities,
   useProblems,
+  useReasons,
   useRequesters,
   useServiceTypes,
   useSubcategories,
+  useTechnicians,
 } from './hooks/use-catalogs'
 export type {
   CategoryOption,
   Option,
   ProblemOption,
+  ReasonOption,
+  ReasonUse,
   RequesterOption,
   SubcategoryOption,
+  TechnicianOption,
 } from './domain/types'

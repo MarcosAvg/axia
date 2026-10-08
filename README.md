@@ -14,26 +14,26 @@ aislados.
 
 ## Estado del proyecto
 
-**Fases 1 y 2 cerradas.** Ya funciona:
+**Fases 1, 2 y 3A cerradas.** Ya funciona:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 200 pruebas pgTAP.
-- **Autenticación y estructura de la app** (Fase 2): inicio de sesión con correo y contraseña
-  (sin auto-registro), perfil creado automáticamente al dar de alta una cuenta, RPC `me()` con
-  perfil/roles/permisos, pantalla "Mi perfil" y layout con rutas protegidas **por permiso**
-  (`/`, `/perfil`, `/admin`). Cuatro usuarios demo ficticios para desarrollo.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 239 pruebas pgTAP.
+- **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
+  RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
+- **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
+  y paginación en la URL, detalle con **línea de tiempo**, **bandeja del supervisor** (`/inbox`) y
+  **vista del técnico** (`/mi-trabajo`) con acciones por estado/permiso y **evidencia** (bucket
+  privado con URL firmada).
 - **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
-- **PWA instalable** (manifest, iconos y `registerType: 'prompt'` con aviso de actualización) y
-  esqueleto offline con Dexie (`outbox`, `evidencias`).
+- **PWA instalable** y esqueleto offline con Dexie (`outbox`, `evidencias`).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
-  pgTAP y build).
-- CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
+  pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 3 (pantallas principales)**. Ver la hoja de ruta y lo pendiente en
-[`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 3B (administración)** y luego la Fase 4 (evidencias de campo y modo sin
+conexión). Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 

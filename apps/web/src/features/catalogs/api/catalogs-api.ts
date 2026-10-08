@@ -7,8 +7,11 @@ import type {
   LocationOption,
   Option,
   ProblemOption,
+  ReasonOption,
+  ReasonUse,
   RequesterOption,
   SubcategoryOption,
+  TechnicianOption,
 } from '../domain/types'
 
 async function fetchOptions(
@@ -116,5 +119,36 @@ export async function fetchRequesters(): Promise<RequesterOption[]> {
     contact: row.contact,
     dependencyId: row.dependency_id,
     userId: row.user_id,
+  }))
+}
+
+export async function fetchTechnicians(): Promise<TechnicianOption[]> {
+  const { data, error } = await supabase
+    .from('technicians')
+    .select('id, full_name, team_id')
+    .eq('active', true)
+    .order('full_name')
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+    teamId: row.team_id,
+  }))
+}
+
+export async function fetchReasons(use: ReasonUse): Promise<ReasonOption[]> {
+  const { data, error } = await supabase
+    .from('reasons')
+    .select('id, name, use, parent_id')
+    .eq('active', true)
+    .eq('use', use)
+    .order('position')
+    .order('name')
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    use: row.use,
+    parentId: row.parent_id,
   }))
 }

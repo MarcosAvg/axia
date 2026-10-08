@@ -8,6 +8,8 @@ import {
   checkDuplicates,
   createTicket,
   fetchEvidence,
+  fetchMyOffers,
+  fetchMyWork,
   fetchParticipants,
   fetchTicket,
   fetchTickets,
@@ -19,6 +21,8 @@ import type { CreateTicketInput } from '../schemas'
 const ticketKeys = {
   list: (filters: TicketFilters, page: number) =>
     ['tickets', 'list', filters, page] as const,
+  myWork: (userId: string) => ['tickets', 'my-work', userId] as const,
+  myOffers: (userId: string) => ['tickets', 'my-offers', userId] as const,
   detail: (id: string) => ['tickets', 'detail', id] as const,
   timeline: (id: string) => ['tickets', 'timeline', id] as const,
   participants: (id: string) => ['tickets', 'participants', id] as const,
@@ -81,5 +85,21 @@ export function useCreateTicket() {
 export function useCheckDuplicates() {
   return useMutation({
     mutationFn: (input: DuplicateCheckInput) => checkDuplicates(input),
+  })
+}
+
+export function useMyWork(userId: string | undefined) {
+  return useQuery({
+    queryKey: ticketKeys.myWork(userId ?? ''),
+    queryFn: () => (userId ? fetchMyWork(userId) : Promise.resolve([])),
+    enabled: Boolean(userId),
+  })
+}
+
+export function useMyOffers(userId: string | undefined) {
+  return useQuery({
+    queryKey: ticketKeys.myOffers(userId ?? ''),
+    queryFn: () => (userId ? fetchMyOffers(userId) : Promise.resolve([])),
+    enabled: Boolean(userId),
   })
 }

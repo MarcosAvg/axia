@@ -7,14 +7,18 @@ import {
   fetchLocations,
   fetchPriorities,
   fetchProblems,
+  fetchReasons,
   fetchRequesters,
   fetchServiceTypes,
   fetchSubcategories,
+  fetchTechnicians,
 } from '../api/catalogs-api'
+import type { ReasonUse } from '../domain/types'
 
 const staleTime = 5 * 60 * 1000
 
 const catalogKeys = {
+  technicians: ['catalogs', 'technicians'] as const,
   buildings: ['catalogs', 'buildings'] as const,
   dependencies: ['catalogs', 'dependencies'] as const,
   serviceTypes: ['catalogs', 'serviceTypes'] as const,
@@ -28,6 +32,23 @@ const catalogKeys = {
     ['catalogs', 'subcategories', categoryId] as const,
   problems: (subcategoryId: string) =>
     ['catalogs', 'problems', subcategoryId] as const,
+  reasons: (use: ReasonUse) => ['catalogs', 'reasons', use] as const,
+}
+
+export function useTechnicians() {
+  return useQuery({
+    queryKey: catalogKeys.technicians,
+    queryFn: fetchTechnicians,
+    staleTime,
+  })
+}
+
+export function useReasons(use: ReasonUse) {
+  return useQuery({
+    queryKey: catalogKeys.reasons(use),
+    queryFn: () => fetchReasons(use),
+    staleTime,
+  })
 }
 
 export function useBuildings() {

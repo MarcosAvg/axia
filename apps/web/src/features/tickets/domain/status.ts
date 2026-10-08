@@ -12,6 +12,17 @@ export function isFinalStatus(status: TicketStatus): boolean {
   return FINAL.includes(status)
 }
 
+/** Estados que siguen en curso (bandejas y pendientes). */
+export const ACTIVE_STATUSES: TicketStatus[] = [
+  'registered',
+  'with_supervisor',
+  'assigned',
+  'in_progress',
+  'paused',
+  'attended',
+  'under_claim',
+]
+
 /** Tono visual del estado (para la insignia). */
 export type StatusTone =
   'neutral' | 'progress' | 'paused' | 'done' | 'discarded'

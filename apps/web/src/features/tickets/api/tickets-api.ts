@@ -2,6 +2,7 @@
 // llegan en el tramo de bandejas. Única capa que habla con Supabase.
 
 import { supabase } from '@/lib/supabase'
+import { isFinalStatus } from '../domain/status'
 import type {
   DuplicateCandidate,
   TicketDetail,
@@ -30,6 +31,7 @@ const DETAIL_SELECT = `${LIST_SELECT}, cycle, building_id, category_id, priority
 
 export interface TicketFilters {
   status?: TicketStatus
+  statuses?: TicketStatus[]
   buildingId?: string
   categoryId?: string
   search?: string
@@ -42,24 +44,31 @@ export interface TicketPage {
   pageSize: number
 }
 
+function buildTicketsQuery(filters: TicketFilters) {
+  const match = {
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.buildingId ? { building_id: filters.buildingId } : {}),
+    ...(filters.categoryId ? { category_id: filters.categoryId } : {}),
+  }
+  const term = filters.search?.replace(/[%,()]/g, '')
+
+  let query = supabase
+    .from('tickets')
+    .select(LIST_SELECT, { count: 'exact' })
+    .match(match)
+  if (filters.statuses?.length) query = query.in('status', filters.statuses)
+  if (term) {
+    query = query.or(`folio.ilike.%${term}%,description.ilike.%${term}%`)
+  }
+  return query
+}
+
 export async function fetchTickets(
   filters: TicketFilters,
   page: number,
 ): Promise<TicketPage> {
   const from = (page - 1) * TICKETS_PAGE_SIZE
-  let query = supabase.from('tickets').select(LIST_SELECT, { count: 'exact' })
-
-  if (filters.status) query = query.eq('status', filters.status)
-  if (filters.buildingId) query = query.eq('building_id', filters.buildingId)
-  if (filters.categoryId) query = query.eq('category_id', filters.categoryId)
-  if (filters.search) {
-    const term = filters.search.replace(/[%,()]/g, '')
-    if (term) {
-      query = query.or(`folio.ilike.%${term}%,description.ilike.%${term}%`)
-    }
-  }
-
-  const { data, error, count } = await query
+  const { data, error, count } = await buildTicketsQuery(filters)
     .order('reported_at', { ascending: false })
     .range(from, from + TICKETS_PAGE_SIZE - 1)
   if (error) throw error
@@ -168,4 +177,47 @@ export async function checkDuplicates(
   })
   if (error) throw error
   return parseDuplicateCandidates(data)
+}
+
+async function fetchTicketsByIds(ids: string[]): Promise<TicketListItem[]> {
+  if (ids.length === 0) return []
+  const { data, error } = await supabase
+    .from('tickets')
+    .select(LIST_SELECT)
+    .in('id', ids)
+  if (error) throw error
+  return (data ?? []).map(parseTicketListItem)
+}
+
+/** Tiquets asignados al técnico vinculado a esta cuenta (bandeja del técnico). */
+export async function fetchMyWork(userId: string): Promise<TicketListItem[]> {
+  const technician = await supabase
+    .from('technicians')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (technician.error) throw technician.error
+  if (!technician.data) return []
+
+  const assignments = await supabase
+    .from('ticket_assignments')
+    .select('ticket_id')
+    .eq('assignee_technician_id', technician.data.id)
+    .is('ended_at', null)
+  if (assignments.error) throw assignments.error
+  const ids = (assignments.data ?? []).map((row) => row.ticket_id)
+  const tickets = await fetchTicketsByIds(ids)
+  return tickets.filter((ticket) => !isFinalStatus(ticket.status))
+}
+
+/** Tiquets ofrecidos a esta cuenta como supervisor (bandeja de ofertas). */
+export async function fetchMyOffers(userId: string): Promise<TicketListItem[]> {
+  const offers = await supabase
+    .from('ticket_offers')
+    .select('ticket_id')
+    .eq('supervisor_user_id', userId)
+    .eq('status', 'offered')
+  if (offers.error) throw offers.error
+  const ids = (offers.data ?? []).map((row) => row.ticket_id)
+  return fetchTicketsByIds(ids)
 }
