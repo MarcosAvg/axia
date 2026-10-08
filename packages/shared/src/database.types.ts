@@ -145,6 +145,34 @@ export type Database = {
         }
         Relationships: []
       }
+      escalation_rules: {
+        Row: {
+          active: boolean
+          condition: Database['public']['Enums']['escalation_condition']
+          created_at: string
+          id: string
+          notify: string
+          threshold: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          condition: Database['public']['Enums']['escalation_condition']
+          created_at?: string
+          id?: string
+          notify?: string
+          threshold: string
+        }
+        Update: {
+          active?: boolean
+          condition?: Database['public']['Enums']['escalation_condition']
+          created_at?: string
+          id?: string
+          notify?: string
+          threshold?: string
+        }
+        Relationships: []
+      }
       evidence: {
         Row: {
           captured_by_technician_id: string | null
@@ -342,6 +370,96 @@ export type Database = {
             columns: ['building_id']
             isOneToOne: false
             referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      notification_rules: {
+        Row: {
+          active: boolean
+          channel: Database['public']['Enums']['notification_channel']
+          created_at: string
+          event_type: Database['public']['Enums']['event_type']
+          id: string
+          recipient: string
+        }
+        ComputedFields: never
+        Insert: {
+          active?: boolean
+          channel?: Database['public']['Enums']['notification_channel']
+          created_at?: string
+          event_type: Database['public']['Enums']['event_type']
+          id?: string
+          recipient: string
+        }
+        Update: {
+          active?: boolean
+          channel?: Database['public']['Enums']['notification_channel']
+          created_at?: string
+          event_type?: Database['public']['Enums']['event_type']
+          id?: string
+          recipient?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          channel: Database['public']['Enums']['notification_channel']
+          created_at: string
+          event_id: number | null
+          id: string
+          payload: NonNullable<Json>
+          read_at: string | null
+          recipient_requester_id: string | null
+          recipient_user_id: string | null
+          ticket_id: string | null
+          type: Database['public']['Enums']['event_type']
+        }
+        ComputedFields: never
+        Insert: {
+          channel?: Database['public']['Enums']['notification_channel']
+          created_at?: string
+          event_id?: number | null
+          id?: string
+          payload?: NonNullable<Json>
+          read_at?: string | null
+          recipient_requester_id?: string | null
+          recipient_user_id?: string | null
+          ticket_id?: string | null
+          type: Database['public']['Enums']['event_type']
+        }
+        Update: {
+          channel?: Database['public']['Enums']['notification_channel']
+          created_at?: string
+          event_id?: number | null
+          id?: string
+          payload?: NonNullable<Json>
+          read_at?: string | null
+          recipient_requester_id?: string | null
+          recipient_user_id?: string | null
+          ticket_id?: string | null
+          type?: Database['public']['Enums']['event_type']
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'ticket_events'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_recipient_requester_id_fkey'
+            columns: ['recipient_requester_id']
+            isOneToOne: false
+            referencedRelation: 'requesters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
             referencedColumns: ['id']
           },
         ]
@@ -1811,6 +1929,11 @@ export type Database = {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
       }
+      notification_mark_read: {
+        Args: { p_notification_id: string }
+        Returns: undefined
+      }
+      notify_event: { Args: { p_event_id: number }; Returns: undefined }
       request_already_handled: {
         Args: { p_client_request_id: string }
         Returns: boolean
@@ -1994,6 +2117,12 @@ export type Database = {
       claim_resolution: 'upheld' | 'dismissed' | 'new_ticket'
       claim_status: 'open' | 'resolved'
       clock_class: 'counted' | 'not_counted'
+      escalation_condition:
+        | 'untaken'
+        | 'unassigned'
+        | 'no_candidate'
+        | 'target_near'
+        | 'target_overdue'
       event_source: 'app' | 'import' | 'integration'
       event_type:
         | 'created'
@@ -2024,6 +2153,7 @@ export type Database = {
       evidence_type:
         'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
       link_type: 'duplicate_of' | 'derived_from' | 'related_to' | 'blocked_by'
+      notification_channel: 'in_app' | 'email' | 'push' | 'sms'
       offer_status: 'offered' | 'taken' | 'withdrawn'
       participation_type: 'leader' | 'auxiliary'
       permission_scope: 'own' | 'team' | 'buildings' | 'all'
@@ -2193,6 +2323,13 @@ export const Constants = {
       claim_resolution: ['upheld', 'dismissed', 'new_ticket'],
       claim_status: ['open', 'resolved'],
       clock_class: ['counted', 'not_counted'],
+      escalation_condition: [
+        'untaken',
+        'unassigned',
+        'no_candidate',
+        'target_near',
+        'target_overdue',
+      ],
       event_source: ['app', 'import', 'integration'],
       event_type: [
         'created',
@@ -2223,6 +2360,7 @@ export const Constants = {
       ],
       evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
       link_type: ['duplicate_of', 'derived_from', 'related_to', 'blocked_by'],
+      notification_channel: ['in_app', 'email', 'push', 'sms'],
       offer_status: ['offered', 'taken', 'withdrawn'],
       participation_type: ['leader', 'auxiliary'],
       permission_scope: ['own', 'team', 'buildings', 'all'],
