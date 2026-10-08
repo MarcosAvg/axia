@@ -33,7 +33,8 @@ aislados.
   **ámbitos y designaciones** (`/admin/ambitos`) y **configuración de la instancia**
   (`/admin/configuracion`); escritura por políticas RLS según permiso.
 - **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
-- **PWA instalable** y esqueleto offline con Dexie (`outbox`, `evidencias`).
+- **PWA instalable** y esqueleto offline con Dexie (`outbox`, `evidencias`); la **evidencia** del
+  técnico se comprime en el dispositivo y se sube reanudable, con cola offline y sincronización.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 

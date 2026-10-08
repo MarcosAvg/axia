@@ -19,4 +19,8 @@ export const messages = {
     offlineReady: 'La aplicación está lista para usarse sin conexión.',
     dismissAction: 'Cerrar',
   },
+  offline: {
+    disconnected: 'Sin conexión',
+    pending: (count: number) => `${count} por sincronizar`,
+  },
 } as const

@@ -21,7 +21,7 @@ export function EvidenceUploader({
   function submit() {
     if (!file) return
     mutation.mutate(
-      { ticketId, cycle, type, file, clientRequestId: crypto.randomUUID() },
+      { ticketId, cycle, type, file },
       {
         onSuccess: () => {
           setFile(null)

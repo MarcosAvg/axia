@@ -8,6 +8,7 @@ function outboxItem() {
     payload: { ticketId: 'ticket-1' },
     state: 'pending' as const,
     attempts: 0,
+    lastError: null,
     createdAt: Date.now(),
   }
 }
@@ -57,7 +58,11 @@ describe('base local (Dexie)', () => {
     await db.evidences.add({
       id,
       ticketId: 'ticket-1',
+      cycle: 1,
+      type: 'before',
       blob,
+      mimeType: 'image/jpeg',
+      fileName: 'foto.jpg',
       state: 'pending',
       createdAt: Date.now(),
     })

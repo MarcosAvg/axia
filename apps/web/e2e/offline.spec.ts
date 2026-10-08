@@ -1,0 +1,91 @@
+import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+
+const DEMO_PASSWORD = 'AxiaDemo2026!'
+
+async function signIn(page: Page, email: string) {
+  await page.goto('/login')
+  await page.getByLabel('Correo electrónico').fill(email)
+  await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
+  await page.getByRole('button', { name: 'Entrar' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Cerrar sesión' }),
+  ).toBeVisible()
+}
+
+async function clickAndWait(page: Page, name: string, rpc: string) {
+  const done = page.waitForResponse((response) =>
+    response.url().includes(`/rpc/${rpc}`),
+  )
+  await page.getByRole('button', { name }).click()
+  await done
+}
+
+async function createAssignedTicket(page: Page, description: string) {
+  await page.goto('/tickets/nuevo')
+  await page
+    .getByLabel('Solicitante', { exact: true })
+    .selectOption({ label: 'Ana Pérez (ejemplo)' })
+  await page
+    .getByLabel('Edificio')
+    .selectOption({ label: 'Edificio Central (ejemplo)' })
+  await page
+    .getByLabel('Ubicación')
+    .selectOption({ label: 'Planta baja (ejemplo)' })
+  await page
+    .getByLabel('Dependencia solicitante')
+    .selectOption({ label: 'Sistemas (ejemplo)' })
+  await page
+    .getByLabel('Categoría', { exact: true })
+    .selectOption({ label: 'Eléctrico (ejemplo)' })
+  await page
+    .getByLabel('Tipo de servicio')
+    .selectOption({ label: 'Correctivo (ejemplo)' })
+  await page.getByLabel('Prioridad').selectOption({ label: 'Media (ejemplo)' })
+  await page.getByLabel('Canal').selectOption({ label: 'Web (ejemplo)' })
+  await page.getByLabel('Descripción del problema').fill(description)
+  await page.getByRole('button', { name: 'Registrar tiquet' }).click()
+  await expect(page.getByText(description)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Asignar técnico' }).click()
+  await page
+    .getByLabel('Técnico')
+    .selectOption({ label: 'Luis Gómez (ejemplo)' })
+  await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
+}
+
+test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
+  page,
+}) => {
+  const description = `Offline E2E ${crypto.randomUUID()}`
+  await signIn(page, 'admin@axia.test')
+  await createAssignedTicket(page, description)
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+
+  await signIn(page, 'tecnico@axia.test')
+  await page.goto('/mi-trabajo')
+  await page.getByText(description).click()
+  await expect(page.getByLabel('Tipo de evidencia')).toBeVisible()
+
+  // Sin conexión: la evidencia queda guardada en el dispositivo.
+  await page.context().setOffline(true)
+  await page.getByLabel('Tipo de evidencia').selectOption({ label: 'Antes' })
+  await page.getByLabel('Archivo').setInputFiles({
+    name: 'antes.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from('foto-sin-conexion'),
+  })
+  await page.getByRole('button', { name: 'Subir evidencia' }).click()
+  await expect(page.getByText('Pendiente de subir')).toBeVisible()
+
+  // Vuelve la conexión y la cola se sincroniza (se recarga para reprocesar).
+  await page.context().setOffline(false)
+  await page.reload()
+  await expect(page.getByText('Evidencia agregada')).toBeVisible({
+    timeout: 20000,
+  })
+
+  // Con la evidencia "antes", el técnico puede iniciar.
+  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
+})

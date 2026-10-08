@@ -9,6 +9,7 @@ import {
 } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
+import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketTimeline } from './ticket-timeline'
@@ -81,6 +82,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
       <Section title={detail.evidence}>
         <div className="flex flex-col gap-4">
           <EvidenceUploader ticketId={ticketId} cycle={ticket.data.cycle} />
+          <PendingEvidence ticketId={ticketId} />
           <TicketEvidenceList items={evidence.data ?? []} />
         </div>
       </Section>
