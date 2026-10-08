@@ -5,6 +5,7 @@ import {
   fetchDuplicatesByDimension,
   fetchMetricsTickets,
   fetchPausesByReason,
+  fetchSatisfaction,
 } from '../api/metrics-api'
 
 const metricsKeys = {
@@ -13,6 +14,7 @@ const metricsKeys = {
   duplicateTickets: ['metrics', 'duplicate-tickets'] as const,
   duplicateAlerts: ['metrics', 'duplicate-alerts'] as const,
   duplicatesByDimension: ['metrics', 'duplicates-by-dimension'] as const,
+  satisfaction: ['metrics', 'satisfaction'] as const,
 }
 
 export function useMetricsTickets() {
@@ -43,4 +45,11 @@ export function useDuplicates() {
     queryFn: fetchDuplicatesByDimension,
   })
   return { tickets, alerts, byDimension }
+}
+
+export function useSatisfaction() {
+  return useQuery({
+    queryKey: metricsKeys.satisfaction,
+    queryFn: fetchSatisfaction,
+  })
 }

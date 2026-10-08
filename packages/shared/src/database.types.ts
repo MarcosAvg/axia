@@ -2141,6 +2141,83 @@ export type Database = {
           },
         ]
       }
+      ticket_ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rated_by: string | null
+          requester_id: string | null
+          score: number
+          ticket_id: string
+          updated_at: string
+        }
+        ComputedFields: never
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_by?: string | null
+          requester_id?: string | null
+          score: number
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rated_by?: string | null
+          requester_id?: string | null
+          score?: number
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_ratings_requester_id_fkey'
+            columns: ['requester_id']
+            isOneToOne: false
+            referencedRelation: 'requesters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_ratings_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: true
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_ratings_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: true
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_ratings_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: true
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_ratings_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: true
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_ratings_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: true
+            referencedRelation: 'v_ticket_metrics_base'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ticket_validations: {
         Row: {
           cycle: number
@@ -2918,6 +2995,19 @@ export type Database = {
           },
         ]
       }
+      v_metrics_satisfaction: {
+        Row: {
+          average_score: number | null
+          ratings: number | null
+          score_1: number | null
+          score_2: number | null
+          score_3: number | null
+          score_4: number | null
+          score_5: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
       v_ticket_events_requester: {
         Row: {
           cycle: number | null
@@ -3400,6 +3490,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      ticket_rate: {
+        Args: {
+          p_client_request_id?: string
+          p_comment?: string
+          p_score: number
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       ticket_reactivate: {
         Args: {
           p_client_request_id?: string
@@ -3569,6 +3668,7 @@ export type Database = {
         | 'evidence_added'
         | 'imported'
         | 'manual_time_recorded'
+        | 'rated'
       evidence_type:
         'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
       link_type: 'duplicate_of' | 'derived_from' | 'related_to' | 'blocked_by'
@@ -3777,6 +3877,7 @@ export const Constants = {
         'evidence_added',
         'imported',
         'manual_time_recorded',
+        'rated',
       ],
       evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
       link_type: ['duplicate_of', 'derived_from', 'related_to', 'blocked_by'],

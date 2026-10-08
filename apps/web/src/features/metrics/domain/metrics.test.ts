@@ -5,6 +5,7 @@ import {
   filterTickets,
   formatMinutes,
   formatPercent,
+  formatScore,
   intervalToMinutes,
   openAging,
   summarize,
@@ -166,5 +167,12 @@ describe('averageOf', () => {
   it('promedia y tolera listas vacías', () => {
     expect(averageOf([10, 20, 30])).toBe(20)
     expect(averageOf([])).toBe(0)
+  })
+})
+
+describe('formatScore', () => {
+  it('formatea la satisfacción promedio', () => {
+    expect(formatScore(4.25)).toBe('4.3 / 5')
+    expect(formatScore(null)).toBe('—')
   })
 })

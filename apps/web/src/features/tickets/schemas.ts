@@ -13,6 +13,7 @@ import type {
   TicketEvidenceItem,
   TicketListItem,
   TicketParticipant,
+  TicketRating,
   TicketTimelineItem,
 } from './domain/types'
 
@@ -203,6 +204,22 @@ export const manualTimeSchema = z
     message: 'El fin debe ser posterior al inicio.',
   })
 export type ManualTimeInput = z.infer<typeof manualTimeSchema>
+
+export const ratingSchema = z.object({
+  score: z.coerce.number().int().min(1).max(5),
+  comment: z.string().trim().max(1000).optional(),
+})
+export type RatingInput = z.infer<typeof ratingSchema>
+
+const ratingRowSchema = z.object({
+  score: z.number(),
+  comment: z.string().nullable(),
+})
+
+export function parseRating(raw: unknown): TicketRating {
+  const row = ratingRowSchema.parse(raw)
+  return { score: row.score, comment: row.comment }
+}
 
 export const createTicketSchema = z.object({
   buildingId: z.string().min(1, 'Selecciona un edificio.'),

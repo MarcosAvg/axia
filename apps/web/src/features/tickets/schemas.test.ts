@@ -3,9 +3,11 @@ import {
   manualTimeSchema,
   parseDuplicateCandidates,
   parseManualTimeSpan,
+  parseRating,
   parseTicketDetail,
   parseTicketListItem,
   parseTimelineItem,
+  ratingSchema,
   ticketListSearchSchema,
 } from './schemas'
 
@@ -199,5 +201,20 @@ describe('parseManualTimeSpan', () => {
     })
     expect(span.subjectTechnicianName).toBeNull()
     expect(span.endedAt).toBeNull()
+  })
+})
+
+describe('ratingSchema y parseRating', () => {
+  it('acepta una calificación de 1 a 5', () => {
+    expect(ratingSchema.safeParse({ score: 4 }).success).toBe(true)
+    expect(ratingSchema.safeParse({ score: 0 }).success).toBe(false)
+    expect(ratingSchema.safeParse({ score: 6 }).success).toBe(false)
+  })
+
+  it('normaliza la calificación guardada', () => {
+    expect(parseRating({ score: 5, comment: null })).toEqual({
+      score: 5,
+      comment: null,
+    })
   })
 })

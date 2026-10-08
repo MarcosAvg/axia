@@ -48,6 +48,7 @@ export const eventLabels: Record<EventType, string> = {
   comment: 'Comentario',
   evidence_added: 'Evidencia agregada',
   manual_time_recorded: 'Tiempo manual',
+  rated: 'Calificación',
   imported: 'Importado',
 }
 
@@ -250,6 +251,16 @@ export const ticketMessages = {
     submit: 'Subir evidencia',
     uploading: 'Subiendo…',
     pending: 'Pendiente de subir',
+  },
+  rating: {
+    title: 'Calificación',
+    prompt: '¿Cómo calificas la atención recibida?',
+    comment: 'Comentario (opcional)',
+    submit: 'Enviar calificación',
+    saving: 'Guardando…',
+    saved: 'Gracias por tu calificación.',
+    current: 'Calificación registrada',
+    score: 'Puntaje',
   },
   myWork: {
     title: 'Mi trabajo',

@@ -24,12 +24,14 @@ import type {
   MetricsFilters as Filters,
   MetricsTicket,
   PauseReasonRow,
+  SatisfactionSummary,
 } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import {
   useMetricsTickets,
   usePausesByReason,
   useDuplicates,
+  useSatisfaction,
 } from '../hooks/use-metrics'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
@@ -106,12 +108,39 @@ function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
   return (id: string) => maps[dimension].get(id) ?? id
 }
 
+function MetricsTail({
+  filtered,
+  duplicates,
+}: {
+  filtered: MetricsTicket[]
+  duplicates: {
+    tickets: DuplicateTicket[]
+    alerts: DuplicateAlert[]
+    rows: DuplicateDimensionRow[]
+  }
+}) {
+  return (
+    <>
+      <ChartCard title={metricsMessages.aging.title}>
+        <AgingList
+          rows={openAging(filtered, new Date())}
+          statusLabel={statusLabel}
+        />
+      </ChartCard>
+      <ChartCard title={metricsMessages.duplicates.title}>
+        <DuplicatesSection {...duplicates} />
+      </ChartCard>
+    </>
+  )
+}
+
 function MetricsContent({
   filtered,
   dimension,
   nameOf,
   pauses,
   duplicates,
+  satisfaction,
   onDimensionChange,
 }: {
   filtered: MetricsTicket[]
@@ -123,11 +152,15 @@ function MetricsContent({
     alerts: DuplicateAlert[]
     rows: DuplicateDimensionRow[]
   }
+  satisfaction: SatisfactionSummary | undefined
   onDimensionChange: (dimension: Dimension) => void
 }) {
   return (
     <>
-      <MetricsKpis summary={summarize(filtered)} />
+      <MetricsKpis
+        summary={summarize(filtered)}
+        satisfaction={satisfaction ?? { average: null, ratings: 0 }}
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title={metricsMessages.charts.volume}>
           <VolumeChart data={volumeByDate(filtered)} />
@@ -150,15 +183,7 @@ function MetricsContent({
           onDimensionChange={onDimensionChange}
         />
       </ChartCard>
-      <ChartCard title={metricsMessages.aging.title}>
-        <AgingList
-          rows={openAging(filtered, new Date())}
-          statusLabel={statusLabel}
-        />
-      </ChartCard>
-      <ChartCard title={metricsMessages.duplicates.title}>
-        <DuplicatesSection {...duplicates} />
-      </ChartCard>
+      <MetricsTail filtered={filtered} duplicates={duplicates} />
     </>
   )
 }
@@ -170,6 +195,7 @@ export function MetricsDashboard() {
   const tickets = useMetricsTickets()
   const pauses = usePausesByReason()
   const duplicates = useDuplicates()
+  const satisfaction = useSatisfaction()
   const buildings = useBuildings()
   const teams = useTeams()
   const categories = useCategories()
@@ -213,6 +239,7 @@ export function MetricsDashboard() {
           nameOf={nameResolver(dimension, catalogs)}
           pauses={pauses.data ?? []}
           duplicates={duplicatesData}
+          satisfaction={satisfaction.data}
           onDimensionChange={setDimension}
         />
       ) : null}

@@ -8,6 +8,7 @@ import type {
   DuplicateTicket,
   MetricsTicket,
   PauseReasonRow,
+  SatisfactionSummary,
 } from '../domain/metrics'
 
 const TICKET_SELECT =
@@ -121,4 +122,16 @@ export async function fetchDuplicatesByDimension(): Promise<
     .order('tickets', { ascending: false })
   if (error) throw error
   return (data ?? []) as unknown as DuplicateDimensionRow[]
+}
+
+export async function fetchSatisfaction(): Promise<SatisfactionSummary> {
+  const { data, error } = await supabase
+    .from('v_metrics_satisfaction')
+    .select('average_score, ratings')
+    .maybeSingle()
+  if (error) throw error
+  return {
+    average: data?.average_score ?? null,
+    ratings: data?.ratings ?? 0,
+  }
 }

@@ -1,11 +1,16 @@
-import { formatMinutes } from '../domain/metrics'
-import type { MetricsSummary } from '../domain/metrics'
-import { formatPercent } from '../domain/metrics'
+import { formatMinutes, formatPercent, formatScore } from '../domain/metrics'
+import type { MetricsSummary, SatisfactionSummary } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { MetricCard } from './metric-card'
 
 /** Tarjetas de KPI del tablero. */
-export function MetricsKpis({ summary }: { summary: MetricsSummary }) {
+export function MetricsKpis({
+  summary,
+  satisfaction,
+}: {
+  summary: MetricsSummary
+  satisfaction: SatisfactionSummary
+}) {
   const k = metricsMessages.kpi
   const cards = [
     { label: k.tickets, value: String(summary.tickets) },
@@ -20,6 +25,7 @@ export function MetricsKpis({ summary }: { summary: MetricsSummary }) {
     { label: k.recapture, value: formatPercent(summary.recaptureRate) },
     { label: k.reopen, value: formatPercent(summary.reopenRate) },
     { label: k.firstFix, value: formatPercent(summary.firstTimeFixRate) },
+    { label: k.satisfaction, value: formatScore(satisfaction.average) },
   ]
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

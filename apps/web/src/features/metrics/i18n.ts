@@ -39,6 +39,7 @@ export const metricsMessages = {
     recapture: 'Recaptura',
     reopen: 'Reapertura',
     firstFix: 'Primera resolución',
+    satisfaction: 'Satisfacción',
   },
   charts: {
     volume: 'Tiquets por día',

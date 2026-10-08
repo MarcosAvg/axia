@@ -20,7 +20,7 @@ aislados.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 336 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 348 pruebas pgTAP.
 - **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
   RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
@@ -45,15 +45,17 @@ aislados.
 - **Calendarios** (Fase 5B-0): administración en `/admin/calendarios` (franjas semanales y festivos),
   calendario por equipo y por defecto, y las fechas de la interfaz en la zona de la institución.
 - **Tablero de métricas** (Fase 5B): `/metricas` con KPI, volumen por día, promedio por dimensión,
-  pausas por motivo y aging, con filtros de fecha/dimensión y exportación CSV (Recharts).
+  pausas por motivo, aging, **duplicados** (tiempo hasta marcarse, alertas y tasa) y **satisfacción**
+  promedio, con filtros de fecha/dimensión y exportación CSV (Recharts).
 - **Fundación de interfaz** (Fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`, `Table`,
   `Tabs`, `Badge`, `Switch`/`Checkbox`), primitivas `field` para formularios, iconos `lucide` y
   avisos con `sonner`.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 6 (integraciones y migración)**, aislada del núcleo. Ver la hoja de ruta y
-lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es los **tiempos objetivo (SLA)** cuando se definan los valores, y después la **Fase 6
+(integraciones y migración)**, aislada del núcleo. Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 

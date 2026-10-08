@@ -52,6 +52,7 @@ export const EVENT_TYPES = [
   'comment',
   'evidence_added',
   'manual_time_recorded',
+  'rated',
   'imported',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
@@ -82,6 +83,12 @@ export interface ManualTimeSpan {
   clockClass: ClockClass
   subjectTechnicianName: string | null
   voidedAt: string | null
+}
+
+/** Calificación de satisfacción de un tiquet (1-5, opcional). */
+export interface TicketRating {
+  score: number
+  comment: string | null
 }
 
 export type ClaimResolution = 'upheld' | 'dismissed' | 'new_ticket'

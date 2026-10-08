@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5C (fundación de interfaz) cerrada — siguiente: Fase 6 (integraciones y migración)
+**Fase actual:** 5 cerrada (incluye duplicados y satisfacción) — siguiente: SLA (con valores) o Fase 6
 
 ## En curso
 
-_(vacío)_ — La fundación de interfaz (olas 1 y 2) quedó cerrada. La siguiente tarea es la **Fase 6**
-(infraestructura de importación y adaptadores, aislada del núcleo), cuando la persona la pida.
-Sin push a `origin`.
+_(vacío)_ — Se cerraron los indicadores de duplicados y la calificación de satisfacción (ADR 0026),
+y se confirmó la zona horaria (`America/Mexico_City`). Lo siguiente es el **SLA** cuando la persona
+defina los valores, o la **Fase 6** (integraciones). Sin push a `origin`.
 
 ## Hecho
 
@@ -169,14 +169,23 @@ Sin push a `origin`.
     `field` de shadcn; roles con `Tabs`/`Table`; usuarios con `Switch`/`Checkbox`; estados de
     carga/error con `Skeleton`/`Alert`; formularios de auth y tiquets con `Alert`; `textarea`.
     Queda `evidence-uploader` → `Progress` y más `Tooltip`/`Skeleton` oportunistas.
+- **Indicadores de duplicados y satisfacción (2026-10-08)**, ramas `feat/pendientes-duplicados` y
+  `feat/pendientes-satisfaccion` (fusionadas localmente a `main`; **sin push**):
+  - Duplicados: vistas de tiempo hasta marcarse y alertas por decisión, y sección en `/metricas` con
+    tasa por dimensión.
+  - Satisfacción: `ticket_ratings`, RPC `ticket_rate` (propia o por proxy), evento `rated`, vista
+    `v_metrics_satisfaction`, formulario de estrellas en el tiquet cerrado y KPI en el tablero.
+  - Zona horaria confirmada: `America/Mexico_City`. Decisiones en el ADR 0026.
+  - Compuerta completa en verde: 348 pgTAP, 116 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Fase 6 — Integraciones y migración**: infraestructura genérica de importación (`import_batches`,
-`import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada
-del núcleo y solo cuando la persona la pida. Quedan menores de UI oportunistas (`Progress` en
-evidencia, más `Tooltip`/`Skeleton`) y pendientes de la Fase 5 (duplicados en el tablero,
-satisfacción y SLA); confirmar la zona horaria real.
+**Tiempos objetivo (SLA)** por prioridad y tipo de servicio cuando la persona defina los valores y
+el reloj (calendario o laboral): tabla de objetivos, cumplimiento en las vistas e indicador.
+Después, **Fase 6 — Integraciones y migración**: infraestructura genérica de importación
+(`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y
+adaptadores, aislada del núcleo. Quedan menores de UI oportunistas (`Progress` en evidencia, más
+`Tooltip`/`Skeleton`) y la exportación XLSX.
 
 ## Hoja de ruta
 
@@ -257,8 +266,9 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       institución — ADR 0023
 - [x] **5B** Tablero con Recharts (KPI, dimensiones, pausas, aging), filtros y exportación CSV —
       ADR 0024
-- [ ] (Pendiente) Tiempos objetivo (SLA) por prioridad y tipo de servicio; satisfacción (requiere
-      la tabla de calificación); indicadores de duplicados en el tablero; XLSX
+- [ ] (Pendiente) Tiempos objetivo (SLA) por prioridad y tipo de servicio; exportación XLSX
+- [x] Indicadores de **duplicados** en el tablero (tiempo hasta marcarse y alertas) y **satisfacción**
+      (tabla `ticket_ratings`, RPC `ticket_rate`, KPI y formulario) — ADR 0026
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,

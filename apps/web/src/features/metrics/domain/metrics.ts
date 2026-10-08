@@ -263,6 +263,17 @@ export function averageOf(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
+export interface SatisfactionSummary {
+  average: number | null
+  ratings: number
+}
+
+/** Texto de la satisfacción promedio (o `—` sin datos). */
+export function formatScore(average: number | null): string {
+  if (average === null || !Number.isFinite(average)) return '—'
+  return `${average.toFixed(1)} / 5`
+}
+
 const OPEN_STATUSES = new Set([
   'registered',
   'with_supervisor',

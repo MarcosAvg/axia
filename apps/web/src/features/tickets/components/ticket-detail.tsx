@@ -1,7 +1,9 @@
 import { ErrorAlert } from '@/components/shared/async-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { can, useAuth } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
+import type { TicketStatus } from '../domain/types'
 import {
   useTicket,
   useTicketEvidence,
@@ -14,6 +16,7 @@ import { ManualTimePanel } from './manual-time-panel'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketEvidenceList } from './ticket-evidence-list'
+import { TicketRatingPanel } from './ticket-rating-panel'
 import { TicketTimeline } from './ticket-timeline'
 import { ParticipantList, TicketSummary } from './ticket-summary'
 
@@ -53,6 +56,14 @@ function EvidenceSection({
   )
 }
 
+function canRateTicket(
+  identity: Identity | null,
+  status: TicketStatus,
+): boolean {
+  if (status !== 'closed') return false
+  return can(identity, 'ticket.rate') || can(identity, 'ticket.rate_on_behalf')
+}
+
 /** Detalle del tiquet: captura, acciones, línea de tiempo, participantes y evidencias. */
 export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const { identity } = useAuth()
@@ -75,6 +86,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
 
   const actions = allowedActions({ identity, status: ticket.data.status })
   const canRecordTime = can(identity, 'time.record_manual')
+  const canRate = canRateTicket(identity, ticket.data.status)
 
   return (
     <div className="flex flex-col gap-6">
@@ -101,6 +113,11 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
       {canRecordTime ? (
         <Section title={manualTimeMessages.title}>
           <ManualTimePanel ticketId={ticketId} />
+        </Section>
+      ) : null}
+      {canRate ? (
+        <Section title={ticketMessages.rating.title}>
+          <TicketRatingPanel ticketId={ticketId} />
         </Section>
       ) : null}
     </div>
