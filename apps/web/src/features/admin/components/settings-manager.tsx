@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { adminMessages } from '../i18n'
 import {
   useInstanceSettings,
@@ -17,11 +18,7 @@ export function SettingsManager() {
       {settings.isLoading ? (
         <p className="text-sm text-muted-foreground">{list.loading}</p>
       ) : null}
-      {settings.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {list.error}
-        </p>
-      ) : null}
+      {settings.isError ? <ErrorAlert message={list.error} /> : null}
       {settings.data ? (
         <SettingsForm
           settings={settings.data}
@@ -35,9 +32,7 @@ export function SettingsManager() {
         </p>
       ) : null}
       {update.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {adminMessages.actions.error}
-        </p>
+        <ErrorAlert message={adminMessages.actions.error} />
       ) : null}
     </div>
   )

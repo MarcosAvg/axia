@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { adminMessages } from '../i18n'
 import {
   useCreateRole,
@@ -26,14 +27,10 @@ export function RolesManager() {
   const { list } = adminMessages
 
   if (roles.isLoading) {
-    return <p className="text-sm text-muted-foreground">{list.loading}</p>
+    return <LoadingList rows={3} />
   }
   if (roles.isError) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {list.error}
-      </p>
-    )
+    return <ErrorAlert message={list.error} />
   }
 
   const roleList = roles.data ?? []

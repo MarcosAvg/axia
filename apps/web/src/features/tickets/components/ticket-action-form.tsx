@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { ErrorAlert } from '@/components/shared/async-state'
 import { usePriorities, useReasons, useTechnicians } from '@/features/catalogs'
 import type { ReasonUse } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
@@ -167,11 +168,7 @@ function ActionFormFooter({
 }) {
   return (
     <>
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(error).message}
-        </p>
-      ) : null}
+      {error ? <ErrorAlert message={toTicketError(error).message} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={isPending} className="min-h-11">
           {ticketMessages.actionFields.submit}

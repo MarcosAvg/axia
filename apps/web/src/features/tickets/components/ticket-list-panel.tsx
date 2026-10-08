@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { TicketList } from './ticket-list'
@@ -27,11 +28,7 @@ export function TicketListPanel({
     )
   }
   if (isError) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {ticketMessages.errors.load}
-      </p>
-    )
+    return <ErrorAlert message={ticketMessages.errors.load} />
   }
   if (items.length === 0) {
     return (

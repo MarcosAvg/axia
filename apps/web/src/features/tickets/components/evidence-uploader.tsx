@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { EvidenceType } from '../domain/types'
@@ -40,9 +41,7 @@ export function EvidenceUploader({
         onFileChange={setFile}
       />
       {mutation.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {ticketMessages.errors.unknown}
-        </p>
+        <ErrorAlert message={ticketMessages.errors.unknown} />
       ) : null}
       <Button
         type="button"

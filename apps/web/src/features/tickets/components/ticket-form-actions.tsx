@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { Button } from '@/components/ui/button'
 import type { TicketError } from '../domain/errors'
 import type { DuplicateCandidate } from '../domain/types'
@@ -24,16 +25,8 @@ export function TicketFormActions({
 }: TicketFormActionsProps) {
   return (
     <>
-      {submitError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {submitError}
-        </p>
-      ) : null}
-      {createError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {createError.message}
-        </p>
-      ) : null}
+      {submitError ? <ErrorAlert message={submitError} /> : null}
+      {createError ? <ErrorAlert message={createError.message} /> : null}
       {candidates.length > 0 ? (
         <DuplicateAlert
           candidates={candidates}

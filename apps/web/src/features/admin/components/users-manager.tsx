@@ -1,3 +1,4 @@
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import {
   useAssignUserRole,
   useProfiles,
@@ -23,14 +24,8 @@ export function UsersManager() {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-lg font-medium">{users.title}</h2>
-      {profiles.isLoading ? (
-        <p className="text-sm text-muted-foreground">{list.loading}</p>
-      ) : null}
-      {profiles.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {list.error}
-        </p>
-      ) : null}
+      {profiles.isLoading ? <LoadingList rows={4} /> : null}
+      {profiles.isError ? <ErrorAlert message={list.error} /> : null}
       {profiles.data ? (
         <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
           {profiles.data.map((profile) => (

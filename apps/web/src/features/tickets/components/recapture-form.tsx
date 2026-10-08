@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { Button } from '@/components/ui/button'
 import { toTicketError } from '../domain/errors'
 import type { TicketDetail } from '../domain/types'
@@ -28,14 +29,10 @@ export function RecaptureForm({
         {...form.catalogs}
       />
       {form.hasError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {ticketMessages.actionFields.required}
-        </p>
+        <ErrorAlert message={ticketMessages.actionFields.required} />
       ) : null}
       {form.mutationError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(form.mutationError).message}
-        </p>
+        <ErrorAlert message={toTicketError(form.mutationError).message} />
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={form.isPending} className="min-h-11">

@@ -1,4 +1,5 @@
-import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import type { Profile, Role, UserRole } from '../domain/access'
 import { adminMessages } from '../i18n'
 
@@ -20,38 +21,43 @@ export function UserRow({
   onAssign,
   onRemove,
 }: UserRowProps) {
-  const { actions } = adminMessages
+  const { list } = adminMessages
+  const activeId = `user-active-${profile.id}`
 
   return (
-    <li className="flex flex-col gap-2 p-3">
+    <li className="flex flex-col gap-3 p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-medium">{profile.fullName}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-11"
-          onClick={onToggleActive}
-        >
-          {profile.active ? actions.deactivate : actions.activate}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Switch
+            id={activeId}
+            checked={profile.active}
+            onCheckedChange={() => onToggleActive()}
+          />
+          <label htmlFor={activeId} className="text-sm text-muted-foreground">
+            {list.active}
+          </label>
+        </div>
       </div>
       <div className="flex flex-wrap gap-3">
         {roles.map((role) => {
+          const id = `user-role-${profile.id}-${role.id}`
           const checked = assignments.some(
             (item) => item.userId === profile.id && item.roleId === role.id,
           )
           return (
-            <label key={role.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="size-4"
+            <div key={role.id} className="flex items-center gap-2">
+              <Checkbox
+                id={id}
                 checked={checked}
-                onChange={(event) =>
-                  event.target.checked ? onAssign(role.id) : onRemove(role.id)
+                onCheckedChange={(value) =>
+                  value ? onAssign(role.id) : onRemove(role.id)
                 }
               />
-              {role.label}
-            </label>
+              <label htmlFor={id} className="text-sm">
+                {role.label}
+              </label>
+            </div>
           )
         })}
       </div>

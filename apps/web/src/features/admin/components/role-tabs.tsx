@@ -1,4 +1,4 @@
-import { cn } from 'cn'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Role } from '../domain/access'
 
 interface RoleTabsProps {
@@ -9,23 +9,16 @@ interface RoleTabsProps {
 
 /** Pestañas para elegir el rol a editar. */
 export function RoleTabs({ roles, selectedId, onSelect }: RoleTabsProps) {
+  if (roles.length === 0) return null
   return (
-    <div className="flex flex-wrap gap-1">
-      {roles.map((role) => (
-        <button
-          key={role.id}
-          type="button"
-          onClick={() => onSelect(role.id)}
-          className={cn(
-            'inline-flex min-h-11 items-center rounded-full px-3 text-sm',
-            role.id === selectedId
-              ? 'bg-muted font-medium text-foreground'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {role.label}
-        </button>
-      ))}
-    </div>
+    <Tabs value={selectedId ?? undefined} onValueChange={onSelect}>
+      <TabsList className="h-auto flex-wrap">
+        {roles.map((role) => (
+          <TabsTrigger key={role.id} value={role.id} className="min-h-9">
+            {role.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }

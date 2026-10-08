@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
@@ -115,11 +116,7 @@ function ManualTimeFooter({
 }) {
   return (
     <>
-      {message ? (
-        <p role="alert" className="text-sm text-destructive">
-          {message}
-        </p>
-      ) : null}
+      {message ? <ErrorAlert message={message} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending} className="min-h-11">
           {pending ? manualTimeMessages.submitting : manualTimeMessages.submit}

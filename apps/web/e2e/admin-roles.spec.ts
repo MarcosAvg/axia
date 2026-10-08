@@ -26,5 +26,5 @@ test('el administrador crea un rol en la administración', async ({ page }) => {
   await page.locator('#role-label').fill(label)
   await page.getByRole('button', { name: 'Agregar' }).click()
 
-  await expect(page.getByRole('button', { name: label })).toBeVisible()
+  await expect(page.getByRole('tab', { name: label })).toBeVisible()
 })

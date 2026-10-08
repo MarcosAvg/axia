@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
@@ -87,9 +88,7 @@ export function ManualTimePanel({ ticketId }: { ticketId: string }) {
         </Button>
       )}
       {voidSpan.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(voidSpan.error).message}
-        </p>
+        <ErrorAlert message={toTicketError(voidSpan.error).message} />
       ) : null}
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">

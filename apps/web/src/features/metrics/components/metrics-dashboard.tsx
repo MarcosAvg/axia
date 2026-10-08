@@ -6,6 +6,7 @@ import {
   useTeams,
 } from '@/features/catalogs'
 import { statusLabels } from '@/features/tickets'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import {
   EMPTY_FILTERS,
   byDimension,
@@ -45,16 +46,10 @@ function MetricsStatus({
   isEmpty: boolean
 }) {
   if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">{metricsMessages.loading}</p>
-    )
+    return <LoadingList rows={4} />
   }
   if (isError) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {metricsMessages.error}
-      </p>
-    )
+    return <ErrorAlert message={metricsMessages.error} />
   }
   if (isEmpty) {
     return (

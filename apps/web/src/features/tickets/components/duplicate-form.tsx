@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TextField } from '@/components/shared/form-fields'
@@ -38,9 +39,9 @@ export function DuplicateForm({
         }
       />
       {actions.markDuplicate.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(actions.markDuplicate.error).message}
-        </p>
+        <ErrorAlert
+          message={toTicketError(actions.markDuplicate.error).message}
+        />
       ) : null}
       <Button
         type="button"

@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { Button } from '@/components/ui/button'
 import { toTicketError } from '../domain/errors'
 import { useAssignSupervisorForm } from '../hooks/use-assign-supervisor-form'
@@ -36,9 +37,7 @@ export function AssignSupervisorForm({
         reasons={form.reasons}
       />
       {form.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(form.error).message}
-        </p>
+        <ErrorAlert message={toTicketError(form.error).message} />
       ) : null}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={form.isPending} className="min-h-11">

@@ -1,3 +1,4 @@
+import { Checkbox } from '@/components/ui/checkbox'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import type { AdminField } from '../domain/catalogs'
 import type { AdminOption } from '../hooks/use-admin-catalog'
@@ -12,16 +13,18 @@ interface CatalogFieldInputProps {
 }
 
 function BooleanField({ field, value, onChange }: CatalogFieldInputProps) {
+  const id = `field-${field.name}`
   return (
-    <label className="flex min-h-11 items-center gap-2 text-sm">
-      <input
-        type="checkbox"
-        className="size-5"
+    <div className="flex min-h-11 items-center gap-2">
+      <Checkbox
+        id={id}
         checked={Boolean(value)}
-        onChange={(event) => onChange(event.target.checked)}
+        onCheckedChange={(checked) => onChange(checked === true)}
       />
-      {field.label}
-    </label>
+      <label htmlFor={id} className="text-sm">
+        {field.label}
+      </label>
+    </div>
   )
 }
 

@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -79,11 +80,7 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
       {manager.rows.isLoading ? (
         <p className="text-sm text-muted-foreground">{list.loading}</p>
       ) : null}
-      {manager.rows.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {list.error}
-        </p>
-      ) : null}
+      {manager.rows.isError ? <ErrorAlert message={list.error} /> : null}
       {manager.rows.data ? (
         <CatalogTable
           rows={manager.rows.data}
@@ -103,11 +100,7 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
           onCancel={() => manager.setEditing(null)}
         />
       ) : null}
-      {manager.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {actions.error}
-        </p>
-      ) : null}
+      {manager.isError ? <ErrorAlert message={actions.error} /> : null}
     </div>
   )
 }

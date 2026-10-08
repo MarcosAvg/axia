@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { TextField } from '@/components/shared/form-fields'
 import type { Identity } from '../domain/identity'
@@ -50,14 +51,14 @@ export function ProfileForm({ identity }: { identity: Identity }) {
         {...register('phone')}
       />
       {mutation.isSuccess ? (
-        <p role="status" className="text-sm text-muted-foreground">
-          {authMessages.profile.saved}
-        </p>
+        <Alert>
+          <AlertTitle>{authMessages.profile.saved}</AlertTitle>
+        </Alert>
       ) : null}
       {mutation.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {authMessages.profile.errors.unknown}
-        </p>
+        <Alert variant="destructive">
+          <AlertTitle>{authMessages.profile.errors.unknown}</AlertTitle>
+        </Alert>
       ) : null}
       <Button
         type="submit"

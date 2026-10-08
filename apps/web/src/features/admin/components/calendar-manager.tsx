@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import type { WorkCalendar } from '../domain/calendar'
 import {
   useCalendars,
@@ -68,18 +69,10 @@ function CalendarStatus({
   isError: boolean
 }) {
   if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {adminMessages.list.loading}
-      </p>
-    )
+    return <LoadingList rows={3} />
   }
   if (isError) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {adminMessages.list.error}
-      </p>
-    )
+    return <ErrorAlert message={adminMessages.list.error} />
   }
   return null
 }

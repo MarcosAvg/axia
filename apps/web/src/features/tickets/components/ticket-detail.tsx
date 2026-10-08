@@ -1,3 +1,4 @@
+import { ErrorAlert } from '@/components/shared/async-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { can, useAuth } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
@@ -66,18 +67,10 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
     )
   }
   if (ticket.isError) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {ticketMessages.errors.load}
-      </p>
-    )
+    return <ErrorAlert message={ticketMessages.errors.load} />
   }
   if (!ticket.data) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        {ticketMessages.errors.notFound}
-      </p>
-    )
+    return <ErrorAlert message={ticketMessages.errors.notFound} />
   }
 
   const actions = allowedActions({ identity, status: ticket.data.status })

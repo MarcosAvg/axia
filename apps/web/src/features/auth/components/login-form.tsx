@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle } from '@/components/ui/alert'
 import { TextField } from '@/components/shared/form-fields'
 import { isInvalidCredentials } from '../domain/auth-error'
 import { useAuth } from '../hooks/auth-context'
@@ -54,9 +55,9 @@ export function LoginForm() {
         {...register('password')}
       />
       {submitError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {submitError}
-        </p>
+        <Alert variant="destructive">
+          <AlertTitle>{submitError}</AlertTitle>
+        </Alert>
       ) : null}
       <Button type="submit" disabled={isSubmitting} className="min-h-11 w-full">
         {isSubmitting
