@@ -61,11 +61,21 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   comandos) y seis ADR iniciales en `docs/decisions/` (Vite + React con React Compiler, Supabase,
   Recharts en lugar de ECharts, cola offline con Dexie, bloqueos dirigidos por datos e
   independencia del núcleo).
+- **Supabase local (Fase 0, tarea 4)**: CLI de Supabase como devDependency (MIT, 2.120.0) y
+  `supabase init` (`supabase/config.toml`); scripts `db:start`, `db:stop`, `db:reset`, `db:test`,
+  `db:types`; `supabase/seed.sql`. Migración `enable_pgtap` (instala pgTAP en `extensions`) y
+  prueba pgTAP de humo (`supabase/tests/database/00_humo.test.sql`), en verde con `pnpm db:test`.
+  `pnpm db:reset` limpio. **Cliente tipado**: `pnpm db:types` genera
+  `packages/shared/src/database.types.ts` (formateado con Prettier en el mismo script),
+  `packages/shared/src/index.ts` los exporta y `apps/web/src/lib/supabase.ts` crea el cliente con
+  `@supabase/supabase-js` (MIT); `apps/web/.env.example` documenta las variables. `db:test` se
+  sumó a `pnpm check` y el CI levanta Supabase antes de la compuerta.
 
 ## Siguiente
 
-Fase 0, tarea 4: Supabase local (`supabase start`, `pnpm db:start`/`db:reset`), cliente tipado y
-`pnpm db:types`.
+Fase 0, tareas restantes: PWA (manifest e iconos, `registerType: 'prompt'`) y esqueleto Dexie
+(`outbox`, `evidencias`); Playwright (prueba de humo y flujo del técnico sin conexión); `knip`;
+el directorio `deploy/`; y el componente `chart`/Recharts (llega con las métricas).
 
 ## Hoja de ruta
 
@@ -74,30 +84,30 @@ migración van después, sobre un núcleo ya estable.
 
 ### Fase 0 — Arranque (sin dependencias de negocio)
 - [ ] Monorepo pnpm: `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`, `scripts/`
-      (faltan `supabase/` y `deploy/`)
+      (falta `deploy/`)
 - [ ] App Vite + React + TypeScript con Tailwind, shadcn/ui (incluido `chart`/Recharts),
       TanStack Router (rutas por carpetas) y TanStack Query (falta el componente `chart`/Recharts,
       que llega con las métricas)
-- [ ] Supabase local funcionando, cliente tipado, `pnpm db:types`
+- [x] Supabase local funcionando, cliente tipado, `pnpm db:types`
 - [ ] PWA configurada (manifest, iconos, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
       límites de tamaño, `dependency-cruiser` o `eslint-plugin-boundaries`, Prettier, knip,
       Husky + lint-staged, commitlint (falta `knip`)
 - [x] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
       (incluye los nombres de este proyecto de origen) y rutas permitidas
-- [ ] Vitest, Playwright y prueba pgTAP de humo (hecho: Vitest; faltan Playwright y pgTAP)
+- [ ] Vitest, Playwright y prueba pgTAP de humo (hecho: Vitest y pgTAP; falta Playwright)
 - [x] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic +
-      check:boundaries + test + build; `db:test` se sumará con Supabase)
-- [x] CI que ejecuta la compuerta completa
+      check:boundaries + test + db:test + build)
+- [x] CI que ejecuta la compuerta completa (levanta Supabase antes)
 - [x] `README.md` (levantar el proyecto en 10 minutos), `.env.example`, `.gitignore`
 - [x] ADR iniciales en `docs/decisions/`: Vite + React como SPA, Supabase, Recharts en lugar
       de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos, independencia
       del núcleo
 - [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
 
-**Falta para cerrar la Fase 0:** Supabase local y `pnpm db:types`, PWA (manifest e iconos) y
-esqueleto Dexie (`outbox`, `evidencias`), Playwright y prueba pgTAP de humo, `knip`, los
-directorios `supabase/` y `deploy/`, y el componente `chart`/Recharts (llega con las métricas).
+**Falta para cerrar la Fase 0:** PWA (manifest e iconos) y esqueleto Dexie (`outbox`,
+`evidencias`), Playwright, `knip`, el directorio `deploy/` y el componente `chart`/Recharts
+(llega con las métricas).
 
 ### Fase 1 — Base de datos núcleo
 - [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
@@ -167,12 +177,14 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 
 ## Notas de entorno
 
-- Versiones (oct 2026): Node 24.14.1, pnpm 12.8.1, Vite 8.3.3, `@vitejs/plugin-react` 6.1.2,
+- Versiones (oct 2026): Node 24.18.0, pnpm 12.8.1, Vite 8.3.3, `@vitejs/plugin-react` 6.1.2,
   React 19.3.0, TypeScript `~6.0.2`, ESLint 9.39.5, `eslint-plugin-react-hooks` 7.1.1,
   `eslint-plugin-jsx-a11y` 6.10.2, `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel`
   0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9, Vitest 5.0.3, `@testing-library/react` 16.3.3,
-  `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1.
-- **jsdom fijado en `^29`**: jsdom 30 exige Node `^24.15.0` y el equipo tiene 24.14.1.
+  `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1, `supabase` (CLI) 2.120.0,
+  `@supabase/supabase-js` 2.117.2.
+- **jsdom fijado en `^29`**: se fijó cuando el equipo tenía Node 24.14.1 (jsdom 30 exige
+  `^24.15.0`). Ahora el equipo usa Node 24.18.0; revisar el salto a jsdom 30 en otra tarea.
 - **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
   para ESLint 10; con ESLint 9 todos los plugins tienen sus peers satisfechos.
 - **Prettier ignora `*.md`**: los documentos escritos a mano no se reformatean; `pnpm format`
@@ -205,7 +217,21 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   `apps/web` con ESLint, filtrando `routeTree.gen.ts`; commitlint 21 con
   `@commitlint/config-conventional`.
 - CI (`.github/workflows/ci.yml`): checkout + `pnpm/action-setup` + `setup-node` (caché pnpm) +
-  `pnpm install --frozen-lockfile` + `pnpm check`. La versión de pnpm sale de `packageManager`.
+  `pnpm install --frozen-lockfile` + `pnpm db:start` (Supabase local con la CLI fijada en el
+  repositorio) + `pnpm check`. La versión de pnpm sale de `packageManager`.
+- **Docker es requisito** para el Supabase local (`pnpm db:start`, `db:reset`, `db:test`). En Linux
+  el usuario debe pertenecer al grupo `docker` y **relanzar la sesión** (los procesos ya en
+  ejecución no heredan el grupo nuevo).
+- Supabase local en Postgres 17; puertos API `54321`, base `54322`, Studio `54323`. `supabase
+  init` generó `supabase/config.toml` y `supabase/.gitignore`.
+- La CLI se usa como devDependency de la raíz (no global) para que la versión quede fijada por el
+  lockfile; `db:types` pasa la salida por Prettier (`--stdin-filepath`) para que el archivo
+  generado quede formateado igual en cada regeneración.
+- La prueba pgTAP necesita la extensión: la migración `enable_pgtap` la instala en `extensions`, y
+  el archivo de prueba fija `set search_path = extensions, public;`.
+- `pnpm check` ahora incluye `db:test`, por lo que **requiere el Supabase local levantado**; el
+  README lo advierte. Los tipos generados viven en `packages/shared/src/database.types.ts` y se
+  exportan desde `packages/shared/src/index.ts`.
 
 ## Registro de sesiones
 
@@ -234,3 +260,7 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - 2026-10-07: documentación de arranque: `README.md` y seis ADR iniciales en `docs/decisions/`;
   Fase 0 marcada y con lo pendiente explícito (Supabase local, PWA, Dexie, Playwright, pgTAP,
   `knip`, `supabase/`/`deploy/` y `chart`/Recharts).
+- 2026-10-07: Supabase local (Fase 0, tarea 4): CLI como devDependency + scripts `db:*`,
+  migración `enable_pgtap`, prueba pgTAP de humo, `db:reset` limpio, `db:types` → tipos en
+  `packages/shared` y cliente tipado en `lib/supabase.ts`; `db:test` sumado a `pnpm check` y CI
+  que levanta Supabase. `pnpm check` completo en verde. Rama `feat/supabase-local`.

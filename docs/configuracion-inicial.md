@@ -564,14 +564,17 @@ Incluye desde temprano un caso con la red cortada (`context.setOffline(true)`) p
 
 ## 9. Integración continua
 
-`.github/workflows/ci.yml`:
+`.github/workflows/ci.yml` (versión vigente; usa la CLI fijada en el repositorio):
 
 ```yaml
 name: CI
-on: [push, pull_request]
+
+on:
+  push:
+  pull_request:
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -580,12 +583,11 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-      - uses: supabase/setup-cli@v1
       - run: pnpm install --frozen-lockfile
-      - run: pnpm supabase start
-      - run: pnpm supabase test db
-      - run: pnpm -r test
-      - run: pnpm build
+      # Levanta Supabase local con la CLI fijada en el repositorio; `pnpm check`
+      # incluye la prueba pgTAP (`db:test`).
+      - run: pnpm db:start
+      - run: pnpm check
 ```
 
 ---
