@@ -8,7 +8,12 @@
 
 ## En curso
 
-_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
+Fase 1, Etapa B — migraciones por tramos (rama `feat/fase-1-db`), cada uno con pgTAP y `pnpm check`.
+**Hechos:** tramos 1-4 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
+historial/evidencias; ruteo/ofertas/duplicados/RPC).
+**Faltan:** 5. pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación; 6. tiempos
+(calendarios, tramos y cálculo); 7. notificaciones y escalamiento; 8. RLS completa, visibilidad,
+semillas y vistas de indicadores.
 
 ## Hecho
 
@@ -145,10 +150,10 @@ llega con las métricas (Fase 6) y `deploy/` se puebla en producción (Fase 8).
 ### Fase 1 — Base de datos núcleo (modelo de datos)
 Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** se aprueba
 `docs/modelo-datos.md` antes de escribir ninguna migración. Cada tramo con pgTAP y `pnpm check`:
-1. [ ] Configuración de la instancia, catálogos maestros y motivos jerárquicos
-2. [ ] Usuarios, perfiles, roles, permisos y ámbitos (equipo, edificios, categorías)
-3. [ ] Tiquets, folio, historial, participantes y evidencias
-4. [ ] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
+1. [x] Configuración de la instancia, catálogos maestros y motivos jerárquicos
+2. [x] Usuarios, perfiles, roles, permisos y ámbitos (equipo, edificios, categorías)
+3. [x] Tiquets, folio, historial, participantes y evidencias
+4. [x] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
 5. [ ] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
 6. [ ] Tiempos: calendarios, tramos y funciones de cálculo
 7. [ ] Notificaciones, reglas y escalamiento
@@ -352,3 +357,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-07: Fase 1, Etapa A (ajustes): recaptura sin aprobación, concurrencia "primero gana",
   reactivación al estado previo, calificación opcional, duplicados sin seguidores y seguidor
   eliminado; documentos actualizados. `pnpm check` en verde. Rama `docs/fase-1-ajustes`.
+- 2026-10-07: Fase 1, Etapa B (tramos 1-4): migraciones `instance_settings_and_catalogs`,
+  `users_roles_and_scopes`, `tickets_and_history` y `routing_offers_and_transitions`, con sus
+  pruebas pgTAP (catalogos, usuarios/roles, tiquets/folio/evidencias y flujo con RPC ruteo,
+  asignación, inicio, atendido, validación). `pnpm db:reset` limpio y `pnpm check` en verde.
+  Rama `feat/fase-1-db`.
