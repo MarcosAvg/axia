@@ -8,7 +8,13 @@
 
 ## En curso
 
-_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
+**Fase 3B — Tramo 1: backend de administración** (rama `feat/fase-3b-admin-db`).
+1. Políticas RLS de escritura con `has_permission(...)`: `catalog.manage` (catálogos, motivos,
+   solicitantes, técnicos), `role.manage` (roles/permisos/usuario-rol), `assignment.manage` (ámbitos
+   y designaciones), `user.manage` (perfiles) y `catalog.manage` para `instance_settings`.
+2. `DELETE` solo en tablas de relación; los catálogos se desactivan (`active=false`).
+3. ADR 0018 (ajusta el alcance del ADR 0015) y pgTAP de las políticas.
+4. `pnpm db:reset`, `pnpm db:test`. Luego Tramo 2 (`feat/fase-3b-catalogs`).
 
 ## Hecho
 
