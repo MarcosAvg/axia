@@ -51,6 +51,7 @@ describe('parseIdentity', () => {
     },
     roles: ['requester'],
     permissions: [{ permission: 'ticket.view', scope: 'own' }],
+    timezone: 'America/Mexico_City',
   }
 
   it('convierte la respuesta de me() en una identidad', () => {
@@ -62,6 +63,7 @@ describe('parseIdentity', () => {
       active: true,
       roles: ['requester'],
       permissions: [{ permission: 'ticket.view', scope: 'own' }],
+      timezone: 'America/Mexico_City',
     })
   })
 

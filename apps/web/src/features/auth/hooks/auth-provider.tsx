@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
+import { setDisplayTimezone } from '@/lib/format'
 import {
   fetchIdentity,
   signInWithPassword,
@@ -28,6 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: status === 'signed-in' && Boolean(userId),
     staleTime: 5 * 60 * 1000,
   })
+
+  useEffect(() => {
+    setDisplayTimezone(identity?.timezone)
+  }, [identity?.timezone])
 
   const signIn = useCallback(async (email: string, password: string) => {
     await signInWithPassword(email, password)

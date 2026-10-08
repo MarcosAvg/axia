@@ -15,6 +15,8 @@ export interface Identity {
   active: boolean
   roles: string[]
   permissions: Permission[]
+  /** Zona horaria de la instancia, para mostrar fechas de forma consistente. */
+  timezone: string
 }
 
 /** Verdadero si la identidad tiene el permiso, en cualquier ámbito. */

@@ -38,6 +38,7 @@ const administrator = {
     { permission: 'user.manage', scope: 'all' as const },
     { permission: 'catalog.manage', scope: 'all' as const },
   ],
+  timezone: 'America/Mexico_City',
 }
 
 const supervisor = {
@@ -47,6 +48,7 @@ const supervisor = {
   active: true,
   roles: ['supervisor'],
   permissions: [{ permission: 'ticket.view', scope: 'buildings' as const }],
+  timezone: 'America/Mexico_City',
 }
 
 function renderAtPath(path: string, auth: AuthContextValue) {

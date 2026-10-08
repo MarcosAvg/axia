@@ -1,12 +1,26 @@
 // Formateadores de presentación (es-MX). Sin dependencias externas.
 
-const dateTimeFormatter = new Intl.DateTimeFormat('es-MX', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
+// Zona horaria de la instancia para mostrar fechas; la fija el proveedor de autenticación.
+let displayTimezone: string | undefined
+
+/** Fija la zona horaria con la que se muestran las fechas (zona de la institución). */
+export function setDisplayTimezone(timezone: string | undefined): void {
+  displayTimezone = timezone
+}
+
+function dateTimeOptions(): Intl.DateTimeFormatOptions {
+  const options: Intl.DateTimeFormatOptions = {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }
+  if (displayTimezone) options.timeZone = displayTimezone
+  return options
+}
 
 export function formatDateTime(iso: string): string {
-  return dateTimeFormatter.format(new Date(iso))
+  return new Intl.DateTimeFormat('es-MX', dateTimeOptions()).format(
+    new Date(iso),
+  )
 }
 
 export function formatBytes(bytes: number | null): string {

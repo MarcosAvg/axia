@@ -22,6 +22,7 @@ const identityResponseSchema = z.object({
     .nullable(),
   roles: z.array(z.string()),
   permissions: z.array(permissionSchema),
+  timezone: z.string(),
 })
 
 export const loginSchema = z.object({
@@ -53,5 +54,6 @@ export function parseIdentity(raw: unknown): Identity {
     active: data.profile.active,
     roles: data.roles,
     permissions: data.permissions as Permission[],
+    timezone: data.timezone,
   }
 }

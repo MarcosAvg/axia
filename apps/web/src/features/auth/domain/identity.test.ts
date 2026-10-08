@@ -9,6 +9,7 @@ function makeIdentity(permissions: Permission[]): Identity {
     active: true,
     roles: ['supervisor'],
     permissions,
+    timezone: 'America/Mexico_City',
   }
 }
 
