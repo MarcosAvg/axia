@@ -14,6 +14,7 @@ import {
   fetchTicket,
   fetchTickets,
   fetchTimeline,
+  searchTicketsByFolio,
 } from '../api/tickets-api'
 import type { DuplicateCheckInput, TicketFilters } from '../api/tickets-api'
 import type { CreateTicketInput } from '../schemas'
@@ -101,5 +102,13 @@ export function useMyOffers(userId: string | undefined) {
     queryKey: ticketKeys.myOffers(userId ?? ''),
     queryFn: () => (userId ? fetchMyOffers(userId) : Promise.resolve([])),
     enabled: Boolean(userId),
+  })
+}
+
+export function useTicketSearchByFolio(term: string) {
+  return useQuery({
+    queryKey: ['tickets', 'search', term],
+    queryFn: () => searchTicketsByFolio(term),
+    enabled: term.trim().length >= 2,
   })
 }
