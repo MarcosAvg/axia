@@ -81,12 +81,19 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `outbox` + `evidencias`, campos en inglés), `sync.ts` (dispara al abrir, `online` y
   `visibilitychange`) y pruebas Vitest (9 en verde). `PwaUpdatePrompt` (`useRegisterSW`) montado
   en `AppProviders`. `pnpm check` en verde. Rama `feat/pwa-offline`.
+- **`knip` (Fase 0, tarea 7)**: `knip` 6.40.0 (ISC) como devDependency de la raíz, script
+  `pnpm knip` sumado a `pnpm check`. `knip.json` (acepta comentarios) con la entrada
+  `apps/web/src/lib/supabase.ts` y la excepción documentada del kit shadcn
+  (`src/components/ui/**`). Hallazgos resueltos sin silenciar código muerto: se borró
+  `apps/web/src/lib/utils.ts` (shim de `cn` sin importadores) y se quitaron `lucide-react` y
+  `dexie-react-hooks` (se re-agregan cuando se usen); se mantienen `@axia/shared` y
+  `@supabase/supabase-js` (los usa `lib/supabase.ts`). `pnpm knip` limpio. Rama `feat/knip`.
 
 ## Siguiente
 
-Fase 0, tareas restantes: `knip`; Playwright (prueba de humo; el flujo del técnico sin conexión
-llega en la Fase 5); el directorio `deploy/`; y el componente `chart`/Recharts (llega con las
-métricas).
+Fase 0, tareas restantes: Playwright (prueba de humo; el flujo del técnico sin conexión
+llega en la Fase 5) y el directorio `deploy/`; el componente `chart`/Recharts llega con las
+métricas (Fase 6).
 
 ## Hoja de ruta
 
@@ -103,12 +110,12 @@ migración van después, sobre un núcleo ya estable.
 - [x] PWA configurada (manifest, iconos provisionales, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
       límites de tamaño, `dependency-cruiser` o `eslint-plugin-boundaries`, Prettier, knip,
-      Husky + lint-staged, commitlint (falta `knip`)
+      Husky + lint-staged, commitlint
 - [x] **`pnpm check:agnostic`**: script con lista configurable de nombres de terceros
       (incluye los nombres de este proyecto de origen) y rutas permitidas
 - [ ] Vitest, Playwright y prueba pgTAP de humo (hecho: Vitest y pgTAP; falta Playwright)
 - [x] Scripts de raíz, incluido **`pnpm check`** (lint + typecheck + check:agnostic +
-      check:boundaries + test + db:test + build)
+      check:boundaries + knip + test + db:test + build)
 - [x] CI que ejecuta la compuerta completa (levanta Supabase antes)
 - [x] `README.md` (levantar el proyecto en 10 minutos), `.env.example`, `.gitignore`
 - [x] ADR iniciales en `docs/decisions/`: Vite + React como SPA, Supabase, Recharts en lugar
@@ -116,8 +123,8 @@ migración van después, sobre un núcleo ya estable.
       del núcleo
 - [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
 
-**Falta para cerrar la Fase 0:** `knip`, Playwright (humo), el directorio `deploy/` y el
-componente `chart`/Recharts (llega con las métricas).
+**Falta para cerrar la Fase 0:** Playwright (humo) y el directorio `deploy/`; el componente
+`chart`/Recharts llega con las métricas (Fase 6).
 
 ### Fase 1 — Base de datos núcleo
 - [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
@@ -193,7 +200,8 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9, Vitest 5.0.3, `@testing-library/react` 16.3.3,
   `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1, `supabase` (CLI) 2.120.0,
   `@supabase/supabase-js` 2.117.2, `vite-plugin-pwa` 2.0.0, `workbox-build`/`workbox-window`
-  7.4.1, `dexie` 4.4.6, `dexie-react-hooks` 4.4.0, `fake-indexeddb` 6.2.5 (solo pruebas).
+  7.4.1, `dexie` 4.4.6, `dexie-react-hooks` 4.4.0, `fake-indexeddb` 6.2.5 (solo pruebas),
+  `knip` 6.40.0.
 - **jsdom fijado en `^29`**: se fijó cuando el equipo tenía Node 24.14.1 (jsdom 30 exige
   `^24.15.0`). Ahora el equipo usa Node 24.18.0; revisar el salto a jsdom 30 en otra tarea.
 - **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
@@ -252,6 +260,11 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - En dev, `/manifest.webmanifest` cae al fallback de la SPA (el manifest solo se genera en el
   build); los iconos y el HTML con `theme-color` sí se sirven. El aviso de actualización no
   aparece en dev/test porque `useRegisterSW` es un no-op fuera del build.
+- **knip**: el `knip.json` acepta comentarios (verificado con `prettier --check`, que también
+  lo acepta). Las entradas de `apps/web` (`main.tsx`, `vite.config.ts`, `test/setup.ts`) las
+  detecta knip solo con sus plugins — solo hizo falta declarar `src/lib/supabase.ts`. Los
+  imports desde archivos bajo `ignore` siguen contando para el uso de dependencias (verificado:
+  `cn`, `class-variance-authority` y `radix-ui` no se marcan aunque el kit esté ignorado).
 
 ## Registro de sesiones
 
@@ -288,3 +301,6 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   manifest es-MX, workbox con precache), iconos provisionales en `public/`, `sw.js` y
   `manifest.webmanifest` verificados en `dist`; `src/lib/offline/` (Dexie v1, disparadores y
   pruebas) y `PwaUpdatePrompt` en `AppProviders`. `pnpm check` en verde. Rama `feat/pwa-offline`.
+- 2026-10-07: `knip` (Fase 0, tarea 7): `knip.json` con la entrada de `lib/supabase.ts` y la
+  excepción documentada del kit shadcn; se borró `lib/utils.ts` y se quitaron `lucide-react` y
+  `dexie-react-hooks`. `pnpm knip` limpio y `pnpm check` en verde. Rama `feat/knip`.
