@@ -12,7 +12,12 @@
     "format": "prettier --write .",
     "check:agnostic": "node scripts/check-agnostic.mjs",
     "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm check:boundaries && pnpm test && pnpm build",
+    "check": "pnpm lint && pnpm typecheck && pnpm check:agnostic && pnpm check:boundaries && pnpm test && pnpm db:test && pnpm build",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:types": "supabase gen types typescript --local | prettier --stdin-filepath packages/shared/src/database.types.ts > packages/shared/src/database.types.ts",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -22,6 +27,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.9",
+    "supabase": "^2.120.0",
     "typescript": "~6.0.3"
   }
 }
