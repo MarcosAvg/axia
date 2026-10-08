@@ -23,10 +23,15 @@ export function MetricsKpis({
   sla: SlaSummary
 }) {
   const k = metricsMessages.kpi
+  const hints = metricsMessages.kpiHints
   const cards = [
     { label: k.tickets, value: String(summary.tickets) },
     { label: k.active, value: formatMinutes(summary.avgActive) },
-    { label: k.activeExtra, value: formatMinutes(summary.avgActiveExtra) },
+    {
+      label: k.activeExtra,
+      value: formatMinutes(summary.avgActiveExtra),
+      hint: hints.activeExtra,
+    },
     { label: k.total, value: formatMinutes(summary.avgTotal) },
     { label: k.net, value: formatMinutes(summary.avgNet) },
     { label: k.response, value: formatMinutes(summary.avgResponse) },
@@ -35,14 +40,27 @@ export function MetricsKpis({
     { label: k.reassignment, value: formatPercent(summary.reassignmentRate) },
     { label: k.recapture, value: formatPercent(summary.recaptureRate) },
     { label: k.reopen, value: formatPercent(summary.reopenRate) },
-    { label: k.firstFix, value: formatPercent(summary.firstTimeFixRate) },
-    { label: k.satisfaction, value: formatScore(satisfaction.average) },
-    { label: k.sla, value: formatRate(sla.complianceRate) },
+    {
+      label: k.firstFix,
+      value: formatPercent(summary.firstTimeFixRate),
+      hint: hints.firstFix,
+    },
+    {
+      label: k.satisfaction,
+      value: formatScore(satisfaction.average),
+      hint: hints.satisfaction,
+    },
+    { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },
   ]
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
-        <MetricCard key={card.label} label={card.label} value={card.value} />
+        <MetricCard
+          key={card.label}
+          label={card.label}
+          value={card.value}
+          hint={card.hint}
+        />
       ))}
     </div>
   )

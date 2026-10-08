@@ -37,6 +37,7 @@ export async function queueEvidence(params: {
     mimeType: blob.type || params.file.type,
     fileName: params.file.name,
     state: 'pending',
+    progress: 0,
     createdAt: Date.now(),
   })
   await enqueue(EVIDENCE_UPLOAD, { evidenceId: id })
@@ -55,8 +56,9 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
   const token = session.data.session?.access_token
   if (!token) throw new Error('Sin sesión')
 
-  await db.evidences.update(evidenceId, { state: 'uploading' })
+  await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
   const storagePath = `tickets/${evidence.ticketId}/${evidence.cycle}/${evidence.id}.jpg`
+  let reported = -1
   await uploadResumable({
     endpoint: endpoint(),
     token,
@@ -64,6 +66,12 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     path: storagePath,
     blob: evidence.blob,
     mimeType: evidence.mimeType,
+    onProgress: (percentage) => {
+      if (percentage !== reported) {
+        reported = percentage
+        void db.evidences.update(evidenceId, { progress: percentage })
+      }
+    },
   })
   const { error } = await supabase.rpc('evidence_add', {
     p_ticket_id: evidence.ticketId,
@@ -77,7 +85,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     await db.evidences.update(evidenceId, { state: 'error' })
     throw error
   }
-  await db.evidences.update(evidenceId, { state: 'uploaded' })
+  await db.evidences.update(evidenceId, { state: 'uploaded', progress: 100 })
 }
 
 /** Registra el manejador de subida de evidencia en la cola de salida. */

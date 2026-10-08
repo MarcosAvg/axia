@@ -34,8 +34,8 @@ aislados.
   (`/admin/configuracion`); escritura por políticas RLS según permiso.
 - **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
 - **PWA instalable** y modo sin conexión con Dexie: la **evidencia** del técnico se comprime en el
-  dispositivo y se sube reanudable, y **sus acciones del tiquet** (iniciar, pausar, atender…) se
-  encolan y sincronizan al recuperar la red.
+  dispositivo y se sube reanudable **con progreso**, y **sus acciones del tiquet** (iniciar, pausar,
+  atender…) se encolan y sincronizan al recuperar la red.
 - **Campo sin cuenta** (Fase 4B): **tiempos manuales** registrados y anulados por supervisor/admin
   (atribuidos a un técnico) y **actuar en nombre de** un técnico (proxy) con actor y sujeto
   distinguidos en el historial.
@@ -46,7 +46,7 @@ aislados.
   calendario por equipo y por defecto, y las fechas de la interfaz en la zona de la institución.
 - **Tablero de métricas** (Fase 5B): `/metricas` con KPI, volumen por día, promedio por dimensión,
   pausas por motivo, aging, **duplicados** (tiempo hasta marcarse, alertas y tasa), **satisfacción**
-  promedio y **cumplimiento de SLA**, con filtros de fecha/dimensión y exportación CSV (Recharts).
+  promedio y **cumplimiento de SLA**, con filtros de fecha/dimensión y exportación CSV/XLSX (Recharts).
 - **Fundación de interfaz** (Fase 5, sub-fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`,
   `Table`, `Tabs`, `Badge`, `Switch`/`Checkbox`), primitivas `field` para formularios, iconos
   `lucide` y avisos con `sonner`.

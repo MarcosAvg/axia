@@ -64,6 +64,7 @@ describe('base local (Dexie)', () => {
       mimeType: 'image/jpeg',
       fileName: 'foto.jpg',
       state: 'pending',
+      progress: 0,
       createdAt: Date.now(),
     })
 

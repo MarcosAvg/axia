@@ -1,3 +1,4 @@
+import { Progress } from '@/components/ui/progress'
 import { EVIDENCE_TYPES } from '../domain/types'
 import { useLocalEvidence } from '../hooks/use-evidence'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
@@ -11,15 +12,26 @@ export function PendingEvidence({ ticketId }: { ticketId: string }) {
     <ul className="flex flex-col gap-1 text-sm">
       {pending.map((item) => {
         const type = EVIDENCE_TYPES.find((candidate) => candidate === item.type)
+        const uploading = item.state === 'uploading'
         return (
           <li
             key={item.id}
-            className="flex items-center justify-between gap-2 rounded-lg border border-dashed p-2"
+            className="flex flex-col gap-1 rounded-lg border border-dashed p-2"
           >
-            <span>{type ? evidenceTypeLabels[type] : item.type}</span>
-            <span className="text-xs text-amber-700 dark:text-amber-400">
-              {ticketMessages.evidence.pending}
-            </span>
+            <div className="flex items-center justify-between gap-2">
+              <span>{type ? evidenceTypeLabels[type] : item.type}</span>
+              <span
+                className="text-xs text-amber-700 dark:text-amber-400"
+                aria-live="polite"
+              >
+                {uploading
+                  ? `${item.progress}%`
+                  : ticketMessages.evidence.pending}
+              </span>
+            </div>
+            {uploading ? (
+              <Progress value={item.progress} className="h-2" />
+            ) : null}
           </li>
         )
       })}

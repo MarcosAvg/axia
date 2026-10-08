@@ -7,6 +7,7 @@ export interface ResumableUploadParams {
   path: string
   blob: Blob
   mimeType: string
+  onProgress?: (percentage: number) => void
 }
 
 /** Subida reanudable (TUS) a Supabase Storage; reintenta por tramos. */
@@ -23,6 +24,11 @@ export function uploadResumable(params: ResumableUploadParams): Promise<void> {
         bucketName: params.bucket,
         objectName: params.path,
         contentType: params.mimeType,
+      },
+      onProgress: (bytesSent, bytesTotal) => {
+        if (params.onProgress && bytesTotal > 0) {
+          params.onProgress(Math.round((bytesSent / bytesTotal) * 100))
+        }
       },
       onError: (error) => reject(error),
       onSuccess: () => resolve(),

@@ -1,4 +1,4 @@
-import { ErrorAlert } from '@/components/shared/async-state'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { TicketList } from './ticket-list'
@@ -23,9 +23,7 @@ export function TicketListPanel({
   onPage,
 }: TicketListPanelProps) {
   if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">{ticketMessages.loading}</p>
-    )
+    return <LoadingList rows={4} />
   }
   if (isError) {
     return <ErrorAlert message={ticketMessages.errors.load} />

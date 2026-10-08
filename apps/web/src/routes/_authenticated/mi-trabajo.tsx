@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { useAuth } from '@/features/auth'
 import { TicketList, ticketMessages, useMyWork } from '@/features/tickets'
 
@@ -17,15 +18,9 @@ function MyWorkPage() {
         <h1 className="text-xl font-semibold">{myWork.title}</h1>
         <p className="text-sm text-muted-foreground">{myWork.subtitle}</p>
       </header>
-      {query.isLoading ? (
-        <p className="text-sm text-muted-foreground">
-          {ticketMessages.loading}
-        </p>
-      ) : null}
+      {query.isLoading ? <LoadingList rows={4} /> : null}
       {query.isError ? (
-        <p role="alert" className="text-sm text-destructive">
-          {ticketMessages.errors.load}
-        </p>
+        <ErrorAlert message={ticketMessages.errors.load} />
       ) : null}
       {query.data && query.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">{myWork.empty}</p>

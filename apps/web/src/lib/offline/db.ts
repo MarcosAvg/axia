@@ -27,6 +27,8 @@ export interface Evidence {
   mimeType: string
   fileName: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
+  /** Porcentaje de subida (0–100). */
+  progress: number
   createdAt: number
 }
 

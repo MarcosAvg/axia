@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
@@ -34,15 +35,9 @@ function InboxPage() {
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">{inbox.team}</h2>
-        {team.isLoading ? (
-          <p className="text-sm text-muted-foreground">
-            {ticketMessages.loading}
-          </p>
-        ) : null}
+        {team.isLoading ? <LoadingList rows={3} /> : null}
         {team.isError ? (
-          <p role="alert" className="text-sm text-destructive">
-            {ticketMessages.errors.load}
-          </p>
+          <ErrorAlert message={ticketMessages.errors.load} />
         ) : null}
         {team.data && team.data.items.length > 0 ? (
           <TicketList items={team.data.items} />

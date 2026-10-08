@@ -42,6 +42,13 @@ export const metricsMessages = {
     satisfaction: 'Satisfacción',
     sla: 'Cumplimiento de SLA',
   },
+  kpiHints: {
+    activeExtra:
+      'Trabajo registrado fuera del horario laboral (noches, fines de semana o festivos).',
+    sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
+    satisfaction: 'Promedio de las calificaciones del solicitante (1 a 5).',
+    firstFix: 'Tiquets cerrados sin reapertura.',
+  },
   sla: {
     title: 'Tiempos objetivo (SLA)',
     priority: 'Prioridad',
@@ -86,4 +93,5 @@ export const metricsMessages = {
     age: 'Antigüedad',
   },
   export: 'Exportar CSV',
+  exportXlsx: 'Exportar XLSX',
 } as const

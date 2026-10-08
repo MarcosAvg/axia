@@ -87,7 +87,72 @@ function csvFor(rows: DimensionRow[], nameOf: (id: string) => string): string {
   )
 }
 
-/** Tabla por dimensión con selector y exportación a CSV. */
+const XLSX_COLUMNS = [
+  { header: t.dimension, key: 'dimension' },
+  { header: t.tickets, key: 'tickets' },
+  { header: t.avgActive, key: 'avgActive' },
+  { header: t.avgTotal, key: 'avgTotal' },
+  { header: t.extra, key: 'extra' },
+  { header: t.reassignment, key: 'reassignment' },
+  { header: t.recapture, key: 'recapture' },
+]
+
+function xlsxRows(
+  rows: DimensionRow[],
+  nameOf: (id: string) => string,
+): Record<string, string | number>[] {
+  return rows.map((row) => ({
+    dimension: nameOf(row.id),
+    tickets: row.tickets,
+    avgActive: formatMinutes(row.avgActive),
+    avgTotal: formatMinutes(row.avgTotal),
+    extra: formatMinutes(row.avgActiveExtra),
+    reassignment: formatPercent(row.reassignmentRate),
+    recapture: formatPercent(row.recaptureRate),
+  }))
+}
+
+function ExportButtons({
+  rows,
+  nameOf,
+}: {
+  rows: DimensionRow[]
+  nameOf: (id: string) => string
+}) {
+  async function handleXlsx() {
+    const { exportXlsx } = await import('@/lib/excel')
+    await exportXlsx(
+      'metricas.xlsx',
+      t.dimension,
+      XLSX_COLUMNS,
+      xlsxRows(rows, nameOf),
+    )
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        disabled={rows.length === 0}
+        onClick={() => downloadTextFile('metricas.csv', csvFor(rows, nameOf))}
+      >
+        {metricsMessages.export}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        disabled={rows.length === 0}
+        onClick={() => void handleXlsx()}
+      >
+        {metricsMessages.exportXlsx}
+      </Button>
+    </div>
+  )
+}
+
+/** Tabla por dimensión con selector y exportación a CSV/XLSX. */
 export function DimensionTable({
   dimension,
   rows,
@@ -113,15 +178,7 @@ export function DimensionTable({
             }
           />
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11"
-          disabled={rows.length === 0}
-          onClick={() => downloadTextFile('metricas.csv', csvFor(rows, nameOf))}
-        >
-          {metricsMessages.export}
-        </Button>
+        <ExportButtons rows={rows} nameOf={nameOf} />
       </div>
       <DimensionTableGrid rows={rows} nameOf={nameOf} />
     </div>

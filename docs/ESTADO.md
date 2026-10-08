@@ -8,9 +8,9 @@
 
 ## En curso
 
-_(vacío)_ — La Fase 5 quedó **cerrada** al implementar los tiempos objetivo (SLA) configurables
-(ADR 0027). Siguen **Fase 6 (Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese
-orden. Quedan menores de UI (`Progress`, `Tooltip`/`Skeleton`) y XLSX. Sin push a `origin`.
+_(vacío)_ — La Fase 5 quedó **cerrada al 100%** (SLA, duplicados, satisfacción, XLSX y remates de
+UI). Siguen **Fase 6 (Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese
+orden. Sin push a `origin`.
 
 ## Hecho
 
@@ -186,6 +186,12 @@ orden. Quedan menores de UI (`Progress`, `Tooltip`/`Skeleton`) y XLSX. Sin push 
   - Selector de unidad (**minutos, horas o días**) en el formulario de administración; la tabla
     muestra el objetivo de forma legible (p. ej. `4 h`).
   - Compuerta completa en verde: 358 pgTAP, 116 Vitest, 12 Playwright.
+- **Remate de la Fase 5 (2026-10-08)**, rama `feat/fase-5-xlsx-progress` (fusionada localmente a
+  `main`; **sin push**):
+  - Exportación **XLSX** con `exceljs` (MIT, carga diferida) junto al CSV.
+  - **Progreso** real de la subida de evidencia (TUS `onProgress` + barra `Progress`).
+  - `Skeleton`/`Alert` en las cargas restantes y `Tooltip` en los KPI. ADR 0028.
+  - Compuerta completa en verde: 358 pgTAP, 120 Vitest, 12 Playwright.
 
 ## Siguiente
 
@@ -280,7 +286,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       (tabla `ticket_ratings`, RPC `ticket_rate`, KPI y formulario) — ADR 0026
 - [x] **Tiempos objetivo (SLA)** por prioridad y tipo de servicio, configurables, con modo de reloj y
       cumplimiento en el tablero — ADR 0027
-- [ ] (Menor) exportación XLSX
+- [x] (Menor) exportación **XLSX** (exceljs, carga diferida), **progreso** de subida de evidencia y
+      `Skeleton`/`Alert`/`Tooltip` de remate — ADR 0028
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,
