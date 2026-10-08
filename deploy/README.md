@@ -1,14 +1,19 @@
 # Axia — Despliegue (producción autoalojada)
 
-Infraestructura de producción. **Nada de aquí se ejecuta desde el repositorio ni toca
-producción**: son scripts y documentación que la persona ejecuta en su servidor.
+Infraestructura de producción. **Nada de aquí se ejecuta desde el repositorio ni toca producción**:
+son scripts y documentación que la persona ejecuta en su servidor.
 
-- `Caddyfile`: proxy TLS (frontend estático y API).
+## Qué hay aquí
+
+- `scripts/up.sh` / `scripts/down.sh`: levantan y apagan el stack de Supabase autoalojado (traen el
+  compose oficial) y, si defines `DATABASE_URL`, aplican migraciones.
+- `scripts/migrate.sh`, `scripts/publish-web.sh`: migrar y publicar el frontend.
+- `scripts/backup.sh`, `scripts/restore.sh`: respaldo y restauración con retención y *drill*.
+- `supabase/`: cómo es el stack de Supabase autoalojado (compose oficial, sin versionar).
+- `examples/`: **ejemplos opcionales** de reverse proxy (nginx, Traefik). **Tú eliges tu proxy.**
 - `.env.production.example`: variables del build del frontend.
-- `supabase/`: cómo levantar el stack de Supabase autoalojado (compose oficial).
-- `scripts/`: migrar, publicar el frontend y respaldar/restaurar.
 
-Reemplaza los marcadores (`TU_DOMINIO_WEB`, `TU_DOMINIO_API`, `TU_SERVIDOR`) por los tuyos.
+> **El reverse proxy no lo impone Axia.** Ver el *contrato* más abajo y monta el que ya uses.
 
 ## Requisitos
 
@@ -18,7 +23,54 @@ Reemplaza los marcadores (`TU_DOMINIO_WEB`, `TU_DOMINIO_API`, `TU_SERVIDOR`) por
   internet**.
 - Secretos (`.env` de Supabase, claves) **fuera del repositorio**.
 
-## Pasos
+## Arranque rápido (un comando)
+
+Desde la raíz del repositorio, en el servidor:
+
+```bash
+pnpm install
+./deploy/scripts/up.sh
+```
+
+`up.sh` descarga el compose oficial de Supabase (si no está), lo levanta con `docker compose up -d`
+y, cuando le pasas `DATABASE_URL`, aplica migraciones. Para ver qué haría sin ejecutar nada:
+
+```bash
+./deploy/scripts/up.sh --dry-run
+```
+
+Variables útiles: `SUPABASE_REF` (rama/etiqueta/commit del repo oficial para **pinar la versión**;
+por defecto, la rama principal) y `COMPOSE_DIR` (dónde vive el compose copiado;
+por defecto `deploy/supabase/docker`).
+
+> **Edita los secretos antes de exponer.** El primer `up.sh` copia el `.env.example` oficial a
+> `deploy/supabase/docker/.env`; cámbialo **todo** (ver `supabase/README.md`).
+
+## Contrato de despliegue (tu proxy)
+
+Axia solo necesita que un reverse proxy haga esto (con el proxy que prefieras):
+
+1. **Servir los estáticos** de `apps/web/dist` y, si la ruta no existe, entregar `/index.html`
+   (*fallback* SPA).
+2. **Proxy hacia Kong** (la API de Supabase, por defecto `http://127.0.0.1:8000`) **permitiendo
+   WebSocket** (Realtime) y pasando las cabeceras de autenticación.
+3. **`no-cache`** para `/sw.js`, `/registerSW.js` y `/manifest.webmanifest` (que los móviles no
+   queden con una versión vieja de la PWA).
+4. **Límite de subida** suficiente para las **evidencias** (fotos); ajústalo también en Kong/Storage.
+5. **TLS** donde tú decidas.
+
+Puedes usar **un dominio para la web y otro para la API** (recomendado: el build apunta
+`VITE_SUPABASE_URL` a la API), o un solo dominio con la API bajo una ruta. Lo que necesites.
+
+### Ejemplos (opcionales)
+
+- `examples/nginx.conf`: dos *server blocks* (web y api) con *fallback* SPA, `no-cache` y proxy a
+  Kong con WebSocket.
+- `examples/traefik.yml`: routers/servicios de Traefik como referencia.
+
+Adáptalos; son solo puntos de partida.
+
+## Paso a paso (alternativa manual)
 
 ### 1. Código
 ```bash
@@ -27,8 +79,8 @@ pnpm install
 ```
 
 ### 2. Stack de Supabase (autoalojado)
-Sigue `supabase/README.md`: copia el compose oficial, edita sus secretos y levántalo con
-`docker compose up -d`.
+`./deploy/scripts/up.sh` (o sigue `supabase/README.md` para hacerlo a mano). Cambia **todos** los
+secretos en `deploy/supabase/docker/.env`.
 
 ### 3. Migraciones y semillas
 ```bash
@@ -44,11 +96,9 @@ set -a && . deploy/.env.production && set +a
 DEPLOY_TARGET='TU_SERVIDOR:/srv/axia/web' ./deploy/scripts/publish-web.sh
 ```
 
-### 5. Caddy (TLS automático)
-```bash
-cp deploy/Caddyfile /etc/caddy/Caddyfile   # edita los dominios primero
-caddy reload --config /etc/caddy/Caddyfile
-```
+### 5. Tu reverse proxy
+Configura tu proxy según el **contrato** de arriba; el directorio publicado (`/srv/axia/web`) es el
+que sirve. Revisa `examples/` si quieres un punto de partida.
 
 ### 6. Verificar
 - `https://TU_DOMINIO_WEB` carga y permite iniciar sesión.

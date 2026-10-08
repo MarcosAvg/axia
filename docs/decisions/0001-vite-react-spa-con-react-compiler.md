@@ -26,7 +26,7 @@ de `useMemo`/`useCallback`.
 
 ## Consecuencias
 
-- Build simple y rápido; el despliegue es estático (Caddy sirve archivos).
+- Build simple y rápido; el despliegue es estático (un servidor de archivos lo sirve).
 - No hay SSR: la primera pintura depende del cliente, aceptable para una app interna.
 - React Compiler debe seguir las reglas de React; `eslint-plugin-react-hooks`
   (`recommended-latest`) las hace cumplir.

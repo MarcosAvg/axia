@@ -10,7 +10,8 @@
 
 _(vacío)_ — **Todas las fases (0–7) están cerradas.** El 2026-10-08 se publicó `main` a `origin`
 por petición expresa de la persona (**excepción única**); a partir de aquí la regla vuelve a ser
-“solo commits locales, sin publicar”. Lo que queda es operativo: aplicar los despliegues reales
+“solo commits locales, sin publicar”. El despliegue se afinó: **Axia no impone reverse proxy**
+(contrato + ejemplos en `deploy/`). Lo que queda es operativo: aplicar los despliegues reales
 (`deploy/README.md`), activar push/correo/escalamiento (`docs/notificaciones-push.md`) y los
 pendientes de negocio que surjan.
 
@@ -216,7 +217,7 @@ pendientes de negocio que surjan.
   - Compuerta completa en verde: 391 pgTAP, 125 Vitest, 12 Playwright.
 - **Fase 7A/7B — despliegue autoalojado y respaldos (2026-10-08)**, rama `feat/fase-7-despliegue`
   (fusionada localmente a `main`; **sin push**):
-  - `deploy/` con `Caddyfile`, ejemplos de entorno, `supabase/` (compose oficial) y runbook;
+  - `deploy/` con ejemplos de entorno, `supabase/` (compose oficial) y runbook;
     scripts `migrate.sh`, `publish-web.sh`, `backup.sh` y `restore.sh` (con `DATABASE_URL` o
     `DB_CONTAINER`, retención y drill). Sin secretos en el repo. ADR 0032.
   - Verificado en local: `backup.sh` genera el dump y `restore.sh` lo restaura en una base
@@ -241,6 +242,12 @@ pendientes de negocio que surjan.
   - `push_subscriptions` (RLS por usuario) y guía de activación en `docs/notificaciones-push.md`;
     workflow **manual** `deploy.yml` guardado por secretos; Capacitor documentado. ADR 0035.
   - Compuerta completa en verde: 404 pgTAP, 125 Vitest, 12 Playwright.
+- **Despliegue sin proxy impuesto (2026-10-08)**, rama `feat/deploy-sin-proxy` (fusionada localmente
+  a `main`; **sin push**):
+  - Se elimina `deploy/Caddyfile`: el **reverse proxy es elección de quien despliega**. `deploy/`
+    documenta el **contrato** y ofrece **ejemplos** (nginx y Traefik) en `deploy/examples/`.
+  - Nuevo comando único `deploy/scripts/up.sh` (con `--dry-run`) que trae el compose oficial de
+    Supabase y migra si hay `DATABASE_URL`; `down.sh` lo apaga sin borrar datos. ADR 0036.
 
 ## Siguiente
 
@@ -353,7 +360,7 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       UI (tareas abiertas) — ADR 0034
 
 ### Fase 7 — Producción
-- [x] **7A** Despliegue autoalojado: `deploy/` con Caddy, ejemplos de entorno, `supabase/` (compose
+- [x] **7A** Despliegue autoalojado: `deploy/` con ejemplos de entorno, `supabase/` (compose
       oficial), scripts de migración y publicación, y runbook — ADR 0032
 - [x] **7B** Respaldos y restauración: `backup.sh`/`restore.sh` con retención y prueba de
       restauración documentada (verificada en local)

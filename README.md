@@ -53,8 +53,9 @@ aislados.
 - **Importación** (Fase 6A/6B): infraestructura genérica (`/admin/integraciones`) y **adaptador
   CSV/Excel** con dry run, resolución de alias/estatus e importación idempotente; los adaptadores de
   fuentes externas viven **aislados** del núcleo.
-- **Despliegue** (Fase 7): `deploy/` con Caddy, compose de Supabase autoalojado, scripts de
-  migración/publicación y respaldo/restauración, y un runbook; **tú lo ejecutas**. Ver
+- **Despliegue** (Fase 7): `deploy/` con scripts de migración/publicación y respaldo/restauración,
+  un runbook y un **contrato de reverse proxy** (con ejemplos opcionales; Axia **no impone** ninguno)
+  para el compose de Supabase autoalojado; **tú lo ejecutas**. Ver
   [`deploy/README.md`](deploy/README.md). Guía de correo/push/escalamiento en
   [`docs/notificaciones-push.md`](docs/notificaciones-push.md).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,

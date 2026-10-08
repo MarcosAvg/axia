@@ -21,7 +21,7 @@ Guía paso a paso para arrancar el proyecto **Axia** (seguimiento de tiquets de 
 | Backend | Supabase (nube o autoalojado): Postgres, Auth, Storage, Realtime, Edge Functions |
 | Pruebas | Vitest, Playwright, pgTAP |
 | Gestor de paquetes | pnpm (monorepo con workspaces) |
-| Proxy en producción | Caddy |
+| Proxy en producción | El que elijas (no lo impone Axia) |
 | Móvil nativo (opcional, después) | Capacitor |
 
 El diseño de la base de datos (tablas, RLS, funciones de transición) se aborda en una etapa posterior. Esta guía deja listo todo lo demás.
@@ -62,7 +62,7 @@ axia/
 │   ├── functions/
 │   ├── tests/database/
 │   └── seed.sql
-├── deploy/                  → docker-compose de producción, Caddyfile, guías
+├── deploy/                  → scripts y guías de despliegue (sin proxy impuesto)
 ├── docs/                    → arquitectura y decisiones
 ├── .github/workflows/       → CI
 ├── package.json
@@ -622,13 +622,13 @@ jobs:
 
 ```bash
 git clone --depth 1 https://github.com/supabase/supabase
-mkdir -p deploy/supabase
-cp -rf supabase/docker/* deploy/supabase/
-cp supabase/docker/.env.example deploy/supabase/.env
-cd deploy/supabase
+mkdir -p deploy/supabase/docker
+cp -rf supabase/docker/* deploy/supabase/docker/
+cp supabase/docker/.env.example deploy/supabase/docker/.env
+cd deploy/supabase/docker
 ```
 
-Edita `deploy/supabase/.env` y **cambia todos los secretos**: contraseña de Postgres, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, credenciales del dashboard, claves internas, SMTP, `SITE_URL`, `API_EXTERNAL_URL` y `SUPABASE_PUBLIC_URL`. La guía oficial de autoalojamiento con Docker explica cómo generar las claves JWT. **Nunca dejes los valores de ejemplo y nunca subas este archivo al repositorio.**
+Edita `deploy/supabase/docker/.env` y **cambia todos los secretos**: contraseña de Postgres, `JWT_SECRET`, `ANON_KEY`, `SERVICE_ROLE_KEY`, credenciales del dashboard, claves internas, SMTP, `SITE_URL`, `API_EXTERNAL_URL` y `SUPABASE_PUBLIC_URL`. La guía oficial de autoalojamiento con Docker explica cómo generar las claves JWT. **Nunca dejes los valores de ejemplo y nunca subas este archivo al repositorio.**
 
 ```bash
 docker compose pull
@@ -636,28 +636,17 @@ docker compose up -d
 docker compose ps
 ```
 
-### 10.3 Caddy
+### 10.3 Reverse proxy (el que elijas)
 
-`deploy/Caddyfile`:
+Axia **no impone** un proxy. Cualquiera sirve; solo debe cumplir el **contrato**:
 
-```
-api.axia.tuinstitucion.mx {
-    reverse_proxy localhost:8000
-}
+1. Servir los estáticos de `apps/web/dist` con *fallback* a `index.html` (SPA).
+2. Hacer proxy a **Kong** (API de Supabase, por defecto `127.0.0.1:8000`) **permitiendo WebSocket** (Realtime).
+3. Poner `no-cache` a `sw.js`, `registerSW.js` y `manifest.webmanifest` (que los móviles no queden con versiones viejas de la PWA).
+4. Permitir el tamaño de las **evidencias** (subida de fotos).
+5. Terminar **TLS** donde tú decidas.
 
-axia.tuinstitucion.mx {
-    root * /srv/axia/web
-    encode gzip
-
-    @sw path /sw.js /registerSW.js /manifest.webmanifest
-    header @sw Cache-Control "no-cache"
-
-    try_files {path} /index.html
-    file_server
-}
-```
-
-El `no-cache` en el service worker evita que los celulares se queden con versiones viejas.
+El detalle está en `deploy/README.md` y hay **ejemplos opcionales** en `deploy/examples/` (nginx y Traefik).
 
 ### 10.4 Aplicar migraciones
 
@@ -741,7 +730,7 @@ El mismo repositorio sirve para ambos entornos. Mantén cada uno con su propio a
 **Producción (cuando toque)**
 - [ ] Servidor con Docker, dominio y puertos 80/443
 - [ ] Todos los secretos de Supabase cambiados
-- [ ] Caddy sirviendo el frontend y el API con TLS
+- [ ] Reverse proxy propio sirviendo el frontend y el API con TLS
 - [ ] Respaldos programados y una restauración de prueba realizada
 
 ---

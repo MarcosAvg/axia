@@ -3,6 +3,9 @@
 El stack de Supabase (Postgres, Auth, Storage, Realtime, Kong/API) se levanta con el compose oficial.
 **No** lo copiamos al repositorio (cambia con frecuencia y contiene secretos): se copia en el servidor.
 
+> **Atajo:** `./deploy/scripts/up.sh` hace por ti los pasos 1–2 (descarga el compose y lo levanta) y
+> migra si defines `DATABASE_URL`. Los pasos de abajo son el detalle manual (y qué hay que editar).
+
 ```bash
 git clone --depth 1 https://github.com/supabase/supabase
 mkdir -p deploy/supabase/docker

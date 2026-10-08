@@ -15,7 +15,8 @@ ejecuta. La guía de referencia es `docs/configuracion-inicial.md` §10.
   secretos). `deploy/supabase/` explica cómo copiarlo, qué secretos cambiar y el detalle de
   Supavisor.
 - **Caddy** (`deploy/Caddyfile`) para TLS automático, frontend estático y proxy de la API, con
-  `no-cache` del service worker.
+  `no-cache` del service worker. *(Superado por la ADR 0036: el proxy pasó a ser elección de quien
+  despliega.)*
 - **Scripts** en `deploy/scripts/`:
   - `migrate.sh` (`supabase db push --db-url`),
   - `publish-web.sh` (build con `.env.production` y `rsync` al servidor),
