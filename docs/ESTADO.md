@@ -128,13 +128,24 @@ exportación y permisos de interfaz. Sin push a `origin` por indicación de la p
     antigüedad y ruteo; índices nuevos. Permiso `metrics.view`.
   - Decisiones en el ADR 0021. Compuerta completa en verde: 309 pgTAP, 96 Vitest, 11 Playwright.
   - Pendientes: satisfacción (sin tabla de calificación) y tiempos objetivo (SLA), como tramo aparte.
+- **Fase 5A (ajuste) — cobertura por equipo, extra y festivos (2026-10-08)**, rama
+  `feat/fase-5a-cobertura-extra` (fusionada localmente a `main`; **sin push**):
+  - El tiempo laboral mide la **cobertura del equipo** (Mantenimiento 06:00–20:00; resto 08:00–17:00,
+    de lunes a viernes), no el turno de cada persona; los turnos por persona y su rotación quedan
+    fuera por decisión.
+  - El trabajo real se separa en **en horario** (`_laboral`) y **fuera de horario** (`_extra`):
+    noches, fin de semana y festivos trabajados no se pierden. Festivos oficiales de México
+    (2026-2027) sembrados y editables. ADR 0022.
+  - Pendiente: **UI de administración** de calendarios, turnos y festivos.
+  - Compuerta completa en verde: 321 pgTAP, 96 Vitest, 11 Playwright.
 
 ## Siguiente
 
 **Fase 5B — Tableros y exportación**: feature `metrics` (`api/` + hooks), tableros con Recharts
 (componente `chart` de shadcn/ui), filtros por fecha/dimensión, gating con `metrics.view` y
-exportación. Antes conviene resolver la zona horaria y el horario laboral reales (pregunta 3), que
-afectan los números. La satisfacción espera a la tabla de calificación y el SLA a sus valores.
+exportación. También queda pendiente la **UI de administración de calendarios, turnos y festivos**
+(hoy en la semilla) y mostrar las fechas en la zona de la institución. La satisfacción espera a la
+tabla de calificación y el SLA a sus valores.
 
 ## Hoja de ruta
 
@@ -236,7 +247,7 @@ concreta, opciones y recomendación.
 |---|---|---|---|
 | 1 | Lista inicial de motivos, subestados y campos | Fase 1 (semilla) | **Resuelta**: §6 de la especificación trae las semillas ficticias |
 | 2 | ¿Los solicitantes tendrán cuenta o serán contactos sin cuenta? | Fase 1 | **Resuelta**: modelo mixto (catálogo con vínculo opcional) |
-| 3 | Zona horaria de la institución y horario laboral para métricas | Fase 5 | Pendiente |
+| 3 | Zona horaria de la institución y horario laboral para métricas | Fase 5 | **Resuelta (diseño)**: una zona para la instancia (`America/Mexico_City`; confirmar si difiere), cobertura por equipo (Mantenimiento 06:00–20:00; resto 08:00–17:00 L–V), extra separado y festivos oficiales MX editables (ADR 0022) |
 | 4 | Formato del número de tiquet | Fase 1 | **Resuelta**: RN-25 (UUID interno + consecutivo global + folio por patrón) |
 | 5 | ¿Se requieren tiempos objetivo (SLA) por prioridad o tipo de servicio? | Fase 5 | Pendiente |
 | 6 | Valores distintos de la columna ESTATUS de la hoja (solo se conoce `EN PROCESO`) | Fase 6 | Pendiente |
