@@ -2229,6 +2229,18 @@ export type Database = {
     }
     Functions: {
       can_see_ticket: { Args: { p_ticket_id: string }; Returns: boolean }
+      evidence_add: {
+        Args: {
+          p_client_request_id?: string
+          p_mime_type?: string
+          p_occurred_at?: string
+          p_size_bytes?: number
+          p_storage_path: string
+          p_ticket_id: string
+          p_type: Database['public']['Enums']['evidence_type']
+        }
+        Returns: string
+      }
       has_permission: {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
@@ -2248,11 +2260,32 @@ export type Database = {
         Returns: boolean
       }
       require_permission: { Args: { p_permission: string }; Returns: undefined }
+      ticket_add_auxiliary: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_reason_id: string
+          p_technician_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       ticket_advance_pause: {
         Args: {
           p_client_request_id?: string
           p_note?: string
           p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_assign_supervisor: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_reason_id: string
+          p_supervisor_user_id?: string
+          p_team_id?: string
           p_ticket_id: string
         }
         Returns: undefined
@@ -2291,6 +2324,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      ticket_check_duplicates: { Args: { p_data: Json }; Returns: Json }
       ticket_comment: {
         Args: {
           p_client_request_id?: string

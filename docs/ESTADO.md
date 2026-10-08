@@ -8,7 +8,13 @@
 
 ## En curso
 
-_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
+**Fase 3A — Tramo 1: backend de operación** (rama `feat/fase-3-flow-backend`).
+1. Evidencia: bucket privado `evidence`, políticas de `storage.objects` ligadas a `can_see_ticket`
+   y RPC `evidence_add(...)` idempotente.
+2. RPC `ticket_assign_supervisor` (RN-06), `ticket_add_auxiliary` (RN-07) y
+   `ticket_check_duplicates` (RN-29, pre-chequeo sin crear).
+3. pgTAP de cada RPC (válido, rol incorrecto, transición inválida e idempotencia).
+4. `pnpm db:reset`, `pnpm db:types`, `pnpm db:test`; luego Tramo 2 (`feat/fase-3-tickets`).
 
 ## Hecho
 
