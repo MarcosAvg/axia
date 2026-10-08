@@ -400,17 +400,17 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: Fase 2, tramo 1: migración `auth_profiles_and_identity` (disparador de perfil, `me()`,
   `profile_update()` y endurecimiento de permisos de ejecución), semilla de usuarios demo y
   `enable_signup = false`; `90_auth_profiles.test.sql` (25 pruebas) y 200 pgTAP en verde;
-  `pnpm db:reset` limpio y `pnpm db:types`. ADR 0016. Rama `feat/fase-2-auth-db`.
+  `pnpm db:reset` limpio y `pnpm db:types`. ADR 0016. Rama `feat/fase-2-auth`.
 - 2026-10-08: Fase 2, tramo 2: feature `auth` (sesión con `AuthProvider`, guard por permiso,
   `AppShell`, acceso, panel, perfil y administración reservada), script `pnpm env:local`, pruebas
-  Vitest (32) y Playwright (4) en verde. `pnpm check` completo en verde. Rama `feat/fase-2-auth-app`.
+  Vitest (32) y Playwright (4) en verde. `pnpm check` completo en verde. Rama `feat/fase-2-auth`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
   el **endurecimiento de permisos** (se retira `EXECUTE` a `anon`/`PUBLIC` de las funciones del
   núcleo, que los privilegios por defecto de Supabase concedían). Sin auto-registro
   (`enable_signup = false`) y cuatro **usuarios demo** ficticios en `seed.sql`. Pruebas pgTAP
-  `90_auth_profiles.test.sql`; 200 pruebas en verde y `pnpm db:types`. Rama `feat/fase-2-auth-db`.
+  `90_auth_profiles.test.sql`; 200 pruebas en verde y `pnpm db:types`. Rama `feat/fase-2-auth`.
 - **Fase 2, Tramo 2 (estructura de la app)**: feature `auth` (`api`, `domain`, `hooks`,
   `components`, `schemas`, `i18n`, `index`), `AuthProvider` (sesión + identidad con TanStack Query),
   guard `RequireAuth`/`RequirePermission` **por permiso**, layout `AppShell`, pantalla de acceso
@@ -419,4 +419,4 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `_authenticated/index.tsx`. React Hook Form + Zod (`react-hook-form`, `zod`,
   `@hookform/resolvers`, MIT); script `pnpm env:local` (`scripts/write-local-env.mjs`); pruebas:
   Vitest (dominio, esquemas, enrutado con sesión simulada) y Playwright (acceso, panel, salir,
-  `/admin` restringido). `pnpm check` en verde. Rama `feat/fase-2-auth-app`.
+  `/admin` restringido). `pnpm check` en verde. Rama `feat/fase-2-auth`.
