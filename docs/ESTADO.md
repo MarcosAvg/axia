@@ -9,11 +9,11 @@
 ## En curso
 
 Fase 1, Etapa B — migraciones por tramos (rama `feat/fase-1-db`), cada uno con pgTAP y `pnpm check`.
-**Hechos:** tramos 1-4 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
-historial/evidencias; ruteo/ofertas/duplicados/RPC).
-**Faltan:** 5. pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación; 6. tiempos
-(calendarios, tramos y cálculo); 7. notificaciones y escalamiento; 8. RLS completa, visibilidad,
-semillas y vistas de indicadores.
+**Hechos:** tramos 1-5 (configuración y catálogos; usuarios/roles/permisos/ámbitos; tiquets/folio/
+historial/evidencias; ruteo/ofertas/duplicados/RPC; pausas/recaptura/reclamaciones/duplicados/
+reactivación).
+**Faltan:** 6. tiempos (calendarios, tramos y cálculo); 7. notificaciones y escalamiento; 8. RLS
+completa, visibilidad, semillas y vistas de indicadores.
 
 ## Hecho
 
@@ -154,7 +154,7 @@ Modelo completo según `docs/especificacion-negocio.md`. **Punto de control:** s
 2. [x] Usuarios, perfiles, roles, permisos y ámbitos (equipo, edificios, categorías)
 3. [x] Tiquets, folio, historial, participantes y evidencias
 4. [x] Ruteo, ofertas, detección de posibles duplicados y transiciones del flujo (RPC)
-5. [ ] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
+5. [x] Pausas, recaptura, reclamaciones, reapertura, duplicados y reactivación
 6. [ ] Tiempos: calendarios, tramos y funciones de cálculo
 7. [ ] Notificaciones, reglas y escalamiento
 8. [ ] RLS completa, visibilidad, semillas y vistas de indicadores
@@ -362,3 +362,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   pruebas pgTAP (catalogos, usuarios/roles, tiquets/folio/evidencias y flujo con RPC ruteo,
   asignación, inicio, atendido, validación). `pnpm db:reset` limpio y `pnpm check` en verde.
   Rama `feat/fase-1-db`.
+- 2026-10-07: Fase 1, Etapa B, tramo 5: pausas y subestados, recaptura, reclamaciones
+  (procedente/improcedente/requiere tiquet nuevo), duplicados y reactivación, con sus RPC y
+  pruebas pgTAP. `pnpm check` en verde. Rama `feat/fase-1-tramos-5-8`.

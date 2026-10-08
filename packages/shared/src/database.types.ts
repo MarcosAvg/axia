@@ -958,6 +958,86 @@ export type Database = {
           },
         ]
       }
+      ticket_claims: {
+        Row: {
+          client_request_id: string | null
+          created_at: string
+          cycle: number
+          description: string
+          id: string
+          opened_at: string
+          opened_by: string | null
+          prior_status: Database['public']['Enums']['ticket_status']
+          reason_id: string
+          resolution: Database['public']['Enums']['claim_resolution'] | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          result_id: string | null
+          status: Database['public']['Enums']['claim_status']
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          client_request_id?: string | null
+          created_at?: string
+          cycle: number
+          description: string
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          prior_status: Database['public']['Enums']['ticket_status']
+          reason_id: string
+          resolution?: Database['public']['Enums']['claim_resolution'] | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          result_id?: string | null
+          status?: Database['public']['Enums']['claim_status']
+          ticket_id: string
+        }
+        Update: {
+          client_request_id?: string | null
+          created_at?: string
+          cycle?: number
+          description?: string
+          id?: string
+          opened_at?: string
+          opened_by?: string | null
+          prior_status?: Database['public']['Enums']['ticket_status']
+          reason_id?: string
+          resolution?: Database['public']['Enums']['claim_resolution'] | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          result_id?: string | null
+          status?: Database['public']['Enums']['claim_status']
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_claims_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_result_id_fkey'
+            columns: ['result_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ticket_duplicate_candidates: {
         Row: {
           candidate_ticket_id: string
@@ -1075,6 +1155,49 @@ export type Database = {
           },
         ]
       }
+      ticket_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          link_type: Database['public']['Enums']['link_type']
+          linked_ticket_id: string
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type: Database['public']['Enums']['link_type']
+          linked_ticket_id: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link_type?: Database['public']['Enums']['link_type']
+          linked_ticket_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
+            columns: ['linked_ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       ticket_offers: {
         Row: {
           cycle: number
@@ -1175,6 +1298,116 @@ export type Database = {
           },
           {
             foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_pause_steps: {
+        Row: {
+          actor_id: string | null
+          entered_at: string
+          exited_at: string | null
+          id: string
+          note: string | null
+          pause_id: string
+          reason_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          actor_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          note?: string | null
+          pause_id: string
+          reason_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          note?: string | null
+          pause_id?: string
+          reason_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_pause_steps_pause_id_fkey'
+            columns: ['pause_id']
+            isOneToOne: false
+            referencedRelation: 'ticket_pauses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pause_steps_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ticket_pauses: {
+        Row: {
+          client_request_id: string | null
+          closed_at: string | null
+          created_at: string
+          cycle: number
+          estimated_date: string | null
+          id: string
+          note: string | null
+          opened_at: string
+          opened_by: string | null
+          origin: Database['public']['Enums']['span_origin']
+          reason_id: string
+          recorded_by: string | null
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          client_request_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          cycle: number
+          estimated_date?: string | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          origin?: Database['public']['Enums']['span_origin']
+          reason_id: string
+          recorded_by?: string | null
+          ticket_id: string
+        }
+        Update: {
+          client_request_id?: string | null
+          closed_at?: string | null
+          created_at?: string
+          cycle?: number
+          estimated_date?: string | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          origin?: Database['public']['Enums']['span_origin']
+          reason_id?: string
+          recorded_by?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_pauses_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
@@ -1529,6 +1762,15 @@ export type Database = {
         Returns: boolean
       }
       require_permission: { Args: { p_permission: string }; Returns: undefined }
+      ticket_advance_pause: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       ticket_assign_technician: {
         Args: {
           p_client_request_id?: string
@@ -1580,6 +1822,50 @@ export type Database = {
         Args: { p_ticket_id: string }
         Returns: undefined
       }
+      ticket_mark_duplicate: {
+        Args: {
+          p_client_request_id?: string
+          p_original_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_open_claim: {
+        Args: {
+          p_client_request_id?: string
+          p_description: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_pause: {
+        Args: {
+          p_client_request_id?: string
+          p_estimated_date?: string
+          p_note?: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_reactivate: {
+        Args: {
+          p_client_request_id?: string
+          p_reason_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
+      ticket_recapture: {
+        Args: {
+          p_changes: Json
+          p_client_request_id?: string
+          p_reason_id?: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       ticket_reject: {
         Args: {
           p_client_request_id?: string
@@ -1587,6 +1873,20 @@ export type Database = {
           p_reason_id: string
           p_ticket_id: string
         }
+        Returns: undefined
+      }
+      ticket_resolve_claim: {
+        Args: {
+          p_client_request_id?: string
+          p_note?: string
+          p_resolution: Database['public']['Enums']['claim_resolution']
+          p_result_id?: string
+          p_ticket_id: string
+        }
+        Returns: string
+      }
+      ticket_resume: {
+        Args: { p_client_request_id?: string; p_ticket_id: string }
         Returns: undefined
       }
       ticket_route: { Args: { p_ticket_id: string }; Returns: undefined }
@@ -1617,6 +1917,8 @@ export type Database = {
     }
     Enums: {
       assignment_stage: 'supervisor' | 'technician'
+      claim_resolution: 'upheld' | 'dismissed' | 'new_ticket'
+      claim_status: 'open' | 'resolved'
       clock_class: 'counted' | 'not_counted'
       event_source: 'app' | 'import' | 'integration'
       event_type:
@@ -1647,6 +1949,7 @@ export type Database = {
         | 'imported'
       evidence_type:
         'request' | 'before' | 'during' | 'after' | 'claim' | 'other'
+      link_type: 'duplicate_of' | 'derived_from' | 'related_to' | 'blocked_by'
       offer_status: 'offered' | 'taken' | 'withdrawn'
       participation_type: 'leader' | 'auxiliary'
       permission_scope: 'own' | 'team' | 'buildings' | 'all'
@@ -1802,6 +2105,8 @@ export const Constants = {
   public: {
     Enums: {
       assignment_stage: ['supervisor', 'technician'],
+      claim_resolution: ['upheld', 'dismissed', 'new_ticket'],
+      claim_status: ['open', 'resolved'],
       clock_class: ['counted', 'not_counted'],
       event_source: ['app', 'import', 'integration'],
       event_type: [
@@ -1832,6 +2137,7 @@ export const Constants = {
         'imported',
       ],
       evidence_type: ['request', 'before', 'during', 'after', 'claim', 'other'],
+      link_type: ['duplicate_of', 'derived_from', 'related_to', 'blocked_by'],
       offer_status: ['offered', 'taken', 'withdrawn'],
       participation_type: ['leader', 'auxiliary'],
       permission_scope: ['own', 'team', 'buildings', 'all'],
