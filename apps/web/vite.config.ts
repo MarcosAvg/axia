@@ -57,6 +57,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // El cliente de Supabase exige URL y clave al construirse; en pruebas no llega
+    // a hacer red (los hooks se sustituyen), así que basta con valores ficticios.
+    env: {
+      VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+      VITE_SUPABASE_ANON_KEY: 'clave-anon-de-prueba',
+    },
     // Lo de `e2e/` lo corre Playwright, no Vitest.
     exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },

@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -7,13 +6,24 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  authMessages,
+  LoadingScreen,
+  LoginForm,
+  useAuth,
+} from '@/features/auth'
 import { messages } from '@/lib/i18n'
 
-export const Route = createFileRoute('/')({
-  component: HomePage,
+export const Route = createFileRoute('/login')({
+  component: LoginPage,
 })
 
-function HomePage() {
+function LoginPage() {
+  const { status } = useAuth()
+
+  if (status === 'loading') return <LoadingScreen />
+  if (status === 'signed-in') return <Navigate to="/" replace />
+
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 text-foreground">
       <header className="flex flex-col items-center gap-1 text-center">
@@ -24,11 +34,11 @@ function HomePage() {
       </header>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{messages.home.welcome}</CardTitle>
-          <CardDescription>{messages.home.description}</CardDescription>
+          <CardTitle>{authMessages.login.title}</CardTitle>
+          <CardDescription>{authMessages.login.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button className="w-full">{messages.home.action}</Button>
+          <LoginForm />
         </CardContent>
       </Card>
     </main>

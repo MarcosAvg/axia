@@ -14,14 +14,17 @@ aislados.
 
 ## Estado del proyecto
 
-**Fase 1 (base de datos núcleo) cerrada.** Ya funciona:
+**Fases 1 y 2 cerradas.** Ya funciona:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
-- Tailwind + shadcn/ui, TanStack Router (rutas por carpetas) y TanStack Query.
-- Pantalla de inicio "Axia" y una página de "no encontrado".
+- Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 175 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 200 pruebas pgTAP.
+- **Autenticación y estructura de la app** (Fase 2): inicio de sesión con correo y contraseña
+  (sin auto-registro), perfil creado automáticamente al dar de alta una cuenta, RPC `me()` con
+  perfil/roles/permisos, pantalla "Mi perfil" y layout con rutas protegidas **por permiso**
+  (`/`, `/perfil`, `/admin`). Cuatro usuarios demo ficticios para desarrollo.
 - **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
 - **PWA instalable** (manifest, iconos y `registerType: 'prompt'` con aviso de actualización) y
   esqueleto offline con Dexie (`outbox`, `evidencias`).
@@ -29,8 +32,8 @@ aislados.
   pgTAP y build).
 - CI en GitHub Actions que levanta Supabase y ejecuta la compuerta.
 
-Lo siguiente es la **Fase 2 (autenticación y estructura de la app)**. Ver la hoja de ruta y lo
-pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 3 (pantallas principales)**. Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
@@ -48,22 +51,29 @@ git clone <url-del-repositorio> axia
 cd axia
 pnpm install      # instala dependencias y configura los hooks de git (Husky)
 pnpm db:start      # levanta Supabase local (la primera vez descarga las imágenes)
+pnpm db:reset      # aplica migraciones y semilla
+pnpm env:local     # escribe apps/web/.env.local desde el Supabase local
 pnpm --filter @axia/web exec playwright install chromium   # navegador para la prueba E2E
 pnpm dev          # abre http://localhost:5173
 ```
 
-`pnpm install` ejecuta el script `prepare` de Husky y deja listos los hooks de commit. No hace
-falta Supabase para ver la pantalla de inicio.
+`pnpm install` ejecuta el script `prepare` de Husky y deja listos los hooks de commit.
 
 Para trabajar con la base de datos local:
 
 ```bash
 pnpm db:start     # levanta Supabase local (la primera vez descarga las imágenes)
 pnpm db:reset     # aplica migraciones y semilla
+pnpm env:local    # regenera apps/web/.env.local (o hazlo a mano, ver .env.example)
 ```
 
-Copia `VITE_SUPABASE_URL` y la clave pública (`ANON_KEY`) que imprime `pnpm db:start` a
-`apps/web/.env.local`, que no se sube al repositorio (ver `apps/web/.env.example`).
+`pnpm env:local` escribe `apps/web/.env.local` (que no se sube al repositorio) a partir de
+`pnpm db:start`; también puedes copiar `VITE_SUPABASE_URL` y la clave pública a mano
+(ver `apps/web/.env.example`).
+
+**Usuarios demo** (solo entorno local, ficticios; contraseña `AxiaDemo2026!`):
+`admin@axia.test`, `supervisor@axia.test`, `tecnico@axia.test` y `solicitante@axia.test`. El alta de
+cuentas es solo por administrador o invitación: **no hay auto-registro**.
 
 El build de producción (`pnpm build`) genera el service worker y el manifest en
 `apps/web/dist`; los iconos de `apps/web/public/` son **provisionales** hasta que la
@@ -77,12 +87,13 @@ institución entregue el logo.
 | `pnpm build` | Compila la app a `apps/web/dist` |
 | `pnpm lint` | ESLint (incluye los límites de tamaño y `react-hooks`/`jsx-a11y`) |
 | `pnpm typecheck` | Verificación de tipos de todo el monorepo |
-| `pnpm test` | Pruebas: Vitest (unitarias/frontend) + Playwright (humo E2E) |
+| `pnpm test` | Pruebas: Vitest (unitarias/frontend) + Playwright (flujos de sesión) |
 | `pnpm format` | Formatea con Prettier |
 | `pnpm db:start` / `pnpm db:stop` | Levanta/apaga el Supabase local |
 | `pnpm db:reset` | Reconstruye la base local (migraciones + semilla) |
 | `pnpm db:test` | Pruebas de base de datos con pgTAP |
 | `pnpm db:types` | Regenera los tipos de TypeScript desde la base local |
+| `pnpm env:local` | Escribe `apps/web/.env.local` desde el Supabase local |
 | `pnpm check:agnostic` | Falla si el núcleo menciona plataformas externas |
 | `pnpm check:boundaries` | Reglas de dependencia entre capas (dependency-cruiser) |
 | `pnpm knip` | Código y dependencias sin uso |

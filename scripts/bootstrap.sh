@@ -42,10 +42,9 @@ pnpm db:reset
 info "Instalando el navegador de Playwright (Chromium)…"
 pnpm --filter @axia/web exec playwright install chromium
 
-if [ ! -f apps/web/.env.local ]; then
-  warn "Crea apps/web/.env.local con VITE_SUPABASE_URL y la clave pública que imprime 'pnpm db:start'."
-  warn "Puedes basarte en apps/web/.env.example."
-fi
+info "Generando apps/web/.env.local desde el Supabase local…"
+pnpm env:local
 
 ok "Listo. Verificación recomendada:  pnpm check"
 ok "Servidor de desarrollo:            pnpm dev  (http://localhost:5173)"
+ok "Usuarios demo (contraseña AxiaDemo2026!): admin@axia.test, supervisor@axia.test, tecnico@axia.test, solicitante@axia.test"
