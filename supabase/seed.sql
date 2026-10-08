@@ -1,4 +1,5 @@
 -- Semilla de datos ficticios de Axia. Se carga con `pnpm db:reset` y `supabase start`.
+-- Los nombres de ejemplo llevan el sufijo "(ejemplo)" para no chocar con los datos de las pruebas.
 
 -- Configuración de la instancia (una fila).
 insert into public.instance_settings (singleton) values (true)
@@ -53,7 +54,6 @@ insert into public.role_permissions (role_id, permission_id, scope)
 select r.id, v.permission_id, v.scope::public.permission_scope
 from (
   values
-    -- Solicitante
     ('requester', 'ticket.create', 'own'),
     ('requester', 'ticket.view', 'own'),
     ('requester', 'ticket.validate', 'own'),
@@ -61,7 +61,6 @@ from (
     ('requester', 'ticket.cancel', 'own'),
     ('requester', 'ticket.mark_duplicate', 'own'),
     ('requester', 'ticket.rate', 'own'),
-    -- Supervisor
     ('supervisor', 'ticket.view', 'buildings'),
     ('supervisor', 'ticket.take_offer', 'team'),
     ('supervisor', 'ticket.assign_supervisor', 'team'),
@@ -84,7 +83,6 @@ from (
     ('supervisor', 'ticket.rate_on_behalf', 'team'),
     ('supervisor', 'time.record_manual', 'team'),
     ('supervisor', 'act_on_behalf', 'team'),
-    -- Técnico
     ('technician', 'ticket.view', 'own'),
     ('technician', 'ticket.recapture', 'own'),
     ('technician', 'ticket.start', 'own'),
@@ -98,7 +96,6 @@ from (
 join public.roles r on r.name = v.role_name
 on conflict do nothing;
 
--- Administrador: todos los permisos con ámbito total.
 insert into public.role_permissions (role_id, permission_id, scope)
 select r.id, p.id, 'all'
 from public.roles r
@@ -119,11 +116,123 @@ insert into public.notification_rules (event_type, recipient, channel) values
   ('duplicate_marked', 'requester', 'in_app')
 on conflict do nothing;
 
--- Reglas de escalamiento (semilla; el disparo programado llega después).
+-- Reglas de escalamiento.
 insert into public.escalation_rules (condition, threshold, notify) values
   ('untaken', interval '4 hours', 'administrators'),
   ('unassigned', interval '8 hours', 'supervisor'),
   ('no_candidate', interval '1 minute', 'administrators'),
   ('target_near', interval '30 minutes', 'supervisor'),
   ('target_overdue', interval '1 minute', 'supervisor')
+on conflict do nothing;
+
+-- Catálogos maestros (ficticios; sufijo "(ejemplo)").
+insert into public.teams (name) values ('Mantenimiento (ejemplo)'), ('Seguridad (ejemplo)')
+on conflict do nothing;
+insert into public.buildings (name) values ('Edificio Central (ejemplo)'), ('Edificio Norte (ejemplo)')
+on conflict do nothing;
+insert into public.locations (building_id, name)
+select b.id, v.name from public.buildings b, (values ('Planta baja (ejemplo)'), ('Piso 1 (ejemplo)')) as v (name)
+where b.name = 'Edificio Central (ejemplo)'
+on conflict do nothing;
+insert into public.dependencies (name)
+values ('Sistemas (ejemplo)'), ('Recursos Humanos (ejemplo)')
+on conflict do nothing;
+insert into public.categories (team_id, name)
+select t.id, v.name from public.teams t, (values ('Eléctrico (ejemplo)'), ('Plomería (ejemplo)')) as v (name)
+where t.name = 'Mantenimiento (ejemplo)'
+on conflict do nothing;
+insert into public.categories (team_id, name)
+select t.id, 'Accesos (ejemplo)' from public.teams t where t.name = 'Seguridad (ejemplo)'
+on conflict do nothing;
+insert into public.subcategories (category_id, name)
+select c.id, 'Contacto (ejemplo)' from public.categories c where c.name = 'Eléctrico (ejemplo)'
+on conflict do nothing;
+insert into public.problems (subcategory_id, name)
+select s.id, 'Chispa o corto (ejemplo)' from public.subcategories s where s.name = 'Contacto (ejemplo)'
+on conflict do nothing;
+insert into public.service_types (name)
+values ('Correctivo (ejemplo)'), ('Preventivo (ejemplo)'), ('Inspección (ejemplo)'),
+       ('Mejora o instalación (ejemplo)'), ('Emergencia (ejemplo)')
+on conflict do nothing;
+insert into public.priorities (name, position, target_minutes) values
+  ('Urgente (ejemplo)', 1, 60), ('Alta (ejemplo)', 2, 240),
+  ('Media (ejemplo)', 3, 1440), ('Baja (ejemplo)', 4, 4320)
+on conflict do nothing;
+insert into public.channels (name)
+values ('Web (ejemplo)'), ('Teléfono (ejemplo)'), ('Importación (ejemplo)')
+on conflict do nothing;
+
+insert into public.technicians (full_name, team_id)
+select v.name, t.id from public.teams t, (values ('Luis Gómez (ejemplo)'), ('Marta Ruiz (ejemplo)')) as v (name)
+where t.name = 'Mantenimiento (ejemplo)'
+  and not exists (select 1 from public.technicians where full_name = v.name);
+
+insert into public.requesters (full_name, contact, dependency_id)
+select v.name, v.contact, d.id
+from public.dependencies d,
+     (values ('Ana Pérez (ejemplo)', 'ext. 100'), ('Beto Lima (ejemplo)', 'ext. 200')) as v (name, contact)
+where d.name = 'Sistemas (ejemplo)'
+  and not exists (select 1 from public.requesters where full_name = v.name);
+
+-- Calendario laboral.
+insert into public.work_calendars (name, timezone)
+values ('Laboral (ejemplo)', 'America/Mexico_City')
+on conflict (name) do nothing;
+insert into public.work_calendar_intervals (calendar_id, weekday, start_time, end_time)
+select c.id, d.weekday, '09:00', '18:00'
+from public.work_calendars c, (values (1), (2), (3), (4), (5)) as d (weekday)
+where c.name = 'Laboral (ejemplo)'
+  and not exists (select 1 from public.work_calendar_intervals i where i.calendar_id = c.id);
+
+-- Motivos jerárquicos (especificación §6; sufijo "(ejemplo)").
+insert into public.reasons (use, name) values
+  ('pause', 'Falta de material (ejemplo)'), ('pause', 'Falta de personal (ejemplo)'),
+  ('pause', 'Proveedor o contratista externo (ejemplo)'), ('pause', 'Acceso al área (ejemplo)'),
+  ('pause', 'Autorización (ejemplo)'), ('pause', 'Herramienta o equipo especial (ejemplo)'),
+  ('pause', 'Condiciones externas (ejemplo)'), ('pause', 'Dependencia de otro tiquet (ejemplo)'),
+  ('pause', 'Esperando información del solicitante (ejemplo)'), ('pause', 'Programado (ejemplo)'),
+  ('rejection', 'Fuera de alcance (ejemplo)'), ('rejection', 'Información insuficiente (ejemplo)'),
+  ('rejection', 'No se pudo reproducir la falla (ejemplo)'),
+  ('rejection', 'Responsabilidad de otra área (ejemplo)'),
+  ('rejection', 'Requiere proyecto u obra mayor (ejemplo)'),
+  ('rejection', 'Sin autorización o presupuesto (ejemplo)'),
+  ('rejection', 'Solicitud improcedente (ejemplo)'),
+  ('cancellation', 'A petición del solicitante (ejemplo)'), ('cancellation', 'Creado por error (ejemplo)'),
+  ('cancellation', 'Ya no es necesario (ejemplo)'), ('cancellation', 'Se resolvió por otro medio (ejemplo)'),
+  ('cancellation', 'Sin respuesta del solicitante (ejemplo)'),
+  ('cancellation', 'Decisión administrativa (ejemplo)'),
+  ('supervisor_reassignment', 'Equipo incorrecto (ejemplo)'),
+  ('supervisor_reassignment', 'Edificio incorrecto (ejemplo)'),
+  ('supervisor_reassignment', 'Categoría incorrecta (ejemplo)'),
+  ('supervisor_reassignment', 'Falta de competencia (ejemplo)'),
+  ('supervisor_reassignment', 'Ausencia o carga de trabajo (ejemplo)'),
+  ('technician_reassignment', 'Ausencia (ejemplo)'),
+  ('technician_reassignment', 'Carga de trabajo (ejemplo)'),
+  ('technician_reassignment', 'Falta de competencia (ejemplo)'),
+  ('technician_reassignment', 'Solicitud del técnico (ejemplo)'),
+  ('recapture', 'Categoría mal capturada (ejemplo)'), ('recapture', 'Ubicación mal capturada (ejemplo)'),
+  ('recapture', 'Tipo de servicio mal capturado (ejemplo)'),
+  ('recapture', 'Prioridad mal capturada (ejemplo)'),
+  ('recapture', 'Descripción insuficiente (ejemplo)'),
+  ('claim', 'Trabajo incompleto (ejemplo)'), ('claim', 'La falla persiste o regresó (ejemplo)'),
+  ('claim', 'Calidad deficiente (ejemplo)'), ('claim', 'No corresponde a lo solicitado (ejemplo)'),
+  ('claim', 'Daño colateral o falta de limpieza (ejemplo)'),
+  ('claim_outcome', 'Procedente (ejemplo)'), ('claim_outcome', 'Improcedente (ejemplo)'),
+  ('claim_outcome', 'Requiere tiquet nuevo (ejemplo)'),
+  ('reactivation', 'Error al descartar (ejemplo)'), ('reactivation', 'Nueva información (ejemplo)'),
+  ('reactivation', 'Decisión administrativa (ejemplo)'),
+  ('auxiliary_support', 'Cobertura de ausencia (ejemplo)'),
+  ('auxiliary_support', 'Trabajo de más de una persona (ejemplo)'),
+  ('auxiliary_support', 'Apoyo por carga de trabajo (ejemplo)'),
+  ('auxiliary_support', 'Apoyo de otra área (ejemplo)')
+on conflict do nothing;
+
+insert into public.reasons (use, name, parent_id)
+select 'pause', v.name, p.id
+from (values ('Por solicitar (ejemplo)'), ('Solicitado (ejemplo)'), ('En cotización (ejemplo)'),
+             ('Cotización aprobada (ejemplo)'), ('Compra externa (ejemplo)'),
+             ('Salida de almacén (ejemplo)'), ('En tránsito (ejemplo)'), ('Recibido (ejemplo)')) as v (name)
+cross join (
+  select id from public.reasons where use = 'pause' and name = 'Falta de material (ejemplo)'
+) p
 on conflict do nothing;
