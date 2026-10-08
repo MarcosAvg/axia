@@ -181,7 +181,7 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 ### Fase 4 — Evidencias y modo sin conexión
 - [x] Captura y compresión de fotos, subida reanudable, cola `outbox` y sincronización (evidencia) —
       ADR 0019
-- [ ] (Resto de 4A) Enrutar las **acciones del tiquet** por la cola cuando no hay conexión
+- [x] Acciones del tiquet por la cola cuando no hay conexión (con `client_request_id` para idempotencia)
 - [ ] (Fase 4B) Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy)
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
@@ -365,6 +365,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   4.4.0 (Apache-2.0) para observar la cola. La mutación de evidencia usa
   `networkMode: 'always'` porque React Query pausa las mutaciones sin conexión. Dexie va en versión 2
   (se añadieron campos a `outbox`/`evidences`). El endpoint de TUS se arma con `VITE_SUPABASE_URL`.
+- **Fase 4A — acciones offline**: las mutaciones de transición usan `networkMode: 'always'` y, si
+  fallan por red (`isNetworkError`), se encolan como `ticket_action` con el mismo `client_request_id`.
+  La cola se ordena por `seq` (campo sin índice, ordenado en memoria) y se serializa con un mutex para
+  que encolar y procesar no se pisen; **sin conexión no se procesa** (se reintenta al evento `online`).
+  Los errores de dominio no se reintentan (se marcan `error` con su motivo).
 
 ## Registro de sesiones
 
@@ -468,6 +473,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: Fase 4A (evidencia offline): compresión `canvas`, cola `outbox` genérica con reintentos,
   evidencias en Dexie, subida reanudable con TUS y `evidence_add`, sincronización e indicador; 84
   Vitest y 11 Playwright en verde. ADR 0019. Rama `feat/fase-4a-offline`.
+- 2026-10-08: Fase 4A (acciones offline): `isNetworkError`, cola `ticket_action`, registro de
+  operaciones, `networkMode: 'always'`, mutex de Dexie y salto del procesamiento sin red; Playwright
+  del técnico que inicia sin conexión. 88 Vitest y 11 Playwright en verde. Rama
+  `feat/fase-4a-acciones-offline`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -531,3 +540,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `evidence_add`; sincronización al abrir/`online`/visibilidad y aviso de "sin conexión" y pendientes.
   React Query con `networkMode: 'always'` en la mutación de evidencia (sin eso queda pausada offline).
   Prueba Playwright del técnico sin conexión. **ADR 0019**. Rama `feat/fase-4a-offline`.
+- **Fase 4A (acciones offline)**: las transiciones del tiquet se encolan si fallan por red
+  (`isNetworkError`) y se reenvían con el mismo `client_request_id`; registro de operaciones
+  (`ticket-operations`), `networkMode: 'always'` en las mutaciones, cola serializada con un mutex y
+  ordenada por secuencia, y sin procesar cuando no hay red. Prueba Playwright del técnico que sube la
+  evidencia e inicia **sin conexión** y se sincroniza al reconectar. Rama
+  `feat/fase-4a-acciones-offline`.

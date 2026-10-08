@@ -67,7 +67,7 @@ test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   await page.getByText(description).click()
   await expect(page.getByLabel('Tipo de evidencia')).toBeVisible()
 
-  // Sin conexión: la evidencia queda guardada en el dispositivo.
+  // Sin conexión: la evidencia y la acción de inicio quedan en cola.
   await page.context().setOffline(true)
   await page.getByLabel('Tipo de evidencia').selectOption({ label: 'Antes' })
   await page.getByLabel('Archivo').setInputFiles({
@@ -78,14 +78,14 @@ test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   await page.getByRole('button', { name: 'Subir evidencia' }).click()
   await expect(page.getByText('Pendiente de subir')).toBeVisible()
 
-  // Vuelve la conexión y la cola se sincroniza (se recarga para reprocesar).
+  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await expect(
+    page.getByText('Asignado', { exact: true }).first(),
+  ).toBeVisible()
+
+  // Vuelve la conexión: el evento 'online' sincroniza la evidencia y el inicio.
   await page.context().setOffline(false)
-  await page.reload()
-  await expect(page.getByText('Evidencia agregada')).toBeVisible({
+  await expect(page.getByText('En proceso', { exact: true })).toBeVisible({
     timeout: 20000,
   })
-
-  // Con la evidencia "antes", el técnico puede iniciar.
-  await page.getByRole('button', { name: 'Iniciar' }).click()
-  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 })
