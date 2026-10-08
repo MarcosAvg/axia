@@ -4,12 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 6 cerrada (implementación) — siguiente: 7C (PWA) y 7D (push, CI/CD, Capacitor)
+**Fase actual:** 7C cerrada (PWA) — siguiente: 7D (push, CI/CD, Capacitor)
 
 ## En curso
 
-_(vacío)_ — La **Fase 6** quedó cerrada (6C-2 y 6D incluidos). Siguen **7C** (PWA con los iconos
-genéricos) y **7D** (push, CI/CD, Capacitor). Sin push a `origin`.
+_(vacío)_ — La **PWA** quedó afinada (manifest e iconos genéricos). Sigue **7D** (notificaciones push,
+CI/CD de despliegue y Capacitor), implementando lo que no dependa de infraestructura real. Sin push a
+`origin`.
 
 ## Hecho
 
@@ -230,6 +231,9 @@ genéricos) y **7D** (push, CI/CD, Capacitor). Sin push a `origin`.
     `external_systems.authority`; RPCs `integration_task_create/resolve` y `external_status_set`; UI
     de tareas en `/admin/integraciones`. ADR 0034.
   - Compuerta completa en verde: 404 pgTAP, 125 Vitest, 12 Playwright.
+- **Fase 7C — PWA (2026-10-08)**, rama `feat/fase-7c-pwa` (fusionada localmente a `main`; **sin push**):
+  - Manifest completo (`id`, `orientation`, `categories`, `purpose` de los iconos) **conservando los
+    iconos genéricos**; caché del service worker revisada (app shell, sin cachear API). Sin arte nuevo.
 
 ## Siguiente
 
@@ -346,7 +350,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       oficial), scripts de migración y publicación, y runbook — ADR 0032
 - [x] **7B** Respaldos y restauración: `backup.sh`/`restore.sh` con retención y prueba de
       restauración documentada (verificada en local)
-- [ ] **7C** PWA final: iconos con el logo definitivo y revisión de la caché del service worker
+- [x] **7C** PWA final: manifest completo (`id`, orientación, categorías, propósito de los iconos) con
+      los iconos genéricos actuales y caché del service worker revisada
 - [ ] **7D** (Opcional) Notificaciones push (VAPID + envío); CI/CD de despliegue; Capacitor
 
 ## Bloqueos y preguntas para la persona
