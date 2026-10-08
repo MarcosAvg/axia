@@ -56,13 +56,17 @@ Reglas de negocio completas: `docs/especificacion-negocio.md` §3 y §5 (RN-01 a
 ## 4. Estados (lógica fija, no catálogo)
 
 `registered` → `with_supervisor` → `assigned` → `in_progress` → `attended` → `closed`, con
-`pending_recapture`, `paused`, `under_claim` y los finales de descarte `rejected`, `cancelled` y
-`duplicate`.
+`paused`, `under_claim` y los finales de descarte `rejected`, `cancelled` y `duplicate`.
 
 Todo movimiento relevante es un **registro explícito del historial** (tipo, motivo, quién, cuándo
 y duración); cambiar una columna no basta. Los cambios de estado ocurren **solo** por funciones
 RPC de transición, que validan permiso, estado y precondiciones y escriben el historial en la
 misma transacción. La matriz de transiciones se detalla en `docs/modelo-datos.md`.
+
+**Concurrencia y acciones tardías:** "la primera es verdad". Una acción que llega tarde (sin
+conexión) sobre un estado ya resuelto se **registra**, pero **no surte efecto**. Un tiquet
+descartado (`rejected`, `cancelled`, `duplicate`) puede **reactivarse** por un administrador y
+vuelve al estado que tenía **justo antes de descartarse**.
 
 ## 5. Captura y recaptura
 
@@ -70,9 +74,10 @@ misma transacción. La matriz de transiciones se detalla en `docs/modelo-datos.m
   subcategoría, problema, tipo de servicio, prioridad, descripción y contacto). **Mala captura**:
   captura incorrecta.
 - **Recaptura**: corrección de la captura **sobre el mismo tiquet**; se conservan los valores
-  originales y cada versión. Si la propone el técnico, requiere aprobación (política configurable)
-  y puede devolver el tiquet al supervisor si ya no corresponde al área. Si la hace un supervisor,
-  se registra y se notifica. Sirve para medir la **calidad de la captura**.
+  originales y cada versión. Se **aplica** y se **avisa** al solicitante y al supervisor; **no hay
+  aprobaciones**. Si la nueva captura deja al técnico fuera de su área, el tiquet vuelve al
+  supervisor. Quien no esté de acuerdo **abre una reclamación**. Sirve para medir la **calidad de
+  la captura**.
 - La **foto al registrar** es **opcional pero muy recomendada** (política configurable; semilla:
   recomendada); el sistema invita a adjuntarla sin bloquear el registro.
 
@@ -145,7 +150,7 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
 - **Marcar duplicado**: cualquier persona que **participe en el flujo** del tiquet (solicitante
   sobre lo suyo, supervisores candidatos o que lo tomaron, técnico y auxiliares, administradores);
   exige enlazar al original. Un duplicado queda **cerrado y fuera de los indicadores de
-  desempeño**.
+  desempeño**; se **avisa al solicitante** y no se crea ninguna relación de seguidor.
 - **Enlaces** entre tiquets: `duplicate_of`, `derived_from`, `related_to`, `blocked_by`.
 
 ## 13. Modelo mixto: cuentas, proxy y tiempos manuales
@@ -177,7 +182,6 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
 | Solicitante | `requester` |
 | Técnico | `technician` |
 | Auxiliar | `auxiliary` |
-| Seguidor | `follower` |
 | Supervisor | `supervisor` |
 | Administrador | `administrator` |
 | Ciclo de atención | `care_cycle` |
@@ -191,9 +195,11 @@ Valores de enum y nombres de tabla/columna en inglés; etiquetas de interfaz en 
 
 ## 15. Decisiones y preguntas
 
-- **Decisiones confirmadas** (además de las §14 de la especificación): modelo mixto de
-  solicitante (catálogo con vínculo opcional), técnicos de catálogo con cuenta opcional, proxy
-  para técnicos y solicitantes sin cuenta, y tiempos manuales. Detalle y ADR en
-  `docs/modelo-datos.md`.
-- **Preguntas abiertas**: las de la especificación (§14, supuestos) y las recogidas en
-  `docs/ESTADO.md` y `docs/modelo-datos.md`. No se resuelven en silencio.
+- **Decisiones confirmadas** (además de las §14 de la especificación): modelo mixto de solicitante
+  (catálogo con vínculo opcional), técnicos de catálogo con cuenta opcional, proxy para técnicos y
+  solicitantes sin cuenta, tiempos manuales, **recaptura sin aprobación** (se aplica y se avisa;
+  la disconformidad va por reclamación), **concurrencia "primero gana"**, **reactivación al estado
+  previo al descarte**, **calificación siempre opcional** y **duplicados sin seguidores** (solo
+  enlace y aviso). Detalle y ADR en `docs/modelo-datos.md`.
+- **Preguntas abiertas**: quedan las de negocio de fases posteriores (zona horaria y horario,
+  tiempos objetivo), registradas en `docs/ESTADO.md`. No se resuelven en silencio.
