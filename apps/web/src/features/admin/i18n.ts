@@ -153,7 +153,7 @@ export const adminMessages = {
     contact: 'Contacto',
     active: 'Activo',
     position: 'Orden',
-    target_minutes: 'Tiempo objetivo (min)',
+    target_minutes: 'Tiempo objetivo',
     target_unit: 'Unidad',
     building_id: 'Edificio',
     team_id: 'Equipo',
