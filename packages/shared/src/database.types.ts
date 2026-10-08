@@ -266,6 +266,20 @@ export type Database = {
             foreignKeyName: 'evidence_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'evidence_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'evidence_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -526,6 +540,20 @@ export type Database = {
             foreignKeyName: 'notifications_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -693,6 +721,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'reasons'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'reasons_parent_id_fkey'
+            columns: ['parent_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'reasons_parent_id_fkey'
+            columns: ['parent_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
           },
         ]
       }
@@ -1097,10 +1139,38 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_assignments_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_assignments_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1153,10 +1223,38 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_captures_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_captures_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_captures_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_captures_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_captures_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1233,6 +1331,20 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_claims_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_claims_result_id_fkey'
             columns: ['result_id']
             isOneToOne: false
@@ -1240,10 +1352,38 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_claims_result_id_fkey'
+            columns: ['result_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_result_id_fkey'
+            columns: ['result_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_claims_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1293,6 +1433,20 @@ export type Database = {
             foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
             columns: ['candidate_ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
+            columns: ['candidate_ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
+            columns: ['candidate_ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -1301,6 +1455,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1371,6 +1539,20 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_events_subject_technician_id_fkey'
             columns: ['subject_technician_id']
             isOneToOne: false
@@ -1382,6 +1564,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1435,6 +1631,20 @@ export type Database = {
             foreignKeyName: 'ticket_external_refs_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_external_refs_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_external_refs_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -1478,6 +1688,20 @@ export type Database = {
             foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
             columns: ['linked_ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
+            columns: ['linked_ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
+            columns: ['linked_ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -1486,6 +1710,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1532,6 +1770,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_offers_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_offers_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1613,6 +1865,20 @@ export type Database = {
             foreignKeyName: 'ticket_participants_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -1661,6 +1927,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'reasons'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pause_steps_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_pause_steps_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
           },
         ]
       }
@@ -1720,10 +2000,38 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_pauses_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_pauses_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1767,6 +2075,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_validations_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_validations_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -1910,6 +2232,20 @@ export type Database = {
             foreignKeyName: 'tickets_duplicate_of_id_fkey'
             columns: ['duplicate_of_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_duplicate_of_id_fkey'
+            columns: ['duplicate_of_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_duplicate_of_id_fkey'
+            columns: ['duplicate_of_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -2030,6 +2366,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'time_spans_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'time_spans_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
@@ -2161,6 +2511,211 @@ export type Database = {
       }
     }
     Views: {
+      v_metrics_aging: {
+        Row: {
+          age: string | null
+          age_labor: string | null
+          category_id: string | null
+          folio: string | null
+          id: string | null
+          pause_time: string | null
+          priority_id: string | null
+          reported_at: string | null
+          status: Database['public']['Enums']['ticket_status'] | null
+          team_id: string | null
+          wait_start_time: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          age?: never
+          age_labor?: never
+          category_id?: string | null
+          folio?: string | null
+          id?: string | null
+          pause_time?: never
+          priority_id?: string | null
+          reported_at?: string | null
+          status?: Database['public']['Enums']['ticket_status'] | null
+          team_id?: string | null
+          wait_start_time?: never
+        }
+        Update: {
+          age?: never
+          age_labor?: never
+          category_id?: string | null
+          folio?: string | null
+          id?: string | null
+          pause_time?: never
+          priority_id?: string | null
+          reported_at?: string | null
+          status?: Database['public']['Enums']['ticket_status'] | null
+          team_id?: string | null
+          wait_start_time?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tickets_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_priority_id_fkey'
+            columns: ['priority_id']
+            isOneToOne: false
+            referencedRelation: 'priorities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      v_metrics_by_dimension: {
+        Row: {
+          avg_active_work_time: string | null
+          avg_active_work_time_labor: string | null
+          avg_assignment_time: string | null
+          avg_net_time: string | null
+          avg_net_time_labor: string | null
+          avg_pause_time: string | null
+          avg_reassignment_time: string | null
+          avg_response_time: string | null
+          avg_total_time: string | null
+          avg_total_time_labor: string | null
+          avg_validation_time: string | null
+          avg_wait_start_time: string | null
+          dimension: string | null
+          dimension_id: string | null
+          dimension_name: string | null
+          first_time_fix_rate: number | null
+          reassigned: number | null
+          reassignment_rate: number | null
+          recapture_rate: number | null
+          recaptured: number | null
+          reopen_rate: number | null
+          reopened: number | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
+      v_metrics_by_technician: {
+        Row: {
+          assigned_count: number | null
+          auxiliary_count: number | null
+          leader_count: number | null
+          participation_time: string | null
+          participation_time_labor: string | null
+          technician_id: string | null
+          technician_name: string | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: [
+          {
+            foreignKeyName: 'ticket_participants_technician_id_fkey'
+            columns: ['technician_id']
+            isOneToOne: false
+            referencedRelation: 'technicians'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      v_metrics_duplicates_by_dimension: {
+        Row: {
+          dimension: string | null
+          dimension_id: string | null
+          dimension_name: string | null
+          duplicate_rate: number | null
+          duplicates: number | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
+      v_metrics_pauses_by_reason: {
+        Row: {
+          pause_time: string | null
+          pause_time_labor: string | null
+          pauses: number | null
+          reason_id: string | null
+          reason_name: string | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
+      v_metrics_reject_cancel_by_reason: {
+        Row: {
+          event_type: Database['public']['Enums']['event_type'] | null
+          reason_id: string | null
+          reason_name: string | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
+      v_metrics_routing: {
+        Row: {
+          building_id: string | null
+          folio: string | null
+          id: string | null
+          offers_count: number | null
+          pending_offers: number | null
+          reported_at: string | null
+          status: Database['public']['Enums']['ticket_status'] | null
+          taken_offers: number | null
+          team_id: string | null
+          time_to_take: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          building_id?: string | null
+          folio?: string | null
+          id?: string | null
+          offers_count?: never
+          pending_offers?: never
+          reported_at?: string | null
+          status?: Database['public']['Enums']['ticket_status'] | null
+          taken_offers?: never
+          team_id?: string | null
+          time_to_take?: never
+        }
+        Update: {
+          building_id?: string | null
+          folio?: string | null
+          id?: string | null
+          offers_count?: never
+          pending_offers?: never
+          reported_at?: string | null
+          status?: Database['public']['Enums']['ticket_status'] | null
+          taken_offers?: never
+          team_id?: string | null
+          time_to_take?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tickets_building_id_fkey'
+            columns: ['building_id']
+            isOneToOne: false
+            referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       v_ticket_events_requester: {
         Row: {
           cycle: number | null
@@ -2184,6 +2739,20 @@ export type Database = {
             foreignKeyName: 'ticket_events_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_ticket_metrics_base'
             referencedColumns: ['id']
           },
@@ -2192,49 +2761,145 @@ export type Database = {
       v_ticket_metrics_base: {
         Row: {
           active_work_time: string | null
+          active_work_time_labor: string | null
+          assignment_time: string | null
+          assignment_time_labor: string | null
+          auxiliary_count: number | null
+          auxiliary_time: string | null
           building_id: string | null
           category_id: string | null
+          claim_time: string | null
+          claim_time_labor: string | null
           closed_at: string | null
+          dependency_id: string | null
           folio: string | null
+          has_after_evidence: boolean | null
+          has_before_evidence: boolean | null
+          has_request_evidence: boolean | null
           id: string | null
           net_time: string | null
+          net_time_labor: string | null
+          pause_time: string | null
+          pause_time_labor: string | null
           priority_id: string | null
+          reassigned_supervisor: boolean | null
+          reassigned_technician: boolean | null
+          reassignment_time: string | null
+          reassignment_time_labor: string | null
+          recapture_count: number | null
+          recaptured: boolean | null
+          reopen_count: number | null
+          reopened: boolean | null
           reported_at: string | null
+          requester_id: string | null
+          response_time: string | null
+          response_time_labor: string | null
           status: Database['public']['Enums']['ticket_status'] | null
           team_id: string | null
           ticket_number: number | null
           total_time: string | null
+          total_time_labor: string | null
+          validated_requester: boolean | null
+          validated_supervisor: boolean | null
+          validation_time: string | null
+          validation_time_labor: string | null
+          wait_start_time: string | null
+          wait_start_time_labor: string | null
         }
         ComputedFields: never
         Insert: {
           active_work_time?: never
+          active_work_time_labor?: never
+          assignment_time?: never
+          assignment_time_labor?: never
+          auxiliary_count?: never
+          auxiliary_time?: never
           building_id?: string | null
           category_id?: string | null
+          claim_time?: never
+          claim_time_labor?: never
           closed_at?: string | null
+          dependency_id?: string | null
           folio?: string | null
+          has_after_evidence?: never
+          has_before_evidence?: never
+          has_request_evidence?: never
           id?: string | null
           net_time?: never
+          net_time_labor?: never
+          pause_time?: never
+          pause_time_labor?: never
           priority_id?: string | null
+          reassigned_supervisor?: never
+          reassigned_technician?: never
+          reassignment_time?: never
+          reassignment_time_labor?: never
+          recapture_count?: never
+          recaptured?: never
+          reopen_count?: never
+          reopened?: never
           reported_at?: string | null
+          requester_id?: string | null
+          response_time?: never
+          response_time_labor?: never
           status?: Database['public']['Enums']['ticket_status'] | null
           team_id?: string | null
           ticket_number?: number | null
           total_time?: never
+          total_time_labor?: never
+          validated_requester?: never
+          validated_supervisor?: never
+          validation_time?: never
+          validation_time_labor?: never
+          wait_start_time?: never
+          wait_start_time_labor?: never
         }
         Update: {
           active_work_time?: never
+          active_work_time_labor?: never
+          assignment_time?: never
+          assignment_time_labor?: never
+          auxiliary_count?: never
+          auxiliary_time?: never
           building_id?: string | null
           category_id?: string | null
+          claim_time?: never
+          claim_time_labor?: never
           closed_at?: string | null
+          dependency_id?: string | null
           folio?: string | null
+          has_after_evidence?: never
+          has_before_evidence?: never
+          has_request_evidence?: never
           id?: string | null
           net_time?: never
+          net_time_labor?: never
+          pause_time?: never
+          pause_time_labor?: never
           priority_id?: string | null
+          reassigned_supervisor?: never
+          reassigned_technician?: never
+          reassignment_time?: never
+          reassignment_time_labor?: never
+          recapture_count?: never
+          recaptured?: never
+          reopen_count?: never
+          reopened?: never
           reported_at?: string | null
+          requester_id?: string | null
+          response_time?: never
+          response_time_labor?: never
           status?: Database['public']['Enums']['ticket_status'] | null
           team_id?: string | null
           ticket_number?: number | null
           total_time?: never
+          total_time_labor?: never
+          validated_requester?: never
+          validated_supervisor?: never
+          validation_time?: never
+          validation_time_labor?: never
+          wait_start_time?: never
+          wait_start_time_labor?: never
         }
         Relationships: [
           {
@@ -2252,10 +2917,24 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'tickets_dependency_id_fkey'
+            columns: ['dependency_id']
+            isOneToOne: false
+            referencedRelation: 'dependencies'
+            referencedColumns: ['id']
+          },
+          {
             foreignKeyName: 'tickets_priority_id_fkey'
             columns: ['priority_id']
             isOneToOne: false
             referencedRelation: 'priorities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_requester_id_fkey'
+            columns: ['requester_id']
+            isOneToOne: false
+            referencedRelation: 'requesters'
             referencedColumns: ['id']
           },
           {
@@ -2295,6 +2974,20 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_events_reason_id_fkey'
+            columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
             foreignKeyName: 'ticket_events_subject_technician_id_fkey'
             columns: ['subject_technician_id']
             isOneToOne: false
@@ -2306,6 +2999,20 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
           {
