@@ -28,8 +28,12 @@ function optional(value: string): string | undefined {
 }
 
 /** Estado y catálogos de la recaptura. */
-export function useRecaptureForm(ticket: TicketDetail, onClose: () => void) {
-  const actions = useTicketActions(ticket.id)
+export function useRecaptureForm(
+  ticket: TicketDetail,
+  subjectTechnicianId: string | undefined,
+  onClose: () => void,
+) {
+  const actions = useTicketActions(ticket.id, subjectTechnicianId)
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)
 

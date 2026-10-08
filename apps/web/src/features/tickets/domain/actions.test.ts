@@ -1,5 +1,5 @@
 import type { Identity } from '@/features/auth'
-import { allowedActions } from './actions'
+import { actionsRequiringSubject, allowedActions } from './actions'
 import type { ActionContext } from './actions'
 import type { TicketStatus } from './types'
 
@@ -63,6 +63,15 @@ describe('allowedActions', () => {
       allowedActions(context(['ticket.validate'], 'in_progress')),
     ).not.toContain('validate')
   })
+
+  it('habilita las acciones del técnico con act_on_behalf (proxy)', () => {
+    expect(allowedActions(context(['act_on_behalf'], 'assigned'))).toContain(
+      'start',
+    )
+    expect(allowedActions(context(['act_on_behalf'], 'in_progress'))).toContain(
+      'attend',
+    )
+  })
 })
 
 describe('allowedActions (reclamaciones y descartes)', () => {
@@ -109,5 +118,27 @@ describe('allowedActions (reclamaciones y descartes)', () => {
     expect(
       allowedActions(context(['ticket.add_auxiliary'], 'in_progress')),
     ).toContain('add_auxiliary')
+  })
+})
+
+describe('actionsRequiringSubject', () => {
+  it('exige sujeto para acciones de proxy sin permiso directo', () => {
+    const blocked = actionsRequiringSubject(
+      identityWith(['act_on_behalf']),
+      ['start', 'pause', 'comment'],
+      false,
+    )
+    expect(blocked).toContain('start')
+    expect(blocked).toContain('pause')
+    expect(blocked).not.toContain('comment')
+  })
+
+  it('no exige sujeto si ya se eligió técnico o hay permiso directo', () => {
+    expect(
+      actionsRequiringSubject(identityWith(['act_on_behalf']), ['start'], true),
+    ).toEqual([])
+    expect(
+      actionsRequiringSubject(identityWith(['ticket.start']), ['start'], false),
+    ).toEqual([])
   })
 })

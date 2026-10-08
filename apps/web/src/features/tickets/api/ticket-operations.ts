@@ -93,17 +93,35 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
       },
       id,
     ),
-  start: (t, _a, id) => startTicket(t, id),
-  pause: (t, a, id) => pauseTicket(t, str(a.reasonId), opt(a.note), id),
-  resume: (t, _a, id) => resumeTicket(t, id),
-  attend: (t, a, id) => attendTicket(t, str(a.workDescription), id),
+  start: (t, a, id) => startTicket(t, id, opt(a.subjectTechnicianId)),
+  pause: (t, a, id) =>
+    pauseTicket(
+      t,
+      {
+        reasonId: str(a.reasonId),
+        note: opt(a.note),
+        subjectTechnicianId: opt(a.subjectTechnicianId),
+      },
+      id,
+    ),
+  resume: (t, a, id) => resumeTicket(t, id, opt(a.subjectTechnicianId)),
+  attend: (t, a, id) =>
+    attendTicket(t, str(a.workDescription), id, opt(a.subjectTechnicianId)),
   validate: (t, _a, id) => validateTicket(t, id),
   reject: (t, a, id) => rejectTicket(t, str(a.reasonId), opt(a.note), id),
   cancel: (t, a, id) => cancelTicket(t, str(a.reasonId), opt(a.note), id),
   change_priority: (t, a, id) => changePriority(t, str(a.priorityId), id),
   comment: (t, a, id) => commentTicket(t, str(a.text), id),
   recapture: (t, a, id) =>
-    recaptureTicket(t, asChanges(a.changes), opt(a.reasonId), id),
+    recaptureTicket(
+      t,
+      {
+        changes: asChanges(a.changes),
+        reasonId: opt(a.reasonId),
+        subjectTechnicianId: opt(a.subjectTechnicianId),
+      },
+      id,
+    ),
   open_claim: (t, a, id) =>
     openClaim(t, str(a.reasonId), str(a.description), id),
   resolve_claim: (t, a, id) =>

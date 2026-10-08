@@ -7,6 +7,7 @@ import type { TicketOperation } from '../api/ticket-operations'
 function useTicketMutation<TVariables extends Record<string, unknown>>(
   operation: TicketOperation,
   ticketId: string,
+  subjectTechnicianId?: string,
 ) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -14,7 +15,9 @@ function useTicketMutation<TVariables extends Record<string, unknown>>(
     networkMode: 'always',
     mutationFn: async (variables: TVariables) => {
       const clientRequestId = crypto.randomUUID()
-      const args: Record<string, unknown> = variables
+      const args: Record<string, unknown> = subjectTechnicianId
+        ? { ...variables, subjectTechnicianId }
+        : variables
       try {
         await TICKET_OPERATIONS[operation](ticketId, args, clientRequestId)
       } catch (error) {
@@ -31,23 +34,29 @@ function useTicketMutation<TVariables extends Record<string, unknown>>(
   })
 }
 
-/** Mutaciones de transición del tiquet; si no hay conexión, se encolan. */
-export function useTicketActions(ticketId: string) {
+/**
+ * Mutaciones de transición del tiquet; si no hay conexión, se encolan.
+ * Con `subjectTechnicianId` las acciones del técnico se registran a nombre de ese técnico (proxy).
+ */
+export function useTicketActions(
+  ticketId: string,
+  subjectTechnicianId?: string,
+) {
   return {
     take: useTicketMutation('take', ticketId),
     assignTechnician: useTicketMutation('assign_technician', ticketId),
     assignSupervisor: useTicketMutation('assign_supervisor', ticketId),
     addAuxiliary: useTicketMutation('add_auxiliary', ticketId),
-    start: useTicketMutation('start', ticketId),
-    pause: useTicketMutation('pause', ticketId),
-    resume: useTicketMutation('resume', ticketId),
-    attend: useTicketMutation('attend', ticketId),
+    start: useTicketMutation('start', ticketId, subjectTechnicianId),
+    pause: useTicketMutation('pause', ticketId, subjectTechnicianId),
+    resume: useTicketMutation('resume', ticketId, subjectTechnicianId),
+    attend: useTicketMutation('attend', ticketId, subjectTechnicianId),
     validate: useTicketMutation('validate', ticketId),
     reject: useTicketMutation('reject', ticketId),
     cancel: useTicketMutation('cancel', ticketId),
     changePriority: useTicketMutation('change_priority', ticketId),
     comment: useTicketMutation('comment', ticketId),
-    recapture: useTicketMutation('recapture', ticketId),
+    recapture: useTicketMutation('recapture', ticketId, subjectTechnicianId),
     openClaim: useTicketMutation('open_claim', ticketId),
     resolveClaim: useTicketMutation('resolve_claim', ticketId),
     markDuplicate: useTicketMutation('mark_duplicate', ticketId),

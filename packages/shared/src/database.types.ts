@@ -2308,6 +2308,7 @@ export type Database = {
       }
     }
     Functions: {
+      can_act_on_behalf: { Args: { p_technician_id: string }; Returns: boolean }
       can_see_ticket: { Args: { p_ticket_id: string }; Returns: boolean }
       evidence_add: {
         Args: {
@@ -2340,6 +2341,15 @@ export type Database = {
         Returns: boolean
       }
       require_permission: { Args: { p_permission: string }; Returns: undefined }
+      require_technician_action: {
+        Args: {
+          p_action_permission: string
+          p_require_participant?: boolean
+          p_technician_id: string
+          p_ticket_id: string
+        }
+        Returns: undefined
+      }
       ticket_add_auxiliary: {
         Args: {
           p_client_request_id?: string
@@ -2355,6 +2365,7 @@ export type Database = {
           p_client_request_id?: string
           p_note?: string
           p_reason_id: string
+          p_subject_technician_id?: string
           p_ticket_id: string
         }
         Returns: undefined
@@ -2382,6 +2393,7 @@ export type Database = {
       ticket_attend: {
         Args: {
           p_client_request_id?: string
+          p_subject_technician_id?: string
           p_ticket_id: string
           p_work_description: string
         }
@@ -2445,6 +2457,7 @@ export type Database = {
           p_estimated_date?: string
           p_note?: string
           p_reason_id: string
+          p_subject_technician_id?: string
           p_ticket_id: string
         }
         Returns: undefined
@@ -2462,6 +2475,7 @@ export type Database = {
           p_changes: Json
           p_client_request_id?: string
           p_reason_id?: string
+          p_subject_technician_id?: string
           p_ticket_id: string
         }
         Returns: undefined
@@ -2486,12 +2500,20 @@ export type Database = {
         Returns: string
       }
       ticket_resume: {
-        Args: { p_client_request_id?: string; p_ticket_id: string }
+        Args: {
+          p_client_request_id?: string
+          p_subject_technician_id?: string
+          p_ticket_id: string
+        }
         Returns: undefined
       }
       ticket_route: { Args: { p_ticket_id: string }; Returns: undefined }
       ticket_start: {
-        Args: { p_client_request_id?: string; p_ticket_id: string }
+        Args: {
+          p_client_request_id?: string
+          p_subject_technician_id?: string
+          p_ticket_id: string
+        }
         Returns: undefined
       }
       ticket_take: {

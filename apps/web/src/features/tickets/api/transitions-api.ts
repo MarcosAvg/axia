@@ -33,36 +33,52 @@ export async function assignTechnician(
   )
 }
 
-export async function startTicket(ticketId: string, clientRequestId: string) {
+export async function startTicket(
+  ticketId: string,
+  clientRequestId: string,
+  subjectTechnicianId?: string | null,
+) {
   await run(
     supabase.rpc('ticket_start', {
       p_ticket_id: ticketId,
       p_client_request_id: clientRequestId,
+      p_subject_technician_id: subjectTechnicianId ?? undefined,
     }),
   )
 }
 
+export interface PauseTicketInput {
+  reasonId: string
+  note: string | null
+  subjectTechnicianId?: string | null
+}
+
 export async function pauseTicket(
   ticketId: string,
-  reasonId: string,
-  note: string | null,
+  input: PauseTicketInput,
   clientRequestId: string,
 ) {
   await run(
     supabase.rpc('ticket_pause', {
       p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_note: note ?? undefined,
+      p_reason_id: input.reasonId,
+      p_note: input.note ?? undefined,
       p_client_request_id: clientRequestId,
+      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
     }),
   )
 }
 
-export async function resumeTicket(ticketId: string, clientRequestId: string) {
+export async function resumeTicket(
+  ticketId: string,
+  clientRequestId: string,
+  subjectTechnicianId?: string | null,
+) {
   await run(
     supabase.rpc('ticket_resume', {
       p_ticket_id: ticketId,
       p_client_request_id: clientRequestId,
+      p_subject_technician_id: subjectTechnicianId ?? undefined,
     }),
   )
 }
@@ -71,12 +87,14 @@ export async function attendTicket(
   ticketId: string,
   workDescription: string,
   clientRequestId: string,
+  subjectTechnicianId?: string | null,
 ) {
   await run(
     supabase.rpc('ticket_attend', {
       p_ticket_id: ticketId,
       p_work_description: workDescription,
       p_client_request_id: clientRequestId,
+      p_subject_technician_id: subjectTechnicianId ?? undefined,
     }),
   )
 }
@@ -154,18 +172,24 @@ export async function commentTicket(
   )
 }
 
+export interface RecaptureTicketInput {
+  changes: Record<string, string | null>
+  reasonId: string | null
+  subjectTechnicianId?: string | null
+}
+
 export async function recaptureTicket(
   ticketId: string,
-  changes: Record<string, string | null>,
-  reasonId: string | null,
+  input: RecaptureTicketInput,
   clientRequestId: string,
 ) {
   await run(
     supabase.rpc('ticket_recapture', {
       p_ticket_id: ticketId,
-      p_changes: changes,
-      p_reason_id: reasonId ?? undefined,
+      p_changes: input.changes,
+      p_reason_id: input.reasonId ?? undefined,
       p_client_request_id: clientRequestId,
+      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
     }),
   )
 }

@@ -129,7 +129,7 @@ export function parseTimelineItem(raw: unknown): TicketTimelineItem {
 }
 
 const participantRowSchema = z.object({
-  technician: z.object({ full_name: z.string() }),
+  technician: z.object({ id: z.string(), full_name: z.string() }),
   participation_type: z.enum(['leader', 'auxiliary']),
   started_at: z.string(),
   ended_at: z.string().nullable(),
@@ -138,6 +138,7 @@ const participantRowSchema = z.object({
 export function parseParticipant(raw: unknown): TicketParticipant {
   const row = participantRowSchema.parse(raw)
   return {
+    technicianId: row.technician.id,
     technicianName: row.technician.full_name,
     participationType: row.participation_type,
     startedAt: row.started_at,

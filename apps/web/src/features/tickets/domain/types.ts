@@ -138,6 +138,7 @@ export interface TicketTimelineItem {
 }
 
 export interface TicketParticipant {
+  technicianId: string
   technicianName: string
   participationType: 'leader' | 'auxiliary'
   startedAt: string

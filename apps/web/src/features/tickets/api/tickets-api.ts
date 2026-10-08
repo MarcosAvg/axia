@@ -112,7 +112,7 @@ export async function fetchParticipants(
   const { data, error } = await supabase
     .from('ticket_participants')
     .select(
-      'technician:technicians(full_name), participation_type, started_at, ended_at',
+      'technician:technicians(id, full_name), participation_type, started_at, ended_at',
     )
     .eq('ticket_id', ticketId)
     .order('started_at')

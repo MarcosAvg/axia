@@ -156,17 +156,52 @@ function buildSubmitHandlers(
   }
 }
 
+function ActionFormFooter({
+  error,
+  isPending,
+  onClose,
+}: {
+  error: unknown
+  isPending: boolean
+  onClose: () => void
+}) {
+  return (
+    <>
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {toTicketError(error).message}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={isPending} className="min-h-11">
+          {ticketMessages.actionFields.submit}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-11"
+          onClick={onClose}
+        >
+          {ticketMessages.actionFields.cancel}
+        </Button>
+      </div>
+    </>
+  )
+}
+
 /** Formulario de una acción del tiquet, según lo que pida cada una. */
 export function TicketActionForm({
   ticketId,
   action,
+  subjectTechnicianId,
   onClose,
 }: {
   ticketId: string
   action: ActionKey
+  subjectTechnicianId?: string
   onClose: () => void
 }) {
-  const actions = useTicketActions(ticketId)
+  const actions = useTicketActions(ticketId, subjectTechnicianId)
   const technicians = useTechnicians()
   const priorities = usePriorities()
   const reasons = useReasons(REASON_USE_BY_ACTION[action] ?? 'pause')
@@ -196,28 +231,11 @@ export function TicketActionForm({
         values={values}
         onChange={onChange}
       />
-      {mutation.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {toTicketError(mutation.error).message}
-        </p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={mutation.isPending}
-          className="min-h-11"
-        >
-          {ticketMessages.actionFields.submit}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-11"
-          onClick={onClose}
-        >
-          {ticketMessages.actionFields.cancel}
-        </Button>
-      </div>
+      <ActionFormFooter
+        error={mutation.error}
+        isPending={mutation.isPending}
+        onClose={onClose}
+      />
     </form>
   )
 }

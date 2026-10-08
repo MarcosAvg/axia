@@ -33,6 +33,25 @@ function Section({
   )
 }
 
+function EvidenceSection({
+  ticketId,
+  cycle,
+}: {
+  ticketId: string
+  cycle: number
+}) {
+  const evidence = useTicketEvidence(ticketId)
+  return (
+    <Section title={ticketMessages.detail.evidence}>
+      <div className="flex flex-col gap-4">
+        <EvidenceUploader ticketId={ticketId} cycle={cycle} />
+        <PendingEvidence ticketId={ticketId} />
+        <TicketEvidenceList items={evidence.data ?? []} />
+      </div>
+    </Section>
+  )
+}
+
 /** Detalle del tiquet: captura, acciones, línea de tiempo, participantes y evidencias. */
 export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const { identity } = useAuth()
@@ -40,7 +59,6 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const ticket = useTicket(ticketId)
   const timeline = useTicketTimeline(ticketId)
   const participants = useTicketParticipants(ticketId)
-  const evidence = useTicketEvidence(ticketId)
 
   if (ticket.isLoading) {
     return (
@@ -72,7 +90,12 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
       </Section>
       {actions.length > 0 ? (
         <Section title={detail.actions}>
-          <TicketActionsPanel ticket={ticket.data} actions={actions} />
+          <TicketActionsPanel
+            ticket={ticket.data}
+            actions={actions}
+            identity={identity}
+            participants={participants.data ?? []}
+          />
         </Section>
       ) : null}
       <Section title={detail.timeline}>
@@ -81,13 +104,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
       <Section title={detail.participants}>
         <ParticipantList participants={participants.data ?? []} />
       </Section>
-      <Section title={detail.evidence}>
-        <div className="flex flex-col gap-4">
-          <EvidenceUploader ticketId={ticketId} cycle={ticket.data.cycle} />
-          <PendingEvidence ticketId={ticketId} />
-          <TicketEvidenceList items={evidence.data ?? []} />
-        </div>
-      </Section>
+      <EvidenceSection ticketId={ticketId} cycle={ticket.data.cycle} />
       {canRecordTime ? (
         <Section title={manualTimeMessages.title}>
           <ManualTimePanel ticketId={ticketId} />

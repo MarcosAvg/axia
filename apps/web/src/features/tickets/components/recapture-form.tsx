@@ -8,12 +8,14 @@ import { RecaptureFields } from './recapture-fields'
 /** Recaptura: aplica una captura corregida sobre el mismo tiquet. */
 export function RecaptureForm({
   ticket,
+  subjectTechnicianId,
   onClose,
 }: {
   ticket: TicketDetail
+  subjectTechnicianId?: string
   onClose: () => void
 }) {
-  const form = useRecaptureForm(ticket, onClose)
+  const form = useRecaptureForm(ticket, subjectTechnicianId, onClose)
 
   return (
     <form

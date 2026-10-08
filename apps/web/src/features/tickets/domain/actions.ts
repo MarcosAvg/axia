@@ -55,6 +55,44 @@ const REASSIGNABLE: TicketStatus[] = [
 const has = (context: ActionContext, permission: string) =>
   can(context.identity, permission)
 
+// Acciones del técnico que también se pueden ejecutar por proxy (act_on_behalf).
+export const PROXY_ACTIONS: ActionKey[] = [
+  'start',
+  'attend',
+  'pause',
+  'resume',
+  'recapture',
+]
+const DIRECT_PERMISSION: Partial<Record<ActionKey, string>> = {
+  start: 'ticket.start',
+  attend: 'ticket.attend',
+  pause: 'ticket.pause',
+  resume: 'ticket.resume',
+  recapture: 'ticket.recapture',
+}
+
+const hasProxy = (context: ActionContext) =>
+  can(context.identity, 'act_on_behalf')
+const technicianAction = (context: ActionContext, permission: string) =>
+  has(context, permission) || hasProxy(context)
+
+/**
+ * Acciones que exigen elegir un técnico sujeto: el usuario puede hacerlas por proxy pero no
+ * tiene el permiso directo y todavía no eligió a nombre de quién.
+ */
+export function actionsRequiringSubject(
+  identity: Identity | null,
+  actions: ActionKey[],
+  hasSubject: boolean,
+): ActionKey[] {
+  if (hasSubject || !can(identity, 'act_on_behalf')) return []
+  return actions.filter(
+    (action) =>
+      PROXY_ACTIONS.includes(action) &&
+      !can(identity, DIRECT_PERMISSION[action] ?? ''),
+  )
+}
+
 const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   assign_technician: (c) =>
     ASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_technician'),
@@ -62,10 +100,12 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
     REASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_supervisor'),
   add_auxiliary: (c) =>
     ADVANCEABLE.includes(c.status) && has(c, 'ticket.add_auxiliary'),
-  start: (c) => c.status === 'assigned' && has(c, 'ticket.start'),
-  pause: (c) => c.status === 'in_progress' && has(c, 'ticket.pause'),
-  resume: (c) => c.status === 'paused' && has(c, 'ticket.resume'),
-  attend: (c) => c.status === 'in_progress' && has(c, 'ticket.attend'),
+  start: (c) => c.status === 'assigned' && technicianAction(c, 'ticket.start'),
+  pause: (c) =>
+    c.status === 'in_progress' && technicianAction(c, 'ticket.pause'),
+  resume: (c) => c.status === 'paused' && technicianAction(c, 'ticket.resume'),
+  attend: (c) =>
+    c.status === 'in_progress' && technicianAction(c, 'ticket.attend'),
   validate: (c) => c.status === 'attended' && has(c, 'ticket.validate'),
   reject: (c) => ADVANCEABLE.includes(c.status) && has(c, 'ticket.reject'),
   cancel: (c) => ADVANCEABLE.includes(c.status) && has(c, 'ticket.cancel'),
@@ -73,7 +113,7 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
     ADVANCEABLE.includes(c.status) && has(c, 'ticket.prioritize'),
   comment: (c) => has(c, 'ticket.view'),
   recapture: (c) =>
-    RECAPTURABLE.includes(c.status) && has(c, 'ticket.recapture'),
+    RECAPTURABLE.includes(c.status) && technicianAction(c, 'ticket.recapture'),
   open_claim: (c) =>
     CLAIMABLE.includes(c.status) && has(c, 'ticket.open_claim'),
   resolve_claim: (c) =>

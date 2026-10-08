@@ -237,6 +237,12 @@ export const ticketMessages = {
     dismissed: 'Improcedente (cerrar)',
     new_ticket: 'Requiere tiquet nuevo',
   },
+  proxy: {
+    label: 'Actuar a nombre de',
+    none: 'Nadie (acción propia)',
+    help: 'Selecciona un técnico para registrar sus acciones a su nombre.',
+    required: 'Selecciona a nombre de qué técnico.',
+  },
   evidence: {
     addTitle: 'Agregar evidencia',
     type: 'Tipo de evidencia',
