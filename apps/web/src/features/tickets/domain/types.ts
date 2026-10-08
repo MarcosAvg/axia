@@ -55,6 +55,13 @@ export const EVENT_TYPES = [
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 
+export type ClaimResolution = 'upheld' | 'dismissed' | 'new_ticket'
+export const CLAIM_RESOLUTIONS: ClaimResolution[] = [
+  'upheld',
+  'dismissed',
+  'new_ticket',
+]
+
 export interface TicketListItem {
   id: string
   folio: string
@@ -73,7 +80,12 @@ export interface TicketListItem {
 export interface TicketDetail extends TicketListItem {
   cycle: number
   buildingId: string
+  locationId: string
+  dependencyId: string
   categoryId: string
+  subcategoryId: string | null
+  problemId: string | null
+  serviceTypeId: string
   priorityId: string
   locationName: string | null
   dependencyName: string | null

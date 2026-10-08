@@ -109,9 +109,9 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
 
 ## Siguiente
 
-**Fase 4 — Evidencias y modo sin conexión**: captura y compresión de fotos, subida reanudable, cola
-`outbox` con Dexie y sincronización; registro de tiempos manuales (interfaz) y actos en nombre de
-otro (proxy); prueba Playwright del flujo del técnico sin conexión. La **Fase 3B quedó cerrada**.
+**Fase 4A — Evidencia y modo sin conexión**: captura y compresión de fotos con `canvas`, cola
+`outbox` con Dexie, subida reanudable con TUS, sincronización y prueba Playwright del técnico sin
+conexión. Después, **Fase 4B** (tiempos manuales y proxy). Las Fases 3A y 3B quedaron cerradas.
 
 ## Hoja de ruta
 
@@ -167,10 +167,9 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Alta de tiquets con catálogos, lista y detalle con línea de tiempo
 - [x] Vista del técnico (móvil primero) y bandejas del supervisor
 - [x] Evidencia en línea mínima (bucket privado, `evidence_add`, subida y URL firmada) — ADR 0017
-- [ ] (Diferido a otra tarea) Interfaz de: reasignar supervisor, agregar auxiliares, recaptura,
-      marcar duplicado, reclamaciones, reactivación y calificación de satisfacción (los RPC de
-      reasignar/auxiliares/duplicados ya existen; la captura offline y los tiempos manuales son
-      Fase 4)
+- [x] (Cerrado el 2026-10-08) Interfaz de recaptura, reclamaciones (abrir/resolver), marcar
+      duplicado y reactivación (los RPC ya existían; sin migraciones). Quedan pendientes la
+      calificación de satisfacción y la interfaz de reasignar supervisor y agregar auxiliares.
 
 **Fase 3B — Administración — cerrada el 2026-10-08:**
 - [x] Catálogos maestros y motivos jerárquicos (feature `admin`, `/admin/catalogos`)
@@ -454,6 +453,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `feat/fase-3b-access`.
 - 2026-10-08: Fase 3B, tramo 4: `/admin/configuracion` (configuración esencial de la instancia) y
   pruebas Vitest del dominio. `pnpm check` completo en verde. **Fase 3B cerrada**.
+- 2026-10-08: cierre de transiciones de 3A: recaptura, reclamaciones (abrir/resolver), marcar
+  duplicado y reactivación (UI + dominio + hooks), sin migraciones; 80 Vitest y 9 Playwright en
+  verde; `pnpm check` completo en verde. Rama `feat/fase-3a-transiciones`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -503,3 +505,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   reclamación, política de evidencia, patrón de folio y zona horaria). Pruebas Vitest del dominio.
   **Fase 3B cerrada** con tramos 1-4; quedan fuera (documentados) alta de cuentas por Edge Function,
   calendarios laborales, reglas de notificación/escalamiento y parámetros finos de duplicados.
+- **Cierre de transiciones de 3A**: interfaz de recaptura (campos de captura + motivo, con selects
+  dependientes), reclamaciones (abrir con motivo + descripción y resolver con resultado + motivo),
+  marcar duplicado (buscar el original por folio) y reactivación. Dominio `allowedActions` ampliado y
+  funciones puras de recaptura. Pruebas Vitest y Playwright (rechazar y reactivar). Sin migraciones.
+  Rama `feat/fase-3a-transiciones`.

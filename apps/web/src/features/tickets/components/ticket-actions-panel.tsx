@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { ActionKey } from '../domain/actions'
-import { ticketMessages } from '../i18n'
+import type { TicketDetail } from '../domain/types'
 import { useTicketActions } from '../hooks/use-ticket-actions'
+import { ticketMessages } from '../i18n'
+import { DuplicateForm } from './duplicate-form'
+import { RecaptureForm } from './recapture-form'
 import { TicketActionForm } from './ticket-action-form'
 
 const ONE_CLICK: ActionKey[] = ['start', 'resume', 'validate']
@@ -14,19 +17,23 @@ const FORM_ACTIONS: ActionKey[] = [
   'change_priority',
   'attend',
   'comment',
+  'open_claim',
+  'resolve_claim',
+  'reactivate',
 ]
+const DEDICATED: ActionKey[] = ['recapture', 'mark_duplicate']
 
 interface TicketActionsPanelProps {
-  ticketId: string
+  ticket: TicketDetail
   actions: ActionKey[]
 }
 
-/** Botonera de acciones disponibles; las que piden datos abren su formulario. */
+/** Botonera de acciones disponibles; cada una abre su formulario. */
 export function TicketActionsPanel({
-  ticketId,
+  ticket,
   actions,
 }: TicketActionsPanelProps) {
-  const mutations = useTicketActions(ticketId)
+  const mutations = useTicketActions(ticket.id)
   const [formAction, setFormAction] = useState<ActionKey | null>(null)
 
   const oneClick: Partial<Record<ActionKey, () => void>> = {
@@ -36,9 +43,14 @@ export function TicketActionsPanel({
   }
 
   const visible = actions.filter(
-    (action) => ONE_CLICK.includes(action) || FORM_ACTIONS.includes(action),
+    (action) =>
+      ONE_CLICK.includes(action) ||
+      FORM_ACTIONS.includes(action) ||
+      DEDICATED.includes(action),
   )
   if (visible.length === 0) return null
+
+  const close = () => setFormAction(null)
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,11 +70,17 @@ export function TicketActionsPanel({
           )
         })}
       </div>
-      {formAction ? (
+      {formAction === 'recapture' ? (
+        <RecaptureForm ticket={ticket} onClose={close} />
+      ) : null}
+      {formAction === 'mark_duplicate' ? (
+        <DuplicateForm ticketId={ticket.id} onClose={close} />
+      ) : null}
+      {formAction && !DEDICATED.includes(formAction) ? (
         <TicketActionForm
-          ticketId={ticketId}
+          ticketId={ticket.id}
           action={formAction}
-          onClose={() => setFormAction(null)}
+          onClose={close}
         />
       ) : null}
     </div>

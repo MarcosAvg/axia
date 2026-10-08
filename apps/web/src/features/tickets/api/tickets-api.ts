@@ -27,7 +27,7 @@ const TICKETS_PAGE_SIZE = 20
 const LIST_SELECT =
   'id, folio, status, reported_at, closed_at, description, requester_name, possible_duplicate, building:buildings(name), category:categories(name), priority:priorities(name), team:teams(name)'
 
-const DETAIL_SELECT = `${LIST_SELECT}, cycle, building_id, category_id, priority_id, requester_contact, duplicate_of_id, location:locations(name), dependency:dependencies(name), subcategory:subcategories(name), problem:problems(name), service_type:service_types(name), channel:channels(name)`
+const DETAIL_SELECT = `${LIST_SELECT}, cycle, building_id, location_id, dependency_id, category_id, subcategory_id, problem_id, service_type_id, priority_id, requester_contact, duplicate_of_id, location:locations(name), dependency:dependencies(name), subcategory:subcategories(name), problem:problems(name), service_type:service_types(name), channel:channels(name)`
 
 export interface TicketFilters {
   status?: TicketStatus
@@ -220,4 +220,19 @@ export async function fetchMyOffers(userId: string): Promise<TicketListItem[]> {
   if (offers.error) throw offers.error
   const ids = (offers.data ?? []).map((row) => row.ticket_id)
   return fetchTicketsByIds(ids)
+}
+
+/** Tiquets cuyo folio coincide con el término (para marcar duplicados). */
+export async function searchTicketsByFolio(
+  term: string,
+): Promise<TicketListItem[]> {
+  const cleaned = term.replace(/[%,()]/g, '').trim()
+  if (!cleaned) return []
+  const { data, error } = await supabase
+    .from('tickets')
+    .select(LIST_SELECT)
+    .ilike('folio', `%${cleaned}%`)
+    .limit(10)
+  if (error) throw error
+  return (data ?? []).map(parseTicketListItem)
 }

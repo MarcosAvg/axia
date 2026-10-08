@@ -13,6 +13,11 @@ export type ActionKey =
   | 'cancel'
   | 'change_priority'
   | 'comment'
+  | 'recapture'
+  | 'open_claim'
+  | 'resolve_claim'
+  | 'mark_duplicate'
+  | 'reactivate'
 
 export interface ActionContext {
   identity: Identity | null
@@ -20,6 +25,13 @@ export interface ActionContext {
 }
 
 const ASSIGNABLE: TicketStatus[] = ['registered', 'with_supervisor', 'assigned']
+const RECAPTURABLE: TicketStatus[] = [
+  'registered',
+  'with_supervisor',
+  'assigned',
+  'in_progress',
+  'paused',
+]
 const ADVANCEABLE: TicketStatus[] = [
   'registered',
   'with_supervisor',
@@ -29,6 +41,8 @@ const ADVANCEABLE: TicketStatus[] = [
   'attended',
   'under_claim',
 ]
+const CLAIMABLE: TicketStatus[] = ['attended', 'closed']
+const DISCARDED: TicketStatus[] = ['rejected', 'cancelled', 'duplicate']
 
 const has = (context: ActionContext, permission: string) =>
   can(context.identity, permission)
@@ -46,6 +60,16 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   change_priority: (c) =>
     ADVANCEABLE.includes(c.status) && has(c, 'ticket.prioritize'),
   comment: (c) => has(c, 'ticket.view'),
+  recapture: (c) =>
+    RECAPTURABLE.includes(c.status) && has(c, 'ticket.recapture'),
+  open_claim: (c) =>
+    CLAIMABLE.includes(c.status) && has(c, 'ticket.open_claim'),
+  resolve_claim: (c) =>
+    c.status === 'under_claim' && has(c, 'ticket.resolve_claim'),
+  mark_duplicate: (c) =>
+    ADVANCEABLE.includes(c.status) && has(c, 'ticket.mark_duplicate'),
+  reactivate: (c) =>
+    DISCARDED.includes(c.status) && has(c, 'ticket.reactivate'),
 }
 
 /** Acciones que el usuario puede ejecutar sobre el tiquet en su estado actual. */

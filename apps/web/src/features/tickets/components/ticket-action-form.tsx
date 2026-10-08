@@ -17,6 +17,9 @@ const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   pause: 'pause',
   reject: 'rejection',
   cancel: 'cancellation',
+  open_claim: 'claim',
+  resolve_claim: 'claim_outcome',
+  reactivate: 'reactivation',
 }
 
 const EMPTY: ActionValues = {
@@ -25,6 +28,7 @@ const EMPTY: ActionValues = {
   priorityId: '',
   note: '',
   text: '',
+  resolution: 'upheld',
 }
 
 function mutationFor(action: ActionKey, actions: Mutations) {
@@ -36,15 +40,20 @@ function mutationFor(action: ActionKey, actions: Mutations) {
     pause: actions.pause,
     reject: actions.reject,
     cancel: actions.cancel,
+    open_claim: actions.openClaim,
+    resolve_claim: actions.resolveClaim,
+    reactivate: actions.reactivate,
   }
   return map[action]
 }
 
-function buildSubmitHandlers(
+type Handlers = Partial<Record<ActionKey, () => void>>
+
+function simpleHandlers(
   actions: Mutations,
   values: ActionValues,
   options: MutateOptions,
-): Partial<Record<ActionKey, () => void>> {
+): Handlers {
   const note = values.note || null
   const text = values.text.trim()
   return {
@@ -85,6 +94,51 @@ function buildSubmitHandlers(
         actions.cancel.mutate({ reasonId: values.reasonId, note }, options)
       }
     },
+  }
+}
+
+function claimHandlers(
+  actions: Mutations,
+  values: ActionValues,
+  options: MutateOptions,
+): Handlers {
+  const note = values.note || null
+  const text = values.text.trim()
+  return {
+    open_claim: () => {
+      if (values.reasonId && text) {
+        actions.openClaim.mutate(
+          { reasonId: values.reasonId, description: text },
+          options,
+        )
+      }
+    },
+    resolve_claim: () => {
+      actions.resolveClaim.mutate(
+        {
+          resolution: values.resolution,
+          resultId: values.reasonId || null,
+          note,
+        },
+        options,
+      )
+    },
+    reactivate: () => {
+      if (values.reasonId) {
+        actions.reactivate.mutate({ reasonId: values.reasonId }, options)
+      }
+    },
+  }
+}
+
+function buildSubmitHandlers(
+  actions: Mutations,
+  values: ActionValues,
+  options: MutateOptions,
+): Handlers {
+  return {
+    ...simpleHandlers(actions, values, options),
+    ...claimHandlers(actions, values, options),
   }
 }
 

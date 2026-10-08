@@ -1,6 +1,7 @@
 // RPC de transición del tiquet. Toda acción de avance pasa por aquí (RPC, nunca update directo).
 
 import { supabase } from '@/lib/supabase'
+import type { ClaimResolution } from '../domain/types'
 
 async function run(
   promise: { error: unknown } | PromiseLike<{ error: unknown }>,
@@ -148,6 +149,88 @@ export async function commentTicket(
       p_ticket_id: ticketId,
       p_text: text,
       p_is_internal: true,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export async function recaptureTicket(
+  ticketId: string,
+  changes: Record<string, string | null>,
+  reasonId: string | null,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_recapture', {
+      p_ticket_id: ticketId,
+      p_changes: changes,
+      p_reason_id: reasonId ?? undefined,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export async function openClaim(
+  ticketId: string,
+  reasonId: string,
+  description: string,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_open_claim', {
+      p_ticket_id: ticketId,
+      p_reason_id: reasonId,
+      p_description: description,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export interface ResolveClaimInput {
+  resolution: ClaimResolution
+  resultId: string | null
+  note: string | null
+}
+
+export async function resolveClaim(
+  ticketId: string,
+  input: ResolveClaimInput,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_resolve_claim', {
+      p_ticket_id: ticketId,
+      p_resolution: input.resolution,
+      p_result_id: input.resultId ?? undefined,
+      p_note: input.note ?? undefined,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export async function markDuplicate(
+  ticketId: string,
+  originalId: string,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_mark_duplicate', {
+      p_ticket_id: ticketId,
+      p_original_id: originalId,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export async function reactivateTicket(
+  ticketId: string,
+  reasonId: string,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_reactivate', {
+      p_ticket_id: ticketId,
+      p_reason_id: reasonId,
       p_client_request_id: clientRequestId,
     }),
   )

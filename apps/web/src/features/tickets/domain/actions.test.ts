@@ -64,3 +64,35 @@ describe('allowedActions', () => {
     ).not.toContain('validate')
   })
 })
+
+describe('allowedActions (reclamaciones y descartes)', () => {
+  it('permite recapturar con permiso en estados no finales', () => {
+    expect(
+      allowedActions(context(['ticket.recapture'], 'in_progress')),
+    ).toContain('recapture')
+  })
+
+  it('abre reclamación solo si está atendido o cerrado', () => {
+    expect(
+      allowedActions(context(['ticket.open_claim'], 'attended')),
+    ).toContain('open_claim')
+    expect(
+      allowedActions(context(['ticket.open_claim'], 'in_progress')),
+    ).not.toContain('open_claim')
+  })
+
+  it('resuelve la reclamación solo en under_claim', () => {
+    expect(
+      allowedActions(context(['ticket.resolve_claim'], 'under_claim')),
+    ).toContain('resolve_claim')
+  })
+
+  it('reactiva solo un tiquet descartado', () => {
+    expect(
+      allowedActions(context(['ticket.reactivate'], 'rejected')),
+    ).toContain('reactivate')
+    expect(
+      allowedActions(context(['ticket.reactivate'], 'in_progress')),
+    ).not.toContain('reactivate')
+  })
+})

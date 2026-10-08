@@ -69,7 +69,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
       </Section>
       {actions.length > 0 ? (
         <Section title={detail.actions}>
-          <TicketActionsPanel ticketId={ticketId} actions={actions} />
+          <TicketActionsPanel ticket={ticket.data} actions={actions} />
         </Section>
       ) : null}
       <Section title={detail.timeline}>
