@@ -26,7 +26,8 @@ aislados.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
   y paginación en la URL, detalle con **línea de tiempo**, **bandeja del supervisor** (`/inbox`) y
   **vista del técnico** (`/mi-trabajo`) con acciones por estado/permiso y **evidencia** (bucket
-  privado con URL firmada); incluye **recaptura, reclamaciones, marcar duplicado y reactivación**.
+  privado con URL firmada); incluye **recaptura, reclamaciones, marcar duplicado, reactivación,
+  reasignar supervisor y agregar auxiliares**.
 - **Administración** (Fase 3B): **catálogos y motivos** (`/admin/catalogos`), **roles y permisos**
   con matriz y ámbito (`/admin/roles`), **usuarios** con roles y vínculos (`/admin/usuarios`),
   **ámbitos y designaciones** (`/admin/ambitos`) y **configuración de la instancia**

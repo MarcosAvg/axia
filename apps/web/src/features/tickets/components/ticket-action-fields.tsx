@@ -33,6 +33,7 @@ const REASON_ACTIONS: ActionKey[] = [
   'open_claim',
   'resolve_claim',
   'reactivate',
+  'add_auxiliary',
 ]
 const TEXT_ACTIONS: ActionKey[] = ['attend', 'comment', 'open_claim']
 const PLACEHOLDER = 'Selecciona…'
@@ -98,11 +99,13 @@ function TextBlock({
   )
 }
 
-function selectField(props: TicketActionFieldsProps): ReactNode {
+function selectFields(props: TicketActionFieldsProps): ReactNode[] {
   const { action, values, onChange, technicians, reasons, priorities } = props
-  if (action === 'assign_technician') {
-    return (
+  const blocks: ReactNode[] = []
+  if (action === 'assign_technician' || action === 'add_auxiliary') {
+    blocks.push(
       <SelectBlock
+        key="technician"
         id="action-technician"
         label={fields.technician}
         options={toOptions(
@@ -110,23 +113,25 @@ function selectField(props: TicketActionFieldsProps): ReactNode {
         )}
         value={values.technicianId}
         onChange={(technicianId) => onChange({ technicianId })}
-      />
+      />,
     )
   }
   if (REASON_ACTIONS.includes(action)) {
-    return (
+    blocks.push(
       <SelectBlock
+        key="reason"
         id="action-reason"
         label={fields.reason}
         options={toOptions(reasons.map((r) => ({ id: r.id, label: r.name })))}
         value={values.reasonId}
         onChange={(reasonId) => onChange({ reasonId })}
-      />
+      />,
     )
   }
   if (action === 'resolve_claim') {
-    return (
+    blocks.push(
       <SelectBlock
+        key="resolution"
         id="action-resolution"
         label={fields.resolution}
         options={resolutionOptions}
@@ -135,12 +140,13 @@ function selectField(props: TicketActionFieldsProps): ReactNode {
           const next = CLAIM_RESOLUTIONS.find((candidate) => candidate === raw)
           if (next) onChange({ resolution: next })
         }}
-      />
+      />,
     )
   }
   if (action === 'change_priority') {
-    return (
+    blocks.push(
       <SelectBlock
+        key="priority"
         id="action-priority"
         label={fields.priority}
         options={toOptions(
@@ -148,10 +154,10 @@ function selectField(props: TicketActionFieldsProps): ReactNode {
         )}
         value={values.priorityId}
         onChange={(priorityId) => onChange({ priorityId })}
-      />
+      />,
     )
   }
-  return null
+  return blocks
 }
 
 function textFields(props: TicketActionFieldsProps): ReactNode[] {
@@ -186,7 +192,7 @@ function textFields(props: TicketActionFieldsProps): ReactNode[] {
 export function TicketActionFields(props: TicketActionFieldsProps) {
   return (
     <div className="flex flex-col gap-4">
-      {selectField(props)}
+      {selectFields(props)}
       {textFields(props)}
     </div>
   )

@@ -235,3 +235,49 @@ export async function reactivateTicket(
     }),
   )
 }
+
+export interface AssignSupervisorInput {
+  reasonId: string
+  supervisorUserId: string | null
+  teamId: string | null
+  note: string | null
+}
+
+export async function assignSupervisor(
+  ticketId: string,
+  input: AssignSupervisorInput,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_assign_supervisor', {
+      p_ticket_id: ticketId,
+      p_reason_id: input.reasonId,
+      p_supervisor_user_id: input.supervisorUserId ?? undefined,
+      p_team_id: input.teamId ?? undefined,
+      p_note: input.note ?? undefined,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}
+
+export interface AddAuxiliaryInput {
+  technicianId: string
+  reasonId: string
+  note: string | null
+}
+
+export async function addAuxiliary(
+  ticketId: string,
+  input: AddAuxiliaryInput,
+  clientRequestId: string,
+) {
+  await run(
+    supabase.rpc('ticket_add_auxiliary', {
+      p_ticket_id: ticketId,
+      p_technician_id: input.technicianId,
+      p_reason_id: input.reasonId,
+      p_note: input.note ?? undefined,
+      p_client_request_id: clientRequestId,
+    }),
+  )
+}

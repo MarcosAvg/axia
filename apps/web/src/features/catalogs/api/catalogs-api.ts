@@ -15,7 +15,7 @@ import type {
 } from '../domain/types'
 
 async function fetchOptions(
-  table: 'buildings' | 'dependencies' | 'service_types' | 'channels',
+  table: 'teams' | 'buildings' | 'dependencies' | 'service_types' | 'channels',
 ): Promise<Option[]> {
   const { data, error } = await supabase
     .from(table)
@@ -26,6 +26,7 @@ async function fetchOptions(
   return data ?? []
 }
 
+export const fetchTeams = () => fetchOptions('teams')
 export const fetchBuildings = () => fetchOptions('buildings')
 export const fetchDependencies = () => fetchOptions('dependencies')
 export const fetchServiceTypes = () => fetchOptions('service_types')

@@ -20,6 +20,7 @@ const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   open_claim: 'claim',
   resolve_claim: 'claim_outcome',
   reactivate: 'reactivation',
+  add_auxiliary: 'auxiliary_support',
 }
 
 const EMPTY: ActionValues = {
@@ -43,6 +44,7 @@ function mutationFor(action: ActionKey, actions: Mutations) {
     open_claim: actions.openClaim,
     resolve_claim: actions.resolveClaim,
     reactivate: actions.reactivate,
+    add_auxiliary: actions.addAuxiliary,
   }
   return map[action]
 }
@@ -126,6 +128,18 @@ function claimHandlers(
     reactivate: () => {
       if (values.reasonId) {
         actions.reactivate.mutate({ reasonId: values.reasonId }, options)
+      }
+    },
+    add_auxiliary: () => {
+      if (values.technicianId && values.reasonId) {
+        actions.addAuxiliary.mutate(
+          {
+            technicianId: values.technicianId,
+            reasonId: values.reasonId,
+            note,
+          },
+          options,
+        )
       }
     },
   }

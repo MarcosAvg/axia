@@ -14,6 +14,7 @@ import {
   fetchTicket,
   fetchTickets,
   fetchTimeline,
+  fetchSupervisors,
   searchTicketsByFolio,
 } from '../api/tickets-api'
 import type { DuplicateCheckInput, TicketFilters } from '../api/tickets-api'
@@ -110,5 +111,13 @@ export function useTicketSearchByFolio(term: string) {
     queryKey: ['tickets', 'search', term],
     queryFn: () => searchTicketsByFolio(term),
     enabled: term.trim().length >= 2,
+  })
+}
+
+export function useSupervisors() {
+  return useQuery({
+    queryKey: ['tickets', 'supervisors'],
+    queryFn: fetchSupervisors,
+    staleTime: 5 * 60 * 1000,
   })
 }

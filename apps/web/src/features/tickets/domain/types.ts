@@ -132,3 +132,8 @@ export interface DuplicateCandidate {
   problem?: string | null
   requester_contact?: string | null
 }
+
+export interface SupervisorOption {
+  id: string
+  fullName: string
+}

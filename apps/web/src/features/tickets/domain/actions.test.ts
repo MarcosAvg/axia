@@ -95,4 +95,19 @@ describe('allowedActions (reclamaciones y descartes)', () => {
       allowedActions(context(['ticket.reactivate'], 'in_progress')),
     ).not.toContain('reactivate')
   })
+
+  it('reasigna supervisor solo con responsable', () => {
+    expect(
+      allowedActions(context(['ticket.assign_supervisor'], 'with_supervisor')),
+    ).toContain('assign_supervisor')
+    expect(
+      allowedActions(context(['ticket.assign_supervisor'], 'registered')),
+    ).not.toContain('assign_supervisor')
+  })
+
+  it('agrega auxiliar en estados no finales', () => {
+    expect(
+      allowedActions(context(['ticket.add_auxiliary'], 'in_progress')),
+    ).toContain('add_auxiliary')
+  })
 })
