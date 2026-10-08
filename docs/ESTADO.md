@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5C (fundación de interfaz) — ola 1 cerrada; siguiente: ola 2 de UI, luego Fase 6
+**Fase actual:** 5C (fundación de interfaz) cerrada — siguiente: Fase 6 (integraciones y migración)
 
 ## En curso
 
-_(vacío)_ — La primera ola de la fundación de interfaz quedó cerrada (shadcn/ui, toasts, Sheet/Dialog,
-Badge/Table). La siguiente tarea es la **ola 2 de UI** (user-menu, roles/usuarios, login/perfil,
-formularios secundarios del detalle) y después la **Fase 6**. Sin push a `origin`.
+_(vacío)_ — La fundación de interfaz (olas 1 y 2) quedó cerrada. La siguiente tarea es la **Fase 6**
+(infraestructura de importación y adaptadores, aislada del núcleo), cuando la persona la pida.
+Sin push a `origin`.
 
 ## Hecho
 
@@ -165,18 +165,18 @@ formularios secundarios del detalle) y después la **Fase 6**. Sin push a `origi
   - Ola 1: insignia → `Badge`, métricas → `Table`, acciones del tiquet → `Sheet`, catálogos →
     `Dialog`, toasts al guardar. Decisiones en el ADR 0025.
   - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
-  - **Ola 2 pendiente:** roles/usuarios (`Tabs`/`Table`/`Checkbox`), login/perfil (`Form`),
-    formularios secundarios del detalle, `Tooltip`/`Skeleton`. El `user-menu` ya usa `DropdownMenu`.
+  - **Ola 2 (2026-10-08, rama `feat/fase-5c-ui-2b`):** campos compartidos sobre las primitivas
+    `field` de shadcn; roles con `Tabs`/`Table`; usuarios con `Switch`/`Checkbox`; estados de
+    carga/error con `Skeleton`/`Alert`; formularios de auth y tiquets con `Alert`; `textarea`.
+    Queda `evidence-uploader` → `Progress` y más `Tooltip`/`Skeleton` oportunistas.
 
 ## Siguiente
 
-**Ola 2 de la fundación de interfaz**: migrar `user-menu` a `DropdownMenu` (ajustando las E2E),
-roles/usuarios a `Tabs`/`Table`/`Checkbox`, login/perfil al `Form` de shadcn, los formularios
-secundarios del detalle y usar `Tooltip`/`Skeleton` donde aporten. Después, **Fase 6** (integraciones
-y migración): infraestructura genérica de importación (`import_batches`, `import_records`,
-`catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada del núcleo y solo
-cuando la persona la pida. Pendientes de la Fase 5: duplicados en el tablero, satisfacción y SLA;
-confirmar la zona horaria real.
+**Fase 6 — Integraciones y migración**: infraestructura genérica de importación (`import_batches`,
+`import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada
+del núcleo y solo cuando la persona la pida. Quedan menores de UI oportunistas (`Progress` en
+evidencia, más `Tooltip`/`Skeleton`) y pendientes de la Fase 5 (duplicados en el tablero,
+satisfacción y SLA); confirmar la zona horaria real.
 
 ## Hoja de ruta
 

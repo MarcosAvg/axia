@@ -38,7 +38,8 @@ también a `components/ui/**` y varios los exceden.
 ## Consecuencias
 
 - La base permite adoptar shadcn de forma orgánica en las siguientes pantallas.
-- **Olas pendientes:** roles/usuarios con `Tabs`/`Table`/`Checkbox`, login/perfil con `Form` de
-  shadcn, formularios secundarios del detalle (recaptura, duplicado, supervisor, tiempos, evidencia),
-  `Tooltip`/`Skeleton`/`Alert` donde aporten. El `user-menu` ya usa `DropdownMenu`.
+- **Olas pendientes:** migrar `evidence-uploader` a `Progress`, y adoptar `Tooltip`/`Skeleton` en más
+  puntos donde aporten. La ola 2 (field/tabs/table/checkbox/alert) ya está aplicada: campos
+  compartidos sobre `field`, roles con `Tabs`/`Table`, usuarios con `Switch`/`Checkbox`, estados de
+  carga/error con `Skeleton`/`Alert` y formularios de auth/tiquets con `Alert`.
 - Los componentes ya migrados se prueban con las E2E existentes (12 en verde).
