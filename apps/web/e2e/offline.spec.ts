@@ -21,6 +21,26 @@ async function clickAndWait(page: Page, name: string, rpc: string) {
   await done
 }
 
+async function ticketActionCount(page: Page): Promise<number> {
+  const result = await page.evaluate(`(async () => {
+    const open = indexedDB.open('axia')
+    const db = await new Promise((resolve, reject) => {
+      open.onsuccess = () => resolve(open.result)
+      open.onerror = () => reject(open.error)
+    })
+    if (!db.objectStoreNames.contains('outbox')) return 0
+    const store = db.transaction('outbox', 'readonly').objectStore('outbox')
+    const all = await new Promise((resolve, reject) => {
+      const request = store.getAll()
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    db.close()
+    return all.filter((item) => item.type === 'ticket_action').length
+  })()`)
+  return Number(result)
+}
+
 async function createAssignedTicket(page: Page, description: string) {
   await page.goto('/tickets/nuevo')
   await page
@@ -82,6 +102,8 @@ test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   await expect(
     page.getByText('Asignado', { exact: true }).first(),
   ).toBeVisible()
+  // Una sola acción en la cola (sin doble envío).
+  await expect.poll(() => ticketActionCount(page)).toBe(1)
 
   // Vuelve la conexión: el evento 'online' sincroniza la evidencia y el inicio.
   await page.context().setOffline(false)

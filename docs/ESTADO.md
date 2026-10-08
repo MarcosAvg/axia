@@ -8,7 +8,13 @@
 
 ## En curso
 
-_(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 líneas.
+**Fase 4B — Tramo 0-1: arreglo del E2E y tiempos manuales** (rama `feat/fase-4b-tiempos`).
+1. Arreglo del E2E: deshabilitar acciones de un clic mientras están pendientes y afirmar un solo
+   `ticket_action` en la cola.
+2. Backend: `subject_technician_id` y anulación en `time_spans`, `event_type` de tiempo manual y
+   `time_span_record`/`time_span_void`; excluir anulados de los cálculos; pgTAP.
+3. Frontend: formulario de tiempos manuales y anulación en el detalle; tramos manuales diferenciados.
+4. Luego proxy (`feat/fase-4b-proxy`) y cierre. Sin push.
 
 ## Hecho
 

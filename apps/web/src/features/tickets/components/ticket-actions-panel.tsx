@@ -4,9 +4,9 @@ import type { ActionKey } from '../domain/actions'
 import type { TicketDetail } from '../domain/types'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
+import { AssignSupervisorForm } from './assign-supervisor-form'
 import { DuplicateForm } from './duplicate-form'
 import { RecaptureForm } from './recapture-form'
-import { AssignSupervisorForm } from './assign-supervisor-form'
 import { TicketActionForm } from './ticket-action-form'
 
 const ONE_CLICK: ActionKey[] = ['start', 'resume', 'validate']
@@ -29,6 +29,40 @@ const DEDICATED: ActionKey[] = [
   'assign_supervisor',
 ]
 
+interface ActionButtonsProps {
+  visible: ActionKey[]
+  oneClick: Partial<Record<ActionKey, () => void>>
+  pending: Partial<Record<ActionKey, boolean>>
+  onOpenForm: (action: ActionKey) => void
+}
+
+function ActionButtons({
+  visible,
+  oneClick,
+  pending,
+  onOpenForm,
+}: ActionButtonsProps) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {visible.map((action) => {
+        const handler = oneClick[action]
+        return (
+          <Button
+            key={action}
+            type="button"
+            variant={handler ? 'secondary' : 'outline'}
+            className="min-h-11"
+            disabled={Boolean(pending[action])}
+            onClick={handler ?? (() => onOpenForm(action))}
+          >
+            {ticketMessages.actions[action]}
+          </Button>
+        )
+      })}
+    </div>
+  )
+}
+
 interface TicketActionsPanelProps {
   ticket: TicketDetail
   actions: ActionKey[]
@@ -47,6 +81,11 @@ export function TicketActionsPanel({
     resume: () => mutations.resume.mutate({}),
     validate: () => mutations.validate.mutate({}),
   }
+  const pending: Partial<Record<ActionKey, boolean>> = {
+    start: mutations.start.isPending,
+    resume: mutations.resume.isPending,
+    validate: mutations.validate.isPending,
+  }
 
   const visible = actions.filter(
     (action) =>
@@ -60,22 +99,12 @@ export function TicketActionsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
-        {visible.map((action) => {
-          const handler = oneClick[action]
-          return (
-            <Button
-              key={action}
-              type="button"
-              variant={handler ? 'secondary' : 'outline'}
-              className="min-h-11"
-              onClick={handler ?? (() => setFormAction(action))}
-            >
-              {ticketMessages.actions[action]}
-            </Button>
-          )
-        })}
-      </div>
+      <ActionButtons
+        visible={visible}
+        oneClick={oneClick}
+        pending={pending}
+        onOpenForm={setFormAction}
+      />
       {formAction === 'recapture' ? (
         <RecaptureForm ticket={ticket} onClose={close} />
       ) : null}
