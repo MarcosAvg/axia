@@ -27,13 +27,16 @@ aislados.
   y paginación en la URL, detalle con **línea de tiempo**, **bandeja del supervisor** (`/inbox`) y
   **vista del técnico** (`/mi-trabajo`) con acciones por estado/permiso y **evidencia** (bucket
   privado con URL firmada).
+- **Administración** (Fase 3B, en curso): edición de **catálogos y motivos** en `/admin/catalogos`
+  (políticas RLS de escritura por permiso). Faltan roles/permisos, usuarios y configuración.
 - **Supabase local** (Postgres, Auth, Storage y Studio) y tipos generados con `pnpm db:types`.
 - **PWA instalable** y esqueleto offline con Dexie (`outbox`, `evidencias`).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 3B (administración)** y luego la Fase 4 (evidencias de campo y modo sin
-conexión). Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **Fase 3B (roles, usuarios y configuración)** y luego la Fase 4 (evidencias de
+campo y modo sin conexión). Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 
