@@ -8,10 +8,11 @@
 
 ## En curso
 
-_(vacío)_ — **Todas las fases (0–7) están cerradas.** Queda, cuando la persona lo pida: aplicar los
-despliegues reales (`deploy/README.md`), activar push/correo/escalamiento
-(`docs/notificaciones-push.md`) y los pendientes de negocio (calificación… ya está; quedan
-zona horaria real confirmada, y mejoras futuras). Sin push a `origin`.
+_(vacío)_ — **Todas las fases (0–7) están cerradas.** El 2026-10-08 se publicó `main` a `origin`
+por petición expresa de la persona (**excepción única**); a partir de aquí la regla vuelve a ser
+“solo commits locales, sin publicar”. Lo que queda es operativo: aplicar los despliegues reales
+(`deploy/README.md`), activar push/correo/escalamiento (`docs/notificaciones-push.md`) y los
+pendientes de negocio que surjan.
 
 ## Hecho
 
