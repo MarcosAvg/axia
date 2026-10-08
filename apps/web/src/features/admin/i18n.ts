@@ -11,6 +11,28 @@ export const adminMessages = {
     roles: 'Roles y permisos',
     users: 'Usuarios',
     scopes: 'Ámbitos y designaciones',
+    settings: 'Configuración',
+  },
+  settings: {
+    title: 'Configuración de la instancia',
+    teamLabel: 'Etiqueta de equipo',
+    validationPolicy: 'Política de validación',
+    autoValidationDays: 'Días para validación automática (vacío = apagada)',
+    claimWindowDays: 'Ventana de reclamación (días)',
+    evidencePolicy: 'Política de evidencia al registrar',
+    folioPattern: 'Patrón de folio',
+    timezone: 'Zona horaria',
+    saved: 'Configuración guardada.',
+  },
+  validationPolicies: {
+    requester: 'Solo solicitante',
+    supervisor: 'Solo supervisor',
+    both: 'Solicitante y supervisor',
+  },
+  evidencePolicies: {
+    optional: 'Opcional',
+    recommended: 'Recomendada',
+    required: 'Obligatoria',
   },
   scopeLabels: {
     own: 'Propios',

@@ -32,6 +32,11 @@ function AdminHome() {
           {adminMessages.nav.scopes}
         </Link>
       </li>
+      <li>
+        <Link to="/admin/configuracion" className="underline">
+          {adminMessages.nav.settings}
+        </Link>
+      </li>
     </ul>
   )
 }

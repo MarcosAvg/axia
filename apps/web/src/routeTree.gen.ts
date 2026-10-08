@@ -19,6 +19,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAmbitosRouteImport } from './routes/_authenticated/admin/ambitos'
 import { Route as AuthenticatedAdminCatalogosRouteImport } from './routes/_authenticated/admin/catalogos'
+import { Route as AuthenticatedAdminConfiguracionRouteImport } from './routes/_authenticated/admin/configuracion'
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets/index'
@@ -76,6 +77,12 @@ const AuthenticatedAdminCatalogosRoute =
     path: '/catalogos',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminConfiguracionRoute =
+  AuthenticatedAdminConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
   id: '/roles',
   path: '/roles',
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof AuthenticatedPerfilRoute
   '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
@@ -148,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/ambitos': typeof AuthenticatedAdminAmbitosRoute
   '/_authenticated/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
+  '/_authenticated/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/admin/ambitos'
     | '/admin/catalogos'
+    | '/admin/configuracion'
     | '/admin/roles'
     | '/admin/usuarios'
     | '/tickets/$ticketId'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/ambitos'
     | '/admin/catalogos'
+    | '/admin/configuracion'
     | '/admin/roles'
     | '/admin/usuarios'
     | '/tickets/$ticketId'
@@ -198,6 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/ambitos'
     | '/_authenticated/admin/catalogos'
+    | '/_authenticated/admin/configuracion'
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/tickets/$ticketId'
@@ -283,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCatalogosRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/configuracion': {
+      id: '/_authenticated/admin/configuracion'
+      path: '/configuracion'
+      fullPath: '/admin/configuracion'
+      preLoaderRoute: typeof AuthenticatedAdminConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/roles': {
       id: '/_authenticated/admin/roles'
       path: '/roles'
@@ -324,6 +344,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAmbitosRoute: typeof AuthenticatedAdminAmbitosRoute
   AuthenticatedAdminCatalogosRoute: typeof AuthenticatedAdminCatalogosRoute
+  AuthenticatedAdminConfiguracionRoute: typeof AuthenticatedAdminConfiguracionRoute
   AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -332,6 +353,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAmbitosRoute: AuthenticatedAdminAmbitosRoute,
   AuthenticatedAdminCatalogosRoute: AuthenticatedAdminCatalogosRoute,
+  AuthenticatedAdminConfiguracionRoute: AuthenticatedAdminConfiguracionRoute,
   AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
