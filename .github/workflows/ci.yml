@@ -18,4 +18,6 @@ jobs:
       # Levanta Supabase local con la CLI fijada en el repositorio; `pnpm check`
       # incluye la prueba pgTAP (`db:test`).
       - run: pnpm db:start
+      # Navegador para la prueba de humo de Playwright (incluida en `pnpm test`).
+      - run: pnpm --filter @axia/web exec playwright install chromium --with-deps
       - run: pnpm check
