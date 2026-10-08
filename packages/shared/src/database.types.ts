@@ -2611,6 +2611,7 @@ export type Database = {
           auxiliary_count: number | null
           leader_count: number | null
           participation_time: string | null
+          participation_time_extra: string | null
           participation_time_labor: string | null
           technician_id: string | null
           technician_name: string | null
@@ -2761,6 +2762,7 @@ export type Database = {
       v_ticket_metrics_base: {
         Row: {
           active_work_time: string | null
+          active_work_time_extra: string | null
           active_work_time_labor: string | null
           assignment_time: string | null
           assignment_time_labor: string | null
@@ -2809,6 +2811,7 @@ export type Database = {
         ComputedFields: never
         Insert: {
           active_work_time?: never
+          active_work_time_extra?: never
           active_work_time_labor?: never
           assignment_time?: never
           assignment_time_labor?: never
@@ -2856,6 +2859,7 @@ export type Database = {
         }
         Update: {
           active_work_time?: never
+          active_work_time_extra?: never
           active_work_time_labor?: never
           assignment_time?: never
           assignment_time_labor?: never
@@ -3240,6 +3244,13 @@ export type Database = {
         Returns: undefined
       }
       ticket_time_by_kind: {
+        Args: {
+          p_kind: Database['public']['Enums']['time_span_kind']
+          p_ticket_id: string
+        }
+        Returns: string
+      }
+      ticket_time_by_kind_extra: {
         Args: {
           p_kind: Database['public']['Enums']['time_span_kind']
           p_ticket_id: string

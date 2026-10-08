@@ -242,23 +242,60 @@ where ss.user_id = 'a0000000-0000-4000-8000-000000000002'
   and b.name = 'Edificio Central (ejemplo)'
 on conflict do nothing;
 
--- Calendario laboral.
-insert into public.work_calendars (name, timezone)
-values ('Laboral (ejemplo)', 'America/Mexico_City')
+-- Calendarios laborales (cobertura por equipo; los turnos internos no cambian la cobertura).
+insert into public.work_calendars (name, timezone) values
+  ('Mantenimiento', 'America/Mexico_City'),
+  ('Oficina', 'America/Mexico_City')
 on conflict (name) do nothing;
+
+-- Mantenimiento: cobertura de 06:00 a 20:00 (unión de sus tres turnos solapados).
 insert into public.work_calendar_intervals (calendar_id, weekday, start_time, end_time)
-select c.id, d.weekday, '09:00', '18:00'
+select c.id, d.weekday, '06:00', '20:00'
 from public.work_calendars c, (values (1), (2), (3), (4), (5)) as d (weekday)
-where c.name = 'Laboral (ejemplo)'
+where c.name = 'Mantenimiento'
   and not exists (select 1 from public.work_calendar_intervals i where i.calendar_id = c.id);
 
--- El calendario de ejemplo es el de la instancia y el del equipo de mantenimiento.
+-- Oficina: 08:00 a 17:00 (el resto de los equipos).
+insert into public.work_calendar_intervals (calendar_id, weekday, start_time, end_time)
+select c.id, d.weekday, '08:00', '17:00'
+from public.work_calendars c, (values (1), (2), (3), (4), (5)) as d (weekday)
+where c.name = 'Oficina'
+  and not exists (select 1 from public.work_calendar_intervals i where i.calendar_id = c.id);
+
+-- Festivos oficiales de México (editables: se agregan o quitan desde la administración).
+insert into public.work_calendar_holidays (calendar_id, holiday, name)
+select c.id, h.holiday, h.name
+from public.work_calendars c
+cross join (values
+  ('2026-01-01'::date, 'Año Nuevo'),
+  ('2026-02-02'::date, 'Día de la Constitución'),
+  ('2026-03-16'::date, 'Natalicio de Benito Juárez'),
+  ('2026-05-01'::date, 'Día del Trabajo'),
+  ('2026-09-16'::date, 'Día de la Independencia'),
+  ('2026-11-16'::date, 'Revolución Mexicana'),
+  ('2026-12-25'::date, 'Navidad'),
+  ('2027-01-01'::date, 'Año Nuevo'),
+  ('2027-02-01'::date, 'Día de la Constitución'),
+  ('2027-03-15'::date, 'Natalicio de Benito Juárez'),
+  ('2027-05-01'::date, 'Día del Trabajo'),
+  ('2027-09-16'::date, 'Día de la Independencia'),
+  ('2027-11-15'::date, 'Revolución Mexicana'),
+  ('2027-12-25'::date, 'Navidad')
+) as h (holiday, name)
+where c.name in ('Mantenimiento', 'Oficina')
+on conflict (calendar_id, holiday) do nothing;
+
+-- El calendario por defecto es el de oficina; Mantenimiento tiene el suyo.
 update public.instance_settings
-  set default_calendar_id = (select id from public.work_calendars where name = 'Laboral (ejemplo)')
+  set default_calendar_id = (select id from public.work_calendars where name = 'Oficina')
   where default_calendar_id is null;
 update public.teams
-  set work_calendar_id = (select id from public.work_calendars where name = 'Laboral (ejemplo)')
-  where name = 'Mantenimiento (ejemplo)' and work_calendar_id is null;
+  set work_calendar_id = case
+    when name = 'Mantenimiento (ejemplo)'
+      then (select id from public.work_calendars where name = 'Mantenimiento')
+    else (select id from public.work_calendars where name = 'Oficina')
+  end
+  where work_calendar_id is null;
 
 -- Motivos jerárquicos (especificación §6; sufijo "(ejemplo)").
 insert into public.reasons (use, name) values
