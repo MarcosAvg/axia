@@ -78,7 +78,8 @@ institución entregue el logo.
 | `pnpm db:types` | Regenera los tipos de TypeScript desde la base local |
 | `pnpm check:agnostic` | Falla si el núcleo menciona plataformas externas |
 | `pnpm check:boundaries` | Reglas de dependencia entre capas (dependency-cruiser) |
-| **`pnpm check`** | **Compuerta completa**: lint + typecheck + check:agnostic + check:boundaries + test + db:test + build |
+| `pnpm knip` | Código y dependencias sin uso |
+| **`pnpm check`** | **Compuerta completa**: lint + typecheck + check:agnostic + check:boundaries + knip + test + db:test + build |
 
 `pnpm check` es la fuente única de verdad; el CI y los hooks la usan. Como incluye `db:test`,
 requiere que el Supabase local esté levantado (`pnpm db:start`).

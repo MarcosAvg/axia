@@ -759,8 +759,9 @@ Además de los scripts de la sección 3, la raíz del repositorio debe tener:
 |---|---|
 | `pnpm lint` | ESLint con los límites de `docs/convenciones-codigo.md` |
 | `pnpm typecheck` | Verificación de tipos de todo el monorepo |
+| `pnpm knip` | Código y dependencias sin uso |
 | `pnpm check:agnostic` | Falla si aparecen nombres de plataformas de terceros fuera de los adaptadores de integración |
-| `pnpm check` | Compuerta completa: lint + typecheck + check:agnostic + test + db:test + build |
+| `pnpm check` | Compuerta completa: lint + typecheck + check:agnostic + check:boundaries + knip + test + db:test + build |
 
 `check:agnostic` es un script (por ejemplo `scripts/check-agnostic.mjs`) que busca una lista
 configurable de nombres de terceros y solo los permite en `apps/web/src/features/integrations/**`,
