@@ -70,12 +70,23 @@ _(vacío)_ — Antes de empezar una tarea, escribe aquí un plan de 3 a 7 línea
   `packages/shared/src/index.ts` los exporta y `apps/web/src/lib/supabase.ts` crea el cliente con
   `@supabase/supabase-js` (MIT); `apps/web/.env.example` documenta las variables. `db:test` se
   sumó a `pnpm check` y el CI levanta Supabase antes de la compuerta.
+- **PWA + esqueleto Dexie (Fase 0, tareas 5-6)**: `vite-plugin-pwa` 2.0.0 con
+  `workbox-build`/`workbox-window` 7.4.1 (MIT), `dexie` 4.4.6 + `dexie-react-hooks` 4.4.0
+  (Apache-2.0) y `fake-indexeddb` 6.2.5 solo para pruebas. `VitePWA` con `registerType: 'prompt'`,
+  manifest es-MX y workbox (`navigateFallback`, precache); el build genera `sw.js` y
+  `manifest.webmanifest` (verificado sirviendo `dist`). Iconos **provisionales** en
+  `apps/web/public/` (`pwa-192`, `pwa-512`, `pwa-512-maskable`, `apple-touch-icon`,
+  `favicon.ico`; fondo `#0f172a`, "A" blanca, generados con ImageMagick) — reemplazar cuando la
+  institución entregue el logo. Esqueleto offline en `src/lib/offline/`: `db.ts` (Dexie v1,
+  `outbox` + `evidencias`, campos en inglés), `sync.ts` (dispara al abrir, `online` y
+  `visibilitychange`) y pruebas Vitest (9 en verde). `PwaUpdatePrompt` (`useRegisterSW`) montado
+  en `AppProviders`. `pnpm check` en verde. Rama `feat/pwa-offline`.
 
 ## Siguiente
 
-Fase 0, tareas restantes: PWA (manifest e iconos, `registerType: 'prompt'`) y esqueleto Dexie
-(`outbox`, `evidencias`); Playwright (prueba de humo y flujo del técnico sin conexión); `knip`;
-el directorio `deploy/`; y el componente `chart`/Recharts (llega con las métricas).
+Fase 0, tareas restantes: `knip`; Playwright (prueba de humo; el flujo del técnico sin conexión
+llega en la Fase 5); el directorio `deploy/`; y el componente `chart`/Recharts (llega con las
+métricas).
 
 ## Hoja de ruta
 
@@ -89,7 +100,7 @@ migración van después, sobre un núcleo ya estable.
       TanStack Router (rutas por carpetas) y TanStack Query (falta el componente `chart`/Recharts,
       que llega con las métricas)
 - [x] Supabase local funcionando, cliente tipado, `pnpm db:types`
-- [ ] PWA configurada (manifest, iconos, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
+- [x] PWA configurada (manifest, iconos provisionales, `registerType: 'prompt'`) y esqueleto Dexie (`outbox`, `evidencias`)
 - [ ] Herramientas que hacen cumplir las convenciones: TypeScript estricto, ESLint con los
       límites de tamaño, `dependency-cruiser` o `eslint-plugin-boundaries`, Prettier, knip,
       Husky + lint-staged, commitlint (falta `knip`)
@@ -105,9 +116,8 @@ migración van después, sobre un núcleo ya estable.
       del núcleo
 - [x] Pantalla de inicio "Axia" visible y `pnpm check` en verde
 
-**Falta para cerrar la Fase 0:** PWA (manifest e iconos) y esqueleto Dexie (`outbox`,
-`evidencias`), Playwright, `knip`, el directorio `deploy/` y el componente `chart`/Recharts
-(llega con las métricas).
+**Falta para cerrar la Fase 0:** `knip`, Playwright (humo), el directorio `deploy/` y el
+componente `chart`/Recharts (llega con las métricas).
 
 ### Fase 1 — Base de datos núcleo
 - [ ] Catálogos: edificios, ubicaciones, dependencias, categorías → subcategorías → problemas,
@@ -182,7 +192,8 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   `eslint-plugin-jsx-a11y` 6.10.2, `babel-plugin-react-compiler` 1.0.0, `@rolldown/plugin-babel`
   0.2.4, `@babel/core` 8.0.6, Prettier 3.9.9, Vitest 5.0.3, `@testing-library/react` 16.3.3,
   `@testing-library/jest-dom` 7.0.1, jsdom 29.1.1, `supabase` (CLI) 2.120.0,
-  `@supabase/supabase-js` 2.117.2.
+  `@supabase/supabase-js` 2.117.2, `vite-plugin-pwa` 2.0.0, `workbox-build`/`workbox-window`
+  7.4.1, `dexie` 4.4.6, `dexie-react-hooks` 4.4.0, `fake-indexeddb` 6.2.5 (solo pruebas).
 - **jsdom fijado en `^29`**: se fijó cuando el equipo tenía Node 24.14.1 (jsdom 30 exige
   `^24.15.0`). Ahora el equipo usa Node 24.18.0; revisar el salto a jsdom 30 en otra tarea.
 - **ESLint 9, no 10**: `eslint-plugin-jsx-a11y` (última versión, 6.10.2) aún no declara soporte
@@ -232,6 +243,15 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
 - `pnpm check` ahora incluye `db:test`, por lo que **requiere el Supabase local levantado**; el
   README lo advierte. Los tipos generados viven en `packages/shared/src/database.types.ts` y se
   exportan desde `packages/shared/src/index.ts`.
+- **Iconos provisionales**: fondo `#0f172a`, "A" blanca en `Adwaita-Sans-Bold`, generados con
+  ImageMagick (`magick -size 512x512 xc:'#0f172a' ... -annotate 0 'A'`); el maskable lleva la "A"
+  más pequeña (zona segura). Reemplazar cuando la institución entregue el logo.
+- **fake-indexeddb no conserva Blob**: al leer, el `Blob` vuelve como objeto vacío (verificado
+  con una prueba sonda temporal, luego borrada). La prueba de evidencias solo verifica metadatos;
+  en un navegador real IndexedDB sí guarda el Blob.
+- En dev, `/manifest.webmanifest` cae al fallback de la SPA (el manifest solo se genera en el
+  build); los iconos y el HTML con `theme-color` sí se sirven. El aviso de actualización no
+  aparece en dev/test porque `useRegisterSW` es un no-op fuera del build.
 
 ## Registro de sesiones
 
@@ -264,3 +284,7 @@ al importar, el `ticket_number` conserva el ID original y la secuencia continúa
   migración `enable_pgtap`, prueba pgTAP de humo, `db:reset` limpio, `db:types` → tipos en
   `packages/shared` y cliente tipado en `lib/supabase.ts`; `db:test` sumado a `pnpm check` y CI
   que levanta Supabase. `pnpm check` completo en verde. Rama `feat/supabase-local`.
+- 2026-10-07: PWA + esqueleto Dexie (Fase 0, tareas 5-6): `VitePWA` (`registerType: 'prompt'`,
+  manifest es-MX, workbox con precache), iconos provisionales en `public/`, `sw.js` y
+  `manifest.webmanifest` verificados en `dist`; `src/lib/offline/` (Dexie v1, disparadores y
+  pruebas) y `PwaUpdatePrompt` en `AppProviders`. `pnpm check` en verde. Rama `feat/pwa-offline`.
