@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
+  addAuxiliary,
+  assignSupervisor,
   assignTechnician,
   attendTicket,
   cancelTicket,
@@ -31,9 +33,20 @@ function useTicketMutation<TVariables>(
   })
 }
 
-/** Mutaciones de recaptura, reclamaciones, duplicado y reactivación. */
-function useTicketClaimActions(ticketId: string) {
+/** Mutaciones de recaptura, reclamaciones, duplicado, reactivación y asignación. */
+function useTicketExtraActions(ticketId: string) {
   return {
+    assignSupervisor: useTicketMutation<{
+      reasonId: string
+      supervisorUserId: string | null
+      teamId: string | null
+      note: string | null
+    }>((variables, id) => assignSupervisor(ticketId, variables, id)),
+    addAuxiliary: useTicketMutation<{
+      technicianId: string
+      reasonId: string
+      note: string | null
+    }>((variables, id) => addAuxiliary(ticketId, variables, id)),
     recapture: useTicketMutation<{
       changes: Record<string, string | null>
       reasonId: string | null
@@ -60,7 +73,7 @@ function useTicketClaimActions(ticketId: string) {
 
 /** Mutaciones de transición del tiquet, con idempotencia e invalidación. */
 export function useTicketActions(ticketId: string) {
-  const claims = useTicketClaimActions(ticketId)
+  const extra = useTicketExtraActions(ticketId)
   return {
     take: useTicketMutation<void>((_variables, id) => takeTicket(ticketId, id)),
     assignTechnician: useTicketMutation<{ technicianId: string }>(
@@ -96,6 +109,6 @@ export function useTicketActions(ticketId: string) {
     comment: useTicketMutation<{ text: string }>((variables, id) =>
       commentTicket(ticketId, variables.text, id),
     ),
-    ...claims,
+    ...extra,
   }
 }

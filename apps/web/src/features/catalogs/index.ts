@@ -12,6 +12,7 @@ export {
   useRequesters,
   useServiceTypes,
   useSubcategories,
+  useTeams,
   useTechnicians,
 } from './hooks/use-catalogs'
 export type {

@@ -6,11 +6,13 @@ import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
 import { DuplicateForm } from './duplicate-form'
 import { RecaptureForm } from './recapture-form'
+import { AssignSupervisorForm } from './assign-supervisor-form'
 import { TicketActionForm } from './ticket-action-form'
 
 const ONE_CLICK: ActionKey[] = ['start', 'resume', 'validate']
 const FORM_ACTIONS: ActionKey[] = [
   'assign_technician',
+  'add_auxiliary',
   'pause',
   'reject',
   'cancel',
@@ -21,7 +23,11 @@ const FORM_ACTIONS: ActionKey[] = [
   'resolve_claim',
   'reactivate',
 ]
-const DEDICATED: ActionKey[] = ['recapture', 'mark_duplicate']
+const DEDICATED: ActionKey[] = [
+  'recapture',
+  'mark_duplicate',
+  'assign_supervisor',
+]
 
 interface TicketActionsPanelProps {
   ticket: TicketDetail
@@ -75,6 +81,9 @@ export function TicketActionsPanel({
       ) : null}
       {formAction === 'mark_duplicate' ? (
         <DuplicateForm ticketId={ticket.id} onClose={close} />
+      ) : null}
+      {formAction === 'assign_supervisor' ? (
+        <AssignSupervisorForm ticketId={ticket.id} onClose={close} />
       ) : null}
       {formAction && !DEDICATED.includes(formAction) ? (
         <TicketActionForm

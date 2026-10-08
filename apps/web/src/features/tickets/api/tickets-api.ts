@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { isFinalStatus } from '../domain/status'
 import type {
   DuplicateCandidate,
+  SupervisorOption,
   TicketDetail,
   TicketEvidenceItem,
   TicketListItem,
@@ -235,4 +236,25 @@ export async function searchTicketsByFolio(
     .limit(10)
   if (error) throw error
   return (data ?? []).map(parseTicketListItem)
+}
+
+/** Supervisores con ámbito activo (para reasignar un supervisor concreto). */
+export async function fetchSupervisors(): Promise<SupervisorOption[]> {
+  const scopes = await supabase
+    .from('supervisor_scopes')
+    .select('user_id')
+    .eq('active', true)
+  if (scopes.error) throw scopes.error
+  const ids = [...new Set((scopes.data ?? []).map((row) => row.user_id))]
+  if (ids.length === 0) return []
+  const profiles = await supabase
+    .from('profiles')
+    .select('id, full_name')
+    .in('id', ids)
+    .order('full_name')
+  if (profiles.error) throw profiles.error
+  return (profiles.data ?? []).map((row) => ({
+    id: row.id,
+    fullName: row.full_name,
+  }))
 }

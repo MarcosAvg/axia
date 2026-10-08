@@ -168,8 +168,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Vista del técnico (móvil primero) y bandejas del supervisor
 - [x] Evidencia en línea mínima (bucket privado, `evidence_add`, subida y URL firmada) — ADR 0017
 - [x] (Cerrado el 2026-10-08) Interfaz de recaptura, reclamaciones (abrir/resolver), marcar
-      duplicado y reactivación (los RPC ya existían; sin migraciones). Quedan pendientes la
-      calificación de satisfacción y la interfaz de reasignar supervisor y agregar auxiliares.
+      duplicado, reactivación, reasignar supervisor (a equipo o supervisor) y agregar auxiliares
+      (los RPC ya existían; sin migraciones). Queda pendiente la calificación de satisfacción.
 
 **Fase 3B — Administración — cerrada el 2026-10-08:**
 - [x] Catálogos maestros y motivos jerárquicos (feature `admin`, `/admin/catalogos`)
@@ -456,6 +456,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: cierre de transiciones de 3A: recaptura, reclamaciones (abrir/resolver), marcar
   duplicado y reactivación (UI + dominio + hooks), sin migraciones; 80 Vitest y 9 Playwright en
   verde; `pnpm check` completo en verde. Rama `feat/fase-3a-transiciones`.
+- 2026-10-08: cierre de 3A (supervisor y auxiliares): reasignar supervisor a equipo/supervisor y
+  agregar auxiliar (UI + dominio + hooks), sin migraciones; 82 Vitest y 10 Playwright en verde;
+  `pnpm check` completo en verde. Rama `feat/fase-3a-supervisor-auxiliares`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -510,3 +513,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   marcar duplicado (buscar el original por folio) y reactivación. Dominio `allowedActions` ampliado y
   funciones puras de recaptura. Pruebas Vitest y Playwright (rechazar y reactivar). Sin migraciones.
   Rama `feat/fase-3a-transiciones`.
+- **Cierre de 3A (supervisor y auxiliares)**: reasignar supervisor (a otro equipo, que re-rutea, o a
+  un supervisor concreto) y agregar apoyo auxiliar; dominio `allowedActions` ampliado y un
+  repositorio de supervisores. Pruebas Vitest y Playwright. Sin migraciones. Rama
+  `feat/fase-3a-supervisor-auxiliares`.

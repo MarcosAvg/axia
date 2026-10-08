@@ -4,6 +4,8 @@ import type { TicketStatus } from './types'
 
 export type ActionKey =
   | 'assign_technician'
+  | 'assign_supervisor'
+  | 'add_auxiliary'
   | 'start'
   | 'pause'
   | 'resume'
@@ -43,6 +45,12 @@ const ADVANCEABLE: TicketStatus[] = [
 ]
 const CLAIMABLE: TicketStatus[] = ['attended', 'closed']
 const DISCARDED: TicketStatus[] = ['rejected', 'cancelled', 'duplicate']
+const REASSIGNABLE: TicketStatus[] = [
+  'with_supervisor',
+  'assigned',
+  'in_progress',
+  'paused',
+]
 
 const has = (context: ActionContext, permission: string) =>
   can(context.identity, permission)
@@ -50,6 +58,10 @@ const has = (context: ActionContext, permission: string) =>
 const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   assign_technician: (c) =>
     ASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_technician'),
+  assign_supervisor: (c) =>
+    REASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_supervisor'),
+  add_auxiliary: (c) =>
+    ADVANCEABLE.includes(c.status) && has(c, 'ticket.add_auxiliary'),
   start: (c) => c.status === 'assigned' && has(c, 'ticket.start'),
   pause: (c) => c.status === 'in_progress' && has(c, 'ticket.pause'),
   resume: (c) => c.status === 'paused' && has(c, 'ticket.resume'),
