@@ -105,3 +105,25 @@ from public.roles r
 cross join public.permissions p
 where r.name = 'administrator'
 on conflict do nothing;
+
+-- Reglas de notificación (evento → destinatario → canal).
+insert into public.notification_rules (event_type, recipient, channel) values
+  ('offered', 'offers', 'in_app'),
+  ('taken', 'requester', 'in_app'),
+  ('assigned_technician', 'assigned_technician', 'in_app'),
+  ('attended', 'requester', 'in_app'),
+  ('claim_opened', 'supervisor', 'in_app'),
+  ('reopened', 'requester', 'in_app'),
+  ('rejected', 'requester', 'in_app'),
+  ('cancelled', 'requester', 'in_app'),
+  ('duplicate_marked', 'requester', 'in_app')
+on conflict do nothing;
+
+-- Reglas de escalamiento (semilla; el disparo programado llega después).
+insert into public.escalation_rules (condition, threshold, notify) values
+  ('untaken', interval '4 hours', 'administrators'),
+  ('unassigned', interval '8 hours', 'supervisor'),
+  ('no_candidate', interval '1 minute', 'administrators'),
+  ('target_near', interval '30 minutes', 'supervisor'),
+  ('target_overdue', interval '1 minute', 'supervisor')
+on conflict do nothing;
