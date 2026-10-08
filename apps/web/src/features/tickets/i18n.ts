@@ -194,6 +194,7 @@ export const ticketMessages = {
     file: 'Archivo',
     submit: 'Subir evidencia',
     uploading: 'Subiendo…',
+    pending: 'Pendiente de subir',
   },
   myWork: {
     title: 'Mi trabajo',

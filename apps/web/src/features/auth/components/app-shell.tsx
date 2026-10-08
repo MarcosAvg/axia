@@ -1,22 +1,16 @@
-import { Link, Outlet, useNavigate } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
+import { Link, Outlet } from '@tanstack/react-router'
 import { messages } from '@/lib/i18n'
 import { can } from '../domain/identity'
 import { useAuth } from '../hooks/auth-context'
 import { authMessages } from '../i18n'
+import { UserMenu } from './user-menu'
 
 const navLinkClass =
   'inline-flex min-h-11 items-center px-1 text-sm text-muted-foreground hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground'
 
 /** Armazón de la aplicación autenticada: cabecera, navegación y salida. */
 export function AppShell() {
-  const { identity, signOut } = useAuth()
-  const navigate = useNavigate()
-
-  async function handleSignOut() {
-    await signOut()
-    await navigate({ to: '/login' })
-  }
+  const { identity } = useAuth()
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -50,19 +44,7 @@ export function AppShell() {
               </Link>
             )}
           </nav>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">
-              {identity?.fullName}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11"
-              onClick={handleSignOut}
-            >
-              {authMessages.signOut}
-            </Button>
-          </div>
+          <UserMenu />
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 p-4">

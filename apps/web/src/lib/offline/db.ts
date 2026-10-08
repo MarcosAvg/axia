@@ -10,6 +10,7 @@ export interface OutboxItem {
   payload: unknown
   state: 'pending' | 'sending' | 'error'
   attempts: number
+  lastError: string | null
   createdAt: number
 }
 
@@ -17,7 +18,11 @@ export interface OutboxItem {
 export interface Evidence {
   id: string
   ticketId: string
+  cycle: number
+  type: string
   blob: Blob
+  mimeType: string
+  fileName: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
   createdAt: number
 }
@@ -28,6 +33,11 @@ export const db = new Dexie('axia') as Dexie & {
 }
 
 db.version(1).stores({
+  outbox: 'id, type, state, createdAt',
+  evidences: 'id, ticketId, state',
+})
+
+db.version(2).stores({
   outbox: 'id, type, state, createdAt',
   evidences: 'id, ticketId, state',
 })

@@ -179,9 +179,11 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       notificación/escalamiento y parámetros finos de duplicados
 
 ### Fase 4 — Evidencias y modo sin conexión
-- [ ] Captura y compresión de fotos, subida reanudable, cola `outbox`, sincronización
-- [ ] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy)
-- [ ] Prueba Playwright del flujo del técnico sin conexión
+- [x] Captura y compresión de fotos, subida reanudable, cola `outbox` y sincronización (evidencia) —
+      ADR 0019
+- [ ] (Resto de 4A) Enrutar las **acciones del tiquet** por la cola cuando no hay conexión
+- [ ] (Fase 4B) Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy)
+- [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
 ### Fase 5 — Métricas y reportes
 - [ ] Indicadores de la especificación §11, tableros con Recharts, exportación CSV/XLSX
@@ -359,6 +361,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (`domain/catalogs.ts`); el acceso usa una lista blanca de tablas (`AdminTable`) y `@ts-expect-error`
   documentado para las escrituras dinámicas, porque el cliente tipado no puede estrechar una tabla
   dinámica. Los datos se validan con las funciones puras de `domain/form-values.ts`.
+- **Fase 4A — offline**: `tus-js-client` 4.3.1 (MIT) para la subida reanudable y `dexie-react-hooks`
+  4.4.0 (Apache-2.0) para observar la cola. La mutación de evidencia usa
+  `networkMode: 'always'` porque React Query pausa las mutaciones sin conexión. Dexie va en versión 2
+  (se añadieron campos a `outbox`/`evidences`). El endpoint de TUS se arma con `VITE_SUPABASE_URL`.
 
 ## Registro de sesiones
 
@@ -459,6 +465,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-08: cierre de 3A (supervisor y auxiliares): reasignar supervisor a equipo/supervisor y
   agregar auxiliar (UI + dominio + hooks), sin migraciones; 82 Vitest y 10 Playwright en verde;
   `pnpm check` completo en verde. Rama `feat/fase-3a-supervisor-auxiliares`.
+- 2026-10-08: Fase 4A (evidencia offline): compresión `canvas`, cola `outbox` genérica con reintentos,
+  evidencias en Dexie, subida reanudable con TUS y `evidence_add`, sincronización e indicador; 84
+  Vitest y 11 Playwright en verde. ADR 0019. Rama `feat/fase-4a-offline`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -517,3 +526,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   un supervisor concreto) y agregar apoyo auxiliar; dominio `allowedActions` ampliado y un
   repositorio de supervisores. Pruebas Vitest y Playwright. Sin migraciones. Rama
   `feat/fase-3a-supervisor-auxiliares`.
+- **Fase 4A (evidencia sin conexión)**: compresión con `canvas`, cola de salida genérica (`outbox`) con
+  reintentos y aviso al terminar, almacén de evidencias en Dexie y **subida reanudable con TUS** +
+  `evidence_add`; sincronización al abrir/`online`/visibilidad y aviso de "sin conexión" y pendientes.
+  React Query con `networkMode: 'always'` en la mutación de evidencia (sin eso queda pausada offline).
+  Prueba Playwright del técnico sin conexión. **ADR 0019**. Rama `feat/fase-4a-offline`.
