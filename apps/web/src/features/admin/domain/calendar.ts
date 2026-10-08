@@ -1,7 +1,6 @@
 // Tipos y funciones puras de los calendarios laborales (franjas semanales y festivos).
 
 export const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] as const
-export type Weekday = (typeof WEEKDAYS)[number]
 
 export interface CalendarInterval {
   id: string

@@ -4,12 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5A cerrada — siguiente: Fase 5B (tableros y exportación)
+**Fase actual:** 5B-0 cerrada (administración de calendarios y zona horaria) — siguiente: 5B (tableros)
 
 ## En curso
 
-_(vacío)_ — La Fase 5A quedó cerrada. La siguiente tarea es la **Fase 5B**: tableros con Recharts,
-exportación y permisos de interfaz. Sin push a `origin` por indicación de la persona.
+_(vacío)_ — La administración de calendarios y la zona horaria en pantalla quedaron cerradas.
+La siguiente tarea es la **Fase 5B**: feature `metrics` (tableros con Recharts, filtros y
+exportación) sobre las vistas de indicadores ya existentes. Sin push a `origin`.
 
 ## Hecho
 
@@ -138,14 +139,22 @@ exportación y permisos de interfaz. Sin push a `origin` por indicación de la p
     (2026-2027) sembrados y editables. ADR 0022.
   - Pendiente: **UI de administración** de calendarios, turnos y festivos.
   - Compuerta completa en verde: 321 pgTAP, 96 Vitest, 11 Playwright.
+- **Fase 5B-0 — administración de calendarios y zona horaria (2026-10-08)**, rama
+  `feat/admin-calendarios` (fusionada localmente a `main`; **sin push**):
+  - RLS de escritura con `catalog.manage` para calendarios (sin borrar: se desactivan), franjas y
+    festivos; pgTAP de las políticas.
+  - Pantalla `/admin/calendarios` (calendarios, franjas semanales y festivos), calendario por
+    equipo en el catálogo de equipos y calendario por defecto en configuración.
+  - `me()` devuelve la zona horaria y la interfaz muestra las fechas en la zona de la institución.
+  - Decisiones en el ADR 0023.
+  - Compuerta completa en verde: 336 pgTAP, 103 Vitest, 11 Playwright.
 
 ## Siguiente
 
 **Fase 5B — Tableros y exportación**: feature `metrics` (`api/` + hooks), tableros con Recharts
 (componente `chart` de shadcn/ui), filtros por fecha/dimensión, gating con `metrics.view` y
-exportación. También queda pendiente la **UI de administración de calendarios, turnos y festivos**
-(hoy en la semilla) y mostrar las fechas en la zona de la institución. La satisfacción espera a la
-tabla de calificación y el SLA a sus valores.
+exportación. La administración de calendarios y la zona horaria en pantalla ya quedaron cerradas
+(ADR 0023). La satisfacción espera a la tabla de calificación y el SLA a sus valores.
 
 ## Hoja de ruta
 
@@ -222,6 +231,8 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 ### Fase 5 — Métricas y reportes
 - [x] **5A** Indicadores de la especificación §11 calculados en la base (calendario y laboral,
       sin duplicados) con vistas y pgTAP — ADR 0021
+- [x] **5B-0** Administración de calendarios (franjas y festivos) y fechas en la zona de la
+      institución — ADR 0023
 - [ ] **5A (pendiente)** Tiempos objetivo (SLA) por prioridad y tipo de servicio; satisfacción
       (requiere la tabla de calificación)
 - [ ] **5B** Tableros con Recharts, filtros y exportación CSV/XLSX

@@ -20,7 +20,7 @@ aislados.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 321 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 336 pruebas pgTAP.
 - **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
   RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
@@ -42,6 +42,8 @@ aislados.
 - **Indicadores** (Fase 5A): tiempo laboral por **cobertura de equipo** (Mantenimiento 06–20, resto
   08–17) con zona horaria y festivos oficiales editables, trabajo **en horario y fuera de horario**
   (extra) y vistas de indicadores por dimensión, técnico, motivo, antigüedad, ruteo y duplicados.
+- **Calendarios** (Fase 5B-0): administración en `/admin/calendarios` (franjas semanales y festivos),
+  calendario por equipo y por defecto, y las fechas de la interfaz en la zona de la institución.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
