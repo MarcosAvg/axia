@@ -35,6 +35,7 @@ insert into public.permissions (id, description) values
   ('ticket.rate_on_behalf', 'Calificar a nombre del solicitante'),
   ('time.record_manual', 'Registrar o corregir tiempos manuales'),
   ('metrics.view', 'Ver métricas e indicadores'),
+  ('data.import', 'Importar datos desde otras fuentes'),
   ('act_on_behalf', 'Actuar en nombre de otro'),
   ('catalog.manage', 'Administrar catálogos'),
   ('user.manage', 'Administrar usuarios'),

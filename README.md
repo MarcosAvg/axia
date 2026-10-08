@@ -20,7 +20,7 @@ aislados.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 358 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 372 pruebas pgTAP.
 - **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
   RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
@@ -50,11 +50,14 @@ aislados.
 - **Fundación de interfaz** (Fase 5, sub-fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`,
   `Table`, `Tabs`, `Badge`, `Switch`/`Checkbox`), primitivas `field` para formularios, iconos
   `lucide` y avisos con `sonner`.
+- **Importación** (Fase 6A): infraestructura genérica (`/admin/integraciones`) para mapear estatus de
+  origen y ver lotes; los adaptadores de fuentes externas viven **aislados** del núcleo.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 6 (integraciones y migración)** —opcional— y la **Fase 7 (producción)**.
-Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es el **adaptador de importación (Fase 6B)** cuando se conozca el formato de origen, y
+después la **Fase 7 (producción)**. Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 

@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5 cerrada — siguiente: Fase 6 (opcional) y Fase 7 (producción)
+**Fase actual:** 6A cerrada (infraestructura de importación) — siguiente: 6B (adaptador CSV/Excel)
 
 ## En curso
 
-_(vacío)_ — La Fase 5 quedó **cerrada al 100%** (SLA, duplicados, satisfacción, XLSX y remates de
-UI). Siguen **Fase 6 (Integraciones y migración, opcional)** y **Fase 7 (Producción)**, en ese
-orden. Sin push a `origin`.
+_(vacío)_ — La **Fase 6A** quedó cerrada: infraestructura genérica de importación, permiso
+`data.import` y administración (`/admin/integraciones`). Siguen **6B** (adaptador CSV/Excel; requiere
+las respuestas #6–#9), **6C** (verificación de métricas) y **Fase 7** (producción). Sin push a `origin`.
 
 ## Hecho
 
@@ -192,14 +192,20 @@ orden. Sin push a `origin`.
   - **Progreso** real de la subida de evidencia (TUS `onProgress` + barra `Progress`).
   - `Skeleton`/`Alert` en las cargas restantes y `Tooltip` en los KPI. ADR 0028.
   - Compuerta completa en verde: 358 pgTAP, 120 Vitest, 12 Playwright.
+- **Fase 6A — infraestructura genérica de importación (2026-10-08)**, rama `feat/fase-6a-import`
+  (fusionada localmente a `main`; **sin push**):
+  - Tablas `import_batches`, `import_records`, `catalog_aliases` e `import_status_map`; permiso
+    `data.import`; RPCs (lote, fila, alias, estatus y **upsert idempotente** de tiquet que conserva
+    el número original y continúa la secuencia); evento `imported` (`source='import'`).
+  - Administración `/admin/integraciones` (mapeo de estatus y lotes). ADR 0029.
+  - Compuerta completa en verde: 372 pgTAP, 120 Vitest, 12 Playwright.
 
 ## Siguiente
 
-**Fase 6 — Integraciones y migración** (opcional): infraestructura genérica de importación
-(`import_batches`, `import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y
-adaptadores, aislada del núcleo; requiere confirmar el formato de origen (preguntas #6–#9). Al
-final, **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación). Quedan menores
-de UI oportunistas (`Progress` en evidencia, más `Tooltip`/`Skeleton`) y la exportación XLSX.
+**Fase 6B — adaptador CSV/Excel** de la fuente heredada (lectura, normalización, dry run con
+reporte de calidad, resolución de alias y upsert), en `features/integrations/**`; requiere las
+respuestas #6–#9. Después, **6C** (verificación de métricas contra la fuente) y **6D** (convivencia,
+opcional). Al final, **Fase 7 — Producción** (despliegue autoalojado, respaldos y documentación).
 
 ## Hoja de ruta
 
@@ -290,11 +296,13 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
       `Skeleton`/`Alert`/`Tooltip` de remate — ADR 0028
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
-- [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,
-      `catalog_aliases`, `import_status_map`, dry run y reporte de calidad de datos
-- [ ] Adaptador de importación CSV/Excel de la hoja heredada
-- [ ] Verificación: las métricas base coinciden con las cifras actuales de la hoja
-- [ ] Otros adaptadores y tareas de sincronización saliente, solo si la persona los pide
+- [x] **6A** Infraestructura genérica de importación: `import_batches`, `import_records`,
+      `catalog_aliases`, `import_status_map`, RPCs y permiso `data.import`; administración
+      (`/admin/integraciones`) — ADR 0029
+- [ ] **6B** Adaptador CSV/Excel de la fuente heredada (dry run, alias y reporte de calidad);
+      requiere las respuestas #6–#9
+- [ ] **6C** Verificación: las métricas base coinciden con las cifras actuales de la fuente
+- [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
 
 ### Fase 7 — Producción
 - [ ] PWA completa, notificaciones push, despliegue autoalojado (Docker Compose + Caddy),

@@ -42,6 +42,9 @@ function AdminLayout() {
           <Link to="/admin/calendarios" className={linkClass}>
             {adminMessages.nav.calendars}
           </Link>
+          <Link to="/admin/integraciones" className={linkClass}>
+            {adminMessages.nav.integrations}
+          </Link>
           <Link to="/admin/configuracion" className={linkClass}>
             {adminMessages.nav.settings}
           </Link>

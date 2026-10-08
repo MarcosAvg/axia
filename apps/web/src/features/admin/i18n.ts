@@ -12,6 +12,7 @@ export const adminMessages = {
     users: 'Usuarios',
     scopes: 'Ámbitos y designaciones',
     calendars: 'Calendarios',
+    integrations: 'Integraciones',
     settings: 'Configuración',
   },
   settings: {
@@ -187,5 +188,25 @@ export const adminMessages = {
     minutes: 'Minutos',
     hours: 'Horas',
     days: 'Días',
+  },
+  integrations: {
+    title: 'Integraciones e importación',
+    help: 'Mapeo de estatus de origen y lotes de importación (la lectura de la fuente la hace un adaptador aislado).',
+    statusMap: 'Mapeo de estatus',
+    batches: 'Lotes de importación',
+    system: 'Sistema de origen',
+    externalStatus: 'Estatus de origen',
+    ticketStatus: 'Estado en Axia',
+    save: 'Guardar mapeo',
+    empty: 'Sin registros todavía.',
+    saved: 'Mapeo guardado.',
+    mode: 'Modo',
+    status: 'Estado',
+    started: 'Inicio',
+    finished: 'Fin',
+    modes: {
+      dry_run: 'Dry run',
+      commit: 'Confirmado',
+    },
   },
 } as const

@@ -59,6 +59,31 @@ export type Database = {
         }
         Relationships: []
       }
+      catalog_aliases: {
+        Row: {
+          alias: string
+          catalog: string
+          created_at: string
+          id: string
+          record_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          alias: string
+          catalog: string
+          created_at?: string
+          id?: string
+          record_id: string
+        }
+        Update: {
+          alias?: string
+          catalog?: string
+          created_at?: string
+          id?: string
+          record_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           active: boolean
@@ -345,6 +370,168 @@ export type Database = {
           operation?: string
         }
         Relationships: []
+      }
+      import_batches: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          finished_at: string | null
+          id: string
+          mode: string
+          started_at: string
+          status: string
+          summary: NonNullable<Json>
+          system: string
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          started_at?: string
+          status?: string
+          summary?: NonNullable<Json>
+          system: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          started_at?: string
+          status?: string
+          summary?: NonNullable<Json>
+          system?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'import_batches_system_fkey'
+            columns: ['system']
+            isOneToOne: false
+            referencedRelation: 'external_systems'
+            referencedColumns: ['name']
+          },
+        ]
+      }
+      import_records: {
+        Row: {
+          batch_id: string
+          created_at: string
+          error: string | null
+          id: string
+          raw: NonNullable<Json>
+          result: string
+          row_number: number | null
+          ticket_id: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          batch_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          raw: NonNullable<Json>
+          result?: string
+          row_number?: number | null
+          ticket_id?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          raw?: NonNullable<Json>
+          result?: string
+          row_number?: number | null
+          ticket_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'import_records_batch_id_fkey'
+            columns: ['batch_id']
+            isOneToOne: false
+            referencedRelation: 'import_batches'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_routing'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_metrics_base'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'import_records_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_ticket_sla'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      import_status_map: {
+        Row: {
+          created_at: string
+          external_status: string
+          id: string
+          system: string
+          ticket_status: Database['public']['Enums']['ticket_status']
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          external_status: string
+          id?: string
+          system: string
+          ticket_status: Database['public']['Enums']['ticket_status']
+        }
+        Update: {
+          created_at?: string
+          external_status?: string
+          id?: string
+          system?: string
+          ticket_status?: Database['public']['Enums']['ticket_status']
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'import_status_map_system_fkey'
+            columns: ['system']
+            isOneToOne: false
+            referencedRelation: 'external_systems'
+            referencedColumns: ['name']
+          },
+        ]
       }
       instance_settings: {
         Row: {
@@ -3605,6 +3792,50 @@ export type Database = {
       has_permission: {
         Args: { p_permission: string; p_user_id: string }
         Returns: boolean
+      }
+      import_alias_get: {
+        Args: { p_alias: string; p_catalog: string }
+        Returns: string
+      }
+      import_alias_set: {
+        Args: { p_alias: string; p_catalog: string; p_record_id: string }
+        Returns: undefined
+      }
+      import_batch_finish: {
+        Args: { p_batch_id: string; p_status: string; p_summary?: Json }
+        Returns: undefined
+      }
+      import_batch_start: {
+        Args: { p_mode?: string; p_system: string }
+        Returns: string
+      }
+      import_record_add: {
+        Args: {
+          p_batch_id: string
+          p_error?: string
+          p_raw: Json
+          p_result: string
+          p_row_number: number
+          p_ticket_id?: string
+        }
+        Returns: string
+      }
+      import_status_get: {
+        Args: { p_external_status: string; p_system: string }
+        Returns: Database['public']['Enums']['ticket_status']
+      }
+      import_status_set: {
+        Args: {
+          p_external_status: string
+          p_system: string
+          p_ticket_status: Database['public']['Enums']['ticket_status']
+        }
+        Returns: undefined
+      }
+      import_system: { Args: { p_system: string }; Returns: undefined }
+      import_ticket_upsert: {
+        Args: { p_data: Json; p_external_id: string; p_system: string }
+        Returns: string
       }
       me: { Args: Record<PropertyKey, never>; Returns: Json }
       notification_mark_read: {
