@@ -444,10 +444,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   pgTAP, 63 Vitest y 6 Playwright en verde; `pnpm check` completo en verde. **Fase 3A cerrada**.
 - 2026-10-08: Fase 3B, tramo 1: políticas RLS de escritura por `has_permission` para catálogos,
   motivos, roles/permisos, usuarios, ámbitos y designaciones; DELETE solo en relaciones; 257 pgTAP en
-  verde. ADR 0018. Rama `feat/fase-3b-admin-db`.
+  verde. ADR 0018. Rama `feat/fase-3b-admin`.
 - 2026-10-08: Fase 3B, tramo 2: feature `admin` con `CatalogManager` dirigido por configuración
   (13 catálogos y motivos) y layout `/admin/catalogos`; Vitest y Playwright del alta de un catálogo;
-  `pnpm check` completo en verde. Rama `feat/fase-3b-catalogs`.
+  `pnpm check` completo en verde. Rama `feat/fase-3b-admin`.
 - **Fase 2, Tramo 1 (base de autenticación)**: migración `auth_profiles_and_identity` con el
   disparador `on_auth_user_created` (crea `profiles` desde los metadatos de la cuenta), las RPC
   `me()` (perfil, roles y permisos en una llamada) y `profile_update()` (solo el perfil propio), y
@@ -483,8 +483,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `has_permission(...)` (`catalog.manage`, `role.manage`, `assignment.manage`, `user.manage`);
   `DELETE` solo en tablas de relación y catálogos que se desactivan, no se borran. **ADR 0018**
   (acota el ADR 0015: la RLS sigue para lectura y transiciones; la administración escribe por RLS).
-  pgTAP `97_admin_writes.test.sql`. Rama `feat/fase-3b-admin-db`.
+  pgTAP `97_admin_writes.test.sql`. Rama `feat/fase-3b-admin`.
 - **Fase 3B, Tramo 2 (catálogos y motivos)**: feature `admin` con un `CatalogManager` dirigido por
   configuración (tabla, columnas, campos y selects de tablas relacionadas) para los 13 catálogos y el
   árbol de motivos; layout `/admin` con `/admin/catalogos`. Pruebas Vitest (`form-values`) y
-  Playwright (crear un equipo). `pnpm check` en verde. Rama `feat/fase-3b-catalogs`.
+  Playwright (crear un equipo). `pnpm check` en verde. Rama `feat/fase-3b-admin`.
