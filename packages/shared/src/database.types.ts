@@ -1630,6 +1630,60 @@ export type Database = {
           },
         ]
       }
+      time_spans: {
+        Row: {
+          client_request_id: string | null
+          clock_class: Database['public']['Enums']['clock_class']
+          created_at: string
+          cycle: number
+          ended_at: string | null
+          id: string
+          kind: Database['public']['Enums']['time_span_kind']
+          origin: Database['public']['Enums']['span_origin']
+          recorded_by: string | null
+          ref_id: string | null
+          started_at: string
+          ticket_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          client_request_id?: string | null
+          clock_class?: Database['public']['Enums']['clock_class']
+          created_at?: string
+          cycle: number
+          ended_at?: string | null
+          id?: string
+          kind: Database['public']['Enums']['time_span_kind']
+          origin?: Database['public']['Enums']['span_origin']
+          recorded_by?: string | null
+          ref_id?: string | null
+          started_at: string
+          ticket_id: string
+        }
+        Update: {
+          client_request_id?: string | null
+          clock_class?: Database['public']['Enums']['clock_class']
+          created_at?: string
+          cycle?: number
+          ended_at?: string | null
+          id?: string
+          kind?: Database['public']['Enums']['time_span_kind']
+          origin?: Database['public']['Enums']['span_origin']
+          recorded_by?: string | null
+          ref_id?: string | null
+          started_at?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'time_spans_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'tickets'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1898,9 +1952,29 @@ export type Database = {
         Args: { p_client_request_id?: string; p_ticket_id: string }
         Returns: undefined
       }
+      ticket_time_by_kind: {
+        Args: {
+          p_kind: Database['public']['Enums']['time_span_kind']
+          p_ticket_id: string
+        }
+        Returns: string
+      }
+      ticket_time_net: { Args: { p_ticket_id: string }; Returns: string }
+      ticket_time_total: { Args: { p_ticket_id: string }; Returns: string }
       ticket_validate: {
         Args: { p_client_request_id?: string; p_ticket_id: string }
         Returns: undefined
+      }
+      time_span_record: {
+        Args: {
+          p_client_request_id?: string
+          p_clock_class?: Database['public']['Enums']['clock_class']
+          p_ended_at: string
+          p_kind: Database['public']['Enums']['time_span_kind']
+          p_started_at: string
+          p_ticket_id: string
+        }
+        Returns: string
       }
       write_event: {
         Args: {
@@ -1977,6 +2051,17 @@ export type Database = {
         | 'rejected'
         | 'cancelled'
         | 'duplicate'
+      time_span_kind:
+        | 'supervisor_response'
+        | 'reassignment'
+        | 'technician_assignment'
+        | 'recapture'
+        | 'wait_start'
+        | 'active_work'
+        | 'pause'
+        | 'validation'
+        | 'claim'
+        | 'duplicate_review'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2166,6 +2251,18 @@ export const Constants = {
         'rejected',
         'cancelled',
         'duplicate',
+      ],
+      time_span_kind: [
+        'supervisor_response',
+        'reassignment',
+        'technician_assignment',
+        'recapture',
+        'wait_start',
+        'active_work',
+        'pause',
+        'validation',
+        'claim',
+        'duplicate_review',
       ],
     },
   },
