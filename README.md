@@ -14,13 +14,13 @@ aislados.
 
 ## Estado del proyecto
 
-**Fases 1 a 4 cerradas.** Ya funciona:
+**Fases 1 a 5A cerradas.** Ya funciona:
 
 - Monorepo pnpm con `apps/web` (Vite + React + TypeScript, React Compiler) y `packages/shared`.
 - Tailwind + shadcn/ui, TanStack Router (rutas por carpetas), TanStack Query y React Hook Form + Zod.
 - **Base de datos núcleo** (Fase 1): catálogos, motivos jerárquicos, roles/permisos configurables,
   tiquets con folio e historial, ruteo con ofertas, pausas, recaptura, reclamaciones, duplicados,
-  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 277 pruebas pgTAP.
+  tramos de tiempo, notificaciones, RLS de lectura y vistas base de indicadores; 309 pruebas pgTAP.
 - **Autenticación y estructura** (Fase 2): inicio de sesión sin auto-registro, perfil automático,
   RPC `me()` (perfil/roles/permisos) y layout con rutas protegidas por permiso.
 - **Operación** (Fase 3A): alta de tiquets con catálogos y **aviso de duplicados**, lista con filtros
@@ -39,10 +39,13 @@ aislados.
 - **Campo sin cuenta** (Fase 4B): **tiempos manuales** registrados y anulados por supervisor/admin
   (atribuidos a un técnico) y **actuar en nombre de** un técnico (proxy) con actor y sujeto
   distinguidos en el historial.
+- **Indicadores** (Fase 5A): tiempo laboral por calendario (franjas, días no laborables y zona
+  horaria, por equipo o instancia) y vistas de indicadores por dimensión, técnico, motivo,
+  antigüedad, ruteo y duplicados.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 5 (métricas y reportes)**. Ver la hoja de ruta y lo pendiente en
+Lo siguiente es la **Fase 5B (tableros y exportación)**. Ver la hoja de ruta y lo pendiente en
 [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos

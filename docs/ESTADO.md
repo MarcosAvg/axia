@@ -4,17 +4,12 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 4B cerrada — siguiente: Fase 5 (métricas y reportes)
+**Fase actual:** 5A cerrada — siguiente: Fase 5B (tableros y exportación)
 
 ## En curso
 
-**Fase 5A — Métricas (cálculo backend + pgTAP)** (rama `feat/fase-5a-metricas`).
-1. Migración: `teams.work_calendar_id` (respaldo al calendario por defecto) y permiso `metrics.view`
-   (admin `all`; supervisor `team`/`buildings`).
-2. Tiempo laboral: recorte de intervalos por calendario (franjas, días no laborables y zona horaria)
-   para total, neto y por tipo; pgTAP con los ejemplos de la especificación §7.
-3. Vistas/funciones de indicadores (calendario y laboral, sin duplicados) e índices; pgTAP.
-4. SLA queda como tramo aparte. Sin push.
+_(vacío)_ — La Fase 5A quedó cerrada. La siguiente tarea es la **Fase 5B**: tableros con Recharts,
+exportación y permisos de interfaz. Sin push a `origin` por indicación de la persona.
 
 ## Hecho
 
@@ -123,12 +118,23 @@
     advance_pause/resume/recapture`, validación `act_on_behalf` (admin cualquiera; supervisor sus
     técnicos) y participación; selector "a nombre de" para supervisor/admin.
   - Decisiones en el ADR 0020. Compuerta completa en verde: 277 pgTAP, 96 Vitest, 11 Playwright.
+- **Fase 5A — tiempo laboral e indicadores (cerrada el 2026-10-08)**, rama `feat/fase-5a-metricas`
+  (fusionada localmente a `main`; **sin push**):
+  - Tiempo laboral por calendario: `teams.work_calendar_id` con respaldo al calendario de la
+    instancia y funciones de recorte por franjas, días no laborables y zona horaria
+    (`ticket_time_total/net/by_kind_laboral`).
+  - Vistas de indicadores: base por tiquet (calendario y laboral, marcas y conteos), agregados por
+    dimensión, duplicados por dimensión, carga por técnico, pausas y rechazos por motivo,
+    antigüedad y ruteo; índices nuevos. Permiso `metrics.view`.
+  - Decisiones en el ADR 0021. Compuerta completa en verde: 309 pgTAP, 96 Vitest, 11 Playwright.
+  - Pendientes: satisfacción (sin tabla de calificación) y tiempos objetivo (SLA), como tramo aparte.
 
 ## Siguiente
 
-**Fase 5 — Métricas y reportes**: indicadores de la especificación §11, tableros con Recharts
-(componente `chart` de shadcn/ui) y exportación. Antes conviene resolver la zona horaria y el
-horario laboral (pregunta 3 de bloqueos), porque afectan el tiempo laboral de los tramos.
+**Fase 5B — Tableros y exportación**: feature `metrics` (`api/` + hooks), tableros con Recharts
+(componente `chart` de shadcn/ui), filtros por fecha/dimensión, gating con `metrics.view` y
+exportación. Antes conviene resolver la zona horaria y el horario laboral reales (pregunta 3), que
+afectan los números. La satisfacción espera a la tabla de calificación y el SLA a sus valores.
 
 ## Hoja de ruta
 
@@ -203,7 +209,11 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
 ### Fase 5 — Métricas y reportes
-- [ ] Indicadores de la especificación §11, tableros con Recharts, exportación CSV/XLSX
+- [x] **5A** Indicadores de la especificación §11 calculados en la base (calendario y laboral,
+      sin duplicados) con vistas y pgTAP — ADR 0021
+- [ ] **5A (pendiente)** Tiempos objetivo (SLA) por prioridad y tipo de servicio; satisfacción
+      (requiere la tabla de calificación)
+- [ ] **5B** Tableros con Recharts, filtros y exportación CSV/XLSX
 
 ### Fase 6 — Integraciones y migración (opcional, aislada del núcleo)
 - [ ] Infraestructura genérica de importación: `import_batches`, `import_records`,
