@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   addHoliday,
   addInterval,
@@ -9,6 +10,7 @@ import {
   updateCalendar,
 } from '../api/calendar-api'
 import type { CalendarInput, IntervalInput } from '../domain/calendar'
+import { adminMessages } from '../i18n'
 
 const calendarKeys = {
   list: ['admin', 'calendars'] as const,
@@ -29,7 +31,11 @@ export function useCreateCalendar() {
   const invalidate = useInvalidateCalendars()
   return useMutation({
     mutationFn: (input: CalendarInput) => createCalendar(input),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate()
+      toast.success(adminMessages.actions.saved)
+    },
+    onError: () => toast.error(adminMessages.actions.error),
   })
 }
 
@@ -38,7 +44,11 @@ export function useUpdateCalendar() {
   return useMutation({
     mutationFn: (variables: { id: string; input: CalendarInput }) =>
       updateCalendar(variables.id, variables.input),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate()
+      toast.success(adminMessages.actions.saved)
+    },
+    onError: () => toast.error(adminMessages.actions.error),
   })
 }
 

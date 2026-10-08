@@ -69,7 +69,7 @@ async function createAssignedTicket(page: Page, description: string) {
 
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
-    .getByLabel('Técnico')
+    .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez (ejemplo)' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 }

@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/shared/form-fields'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
@@ -155,6 +161,36 @@ function ActionForms({
   return null
 }
 
+function ActionSheet({
+  ticket,
+  formAction,
+  subject,
+  onClose,
+}: ActionFormsProps) {
+  return (
+    <Sheet
+      open={formAction !== null}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
+        <SheetHeader>
+          <SheetTitle>
+            {formAction ? ticketMessages.actions[formAction] : ''}
+          </SheetTitle>
+        </SheetHeader>
+        <ActionForms
+          ticket={ticket}
+          formAction={formAction}
+          subject={subject}
+          onClose={onClose}
+        />
+      </SheetContent>
+    </Sheet>
+  )
+}
+
 interface TicketActionsPanelProps {
   ticket: TicketDetail
   actions: ActionKey[]
@@ -214,7 +250,7 @@ export function TicketActionsPanel({
         onOpenForm={setFormAction}
       />
       <ProxyRequiredHint show={blocked.length > 0} />
-      <ActionForms
+      <ActionSheet
         ticket={ticket}
         formAction={formAction}
         subject={subject}

@@ -1,5 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/shared/form-fields'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { downloadTextFile } from '@/lib/download'
 import { formatMinutes, formatPercent, toCsv } from '../domain/metrics'
 import type { Dimension, DimensionRow } from '../domain/metrics'
@@ -27,36 +35,32 @@ function DimensionTableGrid({
     )
   }
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-muted-foreground">
-            <th className="py-2 pr-3 font-medium">{t.dimension}</th>
-            <th className="py-2 pr-3 font-medium">{t.tickets}</th>
-            <th className="py-2 pr-3 font-medium">{t.avgActive}</th>
-            <th className="py-2 pr-3 font-medium">{t.avgTotal}</th>
-            <th className="py-2 pr-3 font-medium">{t.extra}</th>
-            <th className="py-2 pr-3 font-medium">{t.reassignment}</th>
-            <th className="py-2 pr-3 font-medium">{t.recapture}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="border-b">
-              <td className="py-2 pr-3">{nameOf(row.id)}</td>
-              <td className="py-2 pr-3">{row.tickets}</td>
-              <td className="py-2 pr-3">{formatMinutes(row.avgActive)}</td>
-              <td className="py-2 pr-3">{formatMinutes(row.avgTotal)}</td>
-              <td className="py-2 pr-3">{formatMinutes(row.avgActiveExtra)}</td>
-              <td className="py-2 pr-3">
-                {formatPercent(row.reassignmentRate)}
-              </td>
-              <td className="py-2 pr-3">{formatPercent(row.recaptureRate)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t.dimension}</TableHead>
+          <TableHead>{t.tickets}</TableHead>
+          <TableHead>{t.avgActive}</TableHead>
+          <TableHead>{t.avgTotal}</TableHead>
+          <TableHead>{t.extra}</TableHead>
+          <TableHead>{t.reassignment}</TableHead>
+          <TableHead>{t.recapture}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.id}>
+            <TableCell>{nameOf(row.id)}</TableCell>
+            <TableCell>{row.tickets}</TableCell>
+            <TableCell>{formatMinutes(row.avgActive)}</TableCell>
+            <TableCell>{formatMinutes(row.avgTotal)}</TableCell>
+            <TableCell>{formatMinutes(row.avgActiveExtra)}</TableCell>
+            <TableCell>{formatPercent(row.reassignmentRate)}</TableCell>
+            <TableCell>{formatPercent(row.recaptureRate)}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }
 

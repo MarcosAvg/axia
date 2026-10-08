@@ -1,4 +1,5 @@
 import { cn } from 'cn'
+import { Badge } from '@/components/ui/badge'
 import { statusTone } from '../domain/status'
 import type { StatusTone } from '../domain/status'
 import type { TicketStatus } from '../domain/types'
@@ -15,13 +16,11 @@ const toneClasses: Record<StatusTone, string> = {
 /** Insignia del estado del tiquet. */
 export function StatusBadge({ status }: { status: TicketStatus }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
-        toneClasses[statusTone(status)],
-      )}
+    <Badge
+      variant="secondary"
+      className={cn('rounded-full', toneClasses[statusTone(status)])}
     >
       {statusLabels[status]}
-    </span>
+    </Badge>
   )
 }

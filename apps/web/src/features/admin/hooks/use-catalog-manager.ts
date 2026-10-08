@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import type { AdminTable } from '../api/admin-api'
 import { optionSourcesFor } from '../domain/catalog-options'
 import type { AdminCatalogConfig } from '../domain/catalogs'
+import { adminMessages } from '../i18n'
 import {
   useAdminOptions,
   useAdminRows,
@@ -26,16 +28,27 @@ export function useCatalogManager(config: AdminCatalogConfig) {
     const id = editing && editing !== 'new' ? String(editing.id) : undefined
     save.mutate(
       { table: config.table, id, values },
-      { onSuccess: () => setEditing(null) },
+      {
+        onSuccess: () => {
+          setEditing(null)
+          toast.success(adminMessages.actions.saved)
+        },
+        onError: () => toast.error(adminMessages.actions.error),
+      },
     )
   }
 
   function toggle(row: Record<string, unknown>) {
-    save.mutate({
-      table: config.table,
-      id: String(row.id),
-      values: { active: row.active !== true },
-    })
+    save.mutate(
+      {
+        table: config.table,
+        id: String(row.id),
+        values: { active: row.active !== true },
+      },
+      {
+        onError: () => toast.error(adminMessages.actions.error),
+      },
+    )
   }
 
   return {

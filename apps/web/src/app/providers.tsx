@@ -4,6 +4,8 @@ import type { ReactNode } from 'react'
 import { setupOffline } from '@/app/offline'
 import { PwaUpdatePrompt } from '@/app/pwa-update-prompt'
 import { queryClient } from '@/app/query-client'
+import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/features/auth'
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -12,8 +14,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {children}
-        <PwaUpdatePrompt />
+        <TooltipProvider>
+          {children}
+          <PwaUpdatePrompt />
+          <Toaster />
+        </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
   )

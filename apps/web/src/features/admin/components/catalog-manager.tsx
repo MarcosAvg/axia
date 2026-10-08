@@ -1,9 +1,63 @@
 import { Button } from '@/components/ui/button'
-import type { AdminCatalogConfig } from '../domain/catalogs'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import type { AdminTable } from '../api/admin-api'
+import type { AdminCatalogConfig, AdminField } from '../domain/catalogs'
 import { useCatalogManager } from '../hooks/use-catalog-manager'
+import type { AdminOption } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 import { CatalogForm } from './catalog-form'
 import { CatalogTable } from './catalog-table'
+
+type Editing = Record<string, unknown> | 'new' | null
+type Values = Record<string, string | number | boolean | null>
+
+function CatalogDialog({
+  editing,
+  fields,
+  optionsFor,
+  isSaving,
+  onSave,
+  onCancel,
+}: {
+  editing: Exclude<Editing, null>
+  fields: AdminField[]
+  optionsFor: (table: AdminTable) => AdminOption[]
+  isSaving: boolean
+  onSave: (values: Values) => void
+  onCancel: () => void
+}) {
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onCancel()
+      }}
+    >
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            {editing === 'new'
+              ? adminMessages.form.newTitle
+              : adminMessages.form.editTitle}
+          </DialogTitle>
+        </DialogHeader>
+        <CatalogForm
+          fields={fields}
+          row={editing === 'new' ? undefined : editing}
+          optionsFor={optionsFor}
+          isSaving={isSaving}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 /** Gestor de un catálogo: lista, alta, edición y activar/desactivar. */
 export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
@@ -40,9 +94,9 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
         />
       ) : null}
       {manager.editing ? (
-        <CatalogForm
+        <CatalogDialog
+          editing={manager.editing}
           fields={config.fields}
-          row={manager.editing === 'new' ? undefined : manager.editing}
           optionsFor={manager.optionsFor}
           isSaving={manager.isSaving}
           onSave={manager.handleSave}

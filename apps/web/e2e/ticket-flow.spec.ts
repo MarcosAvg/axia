@@ -74,7 +74,7 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
 
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
-    .getByLabel('Técnico')
+    .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez (ejemplo)' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
   await expect(page.getByText('Asignado', { exact: true })).toBeVisible()

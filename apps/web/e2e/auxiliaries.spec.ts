@@ -55,13 +55,13 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   // Asigna técnico y agrega un auxiliar.
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
-    .getByLabel('Técnico')
+    .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez (ejemplo)' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 
   await page.getByRole('button', { name: 'Agregar auxiliar' }).click()
   await page
-    .getByLabel('Técnico')
+    .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Marta Ruiz (ejemplo)' })
   await page.getByLabel('Motivo').selectOption({ index: 1 })
   await clickAndWait(page, 'Confirmar', 'ticket_add_auxiliary')

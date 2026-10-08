@@ -38,4 +38,16 @@ export default defineConfig([
       '@typescript-eslint/ban-ts-comment': ['error', { 'ts-ignore': true }],
     },
   },
+  {
+    // Componentes de shadcn/ui (vendored): los límites de tamaño/complejidad no aplican
+    // a código generado; se documentan en el ADR de fundación de interfaz.
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-params': 'off',
+      'max-depth': 'off',
+      complexity: 'off',
+    },
+  },
 ])

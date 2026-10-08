@@ -42,7 +42,7 @@ export function DimensionChart({
         <ChartTooltip
           content={
             <ChartTooltipContent
-              valueFormatter={(value) => formatMinutes(Number(value))}
+              formatter={(value) => formatMinutes(Number(value))}
             />
           }
         />
