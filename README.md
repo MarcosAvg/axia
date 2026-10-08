@@ -46,11 +46,14 @@ aislados.
   calendario por equipo y por defecto, y las fechas de la interfaz en la zona de la institución.
 - **Tablero de métricas** (Fase 5B): `/metricas` con KPI, volumen por día, promedio por dimensión,
   pausas por motivo y aging, con filtros de fecha/dimensión y exportación CSV (Recharts).
+- **Fundación de interfaz** (Fase 5C): shadcn/ui completo (primitivas, `Sheet`/`Dialog`, `Table`,
+  `Badge`), iconos `lucide` y avisos con `sonner`; base para migrar el resto de pantallas.
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 6 (integraciones y migración)**, aislada del núcleo. Ver la hoja de ruta y
-lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **ola 2 de la fundación de interfaz (shadcn) y luego la Fase 6 (integraciones y
+migración)**, aislada del núcleo. Ver la hoja de ruta y lo pendiente en
+[`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 

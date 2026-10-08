@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 5 cerrada — siguiente: Fase 6 (integraciones y migración)
+**Fase actual:** 5C (fundación de interfaz) — ola 1 cerrada; siguiente: ola 2 de UI, luego Fase 6
 
 ## En curso
 
-_(vacío)_ — El tablero de métricas cerró la Fase 5. La siguiente tarea es la **Fase 6**
-(infraestructura de importación y adaptadores, aislada del núcleo), cuando la persona la pida.
-Sin push a `origin`.
+_(vacío)_ — La primera ola de la fundación de interfaz quedó cerrada (shadcn/ui, toasts, Sheet/Dialog,
+Badge/Table). La siguiente tarea es la **ola 2 de UI** (user-menu, roles/usuarios, login/perfil,
+formularios secundarios del detalle) y después la **Fase 6**. Sin push a `origin`.
 
 ## Hecho
 
@@ -156,13 +156,27 @@ Sin push a `origin`.
   - Agregación en el frontend con funciones puras probadas. Decisiones en el ADR 0024.
   - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
   - Pendientes del tablero: indicadores de duplicados, satisfacción (sin tabla) y SLA (tramo aparte).
+- **Fase 5C — fundación de interfaz con shadcn/ui (ola 1, 2026-10-08)**, rama `feat/fase-5c-ui`
+  (fusionada localmente a `main`; **sin push**):
+  - Instala las primitivas de shadcn/ui (dialog, sheet, table, tabs, badge, checkbox, switch,
+    radio-group, alert, separator, skeleton, tooltip, dropdown-menu, pagination, progress, sonner y
+    el `chart` completo), `lucide-react` y `sonner`; `Toaster`/`TooltipProvider` globales.
+  - `components/ui/**` se trata como *vendored* (límites de ESLint relajados y documentados).
+  - Ola 1: insignia → `Badge`, métricas → `Table`, acciones del tiquet → `Sheet`, catálogos →
+    `Dialog`, toasts al guardar. Decisiones en el ADR 0025.
+  - Compuerta completa en verde: 336 pgTAP, 112 Vitest, 12 Playwright.
+  - **Ola 2 pendiente:** `user-menu` (`DropdownMenu`, ajusta E2E), roles/usuarios (`Tabs`/`Table`/
+    `Checkbox`), login/perfil (`Form`), formularios secundarios del detalle, `Tooltip`/`Skeleton`.
 
 ## Siguiente
 
-**Fase 6 — Integraciones y migración**: infraestructura genérica de importación (`import_batches`,
-`import_records`, `catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada
-del núcleo y solo cuando la persona la pida. Antes conviene cerrar pendientes de la Fase 5
-(duplicados en el tablero, satisfacción y SLA) y confirmar la zona horaria real.
+**Ola 2 de la fundación de interfaz**: migrar `user-menu` a `DropdownMenu` (ajustando las E2E),
+roles/usuarios a `Tabs`/`Table`/`Checkbox`, login/perfil al `Form` de shadcn, los formularios
+secundarios del detalle y usar `Tooltip`/`Skeleton` donde aporten. Después, **Fase 6** (integraciones
+y migración): infraestructura genérica de importación (`import_batches`, `import_records`,
+`catalog_aliases`, `import_status_map`, dry run y reporte) y adaptadores, aislada del núcleo y solo
+cuando la persona la pida. Pendientes de la Fase 5: duplicados en el tablero, satisfacción y SLA;
+confirmar la zona horaria real.
 
 ## Hoja de ruta
 
