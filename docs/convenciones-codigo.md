@@ -1,12 +1,36 @@
-# Axia — Convenciones de código
+# Convenciones de código
 
-Este documento es de cumplimiento obligatorio. Como no hay revisión humana del código, **lo que
-se pueda verificar con una herramienta se verifica con una herramienta** (sección 14). Lo que
-no, se cumple por disciplina y se comprueba en la definición de terminado (sección 15).
+## Objeto
+
+Documento de cumplimiento obligatorio para el código de Axia. Como no hay revisión humana del
+código, **lo que se pueda verificar con una herramienta se verifica con una herramienta** (sección
+14); lo demás se cumple por disciplina y se comprueba en la definición de terminado (sección 15).
+
+## Contenido
+
+1. [Principios](#1-principios)
+2. [Idioma y nombres](#2-idioma-y-nombres)
+3. [Estructura del frontend (por funcionalidad)](#3-estructura-del-frontend-por-funcionalidad)
+4. [Reglas de dependencia](#4-reglas-de-dependencia-se-verifican-con-herramienta)
+5. [Límites de tamaño y complejidad](#5-límites-de-tamaño-y-complejidad)
+6. [TypeScript](#6-typescript)
+7. [React](#7-react)
+8. [Acceso a datos desde el cliente](#8-acceso-a-datos-desde-el-cliente)
+9. [Offline y evidencias](#9-offline-y-evidencias)
+10. [Base de datos (SQL)](#10-base-de-datos-sql)
+11. [Edge Functions](#11-edge-functions)
+12. [Errores, registro y seguridad](#12-errores-registro-y-seguridad)
+13. [Pruebas](#13-pruebas)
+14. [Herramientas que hacen cumplir estas reglas](#14-herramientas-que-hacen-cumplir-estas-reglas)
+15. [Definición de terminado](#15-definición-de-terminado-toda-tarea)
+16. [Documentación](#16-documentación)
+17. [Git](#17-git)
+18. [Dependencias](#18-dependencias)
+19. [Anti-patrones prohibidos](#19-anti-patrones-prohibidos)
 
 ## 1. Principios
 
-1. **Simple antes que ingenioso.** Elige la solución más sencilla que cumpla el requisito.
+1. **Simple antes que ingenioso.** Se elige la solución más sencilla que cumpla el requisito.
 2. **Pequeño y con un solo propósito**: archivos, funciones y componentes hacen una cosa.
 3. **Las reglas de negocio viven en la base de datos y en funciones puras**, no en componentes.
 4. **Todo lo importante se prueba.** Las reglas de seguridad y de transición, primero.
@@ -27,7 +51,7 @@ no, se cumple por disciplina y se comprueba en la definición de terminado (secc
 - Funciones con verbo (`calculateTotalInterval`), tipos y componentes en `PascalCase`,
   variables y funciones en `camelCase`, constantes en `UPPER_SNAKE_CASE`.
 - Archivos en `kebab-case` (`ticket-list.tsx`); hooks en `use-...`.
-- Para términos del negocio usa el glosario de `docs/dominio.md`. No inventes sinónimos.
+- Para términos del negocio se usa el glosario de `docs/dominio.md`; no se inventan sinónimos.
 
 ## 3. Estructura del frontend (por funcionalidad)
 
@@ -83,7 +107,7 @@ resto de funciones no llevan el prefijo `integration-`.
 |---|---|
 | Archivo | 300 líneas (sin comentarios ni líneas vacías) |
 | Función | 60 líneas (advertencia a 50) |
-| Componente React | 150 líneas; si crece, divídelo |
+| Componente React | 150 líneas; si crece, se divide |
 | Parámetros | 4; con más, recibe un objeto |
 | Anidación | 3 niveles |
 | Complejidad ciclomática | 10 |
@@ -94,14 +118,14 @@ estas reglas requiere un comentario con la razón y se evita.
 ## 6. TypeScript
 
 - `strict: true`, `noUncheckedIndexedAccess: true`, `noFallthroughCasesInSwitch: true`.
-- **Prohibido `any`**, `@ts-ignore` y `as` para forzar tipos. Si no hay alternativa, usa
+- **Prohibido `any`**, `@ts-ignore` y `as` para forzar tipos. Si no hay alternativa, se usa
   `@ts-expect-error` con una explicación.
-- Los tipos de la base de datos vienen de `pnpm db:types`; no los escribas a mano. Deriva
-  tipos de interfaz a partir de ellos.
-- **Valida en las fronteras con Zod**: formularios, datos importados, respuestas externas,
-  entradas de Edge Functions. Dentro del sistema, confía en los tipos.
+- Los tipos de la base de datos vienen de `pnpm db:types`; no se escriben a mano. Los tipos de
+  interfaz se derivan a partir de ellos.
+- **Validación en las fronteras con Zod**: formularios, datos importados, respuestas externas y
+  entradas de Edge Functions. Dentro del sistema se confía en los tipos.
 - Estados, roles y tipos como uniones literales o enums compartidos en `packages/shared`.
-- Prefiere `type` para uniones y `interface` para formas de objetos públicos.
+- Se prefiere `type` para uniones e `interface` para formas de objetos públicos.
 - Sin exportaciones por defecto, excepto donde el framework lo exija.
 
 ## 7. React
@@ -111,23 +135,23 @@ estas reglas requiere un comentario con la razón y se evita.
 - **Filtros, orden y paginación de listas viven en la URL** (parámetros de búsqueda del
   router) para poder recargar y compartir.
 - El componente presenta; la lógica va en un hook o en `domain/`.
-- Estado local lo más cerca posible de donde se usa; evita estado global salvo sesión y
+- Estado local lo más cerca posible de donde se usa; se evita el estado global salvo sesión y
   preferencias.
-- Nada de `useEffect` para derivar datos: calcula durante el render o usa `useMemo` con
+- Nada de `useEffect` para derivar datos: se calcula durante el render o se usa `useMemo` con
   criterio.
-- Listas largas paginadas o virtualizadas; nunca cargues miles de filas de una vez.
+- Listas largas paginadas o virtualizadas; nunca se cargan miles de filas de una vez.
 - Cada pantalla maneja los cuatro estados: **cargando, vacío, error y con datos**.
 - Formularios con React Hook Form + Zod; mensajes de error en español junto al campo.
 - **Accesibilidad**: etiquetas en todos los campos, navegación por teclado, foco visible,
-  contraste suficiente, `alt` en imágenes. Es una PWA de uso en campo, con sol y con prisa:
+  contraste suficiente y `alt` en imágenes. Es una PWA de uso en campo, con sol y con prisa:
   objetivos táctiles de al menos 44 px.
 
 ## 8. Acceso a datos desde el cliente
 
 - Toda llamada a Supabase está en `features/*/api/` o `lib/`, con tipos de retorno explícitos.
 - Las **mutaciones que cambian el flujo** (asignar, iniciar, pausar, resolver, etc.) usan
-  **solo RPC**. Prohibido `update` directo a `tickets.status`.
-- Selecciona solo las columnas necesarias; no uses `select('*')` en listas.
+  **solo RPC**. Está prohibido el `update` directo a `tickets.status`.
+- Se seleccionan solo las columnas necesarias; no se usa `select('*')` en listas.
 - Las consultas se paginan y filtran en el servidor.
 - Los errores de Supabase se convierten en errores de dominio tipados antes de llegar a la
   interfaz.
@@ -137,8 +161,8 @@ estas reglas requiere un comentario con la razón y se evita.
 - Toda acción que pueda ocurrir sin conexión se guarda primero en `outbox` (Dexie) con un
   **UUID generado en el cliente** (`crypto.randomUUID()`), que la función en Postgres usa
   como clave de idempotencia (`client_request_id`).
-- La sincronización se dispara al abrir la app, al evento `online` y al volver a primer
-  plano (`visibilitychange`). **No dependas de Background Sync** (no existe en iOS Safari).
+- La sincronización se dispara al abrir la aplicación, al evento `online` y al volver a primer
+  plano (`visibilitychange`). **No se depende de Background Sync** (no existe en iOS Safari).
 - Las fotos se comprimen antes de guardarse, se guardan como `Blob` en IndexedDB y se suben
   con carga reanudable (TUS). El evento queda marcado como "evidencia pendiente" hasta que
   la subida termine.
@@ -149,6 +173,7 @@ estas reglas requiere un comentario con la razón y se evita.
 ## 10. Base de datos (SQL)
 
 ### Nombres
+
 - `snake_case`; tablas en plural (`tickets`, `ticket_events`); claves primarias `id`; claves
   foráneas `<singular>_id`; marcas de tiempo `created_at` y `updated_at` (con disparador).
 - Enums en inglés `snake_case`. Funciones con `<entidad>_<verbo>`: `ticket_assign_technician`,
@@ -156,24 +181,28 @@ estas reglas requiere un comentario con la razón y se evita.
 - Índices: `idx_<tabla>_<columnas>`. Políticas: `<tabla>_<acción>_<rol>`.
 
 ### Independencia del esquema
+
 - El esquema del núcleo **no contiene columnas, enums, funciones ni semillas con nombres de
   plataformas externas**.
 - Identificadores externos solo en `ticket_external_refs(system, external_id)` y datos crudos de
-  importación solo en `import_records.raw`. No añadas columnas al núcleo para un sistema concreto.
+  importación solo en `import_records.raw`. No se añaden columnas al núcleo para un sistema
+  concreto.
 - Si una integración necesita estructura propia, va en tablas con prefijo `integration_` y su
   propia migración, sin llaves foráneas desde el núcleo hacia ellas.
 
 ### Migraciones
+
 - Una migración, una preocupación. Nombre: `AAAAMMDDHHMMSS_verbo_objeto.sql`.
-- Nunca edites una migración ya integrada a `main`: agrega otra.
+- Una migración ya integrada a `main` no se edita: se agrega otra.
 - Toda migración debe aplicarse limpia con `pnpm db:reset` y dejar las pruebas en verde.
-- Incluye `comment on table` / `comment on column` para todo lo que no sea obvio.
+- Se incluye `comment on table` / `comment on column` para todo lo que no sea obvio.
 - Datos semilla de catálogos en `supabase/seed.sql`, idempotentes y ficticios.
 
 ### Seguridad (RLS)
+
 - RLS activado en **toda** tabla del esquema expuesto, sin excepción, con política explícita
   por operación y rol.
-- Usa `(select auth.uid())` dentro de las políticas (mejor rendimiento) y funciones auxiliares
+- Se usa `(select auth.uid())` dentro de las políticas (mejor rendimiento) y funciones auxiliares
   `stable` como `has_role(...)`.
 - **Los roles viven en una tabla (`user_roles`)**; nunca en metadatos editables por el usuario.
 - Funciones `security invoker` por defecto. `security definer` solo con justificación escrita,
@@ -186,13 +215,14 @@ estas reglas requiere un comentario con la razón y se evita.
 - Una función por transición; nada de una función gigante con `case`.
 
 ### Rendimiento
+
 - Índices en claves foráneas y en columnas de filtro frecuentes (estado, fechas, edificio).
 - Las métricas son **vistas** (o materializadas si el volumen lo pide). Los intervalos y el
   mes **se calculan, no se almacenan**.
 
 ## 11. Edge Functions
 
-- Las del núcleo, solo para lo que no cabe en SQL: notificaciones push, reportes pesados.
+- Las del núcleo, solo para lo que no cabe en SQL: notificaciones push y reportes pesados.
 - Las de integración se llaman `integration-<nombre>` y cumplen la sección 4.
 - Validan la entrada con Zod, autentican al llamante y usan la `service role key` únicamente
   dentro de la función, leída de secretos del entorno.
@@ -201,14 +231,14 @@ estas reglas requiere un comentario con la razón y se evita.
 ## 12. Errores, registro y seguridad
 
 - Nunca un `catch` vacío. Un error se maneja, se transforma en un error de dominio o se
-  propaga; y el usuario recibe un mensaje claro en español.
+  propaga; el usuario recibe un mensaje claro en español.
 - Sin `console.log` en el código integrado (se permiten `console.warn` y `console.error`).
-  Usa un módulo `lib/logger` para centralizar.
-- Jamás registres datos personales, tokens ni claves.
-- Entradas siempre validadas; salidas de texto libre siempre escapadas (React lo hace;
-  no uses `dangerouslySetInnerHTML`).
+  Se usa un módulo `lib/logger` para centralizar.
+- No se registran datos personales, tokens ni claves.
+- Entradas siempre validadas; salidas de texto libre siempre escapadas (React lo hace; no se
+  usa `dangerouslySetInnerHTML`).
 - Variables de entorno: solo `VITE_*` públicas en el cliente; lo secreto nunca llega al
-  cliente. Mantén `.env.example` actualizado.
+  cliente. `.env.example` se mantiene al día.
 - Archivos de evidencia en almacenamiento privado con URL firmadas y límites de tipo y tamaño.
 
 ## 13. Pruebas
@@ -222,16 +252,16 @@ estas reglas requiere un comentario con la razón y se evita.
 - Toda función `domain/` nueva lleva pruebas. Toda tabla nueva, pruebas RLS. Toda función de
   transición, pruebas de caso válido, rol incorrecto, transición inválida y repetición
   idempotente.
-- Las pruebas son deterministas: sin dependencia de hora real (inyecta el reloj), de orden
-  o de red externa.
+- Las pruebas son deterministas: sin dependencia de hora real (se inyecta el reloj), de orden
+  ni de red externa.
 - Nombres de prueba descriptivos en español: `rechaza la transición si el rol no es supervisor`.
-- **Nunca debilites, omitas o borres una prueba para que pase.** Un bug corregido se acompaña
-  de una prueba que lo reproduce.
+- **Ninguna prueba se debilita, se omite ni se borra para que pase.** Un error corregido se
+  acompaña de una prueba que lo reproduce.
 - El núcleo debe tener sus pruebas completas **sin cargar ningún adaptador de integración**.
 
 ## 14. Herramientas que hacen cumplir estas reglas
 
-Configúralas en el arranque; el CI y `pnpm check` las ejecutan.
+Se configuran en el arranque; el CI y `pnpm check` las ejecutan.
 
 - **TypeScript**: banderas de la sección 6.
 - **ESLint** (`typescript-eslint`, `react-hooks`, `jsx-a11y`) con:
@@ -249,10 +279,10 @@ rules: {
 }
 ```
 
-- **Fronteras entre capas** con `dependency-cruiser` o `eslint-plugin-boundaries`, que
-  hagan fallar el build al violar la sección 4 (incluida la restricción de importar el
-  cliente de Supabase solo desde `features/*/api` y `lib/`, la prohibición de que el núcleo
-  importe de `features/integrations/` y la ausencia de ciclos).
+- **Fronteras entre capas** con `dependency-cruiser` o `eslint-plugin-boundaries`, que hagan
+  fallar el build al violar la sección 4 (incluida la restricción de importar el cliente de
+  Supabase solo desde `features/*/api` y `lib/`, la prohibición de que el núcleo importe de
+  `features/integrations/` y la ausencia de ciclos).
 - **`pnpm check:agnostic`** (por ejemplo `scripts/check-agnostic.mjs`): busca una lista
   configurable de nombres de plataformas de terceros (mayúsculas y minúsculas) en todo el
   repositorio y falla si aparecen fuera de las rutas permitidas de la sección 4. La lista vive
@@ -277,18 +307,20 @@ rules: {
 
 | Documento | Contenido |
 |---|---|
-| `README.md` | Cómo levantar el proyecto en 10 minutos |
+| `README.md` | Puesta en marcha, comandos y estructura del repositorio |
 | `AGENTS.md` | Reglas cortas para el agente |
-| `docs/ESTADO.md` | Estado, hoja de ruta, bloqueos |
+| `docs/README.md` | Índice de la documentación |
+| `docs/ESTADO.md` | Estado, hoja de ruta y bloqueos |
 | `docs/dominio.md` | Flujo, modelo conceptual y glosario del núcleo |
 | `docs/integraciones-y-migracion.md` | Adaptadores, origen actual de los datos y migración |
+| `docs/estilo-documentacion.md` | Normas de redacción de la documentación |
 | `docs/convenciones-codigo.md` | Este documento |
 | `docs/decisions/NNNN-titulo.md` | Una decisión de arquitectura por archivo |
 
 - **TSDoc** solo en funciones públicas de `lib/` y en el `index.ts` de cada feature: qué hace,
-  parámetros y errores. No comentes lo evidente.
-- **Comentarios en el código explican el porqué**, nunca el qué. Si hace falta explicar
-  qué hace, renombra o reestructura.
+  parámetros y errores. No se comenta lo evidente.
+- **Los comentarios en el código explican el porqué**, nunca el qué. Si hace falta explicar qué
+  hace, se renombra o se reestructura.
 - **Comentarios SQL** con `comment on` en tablas, columnas y funciones.
 - **Plantilla de ADR** (`docs/decisions/0001-titulo.md`):
 
@@ -306,8 +338,8 @@ Y por qué se descartaron.
 Qué se gana, qué se paga y cómo revertirlo.
 ```
 
-- Decisiones que ya merecen ADR desde el arranque: Vite + React como SPA, Supabase,
-  Recharts en lugar de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos,
+- Decisiones que ya merecen ADR desde el arranque: Vite + React como SPA, Supabase, Recharts
+  en lugar de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos e
   independencia del núcleo respecto a plataformas externas.
 - **Regla clave:** un cambio que altera el comportamiento actualiza su documentación en el
   mismo commit.
@@ -319,18 +351,18 @@ Qué se gana, qué se paga y cómo revertirlo.
 - **Conventional Commits** en español: `feat(tickets): agrega asignación a técnico`.
   Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `build`, `ci`.
 - Un commit, una idea; cada commit deja el proyecto compilando y con pruebas en verde.
-- Nunca subas `.env`, claves, volcados de datos reales ni archivos generados por el build.
-- Datos reales de cualquier fuente nunca se suben al repositorio; usa datos ficticios en las
+- No se suben `.env`, claves, volcados de datos reales ni archivos generados por el build.
+- Datos reales de cualquier fuente nunca se suben al repositorio; se usan datos ficticios en las
   pruebas y las semillas.
 
 ## 18. Dependencias
 
-- Antes de añadir una: ¿se resuelve con lo que ya hay o con pocas líneas propias? Si no,
-  verifica en el registro que existe, es la oficial, está mantenida y su licencia es MIT,
-  Apache-2.0, BSD o ISC.
+- Antes de añadir una dependencia se comprueba si se resuelve con lo existente o con pocas
+  líneas propias. En caso contrario, se verifica en el registro que existe, es la oficial, está
+  mantenida y su licencia es MIT, Apache-2.0, BSD o ISC.
 - Versiones fijadas por el archivo de bloqueo (`pnpm-lock.yaml`), que siempre se confirma.
-- Justifica cada dependencia nueva en el mensaje del commit. `knip` detecta las que sobran.
-- No añadas SDK ni clientes de plataformas de terceros al núcleo; si una integración los
+- Cada dependencia nueva se justifica en el mensaje del commit. `knip` detecta las que sobran.
+- No se añaden SDK ni clientes de plataformas de terceros al núcleo; si una integración los
   necesita, viven solo en su adaptador.
 
 ## 19. Anti-patrones prohibidos
@@ -338,7 +370,7 @@ Qué se gana, qué se paga y cómo revertirlo.
 - Componentes con llamadas directas a Supabase.
 - `update` directo al estatus del tiquet desde el cliente.
 - Lógica de negocio dentro de componentes o rutas.
-- Archivos "utils" o "helpers" genéricos que crecen sin límite: nombra por propósito.
+- Archivos "utils" o "helpers" genéricos que crecen sin límite: se nombran por propósito.
 - Estado del servidor copiado a `useState`.
 - Valores mágicos (cadenas de estado, roles, IDs) repetidos en varios archivos.
 - `any`, `@ts-ignore`, `eslint-disable` sin razón escrita.
@@ -346,5 +378,5 @@ Qué se gana, qué se paga y cómo revertirlo.
 - Modificar migraciones ya integradas.
 - Nombres, campos, estados o reglas de otra plataforma dentro del núcleo; hacer que el núcleo
   espere o dependa de un sistema externo.
-- Tocar producción, nube real o credenciales sin confirmación de la persona.
+- Tocar producción, infraestructura real o credenciales sin confirmación de la persona.
 - Hacer pasar una prueba modificándola en lugar de corregir el código.

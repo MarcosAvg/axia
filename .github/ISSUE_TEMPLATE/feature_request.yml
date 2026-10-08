@@ -1,0 +1,25 @@
+name: Solicitud de mejora
+description: Propón una funcionalidad o un cambio
+title: '[Mejora]: '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Problema o necesidad
+      description: Qué situación motiva la solicitud.
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Qué cambio se propone y cómo resolvería la necesidad.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+    validations:
+      required: false

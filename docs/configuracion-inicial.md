@@ -30,7 +30,7 @@ El diseño de la base de datos (tablas, RLS, funciones de transición) se aborda
 
 ## 1. Requisitos previos
 
-Instala en tu equipo:
+Instalar en el equipo:
 
 - **Node.js LTS**
 - **pnpm** (se puede activar con `corepack enable`)
@@ -38,7 +38,7 @@ Instala en tu equipo:
 - **Docker** (Supabase local lo necesita)
 - Editor con soporte de ESLint, Prettier y TypeScript (por ejemplo VS Code)
 
-Verifica:
+Verificar:
 
 ```bash
 node -v
@@ -89,7 +89,7 @@ packages:
   - packages/*
 ```
 
-`package.json` de la raíz (ajusta la versión de pnpm a la que tengas instalada):
+`package.json` de la raíz (ajustar la versión de pnpm a la instalada):
 
 ```json
 {
@@ -158,7 +158,7 @@ pnpm create vite apps/web --template react-ts
 cd apps/web
 ```
 
-Cambia el nombre en `apps/web/package.json` a `"name": "@axia/web"` y luego:
+Cambiar el nombre en `apps/web/package.json` a `"name": "@axia/web"` y ejecutar:
 
 ```bash
 pnpm install
@@ -207,7 +207,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'prompt', // tú decides cuándo actualizar; evita recargar a medio trabajo
+      registerType: 'prompt', // el usuario decide cuándo actualizar; evita recargar a medio trabajo
       manifest: {
         name: 'Axia',
         short_name: 'Axia',
@@ -238,7 +238,7 @@ Coloca los iconos `pwa-192.png`, `pwa-512.png` y `pwa-512-maskable.png` en `apps
 
 ### 4.4 Alias `@` en TypeScript
 
-Agrega en `tsconfig.json` y en `tsconfig.app.json` (dentro de `compilerOptions`), según indique la guía de shadcn/ui para Vite:
+Agregar en `tsconfig.json` y en `tsconfig.app.json` (dentro de `compilerOptions`), según indique la guía de shadcn/ui para Vite:
 
 ```json
 "baseUrl": ".",
@@ -334,7 +334,7 @@ VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=<clave pública que muestra "supabase start">
 ```
 
-Crea también `apps/web/.env.example` con los mismos nombres y sin valores reales.
+Crear también `apps/web/.env.example` con los mismos nombres y sin valores reales.
 
 ### 4.8 Cliente de Supabase
 
@@ -413,7 +413,7 @@ Desde la **raíz** del repositorio:
 pnpm add -D -w supabase
 ```
 
-> Si pnpm bloquea el script de instalación del paquete `supabase`, ejecuta `pnpm approve-builds` y autorízalo.
+> Si pnpm bloquea el script de instalación del paquete `supabase`, ejecutar `pnpm approve-builds` y autorizarlo.
 
 ```bash
 pnpm supabase init                   # crea la carpeta /supabase
@@ -423,7 +423,7 @@ pnpm supabase status                 # muestra URL y claves locales
 
 Puertos locales por defecto: API `54321`, base de datos `54322`, Studio `54323`.
 
-Copia la URL y la clave pública a `apps/web/.env.local`.
+Copiar la URL y la clave pública a `apps/web/.env.local`.
 
 Flujo de trabajo con la base de datos:
 
@@ -558,7 +558,7 @@ cd apps/web
 pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
 
-Importa `defineConfig` desde `vitest/config` (o añade la referencia de tipos de Vitest) y agrega en la configuración:
+Importar `defineConfig` desde `vitest/config` (o añadir la referencia de tipos de Vitest) y agregar en la configuración:
 
 ```ts
 test: { environment: 'jsdom', globals: true }
@@ -577,7 +577,7 @@ La configuración vive en `apps/web/playwright.config.ts` (Chromium, `webServer`
 `pnpm dev`) y las pruebas en `apps/web/e2e/`. `pnpm test` corre Vitest y luego Playwright;
 Vitest excluye `e2e/**` en `vite.config.ts`.
 
-Incluye desde temprano un caso con la red cortada (`context.setOffline(true)`) para el flujo del técnico.
+Incluir desde temprano un caso con la red cortada (`context.setOffline(true)`) para el flujo del técnico.
 
 ---
 

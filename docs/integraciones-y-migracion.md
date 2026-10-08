@@ -1,8 +1,25 @@
-# Axia — Integraciones y migración de datos
+# Integraciones y migración de datos
 
-> **Solo léelo al trabajar en importadores o integraciones.** Este es el único documento (junto
-> con el código de los adaptadores, `docs/ESTADO.md` y `docs/decisions/`) donde pueden aparecer
-> nombres de plataformas de terceros. El núcleo de Axia no debe depender de nada de lo que sigue.
+## Objeto
+
+Describir la migración de datos hacia Axia y la convivencia con el sistema de origen. Documento de
+trabajo para importadores e integraciones.
+
+> **Advertencia:** este es el único documento (junto con el código de los adaptadores,
+> `docs/ESTADO.md` y `docs/decisions/`) donde pueden aparecer nombres de plataformas de terceros. El
+> núcleo de Axia no debe depender de nada de lo que sigue.
+
+## Contenido
+
+1. [Principios](#1-principios)
+2. [Contrato de un adaptador](#2-contrato-de-un-adaptador)
+3. [Origen actual (referencia)](#3-origen-actual-referencia)
+4. [Reglas de importación](#4-reglas-de-importación)
+5. [Numeración y continuidad](#5-numeración-y-continuidad)
+6. [Tiquets importados y seguimiento detallado](#6-tiquets-importados-y-seguimiento-detallado)
+7. [Funciones opcionales de convivencia](#7-funciones-opcionales-de-convivencia-mientras-ambos-sistemas-existan)
+8. [Preguntas abiertas y supuestos](#8-preguntas-abiertas-y-supuestos)
+9. [Criterio de aceptación de la migración](#9-criterio-de-aceptación-de-la-migración)
 
 ## 1. Principios
 
@@ -20,7 +37,7 @@
 
 ## 2. Contrato de un adaptador
 
-Todo adaptador cumple el mismo flujo, sea cual sea la fuente (CSV, Excel, API, correos):
+Todo adaptador cumple el mismo flujo, sea cual sea la fuente (CSV, Excel, API o correos):
 
 ```
 fuente ─► lectura ─► staging (crudo) ─► normalización ─► mapeo a catálogos (alias)
@@ -29,8 +46,8 @@ fuente ─► lectura ─► staging (crudo) ─► normalización ─► mapeo 
 
 Piezas genéricas del núcleo que usan los adaptadores:
 
-- `import_batches`: lote de importación (sistema, fecha, quién, estado, resumen).
-- `import_records`: fila cruda (`raw jsonb`) con su resultado (insertada, actualizada, omitida, error).
+- `import_batches`: lote de importación (sistema, fecha, responsable, estado y resumen).
+- `import_records`: fila cruda (`raw jsonb`) con su resultado (insertada, actualizada, omitida o error).
 - `catalog_aliases`: texto original → registro del catálogo, por tipo de catálogo.
 - `import_status_map`: estatus de la fuente → estado de Axia, por sistema.
 - `ticket_external_refs`: vínculo `(system, external_id)` con el tiquet de Axia.
@@ -48,13 +65,13 @@ Reglas del flujo:
 
 ## 3. Origen actual (referencia)
 
-Hoy los tiquets se registran en una plataforma externa llamada **Atenda**. Una hoja de Google
-la **espeja** y se usa como fuente de datos de trabajo. La cadena actual es: el usuario crea el
-tiquet con catálogos → llega a la plataforma → un encargado lo asigna a un supervisor → el
-supervisor lo asigna (autoriza) a un técnico → el técnico lo realiza o no.
+Hoy los tiquets se registran en una plataforma externa llamada **Atenda**. Una hoja de Google la
+**espeja** y se usa como fuente de datos de trabajo. La cadena actual es: el usuario crea el tiquet
+con catálogos → llega a la plataforma → un encargado lo asigna a un supervisor → el supervisor lo
+asigna (autoriza) a un técnico → el técnico lo realiza o no.
 
-La plataforma externa tiene limitaciones de diseño, y por eso Axia no se ancla a ella. Se
-seguirá usando al menos por ahora; si Axia llega a ser la única fuente es una decisión pendiente.
+La plataforma externa tiene limitaciones de diseño, y por eso Axia no se ancla a ella. Se seguirá
+usando al menos por ahora; que Axia llegue a ser la única fuente es una decisión pendiente.
 
 ### Columnas de la hoja y su destino en Axia
 
@@ -76,7 +93,7 @@ seguirá usando al menos por ahora; si Axia llega a ser la única fuente es una 
 | TÉCNICO DE MTTO | catálogo `technicians` + asignación | |
 | PLATAFORMA | catálogo `channels` | Canal de origen |
 | ID ATENDA | `ticket_external_refs` (`system = 'atenda'`) | Puede faltar |
-| CONTACTO, EXTENCIÓN | contacto del solicitante (nombre y extensión) | Las cabeceras tienen erratas: normalízalas |
+| CONTACTO, EXTENCIÓN | contacto del solicitante (nombre y extensión) | Las cabeceras tienen erratas: se normalizan |
 | AUTORIZACIÓN | asignación de etapa `supervisor` | El supervisor que autoriza |
 | ESTATUS | `import_status_map` → estado de Axia | El texto original queda en `import_records.raw` |
 | COMENTARIOS | evento `note` | No se interpreta |
@@ -100,15 +117,15 @@ seguirá usando al menos por ahora; si Axia llega a ser la única fuente es una 
 
 ## 5. Numeración y continuidad
 
-Decisión provisional: al importar, el `ticket_number` conserva el ID original de la hoja para que
-la gente siga reconociendo sus tiquets, y la secuencia de Axia continúa **después del mayor
-número importado**. El ID original queda además como referencia externa. Se registra en un ADR.
+Decisión provisional: al importar, el `ticket_number` conserva el ID original de la hoja para que la
+gente siga reconociendo sus tiquets, y la secuencia de Axia continúa **después del mayor número
+importado**. El ID original queda además como referencia externa. Se registra en un ADR.
 
 ## 6. Tiquets importados y seguimiento detallado
 
-Los tiquets importados tienen solo lo que la fuente tenía: sin bloqueos ni evidencias previas. No
-se rellenan datos históricos que nunca se capturaron. Cuando alguien da seguimiento detallado a
-un tiquet importado (abre un bloqueo, sube evidencias), desde ese momento tiene línea de tiempo
+Los tiquets importados tienen solo lo que la fuente tenía: sin bloqueos ni evidencias previas. No se
+rellenan datos históricos que nunca se capturaron. Cuando alguien da seguimiento detallado a un
+tiquet importado (abre un bloqueo, sube evidencias), desde ese momento tiene línea de tiempo
 completa. Las métricas avanzadas solo consideran tiquets que cuentan con esos datos.
 
 ## 7. Funciones opcionales de convivencia (mientras ambos sistemas existan)
@@ -119,8 +136,8 @@ Estas funciones son opcionales, genéricas y no deben nombrar sistemas en el nú
   origen; para el seguimiento, Axia.
 - **Tareas de sincronización saliente** (`integration_tasks`): cuando algo cambia en Axia y el
   sistema externo debe reflejarlo manualmente, se crea una tarea con responsable y fecha, en
-  lugar de un comentario libre. Es una convención genérica del núcleo; el texto "qué hay que
-  actualizar y dónde" lo aporta el adaptador.
+  lugar de un comentario libre. Es una convención genérica del núcleo; el texto de qué hay que
+  actualizar y dónde lo aporta el adaptador.
 - **Estado reportado por el sistema externo** (`external_status` en `ticket_external_refs`), para
   detectar diferencias con el estado de Axia sin acoplar el modelo.
 
@@ -128,17 +145,17 @@ Esto resuelve, sin anclar Axia, situaciones como "pendiente actualizar la plataf
 
 ## 8. Preguntas abiertas y supuestos
 
-Supuestos provisionales (reversibles; registra un ADR):
+Supuestos provisionales (reversibles; se registra un ADR):
 
 1. "Asignación de trabajo" de la hoja = asignación al técnico; "intervalo de atención" =
    reporte → asignación; "intervalo de trabajo" = asignación → finalización.
 2. La autorización es la asignación del supervisor al técnico.
 
-Preguntas para la persona (regístralas en `docs/ESTADO.md` cuando la tarea dependa de ellas):
+Preguntas para la persona (se registran en `docs/ESTADO.md` cuando la tarea dependa de ellas):
 
 1. **Valores distintos de la columna ESTATUS** de la hoja (solo se conoce `EN PROCESO`).
 2. ¿La plataforma de origen permite exportar (CSV/Excel), tiene API o envía correos al crear o
-   cambiar un tiquet? Define qué adaptador construir. **Empieza por importación de CSV/Excel.**
+   cambiar un tiquet? Define qué adaptador construir. Se comienza por la importación de CSV/Excel.
 3. ¿"Asignación de trabajo" significa asignación al técnico o inicio del trabajo?
 4. ¿Hay más de una pestaña o año en la hoja? ¿Volumen aproximado de tiquets?
 5. ¿Se seguirán registrando tiquets en la plataforma de origen después de que Axia entre en uso?
@@ -146,6 +163,5 @@ Preguntas para la persona (regístralas en `docs/ESTADO.md` cuando la tarea depe
 ## 9. Criterio de aceptación de la migración
 
 Las **métricas base** de Axia (conteos y los tres intervalos) deben coincidir con las cifras
-actuales de la hoja para el mismo conjunto de datos importado. Se verifica con pruebas que
-comparan resultados de las vistas con valores esperados calculados a partir de datos ficticios
-equivalentes.
+actuales de la hoja para el mismo conjunto de datos importado. Se verifica con pruebas que comparan
+resultados de las vistas con valores esperados calculados a partir de datos ficticios equivalentes.
