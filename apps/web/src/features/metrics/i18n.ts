@@ -54,6 +54,21 @@ export const metricsMessages = {
     reassignment: 'Reasignación',
     recapture: 'Recaptura',
   },
+  duplicates: {
+    title: 'Duplicados',
+    timeToMark: 'Tiempo medio hasta marcarse',
+    alerts: 'Alertas de posible duplicado',
+    dimension: 'Dimensión',
+    tickets: 'Tiquets',
+    duplicates: 'Duplicados',
+    rate: 'Tasa',
+    decisions: {
+      pending: 'Pendientes',
+      ignored: 'Ignoradas',
+      linked: 'Enlazadas',
+      dismissed: 'Descartadas',
+    },
+  },
   aging: {
     title: 'Antigüedad de pendientes',
     ticket: 'Folio',

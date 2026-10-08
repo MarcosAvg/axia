@@ -273,6 +273,13 @@ export type Database = {
             foreignKeyName: 'evidence_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'evidence_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -541,6 +548,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1170,6 +1184,13 @@ export type Database = {
             foreignKeyName: 'ticket_assignments_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_assignments_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -1248,6 +1269,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_captures_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1383,6 +1411,13 @@ export type Database = {
             foreignKeyName: 'ticket_claims_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_claims_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -1440,6 +1475,13 @@ export type Database = {
             foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
             columns: ['candidate_ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_candidate_ticket_id_fkey'
+            columns: ['candidate_ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -1462,6 +1504,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_duplicate_candidates_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1577,6 +1626,13 @@ export type Database = {
             foreignKeyName: 'ticket_events_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -1632,6 +1688,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_external_refs_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1695,6 +1758,13 @@ export type Database = {
             foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
             columns: ['linked_ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_linked_ticket_id_fkey'
+            columns: ['linked_ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -1717,6 +1787,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_links_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1777,6 +1854,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_offers_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -1866,6 +1950,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_participants_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -2031,6 +2122,13 @@ export type Database = {
             foreignKeyName: 'ticket_pauses_ticket_id_fkey'
             columns: ['ticket_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -2082,6 +2180,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_validations_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -2239,6 +2344,13 @@ export type Database = {
             foreignKeyName: 'tickets_duplicate_of_id_fkey'
             columns: ['duplicate_of_id']
             isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_duplicate_of_id_fkey'
+            columns: ['duplicate_of_id']
+            isOneToOne: false
             referencedRelation: 'v_metrics_routing'
             referencedColumns: ['id']
           },
@@ -2373,6 +2485,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'time_spans_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -2628,6 +2747,88 @@ export type Database = {
           },
         ]
       }
+      v_metrics_duplicate_alerts: {
+        Row: {
+          candidates: number | null
+          decision: string | null
+          tickets: number | null
+        }
+        ComputedFields: never
+        Relationships: []
+      }
+      v_metrics_duplicate_tickets: {
+        Row: {
+          building_id: string | null
+          category_id: string | null
+          dependency_id: string | null
+          id: string | null
+          marked_at: string | null
+          reported_at: string | null
+          requester_id: string | null
+          team_id: string | null
+          time_to_mark: string | null
+        }
+        ComputedFields: never
+        Insert: {
+          building_id?: string | null
+          category_id?: string | null
+          dependency_id?: string | null
+          id?: string | null
+          marked_at?: never
+          reported_at?: string | null
+          requester_id?: string | null
+          team_id?: string | null
+          time_to_mark?: never
+        }
+        Update: {
+          building_id?: string | null
+          category_id?: string | null
+          dependency_id?: string | null
+          id?: string | null
+          marked_at?: never
+          reported_at?: string | null
+          requester_id?: string | null
+          team_id?: string | null
+          time_to_mark?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tickets_building_id_fkey'
+            columns: ['building_id']
+            isOneToOne: false
+            referencedRelation: 'buildings'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_dependency_id_fkey'
+            columns: ['dependency_id']
+            isOneToOne: false
+            referencedRelation: 'dependencies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_requester_id_fkey'
+            columns: ['requester_id']
+            isOneToOne: false
+            referencedRelation: 'requesters'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tickets_team_id_fkey'
+            columns: ['team_id']
+            isOneToOne: false
+            referencedRelation: 'teams'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       v_metrics_duplicates_by_dimension: {
         Row: {
           dimension: string | null
@@ -2741,6 +2942,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {
@@ -3010,6 +3218,13 @@ export type Database = {
             columns: ['ticket_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_aging'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_events_ticket_id_fkey'
+            columns: ['ticket_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_duplicate_tickets'
             referencedColumns: ['id']
           },
           {

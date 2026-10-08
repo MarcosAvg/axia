@@ -238,6 +238,31 @@ export interface PauseReasonRow {
   pauseLaborMinutes: number
 }
 
+export interface DuplicateTicket {
+  timeToMarkMinutes: number
+}
+
+export interface DuplicateAlert {
+  decision: string
+  candidates: number
+  tickets: number
+}
+
+export interface DuplicateDimensionRow {
+  dimension: string
+  dimensionId: string
+  dimensionName: string | null
+  tickets: number
+  duplicates: number
+  duplicateRate: number
+}
+
+/** Promedio de minutos de una lista de números. */
+export function averageOf(values: number[]): number {
+  if (values.length === 0) return 0
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
 const OPEN_STATUSES = new Set([
   'registered',
   'with_supervisor',

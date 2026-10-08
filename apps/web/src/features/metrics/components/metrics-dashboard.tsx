@@ -5,6 +5,7 @@ import {
   useDependencies,
   useTeams,
 } from '@/features/catalogs'
+import type { Option } from '@/features/catalogs'
 import { statusLabels } from '@/features/tickets'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import {
@@ -17,16 +18,24 @@ import {
 } from '../domain/metrics'
 import type {
   Dimension,
+  DuplicateAlert,
+  DuplicateDimensionRow,
+  DuplicateTicket,
   MetricsFilters as Filters,
   MetricsTicket,
   PauseReasonRow,
 } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
-import { useMetricsTickets, usePausesByReason } from '../hooks/use-metrics'
+import {
+  useMetricsTickets,
+  usePausesByReason,
+  useDuplicates,
+} from '../hooks/use-metrics'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
 import { DimensionChart } from './dimension-chart'
 import { DimensionTable } from './dimension-table'
+import { DuplicatesSection } from './duplicates-section'
 import { MetricsFilters } from './metrics-filters'
 import type { FilterCatalogs } from './metrics-filters'
 import { MetricsKpis } from './metrics-kpis'
@@ -35,6 +44,32 @@ import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
   (statusLabels as Record<string, string>)[status] ?? status
+
+function buildCatalogs(
+  buildings: Option[] | undefined,
+  teams: Option[] | undefined,
+  categories: Option[] | undefined,
+  dependencies: Option[] | undefined,
+): FilterCatalogs {
+  return {
+    buildings: buildings ?? [],
+    teams: teams ?? [],
+    categories: categories ?? [],
+    dependencies: dependencies ?? [],
+  }
+}
+
+function buildDuplicates(
+  tickets: DuplicateTicket[] | undefined,
+  alerts: DuplicateAlert[] | undefined,
+  rows: DuplicateDimensionRow[] | undefined,
+) {
+  return {
+    tickets: tickets ?? [],
+    alerts: alerts ?? [],
+    rows: rows ?? [],
+  }
+}
 
 function MetricsStatus({
   isLoading,
@@ -76,12 +111,18 @@ function MetricsContent({
   dimension,
   nameOf,
   pauses,
+  duplicates,
   onDimensionChange,
 }: {
   filtered: MetricsTicket[]
   dimension: Dimension
   nameOf: (id: string) => string
   pauses: PauseReasonRow[]
+  duplicates: {
+    tickets: DuplicateTicket[]
+    alerts: DuplicateAlert[]
+    rows: DuplicateDimensionRow[]
+  }
   onDimensionChange: (dimension: Dimension) => void
 }) {
   return (
@@ -115,6 +156,9 @@ function MetricsContent({
           statusLabel={statusLabel}
         />
       </ChartCard>
+      <ChartCard title={metricsMessages.duplicates.title}>
+        <DuplicatesSection {...duplicates} />
+      </ChartCard>
     </>
   )
 }
@@ -125,17 +169,23 @@ export function MetricsDashboard() {
   const [dimension, setDimension] = useState<Dimension>('team')
   const tickets = useMetricsTickets()
   const pauses = usePausesByReason()
+  const duplicates = useDuplicates()
   const buildings = useBuildings()
   const teams = useTeams()
   const categories = useCategories()
   const dependencies = useDependencies()
 
-  const catalogs: FilterCatalogs = {
-    buildings: buildings.data ?? [],
-    teams: teams.data ?? [],
-    categories: categories.data ?? [],
-    dependencies: dependencies.data ?? [],
-  }
+  const catalogs = buildCatalogs(
+    buildings.data,
+    teams.data,
+    categories.data,
+    dependencies.data,
+  )
+  const duplicatesData = buildDuplicates(
+    duplicates.tickets.data,
+    duplicates.alerts.data,
+    duplicates.byDimension.data,
+  )
   const filtered = filterTickets(tickets.data ?? [], filters)
 
   return (
@@ -162,6 +212,7 @@ export function MetricsDashboard() {
           dimension={dimension}
           nameOf={nameResolver(dimension, catalogs)}
           pauses={pauses.data ?? []}
+          duplicates={duplicatesData}
           onDimensionChange={setDimension}
         />
       ) : null}

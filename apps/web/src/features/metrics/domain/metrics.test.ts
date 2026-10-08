@@ -1,5 +1,6 @@
 import {
   EMPTY_FILTERS,
+  averageOf,
   byDimension,
   filterTickets,
   formatMinutes,
@@ -158,5 +159,12 @@ describe('toCsv', () => {
       ],
     )
     expect(csv).toBe('a,b\n"x,y","z""w"\n1,2')
+  })
+})
+
+describe('averageOf', () => {
+  it('promedia y tolera listas vacías', () => {
+    expect(averageOf([10, 20, 30])).toBe(20)
+    expect(averageOf([])).toBe(0)
   })
 })

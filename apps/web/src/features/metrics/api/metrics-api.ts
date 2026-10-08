@@ -2,7 +2,13 @@
 
 import { supabase } from '@/lib/supabase'
 import { intervalToMinutes } from '../domain/metrics'
-import type { MetricsTicket, PauseReasonRow } from '../domain/metrics'
+import type {
+  DuplicateAlert,
+  DuplicateDimensionRow,
+  DuplicateTicket,
+  MetricsTicket,
+  PauseReasonRow,
+} from '../domain/metrics'
 
 const TICKET_SELECT =
   'id, folio, status, reported_at, building_id, category_id, team_id, dependency_id, ' +
@@ -84,4 +90,35 @@ export async function fetchPausesByReason(): Promise<PauseReasonRow[]> {
     pauseMinutes: intervalToMinutes(row.pause_time),
     pauseLaborMinutes: intervalToMinutes(row.pause_time_labor),
   }))
+}
+
+export async function fetchDuplicateTickets(): Promise<DuplicateTicket[]> {
+  const { data, error } = await supabase
+    .from('v_metrics_duplicate_tickets')
+    .select('time_to_mark')
+  if (error) throw error
+  return ((data ?? []) as unknown as { time_to_mark: string | null }[]).map(
+    (row) => ({ timeToMarkMinutes: intervalToMinutes(row.time_to_mark) }),
+  )
+}
+
+export async function fetchDuplicateAlerts(): Promise<DuplicateAlert[]> {
+  const { data, error } = await supabase
+    .from('v_metrics_duplicate_alerts')
+    .select('decision, candidates, tickets')
+  if (error) throw error
+  return (data ?? []) as unknown as DuplicateAlert[]
+}
+
+export async function fetchDuplicatesByDimension(): Promise<
+  DuplicateDimensionRow[]
+> {
+  const { data, error } = await supabase
+    .from('v_metrics_duplicates_by_dimension')
+    .select(
+      'dimension, dimension_id, dimension_name, tickets, duplicates, duplicate_rate',
+    )
+    .order('tickets', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as unknown as DuplicateDimensionRow[]
 }
