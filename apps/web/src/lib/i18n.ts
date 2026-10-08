@@ -13,4 +13,10 @@ export const messages = {
     description: 'La página que buscas no existe o se movió.',
     action: 'Volver al inicio',
   },
+  pwa: {
+    updateAvailable: 'Hay una nueva versión disponible.',
+    updateAction: 'Actualizar',
+    offlineReady: 'La aplicación está lista para usarse sin conexión.',
+    dismissAction: 'Cerrar',
+  },
 } as const
