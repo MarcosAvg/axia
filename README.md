@@ -53,12 +53,14 @@ aislados.
 - **Importación** (Fase 6A/6B): infraestructura genérica (`/admin/integraciones`) y **adaptador
   CSV/Excel** con dry run, resolución de alias/estatus e importación idempotente; los adaptadores de
   fuentes externas viven **aislados** del núcleo.
+- **Despliegue** (Fase 7): `deploy/` con Caddy, compose de Supabase autoalojado, scripts de
+  migración/publicación y respaldo/restauración, y un runbook; **tú lo ejecutas**. Ver
+  [`deploy/README.md`](deploy/README.md).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.
 
-Lo siguiente es la **Fase 7 (producción)**; opcionalmente antes, reconstruir la línea de tiempo al
-importar (6C-2) y la convivencia (6D). Ver la hoja de ruta y lo pendiente en
-[`docs/ESTADO.md`](docs/ESTADO.md).
+Lo siguiente es la **PWA final (iconos)**; opcionalmente notificaciones push, CI/CD, Capacitor y los
+restos de la Fase 6. Ver la hoja de ruta y lo pendiente en [`docs/ESTADO.md`](docs/ESTADO.md).
 
 ## Requisitos
 

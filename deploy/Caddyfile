@@ -1,0 +1,17 @@
+# Axia — Caddy (TLS automático). Reemplaza TU_DOMINIO_API y TU_DOMINIO_WEB.
+
+TU_DOMINIO_API {
+	reverse_proxy localhost:8000
+}
+
+TU_DOMINIO_WEB {
+	root * /srv/axia/web
+	encode gzip
+
+	# El service worker no se cachea para que los móviles no queden con versiones viejas.
+	@sw path /sw.js /registerSW.js /manifest.webmanifest
+	header @sw Cache-Control "no-cache"
+
+	try_files {path} /index.html
+	file_server
+}

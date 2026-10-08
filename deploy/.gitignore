@@ -1,0 +1,7 @@
+# Secretos y artefactos del despliegue: nunca al repositorio.
+*.env
+!.env.production.example
+*.env.production
+backups/
+supabase/docker/
+supabase/volumes/

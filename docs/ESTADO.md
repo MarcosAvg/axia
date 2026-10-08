@@ -4,13 +4,13 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 6C-1 cerrada (verificación de métricas) — siguiente: Fase 7 (producción)
+**Fase actual:** 7A/7B cerradas (despliegue y respaldos) — siguiente: 7C (PWA) o 7D (opcional)
 
 ## En curso
 
-_(vacío)_ — La **Fase 6C-1** quedó cerrada: las fórmulas de métricas se verifican con datos ficticios
-equivalentes (y el tiempo total de un importado). Quedan **6C-2** (reconstruir la línea de tiempo al
-importar, opcional), **6D** (convivencia, opcional) y **Fase 7** (producción). Sin push a `origin`.
+_(vacío)_ — Se preparó el **despliegue autoalojado** y los **respaldos** (scripts + runbook, ADR 0032);
+la persona los ejecuta. Quedan **7C** (iconos/PWA), **7D** (push, CI/CD, Capacitor) y los opcionales
+6C-2/6D. Sin push a `origin`.
 
 ## Hecho
 
@@ -212,12 +212,20 @@ importar, opcional), **6D** (convivencia, opcional) y **Fase 7** (producción). 
     cada tramo, total y neto; pausa no contable, exclusión de duplicados, conteos y tiempo total de
     un importado. ADR 0031.
   - Compuerta completa en verde: 391 pgTAP, 125 Vitest, 12 Playwright.
+- **Fase 7A/7B — despliegue autoalojado y respaldos (2026-10-08)**, rama `feat/fase-7-despliegue`
+  (fusionada localmente a `main`; **sin push**):
+  - `deploy/` con `Caddyfile`, ejemplos de entorno, `supabase/` (compose oficial) y runbook;
+    scripts `migrate.sh`, `publish-web.sh`, `backup.sh` y `restore.sh` (con `DATABASE_URL` o
+    `DB_CONTAINER`, retención y drill). Sin secretos en el repo. ADR 0032.
+  - Verificado en local: `backup.sh` genera el dump y `restore.sh` lo restaura en una base
+    desechable (conteos comprobados). Compuerta sin cambios (391 pgTAP, 125 Vitest, 12 Playwright).
 
 ## Siguiente
 
-**Fase 7 — Producción** (despliegue autoalojado con Docker Compose + Caddy, respaldos y
-documentación). Opcionalmente antes: **6C-2** (reconstruir la línea de tiempo al importar) y **6D**
-(convivencia).
+**Fase 7C — PWA final** con el logo definitivo (iconos) y la revisión de la caché del service worker.
+Opcionales: **7D** (notificaciones push, CI/CD de despliegue, Capacitor), **6C-2** (reconstruir la
+línea de tiempo al importar) y **6D** (convivencia). Los pasos de despliegue y respaldo están en
+`deploy/README.md`.
 
 ## Hoja de ruta
 
@@ -322,9 +330,12 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [ ] **6D** (Opcional) Convivencia: `integration_tasks` y `external_status`
 
 ### Fase 7 — Producción
-- [ ] PWA completa, notificaciones push, despliegue autoalojado (Docker Compose + Caddy),
-      respaldos y restauración de prueba, documentación de despliegue
-- [ ] (Solo si hace falta) envoltura nativa con Capacitor
+- [x] **7A** Despliegue autoalojado: `deploy/` con Caddy, ejemplos de entorno, `supabase/` (compose
+      oficial), scripts de migración y publicación, y runbook — ADR 0032
+- [x] **7B** Respaldos y restauración: `backup.sh`/`restore.sh` con retención y prueba de
+      restauración documentada (verificada en local)
+- [ ] **7C** PWA final: iconos con el logo definitivo y revisión de la caché del service worker
+- [ ] **7D** (Opcional) Notificaciones push (VAPID + envío); CI/CD de despliegue; Capacitor
 
 ## Bloqueos y preguntas para la persona
 
