@@ -56,7 +56,7 @@ const has = (context: ActionContext, permission: string) =>
   can(context.identity, permission)
 
 // Acciones del técnico que también se pueden ejecutar por proxy (act_on_behalf).
-export const PROXY_ACTIONS: ActionKey[] = [
+const PROXY_ACTIONS: ActionKey[] = [
   'start',
   'attend',
   'pause',

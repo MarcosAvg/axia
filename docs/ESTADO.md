@@ -4,17 +4,12 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-08
-**Fase actual:** 4 — Evidencias y modo sin conexión (Fase 3B cerrada)
+**Fase actual:** 4B cerrada — siguiente: Fase 5 (métricas y reportes)
 
 ## En curso
 
-**Fase 4B — Tramo 0-1: arreglo del E2E y tiempos manuales** (rama `feat/fase-4b-tiempos`).
-1. Arreglo del E2E: deshabilitar acciones de un clic mientras están pendientes y afirmar un solo
-   `ticket_action` en la cola.
-2. Backend: `subject_technician_id` y anulación en `time_spans`, `event_type` de tiempo manual y
-   `time_span_record`/`time_span_void`; excluir anulados de los cálculos; pgTAP.
-3. Frontend: formulario de tiempos manuales y anulación en el detalle; tramos manuales diferenciados.
-4. Luego proxy (`feat/fase-4b-proxy`) y cierre. Sin push.
+_(vacío)_ — La Fase 4B quedó cerrada. La siguiente tarea es la Fase 5 (indicadores y tableros),
+aún sin empezar. Sin push a `origin` por indicación de la persona.
 
 ## Hecho
 
@@ -112,12 +107,23 @@
   seguidores** (solo enlace y aviso) y **concepto de seguidor eliminado**. Reflejado en
   `docs/especificacion-negocio.md`, `docs/dominio.md` y `docs/modelo-datos.md`; sin migraciones.
   Rama `docs/fase-1-ajustes`.
+- **Fase 4B — tiempos manuales y proxy del técnico (cerrada el 2026-10-08)**, en ramas
+  `feat/fase-4b-tiempos` y `feat/fase-4b-proxy` (fusionadas localmente a `main`; **sin push**):
+  - Arreglo del E2E: las acciones de un clic se deshabilitan mientras su mutación está pendiente y
+    la prueba offline afirma un solo `ticket_action` en la cola.
+  - Tiempos manuales con atribución al técnico: `time_spans.subject_technician_id`, anulación
+    (`voided_at`/`voided_by`) y re-registro, evento `manual_time_recorded`, RPC `time_span_void` y
+    exclusión de anulados de los indicadores; sección de tiempos manuales en el detalle.
+  - Proxy del técnico: sujeto opcional (`p_subject_technician_id`) en `ticket_start/attend/pause/
+    advance_pause/resume/recapture`, validación `act_on_behalf` (admin cualquiera; supervisor sus
+    técnicos) y participación; selector "a nombre de" para supervisor/admin.
+  - Decisiones en el ADR 0020. Compuerta completa en verde: 277 pgTAP, 96 Vitest, 11 Playwright.
 
 ## Siguiente
 
-**Fase 4A — Evidencia y modo sin conexión**: captura y compresión de fotos con `canvas`, cola
-`outbox` con Dexie, subida reanudable con TUS, sincronización y prueba Playwright del técnico sin
-conexión. Después, **Fase 4B** (tiempos manuales y proxy). Las Fases 3A y 3B quedaron cerradas.
+**Fase 5 — Métricas y reportes**: indicadores de la especificación §11, tableros con Recharts
+(componente `chart` de shadcn/ui) y exportación. Antes conviene resolver la zona horaria y el
+horario laboral (pregunta 3 de bloqueos), porque afectan el tiempo laboral de los tramos.
 
 ## Hoja de ruta
 
@@ -184,11 +190,11 @@ pruebas pgTAP en verde y `pnpm check` completo en verde. Decisiones en los ADR 0
 - [ ] (Fuera de 3B) Alta/invitación de cuentas (Edge Function), calendarios laborales, reglas de
       notificación/escalamiento y parámetros finos de duplicados
 
-### Fase 4 — Evidencias y modo sin conexión
+### Fase 4 — Evidencias y modo sin conexión — **cerrada el 2026-10-08**
 - [x] Captura y compresión de fotos, subida reanudable, cola `outbox` y sincronización (evidencia) —
       ADR 0019
 - [x] Acciones del tiquet por la cola cuando no hay conexión (con `client_request_id` para idempotencia)
-- [ ] (Fase 4B) Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy)
+- [x] Registro de tiempos manuales (interfaz) y actos en nombre de otro (proxy) — ADR 0020
 - [x] Prueba Playwright del flujo de evidencia del técnico sin conexión
 
 ### Fase 5 — Métricas y reportes
