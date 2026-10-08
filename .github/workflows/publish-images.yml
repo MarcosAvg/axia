@@ -1,0 +1,43 @@
+name: Publicar imágenes
+
+# Construye y publica las imágenes de Axia en GHCR (manual o al etiquetar `v*`).
+# El push real usa el token del repositorio (`packages: write`); tú lo disparas.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: web
+            dockerfile: deploy/web.Dockerfile
+          - name: migrate
+            dockerfile: deploy/migrate.Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+      - id: img
+        # GHCR exige el nombre de la imagen en minúsculas.
+        run: echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ steps.img.outputs.repo }}/axia-${{ matrix.name }}:latest
+            ghcr.io/${{ steps.img.outputs.repo }}/axia-${{ matrix.name }}:${{ github.sha }}

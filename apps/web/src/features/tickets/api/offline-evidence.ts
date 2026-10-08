@@ -8,6 +8,7 @@ import {
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { uploadResumable } from '@/lib/offline/tus'
+import { getRuntimeConfig } from '@/lib/runtime-config'
 import { supabase } from '@/lib/supabase'
 import { EVIDENCE_TYPES } from '../domain/types'
 import type { EvidenceType } from '../domain/types'
@@ -16,7 +17,7 @@ const BUCKET = 'evidence'
 const EVIDENCE_UPLOAD = 'evidence_upload'
 
 function endpoint(): string {
-  return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/upload/resumable`
+  return `${getRuntimeConfig().supabaseUrl}/storage/v1/upload/resumable`
 }
 
 /** Comprime el archivo, lo guarda en el dispositivo y encola su subida. */

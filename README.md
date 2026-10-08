@@ -53,10 +53,11 @@ aislados.
 - **Importación** (Fase 6A/6B): infraestructura genérica (`/admin/integraciones`) y **adaptador
   CSV/Excel** con dry run, resolución de alias/estatus e importación idempotente; los adaptadores de
   fuentes externas viven **aislados** del núcleo.
-- **Despliegue** (Fase 7): `deploy/` con scripts de migración/publicación y respaldo/restauración,
-  un runbook y un **contrato de reverse proxy** (con ejemplos opcionales; Axia **no impone** ninguno)
-  para el compose de Supabase autoalojado; **tú lo ejecutas**. Ver
-  [`deploy/README.md`](deploy/README.md). Guía de correo/push/escalamiento en
+- **Despliegue** (Fase 7): `deploy/` con un **`docker-compose.yml`** de la app (frontend + 
+  migraciones, con **configuración en runtime** e imágenes publicables), scripts de
+  respaldo/restauración, un runbook y un **contrato de reverse proxy** (con ejemplos opcionales;
+  Axia **no impone** ninguno). El backend Supabase va aparte (Cloud o autoalojado); **tú lo
+  ejecutas**. Ver [`deploy/README.md`](deploy/README.md). Guía de correo/push/escalamiento en
   [`docs/notificaciones-push.md`](docs/notificaciones-push.md).
 - Compuerta de calidad **`pnpm check`** (lint, tipos, independencia, fronteras, knip, pruebas,
   pgTAP y build) y CI en GitHub Actions.

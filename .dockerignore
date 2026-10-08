@@ -1,0 +1,17 @@
+# Contexto de build de las imágenes de producción.
+.git
+.github
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+playwright-report
+test-results
+.turbo
+.vite
+**/.env
+**/.env.*
+deploy/backups
+deploy/supabase/docker
+deploy/supabase/volumes

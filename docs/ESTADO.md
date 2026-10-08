@@ -10,10 +10,11 @@
 
 _(vacío)_ — **Todas las fases (0–7) están cerradas.** El 2026-10-08 se publicó `main` a `origin`
 por petición expresa de la persona (**excepción única**); a partir de aquí la regla vuelve a ser
-“solo commits locales, sin publicar”. El despliegue se afinó: **Axia no impone reverse proxy**
-(contrato + ejemplos en `deploy/`). Lo que queda es operativo: aplicar los despliegues reales
-(`deploy/README.md`), activar push/correo/escalamiento (`docs/notificaciones-push.md`) y los
-pendientes de negocio que surjan.
+“solo commits locales, sin publicar”. El despliegue quedó afinado: **Axia se levanta con su propio
+`docker compose`** (frontend + migraciones, config en runtime) apuntando a un **Supabase aparte**, y
+el **reverse proxy no lo impone Axia** (contrato + ejemplos). Lo que queda es operativo: publicar las
+imágenes en GHCR, desplegar (`deploy/README.md`), activar push/correo/escalamiento
+(`docs/notificaciones-push.md`) y los pendientes de negocio que surjan.
 
 ## Hecho
 
@@ -248,6 +249,15 @@ pendientes de negocio que surjan.
     documenta el **contrato** y ofrece **ejemplos** (nginx y Traefik) en `deploy/examples/`.
   - Nuevo comando único `deploy/scripts/up.sh` (con `--dry-run`) que trae el compose oficial de
     Supabase y migra si hay `DATABASE_URL`; `down.sh` lo apaga sin borrar datos. ADR 0036.
+- **Axia con Docker Compose (2026-10-08)**, rama `feat/deploy-compose` (fusionada localmente a
+  `main`; **sin push**):
+  - `deploy/docker-compose.yml` (`web` + `migrate`) que apunta a un Supabase **aparte** (Cloud o
+    autoalojado). El frontend lee su configuración en **runtime** (`config.js`), así que una misma
+    imagen sirve para cualquier instalación; `web.Dockerfile`/`migrate.Dockerfile` y publicación en
+    GHCR (`publish-images.yml`). ADR 0037.
+  - Verificado en local: la imagen `web` genera `config.js` desde el entorno, sirve el SPA y responde
+    `no-store`/`no-cache`; la imagen `migrate` responde "Remote database is up to date" contra la base
+    local.
 
 ## Siguiente
 

@@ -650,7 +650,9 @@ El detalle está en `deploy/README.md` y hay **ejemplos opcionales** en `deploy/
 
 ### 10.4 Aplicar migraciones
 
-Desde el servidor, o por túnel SSH:
+Con Docker Compose (ver `deploy/docker-compose.yml`): `docker compose run --rm migrate`.
+
+Sin contenedores:
 
 ```bash
 pnpm supabase db push --db-url "postgresql://<usuario>:<clave>@localhost:5432/postgres"
@@ -660,7 +662,11 @@ pnpm supabase db push --db-url "postgresql://<usuario>:<clave>@localhost:5432/po
 
 ### 10.5 Publicar el frontend
 
-En `apps/web/.env.production` (o variables de build) apunta a tu dominio:
+Dos formas:
+
+**Con Docker Compose** (recomendado): copia `deploy/docker-compose.yml` y `deploy/.env.example`, edita el `.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL`) y ejecuta `docker compose up -d`. El contenedor genera la configuración **en runtime** (`config.js`), así que la misma imagen sirve para cualquier instalación.
+
+**Estáticos a tu proxy**: build con las variables y copia `apps/web/dist` al servidor:
 
 ```
 VITE_SUPABASE_URL=https://api.axia.tuinstitucion.mx

@@ -1,0 +1,32 @@
+# Axia — app con Docker Compose.
+#
+# Supabase va **aparte** (Cloud o autoalojado): aquí solo el frontend y las migraciones.
+# Copia `.env.example` a `.env`, edítalo y ejecuta:
+#   docker compose up -d              # levanta la web
+#   docker compose run --rm migrate   # aplica las migraciones
+#
+# La web publica en `WEB_PORT` (por defecto 8080); tu reverse proxy TLS apunta ahí.
+# Ver el contrato de despliegue en `deploy/README.md`.
+
+name: axia
+
+services:
+  web:
+    image: ${AXIA_WEB_IMAGE:-axia-web:local}
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    env_file: .env
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    restart: unless-stopped
+
+  # Migraciones: `docker compose run --rm migrate` (no se levanta con `up`).
+  migrate:
+    image: ${AXIA_MIGRATE_IMAGE:-axia-migrate:local}
+    build:
+      context: ..
+      dockerfile: deploy/migrate.Dockerfile
+    env_file: .env
+    profiles: ['migrate']
+    restart: 'no'

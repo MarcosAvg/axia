@@ -57,7 +57,17 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        // `config.js` se genera al arrancar el contenedor: no se precachea (para no
+        // quedarse con valores viejos), pero sí se cachea en runtime para el modo offline.
+        globIgnores: ['**/config.js'],
         navigateFallback: '/index.html',
+        runtimeCaching: [
+          {
+            urlPattern: /\/config\.js$/,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'axia-config' },
+          },
+        ],
       },
     }),
   ],
