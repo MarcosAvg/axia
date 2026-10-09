@@ -149,13 +149,14 @@ rangos rápidos (7 · 30 · 90 días y "Todo"), fechas, filtros por catálogo, "
 **exportación CSV/XLSX**; una fila de **KPI destacados** con **delta contra el periodo anterior**
 (tiquets · tiempo activo · SLA · satisfacción · primera solución), que muestra las **fechas
 comparadas**; y el resto en **pestañas por tema** (Resumen · Tiempos · Calidad · SLA y satisfacción ·
-Equipo) con gráficas y tablas `DataTable`. El **Resumen muestra todas las dimensiones a la vez** con
-**cantidades** (rejilla de cinco gráficas de **tiquets** —equipo · edificio · categoría · dependencia ·
-solicitante— y tabla combinada con columna "Dimensión"); el detalle de **tiempos por dimensión** vive
-en la pestaña **Tiempos**. Los indicadores agregados (SLA, satisfacción, pausas, duplicados,
-carga por técnico, rechazos/cancelaciones y ruteo) se calculan en el servidor con filtros, así que
-**respetan la barra**. La **regresión visual** con Playwright es **opt-in** (`pnpm test:visual`),
-fuera de la compuerta.
+Equipo) con gráficas y tablas `DataTable`. El **Resumen compacto** muestra todas las dimensiones a
+la vez con **cantidades** (rejilla de cinco gráficas de **tiquets** —equipo · edificio · categoría ·
+dependencia · solicitante— a altura fija y top 5) y una tabla combinada con columna "Dimensión";
+volumen y ruteo comparten fila, y la tabla y la antigüedad van en dos columnas con **desplazamiento
+interno**. El detalle de **tiempos por dimensión** vive en la pestaña **Tiempos**. Los indicadores
+agregados (SLA, satisfacción, pausas, duplicados, carga por técnico, rechazos/cancelaciones y ruteo)
+se calculan en el servidor con filtros, así que **respetan la barra**. La **regresión visual** con
+Playwright es **opt-in** (`pnpm test:visual`), fuera de la compuerta.
 
 Patrones de acceso y perfil (ADR 0047): **acceso** en dos columnas en escritorio; **perfil** por
 secciones con roles y zona horaria.

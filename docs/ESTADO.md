@@ -849,3 +849,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   Agrupación · Tiquets · Reasignación · Recaptura**; el **desglose por dimensión con tiempos** pasa a
   la pestaña **Tiempos**. Sin cambios de dominio ni de base de datos. **ADR 0051**. `pnpm check` en
   verde (155 Vitest, 12 Playwright, 426 pgTAP). Rama `feat/metricas-resumen-cantidades`.
+- **Métricas: Resumen compacto (Etapa 10)**: las gráficas dejan de usar relación 16:9 y pasan a
+  **altura fija** (volumen 2/3 + ruteo 2×2 en una fila; cinco dimensiones en `sm:2 / xl:5`, `h-36`,
+  **top 5**); el detalle por dimensión y la antigüedad van en dos columnas con **desplazamiento
+  interno**. Sin cambios de dominio ni de base de datos. `pnpm check` en verde (155 Vitest, 12
+  Playwright, 426 pgTAP). Rama `feat/metricas-resumen-compacto`.

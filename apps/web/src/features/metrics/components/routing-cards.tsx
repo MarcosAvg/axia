@@ -5,7 +5,13 @@ import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
 /** Ofertas, pendientes, tomadas y tiempo medio hasta la toma. */
-export function RoutingCards({ routing }: { routing: RoutingSummary }) {
+export function RoutingCards({
+  routing,
+  columns = 4,
+}: {
+  routing: RoutingSummary
+  columns?: 2 | 4
+}) {
   const t = metricsMessages.routing
   const cards: Kpi[] = [
     { label: t.offers, value: String(routing.offers) },
@@ -13,5 +19,5 @@ export function RoutingCards({ routing }: { routing: RoutingSummary }) {
     { label: t.taken, value: String(routing.taken) },
     { label: t.timeToTake, value: formatMinutes(routing.avgTimeToTakeMinutes) },
   ]
-  return <KpiGrid cards={cards} columns={4} />
+  return <KpiGrid cards={cards} columns={columns} />
 }

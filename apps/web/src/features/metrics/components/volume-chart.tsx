@@ -14,7 +14,11 @@ const config = {
 /** Tiquets registrados por día. */
 export function VolumeChart({ data }: { data: VolumePoint[] }) {
   return (
-    <ChartContainer id="metrics-volume" config={config}>
+    <ChartContainer
+      id="metrics-volume"
+      config={config}
+      className="aspect-auto h-56"
+    >
       <LineChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={11} />
