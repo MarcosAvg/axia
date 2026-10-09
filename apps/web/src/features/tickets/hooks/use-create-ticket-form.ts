@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { can, useAuth } from '@/features/auth'
 import { createTicketSchema } from '../schemas'
@@ -49,7 +49,16 @@ export function useCreateTicketForm() {
     }
   }, [canChooseRequester, ownRequester, form])
 
-  const submission = useCreateTicketSubmission(form)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const submission = useCreateTicketSubmission(form, photo)
 
-  return { form, catalogs, canChooseRequester, ownRequester, ...submission }
+  return {
+    form,
+    catalogs,
+    canChooseRequester,
+    ownRequester,
+    photo,
+    setPhoto,
+    ...submission,
+  }
 }

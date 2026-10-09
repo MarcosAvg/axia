@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
+import { saveAndUploadEvidence } from '../api/offline-evidence'
 import { toTicketError } from '../domain/errors'
 import type { DuplicateCandidate } from '../domain/types'
 import type { CreateTicketInput } from '../schemas'
@@ -11,9 +12,24 @@ interface PendingDuplicates {
   candidates: DuplicateCandidate[]
 }
 
+async function uploadRequestPhoto(ticketId: string, photo: File | null) {
+  if (!photo) return
+  try {
+    await saveAndUploadEvidence({
+      ticketId,
+      cycle: 1,
+      type: 'request',
+      file: photo,
+    })
+  } catch (error) {
+    console.warn('No se pudo subir la foto de la solicitud', error)
+  }
+}
+
 /** Registro del tiquet con pre-chequeo de duplicados y confirmación. */
 export function useCreateTicketSubmission(
   form: UseFormReturn<CreateTicketInput>,
+  photo: File | null,
 ) {
   const navigate = useNavigate()
   const [pending, setPending] = useState<PendingDuplicates | null>(null)
@@ -27,7 +43,8 @@ export function useCreateTicketSubmission(
     createMutation.mutate(
       { input, clientRequestId: crypto.randomUUID() },
       {
-        onSuccess: (ticketId) => {
+        onSuccess: async (ticketId) => {
+          await uploadRequestPhoto(ticketId, photo)
           void navigate({ to: '/tickets/$ticketId', params: { ticketId } })
         },
       },

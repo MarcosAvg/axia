@@ -1,6 +1,9 @@
-// Evidencia offline: comprime, guarda en Dexie y encola la subida reanudable + `evidence_add`.
+// Evidencia offline: comprime, guarda en Dexie y sube de inmediato si hay red, o encola la
+// subida reanudable + `evidence_add`. El orden de la cola (`seq`) garantiza que la evidencia
+// se registre antes que la acción de flujo que la exige.
 
 import { db } from '@/lib/offline/db'
+import { isNetworkError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
 import {
   enqueue,
@@ -16,17 +19,19 @@ import type { EvidenceType } from '../domain/types'
 const BUCKET = 'evidence'
 const EVIDENCE_UPLOAD = 'evidence_upload'
 
-function endpoint(): string {
-  return `${getRuntimeConfig().supabaseUrl}/storage/v1/upload/resumable`
-}
-
-/** Comprime el archivo, lo guarda en el dispositivo y encola su subida. */
-export async function queueEvidence(params: {
+interface EvidenceInput {
   ticketId: string
   cycle: number
   type: EvidenceType
   file: File
-}): Promise<string> {
+}
+
+function endpoint(): string {
+  return `${getRuntimeConfig().supabaseUrl}/storage/v1/upload/resumable`
+}
+
+/** Comprime el archivo y lo guarda en el dispositivo, sin subirlo todavía. */
+async function saveEvidence(params: EvidenceInput): Promise<string> {
   const id = crypto.randomUUID()
   const blob = await compressImage(params.file)
   await db.evidences.add({
@@ -41,11 +46,10 @@ export async function queueEvidence(params: {
     progress: 0,
     createdAt: Date.now(),
   })
-  await enqueue(EVIDENCE_UPLOAD, { evidenceId: id })
-  void processOutbox()
   return id
 }
 
+/** Sube una evidencia ya guardada en el dispositivo y la registra en el servidor. */
 async function uploadEvidenceItem(payload: unknown): Promise<void> {
   const { evidenceId } = payload as { evidenceId: string }
   const evidence = await db.evidences.get(evidenceId)
@@ -87,6 +91,29 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     throw error
   }
   await db.evidences.update(evidenceId, { state: 'uploaded', progress: 100 })
+}
+
+/**
+ * Guarda la evidencia y la sube de inmediato si hay red; si no hay conexión (o falla la red a
+ * medio camino), la encola. Se espera a que termine cuando hay red, para que la acción de flujo
+ * posterior encuentre la evidencia ya registrada.
+ */
+export async function saveAndUploadEvidence(
+  params: EvidenceInput,
+): Promise<string> {
+  const id = await saveEvidence(params)
+  const online = typeof navigator === 'undefined' || navigator.onLine === true
+  if (online) {
+    try {
+      await uploadEvidenceItem({ evidenceId: id })
+      return id
+    } catch (error) {
+      if (!isNetworkError(error)) throw error
+    }
+  }
+  await enqueue(EVIDENCE_UPLOAD, { evidenceId: id })
+  void processOutbox()
+  return id
 }
 
 /** Registra el manejador de subida de evidencia en la cola de salida. */

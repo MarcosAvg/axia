@@ -1,23 +1,31 @@
 import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { EvidenceType } from '../domain/types'
+import { allowedEvidenceTypes } from '../domain/evidence'
+import type { EvidenceType, TicketStatus } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { useUploadEvidence } from '../hooks/use-evidence'
 import { EvidenceFields } from './evidence-fields'
 
-/** Sube una evidencia (foto o archivo) al tiquet. */
+/** Sube evidencia suelta, solo con los tipos permitidos para el estado actual. */
 export function EvidenceUploader({
   ticketId,
   cycle,
+  status,
 }: {
   ticketId: string
   cycle: number
+  status: TicketStatus
 }) {
   const mutation = useUploadEvidence()
-  const [type, setType] = useState<EvidenceType>('request')
+  const [chosen, setChosen] = useState<EvidenceType | ''>('')
   const [file, setFile] = useState<File | null>(null)
   const [inputKey, setInputKey] = useState(0)
+  const allowed = allowedEvidenceTypes(status)
+  const type: EvidenceType =
+    chosen && allowed.includes(chosen) ? chosen : (allowed[0] ?? 'other')
+
+  if (allowed.length === 0) return null
 
   function submit() {
     if (!file) return
@@ -36,8 +44,9 @@ export function EvidenceUploader({
     <div className="flex flex-col gap-4 rounded-xl border p-4">
       <EvidenceFields
         type={type}
+        types={allowed}
         inputKey={inputKey}
-        onTypeChange={setType}
+        onTypeChange={setChosen}
         onFileChange={setFile}
       />
       {mutation.error ? (

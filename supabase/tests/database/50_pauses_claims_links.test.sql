@@ -149,6 +149,10 @@ select is(
   (select status from public.tickets order by ticket_number limit 1),
   'attended'::public.ticket_status, 'el tiquet queda atendido');
 
+-- La reclamación exige evidencia `claim` del ciclo.
+insert into public.evidence (ticket_id, cycle, type)
+  select id, cycle, 'claim' from public.tickets order by ticket_number limit 1;
+
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_open_claim(
   (select id from public.tickets order by ticket_number limit 1),
@@ -215,6 +219,8 @@ select public.ticket_create(jsonb_build_object(
   'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 update public.tickets set status = 'attended'
   where id = (select id from public.tickets order by ticket_number desc limit 1);
+insert into public.evidence (ticket_id, cycle, type)
+  select id, cycle, 'claim' from public.tickets order by ticket_number desc limit 1;
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_open_claim(

@@ -240,6 +240,8 @@ export const ticketMessages = {
     more: 'Más acciones',
   },
   actionFields: {
+    evidence: 'Evidencia',
+    evidenceRequired: 'Adjunta la evidencia para continuar.',
     technician: 'Técnico',
     reason: 'Motivo',
     note: 'Nota (opcional)',

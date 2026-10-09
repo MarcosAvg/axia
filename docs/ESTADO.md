@@ -782,3 +782,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   tiquet (qué contiene, los 11 estados, flujo, paso a paso, matriz de transiciones, qué acumula,
   tiempos, duplicados, concurrencia, permisos y reglas de oro), enlazado desde `docs/README.md`.
   Rama `docs/guia-tiquets`.
+- **Evidencia por estado y acciones guiadas (2026-10-09)**: migración
+  `20261009090000_evidence_state_rules.sql` que valida el **tipo de evidencia ↔ estado** en
+  `evidence_add` y exige `claim` en `ticket_open_claim`; prueba pgTAP nueva (100) y ajuste de la
+  50. En el frontend, **iniciar/atender/reclamar piden su evidencia** en un diálogo, el subidor
+  libre se acota a los tipos válidos, el **alta** permite la **foto de solicitud**, y el **detalle**
+  pone la data como columna principal con la **actividad en el sidebar**. **ADR 0044**.
+  `pnpm check` en verde (147 Vitest, 12 Playwright, 409 pgTAP). Rama `feat/evidencia-y-detalle`.

@@ -84,18 +84,16 @@ test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   await page.getByText(description).click()
   await expect(page.getByLabel('Tipo de evidencia')).toBeVisible()
 
-  // Sin conexión: la evidencia y la acción de inicio quedan en cola.
+  // Sin conexión: iniciar pide la evidencia "antes" y ambas quedan en cola.
   await page.context().setOffline(true)
-  await page.getByLabel('Tipo de evidencia').selectOption({ label: 'Antes' })
-  await page.getByLabel('Archivo').setInputFiles({
+  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await page.getByLabel('Evidencia: Antes').setInputFiles({
     name: 'antes.jpg',
     mimeType: 'image/jpeg',
     buffer: Buffer.from('foto-sin-conexion'),
   })
-  await page.getByRole('button', { name: 'Subir evidencia' }).click()
+  await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Pendiente de subir')).toBeVisible()
-
-  await page.getByRole('button', { name: 'Iniciar' }).click()
   await expect(
     page.getByText('Asignado', { exact: true }).first(),
   ).toBeVisible()

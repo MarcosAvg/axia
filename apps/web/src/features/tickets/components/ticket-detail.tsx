@@ -47,17 +47,19 @@ function Section({
 function EvidenceSection({
   ticketId,
   cycle,
+  status,
 }: {
   ticketId: string
   cycle: number
+  status: TicketStatus
 }) {
   const evidence = useTicketEvidence(ticketId)
   return (
     <Section title={ticketMessages.detail.evidence}>
       <div className="flex flex-col gap-4">
-        <EvidenceUploader ticketId={ticketId} cycle={cycle} />
         <PendingEvidence ticketId={ticketId} />
         <TicketEvidenceList items={evidence.data ?? []} />
+        <EvidenceUploader ticketId={ticketId} cycle={cycle} status={status} />
       </div>
     </Section>
   )
@@ -90,20 +92,23 @@ function TicketHeader({ ticket }: { ticket: TicketDetail }) {
   )
 }
 
+/** Columna principal: la data del tiquet. */
 function TicketMain({
   ticketId,
   ticket,
-  timeline,
   participants,
   identity,
   actions,
+  canRecordTime,
+  canRate,
 }: {
   ticketId: string
   ticket: TicketDetail
-  timeline: TicketTimelineItem[]
   participants: TicketParticipant[]
   identity: Identity | null
   actions: ActionKey[]
+  canRecordTime: boolean
+  canRate: boolean
 }) {
   const { detail } = ticketMessages
   return (
@@ -118,33 +123,14 @@ function TicketMain({
           />
         </Section>
       ) : null}
-      <Section title={detail.timeline}>
-        <TicketTimeline items={timeline} />
-      </Section>
-      <EvidenceSection ticketId={ticketId} cycle={ticket.cycle} />
-    </div>
-  )
-}
-
-function TicketRail({
-  ticketId,
-  ticket,
-  participants,
-  canRecordTime,
-  canRate,
-}: {
-  ticketId: string
-  ticket: TicketDetail
-  participants: TicketParticipant[]
-  canRecordTime: boolean
-  canRate: boolean
-}) {
-  const { detail } = ticketMessages
-  return (
-    <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:self-start">
       <Section title={detail.capture}>
         <TicketSummary ticket={ticket} />
       </Section>
+      <EvidenceSection
+        ticketId={ticketId}
+        cycle={ticket.cycle}
+        status={ticket.status}
+      />
       <Section title={detail.participants}>
         <ParticipantList participants={participants} />
       </Section>
@@ -162,7 +148,18 @@ function TicketRail({
   )
 }
 
-/** Detalle del tiquet: encabezado, acciones, actividad, captura y evidencias. */
+/** Sidebar: la actividad del tiquet. */
+function TicketActivity({ timeline }: { timeline: TicketTimelineItem[] }) {
+  return (
+    <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:self-start">
+      <Section title={ticketMessages.detail.timeline}>
+        <TicketTimeline items={timeline} />
+      </Section>
+    </div>
+  )
+}
+
+/** Detalle del tiquet: data principal y actividad como sidebar. */
 export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const { identity } = useAuth()
   const ticket = useTicket(ticketId)
@@ -190,18 +187,13 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
         <TicketMain
           ticketId={ticketId}
           ticket={ticket.data}
-          timeline={timeline.data ?? []}
           participants={participants.data ?? []}
           identity={identity}
           actions={actions}
-        />
-        <TicketRail
-          ticketId={ticketId}
-          ticket={ticket.data}
-          participants={participants.data ?? []}
           canRecordTime={can(identity, 'time.record_manual')}
           canRate={canRateTicket(identity, ticket.data.status)}
         />
+        <TicketActivity timeline={timeline.data ?? []} />
       </div>
     </div>
   )
