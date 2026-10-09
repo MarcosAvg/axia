@@ -58,6 +58,11 @@ function TicketsPage() {
           buildings={buildings.data ?? []}
           categories={categories.data ?? []}
         />
+        {query.data ? (
+          <p className="text-sm text-muted-foreground">
+            {ticketMessages.list.count(query.data.total)}
+          </p>
+        ) : null}
         <TicketListPanel
           isLoading={query.isLoading}
           isError={query.isError}

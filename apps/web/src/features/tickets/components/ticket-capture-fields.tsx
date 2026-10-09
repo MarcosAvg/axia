@@ -1,4 +1,4 @@
-import { TextAreaField } from '@/components/shared/form-fields'
+import { FormSection } from '@/components/shared/form-section'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import type { CreateTicketInput } from '../schemas'
 import type { CreateTicketCatalogs } from '../hooks/use-create-ticket-catalogs'
@@ -15,7 +15,7 @@ interface TicketCaptureFieldsProps {
   ownRequesterName: string | null
 }
 
-/** Campos de la captura del tiquet. */
+/** Secciones de la captura del tiquet: ubicación, clasificación, solicitante y descripción. */
 export function TicketCaptureFields({
   register,
   errors,
@@ -23,39 +23,49 @@ export function TicketCaptureFields({
   canChooseRequester,
   ownRequesterName,
 }: TicketCaptureFieldsProps) {
+  const { sections } = ticketMessages.create
+
   return (
     <>
-      <TicketLocationFields
-        register={register}
-        errors={errors}
-        buildings={catalogs.buildings}
-        locations={catalogs.locations}
-        dependencies={catalogs.dependencies}
-      />
-      <TicketClassificationFields
-        register={register}
-        errors={errors}
-        categories={catalogs.categories}
-        subcategories={catalogs.subcategories}
-        problems={catalogs.problems}
-        serviceTypes={catalogs.serviceTypes}
-        priorities={catalogs.priorities}
-        channels={catalogs.channels}
-      />
-      <TicketRequesterFields
-        register={register}
-        errors={errors}
-        requesters={catalogs.requesters}
-        canChooseRequester={canChooseRequester}
-        ownRequesterName={ownRequesterName}
-      />
-      <TextAreaField
-        id="description"
-        label={ticketMessages.create.fields.description}
-        rows={4}
-        error={errors.description?.message}
-        {...register('description')}
-      />
+      <FormSection
+        title={sections.location}
+        description={sections.locationHelp}
+      >
+        <TicketLocationFields
+          register={register}
+          errors={errors}
+          buildings={catalogs.buildings}
+          locations={catalogs.locations}
+          dependencies={catalogs.dependencies}
+        />
+      </FormSection>
+      <FormSection
+        title={sections.classification}
+        description={sections.classificationHelp}
+      >
+        <TicketClassificationFields
+          register={register}
+          errors={errors}
+          categories={catalogs.categories}
+          subcategories={catalogs.subcategories}
+          problems={catalogs.problems}
+          serviceTypes={catalogs.serviceTypes}
+          priorities={catalogs.priorities}
+          channels={catalogs.channels}
+        />
+      </FormSection>
+      <FormSection
+        title={sections.requester}
+        description={sections.requesterHelp}
+      >
+        <TicketRequesterFields
+          register={register}
+          errors={errors}
+          requesters={catalogs.requesters}
+          canChooseRequester={canChooseRequester}
+          ownRequesterName={ownRequesterName}
+        />
+      </FormSection>
     </>
   )
 }

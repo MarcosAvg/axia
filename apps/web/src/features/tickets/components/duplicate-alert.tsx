@@ -52,7 +52,7 @@ export function DuplicateAlert({
   const { create } = ticketMessages
 
   return (
-    <Card className="border-amber-300 dark:border-amber-800">
+    <Card className="border-warning/50 bg-warning/5">
       <CardHeader>
         <CardTitle>{create.duplicateTitle}</CardTitle>
         <CardDescription>{create.duplicateHelp}</CardDescription>

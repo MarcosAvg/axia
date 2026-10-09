@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
   TicketList,
+  TicketStatusSummary,
   ticketMessages,
   useMyOffers,
   useTicketsList,
@@ -28,7 +29,10 @@ function InboxPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">{inbox.offers}</h2>
         {offers.data && offers.data.length > 0 ? (
-          <TicketList items={offers.data} />
+          <>
+            <TicketStatusSummary items={offers.data} />
+            <TicketList items={offers.data} />
+          </>
         ) : (
           <EmptyState icon={InboxIcon} title={inbox.empty} />
         )}
@@ -40,7 +44,10 @@ function InboxPage() {
           <ErrorAlert message={ticketMessages.errors.load} />
         ) : null}
         {team.data && team.data.items.length > 0 ? (
-          <TicketList items={team.data.items} />
+          <>
+            <TicketStatusSummary items={team.data.items} />
+            <TicketList items={team.data.items} />
+          </>
         ) : (
           <EmptyState icon={InboxIcon} title={inbox.empty} />
         )}
