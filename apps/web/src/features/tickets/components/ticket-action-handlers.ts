@@ -7,6 +7,13 @@ export type Mutations = ReturnType<typeof useTicketActions>
 export type MutateOptions = { onSuccess: () => void }
 export type Handlers = Partial<Record<ActionKey, () => void>>
 
+/** Acciones que tienen su propio formulario dedicado. */
+export const DEDICATED: ActionKey[] = [
+  'recapture',
+  'mark_duplicate',
+  'assign_supervisor',
+]
+
 const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   pause: 'pause',
   reject: 'rejection',
