@@ -21,7 +21,7 @@ export function DimensionCharts({
         return (
           <ChartCard
             key={dimension}
-            title={`${dimensionLabels[dimension]} · ${metricsMessages.charts.activeBy}`}
+            title={`${dimensionLabels[dimension]} · ${metricsMessages.charts.ticketsBy}`}
           >
             <DimensionChart
               id={`metrics-dimension-${dimension}`}

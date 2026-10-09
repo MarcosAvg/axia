@@ -3,12 +3,12 @@ import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
-import { formatMinutes, formatPercent } from '../domain/metrics'
+import { formatPercent } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 
 const t = metricsMessages.table
 
-/** Tabla con todas las agrupaciones por dimensión. */
+/** Cantidades por agrupación y dimensión (Resumen). */
 export function DimensionTable({
   groups,
   nameOf,
@@ -31,21 +31,6 @@ export function DimensionTable({
       cell: (group) => nameOf(group.dimension, group.row.id),
     },
     { id: 'tickets', header: t.tickets, cell: (group) => group.row.tickets },
-    {
-      id: 'avgActive',
-      header: t.avgActive,
-      cell: (group) => formatMinutes(group.row.avgActive),
-    },
-    {
-      id: 'avgTotal',
-      header: t.avgTotal,
-      cell: (group) => formatMinutes(group.row.avgTotal),
-    },
-    {
-      id: 'extra',
-      header: t.extra,
-      cell: (group) => formatMinutes(group.row.avgActiveExtra),
-    },
     {
       id: 'reassignment',
       header: t.reassignment,
