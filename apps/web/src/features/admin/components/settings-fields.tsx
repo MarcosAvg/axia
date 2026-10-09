@@ -22,43 +22,36 @@ const slaClockOptions = (
   Object.keys(slaClockModes) as (keyof typeof slaClockModes)[]
 ).map((value) => ({ value, label: slaClockModes[value] }))
 
-function ScheduleSelects({ register, errors }: SettingsFieldsProps) {
-  const calendars = useCalendars()
-  const options = (calendars.data ?? []).map((calendar) => ({
-    value: calendar.id,
-    label: calendar.name,
-  }))
+/** Campos generales de la instancia. */
+export function GeneralFields({ register, errors }: SettingsFieldsProps) {
   return (
-    <>
-      <SelectField
-        id="settings-default-calendar"
-        label={settings.defaultCalendar}
-        placeholder={adminMessages.actions.selectPlaceholder}
-        options={options}
-        error={errors.defaultCalendarId?.message}
-        {...register('defaultCalendarId')}
-      />
-      <SelectField
-        id="settings-sla-clock"
-        label={settings.slaClockMode}
-        options={slaClockOptions}
-        error={errors.slaClockMode?.message}
-        {...register('slaClockMode')}
-      />
-    </>
-  )
-}
-
-/** Campos del formulario de configuración. */
-export function SettingsFields({ register, errors }: SettingsFieldsProps) {
-  return (
-    <>
+    <div className="grid gap-4 sm:grid-cols-2">
       <TextField
         id="settings-team-label"
         label={settings.teamLabel}
         error={errors.teamLabel?.message}
         {...register('teamLabel')}
       />
+      <TextField
+        id="settings-timezone"
+        label={settings.timezone}
+        error={errors.timezone?.message}
+        {...register('timezone')}
+      />
+      <TextField
+        id="settings-folio"
+        label={settings.folioPattern}
+        error={errors.folioPattern?.message}
+        {...register('folioPattern')}
+      />
+    </div>
+  )
+}
+
+/** Política de validación y evidencia. */
+export function ValidationFields({ register, errors }: SettingsFieldsProps) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
       <SelectField
         id="settings-validation"
         label={settings.validationPolicy}
@@ -87,19 +80,34 @@ export function SettingsFields({ register, errors }: SettingsFieldsProps) {
         error={errors.requestEvidencePolicy?.message}
         {...register('requestEvidencePolicy')}
       />
-      <TextField
-        id="settings-folio"
-        label={settings.folioPattern}
-        error={errors.folioPattern?.message}
-        {...register('folioPattern')}
+    </div>
+  )
+}
+
+/** Calendario por defecto y modo de reloj. */
+export function TimeFields({ register, errors }: SettingsFieldsProps) {
+  const calendars = useCalendars()
+  const options = (calendars.data ?? []).map((calendar) => ({
+    value: calendar.id,
+    label: calendar.name,
+  }))
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      <SelectField
+        id="settings-default-calendar"
+        label={settings.defaultCalendar}
+        placeholder={adminMessages.actions.selectPlaceholder}
+        options={options}
+        error={errors.defaultCalendarId?.message}
+        {...register('defaultCalendarId')}
       />
-      <TextField
-        id="settings-timezone"
-        label={settings.timezone}
-        error={errors.timezone?.message}
-        {...register('timezone')}
+      <SelectField
+        id="settings-sla-clock"
+        label={settings.slaClockMode}
+        options={slaClockOptions}
+        error={errors.slaClockMode?.message}
+        {...register('slaClockMode')}
       />
-      <ScheduleSelects register={register} errors={errors} />
-    </>
+    </div>
   )
 }

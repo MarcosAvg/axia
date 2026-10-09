@@ -250,10 +250,7 @@ export function IntegrationManager() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h2 className="text-lg font-medium">{t.title}</h2>
-        <p className="text-sm text-muted-foreground">{t.help}</p>
-      </header>
+      <p className="text-sm text-muted-foreground">{t.help}</p>
       <section className="flex flex-col gap-3">
         <h3 className="text-sm font-medium">{t.statusMap}</h3>
         <StatusMapForm />

@@ -144,6 +144,11 @@ Patrones de operación (ADR 0042):
   tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
+Patrones de administración (ADR 0046): encabezado único por pantalla (`PageHeader`); catálogos y
+usuarios como `DataTable`; **roles en master-detail** con permiso agrupados por área y alta en
+modal; **usuarios** con modal de roles; **ámbitos** en pestañas; **configuración** por secciones con
+barra de guardado.
+
 Patrones de lista:
 
 - **Tiquets**: tabla en escritorio (`lg+`) y tarjetas en móvil, en el mismo panel.

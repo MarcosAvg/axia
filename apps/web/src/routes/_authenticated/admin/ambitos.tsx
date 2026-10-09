@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { PageHeader } from '@/components/shared/page-header'
+import { adminMessages, ScopesManager } from '@/features/admin'
 import { RequirePermission } from '@/features/auth'
-import { ScopesManager } from '@/features/admin'
 
 export const Route = createFileRoute('/_authenticated/admin/ambitos')({
   component: ScopesPage,
@@ -9,7 +10,13 @@ export const Route = createFileRoute('/_authenticated/admin/ambitos')({
 function ScopesPage() {
   return (
     <RequirePermission permission="assignment.manage">
-      <ScopesManager />
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={adminMessages.nav.scopes}
+          description={adminMessages.descriptions.scopes}
+        />
+        <ScopesManager />
+      </div>
     </RequirePermission>
   )
 }

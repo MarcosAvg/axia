@@ -809,3 +809,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (ahora en `ticket-action-handlers.ts`) porque exportar una constante junto a componentes rompía
   el Fast Refresh de Vite (la hoja inferior no tomaba los cambios sin recargar). `pnpm check` en
   verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama `feat/campo-archivo`.
+- **Fase 8, Etapa 4 (Administración)**: encabezado único por pantalla (`PageHeader`); **catálogos**
+  con `DataTable`, estado con tokens y `EmptyState`; **roles en master-detail** con el alta en
+  modal y la **matriz de permisos agrupada por área**; **usuarios** como tabla con **modal de
+  roles**; **ámbitos** en **pestañas**; **configuración** por **secciones** con barra de guardado y
+  `toast`; calendarios e integraciones sin títulos duplicados. **ADR 0046**. `pnpm check` en verde
+  (147 Vitest, 12 Playwright, 413 pgTAP). Rama `feat/vistas-admin`.

@@ -18,6 +18,7 @@ test('el administrador crea un rol en la administración', async ({ page }) => {
   await signIn(page, 'admin@axia.test')
 
   await page.goto('/admin/roles')
+  await page.getByRole('button', { name: 'Nuevo rol' }).click()
   await expect(page.locator('#role-label')).toBeVisible()
 
   await page
@@ -26,5 +27,5 @@ test('el administrador crea un rol en la administración', async ({ page }) => {
   await page.locator('#role-label').fill(label)
   await page.getByRole('button', { name: 'Agregar' }).click()
 
-  await expect(page.getByRole('tab', { name: label })).toBeVisible()
+  await expect(page.getByRole('button', { name: label })).toBeVisible()
 })

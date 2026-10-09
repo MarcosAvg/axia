@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { PageHeader } from '@/components/shared/page-header'
+import { adminMessages, SettingsManager } from '@/features/admin'
 import { RequirePermission } from '@/features/auth'
-import { SettingsManager } from '@/features/admin'
 
 export const Route = createFileRoute('/_authenticated/admin/configuracion')({
   component: SettingsPage,
@@ -9,7 +10,13 @@ export const Route = createFileRoute('/_authenticated/admin/configuracion')({
 function SettingsPage() {
   return (
     <RequirePermission permission="catalog.manage">
-      <SettingsManager />
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={adminMessages.nav.settings}
+          description={adminMessages.descriptions.settings}
+        />
+        <SettingsManager />
+      </div>
     </RequirePermission>
   )
 }

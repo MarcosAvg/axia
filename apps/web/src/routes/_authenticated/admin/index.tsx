@@ -9,6 +9,7 @@ import {
   ShieldCheckIcon,
   UsersIcon,
 } from 'lucide-react'
+import { PageHeader } from '@/components/shared/page-header'
 import { adminMessages } from '@/features/admin'
 
 export const Route = createFileRoute('/_authenticated/admin/')({
@@ -48,33 +49,43 @@ function AdminLink({
 function AdminHome() {
   const { nav } = adminMessages
   return (
-    <div className={gridClass}>
-      <Link
-        to="/admin/catalogos"
-        search={{ catalog: 'teams' }}
-        className={cardClass}
-      >
-        <LibraryIcon className="size-5 text-muted-foreground" />
-        <span className="font-medium">{nav.catalogs}</span>
-      </Link>
-      <AdminLink to="/admin/roles" icon={ShieldCheckIcon} title={nav.roles} />
-      <AdminLink to="/admin/usuarios" icon={UsersIcon} title={nav.users} />
-      <AdminLink to="/admin/ambitos" icon={Building2Icon} title={nav.scopes} />
-      <AdminLink
-        to="/admin/calendarios"
-        icon={CalendarDaysIcon}
-        title={nav.calendars}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={adminMessages.title}
+        description={adminMessages.subtitle}
       />
-      <AdminLink
-        to="/admin/integraciones"
-        icon={PlugIcon}
-        title={nav.integrations}
-      />
-      <AdminLink
-        to="/admin/configuracion"
-        icon={SettingsIcon}
-        title={nav.settings}
-      />
+      <div className={gridClass}>
+        <Link
+          to="/admin/catalogos"
+          search={{ catalog: 'teams' }}
+          className={cardClass}
+        >
+          <LibraryIcon className="size-5 text-muted-foreground" />
+          <span className="font-medium">{nav.catalogs}</span>
+        </Link>
+        <AdminLink to="/admin/roles" icon={ShieldCheckIcon} title={nav.roles} />
+        <AdminLink to="/admin/usuarios" icon={UsersIcon} title={nav.users} />
+        <AdminLink
+          to="/admin/ambitos"
+          icon={Building2Icon}
+          title={nav.scopes}
+        />
+        <AdminLink
+          to="/admin/calendarios"
+          icon={CalendarDaysIcon}
+          title={nav.calendars}
+        />
+        <AdminLink
+          to="/admin/integraciones"
+          icon={PlugIcon}
+          title={nav.integrations}
+        />
+        <AdminLink
+          to="/admin/configuracion"
+          icon={SettingsIcon}
+          title={nav.settings}
+        />
+      </div>
     </div>
   )
 }

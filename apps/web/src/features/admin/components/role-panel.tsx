@@ -1,3 +1,4 @@
+import { FormSection } from '@/components/shared/form-section'
 import type { Permission, Role, RolePermission, Scope } from '../domain/access'
 import { adminMessages } from '../i18n'
 import { RoleEditForm } from './role-edit-form'
@@ -24,21 +25,24 @@ export function RolePanel({
   onRemove,
 }: RolePanelProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <RoleEditForm
-        key={role.id}
-        role={role}
-        isSaving={isSaving}
-        onSave={onSave}
-      />
-      <h3 className="text-sm font-medium">{adminMessages.roles.permissions}</h3>
-      <RolePermissions
-        roleId={role.id}
-        permissions={permissions}
-        assignments={assignments}
-        onSet={onSet}
-        onRemove={onRemove}
-      />
+    <div className="flex flex-col gap-6">
+      <FormSection title={adminMessages.roles.title}>
+        <RoleEditForm
+          key={role.id}
+          role={role}
+          isSaving={isSaving}
+          onSave={onSave}
+        />
+      </FormSection>
+      <FormSection title={adminMessages.roles.permissions}>
+        <RolePermissions
+          roleId={role.id}
+          permissions={permissions}
+          assignments={assignments}
+          onSet={onSet}
+          onRemove={onRemove}
+        />
+      </FormSection>
     </div>
   )
 }

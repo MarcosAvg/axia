@@ -88,7 +88,6 @@ export function CalendarManager() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-medium">{t.title}</h2>
       <p className="text-sm text-muted-foreground">{t.help}</p>
       <CalendarStatus
         isLoading={calendars.isLoading}
