@@ -1,12 +1,5 @@
 import { useState } from 'react'
-import { ChevronDownIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { SelectField } from '@/components/shared/form-fields'
 import {
   Sheet,
@@ -27,8 +20,11 @@ import { RecaptureForm } from './recapture-form'
 import { TicketActionForm } from './ticket-action-form'
 
 const ONE_CLICK: ActionKey[] = ['resume', 'validate']
+/** Acciones que se separan al final por ser de descarte. */
+const DESTRUCTIVE: ActionKey[] = ['reject', 'cancel', 'mark_duplicate']
 const FORM_ACTIONS: ActionKey[] = [
   'start',
+  'record_progress',
   'assign_technician',
   'add_auxiliary',
   'pause',
@@ -63,8 +59,10 @@ function ActionControls({
   onOpenForm,
 }: ActionControlsProps) {
   const primary = pickPrimaryAction(visible)
-  const secondary = visible.filter((action) => action !== primary)
-  const run = (action: ActionKey) =>
+  const others = visible.filter((action) => action !== primary)
+  const normal = others.filter((action) => !DESTRUCTIVE.includes(action))
+  const destructive = others.filter((action) => DESTRUCTIVE.includes(action))
+  const run = (action: ActionKey) => () =>
     (oneClick[action] ?? (() => onOpenForm(action)))()
   const isDisabled = (action: ActionKey) =>
     Boolean(pending[action]) || blocked.includes(action)
@@ -76,32 +74,38 @@ function ActionControls({
           type="button"
           className="min-h-11"
           disabled={isDisabled(primary)}
-          onClick={() => run(primary)}
+          onClick={run(primary)}
         >
           {ticketMessages.actions[primary]}
         </Button>
       ) : null}
-      {secondary.length > 0 ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" className="min-h-11">
-              {ticketMessages.actions.more}
-              <ChevronDownIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {secondary.map((action) => (
-              <DropdownMenuItem
-                key={action}
-                disabled={isDisabled(action)}
-                onClick={() => run(action)}
-              >
-                {ticketMessages.actions[action]}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {normal.map((action) => (
+        <Button
+          key={action}
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          disabled={isDisabled(action)}
+          onClick={run(action)}
+        >
+          {ticketMessages.actions[action]}
+        </Button>
+      ))}
+      {destructive.length > 0 ? (
+        <span className="mx-1 hidden h-6 w-px bg-border sm:block" />
       ) : null}
+      {destructive.map((action) => (
+        <Button
+          key={action}
+          type="button"
+          variant="destructive"
+          className="min-h-11"
+          disabled={isDisabled(action)}
+          onClick={run(action)}
+        >
+          {ticketMessages.actions[action]}
+        </Button>
+      ))}
     </div>
   )
 }

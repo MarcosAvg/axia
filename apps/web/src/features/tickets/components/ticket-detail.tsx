@@ -48,10 +48,12 @@ function EvidenceSection({
   ticketId,
   cycle,
   status,
+  canAttach,
 }: {
   ticketId: string
   cycle: number
   status: TicketStatus
+  canAttach: boolean
 }) {
   const evidence = useTicketEvidence(ticketId)
   return (
@@ -59,7 +61,9 @@ function EvidenceSection({
       <div className="flex flex-col gap-4">
         <PendingEvidence ticketId={ticketId} />
         <TicketEvidenceList items={evidence.data ?? []} />
-        <EvidenceUploader ticketId={ticketId} cycle={cycle} status={status} />
+        {canAttach ? (
+          <EvidenceUploader ticketId={ticketId} cycle={cycle} status={status} />
+        ) : null}
       </div>
     </Section>
   )
@@ -101,6 +105,7 @@ function TicketMain({
   actions,
   canRecordTime,
   canRate,
+  canAttachEvidence,
 }: {
   ticketId: string
   ticket: TicketDetail
@@ -109,6 +114,7 @@ function TicketMain({
   actions: ActionKey[]
   canRecordTime: boolean
   canRate: boolean
+  canAttachEvidence: boolean
 }) {
   const { detail } = ticketMessages
   return (
@@ -130,6 +136,7 @@ function TicketMain({
         ticketId={ticketId}
         cycle={ticket.cycle}
         status={ticket.status}
+        canAttach={canAttachEvidence}
       />
       <Section title={detail.participants}>
         <ParticipantList participants={participants} />
@@ -192,6 +199,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
           actions={actions}
           canRecordTime={can(identity, 'time.record_manual')}
           canRate={canRateTicket(identity, ticket.data.status)}
+          canAttachEvidence={can(identity, 'evidence.attach')}
         />
         <TicketActivity timeline={timeline.data ?? []} />
       </div>

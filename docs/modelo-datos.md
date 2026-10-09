@@ -286,7 +286,9 @@ quien la envió. La idempotencia se apoya en `client_request_id` (`idempotency_k
 | `ticket.prioritize` | — | ✔ | — | ✔ |
 | `ticket.rate` | ✔ `own` | — | — | ✔ |
 | `ticket.rate_on_behalf` | — | ✔ | — | ✔ |
+| `ticket.record_progress` | — | ✔ `team` | ✔ `own` | ✔ |
 | `time.record_manual` | — | ✔ `team` | — | ✔ |
+| `evidence.attach` | — | ✔ `team` | — | ✔ |
 | `act_on_behalf` | — | ✔ (sus técnicos) | — | ✔ (cualquiera) |
 | `catalog.manage`, `user.manage`, `role.manage`, `assignment.manage` | — | — | — | ✔ |
 

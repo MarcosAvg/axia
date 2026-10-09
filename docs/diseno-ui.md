@@ -127,11 +127,15 @@ Patrones de operación (ADR 0042):
 - **Detalle**: encabezado con folio/estado/prioridad; la **data es la columna principal**
   (acciones, captura, evidencias, participantes, tiempos, calificación) y la **actividad va en el
   sidebar** derecho.
-- **Acciones guiadas**: cada acción abre un diálogo con lo que exige; iniciar pide la evidencia
-  "antes", atender la descripción y "después", y reclamar motivo, descripción y evidencia
-  (ADR 0044). La acción primaria se destaca y el resto vive en "Más acciones".
-- **Evidencia acotada**: el subidor solo ofrece los tipos válidos para el estado; el alta permite
-  adjuntar la foto de solicitud.
+- **Acciones visibles por estado**: se muestran **todas** las acciones permitidas como botones
+  según estado y permiso, con la **primaria destacada** y los **descartes** (Rechazar, Cancelar,
+  Marcar duplicado) al final y en estilo de peligro (ADR 0045).
+- **Acciones guiadas con evidencia**: cada acción abre un diálogo con lo que exige; iniciar pide
+  la evidencia "antes", atender la descripción y "después", reclamar motivo, descripción y
+  evidencia, y **`during`** es el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045).
+- **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
+  muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
+  la foto de solicitud.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
 Patrones de lista:

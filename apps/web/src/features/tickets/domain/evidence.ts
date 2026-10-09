@@ -26,6 +26,7 @@ export function allowedEvidenceTypes(status: TicketStatus): EvidenceType[] {
 /** Tipo de evidencia que exige una acción del flujo, si aplica. */
 const EVIDENCE_BY_ACTION: Partial<Record<ActionKey, EvidenceType>> = {
   start: 'before',
+  record_progress: 'during',
   attend: 'after',
   open_claim: 'claim',
 }

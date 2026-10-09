@@ -7,7 +7,7 @@ export type Mutations = ReturnType<typeof useTicketActions>
 export type MutateOptions = { onSuccess: () => void }
 export type Handlers = Partial<Record<ActionKey, () => void>>
 
-export const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
+const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   pause: 'pause',
   reject: 'rejection',
   cancel: 'cancellation',
@@ -24,6 +24,24 @@ export const EMPTY: ActionValues = {
   note: '',
   text: '',
   resolution: 'upheld',
+}
+
+export function reasonUseFor(action: ActionKey): ReasonUse {
+  return REASON_USE_BY_ACTION[action] ?? 'pause'
+}
+
+/** Estado de vista del formulario: si se muestra y con qué error/pendiente. */
+export function actionFormState(
+  action: ActionKey,
+  mutation: Mutations[keyof Mutations] | undefined,
+  uploading: boolean,
+): { render: boolean; error: unknown; isPending: boolean } {
+  const isProgress = action === 'record_progress'
+  return {
+    render: Boolean(mutation) || isProgress,
+    error: mutation ? mutation.error : null,
+    isPending: (mutation ? mutation.isPending : false) || uploading,
+  }
 }
 
 export function mutationFor(action: ActionKey, actions: Mutations) {
