@@ -144,9 +144,11 @@ Patrones de operación (ADR 0042):
   tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
-Patrones de métricas (ADR 0047–0051): **barra de herramientas** (tarjeta única, no fija) que reúne
-rangos rápidos (7 · 30 · 90 días y "Todo"), fechas, filtros por catálogo, "Limpiar" y
-**exportación CSV/XLSX**; una fila de **KPI destacados** con **delta contra el periodo anterior**
+Patrones de métricas (ADR 0047–0051): **barra de filtros** con el **mismo patrón que la lista de
+Operación** (contenedor `rounded-xl border bg-card p-4`, controles **en línea** con rangos rápidos
+7 · 30 · 90 días y "Todo", fechas y catálogos, y **chips de filtros activos** debajo); la
+**exportación CSV/XLSX** vive en las **acciones del encabezado**. Una fila de **KPI destacados** con
+**delta contra el periodo anterior**
 (tiquets · tiempo activo · SLA · satisfacción · primera solución), que muestra las **fechas
 comparadas**; y el resto en **pestañas por tema** (Resumen · Tiempos · Calidad · SLA y satisfacción ·
 Equipo) con gráficas y tablas `DataTable`. El **Resumen** muestra **una tarjeta por dimensión**
