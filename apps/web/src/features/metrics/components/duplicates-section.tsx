@@ -1,11 +1,7 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { CopyIcon } from 'lucide-react'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
 import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import type {
   DuplicateAlert,
@@ -51,26 +47,38 @@ export function DuplicatesSection({
           />
         ))}
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t.dimension}</TableHead>
-            <TableHead>{t.tickets}</TableHead>
-            <TableHead>{t.duplicates}</TableHead>
-            <TableHead>{t.rate}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={`${row.dimension}-${row.dimensionId}`}>
-              <TableCell>{dimensionName(row)}</TableCell>
-              <TableCell>{row.tickets}</TableCell>
-              <TableCell>{row.duplicates}</TableCell>
-              <TableCell>{formatPercent(row.duplicateRate)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DuplicateDimensionTable rows={rows} />
     </div>
+  )
+}
+
+function DuplicateDimensionTable({ rows }: { rows: DuplicateDimensionRow[] }) {
+  if (rows.length === 0) {
+    return <EmptyState icon={CopyIcon} title={metricsMessages.empty} />
+  }
+  const columns: DataTableColumn<DuplicateDimensionRow>[] = [
+    {
+      id: 'dimension',
+      header: t.dimension,
+      cell: (row) => dimensionName(row),
+    },
+    { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
+    {
+      id: 'duplicates',
+      header: t.duplicates,
+      cell: (row) => row.duplicates,
+    },
+    {
+      id: 'rate',
+      header: t.rate,
+      cell: (row) => formatPercent(row.duplicateRate),
+    },
+  ]
+  return (
+    <DataTable
+      columns={columns}
+      rows={rows}
+      getRowId={(row) => `${row.dimension}-${row.dimensionId}`}
+    />
   )
 }

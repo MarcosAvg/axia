@@ -6,6 +6,8 @@ export const authMessages = {
   login: {
     title: 'Inicia sesión',
     description: 'Accede con tu cuenta de Axia.',
+    brandDescription:
+      'Sigue cada tiquet en todo momento: en qué estado está y, si no avanza, por qué.',
     email: 'Correo electrónico',
     password: 'Contraseña',
     submit: 'Entrar',
@@ -27,6 +29,12 @@ export const authMessages = {
   profile: {
     title: 'Mi perfil',
     description: 'Tu nombre y tu teléfono o extensión de contacto.',
+    sections: {
+      data: 'Datos de la cuenta',
+      account: 'Cuenta',
+    },
+    roles: 'Roles',
+    timezone: 'Zona horaria',
     fullName: 'Nombre completo',
     phone: 'Teléfono o extensión',
     submit: 'Guardar cambios',
@@ -48,3 +56,15 @@ export const authMessages = {
       'Aquí irán los catálogos, los usuarios y los roles. Llegan en la Fase 3.',
   },
 } as const
+
+/** Etiquetas en español de los roles semilla; un rol desconocido se muestra tal cual. */
+const roleLabels: Record<string, string> = {
+  administrator: 'Administrador',
+  supervisor: 'Supervisor',
+  technician: 'Técnico',
+  requester: 'Solicitante',
+}
+
+export function roleLabel(role: string): string {
+  return roleLabels[role] ?? role
+}

@@ -1,6 +1,12 @@
+import { ClockIcon } from 'lucide-react'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
 import { formatMinutes } from '../domain/metrics'
 import type { AgingRow } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
+
+const t = metricsMessages.aging
 
 /** Lista de tiquets pendientes por antigüedad. */
 export function AgingList({
@@ -11,24 +17,20 @@ export function AgingList({
   statusLabel: (status: string) => string
 }) {
   if (rows.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
-    )
+    return <EmptyState icon={ClockIcon} title={metricsMessages.empty} />
   }
-  return (
-    <ul className="flex flex-col gap-2">
-      {rows.map((row) => (
-        <li
-          key={row.id}
-          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm"
-        >
-          <span className="font-medium">{row.folio}</span>
-          <span className="text-muted-foreground">
-            {statusLabel(row.status)}
-          </span>
-          <span>{formatMinutes(row.ageMinutes)}</span>
-        </li>
-      ))}
-    </ul>
-  )
+  const columns: DataTableColumn<AgingRow>[] = [
+    { id: 'folio', header: t.ticket, cell: (row) => row.folio },
+    {
+      id: 'status',
+      header: t.status,
+      cell: (row) => statusLabel(row.status),
+    },
+    {
+      id: 'age',
+      header: t.age,
+      cell: (row) => formatMinutes(row.ageMinutes),
+    },
+  ]
+  return <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />
 }

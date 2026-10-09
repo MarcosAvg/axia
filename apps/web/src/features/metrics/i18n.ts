@@ -42,6 +42,12 @@ export const metricsMessages = {
     satisfaction: 'Satisfacción',
     sla: 'Cumplimiento de SLA',
   },
+  kpiGroups: {
+    carga: 'Carga',
+    tiempos: 'Tiempos',
+    calidad: 'Calidad',
+    sla: 'SLA y satisfacción',
+  },
   kpiHints: {
     activeExtra:
       'Trabajo registrado fuera del horario laboral (noches, fines de semana o festivos).',
