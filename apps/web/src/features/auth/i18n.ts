@@ -1,20 +1,7 @@
 // Textos de la autenticación (es-MX). Centralizados aquí, nunca incrustados en la lógica.
 
 export const authMessages = {
-  nav: {
-    label: 'Navegación principal',
-    home: 'Panel',
-    tickets: 'Tiquets',
-    myWork: 'Mi trabajo',
-    inbox: 'Bandeja',
-    metrics: 'Métricas',
-    profile: 'Mi perfil',
-    admin: 'Administración',
-  },
   signOut: 'Cerrar sesión',
-  userMenu: {
-    label: 'Menú de usuario',
-  },
   loading: 'Cargando…',
   login: {
     title: 'Inicia sesión',

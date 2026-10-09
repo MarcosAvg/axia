@@ -73,7 +73,7 @@ export function MetricsFilters({
   return (
     <form
       onSubmit={(event) => event.preventDefault()}
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      className="grid gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3"
     >
       <TextField
         id="metrics-from"

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { RequirePermission } from '@/features/auth'
 import { useBuildings, useCategories } from '@/features/catalogs'
@@ -42,19 +43,15 @@ function TicketsPage() {
   return (
     <RequirePermission permission="ticket.view">
       <div className="flex flex-col gap-4">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold">
-              {ticketMessages.list.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {ticketMessages.list.subtitle}
-            </p>
-          </div>
-          <Button asChild className="min-h-11">
-            <Link to="/tickets/nuevo">{ticketMessages.list.newAction}</Link>
-          </Button>
-        </header>
+        <PageHeader
+          title={ticketMessages.list.title}
+          description={ticketMessages.list.subtitle}
+          actions={
+            <Button asChild className="min-h-11">
+              <Link to="/tickets/nuevo">{ticketMessages.list.newAction}</Link>
+            </Button>
+          }
+        />
         <TicketFilters
           value={search}
           onChange={applySearch}

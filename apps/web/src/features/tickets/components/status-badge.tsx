@@ -7,10 +7,11 @@ import { statusLabels } from '../i18n'
 
 const toneClasses: Record<StatusTone, string> = {
   neutral: 'bg-muted text-muted-foreground',
-  progress: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
-  paused: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200',
-  done: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-  discarded: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200',
+  progress: 'bg-info/10 text-info dark:bg-info/20',
+  paused:
+    'bg-warning/15 text-warning-foreground dark:bg-warning/20 dark:text-warning',
+  done: 'bg-success/10 text-success dark:bg-success/20',
+  discarded: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
 }
 
 /** Insignia del estado del tiquet. */

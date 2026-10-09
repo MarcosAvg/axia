@@ -4,6 +4,9 @@ dist
 dist-ssr
 *.local
 
+# Generado por TanStack Router (temporal)
+.tanstack
+
 # Variables de entorno (la clave pública va en .env.local; nunca se sube)
 .env
 .env.*

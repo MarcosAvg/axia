@@ -21,7 +21,7 @@ test('un administrador inicia sesión y ve el panel', async ({ page }) => {
   await signIn(page, 'admin@axia.test')
 
   await expect(page.getByText(/Hola, Admin Demo/)).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Administración' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Catálogos' })).toBeVisible()
 })
 
 test('cerrar sesión vuelve al acceso', async ({ page }) => {

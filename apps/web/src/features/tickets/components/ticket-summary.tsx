@@ -23,7 +23,7 @@ export function TicketSummary({ ticket }: { ticket: TicketDetail }) {
         <StatusBadge status={ticket.status} />
       </div>
       <p className="text-sm">{ticket.description}</p>
-      <dl className="grid gap-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
         <Field label={fields.building} value={ticket.buildingName} />
         <Field label={fields.location} value={ticket.locationName} />
         <Field label={fields.dependency} value={ticket.dependencyName} />
