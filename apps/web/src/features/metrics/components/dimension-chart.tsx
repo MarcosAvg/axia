@@ -11,7 +11,7 @@ const config = {
   tickets: { label: metricsMessages.table.tickets, color: 'var(--chart-1)' },
 }
 
-/** Tiquets por dimensión (primeras 8). */
+/** Tiquets por dimensión (primeras 5). */
 export function DimensionChart({
   id,
   rows,
@@ -21,12 +21,12 @@ export function DimensionChart({
   rows: DimensionRow[]
   nameOf: (id: string) => string
 }) {
-  const data = rows.slice(0, 8).map((row) => ({
+  const data = rows.slice(0, 5).map((row) => ({
     name: nameOf(row.id),
     tickets: row.tickets,
   }))
   return (
-    <ChartContainer id={id} config={config}>
+    <ChartContainer id={id} config={config} className="aspect-auto h-36">
       <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis
