@@ -107,9 +107,9 @@ export function ActionContainer({
     <Sheet open={formAction !== null} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[90vh] overflow-y-auto rounded-t-xl"
+        className="max-h-[90vh] overflow-y-auto rounded-t-xl p-4 pb-6"
       >
-        <SheetHeader>
+        <SheetHeader className="p-0 pr-8">
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
         {body}
