@@ -888,3 +888,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   filtros activos** con `FilterChips`); la **exportación CSV/XLSX** se mueve a las **acciones del
   encabezado** (`PageHeader`). Sin patrones nuevos ni cambios de datos. `pnpm check` en verde (157
   Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-filtros-uniformes`.
+- **Métricas: volumen por mes (Etapa 17)**: la gráfica "Tiquets por día" pasa a **"Tiquets por mes"**
+  (misma gráfica de **línea**, agrupada por mes con `volumeByMonth` y etiquetas `formatMonthLabel`);
+  `volumeByDate` se retira. Pruebas puras nuevas. Sin cambios de datos. `pnpm check` en verde (158
+  Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-volumen-mensual`.

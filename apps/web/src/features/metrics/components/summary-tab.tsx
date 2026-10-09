@@ -1,7 +1,7 @@
 import { statusLabels } from '@/features/tickets'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import type { RoutingSummary } from '../domain/indicators'
-import { openAging, volumeByDate } from '../domain/metrics'
+import { openAging, volumeByMonth } from '../domain/metrics'
 import type { MetricsTicket } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
@@ -30,7 +30,7 @@ export function SummaryTab({
       <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
         <div className="lg:col-span-2">
           <ChartCard title={metricsMessages.charts.volume}>
-            <VolumeChart data={volumeByDate(filtered)} />
+            <VolumeChart data={volumeByMonth(filtered)} />
           </ChartCard>
         </div>
         <ChartCard title={metricsMessages.routing.title}>

@@ -178,20 +178,20 @@ export function summarize(tickets: MetricsTicket[]): MetricsSummary {
 }
 
 export interface VolumePoint {
-  date: string
+  month: string
   tickets: number
 }
 
-/** Cuenta tiquets por día de registro (solo los días con actividad). */
-export function volumeByDate(tickets: MetricsTicket[]): VolumePoint[] {
+/** Cuenta tiquets por mes de registro. */
+export function volumeByMonth(tickets: MetricsTicket[]): VolumePoint[] {
   const counts = new Map<string, number>()
   for (const ticket of tickets) {
-    const date = ticket.reportedAt.slice(0, 10)
-    counts.set(date, (counts.get(date) ?? 0) + 1)
+    const month = ticket.reportedAt.slice(0, 7)
+    counts.set(month, (counts.get(month) ?? 0) + 1)
   }
   return [...counts.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, count]) => ({ date, tickets: count }))
+    .map(([month, count]) => ({ month, tickets: count }))
 }
 
 export interface DimensionRow {

@@ -10,13 +10,14 @@ import {
   openAging,
   summarize,
   toCsv,
-  volumeByDate,
+  volumeByMonth,
 } from './metrics'
 import type { MetricsTicket } from './metrics'
 import { allDimensions } from './dimensions'
 import {
   deltaOf,
   formatDelta,
+  formatMonthLabel,
   formatRangeLabel,
   previousRange,
   rangeForDays,
@@ -110,16 +111,16 @@ describe('summarize', () => {
   })
 })
 
-describe('volumeByDate', () => {
-  it('agrupa por día en orden', () => {
-    const points = volumeByDate([
+describe('volumeByMonth', () => {
+  it('agrupa por mes en orden', () => {
+    const points = volumeByMonth([
       ticket({ id: 'a', reportedAt: '2026-10-02T08:00:00Z' }),
-      ticket({ id: 'b', reportedAt: '2026-10-01T09:00:00Z' }),
-      ticket({ id: 'c', reportedAt: '2026-10-01T18:00:00Z' }),
+      ticket({ id: 'b', reportedAt: '2026-09-01T09:00:00Z' }),
+      ticket({ id: 'c', reportedAt: '2026-10-18T18:00:00Z' }),
     ])
     expect(points).toEqual([
-      { date: '2026-10-01', tickets: 2 },
-      { date: '2026-10-02', tickets: 1 },
+      { month: '2026-09', tickets: 1 },
+      { month: '2026-10', tickets: 2 },
     ])
   })
 })
@@ -249,6 +250,13 @@ describe('formatRangeLabel', () => {
   it('formatea un rango con meses en español', () => {
     expect(formatRangeLabel('2026-09-30', '2026-10-07')).toBe('30 sep – 7 oct')
     expect(formatRangeLabel('', '')).toBe('')
+  })
+})
+
+describe('formatMonthLabel', () => {
+  it('formatea un mes con año', () => {
+    expect(formatMonthLabel('2026-10')).toBe('oct 2026')
+    expect(formatMonthLabel('2026-01')).toBe('ene 2026')
   })
 })
 

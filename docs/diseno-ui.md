@@ -154,7 +154,8 @@ comparadas**; y el resto en **pestañas por tema** (Resumen · Tiempos · Calida
 Equipo) con gráficas y tablas `DataTable`. El **Resumen** muestra **una tarjeta por dimensión**
 (equipo · edificio · categoría · dependencia · solicitante), cada una con su **gráfica de tiquets**
 (altura fija, top 5) y su **tabla** (Agrupación · Tiquets · Reasignación · Recaptura, con
-desplazamiento interno); volumen y ruteo comparten fila, y la antigüedad va con scroll. En
+desplazamiento interno); el **volumen por mes** (gráfica de línea) y ruteo comparten fila, y la
+antigüedad va con scroll. En
 **Tiempos**, el mismo formato por dimensión con las columnas de tiempo. En **Calidad**, **pausas** y
 **rechazos/cancelaciones** van como **gráficas** en una fila; los **duplicados** encabezan con una
 **gráfica de tasa por dimensión** y siguen en **tarjeta por dimensión** (Agrupación · Tiquets ·

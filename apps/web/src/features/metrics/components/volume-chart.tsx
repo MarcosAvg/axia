@@ -5,6 +5,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import type { VolumePoint } from '../domain/metrics'
+import { formatMonthLabel } from '../domain/period'
 import { metricsMessages } from '../i18n'
 
 const config = {
@@ -21,7 +22,13 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
     >
       <LineChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
-        <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={11} />
+        <XAxis
+          dataKey="month"
+          tickLine={false}
+          axisLine={false}
+          fontSize={11}
+          tickFormatter={formatMonthLabel}
+        />
         <YAxis
           allowDecimals={false}
           tickLine={false}
