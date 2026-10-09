@@ -24,6 +24,7 @@ interface EvidenceInput {
   cycle: number
   type: EvidenceType
   file: File
+  note?: string | null
 }
 
 function endpoint(): string {
@@ -42,6 +43,7 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
     blob,
     mimeType: blob.type || params.file.type,
     fileName: params.file.name,
+    note: params.note ?? null,
     state: 'pending',
     progress: 0,
     createdAt: Date.now(),
@@ -85,6 +87,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     p_mime_type: evidence.mimeType,
     p_size_bytes: evidence.blob.size,
     p_client_request_id: evidence.id,
+    p_note: evidence.note ?? null,
   })
   if (error) {
     await db.evidences.update(evidenceId, { state: 'error' })

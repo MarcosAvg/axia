@@ -35,7 +35,12 @@ const REASON_ACTIONS: ActionKey[] = [
   'reactivate',
   'add_auxiliary',
 ]
-const TEXT_ACTIONS: ActionKey[] = ['attend', 'comment', 'open_claim']
+const TEXT_ACTIONS: ActionKey[] = [
+  'attend',
+  'record_progress',
+  'comment',
+  'open_claim',
+]
 const PLACEHOLDER = 'Selecciona…'
 
 const toOptions = (items: { id: string; label: string }[]): SelectOption[] =>
@@ -48,6 +53,7 @@ const resolutionOptions: SelectOption[] = CLAIM_RESOLUTIONS.map((value) => ({
 
 function textLabel(action: ActionKey): string {
   if (action === 'attend') return fields.workDescription
+  if (action === 'record_progress') return fields.progress
   if (action === 'comment') return fields.comment
   return fields.claimDescription
 }

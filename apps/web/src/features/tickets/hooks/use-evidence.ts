@@ -20,6 +20,7 @@ export function useUploadEvidence() {
       cycle: number
       type: EvidenceType
       file: File
+      note?: string | null
     }) => saveAndUploadEvidence(variables),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({

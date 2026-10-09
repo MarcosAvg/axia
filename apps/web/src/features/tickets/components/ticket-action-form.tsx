@@ -13,8 +13,9 @@ import { TicketActionFields } from './ticket-action-fields'
 import type { ActionValues } from './ticket-action-fields'
 import {
   EMPTY,
-  REASON_USE_BY_ACTION,
+  actionFormState,
   mutationFor,
+  reasonUseFor,
 } from './ticket-action-handlers'
 import { useActionSubmission } from './use-action-submission'
 
@@ -144,7 +145,7 @@ export function TicketActionForm({
   const actions = useTicketActions(ticketId, subjectTechnicianId)
   const technicians = useTechnicians()
   const priorities = usePriorities()
-  const reasons = useReasons(REASON_USE_BY_ACTION[action] ?? 'pause')
+  const reasons = useReasons(reasonUseFor(action))
   const [values, setValues] = useState<ActionValues>(EMPTY)
   const mutation = mutationFor(action, actions)
   const submission = useActionSubmission({
@@ -156,7 +157,8 @@ export function TicketActionForm({
     onClose,
   })
 
-  if (!mutation) return null
+  const state = actionFormState(action, mutation, submission.uploading)
+  if (!state.render) return null
 
   const onChange = (patch: Partial<ActionValues>) =>
     setValues((current) => ({ ...current, ...patch }))
@@ -172,8 +174,8 @@ export function TicketActionForm({
       priorities={priorities.data ?? []}
       values={values}
       onChange={onChange}
-      error={mutation.error}
-      isPending={mutation.isPending || submission.uploading}
+      error={state.error}
+      isPending={state.isPending}
       onSubmit={(event) => {
         void submission.submit(event)
       }}

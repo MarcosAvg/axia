@@ -789,3 +789,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   libre se acota a los tipos válidos, el **alta** permite la **foto de solicitud**, y el **detalle**
   pone la data como columna principal con la **actividad en el sidebar**. **ADR 0044**.
   `pnpm check` en verde (147 Vitest, 12 Playwright, 409 pgTAP). Rama `feat/evidencia-y-detalle`.
+- **Permisos de evidencia y acciones visibles (2026-10-09)**: permisos nuevos
+  `evidence.attach` (subidor libre; supervisor/admin) y `ticket.record_progress` (paso
+  "Registrar avance", `during`, con nota; técnico/supervisor/admin); el backend exige
+  `evidence.attach` para la evidencia libre (`other`) y `evidence_add` acepta nota. En la
+  interfaz, las acciones se muestran **todas por estado** con la primaria destacada y los
+  **descartes al final en rojo**; el subidor y los tiempos manuales se **ocultan** sin permiso.
+  **ADR 0045**. `pnpm check` en verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama
+  `feat/acciones-y-permisos`.

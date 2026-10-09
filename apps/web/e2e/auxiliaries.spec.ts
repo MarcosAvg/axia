@@ -55,8 +55,7 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
     .selectOption({ label: 'Luis Gómez' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 
-  await page.getByRole('button', { name: 'Más acciones' }).click()
-  await page.getByRole('menuitem', { name: 'Agregar auxiliar' }).click()
+  await page.getByRole('button', { name: 'Agregar auxiliar' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Marta Ruiz' })
@@ -64,9 +63,8 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await clickAndWait(page, 'Confirmar', 'ticket_add_auxiliary')
   await expect(page.getByText('Marta Ruiz · Auxiliar')).toBeVisible()
 
-  // Reasigna a otro equipo (acción secundaria, dentro del menú).
-  await page.getByRole('button', { name: 'Más acciones' }).click()
-  await page.getByRole('menuitem', { name: 'Reasignar supervisor' }).click()
+  // Reasigna a otro equipo.
+  await page.getByRole('button', { name: 'Reasignar supervisor' }).click()
   await page.getByLabel('Equipo').selectOption({ label: 'Seguridad' })
   await page.getByLabel('Motivo').selectOption({ index: 1 })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_supervisor')

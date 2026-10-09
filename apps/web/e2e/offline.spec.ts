@@ -82,7 +82,10 @@ test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   await signIn(page, 'tecnico@axia.test')
   await page.goto('/mi-trabajo')
   await page.getByText(description).click()
-  await expect(page.getByLabel('Tipo de evidencia')).toBeVisible()
+  // El técnico no ve el subidor libre (solo supervisor/admin tienen `evidence.attach`).
+  await expect(page.getByLabel('Tipo de evidencia')).toHaveCount(0)
+  // Espera a que el detalle cargue antes de desconectar.
+  await expect(page.getByRole('button', { name: 'Iniciar' })).toBeVisible()
 
   // Sin conexión: iniciar pide la evidencia "antes" y ambas quedan en cola.
   await page.context().setOffline(true)

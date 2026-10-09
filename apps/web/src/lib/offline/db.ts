@@ -26,6 +26,8 @@ export interface Evidence {
   blob: Blob
   mimeType: string
   fileName: string
+  /** Nota opcional (por ejemplo, el avance al registrar `during`). */
+  note?: string | null
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
   /** Porcentaje de subida (0–100). */
   progress: number

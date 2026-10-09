@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { saveAndUploadEvidence } from '../api/offline-evidence'
 import type { ActionKey } from '../domain/actions'
 import { evidenceForAction } from '../domain/evidence'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { useUploadEvidence } from '../hooks/use-evidence'
 import type { ActionValues } from './ticket-action-fields'
 import { buildSubmitHandlers } from './ticket-action-handlers'
 import type { Mutations } from './ticket-action-handlers'
@@ -34,17 +34,19 @@ export function useActionSubmission({
   setFile: (file: File | null) => void
   submit: (event: FormEvent) => Promise<void>
 } {
+  const upload = useUploadEvidence()
   const [file, setFile] = useState<File | null>(null)
   const [evidenceError, setEvidenceError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const evidenceType = evidenceForAction(action)
+  const isProgress = action === 'record_progress'
 
   async function submit(event: FormEvent) {
     event.preventDefault()
     const handler = buildSubmitHandlers(actions, values, {
       onSuccess: onClose,
     })[action]
-    if (!handler) return
+    if (!handler && !isProgress) return
 
     if (evidenceType) {
       if (!file) {
@@ -54,11 +56,12 @@ export function useActionSubmission({
       setEvidenceError(null)
       setUploading(true)
       try {
-        await saveAndUploadEvidence({
+        await upload.mutateAsync({
           ticketId,
           cycle,
           type: evidenceType,
           file,
+          note: isProgress ? values.text.trim() || null : null,
         })
       } catch (error) {
         setEvidenceError(toTicketError(error).message)
@@ -68,7 +71,11 @@ export function useActionSubmission({
       setUploading(false)
     }
 
-    handler()
+    if (isProgress) {
+      onClose()
+      return
+    }
+    handler?.()
   }
 
   return { evidenceType, evidenceError, uploading, setFile, submit }

@@ -151,7 +151,7 @@ cancelación o marca de duplicado.
 | Participantes | Un líder (técnico asignado) y auxiliares (técnicos o supervisores), con inicio, fin y categoría |
 | Pausas | Motivo jerárquico y subestados; cada paso con su fecha. Máximo una abierta |
 | Reclamaciones | Motivo, descripción, evidencia, resultado y notas |
-| Evidencias | `request` (opcional), `before` y `after` (obligatorias por ciclo), `during` (opcional), `claim` (en reclamación) y `other`. Nunca se borran |
+| Evidencias | `request` (opcional), `before` y `after` (obligatorias por ciclo), `during` (opcional, con el paso "Registrar avance"), `claim` (en reclamación) y `other` (solo con el permiso de evidencia libre). Nunca se borran; cada tipo solo se adjunta en su momento |
 | Enlaces | Duplicado de, derivado de, relacionado con y bloqueado por |
 | Historial | Bitácora de solo agregar con cada cambio, asignación, pausa, recaptura, reclamación, comentario o evidencia |
 | Tiempos | Tramos con inicio y fin y clasificación de reloj, de origen del sistema o manual |

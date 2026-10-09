@@ -9,6 +9,7 @@ export type ActionKey =
   | 'start'
   | 'pause'
   | 'resume'
+  | 'record_progress'
   | 'attend'
   | 'validate'
   | 'reject'
@@ -101,6 +102,9 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   add_auxiliary: (c) =>
     ADVANCEABLE.includes(c.status) && has(c, 'ticket.add_auxiliary'),
   start: (c) => c.status === 'assigned' && technicianAction(c, 'ticket.start'),
+  record_progress: (c) =>
+    (c.status === 'in_progress' || c.status === 'paused') &&
+    has(c, 'ticket.record_progress'),
   pause: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.pause'),
   resume: (c) => c.status === 'paused' && technicianAction(c, 'ticket.resume'),
