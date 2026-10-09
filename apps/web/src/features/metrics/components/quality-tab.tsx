@@ -1,4 +1,4 @@
-import { formatPercent } from '../domain/metrics'
+import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import type { RejectCancelRow } from '../domain/indicators'
 import type {
   DuplicateAlert,
@@ -11,12 +11,12 @@ import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
+import { DuplicateRateChart } from './duplicate-rate-chart'
 import { DuplicateSections } from './duplicate-sections'
-import { DuplicatesSummary } from './duplicates-summary'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
-import { RejectCancelSection } from './reject-cancel-section'
+import { RejectCancelChart } from './reject-cancel-chart'
 
 function qualityCards(
   summary: MetricsSummary,
@@ -62,7 +62,25 @@ function qualityCards(
   ]
 }
 
-/** Calidad: tasas, pausas por motivo y duplicados. */
+function duplicateCards(duplicates: {
+  tickets: DuplicateTicket[]
+  alerts: DuplicateAlert[]
+}): Kpi[] {
+  const t = metricsMessages.duplicates
+  const decisions = t.decisions as Record<string, string>
+  const avg = averageOf(
+    duplicates.tickets.map((item) => item.timeToMarkMinutes),
+  )
+  return [
+    { label: t.timeToMark, value: formatMinutes(avg) },
+    ...duplicates.alerts.map((alert) => ({
+      label: decisions[alert.decision] ?? alert.decision,
+      value: String(alert.candidates),
+    })),
+  ]
+}
+
+/** Calidad: tasas, motivos y duplicados (con sus gráficas). */
 export function QualityTab({
   summary,
   comparison,
@@ -83,8 +101,11 @@ export function QualityTab({
   return (
     <div className="flex flex-col gap-4">
       <KpiGrid
-        cards={qualityCards(summary, comparison)}
-        columns={5}
+        cards={[
+          ...qualityCards(summary, comparison),
+          ...duplicateCards(duplicates),
+        ]}
+        columns={6}
         period={comparison?.label}
       />
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
@@ -92,19 +113,13 @@ export function QualityTab({
           <PausesChart data={pauses} />
         </ChartCard>
         <ChartCard title={metricsMessages.rejectCancel.title}>
-          <RejectCancelSection rows={rejectCancel} />
+          <RejectCancelChart rows={rejectCancel} />
         </ChartCard>
       </div>
       <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h2 className="text-sm font-medium">
-            {metricsMessages.duplicates.byDimension}
-          </h2>
-          <DuplicatesSummary
-            tickets={duplicates.tickets}
-            alerts={duplicates.alerts}
-          />
-        </div>
+        <ChartCard title={metricsMessages.duplicates.byDimension}>
+          <DuplicateRateChart rows={duplicates.rows} />
+        </ChartCard>
         <DuplicateSections rows={duplicates.rows} />
       </div>
     </div>
