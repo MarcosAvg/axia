@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "vitest run && playwright test",
+    "test:visual": "playwright test --config playwright.visual.config.ts",
     "preview": "vite preview"
   },
   "dependencies": {

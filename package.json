@@ -9,6 +9,7 @@
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
+    "test:visual": "pnpm --filter @axia/web test:visual",
     "format": "prettier --write .",
     "check:agnostic": "node scripts/check-agnostic.mjs",
     "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",

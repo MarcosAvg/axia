@@ -86,7 +86,7 @@ export default defineConfig({
       VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
       VITE_SUPABASE_ANON_KEY: 'clave-anon-de-prueba',
     },
-    // Lo de `e2e/` lo corre Playwright, no Vitest.
-    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
+    // Lo de `e2e/` y `visual/` lo corre Playwright, no Vitest.
+    exclude: ['e2e/**', 'visual/**', 'node_modules/**', 'dist/**'],
   },
 })
