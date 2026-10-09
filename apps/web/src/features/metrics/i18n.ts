@@ -26,7 +26,8 @@ export const metricsMessages = {
     dependency: 'Dependencia',
     all: 'Todos',
     clear: 'Limpiar',
-    dimension: 'Agrupar por',
+    remove: 'Quitar',
+    range: 'Rango',
   },
   quickRanges: {
     d7: '7 días',
