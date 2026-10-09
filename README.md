@@ -134,9 +134,10 @@ pnpm env:local    # regenera apps/web/.env.local (alternativa manual en .env.exa
 `pnpm db:start`. Como alternativa, es posible copiar `VITE_SUPABASE_URL` y la clave pública
 manualmente (ver `apps/web/.env.example`).
 
-**Usuarios demo** (solo entorno local, ficticios; contraseña `AxiaDemo2026!`):
-`admin@axia.test`, `supervisor@axia.test`, `tecnico@axia.test` y `solicitante@axia.test`. El alta de
-cuentas es solo por administrador o invitación: **no hay auto-registro**.
+**Usuarios demo** (solo entorno local, ficticios; contraseña `AxiaDemo2026!`), con sus nombres de
+lectura: `admin@axia.test` (Rosa Delgado), `supervisor@axia.test` (Sergio Ramírez),
+`tecnico@axia.test` (Luis Gómez) y `solicitante@axia.test` (Ana Pérez). El alta de cuentas es solo
+por administrador o invitación: **no hay auto-registro**.
 
 El build de producción (`pnpm build`) genera el service worker y el manifest en `apps/web/dist`; los
 iconos de `apps/web/public/` son **provisionales** hasta que la institución entregue el logotipo.

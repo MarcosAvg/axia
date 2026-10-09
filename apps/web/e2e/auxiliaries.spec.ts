@@ -30,24 +30,20 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await page.goto('/tickets/nuevo')
   await page
     .getByLabel('Solicitante', { exact: true })
-    .selectOption({ label: 'Ana Pérez (ejemplo)' })
-  await page
-    .getByLabel('Edificio')
-    .selectOption({ label: 'Edificio Central (ejemplo)' })
-  await page
-    .getByLabel('Ubicación')
-    .selectOption({ label: 'Planta baja (ejemplo)' })
+    .selectOption({ label: 'Ana Pérez' })
+  await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
+  await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
   await page
     .getByLabel('Dependencia solicitante')
-    .selectOption({ label: 'Sistemas (ejemplo)' })
+    .selectOption({ label: 'Sistemas' })
   await page
     .getByLabel('Categoría', { exact: true })
-    .selectOption({ label: 'Eléctrico (ejemplo)' })
+    .selectOption({ label: 'Eléctrico' })
   await page
     .getByLabel('Tipo de servicio')
-    .selectOption({ label: 'Correctivo (ejemplo)' })
-  await page.getByLabel('Prioridad').selectOption({ label: 'Media (ejemplo)' })
-  await page.getByLabel('Canal').selectOption({ label: 'Web (ejemplo)' })
+    .selectOption({ label: 'Correctivo' })
+  await page.getByLabel('Prioridad').selectOption({ label: 'Media' })
+  await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()
   await expect(page.getByText(description)).toBeVisible()
@@ -56,22 +52,22 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
-    .selectOption({ label: 'Luis Gómez (ejemplo)' })
+    .selectOption({ label: 'Luis Gómez' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 
   await page.getByRole('button', { name: 'Más acciones' }).click()
   await page.getByRole('menuitem', { name: 'Agregar auxiliar' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
-    .selectOption({ label: 'Marta Ruiz (ejemplo)' })
+    .selectOption({ label: 'Marta Ruiz' })
   await page.getByLabel('Motivo').selectOption({ index: 1 })
   await clickAndWait(page, 'Confirmar', 'ticket_add_auxiliary')
-  await expect(page.getByText('Marta Ruiz (ejemplo) · Auxiliar')).toBeVisible()
+  await expect(page.getByText('Marta Ruiz · Auxiliar')).toBeVisible()
 
   // Reasigna a otro equipo (acción secundaria, dentro del menú).
   await page.getByRole('button', { name: 'Más acciones' }).click()
   await page.getByRole('menuitem', { name: 'Reasignar supervisor' }).click()
-  await page.getByLabel('Equipo').selectOption({ label: 'Seguridad (ejemplo)' })
+  await page.getByLabel('Equipo').selectOption({ label: 'Seguridad' })
   await page.getByLabel('Motivo').selectOption({ index: 1 })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_supervisor')
   await expect(

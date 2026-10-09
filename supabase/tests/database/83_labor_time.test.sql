@@ -63,7 +63,7 @@ insert into public.teams (name, work_calendar_id)
 insert into public.teams (name) values ('Sin calendario');
 insert into public.buildings (name) values ('Edificio Laboral');
 insert into public.locations (building_id, name)
-  select id, 'Piso 1' from public.buildings where name = 'Edificio Laboral';
+  select id, 'Nivel B' from public.buildings where name = 'Edificio Laboral';
 insert into public.dependencies (name) values ('Dep Laboral');
 insert into public.categories (team_id, name)
   select id, 'Cat A' from public.teams where name = 'Laboral A';
@@ -86,7 +86,7 @@ from public.teams t, public.buildings b, public.locations l,
   public.dependencies d, public.categories c, public.service_types s,
   public.priorities p, public.channels ch, public.requesters r
 where t.name = 'Laboral A' and b.name = 'Edificio Laboral'
-  and l.name = 'Piso 1' and d.name = 'Dep Laboral' and c.name = 'Cat A'
+  and l.name = 'Nivel B' and d.name = 'Dep Laboral' and c.name = 'Cat A'
   and s.name = 'Serv Laboral' and p.name = 'Prio Laboral'
   and ch.name = 'Canal Laboral' and r.full_name = 'Req Laboral';
 
@@ -133,7 +133,7 @@ from public.teams t, public.buildings b, public.locations l,
   public.dependencies d, public.categories c, public.service_types s,
   public.priorities p, public.channels ch, public.requesters r
 where t.name = 'Sin calendario' and b.name = 'Edificio Laboral'
-  and l.name = 'Piso 1' and d.name = 'Dep Laboral' and c.name = 'Cat B'
+  and l.name = 'Nivel B' and d.name = 'Dep Laboral' and c.name = 'Cat B'
   and s.name = 'Serv Laboral' and p.name = 'Prio Laboral'
   and ch.name = 'Canal Laboral' and r.full_name = 'Req Laboral';
 

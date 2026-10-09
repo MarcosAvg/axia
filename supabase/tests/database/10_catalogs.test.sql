@@ -75,18 +75,18 @@ select throws_ok(
 
 -- Motivos jerárquicos.
 select lives_ok(
-  $$ insert into public.reasons (use, name) values ('pause', 'Falta de material') $$,
+  $$ insert into public.reasons (use, name) values ('pause', 'Motivo de prueba') $$,
   'inserta un motivo raíz');
 select lives_ok(
   $$ insert into public.reasons (use, name, parent_id)
-     select 'pause', 'Por solicitar', id from public.reasons where name = 'Falta de material' $$,
+     select 'pause', 'Submotivo de prueba', id from public.reasons where name = 'Motivo de prueba' $$,
   'inserta un subestado del mismo uso');
 select throws_ok(
   $$ insert into public.reasons (use, name, parent_id)
-     select 'rejection', 'Mal', id from public.reasons where name = 'Falta de material' $$,
+     select 'rejection', 'Mal', id from public.reasons where name = 'Motivo de prueba' $$,
   'P0001', null, 'rechaza un hijo con uso distinto al padre');
 select throws_ok(
-  $$ insert into public.reasons (use, name) values ('pause', 'Falta de material') $$,
+  $$ insert into public.reasons (use, name) values ('pause', 'Motivo de prueba') $$,
   '23505', null, 'no repite un motivo raíz del mismo uso');
 
 -- Catálogos.
@@ -98,17 +98,17 @@ select throws_ok(
   '23505', null, 'no repite el nombre de edificio');
 select lives_ok(
   $$ insert into public.locations (building_id, name)
-     select id, 'Planta baja' from public.buildings where name = 'Edificio A' $$,
+     select id, 'Nivel A' from public.buildings where name = 'Edificio A' $$,
   'inserta una ubicación');
 select throws_ok(
   $$ insert into public.locations (building_id, name)
-     select id, 'Planta baja' from public.buildings where name = 'Edificio A' $$,
+     select id, 'Nivel A' from public.buildings where name = 'Edificio A' $$,
   '23505', null, 'no repite la ubicación dentro del edificio');
 select throws_ok(
-  $$ insert into public.priorities (name, target_minutes) values ('Urgente', 0) $$,
+  $$ insert into public.priorities (name, target_minutes) values ('Prioridad Gamma', 0) $$,
   '23514', null, 'rechaza un tiempo objetivo no positivo');
 select lives_ok(
-  $$ insert into public.priorities (name, target_minutes) values ('Urgente', 60) $$,
+  $$ insert into public.priorities (name, target_minutes) values ('Prioridad Gamma', 60) $$,
   'acepta un tiempo objetivo positivo');
 
 -- Calendario y franjas.

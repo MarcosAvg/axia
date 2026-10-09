@@ -76,14 +76,14 @@ select throws_ok(
 
 -- Solicitantes y técnicos pueden existir sin cuenta.
 select lives_ok(
-  $$ insert into public.requesters (full_name, contact) values ('Ana Pérez', 'ext. 100') $$,
+  $$ insert into public.requesters (full_name, contact) values ('Solicitante Alfa', 'ext. 100') $$,
   'inserta un solicitante sin cuenta');
 select lives_ok(
-  $$ insert into public.teams (name) values ('Mantenimiento') $$,
+  $$ insert into public.teams (name) values ('Equipo Alfa') $$,
   'inserta un equipo');
 select lives_ok(
   $$ insert into public.technicians (full_name, team_id)
-     select 'Luis Gómez', id from public.teams where name = 'Mantenimiento' $$,
+     select 'Técnico Alfa', id from public.teams where name = 'Equipo Alfa' $$,
   'inserta un técnico sin cuenta');
 
 select * from finish();

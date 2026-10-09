@@ -39,43 +39,43 @@ from (values
 ) as v (uid, role_name)
 join public.roles r on r.name = v.role_name;
 
-insert into public.teams (name) values ('Mantenimiento'), ('Seguridad');
+insert into public.teams (name) values ('Equipo Alfa'), ('Equipo Beta');
 insert into public.buildings (name) values ('Edificio A');
 insert into public.locations (building_id, name)
-  select id, 'Planta baja' from public.buildings where name = 'Edificio A';
-insert into public.dependencies (name) values ('Sistemas');
+  select id, 'Nivel A' from public.buildings where name = 'Edificio A';
+insert into public.dependencies (name) values ('Dependencia Alfa');
 insert into public.categories (team_id, name)
-  select id, 'Eléctrico' from public.teams where name = 'Mantenimiento';
+  select id, 'Categoría Alfa' from public.teams where name = 'Equipo Alfa';
 insert into public.categories (team_id, name)
-  select id, 'Accesos' from public.teams where name = 'Seguridad';
+  select id, 'Categoría Gamma' from public.teams where name = 'Equipo Beta';
 insert into public.subcategories (category_id, name)
-  select id, 'Contacto' from public.categories where name = 'Eléctrico';
+  select id, 'Subcategoría Alfa' from public.categories where name = 'Categoría Alfa';
 insert into public.problems (subcategory_id, name)
-  select id, 'Chispa' from public.subcategories where name = 'Contacto';
-insert into public.service_types (name) values ('Correctivo');
-insert into public.priorities (name) values ('Media');
-insert into public.channels (name) values ('Web');
+  select id, 'Chispa' from public.subcategories where name = 'Subcategoría Alfa';
+insert into public.service_types (name) values ('Servicio Alfa');
+insert into public.priorities (name) values ('Prioridad Alfa');
+insert into public.channels (name) values ('Canal Alfa');
 
 insert into public.requesters (full_name, contact, dependency_id)
-  select 'Ana Pérez', 'ext. 1', d.id
-  from public.dependencies d where d.name = 'Sistemas';
+  select 'Solicitante Alfa', 'ext. 1', d.id
+  from public.dependencies d where d.name = 'Dependencia Alfa';
 
 insert into public.technicians (full_name, user_id, team_id)
-  select 'Luis Gómez', '00000000-0000-0000-0000-000000000004', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  select 'Técnico Alfa', '00000000-0000-0000-0000-000000000004', t.id
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.technicians (full_name, user_id, team_id)
-  select 'Marta Ruiz', '00000000-0000-0000-0000-000000000005', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  select 'Técnico Beta', '00000000-0000-0000-0000-000000000005', t.id
+  from public.teams t where t.name = 'Equipo Alfa';
 
 insert into public.supervisor_scopes (user_id, team_id)
   select '00000000-0000-0000-0000-000000000002', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.supervisor_scope_buildings (scope_id, building_id)
   select ss.id, b.id from public.supervisor_scopes ss, public.buildings b
   where ss.user_id = '00000000-0000-0000-0000-000000000002' and b.name = 'Edificio A';
 insert into public.supervisor_scopes (user_id, team_id)
   select '00000000-0000-0000-0000-000000000003', t.id
-  from public.teams t where t.name = 'Seguridad';
+  from public.teams t where t.name = 'Equipo Beta';
 insert into public.supervisor_scope_buildings (scope_id, building_id)
   select ss.id, b.id from public.supervisor_scopes ss, public.buildings b
   where ss.user_id = '00000000-0000-0000-0000-000000000003' and b.name = 'Edificio A';
@@ -86,16 +86,16 @@ select set_config('request.jwt.claims',
 
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
-  'location_id', (select id from public.locations where name = 'Planta baja'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'subcategory_id', (select id from public.subcategories where name = 'Contacto'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'subcategory_id', (select id from public.subcategories where name = 'Subcategoría Alfa'),
   'problem_id', (select id from public.problems where name = 'Chispa'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'No enciende la luz',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 
 select is(
   (select count(*)::int from public.ticket_offers
@@ -113,7 +113,7 @@ select public.ticket_assign_supervisor(
   (select id from public.tickets where description = 'No enciende la luz'),
   (select id from public.reasons where use = 'supervisor_reassignment' limit 1),
   null,
-  (select id from public.teams where name = 'Seguridad'),
+  (select id from public.teams where name = 'Equipo Beta'),
   'Equipo incorrecto');
 select is(
   (select status from public.tickets where description = 'No enciende la luz'),
@@ -121,7 +121,7 @@ select is(
 select is(
   (select t.name from public.tickets tk join public.teams t on t.id = tk.team_id
    where tk.description = 'No enciende la luz'),
-  'Seguridad', 'el tiquet queda en el equipo destino');
+  'Equipo Beta', 'el tiquet queda en el equipo destino');
 select is(
   (select count(*)::int from public.ticket_offers o
    join public.tickets tk on tk.id = o.ticket_id
@@ -147,20 +147,20 @@ select throws_ok(
        (select id from public.tickets where description = 'No enciende la luz'),
        (select id from public.reasons where use = 'supervisor_reassignment' limit 1),
        null,
-       (select id from public.teams where name = 'Seguridad')) $$,
+       (select id from public.teams where name = 'Equipo Beta')) $$,
   'P0001', null, 'no se reasigna un tiquet registrado');
 
 -- Segundo tiquet: reasignación a un supervisor concreto.
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
-  'location_id', (select id from public.locations where name = 'Planta baja'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'Fuga de agua',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
@@ -217,7 +217,7 @@ select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-000000000003"}', true);
 select public.ticket_add_auxiliary(
   (select id from public.tickets where description = 'Fuga de agua'),
-  (select id from public.technicians where full_name = 'Luis Gómez'),
+  (select id from public.technicians where full_name = 'Técnico Alfa'),
   (select id from public.reasons where use = 'auxiliary_support' limit 1));
 select is(
   (select count(*)::int from public.ticket_participants p
@@ -241,13 +241,13 @@ select set_config('request.jwt.claims',
 select throws_ok(
   $$ select public.ticket_add_auxiliary(
        (select id from public.tickets where description = 'Fuga de agua'),
-       (select id from public.technicians where full_name = 'Luis Gómez'),
+       (select id from public.technicians where full_name = 'Técnico Alfa'),
        (select id from public.reasons where use = 'auxiliary_support' limit 1)) $$,
   '23505', null, 'no repite al mismo auxiliar');
 select throws_ok(
   $$ select public.ticket_add_auxiliary(
        (select id from public.tickets where description = 'Fuga de agua'),
-       (select id from public.technicians where full_name = 'Marta Ruiz'),
+       (select id from public.technicians where full_name = 'Técnico Beta'),
        (select id from public.reasons where use = 'rejection' limit 1)) $$,
   '22023', null, 'rechaza un motivo que no es de apoyo auxiliar');
 
@@ -256,7 +256,7 @@ select set_config('request.jwt.claims',
 select throws_ok(
   $$ select public.ticket_add_auxiliary(
        (select id from public.tickets where description = 'Fuga de agua'),
-       (select id from public.technicians where full_name = 'Marta Ruiz'),
+       (select id from public.technicians where full_name = 'Técnico Beta'),
        (select id from public.reasons where use = 'auxiliary_support' limit 1)) $$,
   '42501', null, 'el técnico no agrega auxiliares');
 
@@ -267,19 +267,19 @@ select set_config('request.jwt.claims',
 select ok(
   jsonb_array_length(public.ticket_check_duplicates(jsonb_build_object(
     'building_id', (select id from public.buildings where name = 'Edificio A'),
-    'category_id', (select id from public.categories where name = 'Eléctrico'),
+    'category_id', (select id from public.categories where name = 'Categoría Alfa'),
     'description', 'No enciende la luz'))) >= 1,
   'encuentra al menos un posible duplicado');
 select ok(
   (public.ticket_check_duplicates(jsonb_build_object(
     'building_id', (select id from public.buildings where name = 'Edificio A'),
-    'category_id', (select id from public.categories where name = 'Eléctrico'),
+    'category_id', (select id from public.categories where name = 'Categoría Alfa'),
     'description', 'No enciende la luz')) -> 0) ? 'folio',
   'el candidato incluye el folio');
 select ok(
   not ((public.ticket_check_duplicates(jsonb_build_object(
     'building_id', (select id from public.buildings where name = 'Edificio A'),
-    'category_id', (select id from public.categories where name = 'Eléctrico'),
+    'category_id', (select id from public.categories where name = 'Categoría Alfa'),
     'description', 'No enciende la luz')) -> 0) ? 'status'),
   'no expone campos fuera de la configuración');
 

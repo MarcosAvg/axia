@@ -37,24 +37,24 @@ select is(
   true, 'RLS activado en idempotency_keys');
 
 -- Datos de prueba.
-insert into public.teams (name) values ('Mantenimiento');
+insert into public.teams (name) values ('Equipo Alfa');
 insert into public.buildings (name) values ('Edificio A');
 insert into public.buildings (name) values ('Edificio B');
 insert into public.locations (building_id, name)
-  select id, 'Planta baja' from public.buildings where name = 'Edificio A';
-insert into public.dependencies (name) values ('Sistemas');
+  select id, 'Nivel A' from public.buildings where name = 'Edificio A';
+insert into public.dependencies (name) values ('Dependencia Alfa');
 insert into public.categories (team_id, name)
-  select id, 'Eléctrico' from public.teams where name = 'Mantenimiento';
+  select id, 'Categoría Alfa' from public.teams where name = 'Equipo Alfa';
 insert into public.categories (team_id, name)
-  select id, 'Plomería' from public.teams where name = 'Mantenimiento';
+  select id, 'Categoría Beta' from public.teams where name = 'Equipo Alfa';
 insert into public.subcategories (category_id, name)
-  select id, 'Contacto' from public.categories where name = 'Eléctrico';
+  select id, 'Subcategoría Alfa' from public.categories where name = 'Categoría Alfa';
 insert into public.problems (subcategory_id, name)
-  select id, 'Chispa' from public.subcategories where name = 'Contacto';
-insert into public.service_types (name) values ('Correctivo');
-insert into public.priorities (name) values ('Media');
-insert into public.channels (name) values ('Web');
-insert into public.requesters (full_name, contact) values ('Ana Pérez', 'ext. 1');
+  select id, 'Chispa' from public.subcategories where name = 'Subcategoría Alfa';
+insert into public.service_types (name) values ('Servicio Alfa');
+insert into public.priorities (name) values ('Prioridad Alfa');
+insert into public.channels (name) values ('Canal Alfa');
+insert into public.requesters (full_name, contact) values ('Solicitante Alfa', 'ext. 1');
 
 -- Inserta un tiquet de prueba y verifica folio y consecutivo.
 select lives_ok(
@@ -63,14 +63,14 @@ select lives_ok(
        problem_id, service_type_id, priority_id, channel_id, description,
        requester_id, requester_name)
      select b.id, l.id, d.id, c.id, sc.id, p.id, st.id, pr.id, ch.id, 'Falla',
-            rq.id, 'Ana Pérez'
+            rq.id, 'Solicitante Alfa'
      from public.buildings b, public.locations l, public.dependencies d,
           public.categories c, public.subcategories sc, public.problems p,
           public.service_types st, public.priorities pr, public.channels ch,
           public.requesters rq
-     where b.name = 'Edificio A' and l.name = 'Planta baja' and d.name = 'Sistemas'
-       and c.name = 'Eléctrico' and sc.name = 'Contacto' and p.name = 'Chispa'
-       and st.name = 'Correctivo' and pr.name = 'Media' and ch.name = 'Web' $$,
+     where b.name = 'Edificio A' and l.name = 'Nivel A' and d.name = 'Dependencia Alfa'
+       and c.name = 'Categoría Alfa' and sc.name = 'Subcategoría Alfa' and p.name = 'Chispa'
+       and st.name = 'Servicio Alfa' and pr.name = 'Prioridad Alfa' and ch.name = 'Canal Alfa' $$,
   'inserta un tiquet');
 
 select matches(
@@ -81,12 +81,12 @@ select matches(
 insert into public.tickets (
   building_id, location_id, dependency_id, category_id, service_type_id,
   priority_id, channel_id, description, requester_id, requester_name)
-select b.id, l.id, d.id, c.id, st.id, pr.id, ch.id, 'Otra', rq.id, 'Ana Pérez'
+select b.id, l.id, d.id, c.id, st.id, pr.id, ch.id, 'Otra', rq.id, 'Solicitante Alfa'
 from public.buildings b, public.locations l, public.dependencies d,
      public.categories c, public.service_types st, public.priorities pr,
      public.channels ch, public.requesters rq
-where b.name = 'Edificio A' and l.name = 'Planta baja' and d.name = 'Sistemas'
-  and c.name = 'Eléctrico' and st.name = 'Correctivo' and pr.name = 'Media' and ch.name = 'Web';
+where b.name = 'Edificio A' and l.name = 'Nivel A' and d.name = 'Dependencia Alfa'
+  and c.name = 'Categoría Alfa' and st.name = 'Servicio Alfa' and pr.name = 'Prioridad Alfa' and ch.name = 'Canal Alfa';
 
 select cmp_ok(
   (select max(ticket_number) from public.tickets),
@@ -103,9 +103,9 @@ select throws_ok(
      from public.buildings b, public.locations l, public.dependencies d,
           public.categories c, public.subcategories sc, public.service_types st,
           public.priorities pr, public.channels ch, public.requesters rq
-     where b.name = 'Edificio A' and l.name = 'Planta baja' and d.name = 'Sistemas'
-       and c.name = 'Plomería' and sc.name = 'Contacto' and st.name = 'Correctivo'
-       and pr.name = 'Media' and ch.name = 'Web' $$,
+     where b.name = 'Edificio A' and l.name = 'Nivel A' and d.name = 'Dependencia Alfa'
+       and c.name = 'Categoría Beta' and sc.name = 'Subcategoría Alfa' and st.name = 'Servicio Alfa'
+       and pr.name = 'Prioridad Alfa' and ch.name = 'Canal Alfa' $$,
   'P0001', null, 'rechaza una subcategoría que no pertenece a la categoría');
 
 select throws_ok(
@@ -116,9 +116,9 @@ select throws_ok(
      from public.buildings b, public.locations l, public.dependencies d,
           public.categories c, public.service_types st, public.priorities pr,
           public.channels ch, public.requesters rq
-     where b.name = 'Edificio B' and l.name = 'Planta baja' and d.name = 'Sistemas'
-       and c.name = 'Eléctrico' and st.name = 'Correctivo' and pr.name = 'Media'
-       and ch.name = 'Web' $$,
+     where b.name = 'Edificio B' and l.name = 'Nivel A' and d.name = 'Dependencia Alfa'
+       and c.name = 'Categoría Alfa' and st.name = 'Servicio Alfa' and pr.name = 'Prioridad Alfa'
+       and ch.name = 'Canal Alfa' $$,
   'P0001', null, 'rechaza una ubicación que no pertenece al edificio');
 
 -- Asignación de técnico exige el técnico del catálogo.
