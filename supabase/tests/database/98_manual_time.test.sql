@@ -20,33 +20,33 @@ from (values
 ) as v (uid, role_name)
 join public.roles r on r.name = v.role_name;
 
-insert into public.teams (name) values ('Mantenimiento');
+insert into public.teams (name) values ('Equipo Alfa');
 insert into public.buildings (name) values ('Edificio A');
 insert into public.locations (building_id, name)
   select id, 'PB' from public.buildings where name = 'Edificio A';
-insert into public.dependencies (name) values ('Sistemas');
+insert into public.dependencies (name) values ('Dependencia Alfa');
 insert into public.categories (team_id, name)
-  select id, 'Eléctrico' from public.teams where name = 'Mantenimiento';
-insert into public.service_types (name) values ('Correctivo');
-insert into public.priorities (name) values ('Media');
-insert into public.channels (name) values ('Web');
+  select id, 'Categoría Alfa' from public.teams where name = 'Equipo Alfa';
+insert into public.service_types (name) values ('Servicio Alfa');
+insert into public.priorities (name) values ('Prioridad Alfa');
+insert into public.channels (name) values ('Canal Alfa');
 insert into public.requesters (full_name, dependency_id)
-  select 'Ana Pérez', d.id from public.dependencies d where d.name = 'Sistemas';
+  select 'Solicitante Alfa', d.id from public.dependencies d where d.name = 'Dependencia Alfa';
 insert into public.technicians (full_name, team_id)
-  select 'Luis Gómez', t.id from public.teams t where t.name = 'Mantenimiento';
+  select 'Técnico Alfa', t.id from public.teams t where t.name = 'Equipo Alfa';
 
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
   'location_id', (select id from public.locations where name = 'PB'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'Manual',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 
 -- El tiquet lleva abierto dos horas; el tramo va de hace una hora a ahora.
 update public.tickets
@@ -62,7 +62,7 @@ select lives_ok(
        now(),
        'counted',
        '00000000-0000-0000-0000-0000000000aa',
-       (select id from public.technicians where full_name = 'Luis Gómez')) $$,
+       (select id from public.technicians where full_name = 'Técnico Alfa')) $$,
   'el admin registra un tramo manual con técnico sujeto');
 select is(
   (select origin from public.time_spans
@@ -71,7 +71,7 @@ select is(
 select is(
   (select subject_technician_id from public.time_spans
    where client_request_id = '00000000-0000-0000-0000-0000000000aa'),
-  (select id from public.technicians where full_name = 'Luis Gómez'),
+  (select id from public.technicians where full_name = 'Técnico Alfa'),
   'el tramo queda atribuido al técnico');
 select cmp_ok(
   public.ticket_time_by_kind(

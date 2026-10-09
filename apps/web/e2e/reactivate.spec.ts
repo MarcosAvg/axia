@@ -28,24 +28,20 @@ test('el administrador rechaza y reactiva un tiquet', async ({ page }) => {
   await page.goto('/tickets/nuevo')
   await page
     .getByLabel('Solicitante', { exact: true })
-    .selectOption({ label: 'Ana Pérez (ejemplo)' })
-  await page
-    .getByLabel('Edificio')
-    .selectOption({ label: 'Edificio Central (ejemplo)' })
-  await page
-    .getByLabel('Ubicación')
-    .selectOption({ label: 'Planta baja (ejemplo)' })
+    .selectOption({ label: 'Ana Pérez' })
+  await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
+  await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
   await page
     .getByLabel('Dependencia solicitante')
-    .selectOption({ label: 'Sistemas (ejemplo)' })
+    .selectOption({ label: 'Sistemas' })
   await page
     .getByLabel('Categoría', { exact: true })
-    .selectOption({ label: 'Eléctrico (ejemplo)' })
+    .selectOption({ label: 'Eléctrico' })
   await page
     .getByLabel('Tipo de servicio')
-    .selectOption({ label: 'Correctivo (ejemplo)' })
-  await page.getByLabel('Prioridad').selectOption({ label: 'Media (ejemplo)' })
-  await page.getByLabel('Canal').selectOption({ label: 'Web (ejemplo)' })
+    .selectOption({ label: 'Correctivo' })
+  await page.getByLabel('Prioridad').selectOption({ label: 'Media' })
+  await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()
   await expect(page.getByText(description)).toBeVisible()

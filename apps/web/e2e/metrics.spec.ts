@@ -12,7 +12,7 @@ async function signIn(page: Page, email: string) {
 
 test('el administrador abre las métricas', async ({ page }) => {
   await signIn(page, 'admin@axia.test')
-  await expect(page.getByText(/Hola, Admin Demo/)).toBeVisible()
+  await expect(page.getByText(/Hola, Rosa Delgado/)).toBeVisible()
 
   await page
     .getByRole('navigation', { name: 'Navegación principal' })

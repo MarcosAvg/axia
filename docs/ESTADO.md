@@ -772,3 +772,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   estado. Componentes compartidos `FormSection`, `FormActionsBar`, `FilterChips`. Se actualizaron
   los e2e de acciones secundarias. **ADR 0042**. `pnpm check` en verde (142 Vitest, 12 Playwright,
   404 pgTAP). Rama `feat/vistas-operacion`.
+- **Semilla con nombres legibles (2026-10-09)**: `supabase/seed.sql` sin el sufijo `(ejemplo)` en
+  catálogos, personas, motivos y descripciones; usuarios demo con nombres de persona (`Rosa
+  Delgado`, `Sergio Ramírez`, `Luis Gómez`, `Ana Pérez`). Las pruebas pgTAP pasan a un juego de
+  nombres propio (`Equipo Alfa`, `Categoría Alfa`, `Nivel A`, `Motivo de prueba`, …) para no
+  compartir claves únicas con la semilla, y los e2e se actualizan. **ADR 0043**. Rama
+  `feat/semilla-nombres-legibles`.

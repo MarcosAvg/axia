@@ -43,37 +43,37 @@ from (values
 ) as v (uid, role_name)
 join public.roles r on r.name = v.role_name;
 
-insert into public.teams (name) values ('Mantenimiento');
+insert into public.teams (name) values ('Equipo Alfa');
 insert into public.buildings (name) values ('Edificio A');
 insert into public.locations (building_id, name)
-  select id, 'Planta baja' from public.buildings where name = 'Edificio A';
-insert into public.dependencies (name) values ('Sistemas');
+  select id, 'Nivel A' from public.buildings where name = 'Edificio A';
+insert into public.dependencies (name) values ('Dependencia Alfa');
 insert into public.categories (team_id, name)
-  select id, 'Eléctrico' from public.teams where name = 'Mantenimiento';
+  select id, 'Categoría Alfa' from public.teams where name = 'Equipo Alfa';
 insert into public.subcategories (category_id, name)
-  select id, 'Contacto' from public.categories where name = 'Eléctrico';
+  select id, 'Subcategoría Alfa' from public.categories where name = 'Categoría Alfa';
 insert into public.problems (subcategory_id, name)
-  select id, 'Chispa' from public.subcategories where name = 'Contacto';
-insert into public.service_types (name) values ('Correctivo');
-insert into public.priorities (name) values ('Media');
-insert into public.priorities (name) values ('Alta');
-insert into public.channels (name) values ('Web');
+  select id, 'Chispa' from public.subcategories where name = 'Subcategoría Alfa';
+insert into public.service_types (name) values ('Servicio Alfa');
+insert into public.priorities (name) values ('Prioridad Alfa');
+insert into public.priorities (name) values ('Prioridad Beta');
+insert into public.channels (name) values ('Canal Alfa');
 
 insert into public.requesters (full_name, contact, dependency_id, user_id)
-  select 'Ana Pérez', 'ext. 1', d.id, '00000000-0000-0000-0000-000000000004'
-  from public.dependencies d where d.name = 'Sistemas';
+  select 'Solicitante Alfa', 'ext. 1', d.id, '00000000-0000-0000-0000-000000000004'
+  from public.dependencies d where d.name = 'Dependencia Alfa';
 
 insert into public.technicians (full_name, user_id, team_id)
-  select 'Luis Gómez', '00000000-0000-0000-0000-000000000003', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  select 'Técnico Alfa', '00000000-0000-0000-0000-000000000003', t.id
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.technician_categories (technician_id, category_id)
   select tech.id, c.id
   from public.technicians tech, public.categories c
-  where tech.full_name = 'Luis Gómez' and c.name = 'Eléctrico';
+  where tech.full_name = 'Técnico Alfa' and c.name = 'Categoría Alfa';
 
 insert into public.supervisor_scopes (user_id, team_id)
   select '00000000-0000-0000-0000-000000000002', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.supervisor_scope_buildings (scope_id, building_id)
   select ss.id, b.id
   from public.supervisor_scopes ss, public.buildings b
@@ -89,16 +89,16 @@ select set_config('request.jwt.claims',
 select ok(
   (select public.ticket_create(jsonb_build_object(
      'building_id', (select id from public.buildings where name = 'Edificio A'),
-     'location_id', (select id from public.locations where name = 'Planta baja'),
-     'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-     'category_id', (select id from public.categories where name = 'Eléctrico'),
-     'subcategory_id', (select id from public.subcategories where name = 'Contacto'),
+     'location_id', (select id from public.locations where name = 'Nivel A'),
+     'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+     'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+     'subcategory_id', (select id from public.subcategories where name = 'Subcategoría Alfa'),
      'problem_id', (select id from public.problems where name = 'Chispa'),
-     'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-     'priority_id', (select id from public.priorities where name = 'Media'),
-     'channel_id', (select id from public.channels where name = 'Web'),
+     'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+     'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+     'channel_id', (select id from public.channels where name = 'Canal Alfa'),
      'description', 'No enciende la luz',
-     'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')
+     'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')
    )) is not null),
   'registra un tiquet a nombre del solicitante');
 
@@ -121,7 +121,7 @@ select is(
 -- Asignar técnico.
 select public.ticket_assign_technician(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.technicians where full_name = 'Luis Gómez'));
+  (select id from public.technicians where full_name = 'Técnico Alfa'));
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'assigned'::public.ticket_status, 'el tiquet pasa a asignado');
@@ -192,11 +192,11 @@ select is(
 -- Ajuste de prioridad.
 select public.ticket_change_priority(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.priorities where name = 'Alta'));
+  (select id from public.priorities where name = 'Prioridad Beta'));
 select is(
   (select p.name from public.tickets t join public.priorities p on p.id = t.priority_id
    order by t.ticket_number limit 1),
-  'Alta', 'ajusta la prioridad con evento');
+  'Prioridad Beta', 'ajusta la prioridad con evento');
 
 select * from finish();
 

@@ -19,7 +19,7 @@ select is(
    where c.name = 'Oficina' and i.start_time = '08:00' and i.end_time = '17:00'),
   5, 'Oficina cubre de 08:00 a 17:00 de lunes a viernes');
 select is(
-  (select work_calendar_id from public.teams where name = 'Mantenimiento (ejemplo)'),
+  (select work_calendar_id from public.teams where name = 'Mantenimiento'),
   (select id from public.work_calendars where name = 'Mantenimiento'),
   'el equipo de Mantenimiento usa su calendario');
 select cmp_ok(

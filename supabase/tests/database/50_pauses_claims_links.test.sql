@@ -44,59 +44,59 @@ from (values
 ) as v (uid, role_name)
 join public.roles r on r.name = v.role_name;
 
-insert into public.teams (name) values ('Mantenimiento');
+insert into public.teams (name) values ('Equipo Alfa');
 insert into public.buildings (name) values ('Edificio A');
 insert into public.locations (building_id, name)
-  select id, 'Planta baja' from public.buildings where name = 'Edificio A';
-insert into public.dependencies (name) values ('Sistemas');
+  select id, 'Nivel A' from public.buildings where name = 'Edificio A';
+insert into public.dependencies (name) values ('Dependencia Alfa');
 insert into public.categories (team_id, name)
-  select id, 'Eléctrico' from public.teams where name = 'Mantenimiento';
-insert into public.service_types (name) values ('Correctivo');
-insert into public.priorities (name) values ('Media');
-insert into public.channels (name) values ('Web');
+  select id, 'Categoría Alfa' from public.teams where name = 'Equipo Alfa';
+insert into public.service_types (name) values ('Servicio Alfa');
+insert into public.priorities (name) values ('Prioridad Alfa');
+insert into public.channels (name) values ('Canal Alfa');
 insert into public.requesters (full_name, contact, dependency_id, user_id)
-  select 'Ana Pérez', 'ext. 1', d.id, '00000000-0000-0000-0000-000000000004'
-  from public.dependencies d where d.name = 'Sistemas';
+  select 'Solicitante Alfa', 'ext. 1', d.id, '00000000-0000-0000-0000-000000000004'
+  from public.dependencies d where d.name = 'Dependencia Alfa';
 insert into public.technicians (full_name, user_id, team_id)
-  select 'Luis Gómez', '00000000-0000-0000-0000-000000000003', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  select 'Técnico Alfa', '00000000-0000-0000-0000-000000000003', t.id
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.technician_categories (technician_id, category_id)
   select tech.id, c.id from public.technicians tech, public.categories c
-  where tech.full_name = 'Luis Gómez' and c.name = 'Eléctrico';
+  where tech.full_name = 'Técnico Alfa' and c.name = 'Categoría Alfa';
 insert into public.supervisor_scopes (user_id, team_id)
   select '00000000-0000-0000-0000-000000000002', t.id
-  from public.teams t where t.name = 'Mantenimiento';
+  from public.teams t where t.name = 'Equipo Alfa';
 insert into public.supervisor_scope_buildings (scope_id, building_id)
   select ss.id, b.id from public.supervisor_scopes ss, public.buildings b
   where ss.user_id = '00000000-0000-0000-0000-000000000002' and b.name = 'Edificio A';
 update public.instance_settings set validation_policy = 'supervisor';
 
 -- Motivos.
-insert into public.reasons (use, name) values ('pause', 'Falta de material') returning id;
+insert into public.reasons (use, name) values ('pause', 'Motivo de prueba') returning id;
 insert into public.reasons (use, name, parent_id)
-  select 'pause', 'En cotización', id from public.reasons where name = 'Falta de material';
-insert into public.reasons (use, name) values ('claim', 'Trabajo incompleto');
-insert into public.reasons (use, name) values ('claim_outcome', 'Procedente');
-insert into public.reasons (use, name) values ('recapture', 'Descripción insuficiente');
+  select 'pause', 'Submotivo prueba 2', id from public.reasons where name = 'Motivo de prueba';
+insert into public.reasons (use, name) values ('claim', 'Motivo reclamo');
+insert into public.reasons (use, name) values ('claim_outcome', 'Resultado procedente');
+insert into public.reasons (use, name) values ('recapture', 'Motivo recaptura');
 
 -- Crea un tiquet y recórrelo hasta "atendido".
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
-  'location_id', (select id from public.locations where name = 'Planta baja'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'Falla de iluminación',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_take((select id from public.tickets order by ticket_number limit 1));
 select public.ticket_assign_technician(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.technicians where full_name = 'Luis Gómez'));
+  (select id from public.technicians where full_name = 'Técnico Alfa'));
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000003"}', true);
 insert into public.evidence (ticket_id, cycle, type)
@@ -106,18 +106,18 @@ select public.ticket_start((select id from public.tickets order by ticket_number
 -- Pausa, avance y reanudación.
 select public.ticket_pause(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.reasons where name = 'Falta de material'), 'sin cable');
+  (select id from public.reasons where name = 'Motivo de prueba'), 'sin cable');
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'paused'::public.ticket_status, 'el tiquet queda pausado');
 
 select public.ticket_advance_pause(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.reasons where name = 'En cotización'));
+  (select id from public.reasons where name = 'Submotivo prueba 2'));
 select is(
   (select r.name from public.ticket_pauses p join public.reasons r on r.id = p.reason_id
    where p.closed_at is null limit 1),
-  'En cotización', 'avanza el subestado de la pausa');
+  'Submotivo prueba 2', 'avanza el subestado de la pausa');
 select is(
   (select count(*)::int from public.ticket_pause_steps), 2, 'registra cada paso del subestado');
 
@@ -133,7 +133,7 @@ select throws_ok(
 select public.ticket_recapture(
   (select id from public.tickets order by ticket_number limit 1),
   jsonb_build_object('description', 'Falla de iluminación en el pasillo'),
-  (select id from public.reasons where name = 'Descripción insuficiente'));
+  (select id from public.reasons where name = 'Motivo recaptura'));
 select is(
   (select description from public.tickets order by ticket_number limit 1),
   'Falla de iluminación en el pasillo', 'la recaptura actualiza la captura');
@@ -152,14 +152,14 @@ select is(
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_open_claim(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.reasons where name = 'Trabajo incompleto'), 'no funcionó');
+  (select id from public.reasons where name = 'Motivo reclamo'), 'no funcionó');
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'under_claim'::public.ticket_status, 'el tiquet queda en reclamación');
 
 select public.ticket_resolve_claim(
   (select id from public.tickets order by ticket_number limit 1), 'upheld',
-  (select id from public.reasons where name = 'Procedente'), 'procede');
+  (select id from public.reasons where name = 'Resultado procedente'), 'procede');
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'assigned'::public.ticket_status, 'una reclamación procedente reabre');
@@ -171,14 +171,14 @@ select is(
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
-  'location_id', (select id from public.locations where name = 'Planta baja'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'Otra falla',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 
 select public.ticket_mark_duplicate(
   (select id from public.tickets order by ticket_number desc limit 1),
@@ -205,21 +205,21 @@ select throws_ok(
 -- Tercer tiquet: reclamación improcedente cierra.
 select public.ticket_create(jsonb_build_object(
   'building_id', (select id from public.buildings where name = 'Edificio A'),
-  'location_id', (select id from public.locations where name = 'Planta baja'),
-  'dependency_id', (select id from public.dependencies where name = 'Sistemas'),
-  'category_id', (select id from public.categories where name = 'Eléctrico'),
-  'service_type_id', (select id from public.service_types where name = 'Correctivo'),
-  'priority_id', (select id from public.priorities where name = 'Media'),
-  'channel_id', (select id from public.channels where name = 'Web'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'service_type_id', (select id from public.service_types where name = 'Servicio Alfa'),
+  'priority_id', (select id from public.priorities where name = 'Prioridad Alfa'),
+  'channel_id', (select id from public.channels where name = 'Canal Alfa'),
   'description', 'Tercera',
-  'requester_id', (select id from public.requesters where full_name = 'Ana Pérez')));
+  'requester_id', (select id from public.requesters where full_name = 'Solicitante Alfa')));
 update public.tickets set status = 'attended'
   where id = (select id from public.tickets order by ticket_number desc limit 1);
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_open_claim(
   (select id from public.tickets order by ticket_number desc limit 1),
-  (select id from public.reasons where name = 'Trabajo incompleto'), 'no procede');
+  (select id from public.reasons where name = 'Motivo reclamo'), 'no procede');
 select public.ticket_resolve_claim(
   (select id from public.tickets order by ticket_number desc limit 1), 'dismissed',
   null, 'improcedente');
