@@ -870,3 +870,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   el bloque de **duplicados** (KPI + tarjetas por dimensión) queda agrupado bajo su título. Solo
   `quality-tab.tsx`; sin cambios de datos. `pnpm check` en verde (155 Vitest, 12 Playwright, 427
   pgTAP). Rama `feat/metricas-calidad-layout`.
+- **Métricas: Calidad sin hueco (Etapa 14)**: se quita la tarjeta "Duplicados" suelta (que con un solo
+  indicador dejaba un hueco junto al gráfico); el **tiempo medio hasta marcarse** (y las alertas, si
+  las hay) pasa a **línea de resumen en el encabezado** de "Duplicados por dimensión", y **Pausas**
+  (altura fija `h-48`) comparte fila con **Rechazos y cancelaciones**. Solo `quality-tab.tsx`,
+  `duplicates-summary.tsx` y `pauses-chart.tsx`; sin cambios de datos. `pnpm check` en verde (155
+  Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-calidad-reubicacion`.
