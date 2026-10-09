@@ -1,3 +1,19 @@
+import { useQuery } from '@tanstack/react-query'
+import {
+  EMPTY_FILTERS,
+  openAging,
+  summarize,
+  useMetricsTickets,
+  useSla,
+  useSatisfaction,
+} from '@/features/metrics'
+import type {
+  AgingRow,
+  MetricsSummary,
+  MetricsTicket,
+  SatisfactionSummary,
+  SlaSummary,
+} from '@/features/metrics'
 import {
   ACTIVE_STATUSES,
   useMyOffers,
@@ -5,8 +21,47 @@ import {
   useTicketsList,
 } from '@/features/tickets'
 import type { TicketListItem } from '@/features/tickets'
-import { summarizeWork } from '../domain/summary'
-import type { WorkSummary } from '../domain/summary'
+import { fetchRecentActivity } from '../api/dashboard-api'
+import type { ActivityItem } from '../api/dashboard-api'
+import { countByStatus, summarizeWork } from '../domain/summary'
+import type { StatusCount, WorkSummary } from '../domain/summary'
+
+const EMPTY_SLA: SlaSummary = {
+  withTarget: 0,
+  met: 0,
+  complianceRate: null,
+  avgTargetMinutes: null,
+  avgResolutionMinutes: null,
+}
+
+const EMPTY_SATISFACTION: SatisfactionSummary = { average: null, ratings: 0 }
+
+const PREVIEW = 5
+
+interface PageLike {
+  total: number
+  items: TicketListItem[]
+}
+
+function or<T>(value: T | undefined, fallback: T): T {
+  return value ?? fallback
+}
+
+function pageTotal(page: PageLike | undefined): number {
+  return page ? page.total : 0
+}
+
+function pageItems(page: PageLike | undefined): TicketListItem[] {
+  return page ? page.items : []
+}
+
+/** Actividad reciente visible para el usuario (RLS). */
+function useRecentActivity() {
+  return useQuery({
+    queryKey: ['dashboard', 'activity'],
+    queryFn: () => fetchRecentActivity(),
+  })
+}
 
 export interface DashboardData {
   work: WorkSummary
@@ -20,24 +75,16 @@ export interface DashboardData {
     unassigned: number
     closed: number
   }
+  tickets: MetricsTicket[]
+  summary: MetricsSummary
+  statusCounts: StatusCount[]
+  attention: AgingRow[]
+  sla: SlaSummary
+  satisfaction: SatisfactionSummary
+  activity: ActivityItem[]
 }
 
-const PREVIEW = 5
-
-interface PageLike {
-  total: number
-  items: TicketListItem[]
-}
-
-function pageTotal(page: PageLike | undefined): number {
-  return page ? page.total : 0
-}
-
-function pageItems(page: PageLike | undefined): TicketListItem[] {
-  return page ? page.items : []
-}
-
-/** Datos del panel: números y bandejas del usuario (RLS ya limita lo que ve). */
+/** Datos del panel: números, bandejas y métricas del usuario (RLS limita). */
 export function useDashboardData(userId: string | undefined): DashboardData {
   const myWork = useMyWork(userId)
   const offers = useMyOffers(userId)
@@ -49,7 +96,12 @@ export function useDashboardData(userId: string | undefined): DashboardData {
     1,
   )
   const closed = useTicketsList({ statuses: ['closed'] }, 1)
+  const metrics = useMetricsTickets()
+  const sla = useSla(EMPTY_FILTERS)
+  const satisfaction = useSatisfaction(EMPTY_FILTERS)
+  const activity = useRecentActivity()
 
+  const tickets = or(metrics.data, [])
   return {
     work: summarizeWork(myWork.data ?? []),
     offerItems: offers.data ?? [],
@@ -62,5 +114,12 @@ export function useDashboardData(userId: string | undefined): DashboardData {
       unassigned: pageTotal(unassigned.data),
       closed: pageTotal(closed.data),
     },
+    tickets,
+    summary: summarize(tickets),
+    statusCounts: countByStatus(tickets),
+    attention: openAging(tickets, new Date()).slice(0, PREVIEW),
+    sla: or(sla.summary.data, EMPTY_SLA),
+    satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
+    activity: or(activity.data, []),
   }
 }

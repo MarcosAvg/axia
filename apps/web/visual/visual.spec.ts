@@ -24,7 +24,13 @@ test('panel y métricas', async ({ page }) => {
   await expect(page.getByText(/Hola, Rosa Delgado/)).toBeVisible()
   await expect(page).toHaveScreenshot('panel.png', {
     fullPage: true,
-    mask: [page.locator('time')],
+    mask: [
+      page.locator('time'),
+      page.locator('svg.recharts-surface'),
+      page
+        .locator('[data-slot="card"]')
+        .filter({ hasText: 'Requiere tu atención' }),
+    ],
   })
 
   await page

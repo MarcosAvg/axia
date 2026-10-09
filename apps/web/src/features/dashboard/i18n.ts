@@ -18,6 +18,22 @@ export const dashboardMessages = {
     toValidate: 'Por validar',
     unassigned: 'Sin asignar',
     closed: 'Cerrados',
+    activeTime: 'Trabajo activo',
+    firstFix: 'Primera resolución',
+    sla: 'Cumplimiento de SLA',
+    satisfaction: 'Satisfacción',
+  },
+  charts: {
+    volume: 'Tiquets por mes',
+    status: 'Por estado',
+  },
+  attention: {
+    title: 'Requiere tu atención',
+    empty: 'Nada pendiente.',
+  },
+  activity: {
+    title: 'Actividad reciente',
+    empty: 'Sin actividad.',
   },
   sections: {
     offers: 'Ofertas para ti',
