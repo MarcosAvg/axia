@@ -89,7 +89,6 @@ export const metricsMessages = {
   charts: {
     volume: 'Tiquets por día',
     ticketsBy: 'Tiquets',
-    dimensionDetail: 'Detalle por dimensión',
     timesByDimension: 'Tiempos por dimensión',
     pauses: 'Pausas por motivo',
   },
