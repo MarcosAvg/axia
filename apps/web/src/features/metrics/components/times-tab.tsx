@@ -1,20 +1,19 @@
 import { formatMinutes } from '../domain/metrics'
-import type { DimensionRow, MetricsSummary } from '../domain/metrics'
+import type { MetricsSummary } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
+import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
-import { ChartCard } from './chart-card'
-import { DimensionTable } from './dimension-table'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
 function timeCards(
   summary: MetricsSummary,
-  prev: MetricsSummary | null,
+  comparison: Comparison | null,
 ): Kpi[] {
   const k = metricsMessages.kpi
   const hints = metricsMessages.kpiHints
   const change = (pick: (s: MetricsSummary) => number) =>
-    prev ? deltaOf(pick(summary), pick(prev)) : undefined
+    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
   return [
     {
       label: k.active,
@@ -62,24 +61,21 @@ function timeCards(
   ]
 }
 
-/** Tiempos: KPI de duración y tabla por dimensión. */
+/** Tiempos: KPI de duración del rango. */
 export function TimesTab({
   summary,
-  prev,
-  rows,
-  nameOf,
+  comparison,
 }: {
   summary: MetricsSummary
-  prev: MetricsSummary | null
-  rows: DimensionRow[]
-  nameOf: (id: string) => string
+  comparison: Comparison | null
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <KpiGrid cards={timeCards(summary, prev)} columns={4} />
-      <ChartCard title={metricsMessages.table.dimension}>
-        <DimensionTable rows={rows} nameOf={nameOf} />
-      </ChartCard>
+      <KpiGrid
+        cards={timeCards(summary, comparison)}
+        columns={4}
+        period={comparison?.label}
+      />
     </div>
   )
 }

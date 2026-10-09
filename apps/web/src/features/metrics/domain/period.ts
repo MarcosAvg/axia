@@ -1,6 +1,6 @@
 // Periodos y comparación de indicadores (funciones puras).
 
-import type { MetricsFilters } from './metrics'
+import type { MetricsFilters, MetricsSummary } from './metrics'
 
 function toDateString(date: Date): string {
   const year = date.getFullYear()
@@ -14,7 +14,7 @@ export function rangeForDays(
   days: number,
   now: Date,
 ): { from: string; to: string } {
-  const from = new Date(now.getTime() - days * 86_400_000)
+  const from = new Date(now.getTime() - (days - 1) * 86_400_000)
   return { from: toDateString(from), to: toDateString(now) }
 }
 
@@ -51,4 +51,38 @@ export function formatDelta(change: number | null): string {
   const percent = Math.round(Math.abs(change) * 100)
   if (percent === 0) return '0%'
   return `${change > 0 ? '+' : '-'}${percent}%`
+}
+
+const MONTHS = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+]
+
+function formatDayMonth(date: string): string {
+  const [year, month, day] = date.split('-')
+  const monthName = MONTHS[Number(month) - 1]
+  if (!year || !day || !monthName) return date
+  return `${Number(day)} ${monthName}`
+}
+
+/** Rango legible para el periodo comparado, p. ej. "30 sep – 7 oct". */
+export function formatRangeLabel(from: string, to: string): string {
+  if (!from || !to) return ''
+  return `${formatDayMonth(from)} – ${formatDayMonth(to)}`
+}
+
+/** Periodo anterior calculado, con su etiqueta legible. */
+export interface Comparison {
+  summary: MetricsSummary
+  label: string
 }

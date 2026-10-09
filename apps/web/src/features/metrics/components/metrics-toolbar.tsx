@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { SelectField, TextField } from '@/components/shared/form-fields'
+import type { DimensionGroup } from '../domain/dimensions'
 import type { FilterCatalogs, NamedOption } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
 import { rangeForDays } from '../domain/period'
-import type { Dimension, DimensionRow, MetricsFilters } from '../domain/metrics'
-import { dimensionLabels, metricsMessages } from '../i18n'
+import type { MetricsFilters } from '../domain/metrics'
+import { metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
 
 const t = metricsMessages.filters
@@ -15,12 +16,6 @@ const QUICK_RANGES = [
   { key: 'd30' as const, days: 30 },
   { key: 'd90' as const, days: 90 },
 ]
-
-const DIMENSIONS = Object.keys(dimensionLabels) as Dimension[]
-const dimensionOptions = DIMENSIONS.map((value) => ({
-  value,
-  label: dimensionLabels[value],
-}))
 
 function FilterSelect({
   id,
@@ -128,21 +123,15 @@ function CatalogFilters({
   )
 }
 
-interface ToolbarFormProps {
-  filters: MetricsFilters
-  catalogs: FilterCatalogs
-  dimension: Dimension
-  onFiltersChange: (filters: MetricsFilters) => void
-  onDimensionChange: (dimension: Dimension) => void
-}
-
 function ToolbarForm({
   filters,
   catalogs,
-  dimension,
   onFiltersChange,
-  onDimensionChange,
-}: ToolbarFormProps) {
+}: {
+  filters: MetricsFilters
+  catalogs: FilterCatalogs
+  onFiltersChange: (filters: MetricsFilters) => void
+}) {
   return (
     <form
       onSubmit={(event) => event.preventDefault()}
@@ -166,16 +155,6 @@ function ToolbarForm({
           onFiltersChange({ ...filters, to: event.target.value })
         }
       />
-      <SelectField
-        id="metrics-dimension"
-        label={t.dimension}
-        options={dimensionOptions}
-        value={dimension}
-        onChange={(event) => {
-          const next = DIMENSIONS.find((item) => item === event.target.value)
-          if (next) onDimensionChange(next)
-        }}
-      />
       <CatalogFilters
         filters={filters}
         catalogs={catalogs}
@@ -195,20 +174,21 @@ function ToolbarForm({
   )
 }
 
-interface MetricsToolbarProps extends ToolbarFormProps {
-  rows: DimensionRow[]
-  nameOf: (id: string) => string
+interface MetricsToolbarProps {
+  filters: MetricsFilters
+  catalogs: FilterCatalogs
+  groups: DimensionGroup[]
+  nameOf: (dimension: DimensionGroup['dimension'], id: string) => string
+  onFiltersChange: (filters: MetricsFilters) => void
 }
 
-/** Barra del tablero: rangos rápidos, filtros, dimensión y exportación. */
+/** Barra del tablero: rangos rápidos, filtros y exportación. */
 export function MetricsToolbar({
   filters,
   catalogs,
-  dimension,
-  rows,
+  groups,
   nameOf,
   onFiltersChange,
-  onDimensionChange,
 }: MetricsToolbarProps) {
   const setRange = (days: number | null) => {
     if (days === null) {
@@ -221,14 +201,12 @@ export function MetricsToolbar({
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-4">
       <QuickRanges onRange={setRange}>
-        <MetricsExport rows={rows} nameOf={nameOf} />
+        <MetricsExport groups={groups} nameOf={nameOf} />
       </QuickRanges>
       <ToolbarForm
         filters={filters}
         catalogs={catalogs}
-        dimension={dimension}
         onFiltersChange={onFiltersChange}
-        onDimensionChange={onDimensionChange}
       />
     </div>
   )

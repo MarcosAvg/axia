@@ -1,39 +1,40 @@
 import { statusLabels } from '@/features/tickets'
+import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import type { RoutingSummary } from '../domain/indicators'
 import { openAging, volumeByDate } from '../domain/metrics'
-import type { DimensionRow, MetricsTicket } from '../domain/metrics'
+import type { MetricsTicket } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
-import { DimensionChart } from './dimension-chart'
+import { DimensionCharts } from './dimension-charts'
+import { DimensionTable } from './dimension-table'
 import { RoutingCards } from './routing-cards'
 import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
   (statusLabels as Record<string, string>)[status] ?? status
 
-/** Resumen: volumen, comparación por dimensión, ruteo y antigüedad. */
+/** Resumen: volumen, todas las dimensiones, ruteo y antigüedad. */
 export function SummaryTab({
   filtered,
-  rows,
+  groups,
   nameOf,
   routing,
 }: {
   filtered: MetricsTicket[]
-  rows: DimensionRow[]
-  nameOf: (id: string) => string
+  groups: DimensionGroup[]
+  nameOf: (dimension: Dimension, id: string) => string
   routing: RoutingSummary
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title={metricsMessages.charts.volume}>
-          <VolumeChart data={volumeByDate(filtered)} />
-        </ChartCard>
-        <ChartCard title={metricsMessages.charts.byDimension}>
-          <DimensionChart rows={rows} nameOf={nameOf} />
-        </ChartCard>
-      </div>
+      <ChartCard title={metricsMessages.charts.volume}>
+        <VolumeChart data={volumeByDate(filtered)} />
+      </ChartCard>
+      <DimensionCharts groups={groups} nameOf={nameOf} />
+      <ChartCard title={metricsMessages.charts.dimensionDetail}>
+        <DimensionTable groups={groups} nameOf={nameOf} />
+      </ChartCard>
       <ChartCard title={metricsMessages.routing.title}>
         <RoutingCards routing={routing} />
       </ChartCard>

@@ -144,15 +144,17 @@ Patrones de operación (ADR 0042):
   tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
-Patrones de métricas (ADR 0047, 0048, 0049): **barra de herramientas** (tarjeta única, no fija) que
-reúne rangos rápidos (7 · 30 · 90 días y "Todo"), fechas, filtros por catálogo, **selector de
-dimensión** (equipo · edificio · categoría · dependencia · solicitante), "Limpiar" y **exportación
-CSV/XLSX**; una fila de **KPI destacados** con **delta contra el periodo anterior** (tiquets · tiempo
-activo · SLA · satisfacción · primera solución); y el resto en **pestañas por tema** (Resumen ·
-Tiempos · Calidad · SLA y satisfacción · Equipo) con gráficas y tablas `DataTable`. Los indicadores
-agregados (SLA, satisfacción, pausas, duplicados, carga por técnico, rechazos/cancelaciones y ruteo)
-se calculan en el servidor con filtros, así que **respetan la barra**. La **regresión visual** con
-Playwright es **opt-in** (`pnpm test:visual`), fuera de la compuerta.
+Patrones de métricas (ADR 0047–0050): **barra de herramientas** (tarjeta única, no fija) que reúne
+rangos rápidos (7 · 30 · 90 días y "Todo"), fechas, filtros por catálogo, "Limpiar" y
+**exportación CSV/XLSX**; una fila de **KPI destacados** con **delta contra el periodo anterior**
+(tiquets · tiempo activo · SLA · satisfacción · primera solución), que muestra las **fechas
+comparadas**; y el resto en **pestañas por tema** (Resumen · Tiempos · Calidad · SLA y satisfacción ·
+Equipo) con gráficas y tablas `DataTable`. El **Resumen muestra todas las dimensiones a la vez**
+(rejilla de cinco gráficas —equipo · edificio · categoría · dependencia · solicitante— y tabla
+combinada con columna "Dimensión"). Los indicadores agregados (SLA, satisfacción, pausas, duplicados,
+carga por técnico, rechazos/cancelaciones y ruteo) se calculan en el servidor con filtros, así que
+**respetan la barra**. La **regresión visual** con Playwright es **opt-in** (`pnpm test:visual`),
+fuera de la compuerta.
 
 Patrones de acceso y perfil (ADR 0047): **acceso** en dos columnas en escritorio; **perfil** por
 secciones con roles y zona horaria.

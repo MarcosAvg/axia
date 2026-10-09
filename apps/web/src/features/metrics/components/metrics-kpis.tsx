@@ -19,9 +19,11 @@ const COLUMNS: Record<number, string> = {
 export function KpiGrid({
   cards,
   columns = 4,
+  period,
 }: {
   cards: Kpi[]
   columns?: 2 | 3 | 4 | 5
+  period?: string
 }) {
   return (
     <div className={`grid gap-3 ${COLUMNS[columns]}`}>
@@ -33,6 +35,7 @@ export function KpiGrid({
           hint={card.hint}
           delta={card.delta}
           lowerIsBetter={card.lowerIsBetter}
+          period={card.delta !== undefined ? period : undefined}
         />
       ))}
     </div>

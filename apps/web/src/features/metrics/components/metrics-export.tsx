@@ -1,13 +1,14 @@
 import { Button } from '@/components/ui/button'
 import { downloadTextFile } from '@/lib/download'
+import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import { formatMinutes, formatPercent, toCsv } from '../domain/metrics'
-import type { DimensionRow } from '../domain/metrics'
-import { metricsMessages } from '../i18n'
+import { dimensionLabels, metricsMessages } from '../i18n'
 
 const t = metricsMessages.table
 
 const XLSX_COLUMNS = [
   { header: t.dimension, key: 'dimension' },
+  { header: t.name, key: 'name' },
   { header: t.tickets, key: 'tickets' },
   { header: t.avgActive, key: 'avgActive' },
   { header: t.avgTotal, key: 'avgTotal' },
@@ -18,6 +19,7 @@ const XLSX_COLUMNS = [
 
 const headers = [
   t.dimension,
+  t.name,
   t.tickets,
   t.avgActive,
   t.avgTotal,
@@ -26,9 +28,14 @@ const headers = [
   t.recapture,
 ]
 
-function rowValues(row: DimensionRow, nameOf: (id: string) => string) {
+function rowValues(
+  group: DimensionGroup,
+  nameOf: (dimension: Dimension, id: string) => string,
+) {
+  const { row } = group
   return [
-    nameOf(row.id),
+    dimensionLabels[group.dimension],
+    nameOf(group.dimension, row.id),
     row.tickets,
     formatMinutes(row.avgActive),
     formatMinutes(row.avgTotal),
@@ -38,13 +45,13 @@ function rowValues(row: DimensionRow, nameOf: (id: string) => string) {
   ]
 }
 
-/** Exportación de la tabla por dimensión (CSV y XLSX). */
+/** Exportación de todas las agrupaciones por dimensión (CSV y XLSX). */
 export function MetricsExport({
-  rows,
+  groups,
   nameOf,
 }: {
-  rows: DimensionRow[]
-  nameOf: (id: string) => string
+  groups: DimensionGroup[]
+  nameOf: (dimension: Dimension, id: string) => string
 }) {
   async function handleXlsx() {
     const { exportXlsx } = await import('@/lib/excel')
@@ -52,8 +59,8 @@ export function MetricsExport({
       'metricas.xlsx',
       t.dimension,
       XLSX_COLUMNS,
-      rows.map((row) => {
-        const values = rowValues(row, nameOf)
+      groups.map((group) => {
+        const values = rowValues(group, nameOf)
         return Object.fromEntries(
           XLSX_COLUMNS.map((column, index) => [
             column.key,
@@ -70,13 +77,13 @@ export function MetricsExport({
         type="button"
         variant="outline"
         className="min-h-9"
-        disabled={rows.length === 0}
+        disabled={groups.length === 0}
         onClick={() =>
           downloadTextFile(
             'metricas.csv',
             toCsv(
               headers,
-              rows.map((row) => rowValues(row, nameOf)),
+              groups.map((group) => rowValues(group, nameOf)),
             ),
           )
         }
@@ -87,7 +94,7 @@ export function MetricsExport({
         type="button"
         variant="outline"
         className="min-h-9"
-        disabled={rows.length === 0}
+        disabled={groups.length === 0}
         onClick={() => void handleXlsx()}
       >
         {metricsMessages.exportXlsx}

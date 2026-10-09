@@ -13,7 +13,14 @@ import {
   volumeByDate,
 } from './metrics'
 import type { MetricsTicket } from './metrics'
-import { deltaOf, formatDelta, previousRange, rangeForDays } from './period'
+import { allDimensions } from './dimensions'
+import {
+  deltaOf,
+  formatDelta,
+  formatRangeLabel,
+  previousRange,
+  rangeForDays,
+} from './period'
 
 function ticket(partial: Partial<MetricsTicket>): MetricsTicket {
   return {
@@ -204,7 +211,7 @@ describe('rangeForDays', () => {
   it('devuelve el rango de los últimos N días, terminando hoy', () => {
     const now = new Date(2026, 9, 15)
     expect(rangeForDays(7, now)).toEqual({
-      from: '2026-10-08',
+      from: '2026-10-09',
       to: '2026-10-15',
     })
   })
@@ -235,5 +242,35 @@ describe('deltaOf y formatDelta', () => {
     expect(formatDelta(-0.2)).toBe('-20%')
     expect(formatDelta(0)).toBe('0%')
     expect(formatDelta(null)).toBe('—')
+  })
+})
+
+describe('formatRangeLabel', () => {
+  it('formatea un rango con meses en español', () => {
+    expect(formatRangeLabel('2026-09-30', '2026-10-07')).toBe('30 sep – 7 oct')
+    expect(formatRangeLabel('', '')).toBe('')
+  })
+})
+
+describe('allDimensions', () => {
+  it('devuelve una agrupación por dimensión', () => {
+    const groups = allDimensions([
+      ticket({
+        id: 'a',
+        teamId: 'tm1',
+        buildingId: 'b1',
+        categoryId: 'c1',
+        dependencyId: 'd1',
+        requesterId: 'r1',
+      }),
+    ])
+    expect([...new Set(groups.map((group) => group.dimension))]).toEqual([
+      'team',
+      'building',
+      'category',
+      'dependency',
+      'requester',
+    ])
+    expect(groups.every((group) => group.row.tickets === 1)).toBe(true)
   })
 })

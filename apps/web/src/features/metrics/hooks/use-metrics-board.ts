@@ -7,20 +7,17 @@ import {
   useTeams,
 } from '@/features/catalogs'
 import type { Option, RequesterOption } from '@/features/catalogs'
+import { allDimensions } from '../domain/dimensions'
 import type { FilterCatalogs, RoutingSummary } from '../domain/indicators'
-import {
-  EMPTY_FILTERS,
-  byDimension,
-  filterTickets,
-  summarize,
-} from '../domain/metrics'
+import { EMPTY_FILTERS, filterTickets, summarize } from '../domain/metrics'
 import type {
   Dimension,
   MetricsFilters,
   SatisfactionSummary,
   SlaSummary,
 } from '../domain/metrics'
-import { previousRange } from '../domain/period'
+import { formatRangeLabel, previousRange } from '../domain/period'
+import type { Comparison } from '../domain/period'
 import {
   useByTechnician,
   useDuplicates,
@@ -72,7 +69,7 @@ function buildCatalogs(options: {
   }
 }
 
-function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
+function nameResolver(catalogs: FilterCatalogs) {
   const maps: Record<Dimension, Map<string, string>> = {
     team: new Map(catalogs.teams.map((item) => [item.id, item.name])),
     building: new Map(catalogs.buildings.map((item) => [item.id, item.name])),
@@ -82,13 +79,12 @@ function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
     ),
     requester: new Map(catalogs.requesters.map((item) => [item.id, item.name])),
   }
-  return (id: string) => maps[dimension].get(id) ?? id
+  return (dimension: Dimension, id: string) => maps[dimension].get(id) ?? id
 }
 
 /** Estado y datos del tablero de métricas. */
 export function useMetricsBoard() {
   const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
-  const [dimension, setDimension] = useState<Dimension>('team')
   const tickets = useMetricsTickets()
   const pauses = usePausesByReason(filters)
   const duplicates = useDuplicates(filters)
@@ -113,21 +109,22 @@ export function useMetricsBoard() {
   const allTickets = or(tickets.data, [])
   const filtered = filterTickets(allTickets, filters)
   const prevFilters = previousRange(filters)
-  const prevSummary = prevFilters
-    ? summarize(filterTickets(allTickets, prevFilters))
+  const comparison: Comparison | null = prevFilters
+    ? {
+        summary: summarize(filterTickets(allTickets, prevFilters)),
+        label: formatRangeLabel(prevFilters.from, prevFilters.to),
+      }
     : null
 
   return {
     filters,
     setFilters,
-    dimension,
-    setDimension,
     catalogs,
     filtered,
     summary: summarize(filtered),
-    prevSummary,
-    rows: byDimension(filtered, dimension),
-    nameOf: nameResolver(dimension, catalogs),
+    comparison,
+    groups: allDimensions(filtered),
+    nameOf: nameResolver(catalogs),
     loading: tickets.isLoading,
     error: tickets.isError,
     pauses: or(pauses.data, []),

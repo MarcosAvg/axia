@@ -4,12 +4,13 @@ import {
   formatRate,
   formatScore,
 } from '../domain/metrics'
-import { deltaOf } from '../domain/period'
 import type {
   MetricsSummary,
   SatisfactionSummary,
   SlaSummary,
 } from '../domain/metrics'
+import { deltaOf } from '../domain/period'
+import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
@@ -17,19 +18,19 @@ import type { Kpi } from './metrics-kpis'
 /** Indicadores clave del tablero, siempre visibles. */
 export function MetricsHero({
   summary,
-  prev,
+  comparison,
   satisfaction,
   sla,
 }: {
   summary: MetricsSummary
-  prev: MetricsSummary | null
+  comparison: Comparison | null
   satisfaction: SatisfactionSummary
   sla: SlaSummary
 }) {
   const k = metricsMessages.kpi
   const hints = metricsMessages.kpiHints
   const change = (pick: (summary: MetricsSummary) => number) =>
-    prev ? deltaOf(pick(summary), pick(prev)) : undefined
+    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
   const cards: Kpi[] = [
     {
       label: k.tickets,
@@ -56,5 +57,5 @@ export function MetricsHero({
       lowerIsBetter: false,
     },
   ]
-  return <KpiGrid cards={cards} columns={5} />
+  return <KpiGrid cards={cards} columns={5} period={comparison?.label} />
 }

@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0049.
+0038–0050.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -838,3 +838,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **sticky**. **Regresión visual con Playwright opt-in** (`pnpm test:visual`, fuera de la compuerta)
   en `apps/web/visual`. **ADR 0049**. `pnpm check` en verde (153 Vitest, 12 Playwright, 426 pgTAP).
   Rama `feat/metricas-deltas-filtros`.
+- **Métricas: dimensiones simultáneas y periodo comparado (Etapa 8)**: se quita el selector
+  "Agrupar por"; el **Resumen muestra todas las dimensiones a la vez** (rejilla de cinco gráficas y
+  tabla combinada con columna "Dimensión"; exportación con esa columna). Los **KPI quedan globales**
+  del rango. El **delta muestra las fechas comparadas** ("vs 30 sep – 7 oct") y `rangeForDays` pasa
+  a devolver exactamente N días. **ADR 0050**. `pnpm check` en verde (155 Vitest, 12 Playwright, 426
+  pgTAP). Rama `feat/metricas-dimensiones`.
