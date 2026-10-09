@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/shared/form-fields'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
@@ -14,10 +8,7 @@ import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
-import { AssignSupervisorForm } from './assign-supervisor-form'
-import { DuplicateForm } from './duplicate-form'
-import { RecaptureForm } from './recapture-form'
-import { TicketActionForm } from './ticket-action-form'
+import { ActionContainer, DEDICATED } from './action-container'
 
 const ONE_CLICK: ActionKey[] = ['resume', 'validate']
 /** Acciones que se separan al final por ser de descarte. */
@@ -36,11 +27,6 @@ const FORM_ACTIONS: ActionKey[] = [
   'open_claim',
   'resolve_claim',
   'reactivate',
-]
-const DEDICATED: ActionKey[] = [
-  'recapture',
-  'mark_duplicate',
-  'assign_supervisor',
 ]
 
 interface ActionControlsProps {
@@ -155,79 +141,6 @@ function ProxyRequiredHint({ show }: { show: boolean }) {
   )
 }
 
-interface ActionFormsProps {
-  ticket: TicketDetail
-  formAction: ActionKey | null
-  subject: string | undefined
-  onClose: () => void
-}
-
-function ActionForms({
-  ticket,
-  formAction,
-  subject,
-  onClose,
-}: ActionFormsProps) {
-  if (formAction === 'recapture') {
-    return (
-      <RecaptureForm
-        ticket={ticket}
-        subjectTechnicianId={subject}
-        onClose={onClose}
-      />
-    )
-  }
-  if (formAction === 'mark_duplicate') {
-    return <DuplicateForm ticketId={ticket.id} onClose={onClose} />
-  }
-  if (formAction === 'assign_supervisor') {
-    return <AssignSupervisorForm ticketId={ticket.id} onClose={onClose} />
-  }
-  if (formAction && !DEDICATED.includes(formAction)) {
-    return (
-      <TicketActionForm
-        ticketId={ticket.id}
-        cycle={ticket.cycle}
-        action={formAction}
-        subjectTechnicianId={subject}
-        onClose={onClose}
-      />
-    )
-  }
-  return null
-}
-
-function ActionSheet({
-  ticket,
-  formAction,
-  subject,
-  onClose,
-}: ActionFormsProps) {
-  return (
-    <Sheet
-      open={formAction !== null}
-      onOpenChange={(open) => {
-        if (!open) onClose()
-      }}
-    >
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>
-            {formAction ? ticketMessages.actions[formAction] : ''}
-          </SheetTitle>
-        </SheetHeader>
-        <ActionForms
-          key={formAction ?? 'none'}
-          ticket={ticket}
-          formAction={formAction}
-          subject={subject}
-          onClose={onClose}
-        />
-      </SheetContent>
-    </Sheet>
-  )
-}
-
 interface TicketActionsPanelProps {
   ticket: TicketDetail
   actions: ActionKey[]
@@ -235,7 +148,7 @@ interface TicketActionsPanelProps {
   participants: TicketParticipant[]
 }
 
-/** Acciones disponibles: una primaria destacada y el resto en un menú. */
+/** Acciones disponibles según estado y permiso, con la primaria destacada. */
 export function TicketActionsPanel({
   ticket,
   actions,
@@ -285,7 +198,7 @@ export function TicketActionsPanel({
         onOpenForm={setFormAction}
       />
       <ProxyRequiredHint show={blocked.length > 0} />
-      <ActionSheet
+      <ActionContainer
         ticket={ticket}
         formAction={formAction}
         subject={subject}

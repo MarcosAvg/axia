@@ -104,10 +104,7 @@ function ActionFormView({
   onClose: () => void
 }) {
   return (
-    <form
-      onSubmit={onSubmit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
       {evidenceType ? (
         <EvidenceField
           type={evidenceType}

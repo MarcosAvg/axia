@@ -19,10 +19,7 @@ export function RecaptureForm({
   const form = useRecaptureForm(ticket, subjectTechnicianId, onClose)
 
   return (
-    <form
-      onSubmit={form.submit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
+    <form onSubmit={form.submit} className="flex flex-col gap-4">
       <RecaptureFields
         values={form.values}
         onChange={form.change}

@@ -24,7 +24,7 @@ export function DuplicateForm({
   )
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border p-4">
+    <div className="flex flex-col gap-4">
       <TextField
         id="duplicate-search"
         label={ticketMessages.actionFields.searchFolio}

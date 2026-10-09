@@ -797,3 +797,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **descartes al final en rojo**; el subidor y los tiempos manuales se **ocultan** sin permiso.
   **ADR 0045**. `pnpm check` en verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama
   `feat/acciones-y-permisos`.
+- **Contenedor de acciones responsivo (2026-10-09)**: las acciones abren **modal centrado en
+  escritorio** y **hoja inferior en móvil** (`action-container.tsx`), con alto máximo y
+  desplazamiento; los formularios del contenedor ya no llevan borde interno. `pnpm check` en
+  verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama `feat/acciones-modal`.
