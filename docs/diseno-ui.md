@@ -153,9 +153,10 @@ Equipo) con gráficas y tablas `DataTable`. El **Resumen** muestra **una tarjeta
 (equipo · edificio · categoría · dependencia · solicitante), cada una con su **gráfica de tiquets**
 (altura fija, top 5) y su **tabla** (Agrupación · Tiquets · Reasignación · Recaptura, con
 desplazamiento interno); volumen y ruteo comparten fila, y la antigüedad va con scroll. En
-**Tiempos**, el mismo formato por dimensión con las columnas de tiempo. En **Calidad**, los
-**duplicados por dimensión** también van en **una tarjeta por dimensión** (Agrupación · Tiquets ·
-Duplicados · Tasa). Los indicadores agregados
+**Tiempos**, el mismo formato por dimensión con las columnas de tiempo. En **Calidad**, los dos
+desgloses **por motivo** (pausas y rechazos/cancelaciones) comparten fila, y los **duplicados por
+dimensión** van en una **tarjeta por dimensión** (Agrupación · Tiquets · Duplicados · Tasa), con sus
+KPI agrupados encima. Los indicadores agregados
 (SLA, satisfacción, pausas, duplicados, carga por técnico, rechazos/cancelaciones y ruteo) se calculan
 en el servidor con filtros, así que **respetan la barra**. La **regresión visual** con Playwright es
 **opt-in** (`pnpm test:visual`), fuera de la compuerta.

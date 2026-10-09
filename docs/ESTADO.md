@@ -865,3 +865,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   quedan aparte. La migración `20261009120000` añade **categoría** a
   `metrics_duplicates_by_dimension` (faltaba) con pgTAP. Se añade captura visual de Calidad. `pnpm
   check` en verde (155 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-duplicados-dimension`.
+- **Métricas: reacomodo de Calidad (Etapa 13)**: los dos desgloses **por motivo** (pausas y
+  rechazos/cancelaciones) comparten fila; los **KPI de duplicados** pasan a una fila compacta y todo
+  el bloque de **duplicados** (KPI + tarjetas por dimensión) queda agrupado bajo su título. Solo
+  `quality-tab.tsx`; sin cambios de datos. `pnpm check` en verde (155 Vitest, 12 Playwright, 427
+  pgTAP). Rama `feat/metricas-calidad-layout`.
