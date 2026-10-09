@@ -18,13 +18,7 @@ import { AssignSupervisorForm } from './assign-supervisor-form'
 import { DuplicateForm } from './duplicate-form'
 import { RecaptureForm } from './recapture-form'
 import { TicketActionForm } from './ticket-action-form'
-
-/** Acciones que tienen su propio formulario dedicado. */
-export const DEDICATED: ActionKey[] = [
-  'recapture',
-  'mark_duplicate',
-  'assign_supervisor',
-]
+import { DEDICATED } from './ticket-action-handlers'
 
 interface ActionFormsProps {
   ticket: TicketDetail

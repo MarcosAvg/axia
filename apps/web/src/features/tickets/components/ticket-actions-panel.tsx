@@ -8,7 +8,8 @@ import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
-import { ActionContainer, DEDICATED } from './action-container'
+import { ActionContainer } from './action-container'
+import { DEDICATED } from './ticket-action-handlers'
 
 const ONE_CLICK: ActionKey[] = ['resume', 'validate']
 /** Acciones que se separan al final por ser de descarte. */
