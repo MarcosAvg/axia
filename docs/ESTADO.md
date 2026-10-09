@@ -799,5 +799,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `feat/acciones-y-permisos`.
 - **Contenedor de acciones responsivo (2026-10-09)**: las acciones abren **modal centrado en
   escritorio** y **hoja inferior en móvil** (`action-container.tsx`), con alto máximo y
-  desplazamiento; los formularios del contenedor ya no llevan borde interno. `pnpm check` en
-  verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama `feat/acciones-modal`.
+  desplazamiento; los formularios del contenedor ya no llevan borde interno; la hoja inferior de
+  móvil lleva padding. `pnpm check` en verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama
+  `feat/acciones-modal`.
