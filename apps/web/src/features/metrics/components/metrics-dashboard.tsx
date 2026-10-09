@@ -269,11 +269,13 @@ export function MetricsDashboard() {
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
       />
-      <MetricsFilters
-        filters={filters}
-        catalogs={catalogs}
-        onChange={setFilters}
-      />
+      <div className="sticky top-16 z-20">
+        <MetricsFilters
+          filters={filters}
+          catalogs={catalogs}
+          onChange={setFilters}
+        />
+      </div>
       <MetricsStatus
         isLoading={tickets.isLoading}
         isError={tickets.isError}

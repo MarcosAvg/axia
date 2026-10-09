@@ -1,13 +1,9 @@
+import { BarChart3Icon } from 'lucide-react'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/shared/form-fields'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { downloadTextFile } from '@/lib/download'
 import { formatMinutes, formatPercent, toCsv } from '../domain/metrics'
 import type { Dimension, DimensionRow } from '../domain/metrics'
@@ -28,40 +24,38 @@ function DimensionTableGrid({
   nameOf: (id: string) => string
 }) {
   if (rows.length === 0) {
-    return (
-      <p className="py-3 text-sm text-muted-foreground">
-        {metricsMessages.empty}
-      </p>
-    )
+    return <EmptyState icon={BarChart3Icon} title={metricsMessages.empty} />
   }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.dimension}</TableHead>
-          <TableHead>{t.tickets}</TableHead>
-          <TableHead>{t.avgActive}</TableHead>
-          <TableHead>{t.avgTotal}</TableHead>
-          <TableHead>{t.extra}</TableHead>
-          <TableHead>{t.reassignment}</TableHead>
-          <TableHead>{t.recapture}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>{nameOf(row.id)}</TableCell>
-            <TableCell>{row.tickets}</TableCell>
-            <TableCell>{formatMinutes(row.avgActive)}</TableCell>
-            <TableCell>{formatMinutes(row.avgTotal)}</TableCell>
-            <TableCell>{formatMinutes(row.avgActiveExtra)}</TableCell>
-            <TableCell>{formatPercent(row.reassignmentRate)}</TableCell>
-            <TableCell>{formatPercent(row.recaptureRate)}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
+  const columns: DataTableColumn<DimensionRow>[] = [
+    { id: 'dimension', header: t.dimension, cell: (row) => nameOf(row.id) },
+    { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
+    {
+      id: 'avgActive',
+      header: t.avgActive,
+      cell: (row) => formatMinutes(row.avgActive),
+    },
+    {
+      id: 'avgTotal',
+      header: t.avgTotal,
+      cell: (row) => formatMinutes(row.avgTotal),
+    },
+    {
+      id: 'extra',
+      header: t.extra,
+      cell: (row) => formatMinutes(row.avgActiveExtra),
+    },
+    {
+      id: 'reassignment',
+      header: t.reassignment,
+      cell: (row) => formatPercent(row.reassignmentRate),
+    },
+    {
+      id: 'recapture',
+      header: t.recapture,
+      cell: (row) => formatPercent(row.recaptureRate),
+    },
+  ]
+  return <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />
 }
 
 function csvFor(rows: DimensionRow[], nameOf: (id: string) => string): string {

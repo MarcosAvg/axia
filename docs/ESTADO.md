@@ -13,10 +13,10 @@ sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contr
 claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
 lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos ✅,
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
-En curso: **rediseño de vistas** (segunda vuelta de UI/UX). Plan por etapas:
-**1) semilla de demostración** (hecha), **2) Panel como centro de bandejas + métricas personales**
-(hecha), **3) Operación** (lista, alta, detalle y bandejas; hecha), 4) Administración,
-5) Métricas globales, 6) Acceso/perfil y verificación. Siguiente: **Etapa 4 (Administración)**.
+En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostración, Panel como
+centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
+Métricas globales, y Acceso/perfil. Queda como mejora **opcional** la regresión visual con capturas
+de Playwright. Detalle en `docs/diseno-ui.md` y los ADR 0038–0047.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -815,3 +815,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   roles**; **ámbitos** en **pestañas**; **configuración** por **secciones** con barra de guardado y
   `toast`; calendarios e integraciones sin títulos duplicados. **ADR 0046**. `pnpm check` en verde
   (147 Vitest, 12 Playwright, 413 pgTAP). Rama `feat/vistas-admin`.
+- **Fase 8, Etapa 5 (Métricas, acceso y perfil) — cierre del rediseño**: KPI **agrupados por área**
+  (Carga · Tiempos · Calidad · SLA y satisfacción), **filtros sticky**, y tablas de métricas con
+  `DataTable` y `EmptyState`; **acceso** en dos columnas en escritorio y centrado en móvil;
+  **perfil** por secciones con roles y zona horaria. **ADR 0047**. `pnpm check` en verde (147
+  Vitest, 12 Playwright, 413 pgTAP). **Rediseño de interfaz (Fases 8.0–8.5) completo.** Queda como
+  mejora opcional la **regresión visual con capturas de Playwright**. Rama `feat/vistas-metricas`.
