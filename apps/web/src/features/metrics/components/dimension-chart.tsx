@@ -4,15 +4,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { formatMinutes } from '../domain/metrics'
 import type { DimensionRow } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
 const config = {
-  active: { label: metricsMessages.table.avgActive, color: 'var(--chart-2)' },
+  tickets: { label: metricsMessages.table.tickets, color: 'var(--chart-1)' },
 }
 
-/** Promedio de trabajo activo por dimensión (primeras 8). */
+/** Tiquets por dimensión (primeras 8). */
 export function DimensionChart({
   id,
   rows,
@@ -24,7 +23,7 @@ export function DimensionChart({
 }) {
   const data = rows.slice(0, 8).map((row) => ({
     name: nameOf(row.id),
-    active: Math.round(row.avgActive),
+    tickets: row.tickets,
   }))
   return (
     <ChartContainer id={id} config={config}>
@@ -40,15 +39,15 @@ export function DimensionChart({
           textAnchor="end"
           height={64}
         />
-        <YAxis tickLine={false} axisLine={false} width={40} fontSize={11} />
-        <ChartTooltip
-          content={
-            <ChartTooltipContent
-              formatter={(value) => formatMinutes(Number(value))}
-            />
-          }
+        <YAxis
+          allowDecimals={false}
+          tickLine={false}
+          axisLine={false}
+          width={32}
+          fontSize={11}
         />
-        <Bar dataKey="active" fill="var(--chart-2)" radius={4} />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Bar dataKey="tickets" fill="var(--chart-1)" radius={4} />
       </BarChart>
     </ChartContainer>
   )

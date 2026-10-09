@@ -88,8 +88,9 @@ export const metricsMessages = {
   },
   charts: {
     volume: 'Tiquets por día',
-    activeBy: 'Trabajo activo promedio',
+    ticketsBy: 'Tiquets',
     dimensionDetail: 'Detalle por dimensión',
+    timesByDimension: 'Tiempos por dimensión',
     pauses: 'Pausas por motivo',
   },
   table: {

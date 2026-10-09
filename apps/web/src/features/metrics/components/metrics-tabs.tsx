@@ -44,6 +44,20 @@ interface MetricsTabsProps {
   routing: RoutingSummary
 }
 
+const TAB_VALUES = ['summary', 'times', 'quality', 'sla', 'team'] as const
+
+function MetricsTabList() {
+  return (
+    <TabsList className="flex-wrap">
+      {TAB_VALUES.map((value) => (
+        <TabsTrigger key={value} value={value} className="min-h-9">
+          {metricsMessages.tabs[value]}
+        </TabsTrigger>
+      ))}
+    </TabsList>
+  )
+}
+
 /** Pestañas del tablero por tema. */
 export function MetricsTabs({
   filtered,
@@ -60,18 +74,9 @@ export function MetricsTabs({
   rejectCancel,
   routing,
 }: MetricsTabsProps) {
-  const { tabs } = metricsMessages
   return (
     <Tabs defaultValue="summary" className="flex flex-col gap-4">
-      <TabsList className="flex-wrap">
-        {(['summary', 'times', 'quality', 'sla', 'team'] as const).map(
-          (value) => (
-            <TabsTrigger key={value} value={value} className="min-h-9">
-              {tabs[value]}
-            </TabsTrigger>
-          ),
-        )}
-      </TabsList>
+      <MetricsTabList />
       <TabsContent value="summary">
         <SummaryTab
           filtered={filtered}
@@ -81,7 +86,12 @@ export function MetricsTabs({
         />
       </TabsContent>
       <TabsContent value="times">
-        <TimesTab summary={summary} comparison={comparison} />
+        <TimesTab
+          summary={summary}
+          comparison={comparison}
+          groups={groups}
+          nameOf={nameOf}
+        />
       </TabsContent>
       <TabsContent value="quality">
         <QualityTab

@@ -1,8 +1,11 @@
+import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
+import { ChartCard } from './chart-card'
+import { DimensionTimesTable } from './dimension-times-table'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
@@ -61,13 +64,17 @@ function timeCards(
   ]
 }
 
-/** Tiempos: KPI de duración del rango. */
+/** Tiempos: KPI de duración y desglose por dimensión. */
 export function TimesTab({
   summary,
   comparison,
+  groups,
+  nameOf,
 }: {
   summary: MetricsSummary
   comparison: Comparison | null
+  groups: DimensionGroup[]
+  nameOf: (dimension: Dimension, id: string) => string
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -76,6 +83,9 @@ export function TimesTab({
         columns={4}
         period={comparison?.label}
       />
+      <ChartCard title={metricsMessages.charts.timesByDimension}>
+        <DimensionTimesTable groups={groups} nameOf={nameOf} />
+      </ChartCard>
     </div>
   )
 }
