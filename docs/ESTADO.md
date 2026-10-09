@@ -14,9 +14,9 @@ claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de dato
 lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos ✅,
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
 En curso: **rediseño de vistas** (segunda vuelta de UI/UX). Plan por etapas:
-**1) semilla de demostración** (hecha), 2) Panel como centro de bandejas + métricas personales,
-3) Operación (alta, detalle, lista, bandejas), 4) Administración, 5) Métricas globales,
-6) Acceso/perfil y verificación. Siguiente: **Etapa 2 (Panel)**.
+**1) semilla de demostración** (hecha), **2) Panel como centro de bandejas + métricas personales**
+(hecha), 3) Operación (alta, detalle, lista, bandejas), 4) Administración, 5) Métricas globales,
+6) Acceso/perfil y verificación. Siguiente: **Etapa 3 (Operación)**.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -759,3 +759,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   duplicados, satisfacción y SLA) dejan de verse vacías, sobre todo para el administrador. Se
   aislaron tres pruebas pgTAP (87/88/89) que dependían de agregados globales truncando tiquets;
   pgTAP 404 en verde, Playwright 12 en verde.
+- **Rediseño de vistas, Etapa 2 (Panel de inicio)**: nuevo feature `features/dashboard` con
+  **números según rol** (mi trabajo / ofertas / activos / pausa / por validar / sin asignar /
+  cerrados), **bandejas** (ofertas, mi trabajo, activos) y **acciones rápidas**; distinto del
+  tablero global de `/metricas`. Se quitó `roleLabel` (sin uso) y la lista pasó a renderizar
+  **tabla o tarjetas según el ancho** (`lib/use-media-query`) para no duplicar el DOM. **ADR 0041**.
+  `pnpm check` en verde (138 Vitest, 12 Playwright, 404 pgTAP). Rama `feat/vistas-semilla`.

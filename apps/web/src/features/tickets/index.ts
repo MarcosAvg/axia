@@ -11,6 +11,7 @@ export {
   useTicketSearchByFolio,
   useTicketsList,
 } from './hooks/use-tickets'
+export type { TicketListItem } from './domain/types'
 export { registerEvidenceUploadHandler } from './api/offline-evidence'
 export { registerTicketActionHandler } from './api/offline-actions'
 export { ticketMessages, statusLabels } from './i18n'
