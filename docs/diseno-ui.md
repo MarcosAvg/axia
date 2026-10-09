@@ -139,6 +139,9 @@ Patrones de operación (ADR 0042):
 - **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
   muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
   la foto de solicitud.
+- **Campo de archivo (`FileField`)**: botones visibles ("Elegir archivo"/"Sustituir" y "Tomar
+  foto" en móvil, que abre la cámara), vista previa en miniatura y acción "Quitar". Se usa en las
+  tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
 Patrones de lista:

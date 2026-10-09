@@ -30,6 +30,7 @@ export function useActionSubmission({
 }: UseActionSubmission): {
   evidenceType: EvidenceType | undefined
   evidenceError: string | null
+  file: File | null
   uploading: boolean
   setFile: (file: File | null) => void
   submit: (event: FormEvent) => Promise<void>
@@ -78,5 +79,5 @@ export function useActionSubmission({
     handler?.()
   }
 
-  return { evidenceType, evidenceError, uploading, setFile, submit }
+  return { evidenceType, evidenceError, file, uploading, setFile, submit }
 }

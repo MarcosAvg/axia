@@ -1,3 +1,4 @@
+import { FileField } from '@/components/shared/file-field'
 import { SelectField } from '@/components/shared/form-fields'
 import type { EvidenceType } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
@@ -5,7 +6,7 @@ import { evidenceTypeLabels, ticketMessages } from '../i18n'
 interface EvidenceFieldsProps {
   type: EvidenceType
   types: EvidenceType[]
-  inputKey: number
+  file: File | null
   onTypeChange: (type: EvidenceType) => void
   onFileChange: (file: File | null) => void
 }
@@ -14,7 +15,7 @@ interface EvidenceFieldsProps {
 export function EvidenceFields({
   type,
   types,
-  inputKey,
+  file,
   onTypeChange,
   onFileChange,
 }: EvidenceFieldsProps) {
@@ -35,19 +36,14 @@ export function EvidenceFields({
           if (next) onTypeChange(next)
         }}
       />
-      <div className="flex flex-col gap-2">
-        <label htmlFor="evidence-file" className="text-sm font-medium">
-          {ticketMessages.evidence.file}
-        </label>
-        <input
-          key={inputKey}
-          id="evidence-file"
-          type="file"
-          accept="image/*,application/pdf"
-          className="min-h-11 text-sm"
-          onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-        />
-      </div>
+      <FileField
+        id="evidence-file"
+        label={ticketMessages.evidence.file}
+        file={file}
+        onChange={onFileChange}
+        accept="image/*,application/pdf"
+        camera
+      />
     </>
   )
 }

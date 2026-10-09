@@ -23,6 +23,12 @@ export const messages = {
     disconnected: 'Sin conexión',
     pending: (count: number) => `${count} por sincronizar`,
   },
+  fileField: {
+    takePhoto: 'Tomar foto',
+    chooseFile: 'Elegir archivo',
+    replace: 'Sustituir',
+    remove: 'Quitar',
+  },
   theme: {
     aria: 'Cambiar tema y modo',
     colorLabel: 'Tema de color',
