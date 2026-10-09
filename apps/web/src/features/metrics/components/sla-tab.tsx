@@ -8,7 +8,7 @@ import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
-import { SlaSection } from './sla-section'
+import { SlaPriorityChart } from './sla-priority-chart'
 
 /** SLA y satisfacción: cumplimiento, detalle por prioridad y calificación. */
 export function SlaTab({
@@ -34,7 +34,7 @@ export function SlaTab({
     <div className="flex flex-col gap-4">
       <KpiGrid cards={cards} columns={4} />
       <ChartCard title={metricsMessages.sla.title}>
-        <SlaSection rows={slaRows} />
+        <SlaPriorityChart rows={slaRows} />
       </ChartCard>
     </div>
   )

@@ -51,4 +51,18 @@ test('panel y métricas', async ({ page }) => {
     fullPage: true,
     mask: [page.locator('svg.recharts-surface')],
   })
+
+  await page.getByRole('tab', { name: 'SLA y satisfacción' }).click()
+  await expect(page.getByText('Tiempos objetivo (SLA)')).toBeVisible()
+  await expect(page).toHaveScreenshot('sla.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
+
+  await page.getByRole('tab', { name: 'Equipo' }).click()
+  await expect(page.getByText('Tiquets por técnico')).toBeVisible()
+  await expect(page).toHaveScreenshot('equipo.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
 })

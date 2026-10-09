@@ -126,6 +126,7 @@ export const metricsMessages = {
   },
   technicians: {
     title: 'Carga por técnico',
+    byTechnician: 'Tiquets por técnico',
     technician: 'Técnico',
     tickets: 'Tiquets',
     leader: 'Como líder',
