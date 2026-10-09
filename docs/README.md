@@ -22,6 +22,7 @@
 | Documento | Contenido |
 |---|---|
 | [`especificacion-negocio.md`](especificacion-negocio.md) | Fuente de verdad del negocio: flujo, estados, reglas, tiempos y permisos |
+| [`guia-tiquets.md`](guia-tiquets.md) | Ciclo completo de un tiquet: estados, transiciones, tiempos y duplicados |
 | [`dominio.md`](dominio.md) | Flujo de trabajo, modelo conceptual y glosario |
 | [`modelo-datos.md`](modelo-datos.md) | Diseño de la base del núcleo: entidades, transiciones, RLS e indicadores |
 

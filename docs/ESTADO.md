@@ -778,3 +778,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   nombres propio (`Equipo Alfa`, `Categoría Alfa`, `Nivel A`, `Motivo de prueba`, …) para no
   compartir claves únicas con la semilla, y los e2e se actualizan. **ADR 0043**. Rama
   `feat/semilla-nombres-legibles`.
+- **Guía de un tiquet (2026-10-09)**: nuevo `docs/guia-tiquets.md` con el ciclo completo del
+  tiquet (qué contiene, los 11 estados, flujo, paso a paso, matriz de transiciones, qué acumula,
+  tiempos, duplicados, concurrencia, permisos y reglas de oro), enlazado desde `docs/README.md`.
+  Rama `docs/guia-tiquets`.
