@@ -3,7 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { can, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
-import type { TicketStatus } from '../domain/types'
+import type { ActionKey } from '../domain/actions'
+import type {
+  TicketDetail,
+  TicketParticipant,
+  TicketStatus,
+  TicketTimelineItem,
+} from '../domain/types'
 import {
   useTicket,
   useTicketEvidence,
@@ -14,6 +20,7 @@ import { manualTimeMessages, ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
 import { ManualTimePanel } from './manual-time-panel'
 import { PendingEvidence } from './pending-evidence'
+import { StatusBadge } from './status-badge'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketRatingPanel } from './ticket-rating-panel'
@@ -64,10 +71,100 @@ function canRateTicket(
   return can(identity, 'ticket.rate') || can(identity, 'ticket.rate_on_behalf')
 }
 
-/** Detalle del tiquet: captura, acciones, línea de tiempo, participantes y evidencias. */
+function TicketHeader({ ticket }: { ticket: TicketDetail }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {ticket.folio}
+        </h1>
+        <StatusBadge status={ticket.status} />
+        {ticket.priorityName ? (
+          <span className="text-sm text-muted-foreground">
+            {ticket.priorityName}
+          </span>
+        ) : null}
+      </div>
+      <p className="max-w-3xl text-sm">{ticket.description}</p>
+    </div>
+  )
+}
+
+function TicketMain({
+  ticketId,
+  ticket,
+  timeline,
+  participants,
+  identity,
+  actions,
+}: {
+  ticketId: string
+  ticket: TicketDetail
+  timeline: TicketTimelineItem[]
+  participants: TicketParticipant[]
+  identity: Identity | null
+  actions: ActionKey[]
+}) {
+  const { detail } = ticketMessages
+  return (
+    <div className="flex flex-col gap-6">
+      {actions.length > 0 ? (
+        <Section title={detail.actions}>
+          <TicketActionsPanel
+            ticket={ticket}
+            actions={actions}
+            identity={identity}
+            participants={participants}
+          />
+        </Section>
+      ) : null}
+      <Section title={detail.timeline}>
+        <TicketTimeline items={timeline} />
+      </Section>
+      <EvidenceSection ticketId={ticketId} cycle={ticket.cycle} />
+    </div>
+  )
+}
+
+function TicketRail({
+  ticketId,
+  ticket,
+  participants,
+  canRecordTime,
+  canRate,
+}: {
+  ticketId: string
+  ticket: TicketDetail
+  participants: TicketParticipant[]
+  canRecordTime: boolean
+  canRate: boolean
+}) {
+  const { detail } = ticketMessages
+  return (
+    <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:self-start">
+      <Section title={detail.capture}>
+        <TicketSummary ticket={ticket} />
+      </Section>
+      <Section title={detail.participants}>
+        <ParticipantList participants={participants} />
+      </Section>
+      {canRecordTime ? (
+        <Section title={manualTimeMessages.title}>
+          <ManualTimePanel ticketId={ticketId} />
+        </Section>
+      ) : null}
+      {canRate ? (
+        <Section title={ticketMessages.rating.title}>
+          <TicketRatingPanel ticketId={ticketId} />
+        </Section>
+      ) : null}
+    </div>
+  )
+}
+
+/** Detalle del tiquet: encabezado, acciones, actividad, captura y evidencias. */
 export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const { identity } = useAuth()
-  const { detail } = ticketMessages
   const ticket = useTicket(ticketId)
   const timeline = useTicketTimeline(ticketId)
   const participants = useTicketParticipants(ticketId)
@@ -85,44 +182,26 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   }
 
   const actions = allowedActions({ identity, status: ticket.data.status })
-  const canRecordTime = can(identity, 'time.record_manual')
-  const canRate = canRateTicket(identity, ticket.data.status)
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="flex flex-col gap-6">
-        <Section title={detail.timeline}>
-          <TicketTimeline items={timeline.data ?? []} />
-        </Section>
-        <EvidenceSection ticketId={ticketId} cycle={ticket.data.cycle} />
-      </div>
-      <div className="flex flex-col gap-6">
-        {actions.length > 0 ? (
-          <Section title={detail.actions}>
-            <TicketActionsPanel
-              ticket={ticket.data}
-              actions={actions}
-              identity={identity}
-              participants={participants.data ?? []}
-            />
-          </Section>
-        ) : null}
-        <Section title={detail.capture}>
-          <TicketSummary ticket={ticket.data} />
-        </Section>
-        <Section title={detail.participants}>
-          <ParticipantList participants={participants.data ?? []} />
-        </Section>
-        {canRecordTime ? (
-          <Section title={manualTimeMessages.title}>
-            <ManualTimePanel ticketId={ticketId} />
-          </Section>
-        ) : null}
-        {canRate ? (
-          <Section title={ticketMessages.rating.title}>
-            <TicketRatingPanel ticketId={ticketId} />
-          </Section>
-        ) : null}
+    <div className="flex flex-col gap-6">
+      <TicketHeader ticket={ticket.data} />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <TicketMain
+          ticketId={ticketId}
+          ticket={ticket.data}
+          timeline={timeline.data ?? []}
+          participants={participants.data ?? []}
+          identity={identity}
+          actions={actions}
+        />
+        <TicketRail
+          ticketId={ticketId}
+          ticket={ticket.data}
+          participants={participants.data ?? []}
+          canRecordTime={can(identity, 'time.record_manual')}
+          canRate={canRateTicket(identity, ticket.data.status)}
+        />
       </div>
     </div>
   )

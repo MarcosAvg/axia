@@ -1,5 +1,9 @@
 import type { Identity } from '@/features/auth'
-import { actionsRequiringSubject, allowedActions } from './actions'
+import {
+  actionsRequiringSubject,
+  allowedActions,
+  pickPrimaryAction,
+} from './actions'
 import type { ActionContext } from './actions'
 import type { TicketStatus } from './types'
 
@@ -141,5 +145,25 @@ describe('actionsRequiringSubject', () => {
     expect(
       actionsRequiringSubject(identityWith(['ticket.start']), ['start'], false),
     ).toEqual([])
+  })
+})
+
+describe('pickPrimaryAction', () => {
+  it('prefiere validar cuando hay varias acciones', () => {
+    expect(pickPrimaryAction(['comment', 'validate', 'reject'])).toBe(
+      'validate',
+    )
+  })
+
+  it('prefiere atender sobre pausar en proceso', () => {
+    expect(pickPrimaryAction(['pause', 'attend', 'comment'])).toBe('attend')
+  })
+
+  it('elige iniciar cuando el tiquet está asignado', () => {
+    expect(pickPrimaryAction(['assign_technician', 'start'])).toBe('start')
+  })
+
+  it('no hay acción primaria sin acciones', () => {
+    expect(pickPrimaryAction([])).toBeNull()
   })
 })

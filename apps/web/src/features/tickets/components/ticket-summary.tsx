@@ -1,7 +1,6 @@
 import { formatDateTime } from '@/lib/format'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { ticketMessages } from '../i18n'
-import { StatusBadge } from './status-badge'
 
 function Field({ label, value }: { label: string; value: string | null }) {
   return (
@@ -18,11 +17,6 @@ export function TicketSummary({ ticket }: { ticket: TicketDetail }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-lg font-semibold">{ticket.folio}</span>
-        <StatusBadge status={ticket.status} />
-      </div>
-      <p className="text-sm">{ticket.description}</p>
       <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
         <Field label={fields.building} value={ticket.buildingName} />
         <Field label={fields.location} value={ticket.locationName} />

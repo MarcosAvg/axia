@@ -130,3 +130,32 @@ export function allowedActions(context: ActionContext): ActionKey[] {
     checks[key](context),
   )
 }
+
+/** Orden de preferencia del "siguiente paso" que se destaca en el detalle. */
+const PRIMARY_ORDER: ActionKey[] = [
+  'validate',
+  'resolve_claim',
+  'start',
+  'resume',
+  'attend',
+  'assign_technician',
+  'assign_supervisor',
+  'add_auxiliary',
+  'open_claim',
+  'reactivate',
+  'mark_duplicate',
+  'recapture',
+  'change_priority',
+  'pause',
+  'comment',
+  'reject',
+  'cancel',
+]
+
+/** Acción primaria a destacar, o `null` si no hay acciones. */
+export function pickPrimaryAction(actions: ActionKey[]): ActionKey | null {
+  for (const candidate of PRIMARY_ORDER) {
+    if (actions.includes(candidate)) return candidate
+  }
+  return actions[0] ?? null
+}

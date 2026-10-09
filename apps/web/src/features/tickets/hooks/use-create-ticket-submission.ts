@@ -6,18 +6,24 @@ import type { DuplicateCandidate } from '../domain/types'
 import type { CreateTicketInput } from '../schemas'
 import { useCheckDuplicates, useCreateTicket } from './use-tickets'
 
+interface PendingDuplicates {
+  input: CreateTicketInput
+  candidates: DuplicateCandidate[]
+}
+
 /** Registro del tiquet con pre-chequeo de duplicados y confirmación. */
 export function useCreateTicketSubmission(
   form: UseFormReturn<CreateTicketInput>,
 ) {
   const navigate = useNavigate()
-  const [candidates, setCandidates] = useState<DuplicateCandidate[]>([])
-  const [pending, setPending] = useState<CreateTicketInput | null>(null)
+  const [pending, setPending] = useState<PendingDuplicates | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [allowLeave, setAllowLeave] = useState(false)
   const createMutation = useCreateTicket()
   const checkMutation = useCheckDuplicates()
 
   function createWith(input: CreateTicketInput) {
+    setAllowLeave(true)
     createMutation.mutate(
       { input, clientRequestId: crypto.randomUUID() },
       {
@@ -38,8 +44,7 @@ export function useCreateTicketSubmission(
         description: values.description,
       })
       if (found.length > 0) {
-        setPending(values)
-        setCandidates(found)
+        setPending({ input: values, candidates: found })
       } else {
         createWith(values)
       }
@@ -49,22 +54,21 @@ export function useCreateTicketSubmission(
   })
 
   function confirmDuplicate() {
-    if (pending) createWith(pending)
-    setCandidates([])
+    if (pending) createWith(pending.input)
     setPending(null)
   }
 
   function cancelDuplicate() {
-    setCandidates([])
     setPending(null)
   }
 
   return {
-    candidates,
+    candidates: pending?.candidates ?? [],
     onSubmit,
     confirmDuplicate,
     cancelDuplicate,
     submitError,
+    allowLeave,
     isSubmitting: createMutation.isPending || checkMutation.isPending,
     createError: createMutation.error
       ? toTicketError(createMutation.error)

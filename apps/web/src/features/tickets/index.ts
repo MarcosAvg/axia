@@ -5,6 +5,7 @@ export { TicketDetailView } from './components/ticket-detail'
 export { TicketFilters } from './components/ticket-filters'
 export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
+export { TicketStatusSummary } from './components/ticket-status-summary'
 export {
   useMyOffers,
   useMyWork,
