@@ -89,37 +89,41 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const canRate = canRateTicket(identity, ticket.data.status)
 
   return (
-    <div className="flex flex-col gap-6">
-      <Section title={detail.capture}>
-        <TicketSummary ticket={ticket.data} />
-      </Section>
-      {actions.length > 0 ? (
-        <Section title={detail.actions}>
-          <TicketActionsPanel
-            ticket={ticket.data}
-            actions={actions}
-            identity={identity}
-            participants={participants.data ?? []}
-          />
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="flex flex-col gap-6">
+        <Section title={detail.timeline}>
+          <TicketTimeline items={timeline.data ?? []} />
         </Section>
-      ) : null}
-      <Section title={detail.timeline}>
-        <TicketTimeline items={timeline.data ?? []} />
-      </Section>
-      <Section title={detail.participants}>
-        <ParticipantList participants={participants.data ?? []} />
-      </Section>
-      <EvidenceSection ticketId={ticketId} cycle={ticket.data.cycle} />
-      {canRecordTime ? (
-        <Section title={manualTimeMessages.title}>
-          <ManualTimePanel ticketId={ticketId} />
+        <EvidenceSection ticketId={ticketId} cycle={ticket.data.cycle} />
+      </div>
+      <div className="flex flex-col gap-6">
+        {actions.length > 0 ? (
+          <Section title={detail.actions}>
+            <TicketActionsPanel
+              ticket={ticket.data}
+              actions={actions}
+              identity={identity}
+              participants={participants.data ?? []}
+            />
+          </Section>
+        ) : null}
+        <Section title={detail.capture}>
+          <TicketSummary ticket={ticket.data} />
         </Section>
-      ) : null}
-      {canRate ? (
-        <Section title={ticketMessages.rating.title}>
-          <TicketRatingPanel ticketId={ticketId} />
+        <Section title={detail.participants}>
+          <ParticipantList participants={participants.data ?? []} />
         </Section>
-      ) : null}
+        {canRecordTime ? (
+          <Section title={manualTimeMessages.title}>
+            <ManualTimePanel ticketId={ticketId} />
+          </Section>
+        ) : null}
+        {canRate ? (
+          <Section title={ticketMessages.rating.title}>
+            <TicketRatingPanel ticketId={ticketId} />
+          </Section>
+        ) : null}
+      </div>
     </div>
   )
 }

@@ -1,8 +1,11 @@
+import { TicketIcon } from 'lucide-react'
+import { EmptyState } from '@/components/shared/empty-state'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { TicketList } from './ticket-list'
 import { TicketPagination } from './ticket-pagination'
+import { TicketTable } from './ticket-table'
 
 interface TicketListPanelProps {
   isLoading: boolean
@@ -23,21 +26,22 @@ export function TicketListPanel({
   onPage,
 }: TicketListPanelProps) {
   if (isLoading) {
-    return <LoadingList rows={4} />
+    return <LoadingList rows={6} />
   }
   if (isError) {
     return <ErrorAlert message={ticketMessages.errors.load} />
   }
   if (items.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {ticketMessages.list.empty}
-      </p>
-    )
+    return <EmptyState icon={TicketIcon} title={ticketMessages.list.empty} />
   }
   return (
     <>
-      <TicketList items={items} />
+      <div className="hidden lg:block">
+        <TicketTable items={items} />
+      </div>
+      <div className="lg:hidden">
+        <TicketList items={items} />
+      </div>
       <TicketPagination page={page} totalPages={totalPages} onPage={onPage} />
     </>
   )

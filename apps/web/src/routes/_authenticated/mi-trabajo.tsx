@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { HardHatIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { EmptyState } from '@/components/shared/empty-state'
+import { PageHeader } from '@/components/shared/page-header'
 import { useAuth } from '@/features/auth'
 import { TicketList, ticketMessages, useMyWork } from '@/features/tickets'
 
@@ -14,16 +17,13 @@ function MyWorkPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header>
-        <h1 className="text-xl font-semibold">{myWork.title}</h1>
-        <p className="text-sm text-muted-foreground">{myWork.subtitle}</p>
-      </header>
+      <PageHeader title={myWork.title} description={myWork.subtitle} />
       {query.isLoading ? <LoadingList rows={4} /> : null}
       {query.isError ? (
         <ErrorAlert message={ticketMessages.errors.load} />
       ) : null}
       {query.data && query.data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{myWork.empty}</p>
+        <EmptyState icon={HardHatIcon} title={myWork.empty} />
       ) : null}
       {query.data && query.data.length > 0 ? (
         <TicketList items={query.data} />

@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { InboxIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { EmptyState } from '@/components/shared/empty-state'
+import { PageHeader } from '@/components/shared/page-header'
 import { useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
@@ -21,16 +24,13 @@ function InboxPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-xl font-semibold">{inbox.title}</h1>
-        <p className="text-sm text-muted-foreground">{inbox.subtitle}</p>
-      </header>
+      <PageHeader title={inbox.title} description={inbox.subtitle} />
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">{inbox.offers}</h2>
         {offers.data && offers.data.length > 0 ? (
           <TicketList items={offers.data} />
         ) : (
-          <p className="text-sm text-muted-foreground">{inbox.empty}</p>
+          <EmptyState icon={InboxIcon} title={inbox.empty} />
         )}
       </section>
       <section className="flex flex-col gap-3">
@@ -42,7 +42,7 @@ function InboxPage() {
         {team.data && team.data.items.length > 0 ? (
           <TicketList items={team.data.items} />
         ) : (
-          <p className="text-sm text-muted-foreground">{inbox.empty}</p>
+          <EmptyState icon={InboxIcon} title={inbox.empty} />
         )}
       </section>
     </div>

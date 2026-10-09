@@ -95,7 +95,22 @@ El armazón vive en `features/shell` (ver ADR 0039).
 
 ## 3. Componentes y patrones
 
-_(Pendiente: Fases 2 y 3 — tabla de datos, estados, filtros e insignias semánticas.)_
+Componentes compartidos en `components/shared` (ver ADR 0040):
+
+- **`data-table.tsx`**: tabla densa para escritorio. Recibe columnas, filas y un `getRowId`;
+  opcionalmente `onRowClick` (con navegación por teclado). Cada columna puede ocultarse por
+  punto de quiebre (`hideBelow`).
+- **`page-header.tsx`**: título, descripción y acciones de una vista.
+- **`empty-state.tsx`**: estado vacío homogéneo con icono y acción opcionales.
+- **`async-state.tsx`**: `LoadingList` (esqueletos) y `ErrorAlert`.
+
+Patrones de lista:
+
+- **Tiquets**: tabla en escritorio (`lg+`) y tarjetas en móvil, en el mismo panel.
+- **Detalle de tiquet**: dos columnas; contenido a la izquierda y rail de acciones/metadatos a la
+  derecha.
+- Las **insignias de estado** usan tokens semánticos (`info`, `warning`, `success`,
+  `destructive`) y siguen el tema activo.
 
 ## 4. Accesibilidad
 

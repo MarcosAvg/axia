@@ -122,6 +122,15 @@ export const ticketMessages = {
     next: 'Siguiente',
     page: (page: number) => `Página ${page}`,
     duplicateMark: 'Posible duplicado',
+    columns: {
+      folio: 'Folio',
+      description: 'Descripción',
+      status: 'Estado',
+      priority: 'Prioridad',
+      building: 'Edificio',
+      team: 'Equipo',
+      reported: 'Registrado',
+    },
   },
   detail: {
     title: 'Detalle del tiquet',
