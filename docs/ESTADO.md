@@ -3,18 +3,20 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-08
-**Fase actual:** todas las fases (0–7) cerradas — proyecto completo en lo preparable desde el repo
+**Última actualización:** 2026-10-09
+**Fase actual:** Fase 8 — rediseño de interfaz (UI/UX), enfoque escritorio
 
 ## En curso
 
-_(vacío)_ — **Todas las fases (0–7) están cerradas.** El 2026-10-08 se publicó `main` a `origin`
-por petición expresa de la persona (**excepción única**); a partir de aquí la regla vuelve a ser
-“solo commits locales, sin publicar”. El despliegue quedó afinado: **Axia se levanta con su propio
-`docker compose`** (frontend + migraciones, config en runtime) apuntando a un **Supabase aparte**, y
-el **reverse proxy no lo impone Axia** (contrato + ejemplos). Lo que queda es operativo: publicar las
-imágenes en GHCR, desplegar (`deploy/README.md`), activar push/correo/escalamiento
-(`docs/notificaciones-push.md`) y los pendientes de negocio que surjan.
+**Fase 8 — rediseño de interfaz (UI/UX).** Objetivo: layout de escritorio estilo Jira/Linear,
+sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contrast`),
+claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
+lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell, 2 componentes de datos, 3 operación,
+4 métricas+admin, 5 pulido. Detalle en `docs/diseno-ui.md`.
+En curso: **Fase 1 (`feat/ui-shell`)** — Fase 0 cerrada (tokens, temas, proveedor y selector).
+
+_(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
+(`deploy/README.md`, `docs/notificaciones-push.md`).
 
 ## Hecho
 
@@ -725,3 +727,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   ordenada por secuencia, y sin procesar cuando no hay red. Prueba Playwright del técnico que sube la
   evidencia e inicia **sin conexión** y se sincroniza al reconectar. Rama
   `feat/fase-4a-acciones-offline`.
+- **Fase 8, Fase 0 (rediseño de interfaz — sistema de temas)**: tokens movidos a
+  `src/styles/themes.css` con 5 temas (`ocean` predeterminado, `neutral`, `emerald`, `violet`,
+  `contrast`) en claro y oscuro, paleta de gráficos distinguible y tokens semánticos
+  (`success`/`warning`/`info`); lógica pura en `lib/theme.ts` con pruebas; `ThemeProvider` y
+  `ThemeToggle` en `components/shared`; script anti-parpadeo en `index.html`. **ADR 0038**;
+  `docs/diseno-ui.md` iniciado. `pnpm check` en verde (136 Vitest, 404 pgTAP). Rama `feat/ui-temas`.

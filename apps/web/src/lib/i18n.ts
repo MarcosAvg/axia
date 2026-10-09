@@ -23,4 +23,21 @@ export const messages = {
     disconnected: 'Sin conexión',
     pending: (count: number) => `${count} por sincronizar`,
   },
+  theme: {
+    aria: 'Cambiar tema y modo',
+    colorLabel: 'Tema de color',
+    modeLabel: 'Modo',
+    themes: {
+      ocean: 'Océano',
+      neutral: 'Neutro',
+      emerald: 'Esmeralda',
+      violet: 'Violeta',
+      contrast: 'Alto contraste',
+    },
+    modes: {
+      light: 'Claro',
+      dark: 'Oscuro',
+      system: 'Sistema',
+    },
+  },
 } as const

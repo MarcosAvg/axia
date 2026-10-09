@@ -1,4 +1,5 @@
 import { Link, Outlet } from '@tanstack/react-router'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { messages } from '@/lib/i18n'
 import { can } from '../domain/identity'
 import { useAuth } from '../hooks/auth-context'
@@ -49,7 +50,10 @@ export function AppShell() {
               </Link>
             )}
           </nav>
-          <UserMenu />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 p-4">

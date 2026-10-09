@@ -3,13 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
       content="Axia: seguimiento de tiquets de mantenimiento"
     />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Aplica tema y modo antes del primer pintado para evitar el parpadeo. -->
+    <script>
+      ;(function () {
+        try {
+          var theme = localStorage.getItem('axia.theme') || 'ocean'
+          var mode = localStorage.getItem('axia.color-mode') || 'system'
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.setAttribute('data-theme', theme)
+          root.classList.toggle('dark', dark)
+          root.style.colorScheme = dark ? 'dark' : 'light'
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', dark ? '#0e1524' : '#ffffff')
+        } catch (error) {
+          console.warn('No se pudo aplicar el tema inicial', error)
+        }
+      })()
+    </script>
     <!-- Configuración en runtime: la reescribe el contenedor; en desarrollo queda vacía. -->
     <script src="/config.js"></script>
     <title>Axia</title>

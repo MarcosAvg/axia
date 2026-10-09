@@ -28,11 +28,11 @@ export default defineConfig({
         lang: 'es-MX',
         id: '/',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         start_url: '/',
         scope: '/',
         categories: ['business', 'productivity'],
-        theme_color: '#0f172a',
+        theme_color: '#2563eb',
         background_color: '#ffffff',
         icons: [
           {
