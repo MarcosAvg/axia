@@ -25,6 +25,19 @@ export const metricsMessages = {
     dependency: 'Dependencia',
     all: 'Todos',
     clear: 'Limpiar',
+    dimension: 'Agrupar por',
+  },
+  quickRanges: {
+    d7: '7 días',
+    d30: '30 días',
+    d90: '90 días',
+    all: 'Todo',
+  },
+  tabs: {
+    summary: 'Resumen',
+    times: 'Tiempos',
+    quality: 'Calidad',
+    sla: 'SLA y satisfacción',
   },
   kpi: {
     tickets: 'Tiquets',
