@@ -104,6 +104,7 @@ export const metricsMessages = {
   },
   duplicates: {
     title: 'Duplicados',
+    byDimension: 'Duplicados por dimensión',
     timeToMark: 'Tiempo medio hasta marcarse',
     alerts: 'Alertas de posible duplicado',
     dimension: 'Dimensión',
