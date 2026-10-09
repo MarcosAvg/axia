@@ -12,8 +12,8 @@
 sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contrast`),
 claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
 lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos ✅,
-3 operación ✅, 4 métricas+admin, 5 pulido. Detalle en `docs/diseno-ui.md`.
-En curso: **Fase 4 (métricas y administración)** — Fases 0 a 3 cerradas.
+3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
+En curso: **cerrada**; pendiente la validación visual de la persona y los ajustes que pida.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -744,3 +744,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   semánticos; lista de tiquets con tabla en escritorio y tarjetas en móvil; detalle de tiquet a
   dos columnas (contenido + rail de acciones/metadatos). **ADR 0040**; `docs/diseno-ui.md`
   actualizado. `pnpm check` en verde (136 Vitest, 12 Playwright, 404 pgTAP). Rama `feat/ui-temas`.
+- **Fase 8, Fases 4-5 (métricas, administración y accesibilidad)**: `PageHeader` en el tablero,
+  filtros en tarjeta, panel de administración como cuadrícula de accesos; enlace "Saltar al
+  contenido", `aria-current="page"` en la navegación e indicador offline con tokens semánticos.
+  `docs/diseno-ui.md` completo. `pnpm check` en verde (136 Vitest, 12 Playwright, 404 pgTAP).
+  Rama `feat/ui-temas`.

@@ -2,6 +2,7 @@
 
 export const shellMessages = {
   brand: 'Axia',
+  skipToContent: 'Saltar al contenido',
   groups: {
     operation: 'Operación',
     analytics: 'Análisis',

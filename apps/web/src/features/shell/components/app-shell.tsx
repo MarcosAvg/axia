@@ -31,6 +31,12 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-svh w-full bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:ring-2 focus:ring-ring"
+      >
+        {shellMessages.skipToContent}
+      </a>
       <aside
         className={cn(
           'sticky top-0 hidden h-svh shrink-0 border-r transition-[width] duration-200 lg:block',
@@ -57,7 +63,10 @@ export function AppShell() {
           onOpenSidebar={() => setMobileOpen(true)}
           onOpenSearch={() => setSearchOpen(true)}
         />
-        <main className="mx-auto w-full max-w-[1600px] flex-1 p-4 lg:p-6">
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-[1600px] flex-1 p-4 lg:p-6"
+        >
           <Outlet />
         </main>
       </div>

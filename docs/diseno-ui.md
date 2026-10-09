@@ -115,6 +115,8 @@ Patrones de lista:
 ## 4. Accesibilidad
 
 - Foco visible y navegación por teclado en todos los controles.
+- Enlace **"Saltar al contenido"** (visible al enfocar) que apunta a `#main-content`.
+- `aria-current="page"` en el destino activo de la navegación.
 - Contraste suficiente (AA) en los cinco temas.
 - Objetivos táctiles de al menos 44 px en móvil.
 - Tema `contrast` para condiciones de mucha luz.

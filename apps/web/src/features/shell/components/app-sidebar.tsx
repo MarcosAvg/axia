@@ -41,6 +41,7 @@ function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
         to="/tickets"
         search={{ page: 1 }}
         className={className}
+        activeProps={{ 'aria-current': 'page' }}
         onClick={onNavigate}
       >
         {content}
@@ -50,12 +51,18 @@ function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
         to="/admin/catalogos"
         search={{ catalog: 'teams' }}
         className={className}
+        activeProps={{ 'aria-current': 'page' }}
         onClick={onNavigate}
       >
         {content}
       </Link>
     ) : (
-      <Link to={item.to} className={className} onClick={onNavigate}>
+      <Link
+        to={item.to}
+        className={className}
+        activeProps={{ 'aria-current': 'page' }}
+        onClick={onNavigate}
+      >
         {content}
       </Link>
     )

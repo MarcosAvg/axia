@@ -8,6 +8,7 @@ import {
 import type { Option } from '@/features/catalogs'
 import { statusLabels } from '@/features/tickets'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { PageHeader } from '@/components/shared/page-header'
 import {
   EMPTY_FILTERS,
   byDimension,
@@ -264,12 +265,10 @@ export function MetricsDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-xl font-semibold">{metricsMessages.title}</h1>
-        <p className="text-sm text-muted-foreground">
-          {metricsMessages.subtitle}
-        </p>
-      </header>
+      <PageHeader
+        title={metricsMessages.title}
+        description={metricsMessages.subtitle}
+      />
       <MetricsFilters
         filters={filters}
         catalogs={catalogs}

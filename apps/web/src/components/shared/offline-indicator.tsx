@@ -24,7 +24,10 @@ export function OfflineIndicator() {
   if (online && pending === 0) return null
 
   return (
-    <span role="status" className="text-xs text-amber-700 dark:text-amber-400">
+    <span
+      role="status"
+      className="text-xs text-warning-foreground dark:text-warning"
+    >
       {online
         ? messages.offline.pending(pending)
         : messages.offline.disconnected}
