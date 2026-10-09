@@ -883,3 +883,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   se eliminan `duplicates-summary`, `sla-section` y `reject-cancel-section`. Se añaden capturas
   visuales de **SLA** y **Equipo**. `pnpm check` en verde (157 Vitest, 12 Playwright, 427 pgTAP).
   Rama `feat/metricas-graficas`.
+- **Métricas: filtros uniformes (Etapa 16)**: la barra del tablero adopta el **mismo patrón que la
+  lista de Operación** (contenedor `rounded-xl border bg-card p-4`, controles en línea + **chips de
+  filtros activos** con `FilterChips`); la **exportación CSV/XLSX** se mueve a las **acciones del
+  encabezado** (`PageHeader`). Sin patrones nuevos ni cambios de datos. `pnpm check` en verde (157
+  Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-filtros-uniformes`.

@@ -2,6 +2,7 @@ import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { useMetricsBoard } from '../hooks/use-metrics-board'
 import { metricsMessages } from '../i18n'
+import { MetricsExport } from './metrics-export'
 import { MetricsHero } from './metrics-hero'
 import { MetricsTabs } from './metrics-tabs'
 import { MetricsToolbar } from './metrics-toolbar'
@@ -14,12 +15,11 @@ export function MetricsDashboard() {
       <PageHeader
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
+        actions={<MetricsExport groups={board.groups} nameOf={board.nameOf} />}
       />
       <MetricsToolbar
         filters={board.filters}
         catalogs={board.catalogs}
-        groups={board.groups}
-        nameOf={board.nameOf}
         onFiltersChange={board.setFilters}
       />
       {board.loading ? <LoadingList rows={4} /> : null}
