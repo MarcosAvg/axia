@@ -17,14 +17,13 @@ export function TechnicianCategories() {
   const categories = useAdminRows('categories')
   const add = useAddTechnicianCategory()
   const remove = useRemoveTechnicianCategory()
-  const { scopes: t, list } = adminMessages
+  const { list } = adminMessages
 
   const technicianName = (id: string) =>
     people.data?.technicians.find((person) => person.id === id)?.fullName ?? '—'
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-medium">{t.technician}</h2>
       {designations.isLoading ? (
         <p className="text-sm text-muted-foreground">{list.loading}</p>
       ) : null}

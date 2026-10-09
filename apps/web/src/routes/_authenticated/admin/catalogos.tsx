@@ -1,6 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { cn } from 'cn'
-import { ADMIN_CATALOGS, CatalogManager, catalogByKey } from '@/features/admin'
+import { PageHeader } from '@/components/shared/page-header'
+import {
+  ADMIN_CATALOGS,
+  CatalogManager,
+  adminMessages,
+  catalogByKey,
+} from '@/features/admin'
 
 export const Route = createFileRoute('/_authenticated/admin/catalogos')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -15,6 +21,10 @@ function CatalogsPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <PageHeader
+        title={adminMessages.nav.catalogs}
+        description={adminMessages.descriptions.catalogs}
+      />
       <nav className="flex flex-wrap gap-1" aria-label="Catálogos">
         {ADMIN_CATALOGS.map((item) => (
           <Link

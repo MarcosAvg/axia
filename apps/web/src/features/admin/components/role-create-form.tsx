@@ -7,10 +7,15 @@ import { adminMessages } from '../i18n'
 interface RoleCreateFormProps {
   onCreate: (values: { name: string; label: string }) => void
   isSaving: boolean
+  onClose?: () => void
 }
 
 /** Alta de un rol. */
-export function RoleCreateForm({ onCreate, isSaving }: RoleCreateFormProps) {
+export function RoleCreateForm({
+  onCreate,
+  isSaving,
+  onClose,
+}: RoleCreateFormProps) {
   const [name, setName] = useState('')
   const [label, setLabel] = useState('')
   const { roles, actions } = adminMessages
@@ -21,6 +26,7 @@ export function RoleCreateForm({ onCreate, isSaving }: RoleCreateFormProps) {
     onCreate({ name: name.trim(), label: label.trim() })
     setName('')
     setLabel('')
+    onClose?.()
   }
 
   return (

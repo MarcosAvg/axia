@@ -1,4 +1,4 @@
-import { ErrorAlert } from '@/components/shared/async-state'
+import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -77,9 +77,7 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
           {actions.add}
         </Button>
       </div>
-      {manager.rows.isLoading ? (
-        <p className="text-sm text-muted-foreground">{list.loading}</p>
-      ) : null}
+      {manager.rows.isLoading ? <LoadingList rows={4} /> : null}
       {manager.rows.isError ? <ErrorAlert message={list.error} /> : null}
       {manager.rows.data ? (
         <CatalogTable

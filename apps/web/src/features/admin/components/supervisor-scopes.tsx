@@ -22,14 +22,13 @@ export function SupervisorScopes() {
   const removeScope = useDeleteSupervisorScope()
   const addBuilding = useAddScopeBuilding()
   const removeBuilding = useRemoveScopeBuilding()
-  const { scopes: t, list } = adminMessages
+  const { list } = adminMessages
 
   const profileName = (id: string) =>
     profiles.data?.find((profile) => profile.id === id)?.fullName ?? '—'
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-medium">{t.supervisor}</h2>
       {scopes.isLoading ? (
         <p className="text-sm text-muted-foreground">{list.loading}</p>
       ) : null}

@@ -27,6 +27,11 @@ export const adminMessages = {
     defaultCalendar: 'Calendario laboral por defecto',
     slaClockMode: 'Modo de reloj de los objetivos (SLA)',
     saved: 'Configuración guardada.',
+    sections: {
+      general: 'General',
+      validation: 'Validación y evidencia',
+      time: 'Tiempos y SLA',
+    },
   },
   slaClockModes: {
     calendar: 'Calendario (continuo)',
@@ -86,7 +91,20 @@ export const adminMessages = {
     scope: 'Ámbito',
     none: 'Sin permiso',
     createTitle: 'Nuevo rol',
+    listLabel: 'Roles',
   },
+  permissionGroups: {
+    ticket: 'Tiquets',
+    time: 'Tiempos',
+    evidence: 'Evidencia',
+    metrics: 'Métricas',
+    data: 'Datos',
+    catalog: 'Catálogos',
+    user: 'Usuarios',
+    role: 'Roles y permisos',
+    assignment: 'Designaciones',
+    act_on_behalf: 'Otros',
+  } as Record<string, string>,
   users: {
     title: 'Usuarios',
     roles: 'Roles',
@@ -126,6 +144,15 @@ export const adminMessages = {
     empty: 'Sin registros todavía.',
     loading: 'Cargando…',
     error: 'No se pudo cargar.',
+  },
+  descriptions: {
+    catalogs: 'Catálogos maestros y motivos jerárquicos.',
+    roles: 'Roles y su matriz de permisos por ámbito.',
+    users: 'Cuentas, roles y vínculos con los catálogos.',
+    scopes: 'Ámbitos de supervisor y designaciones de técnicos.',
+    calendars: 'Jornadas por equipo, franjas y días no laborables.',
+    integrations: 'Mapeo de estatus, lotes de importación y convivencia.',
+    settings: 'Parámetros generales de la instancia.',
   },
   catalogPicker: 'Catálogo',
   form: {

@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import type { Profile } from '../domain/access'
 import {
   useAssignUserRole,
   useProfiles,
@@ -9,7 +11,8 @@ import {
 } from '../hooks/use-access'
 import { adminMessages } from '../i18n'
 import { LinksManager } from './links-manager'
-import { UserRow } from './user-row'
+import { UserRolesDialog } from './user-roles-dialog'
+import { UsersTable } from './users-table'
 
 /** Usuarios: roles, activar/desactivar y vínculos con los catálogos. */
 export function UsersManager() {
@@ -19,33 +22,34 @@ export function UsersManager() {
   const assign = useAssignUserRole()
   const remove = useRemoveUserRole()
   const setActive = useSetProfileActive()
-  const { users, list } = adminMessages
+  const [editing, setEditing] = useState<Profile | null>(null)
 
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-lg font-medium">{users.title}</h2>
+    <div className="flex flex-col gap-8">
       {profiles.isLoading ? <LoadingList rows={4} /> : null}
-      {profiles.isError ? <ErrorAlert message={list.error} /> : null}
+      {profiles.isError ? (
+        <ErrorAlert message={adminMessages.list.error} />
+      ) : null}
       {profiles.data ? (
-        <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
-          {profiles.data.map((profile) => (
-            <UserRow
-              key={profile.id}
-              profile={profile}
-              roles={roles.data ?? []}
-              assignments={userRoles.data ?? []}
-              onToggleActive={() =>
-                setActive.mutate({ id: profile.id, active: !profile.active })
-              }
-              onAssign={(roleId) =>
-                assign.mutate({ userId: profile.id, roleId })
-              }
-              onRemove={(roleId) =>
-                remove.mutate({ userId: profile.id, roleId })
-              }
-            />
-          ))}
-        </ul>
+        <UsersTable
+          profiles={profiles.data}
+          roles={roles.data ?? []}
+          assignments={userRoles.data ?? []}
+          onToggleActive={(profile) =>
+            setActive.mutate({ id: profile.id, active: !profile.active })
+          }
+          onEditRoles={setEditing}
+        />
+      ) : null}
+      {editing ? (
+        <UserRolesDialog
+          profile={editing}
+          roles={roles.data ?? []}
+          assignments={userRoles.data ?? []}
+          onAssign={(roleId) => assign.mutate({ userId: editing.id, roleId })}
+          onRemove={(roleId) => remove.mutate({ userId: editing.id, roleId })}
+          onClose={() => setEditing(null)}
+        />
       ) : null}
       <LinksManager />
     </div>

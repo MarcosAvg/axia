@@ -1,3 +1,8 @@
+import { LibraryIcon } from 'lucide-react'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminColumn } from '../domain/catalogs'
@@ -37,6 +42,97 @@ function columnText(
   return cellText(row[column.key])
 }
 
+function StatusCell({ active }: { active: boolean }) {
+  const { list } = adminMessages
+  if (active) {
+    return (
+      <Badge className="bg-success/10 text-success dark:bg-success/20">
+        {list.active}
+      </Badge>
+    )
+  }
+  return (
+    <Badge className="bg-warning/15 text-warning-foreground dark:bg-warning/20 dark:text-warning">
+      {list.inactive}
+    </Badge>
+  )
+}
+
+function ActionsCell({
+  row,
+  onEdit,
+  onToggle,
+}: {
+  row: Record<string, unknown>
+  onEdit: (row: Record<string, unknown>) => void
+  onToggle: (row: Record<string, unknown>) => void
+}) {
+  const { actions } = adminMessages
+  return (
+    <div className="flex justify-end gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-9"
+        onClick={() => onEdit(row)}
+      >
+        {actions.edit}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        className="min-h-9"
+        onClick={() => onToggle(row)}
+      >
+        {row.active === false ? actions.activate : actions.deactivate}
+      </Button>
+    </div>
+  )
+}
+
+function buildColumns(
+  columns: AdminColumn[],
+  optionsFor: (table: AdminTable) => AdminOption[],
+  onEdit: (row: Record<string, unknown>) => void,
+  onToggle: (row: Record<string, unknown>) => void,
+): DataTableColumn<Record<string, unknown>>[] {
+  const [primary, ...secondary] = columns
+  return [
+    {
+      id: primary?.key ?? 'primary',
+      header: primary?.label ?? '',
+      cell: (row) => (
+        <span className="font-medium">
+          {primary ? columnText(row, primary, optionsFor) : '—'}
+        </span>
+      ),
+    },
+    {
+      id: 'details',
+      header: '',
+      cell: (row) => (
+        <span className="text-muted-foreground">
+          {secondary
+            .map((column) => columnText(row, column, optionsFor))
+            .join(' · ')}
+        </span>
+      ),
+    },
+    {
+      id: 'status',
+      header: adminMessages.list.active,
+      cell: (row) => <StatusCell active={row.active !== false} />,
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: (row) => (
+        <ActionsCell row={row} onEdit={onEdit} onToggle={onToggle} />
+      ),
+    },
+  ]
+}
+
 /** Lista de registros de un catálogo con acciones de editar y activar/desactivar. */
 export function CatalogTable({
   rows,
@@ -45,55 +141,15 @@ export function CatalogTable({
   onEdit,
   onToggle,
 }: CatalogTableProps) {
-  const { list, actions } = adminMessages
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">{list.empty}</p>
+    return <EmptyState icon={LibraryIcon} title={adminMessages.list.empty} />
   }
-  const [primary, ...secondary] = columns
-  if (!primary) return null
 
   return (
-    <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
-      {rows.map((row) => (
-        <li
-          key={String(row.id)}
-          className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="font-medium">
-              {columnText(row, primary, optionsFor)}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {secondary
-                .map((column) => columnText(row, column, optionsFor))
-                .join(' · ')}
-            </span>
-            {row.active === false ? (
-              <span className="text-xs text-amber-700 dark:text-amber-400">
-                {list.inactive}
-              </span>
-            ) : null}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11"
-              onClick={() => onEdit(row)}
-            >
-              {actions.edit}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="min-h-11"
-              onClick={() => onToggle(row)}
-            >
-              {row.active === false ? actions.activate : actions.deactivate}
-            </Button>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <DataTable
+      columns={buildColumns(columns, optionsFor, onEdit, onToggle)}
+      rows={rows}
+      getRowId={(row) => String(row.id)}
+    />
   )
 }

@@ -1,68 +1,124 @@
-import { useState } from 'react'
+import { ShieldCheckIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { EmptyState } from '@/components/shared/empty-state'
+import { Button } from '@/components/ui/button'
+import type { Permission, Role, RolePermission, Scope } from '../domain/access'
+import { useRolesController } from '../hooks/use-roles-controller'
 import { adminMessages } from '../i18n'
-import {
-  useCreateRole,
-  usePermissions,
-  useRemoveRolePermission,
-  useRolePermissions,
-  useRoles,
-  useSetRolePermission,
-  useUpdateRole,
-} from '../hooks/use-access'
-import { RoleCreateForm } from './role-create-form'
+import { RoleCreateDialog } from './role-create-dialog'
+import { RoleList } from './role-list'
 import { RolePanel } from './role-panel'
-import { RoleTabs } from './role-tabs'
 
-/** Roles: alta, edición y matriz de permisos con ámbito. */
+function RolesSidebar({
+  roles,
+  selectedId,
+  onSelect,
+  onCreate,
+}: {
+  roles: Role[]
+  selectedId: string | null
+  onSelect: (id: string) => void
+  onCreate: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <RoleList roles={roles} selectedId={selectedId} onSelect={onSelect} />
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        onClick={onCreate}
+      >
+        {adminMessages.roles.createTitle}
+      </Button>
+    </div>
+  )
+}
+
+interface RoleDetailProps {
+  selected: Role | undefined
+  creating: boolean
+  permissions: Permission[]
+  assignments: RolePermission[]
+  isCreating: boolean
+  isSaving: boolean
+  onCreate: (values: { name: string; label: string }) => void
+  onCancelCreate: () => void
+  onSave: (values: { label: string; active: boolean }) => void
+  onSet: (permissionId: string, scope: Scope) => void
+  onRemove: (permissionId: string) => void
+}
+
+function RoleDetail({
+  selected,
+  creating,
+  permissions,
+  assignments,
+  isCreating,
+  isSaving,
+  onCreate,
+  onCancelCreate,
+  onSave,
+  onSet,
+  onRemove,
+}: RoleDetailProps) {
+  if (creating) {
+    return (
+      <RoleCreateDialog
+        isSaving={isCreating}
+        onCreate={onCreate}
+        onClose={onCancelCreate}
+      />
+    )
+  }
+  if (!selected) {
+    return (
+      <EmptyState icon={ShieldCheckIcon} title={adminMessages.list.empty} />
+    )
+  }
+  return (
+    <RolePanel
+      role={selected}
+      permissions={permissions}
+      assignments={assignments}
+      isSaving={isSaving}
+      onSave={onSave}
+      onSet={onSet}
+      onRemove={onRemove}
+    />
+  )
+}
+
+/** Roles en master-detail: lista a la izquierda y detalle con permisos. */
 export function RolesManager() {
-  const roles = useRoles()
-  const permissions = usePermissions()
-  const assignments = useRolePermissions()
-  const createRole = useCreateRole()
-  const updateRole = useUpdateRole()
-  const setPermission = useSetRolePermission()
-  const removePermission = useRemoveRolePermission()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { list } = adminMessages
+  const controller = useRolesController()
 
-  if (roles.isLoading) {
-    return <LoadingList rows={3} />
+  if (controller.isLoading) return <LoadingList rows={3} />
+  if (controller.isError) {
+    return <ErrorAlert message={adminMessages.list.error} />
   }
-  if (roles.isError) {
-    return <ErrorAlert message={list.error} />
-  }
-
-  const roleList = roles.data ?? []
-  const selected =
-    roleList.find((role) => role.id === selectedId) ?? roleList[0]
 
   return (
-    <div className="flex flex-col gap-6">
-      <RoleCreateForm
-        onCreate={(values) => createRole.mutate(values)}
-        isSaving={createRole.isPending}
+    <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+      <RolesSidebar
+        roles={controller.roleList}
+        selectedId={controller.selected ? controller.selected.id : null}
+        onSelect={controller.select}
+        onCreate={controller.startCreate}
       />
-      <RoleTabs
-        roles={roleList}
-        selectedId={selected ? selected.id : null}
-        onSelect={setSelectedId}
+      <RoleDetail
+        selected={controller.selected}
+        creating={controller.creating}
+        permissions={controller.permissions}
+        assignments={controller.assignments}
+        isCreating={controller.isCreating}
+        isSaving={controller.isSaving}
+        onCreate={controller.create}
+        onCancelCreate={controller.cancelCreate}
+        onSave={controller.save}
+        onSet={controller.setPermission}
+        onRemove={controller.removePermission}
       />
-      {selected ? (
-        <RolePanel
-          role={selected}
-          permissions={permissions.data ?? []}
-          assignments={assignments.data ?? []}
-          isSaving={updateRole.isPending}
-          onSave={(values) => updateRole.mutate({ id: selected.id, values })}
-          onSet={(permissionId, scope) =>
-            setPermission.mutate({ roleId: selected.id, permissionId, scope })
-          }
-          onRemove={(permissionId) =>
-            removePermission.mutate({ roleId: selected.id, permissionId })
-          }
-        />
-      ) : null}
     </div>
   )
 }
