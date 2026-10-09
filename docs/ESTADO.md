@@ -15,8 +15,8 @@ lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componente
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
 En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostración, Panel como
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
-Métricas globales, y Acceso/perfil. Queda como mejora **opcional** la regresión visual con capturas
-de Playwright. Detalle en `docs/diseno-ui.md` y los ADR 0038–0047.
+Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. Queda como mejora **opcional** la
+regresión visual con capturas de Playwright. Detalle en `docs/diseno-ui.md` y los ADR 0038–0048.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -821,3 +821,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **perfil** por secciones con roles y zona horaria. **ADR 0047**. `pnpm check` en verde (147
   Vitest, 12 Playwright, 413 pgTAP). **Rediseño de interfaz (Fases 8.0–8.5) completo.** Queda como
   mejora opcional la **regresión visual con capturas de Playwright**. Rama `feat/vistas-metricas`.
+- **Rediseño total del tablero de métricas (Etapa 6)**: `/metricas` pasa de un scroll largo a
+  **pestañas por tema** (Resumen · Tiempos · Calidad · SLA y satisfacción), con una **barra de
+  herramientas sticky** que concentra rangos rápidos (7 · 30 · 90 días y "Todo"), fechas, filtros
+  por catálogo, **selector de dimensión** y **exportación CSV/XLSX**; una fila de **KPI destacados**
+  siempre visible. Sin cambios de lógica (mismas funciones puras y hooks; solo se añade
+  `rangeForDays`). Componentes nuevos: `MetricsToolbar`, `MetricsHero`, `MetricsTabs`,
+  `MetricsExport` y `KpiGrid`. **ADR 0048**. `pnpm check` en verde (148 Vitest, 12 Playwright, 413
+  pgTAP). Rama `feat/metricas-rediseno`.
