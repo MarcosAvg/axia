@@ -4,16 +4,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { DeltaBadge } from './delta-badge'
 
-/** Tarjeta de un indicador, con explicación opcional. */
+/** Tarjeta de un indicador, con explicación y delta opcionales. */
 export function MetricCard({
   label,
   value,
   hint,
+  delta,
+  lowerIsBetter,
 }: {
   label: string
   value: string
   hint?: string
+  delta?: number | null
+  lowerIsBetter?: boolean
 }) {
   return (
     <Card>
@@ -36,8 +41,11 @@ export function MetricCard({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-1">
         <p className="text-2xl font-semibold">{value}</p>
+        {delta !== undefined ? (
+          <DeltaBadge change={delta} lowerIsBetter={lowerIsBetter} />
+        ) : null}
       </CardContent>
     </Card>
   )

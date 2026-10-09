@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import type { Option } from '@/features/catalogs'
-import { EMPTY_FILTERS, rangeForDays } from '../domain/metrics'
+import { EMPTY_FILTERS } from '../domain/metrics'
+import { rangeForDays } from '../domain/period'
 import type { Dimension, DimensionRow, MetricsFilters } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
@@ -14,6 +15,7 @@ export interface FilterCatalogs {
   teams: Option[]
   categories: Option[]
   dependencies: Option[]
+  requesters: Option[]
 }
 
 const QUICK_RANGES = [

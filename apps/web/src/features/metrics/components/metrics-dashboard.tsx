@@ -5,15 +5,17 @@ import {
   useBuildings,
   useCategories,
   useDependencies,
+  useRequesters,
   useTeams,
 } from '@/features/catalogs'
-import type { Option } from '@/features/catalogs'
+import type { Option, RequesterOption } from '@/features/catalogs'
 import {
   EMPTY_FILTERS,
   byDimension,
   filterTickets,
   summarize,
 } from '../domain/metrics'
+import { previousRange } from '../domain/period'
 import type {
   Dimension,
   MetricsFilters,
@@ -43,17 +45,22 @@ const EMPTY_SLA: SlaSummary = {
 
 const EMPTY_SATISFACTION: SatisfactionSummary = { average: null, ratings: 0 }
 
-function buildCatalogs(
-  buildings: Option[] | undefined,
-  teams: Option[] | undefined,
-  categories: Option[] | undefined,
-  dependencies: Option[] | undefined,
-): FilterCatalogs {
+function buildCatalogs(options: {
+  buildings: Option[] | undefined
+  teams: Option[] | undefined
+  categories: Option[] | undefined
+  dependencies: Option[] | undefined
+  requesters: RequesterOption[] | undefined
+}): FilterCatalogs {
   return {
-    buildings: buildings ?? [],
-    teams: teams ?? [],
-    categories: categories ?? [],
-    dependencies: dependencies ?? [],
+    buildings: options.buildings ?? [],
+    teams: options.teams ?? [],
+    categories: options.categories ?? [],
+    dependencies: options.dependencies ?? [],
+    requesters: (options.requesters ?? []).map((item) => ({
+      id: item.id,
+      name: item.fullName,
+    })),
   }
 }
 
@@ -65,6 +72,7 @@ function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
     dependency: new Map(
       catalogs.dependencies.map((item) => [item.id, item.name]),
     ),
+    requester: new Map(catalogs.requesters.map((item) => [item.id, item.name])),
   }
   return (id: string) => maps[dimension].get(id) ?? id
 }
@@ -81,14 +89,21 @@ function useMetricsBoard() {
   const teams = useTeams()
   const categories = useCategories()
   const dependencies = useDependencies()
+  const requesters = useRequesters()
 
-  const catalogs = buildCatalogs(
-    buildings.data,
-    teams.data,
-    categories.data,
-    dependencies.data,
-  )
-  const filtered = filterTickets(tickets.data ?? [], filters)
+  const catalogs = buildCatalogs({
+    buildings: buildings.data,
+    teams: teams.data,
+    categories: categories.data,
+    dependencies: dependencies.data,
+    requesters: requesters.data,
+  })
+  const allTickets = tickets.data ?? []
+  const filtered = filterTickets(allTickets, filters)
+  const prevFilters = previousRange(filters)
+  const prevSummary = prevFilters
+    ? summarize(filterTickets(allTickets, prevFilters))
+    : null
   return {
     filters,
     setFilters,
@@ -97,6 +112,7 @@ function useMetricsBoard() {
     catalogs,
     filtered,
     summary: summarize(filtered),
+    prevSummary,
     rows: byDimension(filtered, dimension),
     nameOf: nameResolver(dimension, catalogs),
     loading: tickets.isLoading,
@@ -122,7 +138,7 @@ export function MetricsDashboard() {
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
       />
-      <div className="sticky top-16 z-20">
+      <div>
         <MetricsToolbar
           filters={board.filters}
           catalogs={board.catalogs}
@@ -142,12 +158,14 @@ export function MetricsDashboard() {
         <>
           <MetricsHero
             summary={board.summary}
+            prev={board.prevSummary}
             satisfaction={board.satisfaction}
             sla={board.sla}
           />
           <MetricsTabs
             filtered={board.filtered}
             summary={board.summary}
+            prev={board.prevSummary}
             rows={board.rows}
             nameOf={board.nameOf}
             pauses={board.pauses}

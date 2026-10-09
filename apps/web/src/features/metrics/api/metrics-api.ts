@@ -14,10 +14,10 @@ import type {
 } from '../domain/metrics'
 
 const TICKET_SELECT =
-  'id, folio, status, reported_at, building_id, category_id, team_id, dependency_id, ' +
+  'id, folio, status, reported_at, building_id, category_id, team_id, dependency_id, requester_id, ' +
   'total_time, net_time, active_work_time, active_work_time_labor, active_work_time_extra, ' +
   'response_time, assignment_time, validation_time, ' +
-  'reassigned_supervisor, recaptured, reopened'
+  'reassigned_supervisor, reassigned_technician, recaptured, reopened'
 
 interface TicketRow {
   id: string
@@ -28,6 +28,7 @@ interface TicketRow {
   category_id: string
   team_id: string
   dependency_id: string
+  requester_id: string
   total_time: string | null
   net_time: string | null
   active_work_time: string | null
@@ -37,6 +38,7 @@ interface TicketRow {
   assignment_time: string | null
   validation_time: string | null
   reassigned_supervisor: boolean
+  reassigned_technician: boolean
   recaptured: boolean
   reopened: boolean
 }
@@ -51,6 +53,7 @@ function parseTicket(row: TicketRow): MetricsTicket {
     categoryId: row.category_id,
     teamId: row.team_id,
     dependencyId: row.dependency_id,
+    requesterId: row.requester_id,
     totalMinutes: intervalToMinutes(row.total_time),
     netMinutes: intervalToMinutes(row.net_time),
     activeMinutes: intervalToMinutes(row.active_work_time),
@@ -60,6 +63,7 @@ function parseTicket(row: TicketRow): MetricsTicket {
     assignmentMinutes: intervalToMinutes(row.assignment_time),
     validationMinutes: intervalToMinutes(row.validation_time),
     reassigned: row.reassigned_supervisor,
+    reassignedTechnician: row.reassigned_technician,
     recaptured: row.recaptured,
     reopened: row.reopened,
   }

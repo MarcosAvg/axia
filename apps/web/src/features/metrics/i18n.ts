@@ -7,6 +7,7 @@ export const dimensionLabels: Record<Dimension, string> = {
   building: 'Edificio',
   category: 'Categoría',
   dependency: 'Dependencia',
+  requester: 'Solicitante',
 }
 
 export const metricsMessages = {
@@ -54,6 +55,7 @@ export const metricsMessages = {
     firstFix: 'Primera resolución',
     satisfaction: 'Satisfacción',
     sla: 'Cumplimiento de SLA',
+    reassignedTechnician: 'Reasignación de técnico',
   },
   kpiGroups: {
     carga: 'Carga',
@@ -67,6 +69,12 @@ export const metricsMessages = {
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     satisfaction: 'Promedio de las calificaciones del solicitante (1 a 5).',
     firstFix: 'Tiquets cerrados sin reapertura.',
+    reassignedTechnician:
+      'Tiquets en los que el técnico cambió después de la asignación.',
+  },
+  delta: {
+    vsPrevious: 'vs periodo anterior',
+    noData: 'Sin periodo previo',
   },
   sla: {
     title: 'Tiempos objetivo (SLA)',

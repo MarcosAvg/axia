@@ -4,6 +4,8 @@ export interface Kpi {
   label: string
   value: string
   hint?: string
+  delta?: number | null
+  lowerIsBetter?: boolean
 }
 
 const COLUMNS: Record<number, string> = {
@@ -29,6 +31,8 @@ export function KpiGrid({
           label={card.label}
           value={card.value}
           hint={card.hint}
+          delta={card.delta}
+          lowerIsBetter={card.lowerIsBetter}
         />
       ))}
     </div>

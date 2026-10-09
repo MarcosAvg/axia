@@ -9,6 +9,7 @@ export interface MetricsTicket {
   categoryId: string
   teamId: string
   dependencyId: string
+  requesterId: string
   totalMinutes: number
   netMinutes: number
   activeMinutes: number
@@ -18,6 +19,7 @@ export interface MetricsTicket {
   assignmentMinutes: number
   validationMinutes: number
   reassigned: boolean
+  reassignedTechnician: boolean
   recaptured: boolean
   reopened: boolean
 }
@@ -40,29 +42,15 @@ export const EMPTY_FILTERS: MetricsFilters = {
   dependencyId: '',
 }
 
-export type Dimension = 'team' | 'building' | 'category' | 'dependency'
-
-function toDateString(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-/** Rango de fechas (día) de los últimos `days` días, terminando hoy. */
-export function rangeForDays(
-  days: number,
-  now: Date,
-): { from: string; to: string } {
-  const from = new Date(now.getTime() - days * 86_400_000)
-  return { from: toDateString(from), to: toDateString(now) }
-}
+export type Dimension =
+  'team' | 'building' | 'category' | 'dependency' | 'requester'
 
 const DIMENSION_ID: Record<Dimension, keyof MetricsTicket> = {
   team: 'teamId',
   building: 'buildingId',
   category: 'categoryId',
   dependency: 'dependencyId',
+  requester: 'requesterId',
 }
 
 /** Minutos a partir de un intervalo de Postgres (`04:05:00`, `1 day 02:00:00`). */
@@ -129,9 +117,11 @@ export function filterTickets(
 export interface MetricsSummary {
   tickets: number
   reassigned: number
+  reassignedTechnician: number
   recaptured: number
   reopened: number
   reassignmentRate: number
+  technicianReassignmentRate: number
   recaptureRate: number
   reopenRate: number
   firstTimeFixRate: number
@@ -158,6 +148,9 @@ function average(
 export function summarize(tickets: MetricsTicket[]): MetricsSummary {
   const count = tickets.length
   const reassigned = tickets.filter((t) => t.reassigned).length
+  const reassignedTechnician = tickets.filter(
+    (t) => t.reassignedTechnician,
+  ).length
   const recaptured = tickets.filter((t) => t.recaptured).length
   const reopened = tickets.filter((t) => t.reopened).length
   const closed = tickets.filter((t) => t.status === 'closed')
@@ -165,9 +158,11 @@ export function summarize(tickets: MetricsTicket[]): MetricsSummary {
   return {
     tickets: count,
     reassigned,
+    reassignedTechnician,
     recaptured,
     reopened,
     reassignmentRate: ratio(reassigned, count),
+    technicianReassignmentRate: ratio(reassignedTechnician, count),
     recaptureRate: ratio(recaptured, count),
     reopenRate: ratio(reopened, count),
     firstTimeFixRate: ratio(firstFix, closed.length),
