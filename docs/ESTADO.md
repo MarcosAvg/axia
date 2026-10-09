@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0051.
+0038–0052.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -892,3 +892,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (misma gráfica de **línea**, agrupada por mes con `volumeByMonth` y etiquetas `formatMonthLabel`);
   `volumeByDate` se retira. Pruebas puras nuevas. Sin cambios de datos. `pnpm check` en verde (158
   Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-volumen-mensual`.
+- **Panel de inicio ampliado (Etapa 18)**: el Panel (`/`) gana **KPI por rol** (hasta 6, con trabajo
+  activo/primera resolución/SLA/satisfacción), **gráficas** (tiquets por mes y por estado),
+  **"Requiere tu atención"** (abiertos más antiguos) y **actividad reciente**; conserva bandejas y
+  acciones. Reutiliza hooks/dominio de métricas (su `index.ts` expone más) y no toca la base. **ADR
+  0052**. `pnpm check` en verde (160 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/panel-ampliado`.

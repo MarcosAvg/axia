@@ -96,10 +96,14 @@ El armazón vive en `features/shell` (ver ADR 0039).
 ## 2.bis Panel de inicio
 
 El Panel (`/`) es un **centro de bandejas con métricas propias del usuario** (`features/dashboard`,
-ver ADR 0041):
+ver ADR 0041 y 0052):
 
-- **Números según rol**: mi trabajo / ofertas / activos / en pausa / por validar / sin asignar /
-  cerrados, calculados de las bandejas del usuario (el RLS ya limita lo que ve).
+- **KPI según rol** (hasta 6): mi trabajo / ofertas / activos / en pausa / por validar / sin asignar /
+  cerrados, más **trabajo activo** y **primera resolución** (técnico), **SLA** (supervisor/admin) y
+  **satisfacción** (admin); calculados de lo que el RLS deja ver.
+- **Gráficas**: **tiquets por mes** (línea) y **por estado** (barras).
+- **Requiere tu atención**: los tiquets abiertos más antiguos, con enlace al detalle.
+- **Actividad reciente**: últimos eventos visibles (folio, tipo y fecha).
 - **Bandejas**: ofertas para ti, mi trabajo y tiquets activos, con "Ver todos" y estado vacío.
 - **Acciones rápidas** según permisos.
 - Es distinto del **tablero global** de `/metricas` (permiso `metrics.view`).
