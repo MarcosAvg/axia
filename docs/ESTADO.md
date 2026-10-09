@@ -860,3 +860,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   columnas de tiempo. Componentes `DimensionSection`/`DimensionSections` (sustituyen a las tablas
   combinadas). Sin cambios de dominio ni de base de datos. `pnpm check` en verde (155 Vitest, 12
   Playwright, 426 pgTAP). Rama `feat/metricas-secciones-dimension`.
+- **Métricas: duplicados por dimensión (Etapa 12)**: la tabla plana de duplicados en **Calidad** pasa
+  a **una tarjeta por dimensión** (Agrupación · Tiquets · Duplicados · Tasa) y los KPI de duplicados
+  quedan aparte. La migración `20261009120000` añade **categoría** a
+  `metrics_duplicates_by_dimension` (faltaba) con pgTAP. Se añade captura visual de Calidad. `pnpm
+  check` en verde (155 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-duplicados-dimension`.

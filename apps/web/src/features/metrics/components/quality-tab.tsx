@@ -11,7 +11,8 @@ import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { DuplicatesSection } from './duplicates-section'
+import { DuplicateSections } from './duplicate-sections'
+import { DuplicatesSummary } from './duplicates-summary'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
@@ -91,8 +92,17 @@ export function QualityTab({
           <PausesChart data={pauses} />
         </ChartCard>
         <ChartCard title={metricsMessages.duplicates.title}>
-          <DuplicatesSection {...duplicates} />
+          <DuplicatesSummary
+            tickets={duplicates.tickets}
+            alerts={duplicates.alerts}
+          />
         </ChartCard>
+      </div>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          {metricsMessages.duplicates.byDimension}
+        </h2>
+        <DuplicateSections rows={duplicates.rows} />
       </div>
       <ChartCard title={metricsMessages.rejectCancel.title}>
         <RejectCancelSection rows={rejectCancel} />

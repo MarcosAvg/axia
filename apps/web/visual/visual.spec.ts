@@ -44,4 +44,11 @@ test('panel y métricas', async ({ page }) => {
       page.getByText('Antigüedad de pendientes'),
     ],
   })
+
+  await page.getByRole('tab', { name: 'Calidad' }).click()
+  await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
+  await expect(page).toHaveScreenshot('calidad.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
 })

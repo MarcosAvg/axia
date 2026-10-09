@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(30);
+select plan(31);
 
 -- Sin calendario laboral: modo laboral = modo calendario (cálculo determinista).
 update public.instance_settings set default_calendar_id = null;
@@ -228,6 +228,13 @@ select is(
      p_team => (select id from public.teams where name = 'Métricas T'))
    where dimension = 'building'),
   1::bigint, 'duplicados por dimensión filtrados por rango');
+
+select is(
+  (select duplicates from public.metrics_duplicates_by_dimension(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))
+   where dimension = 'category'),
+  1::bigint, 'duplicados por categoría incluidos');
 
 select is(
   (select sum(offers)::bigint from public.metrics_routing(
