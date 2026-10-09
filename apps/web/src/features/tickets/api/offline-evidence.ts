@@ -87,7 +87,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     p_mime_type: evidence.mimeType,
     p_size_bytes: evidence.blob.size,
     p_client_request_id: evidence.id,
-    p_note: evidence.note ?? null,
+    p_note: evidence.note ?? undefined,
   })
   if (error) {
     await db.evidences.update(evidenceId, { state: 'error' })
