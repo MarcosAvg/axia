@@ -144,9 +144,15 @@ Patrones de operación (ADR 0042):
   tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
-Patrones de métricas, acceso y perfil (ADR 0047): KPI **agrupados por área** (Carga · Tiempos ·
-Calidad · SLA y satisfacción), **filtros sticky** y tablas con `DataTable`; **acceso** en dos
-columnas en escritorio; **perfil** por secciones con roles y zona horaria.
+Patrones de métricas (ADR 0047, 0048): **barra de herramientas sticky** que reúne rangos rápidos
+(7 · 30 · 90 días y "Todo"), fechas, filtros por catálogo, **selector de dimensión** (equipo ·
+edificio · categoría · dependencia), "Limpiar" y **exportación CSV/XLSX**; una fila de **KPI
+destacados** siempre visible (tiquets · tiempo activo · SLA · satisfacción · primera solución); y el
+resto en **pestañas por tema** (Resumen · Tiempos · Calidad · SLA y satisfacción) con gráficas y
+tablas `DataTable`.
+
+Patrones de acceso y perfil (ADR 0047): **acceso** en dos columnas en escritorio; **perfil** por
+secciones con roles y zona horaria.
 
 Patrones de administración (ADR 0046): encabezado único por pantalla (`PageHeader`); catálogos y
 usuarios como `DataTable`; **roles en master-detail** con permiso agrupados por área y alta en

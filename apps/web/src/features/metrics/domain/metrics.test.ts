@@ -8,6 +8,7 @@ import {
   formatScore,
   intervalToMinutes,
   openAging,
+  rangeForDays,
   summarize,
   toCsv,
   volumeByDate,
@@ -174,5 +175,15 @@ describe('formatScore', () => {
   it('formatea la satisfacción promedio', () => {
     expect(formatScore(4.25)).toBe('4.3 / 5')
     expect(formatScore(null)).toBe('—')
+  })
+})
+
+describe('rangeForDays', () => {
+  it('devuelve el rango de los últimos N días, terminando hoy', () => {
+    const now = new Date(2026, 9, 15)
+    expect(rangeForDays(7, now)).toEqual({
+      from: '2026-10-08',
+      to: '2026-10-15',
+    })
   })
 })
