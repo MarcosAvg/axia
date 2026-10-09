@@ -91,22 +91,23 @@ export function QualityTab({
         <ChartCard title={metricsMessages.charts.pauses}>
           <PausesChart data={pauses} />
         </ChartCard>
-        <ChartCard title={metricsMessages.duplicates.title}>
-          <DuplicatesSummary
-            tickets={duplicates.tickets}
-            alerts={duplicates.alerts}
-          />
+        <ChartCard title={metricsMessages.rejectCancel.title}>
+          <RejectCancelSection rows={rejectCancel} />
         </ChartCard>
       </div>
-      <div className="flex flex-col gap-3">
+      <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">
-          {metricsMessages.duplicates.byDimension}
+          {metricsMessages.duplicates.title}
         </h2>
+        <DuplicatesSummary
+          tickets={duplicates.tickets}
+          alerts={duplicates.alerts}
+        />
+        <h3 className="text-sm font-medium text-muted-foreground">
+          {metricsMessages.duplicates.byDimension}
+        </h3>
         <DuplicateSections rows={duplicates.rows} />
-      </div>
-      <ChartCard title={metricsMessages.rejectCancel.title}>
-        <RejectCancelSection rows={rejectCancel} />
-      </ChartCard>
+      </section>
     </div>
   )
 }
