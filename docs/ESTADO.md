@@ -15,8 +15,8 @@ lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componente
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
 En curso: **rediseño de vistas** (segunda vuelta de UI/UX). Plan por etapas:
 **1) semilla de demostración** (hecha), **2) Panel como centro de bandejas + métricas personales**
-(hecha), 3) Operación (alta, detalle, lista, bandejas), 4) Administración, 5) Métricas globales,
-6) Acceso/perfil y verificación. Siguiente: **Etapa 3 (Operación)**.
+(hecha), **3) Operación** (lista, alta, detalle y bandejas; hecha), 4) Administración,
+5) Métricas globales, 6) Acceso/perfil y verificación. Siguiente: **Etapa 4 (Administración)**.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -765,3 +765,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   tablero global de `/metricas`. Se quitó `roleLabel` (sin uso) y la lista pasó a renderizar
   **tabla o tarjetas según el ancho** (`lib/use-media-query`) para no duplicar el DOM. **ADR 0041**.
   `pnpm check` en verde (138 Vitest, 12 Playwright, 404 pgTAP). Rama `feat/vistas-semilla`.
+- **Rediseño de vistas, Etapa 3 (Operación)**: **lista** con chips de filtros activos y contador;
+  **alta** por secciones, dos columnas con duplicados al lado, barra de guardado fija y aviso de
+  cambios sin guardar; **detalle** con encabezado, **activity feed** con iconos y rail fijo con
+  **acción primaria** (`pickPrimaryAction`) + menú "Más acciones"; **bandejas** con conteo por
+  estado. Componentes compartidos `FormSection`, `FormActionsBar`, `FilterChips`. Se actualizaron
+  los e2e de acciones secundarias. **ADR 0042**. `pnpm check` en verde (142 Vitest, 12 Playwright,
+  404 pgTAP). Rama `feat/vistas-operacion`.

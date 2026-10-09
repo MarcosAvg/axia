@@ -117,6 +117,16 @@ Componentes compartidos en `components/shared` (ver ADR 0040):
 - **`page-header.tsx`**: título, descripción y acciones de una vista.
 - **`empty-state.tsx`**: estado vacío homogéneo con icono y acción opcionales.
 - **`async-state.tsx`**: `LoadingList` (esqueletos) y `ErrorAlert`.
+- **`form-section.tsx`** y **`form-actions-bar.tsx`**: secciones de formulario y barra de guardado.
+- **`filter-chips.tsx`**: chips de filtros activos con quitar individual.
+
+Patrones de operación (ADR 0042):
+
+- **Alta**: secciones (Ubicación, Clasificación, Solicitante, Descripción), dos columnas con el
+  aviso de duplicados al lado y barra de guardado fija; aviso de cambios sin guardar.
+- **Detalle**: encabezado con folio/estado/prioridad; **activity feed** con iconos y rail fijo con
+  **acción primaria** destacada y el resto en "Más acciones".
+- **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
 Patrones de lista:
 

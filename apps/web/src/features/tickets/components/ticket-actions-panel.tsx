@@ -1,5 +1,12 @@
 import { useState } from 'react'
+import { ChevronDownIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { SelectField } from '@/components/shared/form-fields'
 import {
   Sheet,
@@ -10,7 +17,7 @@ import {
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
-import { actionsRequiringSubject } from '../domain/actions'
+import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
@@ -39,7 +46,7 @@ const DEDICATED: ActionKey[] = [
   'assign_supervisor',
 ]
 
-interface ActionButtonsProps {
+interface ActionControlsProps {
   visible: ActionKey[]
   oneClick: Partial<Record<ActionKey, () => void>>
   pending: Partial<Record<ActionKey, boolean>>
@@ -47,30 +54,53 @@ interface ActionButtonsProps {
   onOpenForm: (action: ActionKey) => void
 }
 
-function ActionButtons({
+function ActionControls({
   visible,
   oneClick,
   pending,
   blocked,
   onOpenForm,
-}: ActionButtonsProps) {
+}: ActionControlsProps) {
+  const primary = pickPrimaryAction(visible)
+  const secondary = visible.filter((action) => action !== primary)
+  const run = (action: ActionKey) =>
+    (oneClick[action] ?? (() => onOpenForm(action)))()
+  const isDisabled = (action: ActionKey) =>
+    Boolean(pending[action]) || blocked.includes(action)
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {visible.map((action) => {
-        const handler = oneClick[action]
-        return (
-          <Button
-            key={action}
-            type="button"
-            variant={handler ? 'secondary' : 'outline'}
-            className="min-h-11"
-            disabled={Boolean(pending[action]) || blocked.includes(action)}
-            onClick={handler ?? (() => onOpenForm(action))}
-          >
-            {ticketMessages.actions[action]}
-          </Button>
-        )
-      })}
+    <div className="flex flex-wrap items-center gap-2">
+      {primary ? (
+        <Button
+          type="button"
+          className="min-h-11"
+          disabled={isDisabled(primary)}
+          onClick={() => run(primary)}
+        >
+          {ticketMessages.actions[primary]}
+        </Button>
+      ) : null}
+      {secondary.length > 0 ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="outline" className="min-h-11">
+              {ticketMessages.actions.more}
+              <ChevronDownIcon />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {secondary.map((action) => (
+              <DropdownMenuItem
+                key={action}
+                disabled={isDisabled(action)}
+                onClick={() => run(action)}
+              >
+                {ticketMessages.actions[action]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
     </div>
   )
 }
@@ -198,7 +228,7 @@ interface TicketActionsPanelProps {
   participants: TicketParticipant[]
 }
 
-/** Botonera de acciones disponibles; cada una abre su formulario. */
+/** Acciones disponibles: una primaria destacada y el resto en un menú. */
 export function TicketActionsPanel({
   ticket,
   actions,
@@ -242,7 +272,7 @@ export function TicketActionsPanel({
           onChange={setSubject}
         />
       ) : null}
-      <ActionButtons
+      <ActionControls
         visible={visible}
         oneClick={oneClick}
         pending={pending}

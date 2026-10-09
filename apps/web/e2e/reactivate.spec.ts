@@ -50,8 +50,9 @@ test('el administrador rechaza y reactiva un tiquet', async ({ page }) => {
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()
   await expect(page.getByText(description)).toBeVisible()
 
-  // Rechazar.
-  await page.getByRole('button', { name: 'Rechazar' }).click()
+  // Rechazar (acción secundaria, dentro del menú).
+  await page.getByRole('button', { name: 'Más acciones' }).click()
+  await page.getByRole('menuitem', { name: 'Rechazar' }).click()
   await page.getByLabel('Motivo').selectOption({ index: 1 })
   await clickAndWait(page, 'Confirmar', 'ticket_reject')
   await expect(
