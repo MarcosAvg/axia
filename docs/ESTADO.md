@@ -876,3 +876,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (altura fija `h-48`) comparte fila con **Rechazos y cancelaciones**. Solo `quality-tab.tsx`,
   `duplicates-summary.tsx` y `pauses-chart.tsx`; sin cambios de datos. `pnpm check` en verde (155
   Vitest, 12 Playwright, 427 pgTAP). Rama `feat/metricas-calidad-reubicacion`.
+- **Métricas: más gráficas y duplicados como KPI (Etapa 15)**: el **tiempo medio hasta marcarse**
+  pasa a la **fila de KPI** de Calidad (6 tarjetas), **rechazos/cancelaciones** y la **tasa de
+  duplicados por dimensión** son **gráficas**, el **cumplimiento por prioridad** (SLA) y los
+  **tiquets por técnico** (Equipo) también. Helper puro `duplicateRateByDimension` con prueba;
+  se eliminan `duplicates-summary`, `sla-section` y `reject-cancel-section`. Se añaden capturas
+  visuales de **SLA** y **Equipo**. `pnpm check` en verde (157 Vitest, 12 Playwright, 427 pgTAP).
+  Rama `feat/metricas-graficas`.
