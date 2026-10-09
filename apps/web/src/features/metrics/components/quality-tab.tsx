@@ -87,7 +87,7 @@ export function QualityTab({
         columns={5}
         period={comparison?.label}
       />
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ChartCard title={metricsMessages.charts.pauses}>
           <PausesChart data={pauses} />
         </ChartCard>
@@ -95,19 +95,18 @@ export function QualityTab({
           <RejectCancelSection rows={rejectCancel} />
         </ChartCard>
       </div>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          {metricsMessages.duplicates.title}
-        </h2>
-        <DuplicatesSummary
-          tickets={duplicates.tickets}
-          alerts={duplicates.alerts}
-        />
-        <h3 className="text-sm font-medium text-muted-foreground">
-          {metricsMessages.duplicates.byDimension}
-        </h3>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 className="text-sm font-medium">
+            {metricsMessages.duplicates.byDimension}
+          </h2>
+          <DuplicatesSummary
+            tickets={duplicates.tickets}
+            alerts={duplicates.alerts}
+          />
+        </div>
         <DuplicateSections rows={duplicates.rows} />
-      </section>
+      </div>
     </div>
   )
 }
