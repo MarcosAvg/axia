@@ -4,18 +4,25 @@ import { metricsMessages } from '../i18n'
 
 /**
  * Cambio contra el periodo anterior. Si `lowerIsBetter` se omite, el cambio es
- * informativo (sin color de bueno/malo).
+ * informativo (sin color de bueno/malo). Si se conoce `period`, se muestran las
+ * fechas comparadas.
  */
 export function DeltaBadge({
   change,
   lowerIsBetter,
+  period,
 }: {
   change: number | null
   lowerIsBetter?: boolean
+  period?: string
 }) {
   const t = metricsMessages.delta
   if (change === null) {
-    return <span className="text-xs text-muted-foreground">{t.noData}</span>
+    return (
+      <span className="text-xs text-muted-foreground">
+        {period ? '—' : t.noData}
+      </span>
+    )
   }
   const rounded = Math.round(change * 100)
   const isGood =
@@ -38,7 +45,9 @@ export function DeltaBadge({
     <span className={`inline-flex items-center gap-1 text-xs ${tone}`}>
       <Icon className="size-3.5" aria-hidden />
       {formatDelta(change)}
-      <span className="text-muted-foreground">{t.vsPrevious}</span>
+      <span className="text-muted-foreground">
+        {period ? `${t.vs} ${period}` : t.vsPrevious}
+      </span>
     </span>
   )
 }

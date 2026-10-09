@@ -75,6 +75,7 @@ export const metricsMessages = {
   },
   delta: {
     vsPrevious: 'vs periodo anterior',
+    vs: 'vs',
     noData: 'Sin periodo previo',
   },
   sla: {
@@ -87,11 +88,13 @@ export const metricsMessages = {
   },
   charts: {
     volume: 'Tiquets por día',
-    byDimension: 'Promedio por dimensión',
+    activeBy: 'Trabajo activo promedio',
+    dimensionDetail: 'Detalle por dimensión',
     pauses: 'Pausas por motivo',
   },
   table: {
     dimension: 'Dimensión',
+    name: 'Agrupación',
     tickets: 'Tiquets',
     avgActive: 'Trabajo activo',
     avgTotal: 'Tiempo total',

@@ -1,11 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import type {
   RejectCancelRow,
   RoutingSummary,
   TechnicianRow,
 } from '../domain/indicators'
 import type {
-  DimensionRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
@@ -16,6 +16,7 @@ import type {
   SlaPriorityRow,
   SlaSummary,
 } from '../domain/metrics'
+import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { QualityTab } from './quality-tab'
 import { SlaTab } from './sla-tab'
@@ -26,9 +27,9 @@ import { TimesTab } from './times-tab'
 interface MetricsTabsProps {
   filtered: MetricsTicket[]
   summary: MetricsSummary
-  prev: MetricsSummary | null
-  rows: DimensionRow[]
-  nameOf: (id: string) => string
+  comparison: Comparison | null
+  groups: DimensionGroup[]
+  nameOf: (dimension: Dimension, id: string) => string
   pauses: PauseReasonRow[]
   duplicates: {
     tickets: DuplicateTicket[]
@@ -47,8 +48,8 @@ interface MetricsTabsProps {
 export function MetricsTabs({
   filtered,
   summary,
-  prev,
-  rows,
+  comparison,
+  groups,
   nameOf,
   pauses,
   duplicates,
@@ -74,18 +75,18 @@ export function MetricsTabs({
       <TabsContent value="summary">
         <SummaryTab
           filtered={filtered}
-          rows={rows}
+          groups={groups}
           nameOf={nameOf}
           routing={routing}
         />
       </TabsContent>
       <TabsContent value="times">
-        <TimesTab summary={summary} prev={prev} rows={rows} nameOf={nameOf} />
+        <TimesTab summary={summary} comparison={comparison} />
       </TabsContent>
       <TabsContent value="quality">
         <QualityTab
           summary={summary}
-          prev={prev}
+          comparison={comparison}
           pauses={pauses}
           duplicates={duplicates}
           rejectCancel={rejectCancel}

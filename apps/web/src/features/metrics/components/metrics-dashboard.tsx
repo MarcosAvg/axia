@@ -18,11 +18,9 @@ export function MetricsDashboard() {
       <MetricsToolbar
         filters={board.filters}
         catalogs={board.catalogs}
-        dimension={board.dimension}
-        rows={board.rows}
+        groups={board.groups}
         nameOf={board.nameOf}
         onFiltersChange={board.setFilters}
-        onDimensionChange={board.setDimension}
       />
       {board.loading ? <LoadingList rows={4} /> : null}
       {board.error ? <ErrorAlert message={metricsMessages.error} /> : null}
@@ -33,15 +31,15 @@ export function MetricsDashboard() {
         <>
           <MetricsHero
             summary={board.summary}
-            prev={board.prevSummary}
+            comparison={board.comparison}
             satisfaction={board.satisfaction}
             sla={board.sla}
           />
           <MetricsTabs
             filtered={board.filtered}
             summary={board.summary}
-            prev={board.prevSummary}
-            rows={board.rows}
+            comparison={board.comparison}
+            groups={board.groups}
             nameOf={board.nameOf}
             pauses={board.pauses}
             duplicates={board.duplicates}

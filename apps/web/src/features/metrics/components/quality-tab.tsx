@@ -8,6 +8,7 @@ import type {
   PauseReasonRow,
 } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
+import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DuplicatesSection } from './duplicates-section'
@@ -18,12 +19,12 @@ import { RejectCancelSection } from './reject-cancel-section'
 
 function qualityCards(
   summary: MetricsSummary,
-  prev: MetricsSummary | null,
+  comparison: Comparison | null,
 ): Kpi[] {
   const k = metricsMessages.kpi
   const hints = metricsMessages.kpiHints
   const change = (pick: (s: MetricsSummary) => number) =>
-    prev ? deltaOf(pick(summary), pick(prev)) : undefined
+    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
   return [
     {
       label: k.reassignment,
@@ -63,13 +64,13 @@ function qualityCards(
 /** Calidad: tasas, pausas por motivo y duplicados. */
 export function QualityTab({
   summary,
-  prev,
+  comparison,
   pauses,
   duplicates,
   rejectCancel,
 }: {
   summary: MetricsSummary
-  prev: MetricsSummary | null
+  comparison: Comparison | null
   pauses: PauseReasonRow[]
   duplicates: {
     tickets: DuplicateTicket[]
@@ -80,7 +81,11 @@ export function QualityTab({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <KpiGrid cards={qualityCards(summary, prev)} columns={5} />
+      <KpiGrid
+        cards={qualityCards(summary, comparison)}
+        columns={5}
+        period={comparison?.label}
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard title={metricsMessages.charts.pauses}>
           <PausesChart data={pauses} />

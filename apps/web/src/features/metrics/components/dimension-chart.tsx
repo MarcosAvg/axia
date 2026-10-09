@@ -14,9 +14,11 @@ const config = {
 
 /** Promedio de trabajo activo por dimensión (primeras 8). */
 export function DimensionChart({
+  id,
   rows,
   nameOf,
 }: {
+  id: string
   rows: DimensionRow[]
   nameOf: (id: string) => string
 }) {
@@ -25,7 +27,7 @@ export function DimensionChart({
     active: Math.round(row.avgActive),
   }))
   return (
-    <ChartContainer id="metrics-dimension" config={config}>
+    <ChartContainer id={id} config={config}>
       <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis

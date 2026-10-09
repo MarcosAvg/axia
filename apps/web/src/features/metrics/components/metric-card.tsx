@@ -13,12 +13,14 @@ export function MetricCard({
   hint,
   delta,
   lowerIsBetter,
+  period,
 }: {
   label: string
   value: string
   hint?: string
   delta?: number | null
   lowerIsBetter?: boolean
+  period?: string
 }) {
   return (
     <Card>
@@ -44,7 +46,11 @@ export function MetricCard({
       <CardContent className="flex flex-col gap-1">
         <p className="text-2xl font-semibold">{value}</p>
         {delta !== undefined ? (
-          <DeltaBadge change={delta} lowerIsBetter={lowerIsBetter} />
+          <DeltaBadge
+            change={delta}
+            lowerIsBetter={lowerIsBetter}
+            period={period}
+          />
         ) : null}
       </CardContent>
     </Card>
