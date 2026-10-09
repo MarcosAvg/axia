@@ -6,15 +6,14 @@ import type { MetricsTicket } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
-import { DimensionCharts } from './dimension-charts'
-import { DimensionTable } from './dimension-table'
+import { DimensionSections } from './dimension-sections'
 import { RoutingCards } from './routing-cards'
 import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
   (statusLabels as Record<string, string>)[status] ?? status
 
-/** Resumen compacto: volumen + ruteo, dimensiones y detalle con desplazamiento. */
+/** Resumen: volumen + ruteo, una sección por dimensión y antigüedad. */
 export function SummaryTab({
   filtered,
   groups,
@@ -38,22 +37,20 @@ export function SummaryTab({
           <RoutingCards routing={routing} columns={2} />
         </ChartCard>
       </div>
-      <DimensionCharts groups={groups} nameOf={nameOf} />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title={metricsMessages.charts.dimensionDetail}>
-          <div className="max-h-80 overflow-auto">
-            <DimensionTable groups={groups} nameOf={nameOf} />
-          </div>
-        </ChartCard>
-        <ChartCard title={metricsMessages.aging.title}>
-          <div className="max-h-80 overflow-auto">
-            <AgingList
-              rows={openAging(filtered, new Date()).slice(0, 8)}
-              statusLabel={statusLabel}
-            />
-          </div>
-        </ChartCard>
-      </div>
+      <DimensionSections
+        groups={groups}
+        nameOf={nameOf}
+        variant="counts"
+        withChart
+      />
+      <ChartCard title={metricsMessages.aging.title}>
+        <div className="max-h-80 overflow-auto">
+          <AgingList
+            rows={openAging(filtered, new Date()).slice(0, 8)}
+            statusLabel={statusLabel}
+          />
+        </div>
+      </ChartCard>
     </div>
   )
 }

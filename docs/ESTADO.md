@@ -854,3 +854,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **top 5**); el detalle por dimensión y la antigüedad van en dos columnas con **desplazamiento
   interno**. Sin cambios de dominio ni de base de datos. `pnpm check` en verde (155 Vitest, 12
   Playwright, 426 pgTAP). Rama `feat/metricas-resumen-compacto`.
+- **Métricas: una sección por dimensión (Etapa 11)**: el detalle deja de ser una tabla plana con
+  columna "Dimensión" y pasa a **una tarjeta por dimensión** (gráfica de tiquets + tabla con
+  Agrupación · Tiquets · Reasignación · Recaptura y scroll); en **Tiempos**, el mismo formato con las
+  columnas de tiempo. Componentes `DimensionSection`/`DimensionSections` (sustituyen a las tablas
+  combinadas). Sin cambios de dominio ni de base de datos. `pnpm check` en verde (155 Vitest, 12
+  Playwright, 426 pgTAP). Rama `feat/metricas-secciones-dimension`.

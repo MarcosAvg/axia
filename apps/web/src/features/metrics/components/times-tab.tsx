@@ -4,8 +4,7 @@ import type { MetricsSummary } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
-import { ChartCard } from './chart-card'
-import { DimensionTimesTable } from './dimension-times-table'
+import { DimensionSections } from './dimension-sections'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
@@ -83,9 +82,12 @@ export function TimesTab({
         columns={4}
         period={comparison?.label}
       />
-      <ChartCard title={metricsMessages.charts.timesByDimension}>
-        <DimensionTimesTable groups={groups} nameOf={nameOf} />
-      </ChartCard>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          {metricsMessages.charts.timesByDimension}
+        </h2>
+        <DimensionSections groups={groups} nameOf={nameOf} variant="times" />
+      </div>
     </div>
   )
 }
