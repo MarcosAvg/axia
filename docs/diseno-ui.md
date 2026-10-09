@@ -130,9 +130,12 @@ Patrones de operación (ADR 0042):
 - **Acciones visibles por estado**: se muestran **todas** las acciones permitidas como botones
   según estado y permiso, con la **primaria destacada** y los **descartes** (Rechazar, Cancelar,
   Marcar duplicado) al final y en estilo de peligro (ADR 0045).
-- **Acciones guiadas con evidencia**: cada acción abre un diálogo con lo que exige; iniciar pide
-  la evidencia "antes", atender la descripción y "después", reclamar motivo, descripción y
-  evidencia, y **`during`** es el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045).
+- **Contenedor de acciones**: cada acción abre un **modal centrado en escritorio** y una **hoja
+  inferior (bottom sheet) en móvil**, con alto máximo y desplazamiento; sin borde interno en los
+  formularios (el contenedor aporta el marco).
+- **Acciones guiadas con evidencia**: cada acción pide lo que exige; iniciar la evidencia "antes",
+  atender la descripción y "después", reclamar motivo, descripción y evidencia, y **`during`** es
+  el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045).
 - **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
   muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
   la foto de solicitud.

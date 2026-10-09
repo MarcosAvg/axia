@@ -17,10 +17,7 @@ export function AssignSupervisorForm({
   const { actionFields } = ticketMessages
 
   return (
-    <form
-      onSubmit={form.submit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
+    <form onSubmit={form.submit} className="flex flex-col gap-4">
       <AssignSupervisorFields
         mode={form.mode}
         onMode={form.setMode}
