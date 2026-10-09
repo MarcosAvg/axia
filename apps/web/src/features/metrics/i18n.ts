@@ -88,7 +88,7 @@ export const metricsMessages = {
     empty: 'Sin tiquets con objetivo.',
   },
   charts: {
-    volume: 'Tiquets por día',
+    volume: 'Tiquets por mes',
     ticketsBy: 'Tiquets',
     timesByDimension: 'Tiempos por dimensión',
     pauses: 'Pausas por motivo',

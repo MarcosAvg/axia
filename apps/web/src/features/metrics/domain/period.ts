@@ -81,6 +81,14 @@ export function formatRangeLabel(from: string, to: string): string {
   return `${formatDayMonth(from)} – ${formatDayMonth(to)}`
 }
 
+/** Etiqueta legible de un mes "YYYY-MM", p. ej. "oct 2026". */
+export function formatMonthLabel(month: string): string {
+  const [year, value] = month.split('-')
+  const monthName = MONTHS[Number(value) - 1]
+  if (!year || !monthName) return month
+  return `${monthName} ${year}`
+}
+
 /** Periodo anterior calculado, con su etiqueta legible. */
 export interface Comparison {
   summary: MetricsSummary
