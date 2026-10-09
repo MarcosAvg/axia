@@ -350,3 +350,417 @@ cross join (
   select id from public.reasons where use = 'pause' and name = 'Falta de material (ejemplo)'
 ) p
 on conflict do nothing;
+
+-- ============================================================================
+-- Tiquets de demostración (solo entorno local).
+--
+-- Reparten los estados para que todas las vistas tengan datos: bandejas, tablero,
+-- métricas, duplicados, satisfacción y SLA. Las marcas de tiempo van retrasadas
+-- respecto a `now()` para no alterar el orden que esperan las pruebas de Playwright
+-- (que crean tiquets al momento). Los identificadores son fijos para que la
+-- semilla sea idempotente; los eventos generan los tramos de tiempo por disparador.
+-- ============================================================================
+
+-- Ubicaciones del Edificio Norte (faltaban; los tiquets requieren ubicación del edificio).
+insert into public.locations (building_id, name)
+select b.id, v.name from public.buildings b,
+  (values ('Planta baja (ejemplo)'), ('Piso 1 (ejemplo)')) as v (name)
+where b.name = 'Edificio Norte (ejemplo)'
+on conflict do nothing;
+
+do $$
+begin
+  if exists (
+    select 1 from public.tickets where id = 'b0000000-0000-4000-8000-000000000001'
+  ) then
+    return;
+  end if;
+
+  -- Tiquets: uno por estado y variantes, en dos edificios y dos equipos.
+  insert into public.tickets (
+    id, status, cycle, team_id, building_id, location_id, dependency_id, category_id,
+    subcategory_id, problem_id, service_type_id, priority_id, channel_id, description,
+    requester_id, requester_name, requester_contact, registered_by, reported_at,
+    closed_at, possible_duplicate, duplicate_of_id, status_before_discard)
+  select
+    v.id, v.status, 1, cat.team_id, b.id, loc.id, dep.id, cat.id,
+    sub.id, prb.id, st.id, pr.id, ch.id, v.description,
+    req.id, req.full_name, req.contact, v.registered_by, v.reported_at,
+    v.closed_at, v.possible_duplicate, v.duplicate_of, v.status_before_discard
+  from (values
+    ('b0000000-0000-4000-8000-000000000001'::uuid, 'registered'::public.ticket_status,
+     'Eléctrico (ejemplo)', 'Contacto (ejemplo)', 'Chispa o corto (ejemplo)', 'Correctivo (ejemplo)',
+     'Media (ejemplo)', 'Web (ejemplo)', 'Edificio Central (ejemplo)', 'Planta baja (ejemplo)',
+     'Ana Pérez (ejemplo)', 'No enciende la luz del pasillo del ala norte (ejemplo)',
+     now() - interval '2 hours', null::timestamptz, false, null::uuid, null::public.ticket_status,
+     'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('b0000000-0000-4000-8000-000000000002'::uuid, 'with_supervisor'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Alta (ejemplo)', 'Teléfono (ejemplo)',
+     'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)', 'Ana Pérez (ejemplo)',
+     'Contacto eléctrico suelto en la sala de juntas (ejemplo)',
+     now() - interval '1 day', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'assigned'::public.ticket_status,
+     'Plomería (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Beto Lima (ejemplo)',
+     'Fuga de agua en el baño de planta baja (ejemplo)',
+     now() - interval '2 days', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'in_progress'::public.ticket_status,
+     'Eléctrico (ejemplo)', 'Contacto (ejemplo)', 'Chispa o corto (ejemplo)', 'Emergencia (ejemplo)',
+     'Urgente (ejemplo)', 'Teléfono (ejemplo)', 'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)',
+     'Ana Pérez (ejemplo)', 'Olor a quemado en el tablero del piso 1 (ejemplo)',
+     now() - interval '3 days', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'paused'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Ana Pérez (ejemplo)',
+     'Lámpara del recibidor intermitente (ejemplo)',
+     now() - interval '4 days', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'attended'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Preventivo (ejemplo)', 'Alta (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)', 'Beto Lima (ejemplo)',
+     'Revisión de contactos del área de sistemas (ejemplo)',
+     now() - interval '5 days', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'closed'::public.ticket_status,
+     'Eléctrico (ejemplo)', 'Contacto (ejemplo)', 'Chispa o corto (ejemplo)', 'Correctivo (ejemplo)',
+     'Media (ejemplo)', 'Web (ejemplo)', 'Edificio Central (ejemplo)', 'Planta baja (ejemplo)',
+     'Ana Pérez (ejemplo)', 'Cortocircuito en la toma de la recepción (ejemplo)',
+     now() - interval '8 days', now() - interval '6 days 23 hours', false, null, null,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'closed'::public.ticket_status,
+     'Plomería (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Baja (ejemplo)', 'Teléfono (ejemplo)',
+     'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)', 'Beto Lima (ejemplo)',
+     'Goteo en el lavabo del piso 1 (ejemplo)',
+     now() - interval '12 days', now() - interval '10 days', false, null, null,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'under_claim'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Alta (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Ana Pérez (ejemplo)',
+     'La falla de iluminación persiste (ejemplo)',
+     now() - interval '6 days', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000010'::uuid, 'rejected'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Inspección (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)', 'Beto Lima (ejemplo)',
+     'Solicitud de cambio de luminarias por estética (ejemplo)',
+     now() - interval '9 days', null, false, null, 'with_supervisor'::public.ticket_status,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000011'::uuid, 'cancelled'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Baja (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Ana Pérez (ejemplo)',
+     'Reporte duplicado por error del solicitante (ejemplo)',
+     now() - interval '10 days', null, false, null, 'registered'::public.ticket_status,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000012'::uuid, 'duplicate'::public.ticket_status,
+     'Plomería (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Piso 1 (ejemplo)', 'Beto Lima (ejemplo)',
+     'Fuga repetida, ya reportada antes (ejemplo)',
+     now() - interval '7 days', null, true,
+     'b0000000-0000-4000-8000-000000000007'::uuid, 'registered'::public.ticket_status,
+     'a0000000-0000-4000-8000-000000000004'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'assigned'::public.ticket_status,
+     'Plomería (ejemplo)', null, null, 'Preventivo (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Ana Pérez (ejemplo)',
+     'Mantenimiento preventivo de tuberías (ejemplo)',
+     now() - interval '1 day 12 hours', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000014'::uuid, 'registered'::public.ticket_status,
+     'Accesos (ejemplo)', null, null, 'Correctivo (ejemplo)', 'Alta (ejemplo)', 'Teléfono (ejemplo)',
+     'Edificio Norte (ejemplo)', 'Planta baja (ejemplo)', 'Beto Lima (ejemplo)',
+     'La puerta de acceso principal no cierra (ejemplo)',
+     now() - interval '3 hours', null, false, null, null,
+     'a0000000-0000-4000-8000-000000000002'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'closed'::public.ticket_status,
+     'Eléctrico (ejemplo)', null, null, 'Mejora o instalación (ejemplo)', 'Media (ejemplo)', 'Web (ejemplo)',
+     'Edificio Central (ejemplo)', 'Planta baja (ejemplo)', 'Ana Pérez (ejemplo)',
+     'Instalación de contactos en el área de archivo (ejemplo)',
+     now() - interval '20 days', now() - interval '18 days', false, null, null,
+     'a0000000-0000-4000-8000-000000000004')
+  ) as v (id, status, category, subcategory, problem, service_type, priority, channel,
+          building, location, requester, description, reported_at, closed_at,
+          possible_duplicate, duplicate_of, status_before_discard, registered_by)
+  join public.categories cat on cat.name = v.category
+  join public.buildings b on b.name = v.building
+  join public.locations loc on loc.building_id = b.id and loc.name = v.location
+  join public.dependencies dep on dep.name = 'Sistemas (ejemplo)'
+  join public.service_types st on st.name = v.service_type
+  join public.priorities pr on pr.name = v.priority
+  join public.channels ch on ch.name = v.channel
+  join public.requesters req on req.full_name = v.requester
+  left join public.subcategories sub on sub.name = v.subcategory and sub.category_id = cat.id
+  left join public.problems prb on prb.name = v.problem and prb.subcategory_id = sub.id;
+
+  -- Bitácora en orden cronológico; dispara la creación de los tramos de tiempo.
+  insert into public.ticket_events (
+    ticket_id, cycle, type, actor_id, reason_id, subject_technician_id, occurred_at, payload)
+  select v.ticket_id, 1, v.type, v.actor, r.id, t.id, v.occurred_at, v.payload
+  from (values
+    ('b0000000-0000-4000-8000-000000000001'::uuid, 'created'::public.event_type,
+     now() - interval '2 hours', 'a0000000-0000-4000-8000-000000000004'::uuid,
+     null::text, null::text, '{}'::jsonb),
+    ('b0000000-0000-4000-8000-000000000002'::uuid, 'created'::public.event_type,
+     now() - interval '1 day', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000002'::uuid, 'taken'::public.event_type,
+     now() - interval '20 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'created'::public.event_type,
+     now() - interval '2 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'taken'::public.event_type,
+     now() - interval '1 day 20 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '1 day 12 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'created'::public.event_type,
+     now() - interval '3 days', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'taken'::public.event_type,
+     now() - interval '2 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '2 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'started'::public.event_type,
+     now() - interval '2 days 18 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'created'::public.event_type,
+     now() - interval '4 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'taken'::public.event_type,
+     now() - interval '3 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '3 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'started'::public.event_type,
+     now() - interval '3 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'paused'::public.event_type,
+     now() - interval '2 days', 'a0000000-0000-4000-8000-000000000003'::uuid,
+     'Falta de material (ejemplo)', null, '{}'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'created'::public.event_type,
+     now() - interval '5 days', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'taken'::public.event_type,
+     now() - interval '4 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '4 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'started'::public.event_type,
+     now() - interval '4 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'attended'::public.event_type,
+     now() - interval '4 days', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null,
+     '{"work_description":"Se reemplazaron los contactos (ejemplo)"}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'created'::public.event_type,
+     now() - interval '8 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'taken'::public.event_type,
+     now() - interval '7 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '7 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'started'::public.event_type,
+     now() - interval '7 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'paused'::public.event_type,
+     now() - interval '7 days 12 hours', 'a0000000-0000-4000-8000-000000000003'::uuid,
+     'Falta de material (ejemplo)', null, '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'resumed'::public.event_type,
+     now() - interval '7 days 8 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'attended'::public.event_type,
+     now() - interval '7 days', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null,
+     '{"work_description":"Se reparó el cortocircuito (ejemplo)"}'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'validated'::public.event_type,
+     now() - interval '6 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'created'::public.event_type,
+     now() - interval '12 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'taken'::public.event_type,
+     now() - interval '11 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '11 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'started'::public.event_type,
+     now() - interval '11 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'attended'::public.event_type,
+     now() - interval '11 days', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null,
+     '{"work_description":"Se cambió el empaque del lavabo (ejemplo)"}'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'validated'::public.event_type,
+     now() - interval '10 days', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'created'::public.event_type,
+     now() - interval '6 days', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'taken'::public.event_type,
+     now() - interval '5 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '5 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'started'::public.event_type,
+     now() - interval '5 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'attended'::public.event_type,
+     now() - interval '5 days 12 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null,
+     '{"work_description":"Se ajustó la luminaria (ejemplo)"}'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'claim_opened'::public.event_type,
+     now() - interval '5 days', 'a0000000-0000-4000-8000-000000000004'::uuid,
+     'Trabajo incompleto (ejemplo)', null, '{}'),
+    ('b0000000-0000-4000-8000-000000000010'::uuid, 'created'::public.event_type,
+     now() - interval '9 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000010'::uuid, 'taken'::public.event_type,
+     now() - interval '8 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000010'::uuid, 'rejected'::public.event_type,
+     now() - interval '8 days 12 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     'Fuera de alcance (ejemplo)', null, '{}'),
+    ('b0000000-0000-4000-8000-000000000011'::uuid, 'created'::public.event_type,
+     now() - interval '10 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000011'::uuid, 'cancelled'::public.event_type,
+     now() - interval '9 days 12 hours', 'a0000000-0000-4000-8000-000000000004'::uuid,
+     'A petición del solicitante (ejemplo)', null, '{}'),
+    ('b0000000-0000-4000-8000-000000000012'::uuid, 'created'::public.event_type,
+     now() - interval '7 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000012'::uuid, 'duplicate_marked'::public.event_type,
+     now() - interval '6 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'created'::public.event_type,
+     now() - interval '1 day 12 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'taken'::public.event_type,
+     now() - interval '1 day 10 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '1 day', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Marta Ruiz (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000014'::uuid, 'created'::public.event_type,
+     now() - interval '3 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'created'::public.event_type,
+     now() - interval '20 days', 'a0000000-0000-4000-8000-000000000004'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'taken'::public.event_type,
+     now() - interval '19 days 23 hours', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'assigned_technician'::public.event_type,
+     now() - interval '19 days 22 hours', 'a0000000-0000-4000-8000-000000000002'::uuid,
+     null, 'Luis Gómez (ejemplo)', '{}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'started'::public.event_type,
+     now() - interval '19 days 20 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null, '{}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'attended'::public.event_type,
+     now() - interval '19 days 12 hours', 'a0000000-0000-4000-8000-000000000003'::uuid, null, null,
+     '{"work_description":"Se instalaron contactos nuevos (ejemplo)"}'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'validated'::public.event_type,
+     now() - interval '18 days', 'a0000000-0000-4000-8000-000000000002'::uuid, null, null, '{}')
+  ) as v (ticket_id, type, occurred_at, actor, reason_name, tech_name, payload)
+  left join public.reasons r on r.name = v.reason_name
+  left join public.technicians t on t.full_name = v.tech_name
+  order by v.occurred_at;
+
+  -- Asignaciones (cadena supervisor → técnico). Abiertas mientras el tiquet sigue activo.
+  insert into public.ticket_assignments (
+    ticket_id, cycle, stage, assignee_user_id, assignee_technician_id, assigned_by, assigned_at, ended_at)
+  select v.ticket_id, 1, v.stage, v.assignee_user, tech.id,
+         'a0000000-0000-4000-8000-000000000002', v.assigned_at, v.ended_at
+  from (values
+    ('b0000000-0000-4000-8000-000000000002'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null::text,
+     now() - interval '20 hours', null::timestamptz),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '1 day 20 hours', null),
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '1 day 12 hours', null),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '2 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '2 days 22 hours', null),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '3 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '3 days 22 hours', null),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '4 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '4 days 22 hours', now() - interval '4 days'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '7 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '7 days 22 hours', now() - interval '7 days'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '11 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '11 days 22 hours', now() - interval '11 days'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '5 days 23 hours', null),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'technician'::public.assignment_stage,
+     null, 'Luis Gómez (ejemplo)', now() - interval '5 days 22 hours', now() - interval '5 days 12 hours'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'supervisor'::public.assignment_stage,
+     'a0000000-0000-4000-8000-000000000002'::uuid, null, now() - interval '1 day 10 hours', null),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'technician'::public.assignment_stage,
+     null, 'Marta Ruiz (ejemplo)', now() - interval '1 day', null)
+  ) as v (ticket_id, stage, assignee_user, tech_name, assigned_at, ended_at)
+  left join public.technicians tech on tech.full_name = v.tech_name;
+
+  -- Participación (líder) para medir horas por técnico.
+  insert into public.ticket_participants (
+    ticket_id, cycle, technician_id, participation_type, category_id, started_at, ended_at)
+  select v.ticket_id, 1, tech.id, 'leader', cat.id, v.started_at, v.ended_at
+  from (values
+    ('b0000000-0000-4000-8000-000000000003'::uuid, 'Luis Gómez (ejemplo)', 'Plomería (ejemplo)', now() - interval '1 day 12 hours', null::timestamptz),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '2 days 22 hours', null),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '3 days 22 hours', null),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '4 days 22 hours', now() - interval '4 days'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '7 days 22 hours', now() - interval '7 days'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'Luis Gómez (ejemplo)', 'Plomería (ejemplo)', now() - interval '11 days 22 hours', now() - interval '11 days'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '5 days 22 hours', now() - interval '5 days 12 hours'),
+    ('b0000000-0000-4000-8000-000000000013'::uuid, 'Marta Ruiz (ejemplo)', 'Plomería (ejemplo)', now() - interval '1 day', null),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'Luis Gómez (ejemplo)', 'Eléctrico (ejemplo)', now() - interval '19 days 22 hours', now() - interval '19 days 12 hours')
+  ) as v (ticket_id, tech_name, category, started_at, ended_at)
+  join public.technicians tech on tech.full_name = v.tech_name
+  join public.categories cat on cat.name = v.category;
+
+  -- Ofertas al supervisor demo (bandeja de ofertas). Una pendiente y una tomada.
+  insert into public.ticket_offers (
+    ticket_id, cycle, supervisor_user_id, status, offered_at, resolved_at)
+  values
+    ('b0000000-0000-4000-8000-000000000001', 1, 'a0000000-0000-4000-8000-000000000002',
+     'offered', now() - interval '2 hours', null),
+    ('b0000000-0000-4000-8000-000000000002', 1, 'a0000000-0000-4000-8000-000000000002',
+     'taken', now() - interval '1 day', now() - interval '20 hours')
+  on conflict do nothing;
+
+  -- Pausas cerradas y abiertas (métricas de pausas por motivo).
+  insert into public.ticket_pauses (
+    ticket_id, cycle, reason_id, opened_by, opened_at, closed_at)
+  select v.ticket_id, 1, r.id, 'a0000000-0000-4000-8000-000000000003',
+         v.opened_at, v.closed_at
+  from (values
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'Falta de material (ejemplo)',
+     now() - interval '2 days', null::timestamptz),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'Falta de material (ejemplo)',
+     now() - interval '7 days 12 hours', now() - interval '7 days 8 hours')
+  ) as v (ticket_id, reason_name, opened_at, closed_at)
+  join public.reasons r on r.name = v.reason_name;
+
+  -- Calificaciones de satisfacción en tiquets cerrados.
+  insert into public.ticket_ratings (ticket_id, score, comment, rated_by, requester_id)
+  select v.ticket_id, v.score, v.comment,
+         'a0000000-0000-4000-8000-000000000004',
+         (select id from public.requesters where full_name = 'Ana Pérez (ejemplo)')
+  from (values
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 5::smallint, 'Resuelto muy rápido (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 3::smallint, 'Tardó un poco (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 4::smallint, 'Buen trabajo (ejemplo)')
+  ) as v (ticket_id, score, comment);
+
+  -- Evidencias (solo metadatos; sin archivo en Storage).
+  insert into public.evidence (
+    ticket_id, cycle, type, storage_path, mime_type, size_bytes,
+    captured_by_technician_id, captured_by_user_id, uploaded_by, occurred_at)
+  select v.ticket_id, 1, v.type, null, 'image/jpeg', v.size_bytes,
+         tech.id, 'a0000000-0000-4000-8000-000000000003',
+         'a0000000-0000-4000-8000-000000000003', v.occurred_at
+  from (values
+    ('b0000000-0000-4000-8000-000000000001'::uuid, 'request'::public.evidence_type, now() - interval '2 hours', 120000::bigint, null::text),
+    ('b0000000-0000-4000-8000-000000000004'::uuid, 'before'::public.evidence_type, now() - interval '2 days 19 hours', 180000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000005'::uuid, 'before'::public.evidence_type, now() - interval '3 days 21 hours', 175000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'before'::public.evidence_type, now() - interval '4 days 21 hours', 160000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000006'::uuid, 'after'::public.evidence_type, now() - interval '4 days 1 hour', 165000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'before'::public.evidence_type, now() - interval '7 days 21 hours', 200000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000007'::uuid, 'after'::public.evidence_type, now() - interval '7 days 1 hour', 210000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'before'::public.evidence_type, now() - interval '11 days 21 hours', 140000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000008'::uuid, 'after'::public.evidence_type, now() - interval '11 days 1 hour', 145000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'before'::public.evidence_type, now() - interval '5 days 21 hours', 155000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000009'::uuid, 'after'::public.evidence_type, now() - interval '5 days 13 hours', 158000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000012'::uuid, 'request'::public.evidence_type, now() - interval '7 days', 130000, null),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'before'::public.evidence_type, now() - interval '19 days 21 hours', 170000, 'Luis Gómez (ejemplo)'),
+    ('b0000000-0000-4000-8000-000000000015'::uuid, 'after'::public.evidence_type, now() - interval '19 days 13 hours', 172000, 'Luis Gómez (ejemplo)')
+  ) as v (ticket_id, type, occurred_at, size_bytes, tech_name)
+  left join public.technicians tech on tech.full_name = v.tech_name;
+
+  -- Enlace del duplicado.
+  insert into public.ticket_links (ticket_id, linked_ticket_id, link_type, created_by)
+  values ('b0000000-0000-4000-8000-000000000012', 'b0000000-0000-4000-8000-000000000007',
+          'duplicate_of', 'a0000000-0000-4000-8000-000000000002')
+  on conflict do nothing;
+end $$;

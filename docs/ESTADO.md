@@ -13,7 +13,10 @@ sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contr
 claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
 lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos ✅,
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
-En curso: **cerrada**; pendiente la validación visual de la persona y los ajustes que pida.
+En curso: **rediseño de vistas** (segunda vuelta de UI/UX). Plan por etapas:
+**1) semilla de demostración** (hecha), 2) Panel como centro de bandejas + métricas personales,
+3) Operación (alta, detalle, lista, bandejas), 4) Administración, 5) Métricas globales,
+6) Acceso/perfil y verificación. Siguiente: **Etapa 2 (Panel)**.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -749,3 +752,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   contenido", `aria-current="page"` en la navegación e indicador offline con tokens semánticos.
   `docs/diseno-ui.md` completo. `pnpm check` en verde (136 Vitest, 12 Playwright, 404 pgTAP).
   Rama `feat/ui-temas`.
+- **Rediseño de vistas, Etapa 1 (semilla de demostración)**: `supabase/seed.sql` ahora siembra
+  **15 tiquets** que cubren los 11 estados, en dos edificios y dos equipos, con asignaciones,
+  participantes, ofertas al supervisor, pausas, calificaciones, evidencias (metadatos) y una
+  bitácora que genera los tramos de tiempo. Con esto las vistas (bandejas, tablero, métricas,
+  duplicados, satisfacción y SLA) dejan de verse vacías, sobre todo para el administrador. Se
+  aislaron tres pruebas pgTAP (87/88/89) que dependían de agregados globales truncando tiquets;
+  pgTAP 404 en verde, Playwright 12 en verde.
