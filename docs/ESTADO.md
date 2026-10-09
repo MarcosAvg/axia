@@ -11,9 +11,9 @@
 **Fase 8 — rediseño de interfaz (UI/UX).** Objetivo: layout de escritorio estilo Jira/Linear,
 sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contrast`),
 claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
-lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell, 2 componentes de datos, 3 operación,
+lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos, 3 operación,
 4 métricas+admin, 5 pulido. Detalle en `docs/diseno-ui.md`.
-En curso: **Fase 1 (`feat/ui-shell`)** — Fase 0 cerrada (tokens, temas, proveedor y selector).
+En curso: **Fase 2 (`feat/ui-componentes-datos`)** — Fases 0 y 1 cerradas.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -733,3 +733,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (`success`/`warning`/`info`); lógica pura en `lib/theme.ts` con pruebas; `ThemeProvider` y
   `ThemeToggle` en `components/shared`; script anti-parpadeo en `index.html`. **ADR 0038**;
   `docs/diseno-ui.md` iniciado. `pnpm check` en verde (136 Vitest, 404 pgTAP). Rama `feat/ui-temas`.
+- **Fase 8, Fase 1 (rediseño de interfaz — armazón)**: nuevo feature `features/shell` con barra
+  lateral agrupada (Operación / Análisis / Administración / Cuenta) colapsable en escritorio y
+  cajón en móvil, barra superior con migas de pan, búsqueda global (`Cmd/Ctrl+K`, tiquets por
+  folio), selector de tema y menú de usuario; el contenido usa el ancho disponible. La
+  administración pierde su barra propia. **ADR 0039**; `docs/diseno-ui.md` actualizado. `pnpm
+  check` en verde (136 Vitest, 12 Playwright, 404 pgTAP). Rama `feat/ui-shell`.

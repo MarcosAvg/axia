@@ -5,7 +5,12 @@ export { TicketDetailView } from './components/ticket-detail'
 export { TicketFilters } from './components/ticket-filters'
 export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
-export { useMyOffers, useMyWork, useTicketsList } from './hooks/use-tickets'
+export {
+  useMyOffers,
+  useMyWork,
+  useTicketSearchByFolio,
+  useTicketsList,
+} from './hooks/use-tickets'
 export { registerEvidenceUploadHandler } from './api/offline-evidence'
 export { registerTicketActionHandler } from './api/offline-actions'
 export { ticketMessages, statusLabels } from './i18n'

@@ -80,8 +80,18 @@ tokens; **no se inventan colores sueltos en los componentes**.
 
 ## 2. Layout y navegación
 
-_(Pendiente: Fase 1 del rediseño — armazón con barra lateral, barra superior, breadcrumbs y
-búsqueda global.)_
+El armazón vive en `features/shell` (ver ADR 0039).
+
+- **Barra lateral** (`app-sidebar.tsx`): persistente y colapsable en escritorio (`lg+`), cajón en
+  móvil. Agrupa los destinos por áreas (Operación, Análisis, Administración y Cuenta) con iconos,
+  estado activo y tooltips al colapsar. Los destinos se definen en `components/nav-items.tsx`.
+- **Barra superior** (`app-topbar.tsx`): botón de menú (móvil), migas de pan, búsqueda global,
+  indicador offline, selector de tema y menú de usuario.
+- **Búsqueda global** (`global-search.tsx`): paleta con `Cmd/Ctrl+K`; ofrece navegación rápida y
+  tiquets por folio.
+- **Migas de pan** (`breadcrumbs.tsx`): derivadas de la ruta activa.
+- El contenido usa todo el ancho disponible (hasta `1600px`), en lugar de una sola columna
+  estrecha.
 
 ## 3. Componentes y patrones
 

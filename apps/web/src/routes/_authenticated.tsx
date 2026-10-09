@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { AppShell, RequireAuth } from '@/features/auth'
+import { RequireAuth } from '@/features/auth'
+import { AppShell } from '@/features/shell'
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthenticatedLayout,
