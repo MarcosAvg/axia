@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button'
 import { can, useAuth } from '@/features/auth'
 import { useDashboardData } from '../hooks/use-dashboard'
 import { dashboardMessages as t } from '../i18n'
+import { ActivitySection } from './activity-section'
+import { AttentionSection } from './attention-section'
+import { DashboardCharts } from './dashboard-charts'
 import { DashboardKpis } from './dashboard-kpis'
 import { DashboardSections } from './dashboard-sections'
 
@@ -39,7 +42,7 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
   )
 }
 
-/** Panel de inicio: números del usuario y sus bandejas. */
+/** Panel de inicio: números, gráficas, pendientes y bandejas del usuario. */
 export function Dashboard() {
   const { identity } = useAuth()
   const data = useDashboardData(identity?.userId)
@@ -61,7 +64,18 @@ export function Dashboard() {
         work={data.work}
         offers={data.offerItems.length}
         totals={data.totals}
+        summary={data.summary}
+        sla={data.sla}
+        satisfaction={data.satisfaction}
       />
+      <DashboardCharts
+        tickets={data.tickets}
+        statusCounts={data.statusCounts}
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <AttentionSection rows={data.attention} />
+        <ActivitySection items={data.activity} />
+      </div>
       <DashboardSections
         data={data}
         isSupervisor={isSupervisor}

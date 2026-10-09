@@ -15,7 +15,7 @@ export {
 export type { TicketListItem } from './domain/types'
 export { registerEvidenceUploadHandler } from './api/offline-evidence'
 export { registerTicketActionHandler } from './api/offline-actions'
-export { ticketMessages, statusLabels } from './i18n'
+export { ticketMessages, statusLabels, eventLabels } from './i18n'
 export { TICKET_STATUSES } from './domain/types'
 export type { TicketStatus } from './domain/types'
 export { ACTIVE_STATUSES } from './domain/status'
