@@ -93,6 +93,20 @@ El armazón vive en `features/shell` (ver ADR 0039).
 - El contenido usa todo el ancho disponible (hasta `1600px`), en lugar de una sola columna
   estrecha.
 
+## 2.bis Panel de inicio
+
+El Panel (`/`) es un **centro de bandejas con métricas propias del usuario** (`features/dashboard`,
+ver ADR 0041):
+
+- **Números según rol**: mi trabajo / ofertas / activos / en pausa / por validar / sin asignar /
+  cerrados, calculados de las bandejas del usuario (el RLS ya limita lo que ve).
+- **Bandejas**: ofertas para ti, mi trabajo y tiquets activos, con "Ver todos" y estado vacío.
+- **Acciones rápidas** según permisos.
+- Es distinto del **tablero global** de `/metricas` (permiso `metrics.view`).
+
+La **semilla de demostración** (`supabase/seed.sql`) crea tiquets en todos los estados para que
+estas vistas tengan datos al evaluar la interfaz.
+
 ## 3. Componentes y patrones
 
 Componentes compartidos en `components/shared` (ver ADR 0040):

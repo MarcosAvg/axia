@@ -2,6 +2,9 @@ begin;
 
 set search_path = extensions, public;
 
+-- Aísla la prueba de los tiquets y calificaciones de la semilla.
+truncate table public.tickets cascade;
+
 select plan(8);
 
 insert into auth.users (id, email, raw_user_meta_data)

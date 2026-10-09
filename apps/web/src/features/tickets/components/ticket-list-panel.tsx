@@ -1,6 +1,7 @@
 import { TicketIcon } from 'lucide-react'
 import { EmptyState } from '@/components/shared/empty-state'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { useMediaQuery } from '@/lib/use-media-query'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { TicketList } from './ticket-list'
@@ -25,6 +26,8 @@ export function TicketListPanel({
   totalPages,
   onPage,
 }: TicketListPanelProps) {
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
+
   if (isLoading) {
     return <LoadingList rows={6} />
   }
@@ -36,12 +39,7 @@ export function TicketListPanel({
   }
   return (
     <>
-      <div className="hidden lg:block">
-        <TicketTable items={items} />
-      </div>
-      <div className="lg:hidden">
-        <TicketList items={items} />
-      </div>
+      {isDesktop ? <TicketTable items={items} /> : <TicketList items={items} />}
       <TicketPagination page={page} totalPages={totalPages} onPage={onPage} />
     </>
   )

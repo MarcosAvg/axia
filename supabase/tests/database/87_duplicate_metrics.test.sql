@@ -2,6 +2,9 @@ begin;
 
 set search_path = extensions, public;
 
+-- Aísla la prueba de los tiquets de la semilla (agregados globales).
+truncate table public.tickets cascade;
+
 select plan(4);
 
 insert into public.teams (name) values ('Dup T');

@@ -14,7 +14,10 @@ test('el administrador abre las métricas', async ({ page }) => {
   await signIn(page, 'admin@axia.test')
   await expect(page.getByText(/Hola, Admin Demo/)).toBeVisible()
 
-  await page.getByRole('link', { name: 'Métricas' }).click()
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
   await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
   await expect(
     page.getByText('No se pudieron cargar las métricas.'),

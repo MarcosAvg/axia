@@ -78,14 +78,14 @@ describe('enrutado y sesión', () => {
     ).toBeInTheDocument()
   })
 
-  it('con sesión, "/" muestra el panel con el nombre y los roles', async () => {
+  it('con sesión, "/" muestra el panel con el nombre y sus números', async () => {
     renderAtPath(
       '/',
       makeAuthValue({ status: 'signed-in', identity: administrator }),
     )
 
     expect(await screen.findByText(/Hola, Admin Demo/)).toBeInTheDocument()
-    expect(screen.getByText('Administrador')).toBeInTheDocument()
+    expect(screen.getByText('Sin asignar')).toBeInTheDocument()
   })
 
   it('con permiso, "/admin" muestra la administración', async () => {

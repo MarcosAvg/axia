@@ -48,15 +48,3 @@ export const authMessages = {
       'Aquí irán los catálogos, los usuarios y los roles. Llegan en la Fase 3.',
   },
 } as const
-
-/** Etiquetas en español de los roles semilla; un rol desconocido se muestra tal cual. */
-const roleLabels: Record<string, string> = {
-  administrator: 'Administrador',
-  supervisor: 'Supervisor',
-  technician: 'Técnico',
-  requester: 'Solicitante',
-}
-
-export function roleLabel(role: string): string {
-  return roleLabels[role] ?? role
-}
