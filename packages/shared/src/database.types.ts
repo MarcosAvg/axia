@@ -3911,6 +3911,7 @@ export type Database = {
         Args: {
           p_client_request_id?: string
           p_mime_type?: string
+          p_note?: string
           p_occurred_at?: string
           p_size_bytes?: number
           p_storage_path: string
@@ -4008,6 +4009,185 @@ export type Database = {
         Returns: undefined
       }
       me: { Args: Record<PropertyKey, never>; Returns: Json }
+      metrics_by_technician: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          assigned_count: number
+          auxiliary_count: number
+          leader_count: number
+          participation_time: string
+          participation_time_extra: string
+          participation_time_labor: string
+          technician_id: string
+          technician_name: string
+          tickets: number
+        }[]
+      }
+      metrics_date_in: {
+        Args: { p_at: string; p_from: string; p_to: string }
+        Returns: boolean
+      }
+      metrics_dims_in: {
+        Args: {
+          p_building: string
+          p_category: string
+          p_dependency: string
+          p_team: string
+          t_building: string
+          t_category: string
+          t_dependency: string
+          t_team: string
+        }
+        Returns: boolean
+      }
+      metrics_duplicate_alerts: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          candidates: number
+          decision: string
+          tickets: number
+        }[]
+      }
+      metrics_duplicate_tickets: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          time_to_mark: string
+        }[]
+      }
+      metrics_duplicates_by_dimension: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          dimension: string
+          dimension_id: string
+          dimension_name: string
+          duplicate_rate: number
+          duplicates: number
+          tickets: number
+        }[]
+      }
+      metrics_pauses_by_reason: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          pause_time: string
+          pause_time_labor: string
+          pauses: number
+          reason_name: string
+        }[]
+      }
+      metrics_reject_cancel_by_reason: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          event_type: string
+          reason_name: string
+          tickets: number
+        }[]
+      }
+      metrics_routing: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          avg_time_to_take: string
+          offers: number
+          pending_offers: number
+          taken: number
+        }[]
+      }
+      metrics_satisfaction: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          average_score: number
+          ratings: number
+        }[]
+      }
+      metrics_sla: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          avg_resolution_minutes: number
+          avg_target_minutes: number
+          compliance_rate: number
+          met: number
+          with_target: number
+        }[]
+      }
+      metrics_sla_by_priority: {
+        Args: {
+          p_building?: string
+          p_category?: string
+          p_dependency?: string
+          p_from?: string
+          p_team?: string
+          p_to?: string
+        }
+        Returns: {
+          compliance_rate: number
+          met: number
+          priority_id: string
+          priority_name: string
+          with_target: number
+        }[]
+      }
       notification_mark_read: {
         Args: { p_notification_id: string }
         Returns: undefined

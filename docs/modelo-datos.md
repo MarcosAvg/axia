@@ -399,6 +399,11 @@ laboral, excluyendo duplicados de los de desempeño.
 | Sin evidencia de solicitud | proporción sin `evidence type=request` y su relación con recapturas |
 | Duplicados | tasa por solicitante/dependencia/ubicación/equipo; tiempo hasta marcarse; alertas ignoradas vs atendidas; volumen con/sin duplicados |
 
+Los indicadores agregados que no se derivan de la lista de tiquets (SLA, satisfacción, pausas,
+duplicados, carga por técnico, rechazos/cancelaciones y ruteo) se exponen como **funciones RPC**
+(`metrics_*`) que aceptan rango de días y dimensiones. Filtran por el **día UTC** de `reported_at`
+(misma convención que el cliente) y respetan la RLS (`security invoker`).
+
 ## 11. Decisiones, ADR, riesgos y preguntas abiertas
 
 **Decisiones confirmadas** (además de las §14 de la especificación): recaptura **sin aprobación**

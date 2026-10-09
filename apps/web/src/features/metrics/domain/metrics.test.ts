@@ -8,12 +8,12 @@ import {
   formatScore,
   intervalToMinutes,
   openAging,
-  rangeForDays,
   summarize,
   toCsv,
   volumeByDate,
 } from './metrics'
 import type { MetricsTicket } from './metrics'
+import { deltaOf, formatDelta, previousRange, rangeForDays } from './period'
 
 function ticket(partial: Partial<MetricsTicket>): MetricsTicket {
   return {
@@ -25,6 +25,7 @@ function ticket(partial: Partial<MetricsTicket>): MetricsTicket {
     categoryId: 'c1',
     teamId: 'tm1',
     dependencyId: 'd1',
+    requesterId: 'r1',
     totalMinutes: 240,
     netMinutes: 180,
     activeMinutes: 60,
@@ -34,6 +35,7 @@ function ticket(partial: Partial<MetricsTicket>): MetricsTicket {
     assignmentMinutes: 30,
     validationMinutes: 20,
     reassigned: false,
+    reassignedTechnician: false,
     recaptured: false,
     reopened: false,
     ...partial,
@@ -84,10 +86,17 @@ describe('summarize', () => {
   it('calcula tasas y promedios', () => {
     const summary = summarize([
       ticket({ id: 'a', reopened: false, activeMinutes: 60 }),
-      ticket({ id: 'b', reopened: true, reassigned: true, activeMinutes: 120 }),
+      ticket({
+        id: 'b',
+        reopened: true,
+        reassigned: true,
+        reassignedTechnician: true,
+        activeMinutes: 120,
+      }),
     ])
     expect(summary.tickets).toBe(2)
     expect(summary.reassignmentRate).toBe(0.5)
+    expect(summary.technicianReassignmentRate).toBe(0.5)
     expect(summary.reopenRate).toBe(0.5)
     expect(summary.firstTimeFixRate).toBe(0.5)
     expect(summary.avgActive).toBe(90)
@@ -120,6 +129,19 @@ describe('byDimension', () => {
     )
     expect(rows[0]).toMatchObject({ id: 'tm1', tickets: 2 })
     expect(rows[1]).toMatchObject({ id: 'tm2', tickets: 1 })
+  })
+
+  it('agrupa por solicitante', () => {
+    const rows = byDimension(
+      [
+        ticket({ id: 'a', requesterId: 'r1' }),
+        ticket({ id: 'b', requesterId: 'r2' }),
+        ticket({ id: 'c', requesterId: 'r2' }),
+      ],
+      'requester',
+    )
+    expect(rows[0]).toMatchObject({ id: 'r2', tickets: 2 })
+    expect(rows[1]).toMatchObject({ id: 'r1', tickets: 1 })
   })
 })
 
@@ -185,5 +207,33 @@ describe('rangeForDays', () => {
       from: '2026-10-08',
       to: '2026-10-15',
     })
+  })
+})
+
+describe('previousRange', () => {
+  it('desplaza el rango por su longitud', () => {
+    expect(
+      previousRange({ ...EMPTY_FILTERS, from: '2026-10-08', to: '2026-10-15' }),
+    ).toEqual({ ...EMPTY_FILTERS, from: '2026-09-30', to: '2026-10-07' })
+  })
+
+  it('devuelve null sin rango completo', () => {
+    expect(previousRange(EMPTY_FILTERS)).toBeNull()
+    expect(previousRange({ ...EMPTY_FILTERS, from: '2026-10-08' })).toBeNull()
+  })
+})
+
+describe('deltaOf y formatDelta', () => {
+  it('calcula el cambio relativo', () => {
+    expect(deltaOf(120, 100)).toBeCloseTo(0.2)
+    expect(deltaOf(80, 100)).toBeCloseTo(-0.2)
+    expect(deltaOf(10, 0)).toBeNull()
+  })
+
+  it('formatea con signo', () => {
+    expect(formatDelta(0.2)).toBe('+20%')
+    expect(formatDelta(-0.2)).toBe('-20%')
+    expect(formatDelta(0)).toBe('0%')
+    expect(formatDelta(null)).toBe('—')
   })
 })

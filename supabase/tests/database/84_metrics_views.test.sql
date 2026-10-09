@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(17);
+select plan(30);
 
 -- Sin calendario laboral: modo laboral = modo calendario (cálculo determinista).
 update public.instance_settings set default_calendar_id = null;
@@ -164,6 +164,81 @@ select is(
   (select tickets from public.v_metrics_reject_cancel_by_reason
    where event_type = 'rejected' and reason_name = 'Rechazo métricas'),
   1::bigint, 'agrupa los rechazos por motivo');
+
+-- Funciones con filtros en el servidor. Se acotan al equipo del fixture para
+-- aislarlas de los datos de la semilla.
+update public.priorities set target_minutes = 120 where name = 'Prio Métricas';
+
+select is(
+  (select with_target from public.metrics_sla(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1::bigint, 'metrics_sla cuenta el cerrado con objetivo en el rango');
+select is(
+  (select met from public.metrics_sla(
+     '2026-10-06', '2026-10-06',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  0::bigint, 'metrics_sla excluye los tiquets fuera del rango');
+select is(
+  (select count(*)::int from public.metrics_sla_by_priority(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1, 'metrics_sla_by_priority filtra por rango');
+
+select is(
+  (select ratings from public.metrics_satisfaction(
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  0::bigint, 'metrics_satisfaction sin calificaciones');
+
+select is(
+  (select count(*)::int from public.metrics_by_technician(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  2, 'metrics_by_technician filtra por rango');
+select is(
+  (select count(*)::int from public.metrics_by_technician(
+     '2026-10-06', '2026-10-06',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  0, 'metrics_by_technician vacío fuera del rango');
+select is(
+  (select count(*)::int from public.metrics_by_technician(
+     p_dependency => (select id from public.dependencies where name = 'Dep Métricas'))),
+  2, 'metrics_by_technician filtra por dependencia');
+
+select is(
+  (select tickets from public.metrics_reject_cancel_by_reason(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1::bigint, 'rechazos filtrados por rango');
+
+select is(
+  (select count(*)::int from public.metrics_pauses_by_reason(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1, 'pausas filtradas por rango');
+select is(
+  (select count(*)::int from public.metrics_pauses_by_reason(
+     '2026-10-06', '2026-10-06',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  0, 'pausas vacías fuera del rango');
+
+select is(
+  (select duplicates from public.metrics_duplicates_by_dimension(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))
+   where dimension = 'building'),
+  1::bigint, 'duplicados por dimensión filtrados por rango');
+
+select is(
+  (select sum(offers)::bigint from public.metrics_routing(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1::bigint, 'ruteo filtrado por rango');
+select is(
+  (select count(*)::int from public.metrics_duplicate_tickets(
+     '2026-10-05', '2026-10-05',
+     p_team => (select id from public.teams where name = 'Métricas T'))),
+  1, 'tiempo hasta marcarse filtrado por rango');
 
 select * from finish();
 

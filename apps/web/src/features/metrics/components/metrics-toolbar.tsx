@@ -1,20 +1,14 @@
 import { Button } from '@/components/ui/button'
 import { SelectField, TextField } from '@/components/shared/form-fields'
-import type { Option } from '@/features/catalogs'
-import { EMPTY_FILTERS, rangeForDays } from '../domain/metrics'
+import type { FilterCatalogs, NamedOption } from '../domain/indicators'
+import { EMPTY_FILTERS } from '../domain/metrics'
+import { rangeForDays } from '../domain/period'
 import type { Dimension, DimensionRow, MetricsFilters } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
 
 const t = metricsMessages.filters
 const quick = metricsMessages.quickRanges
-
-export interface FilterCatalogs {
-  buildings: Option[]
-  teams: Option[]
-  categories: Option[]
-  dependencies: Option[]
-}
 
 const QUICK_RANGES = [
   { key: 'd7' as const, days: 7 },
@@ -38,7 +32,7 @@ function FilterSelect({
   id: string
   label: string
   value: string
-  items: Option[]
+  items: NamedOption[]
   onChange: (value: string) => void
 }) {
   return (

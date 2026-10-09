@@ -15,8 +15,9 @@ lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componente
 3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
 En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostración, Panel como
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
-Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. Queda como mejora **opcional** la
-regresión visual con capturas de Playwright. Detalle en `docs/diseno-ui.md` y los ADR 0038–0048.
+Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
+quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
+0038–0049.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -829,3 +830,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `rangeForDays`). Componentes nuevos: `MetricsToolbar`, `MetricsHero`, `MetricsTabs`,
   `MetricsExport` y `KpiGrid`. **ADR 0048**. `pnpm check` en verde (148 Vitest, 12 Playwright, 413
   pgTAP). Rama `feat/metricas-rediseno`.
+- **Métricas: deltas, filtros en el servidor y nuevos indicadores (Etapa 7)**: **deltas** vs periodo
+  anterior en los KPI de tiquets (cliente); **dimensión solicitante** y **marca de reasignación de
+  técnico**; y los indicadores agregados pasan a **funciones `metrics_*` en el servidor** que
+  respetan la barra de filtros (antes las vistas globales la ignoraban). Nuevos: pestaña **Equipo**
+  (carga por técnico), **rechazos/cancelaciones por motivo** y **ruteo y toma**; la barra deja de ser
+  **sticky**. **Regresión visual con Playwright opt-in** (`pnpm test:visual`, fuera de la compuerta)
+  en `apps/web/visual`. **ADR 0049**. `pnpm check` en verde (153 Vitest, 12 Playwright, 426 pgTAP).
+  Rama `feat/metricas-deltas-filtros`.

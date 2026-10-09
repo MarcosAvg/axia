@@ -7,6 +7,7 @@ export const dimensionLabels: Record<Dimension, string> = {
   building: 'Edificio',
   category: 'Categoría',
   dependency: 'Dependencia',
+  requester: 'Solicitante',
 }
 
 export const metricsMessages = {
@@ -38,6 +39,7 @@ export const metricsMessages = {
     times: 'Tiempos',
     quality: 'Calidad',
     sla: 'SLA y satisfacción',
+    team: 'Equipo',
   },
   kpi: {
     tickets: 'Tiquets',
@@ -54,6 +56,7 @@ export const metricsMessages = {
     firstFix: 'Primera resolución',
     satisfaction: 'Satisfacción',
     sla: 'Cumplimiento de SLA',
+    reassignedTechnician: 'Reasignación de técnico',
   },
   kpiGroups: {
     carga: 'Carga',
@@ -67,6 +70,12 @@ export const metricsMessages = {
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     satisfaction: 'Promedio de las calificaciones del solicitante (1 a 5).',
     firstFix: 'Tiquets cerrados sin reapertura.',
+    reassignedTechnician:
+      'Tiquets en los que el técnico cambió después de la asignación.',
+  },
+  delta: {
+    vsPrevious: 'vs periodo anterior',
+    noData: 'Sin periodo previo',
   },
   sla: {
     title: 'Tiempos objetivo (SLA)',
@@ -110,6 +119,31 @@ export const metricsMessages = {
     ticket: 'Folio',
     status: 'Estado',
     age: 'Antigüedad',
+  },
+  technicians: {
+    title: 'Carga por técnico',
+    technician: 'Técnico',
+    tickets: 'Tiquets',
+    leader: 'Como líder',
+    auxiliary: 'Como auxiliar',
+    participation: 'Participación',
+    extra: 'Fuera de horario',
+    assigned: 'Asignados',
+  },
+  rejectCancel: {
+    title: 'Rechazos y cancelaciones',
+    event: 'Tipo',
+    reason: 'Motivo',
+    tickets: 'Tiquets',
+    rejected: 'Rechazado',
+    cancelled: 'Cancelado',
+  },
+  routing: {
+    title: 'Ruteo y toma',
+    offers: 'Ofertas',
+    pending: 'Pendientes',
+    taken: 'Tomadas',
+    timeToTake: 'Tiempo hasta la toma',
   },
   export: 'Exportar CSV',
   exportXlsx: 'Exportar XLSX',
