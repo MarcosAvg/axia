@@ -1,0 +1,146 @@
+import { useState } from 'react'
+import {
+  useBuildings,
+  useCategories,
+  useDependencies,
+  useRequesters,
+  useTeams,
+} from '@/features/catalogs'
+import type { Option, RequesterOption } from '@/features/catalogs'
+import type { FilterCatalogs, RoutingSummary } from '../domain/indicators'
+import {
+  EMPTY_FILTERS,
+  byDimension,
+  filterTickets,
+  summarize,
+} from '../domain/metrics'
+import type {
+  Dimension,
+  MetricsFilters,
+  SatisfactionSummary,
+  SlaSummary,
+} from '../domain/metrics'
+import { previousRange } from '../domain/period'
+import {
+  useByTechnician,
+  useDuplicates,
+  useMetricsTickets,
+  usePausesByReason,
+  useRejectCancel,
+  useRouting,
+  useSatisfaction,
+  useSla,
+} from './use-metrics'
+
+const EMPTY_SLA: SlaSummary = {
+  withTarget: 0,
+  met: 0,
+  complianceRate: null,
+  avgTargetMinutes: null,
+  avgResolutionMinutes: null,
+}
+
+const EMPTY_SATISFACTION: SatisfactionSummary = { average: null, ratings: 0 }
+
+const EMPTY_ROUTING: RoutingSummary = {
+  offers: 0,
+  pendingOffers: 0,
+  taken: 0,
+  avgTimeToTakeMinutes: 0,
+}
+
+function or<T>(value: T | undefined, fallback: T): T {
+  return value ?? fallback
+}
+
+function buildCatalogs(options: {
+  buildings: Option[] | undefined
+  teams: Option[] | undefined
+  categories: Option[] | undefined
+  dependencies: Option[] | undefined
+  requesters: RequesterOption[] | undefined
+}): FilterCatalogs {
+  return {
+    buildings: or(options.buildings, []),
+    teams: or(options.teams, []),
+    categories: or(options.categories, []),
+    dependencies: or(options.dependencies, []),
+    requesters: or(options.requesters, []).map((item) => ({
+      id: item.id,
+      name: item.fullName,
+    })),
+  }
+}
+
+function nameResolver(dimension: Dimension, catalogs: FilterCatalogs) {
+  const maps: Record<Dimension, Map<string, string>> = {
+    team: new Map(catalogs.teams.map((item) => [item.id, item.name])),
+    building: new Map(catalogs.buildings.map((item) => [item.id, item.name])),
+    category: new Map(catalogs.categories.map((item) => [item.id, item.name])),
+    dependency: new Map(
+      catalogs.dependencies.map((item) => [item.id, item.name]),
+    ),
+    requester: new Map(catalogs.requesters.map((item) => [item.id, item.name])),
+  }
+  return (id: string) => maps[dimension].get(id) ?? id
+}
+
+/** Estado y datos del tablero de métricas. */
+export function useMetricsBoard() {
+  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
+  const [dimension, setDimension] = useState<Dimension>('team')
+  const tickets = useMetricsTickets()
+  const pauses = usePausesByReason(filters)
+  const duplicates = useDuplicates(filters)
+  const satisfaction = useSatisfaction(filters)
+  const sla = useSla(filters)
+  const technicians = useByTechnician(filters)
+  const rejectCancel = useRejectCancel(filters)
+  const routing = useRouting(filters)
+  const buildings = useBuildings()
+  const teams = useTeams()
+  const categories = useCategories()
+  const dependencies = useDependencies()
+  const requesters = useRequesters()
+
+  const catalogs = buildCatalogs({
+    buildings: buildings.data,
+    teams: teams.data,
+    categories: categories.data,
+    dependencies: dependencies.data,
+    requesters: requesters.data,
+  })
+  const allTickets = or(tickets.data, [])
+  const filtered = filterTickets(allTickets, filters)
+  const prevFilters = previousRange(filters)
+  const prevSummary = prevFilters
+    ? summarize(filterTickets(allTickets, prevFilters))
+    : null
+
+  return {
+    filters,
+    setFilters,
+    dimension,
+    setDimension,
+    catalogs,
+    filtered,
+    summary: summarize(filtered),
+    prevSummary,
+    rows: byDimension(filtered, dimension),
+    nameOf: nameResolver(dimension, catalogs),
+    loading: tickets.isLoading,
+    error: tickets.isError,
+    pauses: or(pauses.data, []),
+    duplicates: {
+      tickets: or(duplicates.tickets.data, []),
+      alerts: or(duplicates.alerts.data, []),
+      rows: or(duplicates.byDimension.data, []),
+    },
+    satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
+    sla: or(sla.summary.data, EMPTY_SLA),
+    slaRows: or(sla.byPriority.data, []),
+    technicians: or(technicians.data, []),
+    rejectCancel: or(rejectCancel.data, []),
+    routing: or(routing.data, EMPTY_ROUTING),
+  }
+}

@@ -1,11 +1,17 @@
-// Lectura de indicadores. Única capa que habla con Supabase (vistas de métricas).
+// Lectura de indicadores. Única capa que habla con Supabase.
 
 import { supabase } from '@/lib/supabase'
+import type {
+  RejectCancelRow,
+  RoutingSummary,
+  TechnicianRow,
+} from '../domain/indicators'
 import { intervalToMinutes } from '../domain/metrics'
 import type {
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
+  MetricsFilters,
   MetricsTicket,
   PauseReasonRow,
   SatisfactionSummary,
@@ -78,20 +84,27 @@ export async function fetchMetricsTickets(): Promise<MetricsTicket[]> {
   return ((data ?? []) as unknown as TicketRow[]).map(parseTicket)
 }
 
-interface PauseRow {
-  reason_name: string
-  pauses: number
-  pause_time: string | null
-  pause_time_labor: string | null
+/** Parámetros de filtro para las funciones de indicadores (vacío = sin filtro). */
+function filterParams(filters: MetricsFilters) {
+  return {
+    p_from: filters.from || undefined,
+    p_to: filters.to || undefined,
+    p_building: filters.buildingId || undefined,
+    p_team: filters.teamId || undefined,
+    p_category: filters.categoryId || undefined,
+    p_dependency: filters.dependencyId || undefined,
+  }
 }
 
-export async function fetchPausesByReason(): Promise<PauseReasonRow[]> {
-  const { data, error } = await supabase
-    .from('v_metrics_pauses_by_reason')
-    .select('reason_name, pauses, pause_time, pause_time_labor')
-    .order('pauses', { ascending: false })
+export async function fetchPausesByReason(
+  filters: MetricsFilters,
+): Promise<PauseReasonRow[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_pauses_by_reason',
+    filterParams(filters),
+  )
   if (error) throw error
-  return ((data ?? []) as unknown as PauseRow[]).map((row) => ({
+  return (data ?? []).map((row) => ({
     reasonName: row.reason_name,
     pauses: row.pauses,
     pauseMinutes: intervalToMinutes(row.pause_time),
@@ -99,58 +112,71 @@ export async function fetchPausesByReason(): Promise<PauseReasonRow[]> {
   }))
 }
 
-export async function fetchDuplicateTickets(): Promise<DuplicateTicket[]> {
-  const { data, error } = await supabase
-    .from('v_metrics_duplicate_tickets')
-    .select('time_to_mark')
-  if (error) throw error
-  return ((data ?? []) as unknown as { time_to_mark: string | null }[]).map(
-    (row) => ({ timeToMarkMinutes: intervalToMinutes(row.time_to_mark) }),
+export async function fetchDuplicateTickets(
+  filters: MetricsFilters,
+): Promise<DuplicateTicket[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_duplicate_tickets',
+    filterParams(filters),
   )
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    timeToMarkMinutes: intervalToMinutes(row.time_to_mark),
+  }))
 }
 
-export async function fetchDuplicateAlerts(): Promise<DuplicateAlert[]> {
-  const { data, error } = await supabase
-    .from('v_metrics_duplicate_alerts')
-    .select('decision, candidates, tickets')
+export async function fetchDuplicateAlerts(
+  filters: MetricsFilters,
+): Promise<DuplicateAlert[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_duplicate_alerts',
+    filterParams(filters),
+  )
   if (error) throw error
-  return (data ?? []) as unknown as DuplicateAlert[]
+  return (data ?? []).map((row) => ({
+    decision: row.decision,
+    candidates: row.candidates,
+    tickets: row.tickets,
+  }))
 }
 
-export async function fetchDuplicatesByDimension(): Promise<
-  DuplicateDimensionRow[]
-> {
-  const { data, error } = await supabase
-    .from('v_metrics_duplicates_by_dimension')
-    .select(
-      'dimension, dimension_id, dimension_name, tickets, duplicates, duplicate_rate',
-    )
-    .order('tickets', { ascending: false })
+export async function fetchDuplicatesByDimension(
+  filters: MetricsFilters,
+): Promise<DuplicateDimensionRow[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_duplicates_by_dimension',
+    filterParams(filters),
+  )
   if (error) throw error
-  return (data ?? []) as unknown as DuplicateDimensionRow[]
+  return (data ?? []).map((row) => ({
+    dimension: row.dimension,
+    dimensionId: row.dimension_id,
+    dimensionName: row.dimension_name,
+    tickets: row.tickets,
+    duplicates: row.duplicates,
+    duplicateRate: row.duplicate_rate,
+  }))
 }
 
-export async function fetchSatisfaction(): Promise<SatisfactionSummary> {
-  const { data, error } = await supabase
-    .from('v_metrics_satisfaction')
-    .select('average_score, ratings')
-    .maybeSingle()
+export async function fetchSatisfaction(
+  filters: MetricsFilters,
+): Promise<SatisfactionSummary> {
+  const { data, error } = await supabase.rpc(
+    'metrics_satisfaction',
+    filterParams(filters),
+  )
   if (error) throw error
-  return {
-    average: data?.average_score ?? null,
-    ratings: data?.ratings ?? 0,
-  }
+  const row = data?.[0]
+  return { average: row?.average_score ?? null, ratings: row?.ratings ?? 0 }
 }
 
-export async function fetchSla(): Promise<SlaSummary> {
-  const { data, error } = await supabase
-    .from('v_metrics_sla')
-    .select(
-      'with_target, met, compliance_rate, avg_target_minutes, avg_resolution_minutes',
-    )
-    .maybeSingle()
+export async function fetchSla(filters: MetricsFilters): Promise<SlaSummary> {
+  const { data, error } = await supabase.rpc(
+    'metrics_sla',
+    filterParams(filters),
+  )
   if (error) throw error
-  return parseSla(data)
+  return parseSla(data?.[0] ?? null)
 }
 
 interface SlaRow {
@@ -180,25 +206,72 @@ function parseSla(data: SlaRow | null): SlaSummary {
   }
 }
 
-export async function fetchSlaByPriority(): Promise<SlaPriorityRow[]> {
-  const { data, error } = await supabase
-    .from('v_metrics_sla_by_priority')
-    .select('priority_id, priority_name, with_target, met, compliance_rate')
-    .order('priority_name')
+export async function fetchSlaByPriority(
+  filters: MetricsFilters,
+): Promise<SlaPriorityRow[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_sla_by_priority',
+    filterParams(filters),
+  )
   if (error) throw error
-  return (
-    (data ?? []) as unknown as {
-      priority_id: string
-      priority_name: string
-      with_target: number
-      met: number
-      compliance_rate: number | null
-    }[]
-  ).map((row) => ({
+  return (data ?? []).map((row) => ({
     priorityId: row.priority_id,
     priorityName: row.priority_name,
     withTarget: row.with_target,
     met: row.met,
     complianceRate: row.compliance_rate,
   }))
+}
+
+export async function fetchByTechnician(
+  filters: MetricsFilters,
+): Promise<TechnicianRow[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_by_technician',
+    filterParams(filters),
+  )
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    technicianId: row.technician_id,
+    name: row.technician_name,
+    tickets: row.tickets,
+    leaderCount: row.leader_count,
+    auxiliaryCount: row.auxiliary_count,
+    participationMinutes: intervalToMinutes(row.participation_time),
+    participationLaborMinutes: intervalToMinutes(row.participation_time_labor),
+    participationExtraMinutes: intervalToMinutes(row.participation_time_extra),
+    assignedCount: row.assigned_count,
+  }))
+}
+
+export async function fetchRejectCancel(
+  filters: MetricsFilters,
+): Promise<RejectCancelRow[]> {
+  const { data, error } = await supabase.rpc(
+    'metrics_reject_cancel_by_reason',
+    filterParams(filters),
+  )
+  if (error) throw error
+  return (data ?? []).map((row) => ({
+    eventType: row.event_type,
+    reasonName: row.reason_name,
+    tickets: row.tickets,
+  }))
+}
+
+export async function fetchRouting(
+  filters: MetricsFilters,
+): Promise<RoutingSummary> {
+  const { data, error } = await supabase.rpc(
+    'metrics_routing',
+    filterParams(filters),
+  )
+  if (error) throw error
+  const row = data?.[0]
+  return {
+    offers: row?.offers ?? 0,
+    pendingOffers: row?.pending_offers ?? 0,
+    taken: row?.taken ?? 0,
+    avgTimeToTakeMinutes: intervalToMinutes(row?.avg_time_to_take),
+  }
 }

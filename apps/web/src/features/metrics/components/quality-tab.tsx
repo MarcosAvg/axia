@@ -1,4 +1,5 @@
 import { formatPercent } from '../domain/metrics'
+import type { RejectCancelRow } from '../domain/indicators'
 import type {
   DuplicateAlert,
   DuplicateDimensionRow,
@@ -13,6 +14,7 @@ import { DuplicatesSection } from './duplicates-section'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
+import { RejectCancelSection } from './reject-cancel-section'
 
 function qualityCards(
   summary: MetricsSummary,
@@ -64,6 +66,7 @@ export function QualityTab({
   prev,
   pauses,
   duplicates,
+  rejectCancel,
 }: {
   summary: MetricsSummary
   prev: MetricsSummary | null
@@ -73,6 +76,7 @@ export function QualityTab({
     alerts: DuplicateAlert[]
     rows: DuplicateDimensionRow[]
   }
+  rejectCancel: RejectCancelRow[]
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -85,6 +89,9 @@ export function QualityTab({
           <DuplicatesSection {...duplicates} />
         </ChartCard>
       </div>
+      <ChartCard title={metricsMessages.rejectCancel.title}>
+        <RejectCancelSection rows={rejectCancel} />
+      </ChartCard>
     </div>
   )
 }
