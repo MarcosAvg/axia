@@ -3,158 +3,45 @@ import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { usePriorities, useReasons, useTechnicians } from '@/features/catalogs'
-import type { ReasonUse } from '@/features/catalogs'
+import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
-import { ticketMessages } from '../i18n'
+import type { EvidenceType } from '../domain/types'
+import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { TicketActionFields } from './ticket-action-fields'
 import type { ActionValues } from './ticket-action-fields'
+import {
+  EMPTY,
+  REASON_USE_BY_ACTION,
+  mutationFor,
+} from './ticket-action-handlers'
+import { useActionSubmission } from './use-action-submission'
 
-type Mutations = ReturnType<typeof useTicketActions>
-type MutateOptions = { onSuccess: () => void }
-
-const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
-  pause: 'pause',
-  reject: 'rejection',
-  cancel: 'cancellation',
-  open_claim: 'claim',
-  resolve_claim: 'claim_outcome',
-  reactivate: 'reactivation',
-  add_auxiliary: 'auxiliary_support',
-}
-
-const EMPTY: ActionValues = {
-  technicianId: '',
-  reasonId: '',
-  priorityId: '',
-  note: '',
-  text: '',
-  resolution: 'upheld',
-}
-
-function mutationFor(action: ActionKey, actions: Mutations) {
-  const map: Partial<Record<ActionKey, Mutations[keyof Mutations]>> = {
-    assign_technician: actions.assignTechnician,
-    attend: actions.attend,
-    change_priority: actions.changePriority,
-    comment: actions.comment,
-    pause: actions.pause,
-    reject: actions.reject,
-    cancel: actions.cancel,
-    open_claim: actions.openClaim,
-    resolve_claim: actions.resolveClaim,
-    reactivate: actions.reactivate,
-    add_auxiliary: actions.addAuxiliary,
-  }
-  return map[action]
-}
-
-type Handlers = Partial<Record<ActionKey, () => void>>
-
-function simpleHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
-  const note = values.note || null
-  const text = values.text.trim()
-  return {
-    assign_technician: () => {
-      if (values.technicianId) {
-        actions.assignTechnician.mutate(
-          { technicianId: values.technicianId },
-          options,
-        )
-      }
-    },
-    attend: () => {
-      if (text) actions.attend.mutate({ workDescription: text }, options)
-    },
-    change_priority: () => {
-      if (values.priorityId) {
-        actions.changePriority.mutate(
-          { priorityId: values.priorityId },
-          options,
-        )
-      }
-    },
-    comment: () => {
-      if (text) actions.comment.mutate({ text }, options)
-    },
-    pause: () => {
-      if (values.reasonId) {
-        actions.pause.mutate({ reasonId: values.reasonId, note }, options)
-      }
-    },
-    reject: () => {
-      if (values.reasonId) {
-        actions.reject.mutate({ reasonId: values.reasonId, note }, options)
-      }
-    },
-    cancel: () => {
-      if (values.reasonId) {
-        actions.cancel.mutate({ reasonId: values.reasonId, note }, options)
-      }
-    },
-  }
-}
-
-function claimHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
-  const note = values.note || null
-  const text = values.text.trim()
-  return {
-    open_claim: () => {
-      if (values.reasonId && text) {
-        actions.openClaim.mutate(
-          { reasonId: values.reasonId, description: text },
-          options,
-        )
-      }
-    },
-    resolve_claim: () => {
-      actions.resolveClaim.mutate(
-        {
-          resolution: values.resolution,
-          resultId: values.reasonId || null,
-          note,
-        },
-        options,
-      )
-    },
-    reactivate: () => {
-      if (values.reasonId) {
-        actions.reactivate.mutate({ reasonId: values.reasonId }, options)
-      }
-    },
-    add_auxiliary: () => {
-      if (values.technicianId && values.reasonId) {
-        actions.addAuxiliary.mutate(
-          {
-            technicianId: values.technicianId,
-            reasonId: values.reasonId,
-            note,
-          },
-          options,
-        )
-      }
-    },
-  }
-}
-
-function buildSubmitHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
-  return {
-    ...simpleHandlers(actions, values, options),
-    ...claimHandlers(actions, values, options),
-  }
+function EvidenceField({
+  type,
+  error,
+  onChange,
+}: {
+  type: EvidenceType
+  error: string | null
+  onChange: (file: File | null) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor="action-evidence" className="text-sm font-medium">
+        {ticketMessages.actionFields.evidence}: {evidenceTypeLabels[type]}
+      </label>
+      <input
+        id="action-evidence"
+        type="file"
+        accept="image/*,application/pdf"
+        className="min-h-11 text-sm"
+        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+      />
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+    </div>
+  )
 }
 
 function ActionFormFooter({
@@ -186,14 +73,70 @@ function ActionFormFooter({
   )
 }
 
-/** Formulario de una acción del tiquet, según lo que pida cada una. */
+function ActionFormView({
+  evidenceType,
+  evidenceError,
+  onEvidenceChange,
+  action,
+  technicians,
+  reasons,
+  priorities,
+  values,
+  onChange,
+  error,
+  isPending,
+  onSubmit,
+  onClose,
+}: {
+  evidenceType: EvidenceType | undefined
+  evidenceError: string | null
+  onEvidenceChange: (file: File | null) => void
+  action: ActionKey
+  technicians: TechnicianOption[]
+  reasons: ReasonOption[]
+  priorities: { id: string; name: string }[]
+  values: ActionValues
+  onChange: (patch: Partial<ActionValues>) => void
+  error: unknown
+  isPending: boolean
+  onSubmit: (event: FormEvent) => void
+  onClose: () => void
+}) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col gap-4 rounded-xl border p-4"
+    >
+      {evidenceType ? (
+        <EvidenceField
+          type={evidenceType}
+          error={evidenceError}
+          onChange={onEvidenceChange}
+        />
+      ) : null}
+      <TicketActionFields
+        action={action}
+        technicians={technicians}
+        reasons={reasons}
+        priorities={priorities}
+        values={values}
+        onChange={onChange}
+      />
+      <ActionFormFooter error={error} isPending={isPending} onClose={onClose} />
+    </form>
+  )
+}
+
+/** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
 export function TicketActionForm({
   ticketId,
+  cycle,
   action,
   subjectTechnicianId,
   onClose,
 }: {
   ticketId: string
+  cycle: number
   action: ActionKey
   subjectTechnicianId?: string
   onClose: () => void
@@ -204,35 +147,37 @@ export function TicketActionForm({
   const reasons = useReasons(REASON_USE_BY_ACTION[action] ?? 'pause')
   const [values, setValues] = useState<ActionValues>(EMPTY)
   const mutation = mutationFor(action, actions)
+  const submission = useActionSubmission({
+    actions,
+    values,
+    action,
+    ticketId,
+    cycle,
+    onClose,
+  })
+
+  if (!mutation) return null
 
   const onChange = (patch: Partial<ActionValues>) =>
     setValues((current) => ({ ...current, ...patch }))
 
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    buildSubmitHandlers(actions, values, { onSuccess: onClose })[action]?.()
-  }
-
-  if (!mutation) return null
-
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
-      <TicketActionFields
-        action={action}
-        technicians={technicians.data ?? []}
-        reasons={reasons.data ?? []}
-        priorities={priorities.data ?? []}
-        values={values}
-        onChange={onChange}
-      />
-      <ActionFormFooter
-        error={mutation.error}
-        isPending={mutation.isPending}
-        onClose={onClose}
-      />
-    </form>
+    <ActionFormView
+      evidenceType={submission.evidenceType}
+      evidenceError={submission.evidenceError}
+      onEvidenceChange={submission.setFile}
+      action={action}
+      technicians={technicians.data ?? []}
+      reasons={reasons.data ?? []}
+      priorities={priorities.data ?? []}
+      values={values}
+      onChange={onChange}
+      error={mutation.error}
+      isPending={mutation.isPending || submission.uploading}
+      onSubmit={(event) => {
+        void submission.submit(event)
+      }}
+      onClose={onClose}
+    />
   )
 }

@@ -19,20 +19,6 @@ async function signOut(page: Page) {
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 }
 
-async function uploadEvidence(page: Page, type: string) {
-  await page.getByLabel('Tipo de evidencia').selectOption({ label: type })
-  await page.getByLabel('Archivo').setInputFiles({
-    name: 'evidencia.jpg',
-    mimeType: 'image/jpeg',
-    buffer: Buffer.from('foto'),
-  })
-  const done = page.waitForResponse((response) =>
-    response.url().includes('/rpc/evidence_add'),
-  )
-  await page.getByRole('button', { name: 'Subir evidencia' }).click()
-  await done
-}
-
 async function clickAndWait(page: Page, name: string, rpc: string) {
   const done = page.waitForResponse((response) =>
     response.url().includes(`/rpc/${rpc}`),
@@ -81,16 +67,27 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await signIn(page, 'tecnico@axia.test')
   await page.goto('/mi-trabajo')
   await page.getByText(description).click()
-  await uploadEvidence(page, 'Antes')
-  await clickAndWait(page, 'Iniciar', 'ticket_start')
+
+  // Iniciar pide la evidencia "antes".
+  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await page.getByLabel('Evidencia: Antes').setInputFiles({
+    name: 'antes.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from('antes'),
+  })
+  await clickAndWait(page, 'Confirmar', 'ticket_start')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 
-  // Sube la evidencia de cierre y marca atendido.
-  await uploadEvidence(page, 'Después')
+  // Atender pide descripción y evidencia "después".
   await page.getByRole('button', { name: 'Marcar atendido' }).click()
   await page
     .getByLabel('Descripción del trabajo')
     .fill('Se revisó la instalación y quedó funcionando')
+  await page.getByLabel('Evidencia: Después').setInputFiles({
+    name: 'despues.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from('despues'),
+  })
   await clickAndWait(page, 'Confirmar', 'ticket_attend')
   await expect(
     page.getByText('Atendido', { exact: true }).first(),

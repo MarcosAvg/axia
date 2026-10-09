@@ -18,6 +18,8 @@ interface TicketFormFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  photo: File | null
+  onPhotoChange: (file: File | null) => void
 }
 
 function TicketFormFields({
@@ -26,6 +28,8 @@ function TicketFormFields({
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  photo,
+  onPhotoChange,
 }: TicketFormFieldsProps) {
   const { sections, fields } = ticketMessages.create
   return (
@@ -48,6 +52,21 @@ function TicketFormFields({
           error={errors.description?.message}
           {...register('description')}
         />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="create-photo" className="text-sm font-medium">
+            {ticketMessages.create.photo}
+          </label>
+          <input
+            id="create-photo"
+            type="file"
+            accept="image/*"
+            className="min-h-11 text-sm"
+            onChange={(event) => onPhotoChange(event.target.files?.[0] ?? null)}
+          />
+          {photo ? (
+            <span className="text-xs text-muted-foreground">{photo.name}</span>
+          ) : null}
+        </div>
       </FormSection>
     </div>
   )
@@ -68,6 +87,8 @@ export function TicketForm() {
     createError,
     isSubmitting,
     allowLeave,
+    photo,
+    setPhoto,
   } = useCreateTicketForm()
   const { register, formState } = form
 
@@ -85,6 +106,8 @@ export function TicketForm() {
           catalogs={catalogs}
           canChooseRequester={canChooseRequester}
           ownRequesterName={ownRequester?.fullName ?? null}
+          photo={photo}
+          onPhotoChange={setPhoto}
         />
         <TicketFormAside
           submitError={submitError}

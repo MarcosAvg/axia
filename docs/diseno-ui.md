@@ -124,8 +124,14 @@ Patrones de operación (ADR 0042):
 
 - **Alta**: secciones (Ubicación, Clasificación, Solicitante, Descripción), dos columnas con el
   aviso de duplicados al lado y barra de guardado fija; aviso de cambios sin guardar.
-- **Detalle**: encabezado con folio/estado/prioridad; **activity feed** con iconos y rail fijo con
-  **acción primaria** destacada y el resto en "Más acciones".
+- **Detalle**: encabezado con folio/estado/prioridad; la **data es la columna principal**
+  (acciones, captura, evidencias, participantes, tiempos, calificación) y la **actividad va en el
+  sidebar** derecho.
+- **Acciones guiadas**: cada acción abre un diálogo con lo que exige; iniciar pide la evidencia
+  "antes", atender la descripción y "después", y reclamar motivo, descripción y evidencia
+  (ADR 0044). La acción primaria se destaca y el resto vive en "Más acciones".
+- **Evidencia acotada**: el subidor solo ofrece los tipos válidos para el estado; el alta permite
+  adjuntar la foto de solicitud.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
 
 Patrones de lista:

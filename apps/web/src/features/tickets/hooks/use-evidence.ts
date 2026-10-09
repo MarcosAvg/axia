@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/lib/offline/db'
 import type { Evidence } from '@/lib/offline/db'
 import { getEvidenceUrl } from '../api/evidence-api'
-import { queueEvidence } from '../api/offline-evidence'
+import { saveAndUploadEvidence } from '../api/offline-evidence'
 import type { EvidenceType } from '../domain/types'
 
 const evidenceKeys = {
@@ -20,7 +20,7 @@ export function useUploadEvidence() {
       cycle: number
       type: EvidenceType
       file: File
-    }) => queueEvidence(variables),
+    }) => saveAndUploadEvidence(variables),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({
         queryKey: ['tickets', 'evidence', variables.ticketId],

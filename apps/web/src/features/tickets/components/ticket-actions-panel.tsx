@@ -26,8 +26,9 @@ import { DuplicateForm } from './duplicate-form'
 import { RecaptureForm } from './recapture-form'
 import { TicketActionForm } from './ticket-action-form'
 
-const ONE_CLICK: ActionKey[] = ['start', 'resume', 'validate']
+const ONE_CLICK: ActionKey[] = ['resume', 'validate']
 const FORM_ACTIONS: ActionKey[] = [
+  'start',
   'assign_technician',
   'add_auxiliary',
   'pause',
@@ -182,6 +183,7 @@ function ActionForms({
     return (
       <TicketActionForm
         ticketId={ticket.id}
+        cycle={ticket.cycle}
         action={formAction}
         subjectTechnicianId={subject}
         onClose={onClose}
@@ -211,6 +213,7 @@ function ActionSheet({
           </SheetTitle>
         </SheetHeader>
         <ActionForms
+          key={formAction ?? 'none'}
           ticket={ticket}
           formAction={formAction}
           subject={subject}
@@ -243,12 +246,10 @@ export function TicketActionsPanel({
   const mutations = useTicketActions(ticket.id, subject)
 
   const oneClick: Partial<Record<ActionKey, () => void>> = {
-    start: () => mutations.start.mutate({}),
     resume: () => mutations.resume.mutate({}),
     validate: () => mutations.validate.mutate({}),
   }
   const pending: Partial<Record<ActionKey, boolean>> = {
-    start: mutations.start.isPending,
     resume: mutations.resume.isPending,
     validate: mutations.validate.isPending,
   }

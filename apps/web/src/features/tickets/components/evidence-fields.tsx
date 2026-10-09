@@ -1,38 +1,37 @@
 import { SelectField } from '@/components/shared/form-fields'
-import { EVIDENCE_TYPES } from '../domain/types'
 import type { EvidenceType } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
 
-const TYPE_OPTIONS = EVIDENCE_TYPES.map((type) => ({
-  value: type,
-  label: evidenceTypeLabels[type],
-}))
-
 interface EvidenceFieldsProps {
   type: EvidenceType
+  types: EvidenceType[]
   inputKey: number
   onTypeChange: (type: EvidenceType) => void
   onFileChange: (file: File | null) => void
 }
 
-/** Campos para elegir el tipo de evidencia y el archivo. */
+/** Campos para elegir el tipo de evidencia (solo los válidos) y el archivo. */
 export function EvidenceFields({
   type,
+  types,
   inputKey,
   onTypeChange,
   onFileChange,
 }: EvidenceFieldsProps) {
+  const options = types.map((item) => ({
+    value: item,
+    label: evidenceTypeLabels[item],
+  }))
+
   return (
     <>
       <SelectField
         id="evidence-type"
         label={ticketMessages.evidence.type}
-        options={TYPE_OPTIONS}
+        options={options}
         value={type}
         onChange={(event) => {
-          const next = EVIDENCE_TYPES.find(
-            (candidate) => candidate === event.target.value,
-          )
+          const next = types.find((item) => item === event.target.value)
           if (next) onTypeChange(next)
         }}
       />
