@@ -20,7 +20,6 @@ export function EvidenceUploader({
   const mutation = useUploadEvidence()
   const [chosen, setChosen] = useState<EvidenceType | ''>('')
   const [file, setFile] = useState<File | null>(null)
-  const [inputKey, setInputKey] = useState(0)
   const allowed = allowedEvidenceTypes(status)
   const type: EvidenceType =
     chosen && allowed.includes(chosen) ? chosen : (allowed[0] ?? 'other')
@@ -34,7 +33,6 @@ export function EvidenceUploader({
       {
         onSuccess: () => {
           setFile(null)
-          setInputKey((key) => key + 1)
         },
       },
     )
@@ -45,7 +43,7 @@ export function EvidenceUploader({
       <EvidenceFields
         type={type}
         types={allowed}
-        inputKey={inputKey}
+        file={file}
         onTypeChange={setChosen}
         onFileChange={setFile}
       />

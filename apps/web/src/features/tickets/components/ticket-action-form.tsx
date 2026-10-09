@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { ErrorAlert } from '@/components/shared/async-state'
+import { FileField } from '@/components/shared/file-field'
 import { usePriorities, useReasons, useTechnicians } from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
@@ -18,32 +19,6 @@ import {
   reasonUseFor,
 } from './ticket-action-handlers'
 import { useActionSubmission } from './use-action-submission'
-
-function EvidenceField({
-  type,
-  error,
-  onChange,
-}: {
-  type: EvidenceType
-  error: string | null
-  onChange: (file: File | null) => void
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor="action-evidence" className="text-sm font-medium">
-        {ticketMessages.actionFields.evidence}: {evidenceTypeLabels[type]}
-      </label>
-      <input
-        id="action-evidence"
-        type="file"
-        accept="image/*,application/pdf"
-        className="min-h-11 text-sm"
-        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-      />
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-    </div>
-  )
-}
 
 function ActionFormFooter({
   error,
@@ -77,6 +52,7 @@ function ActionFormFooter({
 function ActionFormView({
   evidenceType,
   evidenceError,
+  evidenceFile,
   onEvidenceChange,
   action,
   technicians,
@@ -91,6 +67,7 @@ function ActionFormView({
 }: {
   evidenceType: EvidenceType | undefined
   evidenceError: string | null
+  evidenceFile: File | null
   onEvidenceChange: (file: File | null) => void
   action: ActionKey
   technicians: TechnicianOption[]
@@ -106,11 +83,19 @@ function ActionFormView({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       {evidenceType ? (
-        <EvidenceField
-          type={evidenceType}
-          error={evidenceError}
-          onChange={onEvidenceChange}
-        />
+        <div className="flex flex-col gap-1">
+          <FileField
+            id="action-evidence"
+            label={`${ticketMessages.actionFields.evidence}: ${evidenceTypeLabels[evidenceType]}`}
+            file={evidenceFile}
+            onChange={onEvidenceChange}
+            accept="image/*,application/pdf"
+            camera
+          />
+          {evidenceError ? (
+            <p className="text-sm text-destructive">{evidenceError}</p>
+          ) : null}
+        </div>
       ) : null}
       <TicketActionFields
         action={action}
@@ -164,6 +149,7 @@ export function TicketActionForm({
     <ActionFormView
       evidenceType={submission.evidenceType}
       evidenceError={submission.evidenceError}
+      evidenceFile={submission.file}
       onEvidenceChange={submission.setFile}
       action={action}
       technicians={technicians.data ?? []}

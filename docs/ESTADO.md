@@ -802,3 +802,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   desplazamiento; los formularios del contenedor ya no llevan borde interno; la hoja inferior de
   móvil lleva padding. `pnpm check` en verde (147 Vitest, 12 Playwright, 413 pgTAP). Rama
   `feat/acciones-modal`.
+- **Campo de archivo con botones y cámara (2026-10-09)**: nuevo `FileField`
+  (`components/shared/file-field.tsx`) con botones visibles, cámara en móvil
+  (`capture="environment"`), miniatura y acciones "Quitar"/"Sustituir"; se aplica en la acción
+  guiada, el subidor libre y el alta. `pnpm check` en verde (147 Vitest, 12 Playwright, 413
+  pgTAP). Rama `feat/campo-archivo`.

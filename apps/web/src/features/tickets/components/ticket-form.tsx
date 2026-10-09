@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { FormActionsBar } from '@/components/shared/form-actions-bar'
+import { FileField } from '@/components/shared/file-field'
 import { FormSection } from '@/components/shared/form-section'
 import { TextAreaField } from '@/components/shared/form-fields'
 import { Button } from '@/components/ui/button'
@@ -52,21 +53,14 @@ function TicketFormFields({
           error={errors.description?.message}
           {...register('description')}
         />
-        <div className="flex flex-col gap-2">
-          <label htmlFor="create-photo" className="text-sm font-medium">
-            {ticketMessages.create.photo}
-          </label>
-          <input
-            id="create-photo"
-            type="file"
-            accept="image/*"
-            className="min-h-11 text-sm"
-            onChange={(event) => onPhotoChange(event.target.files?.[0] ?? null)}
-          />
-          {photo ? (
-            <span className="text-xs text-muted-foreground">{photo.name}</span>
-          ) : null}
-        </div>
+        <FileField
+          id="create-photo"
+          label={ticketMessages.create.photo}
+          file={photo}
+          onChange={onPhotoChange}
+          accept="image/*"
+          camera
+        />
       </FormSection>
     </div>
   )
