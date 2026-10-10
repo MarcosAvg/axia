@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0054.
+0038–0055.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -922,3 +922,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   supervisor"** (etiqueta renombrada desde "Con supervisor"); desde ahí puede **asignar técnico** o
   **reasignar supervisor**. Nueva prueba e2e (`e2e/take-offer.spec.ts`). **ADR 0054**. `pnpm check` en
   verde (159 Vitest, 13 Playwright, 431 pgTAP). Rama `feat/auto-tomar`.
+- **Visibilidad del solicitante configurable (Etapa 23)**: el conjunto por defecto de
+  `requester_visible_event_types` se amplía a **18** tipos (recaptura, reasignaciones y prioridad) y el
+  administrador lo **edita en Configuración** (casillas por tipo). Migración que ajusta el default y la
+  fila existente; pgTAP de la vista ampliado. **ADR 0055**. `pnpm check` en verde (159 Vitest, 13
+  Playwright, 433 pgTAP). Rama `feat/visibilidad-solicitante`.
