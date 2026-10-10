@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { render, screen } from '@testing-library/react'
 import { ThemeProvider } from '@/components/shared/theme-provider'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthContext, authMessages } from '@/features/auth'
 import type { AuthContextValue } from '@/features/auth'
 import { adminMessages } from '@/features/admin'
@@ -61,9 +62,11 @@ function renderAtPath(path: string, auth: AuthContextValue) {
   render(
     <QueryClientProvider client={new QueryClient()}>
       <ThemeProvider>
-        <AuthContext.Provider value={auth}>
-          <RouterProvider router={router} />
-        </AuthContext.Provider>
+        <TooltipProvider>
+          <AuthContext.Provider value={auth}>
+            <RouterProvider router={router} />
+          </AuthContext.Provider>
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>,
   )

@@ -26,6 +26,22 @@ export const dashboardMessages = {
   charts: {
     volume: 'Tiquets por mes',
   },
+  kpiHints: {
+    myWork: 'Tiquets en los que participas actualmente.',
+    offers: 'Tiquets registrados que esperan que los tomes.',
+    active: 'Tiquets abiertos de la instancia (sin cerrar ni descartar).',
+    inProgress: 'Tiquets que ya están en atención.',
+    paused: 'Tiquets detenidos con una pausa abierta.',
+    toValidate: 'Tiquets atendidos que esperan validación para cerrarse.',
+    unassigned: 'Tiquets registrados que aún no tienen técnico asignado.',
+    closed: 'Tiquets cerrados en el periodo consultado.',
+    activeTime:
+      'Tiempo medio de trabajo activo por tiquet (del inicio a la atención, sin pausas).',
+    firstFix: 'Porcentaje de tiquets cerrados sin reapertura posterior.',
+    sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
+    satisfaction:
+      'Promedio de las calificaciones del solicitante (escala 1 a 5).',
+  },
   activity: {
     title: 'Actividad reciente',
     empty: 'Sin actividad.',

@@ -30,6 +30,7 @@ function qualityCards(
     {
       label: k.reassignment,
       value: formatPercent(summary.reassignmentRate),
+      hint: hints.reassignment,
       delta: change((s) => s.reassignmentRate),
       lowerIsBetter: true,
     },
@@ -43,12 +44,14 @@ function qualityCards(
     {
       label: k.recapture,
       value: formatPercent(summary.recaptureRate),
+      hint: hints.recapture,
       delta: change((s) => s.recaptureRate),
       lowerIsBetter: true,
     },
     {
       label: k.reopen,
       value: formatPercent(summary.reopenRate),
+      hint: hints.reopen,
       delta: change((s) => s.reopenRate),
       lowerIsBetter: true,
     },
@@ -67,15 +70,17 @@ function duplicateCards(duplicates: {
   alerts: DuplicateAlert[]
 }): Kpi[] {
   const t = metricsMessages.duplicates
+  const hints = metricsMessages.duplicateHints
   const decisions = t.decisions as Record<string, string>
   const avg = averageOf(
     duplicates.tickets.map((item) => item.timeToMarkMinutes),
   )
   return [
-    { label: t.timeToMark, value: formatMinutes(avg) },
+    { label: t.timeToMark, value: formatMinutes(avg), hint: hints.timeToMark },
     ...duplicates.alerts.map((alert) => ({
       label: decisions[alert.decision] ?? alert.decision,
       value: String(alert.candidates),
+      hint: hints.alerts,
     })),
   ]
 }
@@ -109,15 +114,24 @@ export function QualityTab({
         period={comparison?.label}
       />
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <ChartCard title={metricsMessages.charts.pauses}>
+        <ChartCard
+          title={metricsMessages.charts.pauses}
+          hint={metricsMessages.chartHints.pauses}
+        >
           <PausesChart data={pauses} />
         </ChartCard>
-        <ChartCard title={metricsMessages.rejectCancel.title}>
+        <ChartCard
+          title={metricsMessages.rejectCancel.title}
+          hint={metricsMessages.chartHints.rejectCancel}
+        >
           <RejectCancelChart rows={rejectCancel} />
         </ChartCard>
       </div>
       <div className="flex flex-col gap-3">
-        <ChartCard title={metricsMessages.duplicates.byDimension}>
+        <ChartCard
+          title={metricsMessages.duplicates.byDimension}
+          hint={metricsMessages.chartHints.duplicatesByDimension}
+        >
           <DuplicateRateChart rows={duplicates.rows} />
         </ChartCard>
         <DuplicateSections rows={duplicates.rows} />

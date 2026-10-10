@@ -73,6 +73,14 @@ Tailwind expone los tokens como utilidades (`@theme inline` en `index.css`):
 Para estados y prioridades se usan las insignias del feature de tiquets, que aplican estos
 tokens; **no se inventan colores sueltos en los componentes**.
 
+### Ayuda en los títulos
+
+Los títulos de indicadores, gráficas, tablas, columnas y secciones pueden llevar una explicación con
+el componente `HintLabel` (`components/shared/hint.tsx`): el texto más un **ícono de información
+(ⓘ)** que abre un tooltip al pasar el cursor o enfocar. Los textos viven en el i18n de cada feature
+(`kpiHints`, `chartHints`, `tableHints`, `duplicateHints`, `detailSectionHints`, `settingsHints`). Los
+encabezados de tabla lo exponen con `DataTableColumn.hint`.
+
 ### Cómo añadir un tema
 
 1. Añade el nombre al arreglo `THEMES` de `apps/web/src/lib/theme.ts`.

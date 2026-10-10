@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { cn } from 'cn'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
 import type { SortState } from '@/lib/sort'
+import { HintIcon } from '@/components/shared/hint'
 import {
   Table,
   TableBody,
@@ -27,6 +28,8 @@ export interface DataTableColumn<T> {
   align?: ColumnAlign
   /** Habilita el orden por esta columna (requiere `onSortChange`). */
   sortable?: boolean
+  /** Explicación del encabezado (ícono de información). */
+  hint?: string
 }
 
 interface DataTableProps<T> {
@@ -91,23 +94,28 @@ function HeaderCell<T>({
   const active = sort?.key === column.id
   return (
     <TableHead className={columnClass(column)}>
-      {column.sortable && onSortChange ? (
-        <button
-          type="button"
-          onClick={() => onSortChange(column.id)}
-          title={`Ordenar por ${typeof column.header === 'string' ? column.header : column.id}`}
-          aria-pressed={active}
-          className={cn(
-            'group inline-flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
-            column.align === 'right' && 'flex-row-reverse',
-          )}
-        >
-          {column.header}
-          <SortIcon active={active} dir={sort?.dir} />
-        </button>
-      ) : (
-        column.header
-      )}
+      <span className="inline-flex items-center gap-1">
+        {column.sortable && onSortChange ? (
+          <button
+            type="button"
+            onClick={() => onSortChange(column.id)}
+            title={`Ordenar por ${typeof column.header === 'string' ? column.header : column.id}`}
+            aria-pressed={active}
+            className={cn(
+              'group inline-flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
+              column.align === 'right' && 'flex-row-reverse',
+            )}
+          >
+            {column.header}
+            <SortIcon active={active} dir={sort?.dir} />
+          </button>
+        ) : (
+          column.header
+        )}
+        {column.hint ? (
+          <HintIcon hint={column.hint} label={column.header} />
+        ) : null}
+      </span>
     </TableHead>
   )
 }

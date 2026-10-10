@@ -7,6 +7,7 @@ import { FormSection } from '@/components/shared/form-section'
 import { Button } from '@/components/ui/button'
 import { EVENT_TYPES } from '@/features/tickets'
 import type { InstanceSettings } from '../domain/settings'
+import { settingsHints } from '../hints'
 import { adminMessages } from '../i18n'
 import {
   GeneralFields,
@@ -45,16 +46,16 @@ function SettingsFormView({
   const { sections } = adminMessages.settings
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
-      <FormSection title={sections.general}>
+      <FormSection title={sections.general} hint={settingsHints.general}>
         <GeneralFields register={register} errors={errors} />
       </FormSection>
-      <FormSection title={sections.validation}>
+      <FormSection title={sections.validation} hint={settingsHints.validation}>
         <ValidationFields register={register} errors={errors} />
       </FormSection>
-      <FormSection title={sections.time}>
+      <FormSection title={sections.time} hint={settingsHints.time}>
         <TimeFields register={register} errors={errors} />
       </FormSection>
-      <FormSection title={sections.visibility}>
+      <FormSection title={sections.visibility} hint={settingsHints.visibility}>
         <VisibilityFields register={register} errors={errors} />
       </FormSection>
       <FormActionsBar>

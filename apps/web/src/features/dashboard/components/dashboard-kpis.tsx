@@ -1,4 +1,5 @@
 import { cn } from 'cn'
+import { HintLabel } from '@/components/shared/hint'
 import { ToneDot } from '@/components/shared/tone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toneClasses, toneForIndex } from '@/lib/tones'
@@ -29,6 +30,7 @@ interface DashboardTotals {
 interface Kpi {
   label: string
   value: string
+  hint?: string
 }
 
 interface KpiInput {
@@ -38,6 +40,94 @@ interface KpiInput {
   summary: MetricsSummary
   sla: SlaSummary
   satisfaction: SatisfactionSummary
+}
+
+const k = t.kpi
+const hints = t.kpiHints
+
+function adminKpis(
+  totals: DashboardTotals,
+  sla: SlaSummary,
+  satisfaction: SatisfactionSummary,
+): Kpi[] {
+  return [
+    { label: k.active, value: String(totals.active), hint: hints.active },
+    {
+      label: k.unassigned,
+      value: String(totals.unassigned),
+      hint: hints.unassigned,
+    },
+    { label: k.paused, value: String(totals.paused), hint: hints.paused },
+    { label: k.closed, value: String(totals.closed), hint: hints.closed },
+    { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },
+    {
+      label: k.satisfaction,
+      value: formatScore(satisfaction.average),
+      hint: hints.satisfaction,
+    },
+  ]
+}
+
+function technicianKpis(work: WorkSummary, summary: MetricsSummary): Kpi[] {
+  return [
+    { label: k.myWork, value: String(work.total), hint: hints.myWork },
+    {
+      label: k.inProgress,
+      value: String(work.inProgress),
+      hint: hints.inProgress,
+    },
+    { label: k.paused, value: String(work.paused), hint: hints.paused },
+    {
+      label: k.toValidate,
+      value: String(work.attended),
+      hint: hints.toValidate,
+    },
+    {
+      label: k.activeTime,
+      value: formatMinutes(summary.avgActive),
+      hint: hints.activeTime,
+    },
+    {
+      label: k.firstFix,
+      value: formatPercent(summary.firstTimeFixRate),
+      hint: hints.firstFix,
+    },
+  ]
+}
+
+function supervisorKpis(
+  offers: number,
+  totals: DashboardTotals,
+  sla: SlaSummary,
+): Kpi[] {
+  return [
+    { label: k.offers, value: String(offers), hint: hints.offers },
+    {
+      label: k.unassigned,
+      value: String(totals.unassigned),
+      hint: hints.unassigned,
+    },
+    { label: k.paused, value: String(totals.paused), hint: hints.paused },
+    {
+      label: k.toValidate,
+      value: String(totals.attended),
+      hint: hints.toValidate,
+    },
+    { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },
+  ]
+}
+
+function requesterKpis(totals: DashboardTotals): Kpi[] {
+  return [
+    { label: k.active, value: String(totals.active), hint: hints.active },
+    { label: k.paused, value: String(totals.paused), hint: hints.paused },
+    {
+      label: k.toValidate,
+      value: String(totals.attended),
+      hint: hints.toValidate,
+    },
+    { label: k.closed, value: String(totals.closed), hint: hints.closed },
+  ]
 }
 
 function buildKpis(identity: Identity | null, input: KpiInput): Kpi[] {
@@ -50,47 +140,10 @@ function buildKpis(identity: Identity | null, input: KpiInput): Kpi[] {
   const isTechnician =
     can(identity, 'ticket.start') || can(identity, 'ticket.attend')
 
-  if (isAdmin) {
-    return [
-      { label: t.kpi.active, value: String(totals.active) },
-      { label: t.kpi.unassigned, value: String(totals.unassigned) },
-      { label: t.kpi.paused, value: String(totals.paused) },
-      { label: t.kpi.closed, value: String(totals.closed) },
-      { label: t.kpi.sla, value: formatRate(sla.complianceRate) },
-      {
-        label: t.kpi.satisfaction,
-        value: formatScore(satisfaction.average),
-      },
-    ]
-  }
-  if (isTechnician) {
-    return [
-      { label: t.kpi.myWork, value: String(work.total) },
-      { label: t.kpi.inProgress, value: String(work.inProgress) },
-      { label: t.kpi.paused, value: String(work.paused) },
-      { label: t.kpi.toValidate, value: String(work.attended) },
-      { label: t.kpi.activeTime, value: formatMinutes(summary.avgActive) },
-      {
-        label: t.kpi.firstFix,
-        value: formatPercent(summary.firstTimeFixRate),
-      },
-    ]
-  }
-  if (isSupervisor) {
-    return [
-      { label: t.kpi.offers, value: String(offers) },
-      { label: t.kpi.unassigned, value: String(totals.unassigned) },
-      { label: t.kpi.paused, value: String(totals.paused) },
-      { label: t.kpi.toValidate, value: String(totals.attended) },
-      { label: t.kpi.sla, value: formatRate(sla.complianceRate) },
-    ]
-  }
-  return [
-    { label: t.kpi.active, value: String(totals.active) },
-    { label: t.kpi.paused, value: String(totals.paused) },
-    { label: t.kpi.toValidate, value: String(totals.attended) },
-    { label: t.kpi.closed, value: String(totals.closed) },
-  ]
+  if (isAdmin) return adminKpis(totals, sla, satisfaction)
+  if (isTechnician) return technicianKpis(work, summary)
+  if (isSupervisor) return supervisorKpis(offers, totals, sla)
+  return requesterKpis(totals)
 }
 
 /** Tarjetas de números del usuario, según su rol. */
@@ -109,7 +162,7 @@ export function DashboardKpis({
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <ToneDot tone={tone} />
-                {kpi.label}
+                <HintLabel label={kpi.label} hint={kpi.hint} />
               </CardTitle>
             </CardHeader>
             <CardContent>

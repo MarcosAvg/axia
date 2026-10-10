@@ -29,6 +29,7 @@ export function AgingList({
     {
       id: 'age',
       header: t.age,
+      hint: metricsMessages.tableHints.age,
       cell: (row) => formatMinutes(row.ageMinutes),
     },
   ]

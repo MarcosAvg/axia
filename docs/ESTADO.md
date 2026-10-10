@@ -8,16 +8,16 @@
 
 ## En curso
 
-**Paleta de acentos de color (cerrado).** Se añaden **6 tonos fijos** (`tone-1..6`, iguales en todos
-los temas) con utilidades Tailwind y un helper puro (`lib/tones.ts`, con `toneForIndex`/`toneForId`/
-`toneForPriority`). Se aplican de forma **sutil** en tarjetas KPI (Panel y Métricas), encabezados de
-sección, insignia de **prioridad por nivel**, puntos de **categoría/equipo/edificio** y grupos del
-sidebar. **ADR 0063**. `pnpm check` en verde.
+**Ayuda explicativa en los títulos (cerrado).** Indicadores, gráficas, tablas, encabezados de columna y
+secciones llevan una explicación con **ícono ⓘ + tooltip** (`HintLabel`; `DataTableColumn.hint` para
+columnas). Los textos detallados viven en i18n por feature. Panel (KPIs), Métricas (KPIs, gráficas,
+tablas y columnas), detalle del tiquet (secciones) y Configuración (secciones). Prueba de `HintLabel`.
+`pnpm check` en verde.
 
-_(Histórico)_ Timeline con más espacio en escritorio, subestados de pausa en cascada (ADR 0062), pausa
-por motivo/subestado (0061), subestados de pausa (0060), importación de catálogos (0059) y rediseños de
-Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión
-visual **opt-in** (`pnpm test:visual`).
+_(Histórico)_ Paleta de acentos (ADR 0063), timeline más ancho, subestados de pausa en cascada (0062),
+pausa por motivo/subestado (0061), subestados de pausa (0060), importación de catálogos (0059) y
+rediseños de Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa.
+Regresión visual **opt-in** (`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -983,3 +983,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   encabezados de sección, **prioridad por nivel**, puntos de categoría/equipo/edificio y grupos del
   sidebar; se agrega `priorityPosition` a la lista/detalle. **ADR 0063**. `pnpm check` en verde. Rama
   `feat/acentos-color`.
+- **Ayuda en los títulos (Etapa 33)**: componente `HintLabel` (**ícono ⓘ + tooltip**) y
+  `DataTableColumn.hint`. Se añaden explicaciones detalladas a **todos los KPI** (Panel y Métricas),
+  **gráficas y tablas** (vía `ChartCard.hint`), **encabezados de columna** y **secciones** (detalle del
+  tiquet y Configuración). Textos en i18n por feature (`kpiHints`, `chartHints`, `tableHints`,
+  `duplicateHints`, `detailSectionHints`, `settingsHints`). Prueba de `HintLabel`. `pnpm check` en
+  verde. Rama `feat/ayuda-titulos`.
