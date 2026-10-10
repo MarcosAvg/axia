@@ -4478,6 +4478,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      ticket_pause_steps: {
+        Args: { p_ticket_id: string }
+        Returns: {
+          actor_name: string
+          entered_at: string
+          exited_at: string
+          note: string
+          pause_id: string
+          reason_id: string
+          reason_name: string
+        }[]
+      }
       ticket_rate: {
         Args: {
           p_client_request_id?: string
