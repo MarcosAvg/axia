@@ -22,7 +22,7 @@ const listRow = {
   possible_duplicate: false,
   building: { name: 'Edificio A' },
   category: { name: 'Eléctrico' },
-  priority: { name: 'Media' },
+  priority: { name: 'Media', position: 3 },
   team: { name: 'Mantenimiento' },
 }
 
@@ -32,6 +32,7 @@ describe('parseTicketListItem', () => {
     expect(item.buildingName).toBe('Edificio A')
     expect(item.status).toBe('in_progress')
     expect(item.possibleDuplicate).toBe(false)
+    expect(item.priorityPosition).toBe(3)
   })
 
   it('tolera referencias nulas', () => {

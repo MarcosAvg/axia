@@ -22,6 +22,9 @@ const evidenceTypeSchema = z.enum(EVIDENCE_TYPES)
 const eventTypeSchema = z.enum(EVENT_TYPES)
 
 const namedRef = z.object({ name: z.string() }).nullable()
+const priorityRef = z
+  .object({ name: z.string(), position: z.number() })
+  .nullable()
 
 const ticketBaseRowSchema = z.object({
   id: z.string(),
@@ -34,7 +37,7 @@ const ticketBaseRowSchema = z.object({
   possible_duplicate: z.boolean(),
   building: namedRef,
   category: namedRef,
-  priority: namedRef,
+  priority: priorityRef,
   team: namedRef,
 })
 
@@ -49,10 +52,11 @@ export function parseTicketListItem(raw: unknown): TicketListItem {
     description: row.description,
     requesterName: row.requester_name,
     possibleDuplicate: row.possible_duplicate,
-    buildingName: row.building?.name ?? null,
-    categoryName: row.category?.name ?? null,
-    priorityName: row.priority?.name ?? null,
-    teamName: row.team?.name ?? null,
+    buildingName: nameOf(row.building),
+    categoryName: nameOf(row.category),
+    priorityName: nameOf(row.priority),
+    priorityPosition: row.priority ? row.priority.position : null,
+    teamName: nameOf(row.team),
   }
 }
 

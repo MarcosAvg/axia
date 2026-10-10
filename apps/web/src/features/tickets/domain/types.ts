@@ -110,6 +110,7 @@ export interface TicketListItem {
   buildingName: string | null
   categoryName: string | null
   priorityName: string | null
+  priorityPosition: number | null
   teamName: string | null
 }
 

@@ -1,9 +1,12 @@
+import { cn } from 'cn'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { toneClasses } from '@/lib/tones'
+import type { Tone } from '@/lib/tones'
 import { DeltaBadge } from './delta-badge'
 
 /** Tarjeta de un indicador, con explicación y delta opcionales. */
@@ -14,6 +17,7 @@ export function MetricCard({
   delta,
   lowerIsBetter,
   period,
+  tone,
 }: {
   label: string
   value: string
@@ -21,6 +25,7 @@ export function MetricCard({
   delta?: number | null
   lowerIsBetter?: boolean
   period?: string
+  tone?: Tone
 }) {
   return (
     <Card>
@@ -44,7 +49,14 @@ export function MetricCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
-        <p className="text-2xl font-semibold">{value}</p>
+        <p
+          className={cn(
+            'text-2xl font-semibold',
+            tone && toneClasses[tone].text,
+          )}
+        >
+          {value}
+        </p>
         {delta !== undefined ? (
           <DeltaBadge
             change={delta}

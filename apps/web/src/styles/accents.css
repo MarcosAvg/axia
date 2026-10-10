@@ -1,0 +1,26 @@
+/*
+ * Paleta de acentos de Axia.
+ *
+ * Seis tonos fijos (azul, teal, violeta, ámbar, rosa y verde) que NO dependen
+ * del tema: se usan como acentos sutiles (tinte /10 + texto/ícono de color) en
+ * indicadores, encabezados, prioridad y chips. Los define `lib/tones.ts` y se
+ * exponen a Tailwind como `tone-1..6` desde `index.css`.
+ */
+
+:root {
+  --tone-1: oklch(0.52 0.16 256);
+  --tone-2: oklch(0.55 0.12 195);
+  --tone-3: oklch(0.52 0.18 300);
+  --tone-4: oklch(0.56 0.14 70);
+  --tone-5: oklch(0.55 0.19 12);
+  --tone-6: oklch(0.53 0.13 155);
+}
+
+.dark {
+  --tone-1: oklch(0.75 0.14 256);
+  --tone-2: oklch(0.77 0.12 195);
+  --tone-3: oklch(0.76 0.15 300);
+  --tone-4: oklch(0.82 0.13 75);
+  --tone-5: oklch(0.76 0.16 12);
+  --tone-6: oklch(0.77 0.13 155);
+}

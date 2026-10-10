@@ -8,14 +8,16 @@
 
 ## En curso
 
-**Detalle del tiquet: más espacio para el timeline (cerrado).** En escritorio la rejilla pasa a
-~**60/40** (contenido principal / timeline, con mínimo de ~20rem para el timeline) y el ancho máximo
-de la página autenticada sube a **1800 px**. Sin cambios en móvil. `pnpm check` en verde.
+**Paleta de acentos de color (cerrado).** Se añaden **6 tonos fijos** (`tone-1..6`, iguales en todos
+los temas) con utilidades Tailwind y un helper puro (`lib/tones.ts`, con `toneForIndex`/`toneForId`/
+`toneForPriority`). Se aplican de forma **sutil** en tarjetas KPI (Panel y Métricas), encabezados de
+sección, insignia de **prioridad por nivel**, puntos de **categoría/equipo/edificio** y grupos del
+sidebar. **ADR 0063**. `pnpm check` en verde.
 
-_(Histórico)_ Subestados de pausa en cascada (ADR 0062), pausa por motivo/subestado (0061), subestados
-de pausa (0060), importación de catálogos (0059) y rediseños de Administración (0057) y de
-Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión visual **opt-in**
-(`pnpm test:visual`).
+_(Histórico)_ Timeline con más espacio en escritorio, subestados de pausa en cascada (ADR 0062), pausa
+por motivo/subestado (0061), subestados de pausa (0060), importación de catálogos (0059) y rediseños de
+Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión
+visual **opt-in** (`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -976,3 +978,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (contenido / timeline, mínimo ~20rem para el timeline) y el ancho máximo de la página autenticada
   sube a **1800 px**. Sin cambios en móvil; sin ADR (ajuste de layout). `pnpm check` en verde. Rama
   `feat/detalle-timeline-espacio`.
+- **Paleta de acentos (Etapa 32)**: 6 tonos fijos (`tone-1..6`) iguales en todos los temas, con
+  utilidades Tailwind y helper puro (`lib/tones.ts`). Acento sutil en KPI (Panel y Métricas),
+  encabezados de sección, **prioridad por nivel**, puntos de categoría/equipo/edificio y grupos del
+  sidebar; se agrega `priorityPosition` a la lista/detalle. **ADR 0063**. `pnpm check` en verde. Rama
+  `feat/acentos-color`.
