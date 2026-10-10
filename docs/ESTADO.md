@@ -8,16 +8,17 @@
 
 ## En curso
 
-**Rediseño de Administración (desktop-first): cerrado.** Marco común (`AdminPage` + barra de lista),
-catálogos con **rail lateral** y **tablas específicas** (columnas reales alineadas, búsqueda y orden
-en cliente, estado con switch y acciones en menú `⋯`), **diálogos unificados** (`EntityDialog`/
-`EntityForm` con secciones y pie fijo), y `DataTable` compartida extendida. Alcance: toda la sección
-(catálogos, roles, usuarios, ámbitos, calendarios, configuración, integraciones). **Sin backend.**
-Detalle en `docs/diseno-ui.md` y ADR 0057. `pnpm check` en verde.
+**Rediseño de Usuarios, Ámbitos y Calendarios: cerrado.** Usuarios en pestañas **Cuentas / Vínculos**
+(tabla de cuentas con vínculo y tablas por catálogo con diálogo para asignar la cuenta); Ámbitos con
+**tablas + diálogos** (supervisores con edificios en diálogo con búsqueda; designaciones por técnico
+con chips quitables); Calendarios con **rail + detalle por secciones**, crear/editar en diálogo,
+franjas (por día) y festivos como **tablas**, con guardado explícito de la cabecera y cambios
+inmediatos en franjas/festivos. **Sin backend.** Detalle en `docs/diseno-ui.md` y ADR 0058.
+`pnpm check` en verde.
 
-_(Histórico)_ Rediseño de vistas 8.0–8.5 **cerrado**; fase 8 completa (Panel, Operación,
-Administración, Métricas, Acceso/perfil). La regresión visual con Playwright es **opt-in**
-(`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR 0038–0057.
+_(Histórico)_ Rediseño de Administración (ADR 0057) **cerrado**: marco común, catálogos con rail y
+tablas específicas, diálogos unificados. Fase 8 completa. Regresión visual **opt-in**
+(`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -944,3 +945,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   (`align`/`sortable`/`empty`); roles, usuarios, ámbitos e integraciones sobre las mismas piezas. El
   inicio `/admin` se agrupa por áreas. **ADR 0057**. `pnpm check` en verde (174 Vitest, 13 Playwright,
   440 pgTAP). Rama `feat/admin-rediseno`.
+- **Usuarios, Ámbitos y Calendarios (Etapa 26)**: Usuarios en pestañas **Cuentas / Vínculos** (tabla
+  con vínculo y tablas por catálogo con diálogo de búsqueda para asignar la cuenta); Ámbitos con
+  **tablas + diálogos** (supervisores con edificios en diálogo con búsqueda; designaciones por técnico
+  con chips quitables); Calendarios con **rail + detalle por secciones**, alta/edición en diálogo,
+  franjas y festivos como **tablas**, con guardado explícito de cabecera y cambios inmediatos.
+  Utilidades puras probadas (`scope-list`, `user-list`). **ADR 0058**. `pnpm check` en verde (180
+  Vitest, 13 Playwright, 440 pgTAP). Rama `feat/admin-usuarios-ambitos-calendarios`.
