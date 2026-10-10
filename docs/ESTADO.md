@@ -8,15 +8,15 @@
 
 ## En curso
 
-**Importación de catálogos por plantilla (cerrado).** Se genera una **plantilla XLSX** en la app (una
-hoja por catálogo en orden de dependencias, con listas y validación), se rellena y se sube: **dry run**
-por catálogo (nuevas, a actualizar, inválidas, duplicadas) y **confirmación** que upserta por **clave
-natural** con una **RPC atómica por hoja** y lista blanca, dejando **historial**. Referencias por
-nombre resueltas en cliente; solicitantes/técnicos por nombre + padre; sin borrados. **ADR 0059**.
-`pnpm check` en verde.
+**Subestados de pausa en la interfaz (cerrado).** El núcleo ya los modelaba; ahora la app los usa:
+la acción **"Avanzar subestado"** (solo a un **hijo directo**, validado en la RPC), selector de motivo
+**jerárquico** al pausar, **panel de pausa** con subestado actual e historial de pasos, y el árbol de
+**Motivos** en Administración. `ticket_pause` exige motivo del uso `pause`; `ticket_advance_pause`
+exige hijo directo activo; nueva función `ticket_pause_steps`. **ADR 0060**. `pnpm check` en verde.
 
-_(Histórico)_ Rediseño de Usuarios, Ámbitos y Calendarios (ADR 0058) cerrado; rediseño de
-Administración (ADR 0057) cerrado; fase 8 completa. Regresión visual **opt-in** (`pnpm test:visual`).
+_(Histórico)_ Importación de catálogos (ADR 0059), rediseños de Administración (0057) y de
+Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión visual **opt-in**
+(`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -956,3 +956,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   referencias por nombre resueltas en cliente (solicitantes/técnicos por nombre + padre); **historial**
   de cargas. Funciones puras probadas (`catalog-import`). **ADR 0059**. `pnpm check` en verde.
   Rama `feat/importar-catalogos`.
+- **Subestados de pausa (Etapa 28)**: la app usa la jerarquía del núcleo. Acción **"Avanzar
+  subestado"** (solo a un **hijo directo**, validado en `ticket_advance_pause`), `ticket_pause` exige
+  motivo del uso `pause`, nueva función `ticket_pause_steps`; selector de motivo **jerárquico**,
+  **panel de pausa** con subestado actual y pasos, y árbol de **Motivos** en Administración. Funciones
+  puras probadas (`reasons`, `pause`); e2e de pausa → avanzar → reanudar. **ADR 0060**. `pnpm check`
+  en verde. Rama `feat/pausa-subestados`.

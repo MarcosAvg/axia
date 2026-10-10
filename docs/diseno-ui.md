@@ -148,6 +148,9 @@ Patrones de operación (ADR 0042):
 - **Acciones guiadas con evidencia**: cada acción pide lo que exige; iniciar la evidencia "antes",
   atender el **tipo de servicio**, la descripción y "después", reclamar motivo, descripción y
   evidencia, y **`during`** es el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045, 0056).
+- **Pausa y subestados**: al pausar se elige un motivo del **árbol** (opciones indentadas); con el
+  tiquet pausado se puede **avanzar el subestado** (solo a un **hijo directo**) y el detalle muestra
+  el **subestado actual** y el **historial de pasos** con fechas (ADR 0011, 0060).
 - **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
   muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
   la foto de solicitud.
