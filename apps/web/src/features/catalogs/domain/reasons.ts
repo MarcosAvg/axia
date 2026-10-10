@@ -43,25 +43,27 @@ export function rootReasons(reasons: ReasonOption[]): ReasonOption[] {
   return reasons.filter((reason) => reason.parentId === null)
 }
 
-/** Todos los descendientes de un nodo (excluye al propio nodo). */
-export function descendantReasons(
+/**
+ * Camino de selección desde los hijos del motivo hasta `value` (excluye el motivo).
+ * Devuelve `[]` si `value` no es descendiente de `rootId`.
+ */
+export function pathToReason(
   reasons: ReasonOption[],
-  ancestorId: string | null | undefined,
-): ReasonOption[] {
-  if (!ancestorId) return []
-  const childrenOf = new Map<string, ReasonOption[]>()
-  for (const reason of reasons) {
-    if (!reason.parentId) continue
-    const list = childrenOf.get(reason.parentId) ?? []
-    list.push(reason)
-    childrenOf.set(reason.parentId, list)
+  rootId: string | null | undefined,
+  value: string | null | undefined,
+): string[] {
+  if (!rootId || !value) return []
+  const byId = new Map(reasons.map((reason) => [reason.id, reason]))
+  const path: string[] = []
+  let cursor: string | null | undefined = value
+  let guard = 0
+  while (cursor && guard < 50) {
+    const reason = byId.get(cursor)
+    if (!reason) return []
+    path.unshift(reason.id)
+    if (reason.parentId === rootId) return path
+    cursor = reason.parentId
+    guard += 1
   }
-  const result: ReasonOption[] = []
-  const stack = [...(childrenOf.get(ancestorId) ?? [])]
-  while (stack.length > 0) {
-    const current = stack.pop() as ReasonOption
-    result.push(current)
-    stack.push(...(childrenOf.get(current.id) ?? []))
-  }
-  return result
+  return []
 }

@@ -6,6 +6,7 @@ export const pauseMessages = {
   current: 'Subestado actual',
   history: 'Pasos del subestado',
   substate: 'Nuevo subestado',
+  child: 'Subestado',
   open: 'En curso',
   entered: 'Desde',
   exited: 'Hasta',

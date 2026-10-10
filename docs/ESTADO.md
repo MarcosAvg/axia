@@ -8,16 +8,15 @@
 
 ## En curso
 
-**Pausa por motivo/subestado y subestado obligatorio al reanudar (cerrado).** Al pausar se elige el
-**motivo** (raíz); mientras está pausada se **gestiona** el **subestado** (cualquier descendiente del
-motivo); **al reanudar es obligatorio** un **subestado** (hijo directo del motivo). Nueva columna
-`ticket_pauses.root_reason_id`, función `ticket_pause_state`, nueva firma de `ticket_resume` y tramos
-de tiempo **por subestado**. Panel con motivo, subestado actual e historial. **ADR 0061**.
-`pnpm check` en verde.
+**Subestados de pausa en cascada (cerrado).** La pausa se clasifica **bajando por la rama**: un select
+por nivel (cada uno con los hijos del anterior), tanto al **gestionar** como al **reanudar**; el
+subestado final puede ser de **cualquier profundidad**. `ticket_resume` acepta cualquier **descendiente
+del motivo**. Componente `ReasonCascade` y helper `pathToReason`; tercer nivel en la semilla. **ADR
+0062**. `pnpm check` en verde.
 
-_(Histórico)_ Subestados de pausa (ADR 0060), importación de catálogos (0059) y rediseños de
-Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión
-visual **opt-in** (`pnpm test:visual`).
+_(Histórico)_ Pausa por motivo/subestado y reanudar obligatorio (ADR 0061), subestados de pausa (0060),
+importación de catálogos (0059) y rediseños de Administración (0057) y de Usuarios/Ámbitos/Calendarios
+(0058) cerrados; fase 8 completa. Regresión visual **opt-in** (`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -969,3 +968,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `ticket_resume`, helper `reason_is_descendant_or_self` y **tramos por subestado**. Panel con motivo,
   subestado actual e historial. **ADR 0061**. `pnpm check` en verde. Rama
   `feat/pausa-motivo-subestados`.
+- **Subestados de pausa en cascada (Etapa 30)**: la selección baja por la rama con **un select por
+  nivel** (cada uno con los hijos del anterior), al gestionar y al reanudar; el subestado final puede
+  ser de **cualquier profundidad** y `ticket_resume` acepta cualquier **descendiente del motivo**.
+  Componente `ReasonCascade` y helper `pathToReason`; tercer nivel en la semilla. **ADR 0062**.
+  `pnpm check` en verde. Rama `feat/pausa-subestados-cascada`.

@@ -149,9 +149,10 @@ Patrones de operación (ADR 0042):
   atender el **tipo de servicio**, la descripción y "después", reclamar motivo, descripción y
   evidencia, y **`during`** es el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045, 0056).
 - **Pausa y subestados**: al pausar se elige el **motivo** (nodo **raíz** del árbol); mientras está
-  pausada se **gestiona** eligiendo cualquier **subestado** del motivo; **reanudar exige un subestado**
-  (**hijo directo** del motivo); el detalle muestra **motivo**, **subestado actual** e **historial de
-  pasos** con fechas; el tiempo de pausa se mide **por subestado** (ADR 0011, 0060, 0061).
+  pausada se **gestiona** y al **reanudar** se elige el subestado en **cascada** (un select por nivel,
+  cada uno con los hijos del anterior; cualquier profundidad); el detalle muestra **motivo**,
+  **subestado actual** e **historial de pasos** con fechas; el tiempo de pausa se mide **por subestado**
+  (ADR 0011, 0060, 0061, 0062).
 - **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
   muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
   la foto de solicitud.

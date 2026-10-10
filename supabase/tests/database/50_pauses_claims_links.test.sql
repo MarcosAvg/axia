@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(31);
+select plan(32);
 
 -- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
 truncate table public.tickets cascade;
@@ -128,8 +128,8 @@ select throws_ok(
 select throws_ok(
   $$ select public.ticket_resume(
        (select id from public.tickets order by ticket_number limit 1),
-       (select id from public.reasons where name = 'Sub-submotivo')) $$,
-  'P0001', null, 'no reanuda con un subestado que no es hijo directo del motivo');
+       (select id from public.reasons where name = 'Otro hijo')) $$,
+  'P0001', null, 'no reanuda con un subestado de otro motivo');
 select throws_ok(
   $$ select public.ticket_resume(
        (select id from public.tickets order by ticket_number limit 1)) $$,
@@ -162,10 +162,14 @@ select is(
 
 select public.ticket_resume(
   (select id from public.tickets order by ticket_number limit 1),
-  (select id from public.reasons where name = 'Submotivo prueba 2'));
+  (select id from public.reasons where name = 'Sub-submotivo'));
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'in_progress'::public.ticket_status, 'al reanudar vuelve a en proceso');
+select is(
+  (select r.name from public.ticket_pauses p join public.reasons r on r.id = p.reason_id
+   where p.closed_at is not null order by p.closed_at desc limit 1),
+  'Sub-submotivo', 'guardar el subestado final de la pausa');
 select throws_ok(
   $$ select public.ticket_resume(
        (select id from public.tickets order by ticket_number limit 1),

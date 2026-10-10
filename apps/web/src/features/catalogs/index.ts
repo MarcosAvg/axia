@@ -27,7 +27,7 @@ export type {
 } from './domain/types'
 export {
   childReasons,
-  descendantReasons,
   indentReasons,
+  pathToReason,
   rootReasons,
 } from './domain/reasons'

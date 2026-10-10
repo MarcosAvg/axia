@@ -428,6 +428,15 @@ cross join (
 ) p
 on conflict do nothing;
 
+-- Un tercer nivel (subestados de un subestado) para la selección en cascada.
+insert into public.reasons (use, name, parent_id)
+select 'pause', v.name, p.id
+from (values ('Con proveedor'), ('Sin proveedor')) as v (name)
+cross join (
+  select id from public.reasons where use = 'pause' and name = 'Por solicitar'
+) p
+on conflict do nothing;
+
 -- ============================================================================
 -- Tiquets de demostración (solo entorno local).
 --

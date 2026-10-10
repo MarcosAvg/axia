@@ -1,7 +1,7 @@
 import {
   childReasons,
-  descendantReasons,
   indentReasons,
+  pathToReason,
   rootReasons,
 } from './reasons'
 import type { ReasonOption } from './types'
@@ -36,13 +36,11 @@ describe('rootReasons', () => {
   })
 })
 
-describe('descendantReasons', () => {
-  it('devuelve todos los descendientes', () => {
-    expect(descendantReasons(reasons, 'r1').map((r) => r.id)).toEqual([
-      'r2',
-      'r3',
-    ])
-    expect(descendantReasons(reasons, 'r4')).toEqual([])
-    expect(descendantReasons(reasons, null)).toEqual([])
+describe('pathToReason', () => {
+  it('reconstruye el camino desde el motivo hasta el subestado', () => {
+    expect(pathToReason(reasons, 'r1', 'r3')).toEqual(['r2', 'r3'])
+    expect(pathToReason(reasons, 'r1', 'r2')).toEqual(['r2'])
+    expect(pathToReason(reasons, 'r1', 'r4')).toEqual([])
+    expect(pathToReason(reasons, null, 'r3')).toEqual([])
   })
 })
