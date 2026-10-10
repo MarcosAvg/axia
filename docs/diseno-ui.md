@@ -151,6 +151,9 @@ Patrones de operación (ADR 0042):
   foto" en móvil, que abre la cámara), vista previa en miniatura y acción "Quitar". Se usa en las
   tres ubicaciones: acción guiada, subidor libre y alta.
 - **Bandejas**: conteo por estado (`TicketStatusSummary`).
+- **Tomar ofertas**: abrir el detalle de un tiquet `registered` con una oferta activa lo **toma**
+  (pasa a **"Tomado por supervisor"**); desde ahí el supervisor puede **asignar técnico** o
+  **reasignar supervisor** (ADR 0054).
 
 Patrones de métricas (ADR 0047–0051): **barra de filtros** con el **mismo patrón que la lista de
 Operación** (contenedor `rounded-xl border bg-card p-4`, controles **en línea** con rangos rápidos
