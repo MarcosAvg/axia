@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { TextField } from '@/components/shared/form-fields'
 import type { CalendarInput, WorkCalendar } from '../domain/calendar'
 import { adminMessages } from '../i18n'
+import { EntityForm } from './entity-form'
+import { FormGroup } from './form-group'
 
 const EMPTY: CalendarInput = {
   name: '',
@@ -20,42 +22,11 @@ function initial(calendar?: WorkCalendar): CalendarInput {
   }
 }
 
-function CalendarFields({
-  values,
-  error,
-  onChange,
-}: {
-  values: CalendarInput
-  error: string | null
-  onChange: (patch: Partial<CalendarInput>) => void
-}) {
-  const { fields, settings } = adminMessages
-  return (
-    <>
-      <TextField
-        id="calendar-name"
-        label={fields.name}
-        value={values.name}
-        error={error ?? undefined}
-        onChange={(event) => onChange({ name: event.target.value })}
-      />
-      <TextField
-        id="calendar-timezone"
-        label={settings.timezone}
-        value={values.timezone}
-        onChange={(event) => onChange({ timezone: event.target.value })}
-      />
-      <label className="flex min-h-11 items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-5"
-          checked={values.active}
-          onChange={(event) => onChange({ active: event.target.checked })}
-        />
-        {fields.active}
-      </label>
-    </>
-  )
+interface CalendarFormProps {
+  calendar?: WorkCalendar
+  isSaving: boolean
+  onSubmit: (input: CalendarInput) => void
+  onCancel: () => void
 }
 
 /** Alta o edición de un calendario (nombre, zona horaria y estado). */
@@ -64,26 +35,13 @@ export function CalendarForm({
   isSaving,
   onSubmit,
   onCancel,
-}: {
-  calendar?: WorkCalendar
-  isSaving: boolean
-  onSubmit: (input: CalendarInput) => void
-  onCancel?: () => void
-}) {
-  const { calendar: t, actions } = adminMessages
+}: CalendarFormProps) {
+  const { calendar: t, fields, settings } = adminMessages
   const [values, setValues] = useState<CalendarInput>(() => initial(calendar))
-  const [error, setError] = useState<string | null>(null)
-
-  const patch = (next: Partial<CalendarInput>) =>
-    setValues((current) => ({ ...current, ...next }))
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!values.name.trim() || !values.timezone.trim()) {
-      setError(t.missing)
-      return
-    }
-    setError(null)
+    if (!values.name.trim() || !values.timezone.trim()) return
     onSubmit({
       name: values.name.trim(),
       timezone: values.timezone.trim(),
@@ -92,26 +50,40 @@ export function CalendarForm({
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
-      <CalendarFields values={values} error={error} onChange={patch} />
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={isSaving} className="min-h-11">
-          {isSaving ? actions.saving : actions.save}
-        </Button>
-        {onCancel ? (
-          <Button
-            type="button"
-            variant="ghost"
-            className="min-h-11"
-            onClick={onCancel}
-          >
-            {actions.cancel}
-          </Button>
-        ) : null}
-      </div>
-    </form>
+    <EntityForm onSubmit={submit} onCancel={onCancel} isSaving={isSaving}>
+      <FormGroup title={t.details}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TextField
+            id="calendar-name"
+            label={fields.name}
+            value={values.name}
+            onChange={(event) =>
+              setValues((current) => ({ ...current, name: event.target.value }))
+            }
+          />
+          <TextField
+            id="calendar-timezone"
+            label={settings.timezone}
+            value={values.timezone}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                timezone: event.target.value,
+              }))
+            }
+          />
+        </div>
+        <label className="flex min-h-11 items-center gap-2 text-sm">
+          <Switch
+            checked={values.active}
+            aria-label={fields.active}
+            onCheckedChange={(checked) =>
+              setValues((current) => ({ ...current, active: checked }))
+            }
+          />
+          {fields.active}
+        </label>
+      </FormGroup>
+    </EntityForm>
   )
 }

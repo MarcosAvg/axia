@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
+import { PlusIcon, TrashIcon } from 'lucide-react'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
 import { SelectField, TextField } from '@/components/shared/form-fields'
-import { WEEKDAYS, isValidInterval } from '../domain/calendar'
-import type { CalendarInterval } from '../domain/calendar'
+import { Button } from '@/components/ui/button'
+import { WEEKDAYS, isValidInterval, sortIntervals } from '../domain/calendar'
+import type { CalendarInterval, IntervalInput } from '../domain/calendar'
 import { useAddInterval, useRemoveInterval } from '../hooks/use-calendars'
 import { adminMessages } from '../i18n'
+import { EntityDialog } from './entity-dialog'
+import { EntityForm } from './entity-form'
+import { FormGroup } from './form-group'
 
 const t = adminMessages.calendar
 const weekdays = adminMessages.weekdays as Record<number, string>
@@ -18,33 +24,98 @@ function dayLabel(weekday: number): string {
   return weekdays[weekday] ?? ''
 }
 
-function IntervalRow({
-  interval,
-  onRemove,
-}: {
-  interval: CalendarInterval
-  onRemove: (id: string) => void
-}) {
+function buildIntervalColumns(
+  onRemove: (interval: CalendarInterval) => void,
+): DataTableColumn<CalendarInterval>[] {
+  return [
+    {
+      id: 'weekday',
+      header: t.day,
+      sortable: true,
+      cell: (interval) => dayLabel(interval.weekday),
+    },
+    {
+      id: 'start',
+      header: t.start,
+      align: 'right',
+      cell: (interval) => interval.startTime,
+    },
+    {
+      id: 'end',
+      header: t.end,
+      align: 'right',
+      cell: (interval) => interval.endTime,
+    },
+    {
+      id: 'actions',
+      header: '',
+      align: 'right',
+      className: 'w-14',
+      cell: (interval) => (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`${t.remove}: ${dayLabel(interval.weekday)} ${interval.startTime}-${interval.endTime}`}
+            onClick={() => onRemove(interval)}
+          >
+            <TrashIcon />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+}
+
+interface IntervalFieldsProps {
+  weekday: string
+  startTime: string
+  endTime: string
+  error: string | null
+  onWeekday: (value: string) => void
+  onStart: (value: string) => void
+  onEnd: (value: string) => void
+}
+
+function IntervalFields(props: IntervalFieldsProps) {
   return (
-    <li className="flex min-h-11 flex-wrap items-center gap-2 text-sm">
-      <span className="font-medium">{dayLabel(interval.weekday)}</span>
-      <span className="text-muted-foreground">
-        {interval.startTime}–{interval.endTime}
-      </span>
-      <Button
-        type="button"
-        variant="ghost"
-        className="min-h-11"
-        onClick={() => onRemove(interval.id)}
-      >
-        {t.remove}
-      </Button>
-    </li>
+    <div className="grid gap-4 sm:grid-cols-3">
+      <SelectField
+        id="interval-weekday"
+        label={t.day}
+        options={weekdayOptions}
+        value={props.weekday}
+        onChange={(event) => props.onWeekday(event.target.value)}
+      />
+      <TextField
+        id="interval-start"
+        label={t.start}
+        type="time"
+        value={props.startTime}
+        onChange={(event) => props.onStart(event.target.value)}
+      />
+      <TextField
+        id="interval-end"
+        label={t.end}
+        type="time"
+        value={props.endTime}
+        error={props.error ?? undefined}
+        onChange={(event) => props.onEnd(event.target.value)}
+      />
+    </div>
   )
 }
 
-function AddIntervalForm({ calendarId }: { calendarId: string }) {
-  const add = useAddInterval()
+function IntervalDialog({
+  isSaving,
+  onAdd,
+  onClose,
+}: {
+  isSaving: boolean
+  onAdd: (input: IntervalInput) => void
+  onClose: () => void
+}) {
   const [weekday, setWeekday] = useState('1')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('18:00')
@@ -57,46 +128,36 @@ function AddIntervalForm({ calendarId }: { calendarId: string }) {
       return
     }
     setError(null)
-    add.mutate({
-      calendarId,
-      input: { weekday: Number(weekday), startTime, endTime },
-    })
+    onAdd({ weekday: Number(weekday), startTime, endTime })
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
-      <div className="w-40">
-        <SelectField
-          id="interval-weekday"
-          label={t.day}
-          options={weekdayOptions}
-          value={weekday}
-          onChange={(event) => setWeekday(event.target.value)}
-        />
-      </div>
-      <div className="w-32">
-        <TextField
-          id="interval-start"
-          label={t.start}
-          type="time"
-          value={startTime}
-          onChange={(event) => setStartTime(event.target.value)}
-        />
-      </div>
-      <div className="w-32">
-        <TextField
-          id="interval-end"
-          label={t.end}
-          type="time"
-          value={endTime}
-          error={error ?? undefined}
-          onChange={(event) => setEndTime(event.target.value)}
-        />
-      </div>
-      <Button type="submit" disabled={add.isPending} className="min-h-11">
-        {t.addInterval}
-      </Button>
-    </form>
+    <EntityDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+      title={t.addInterval}
+    >
+      <EntityForm
+        onSubmit={submit}
+        onCancel={onClose}
+        isSaving={isSaving}
+        submitLabel={adminMessages.actions.add}
+      >
+        <FormGroup title={t.intervals}>
+          <IntervalFields
+            weekday={weekday}
+            startTime={startTime}
+            endTime={endTime}
+            error={error}
+            onWeekday={setWeekday}
+            onStart={setStartTime}
+            onEnd={setEndTime}
+          />
+        </FormGroup>
+      </EntityForm>
+    </EntityDialog>
   )
 }
 
@@ -108,24 +169,48 @@ export function CalendarIntervals({
   calendarId: string
   intervals: CalendarInterval[]
 }) {
+  const add = useAddInterval()
   const remove = useRemoveInterval()
+  const [adding, setAdding] = useState(false)
+  const rows = sortIntervals(intervals)
+
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium">{t.intervals}</h3>
-      {intervals.length === 0 ? (
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold">{t.intervals}</h3>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setAdding(true)}
+        >
+          <PlusIcon />
+          {t.addInterval}
+        </Button>
+      </div>
+      {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.noIntervals}</p>
       ) : (
-        <ul className="flex flex-col">
-          {intervals.map((interval) => (
-            <IntervalRow
-              key={interval.id}
-              interval={interval}
-              onRemove={(id) => remove.mutate(id)}
-            />
-          ))}
-        </ul>
+        <DataTable
+          columns={buildIntervalColumns((interval) =>
+            remove.mutate(interval.id),
+          )}
+          rows={rows}
+          getRowId={(row) => row.id}
+        />
       )}
-      <AddIntervalForm calendarId={calendarId} />
+      {adding ? (
+        <IntervalDialog
+          isSaving={add.isPending}
+          onAdd={(input) =>
+            add.mutate(
+              { calendarId, input },
+              { onSuccess: () => setAdding(false) },
+            )
+          }
+          onClose={() => setAdding(false)}
+        />
+      ) : null}
     </section>
   )
 }

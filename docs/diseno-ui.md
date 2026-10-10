@@ -184,14 +184,17 @@ en el servidor con filtros, así que **respetan la barra**. La **regresión visu
 Patrones de acceso y perfil (ADR 0047): **acceso** en dos columnas en escritorio; **perfil** por
 secciones con roles y zona horaria.
 
-Patrones de administración (ADR 0046, 0057): encabezado único por pantalla (`PageHeader`/`AdminPage`);
-**marco común** con `AdminToolbar` (buscador, contador y acción primaria) en las listas; **catálogos
-con rail lateral** en escritorio y **tablas específicas por entidad** (columnas reales alineadas,
-relaciones con nombre, estado como `Switch` y acciones en menú `⋯`), con **búsqueda y orden en
-cliente**; **diálogos unificados** (`EntityDialog` centrado en escritorio / hoja inferior en móvil,
-`EntityForm` con pie de acciones fijo y secciones "Datos"/"Opciones"); **roles en master-detail** con
-permisos agrupados por área y alta en diálogo; **usuarios** con búsqueda, roles y modal; **ámbitos**
-en pestañas; **configuración** por secciones con barra de guardado, incluida la **visibilidad del
+Patrones de administración (ADR 0046, 0057, 0058): encabezado único por pantalla
+(`PageHeader`/`AdminPage`); **marco común** con `AdminToolbar` (buscador, contador y acción primaria)
+en las listas; **catálogos con rail lateral** en escritorio y **tablas específicas por entidad**
+(columnas reales alineadas, relaciones con nombre, estado como `Switch` y acciones en menú `⋯`), con
+**búsqueda y orden en cliente**; **diálogos unificados** (`EntityDialog` centrado en escritorio / hoja
+inferior en móvil, `EntityForm` con pie de acciones fijo y secciones "Datos"/"Opciones"); **roles en
+master-detail** con permisos agrupados por área y alta en diálogo; **usuarios** en pestañas **Cuentas**
+(tabla con vínculo y estado) y **Vínculos** (tablas de solicitantes/técnicos con diálogo de búsqueda);
+**ámbitos** con tablas (supervisores con edificios en diálogo; designaciones con chips quitables);
+**calendarios** con rail + detalle por secciones, alta/edición en diálogo y franjas/festivos como
+tablas; **configuración** por secciones con barra de guardado, incluida la **visibilidad del
 solicitante** (casillas por tipo de evento, ADR 0055); **integraciones** sobre la misma `DataTable`.
 
 Patrones de lista:
