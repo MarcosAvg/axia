@@ -5,9 +5,15 @@ import { z } from 'zod'
 import { FormActionsBar } from '@/components/shared/form-actions-bar'
 import { FormSection } from '@/components/shared/form-section'
 import { Button } from '@/components/ui/button'
+import { EVENT_TYPES } from '@/features/tickets'
 import type { InstanceSettings } from '../domain/settings'
 import { adminMessages } from '../i18n'
-import { GeneralFields, TimeFields, ValidationFields } from './settings-fields'
+import {
+  GeneralFields,
+  TimeFields,
+  ValidationFields,
+  VisibilityFields,
+} from './settings-fields'
 
 const schema = z.object({
   teamLabel: z.string().trim().min(1),
@@ -19,6 +25,7 @@ const schema = z.object({
   timezone: z.string().trim().min(1),
   defaultCalendarId: z.string().optional(),
   slaClockMode: z.enum(['calendar', 'laboral']),
+  requesterVisibleEventTypes: z.array(z.enum(EVENT_TYPES)).min(1),
 })
 
 type SettingsValues = z.infer<typeof schema>
@@ -45,6 +52,9 @@ function SettingsFormView({
       </FormSection>
       <FormSection title={sections.time}>
         <TimeFields register={register} errors={errors} />
+      </FormSection>
+      <FormSection title={sections.visibility}>
+        <VisibilityFields register={register} errors={errors} />
       </FormSection>
       <FormActionsBar>
         <Button type="submit" disabled={isSaving} className="min-h-11">
@@ -86,6 +96,7 @@ export function SettingsForm({
       timezone: settings.timezone,
       defaultCalendarId: settings.defaultCalendarId ?? '',
       slaClockMode: settings.slaClockMode,
+      requesterVisibleEventTypes: settings.requesterVisibleEventTypes,
     },
   })
 
@@ -102,6 +113,7 @@ export function SettingsForm({
       timezone: values.timezone,
       defaultCalendarId: values.defaultCalendarId || null,
       slaClockMode: values.slaClockMode,
+      requesterVisibleEventTypes: values.requesterVisibleEventTypes,
     })
   })
 

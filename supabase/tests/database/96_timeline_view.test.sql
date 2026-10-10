@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(5);
+select plan(7);
 
 -- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
 truncate table public.tickets cascade;
@@ -65,6 +65,12 @@ select set_config('request.jwt.claims',
 select public.ticket_take((select id from public.tickets limit 1));
 select public.ticket_comment((select id from public.tickets limit 1), 'nota interna', true);
 
+-- Eventos de recaptura (visible) y apoyo auxiliar (interno) para probar el filtro.
+insert into public.ticket_events (ticket_id, cycle, type)
+  select id, cycle, 'capture_recaptured' from public.tickets limit 1;
+insert into public.ticket_events (ticket_id, cycle, type)
+  select id, cycle, 'auxiliary_added' from public.tickets limit 1;
+
 -- El personal ve todo.
 select cmp_ok(
   (select count(*)::int from public.v_ticket_timeline where type = 'taken'), '>=', 1,
@@ -82,6 +88,12 @@ select cmp_ok(
 select is(
   (select count(*)::int from public.v_ticket_timeline where type = 'comment'), 0,
   'el solicitante no ve los comentarios internos');
+select cmp_ok(
+  (select count(*)::int from public.v_ticket_timeline where type = 'capture_recaptured'),
+  '>=', 1, 'el solicitante ve la recaptura');
+select is(
+  (select count(*)::int from public.v_ticket_timeline where type = 'auxiliary_added'), 0,
+  'el solicitante no ve el apoyo auxiliar');
 
 select * from finish();
 

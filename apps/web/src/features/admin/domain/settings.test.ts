@@ -38,11 +38,13 @@ describe('settingsToUpdate', () => {
       timezone: 'America/Mexico_City',
       defaultCalendarId: null,
       slaClockMode: 'calendar',
+      requesterVisibleEventTypes: ['created', 'taken'],
     })
     expect(update.claim_window).toBe('2 days')
     expect(update.auto_validation_days).toBeNull()
     expect(update.validation_policy).toBe('both')
     expect(update.default_calendar_id).toBeNull()
     expect(update.sla_clock_mode).toBe('calendar')
+    expect(update.requester_visible_event_types).toEqual(['created', 'taken'])
   })
 })
