@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0053.
+0038–0054.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -917,3 +917,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   a los activos. La **semilla** estrena **7 técnicos, 9 categorías, 14 subcategorías, 23 problemas** y
   **designaciones** (`technician_categories`). **ADR 0053**. `pnpm check` en verde (159 Vitest, 12
   Playwright, 431 pgTAP). Rama `feat/participantes-integridad`.
+- **Tomar la oferta al abrir (Etapa 22)**: al abrir el detalle de un tiquet `registered` con **oferta
+  activa**, el supervisor lo **toma** automáticamente (`ticket_take`) y pasa a **"Tomado por
+  supervisor"** (etiqueta renombrada desde "Con supervisor"); desde ahí puede **asignar técnico** o
+  **reasignar supervisor**. Nueva prueba e2e (`e2e/take-offer.spec.ts`). **ADR 0054**. `pnpm check` en
+  verde (159 Vitest, 13 Playwright, 431 pgTAP). Rama `feat/auto-tomar`.

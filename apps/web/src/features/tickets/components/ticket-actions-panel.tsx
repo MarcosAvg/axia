@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/shared/form-fields'
 import { can } from '@/features/auth'
@@ -6,6 +6,7 @@ import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
 import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
+import { useMyOffers } from '../hooks/use-tickets'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
@@ -142,6 +143,23 @@ function ProxyRequiredHint({ show }: { show: boolean }) {
   )
 }
 
+function useAutoTakeOffer(
+  ticket: TicketDetail,
+  userId: string | undefined,
+  take: ReturnType<typeof useTicketActions>['take'],
+) {
+  const offers = useMyOffers(userId)
+  const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
+  const took = useRef(false)
+  useEffect(() => {
+    if (took.current) return
+    if (ticket.status === 'registered' && hasOffer) {
+      took.current = true
+      take.mutate({})
+    }
+  }, [ticket.status, hasOffer, take])
+}
+
 interface TicketActionsPanelProps {
   ticket: TicketDetail
   actions: ActionKey[]
@@ -162,6 +180,9 @@ export function TicketActionsPanel({
   const subject =
     canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
   const mutations = useTicketActions(ticket.id, subject)
+
+  // Al abrir el detalle, el supervisor con oferta activa toma el tiquet.
+  useAutoTakeOffer(ticket, identity?.userId, mutations.take)
 
   const oneClick: Partial<Record<ActionKey, () => void>> = {
     resume: () => mutations.resume.mutate({}),
