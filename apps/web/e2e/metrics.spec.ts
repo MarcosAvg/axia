@@ -23,3 +23,22 @@ test('el administrador abre las métricas', async ({ page }) => {
     page.getByText('No se pudieron cargar las métricas.'),
   ).toHaveCount(0)
 })
+
+test('alterna la vista de tiempos entre promedio y acumulado', async ({
+  page,
+}) => {
+  await signIn(page, 'admin@axia.test')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
+
+  await expect(
+    page.getByText('Trabajo activo', { exact: true }).first(),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Acumulado' }).click()
+  await expect(
+    page.getByText('Trabajo activo (acumulado)').first(),
+  ).toBeVisible()
+})

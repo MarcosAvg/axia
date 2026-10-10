@@ -194,7 +194,10 @@ Duplicados · Tasa); el **tiempo medio hasta marcarse** es un **KPI** más. En *
 **cumplimiento por prioridad** es una **gráfica de barras**; en **Equipo**, **tiquets por técnico**
 también es una **gráfica**. Los indicadores agregados
 (SLA, satisfacción, pausas, duplicados, carga por técnico, rechazos/cancelaciones y ruteo) se calculan
-en el servidor con filtros, así que **respetan la barra**. La **regresión visual** con Playwright es
+en el servidor con filtros, así que **respetan la barra**. La **vista de tiempos** alterna entre
+**promedio** y **acumulado** con un control segmentado en la barra de Métricas (y en el Panel, cuando
+hay indicadores de tiempo); la preferencia se persiste y afecta los KPI de tiempo, las columnas por
+dimensión y la exportación (ADR 0064). La **regresión visual** con Playwright es
 **opt-in** (`pnpm test:visual`), fuera de la compuerta.
 
 Patrones de acceso y perfil (ADR 0047): **acceso** en dos columnas en escritorio; **perfil** por

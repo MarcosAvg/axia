@@ -1,7 +1,6 @@
 import {
   EMPTY_FILTERS,
   averageOf,
-  byDimension,
   filterTickets,
   formatMinutes,
   formatPercent,
@@ -13,7 +12,7 @@ import {
   volumeByMonth,
 } from './metrics'
 import type { MetricsTicket } from './metrics'
-import { allDimensions } from './dimensions'
+import { allDimensions, byDimension } from './dimensions'
 import {
   deltaOf,
   formatDelta,
@@ -108,6 +107,7 @@ describe('summarize', () => {
     expect(summary.reopenRate).toBe(0.5)
     expect(summary.firstTimeFixRate).toBe(0.5)
     expect(summary.avgActive).toBe(90)
+    expect(summary.sumActive).toBe(180)
   })
 })
 
@@ -137,6 +137,7 @@ describe('byDimension', () => {
     )
     expect(rows[0]).toMatchObject({ id: 'tm1', tickets: 2 })
     expect(rows[1]).toMatchObject({ id: 'tm2', tickets: 1 })
+    expect(rows[0]).toMatchObject({ sumActive: 120 })
   })
 
   it('agrupa por solicitante', () => {

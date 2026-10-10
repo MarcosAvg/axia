@@ -1,8 +1,17 @@
 import { cn } from 'cn'
+import { AggregationToggle } from '@/components/shared/aggregation-toggle'
 import { HintLabel } from '@/components/shared/hint'
 import { ToneDot } from '@/components/shared/tone'
+import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { messages } from '@/lib/i18n'
 import { toneClasses, toneForIndex } from '@/lib/tones'
+import {
+  aggregationHint,
+  aggregationLabel,
+  timeValue,
+} from '@/lib/time-aggregation'
+import type { TimeAggregation } from '@/lib/time-aggregation'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import {
@@ -31,6 +40,8 @@ interface Kpi {
   label: string
   value: string
   hint?: string
+  /** Indicador de tiempo: cambia entre promedio y acumulado. */
+  temporal?: boolean
 }
 
 interface KpiInput {
@@ -68,7 +79,11 @@ function adminKpis(
   ]
 }
 
-function technicianKpis(work: WorkSummary, summary: MetricsSummary): Kpi[] {
+function technicianKpis(
+  work: WorkSummary,
+  summary: MetricsSummary,
+  aggregation: TimeAggregation,
+): Kpi[] {
   return [
     { label: k.myWork, value: String(work.total), hint: hints.myWork },
     {
@@ -83,9 +98,12 @@ function technicianKpis(work: WorkSummary, summary: MetricsSummary): Kpi[] {
       hint: hints.toValidate,
     },
     {
-      label: k.activeTime,
-      value: formatMinutes(summary.avgActive),
-      hint: hints.activeTime,
+      label: aggregationLabel(k.activeTime, aggregation),
+      value: formatMinutes(
+        timeValue(aggregation, summary.avgActive, summary.sumActive),
+      ),
+      hint: aggregationHint(hints.activeTime, aggregation),
+      temporal: true,
     },
     {
       label: k.firstFix,
@@ -130,7 +148,11 @@ function requesterKpis(totals: DashboardTotals): Kpi[] {
   ]
 }
 
-function buildKpis(identity: Identity | null, input: KpiInput): Kpi[] {
+function buildKpis(
+  identity: Identity | null,
+  input: KpiInput,
+  aggregation: TimeAggregation,
+): Kpi[] {
   const { work, offers, totals, summary, sla, satisfaction } = input
   const isAdmin =
     can(identity, 'user.manage') || can(identity, 'catalog.manage')
@@ -141,7 +163,7 @@ function buildKpis(identity: Identity | null, input: KpiInput): Kpi[] {
     can(identity, 'ticket.start') || can(identity, 'ticket.attend')
 
   if (isAdmin) return adminKpis(totals, sla, satisfaction)
-  if (isTechnician) return technicianKpis(work, summary)
+  if (isTechnician) return technicianKpis(work, summary, aggregation)
   if (isSupervisor) return supervisorKpis(offers, totals, sla)
   return requesterKpis(totals)
 }
@@ -151,30 +173,45 @@ export function DashboardKpis({
   identity,
   ...input
 }: KpiInput & { identity: Identity | null }) {
-  const kpis = buildKpis(identity, input)
+  const { aggregation } = useTimeAggregation()
+  const kpis = buildKpis(identity, input, aggregation)
+  const showToggle = kpis.some((kpi) => kpi.temporal)
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {kpis.map((kpi, index) => {
-        const tone = toneForIndex(index)
-        return (
-          <Card key={kpi.label}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <ToneDot tone={tone} />
-                <HintLabel label={kpi.label} hint={kpi.hint} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p
-                className={cn('text-2xl font-semibold', toneClasses[tone].text)}
-              >
-                {kpi.value}
-              </p>
-            </CardContent>
-          </Card>
-        )
-      })}
+    <div className="flex flex-col gap-3">
+      {showToggle ? (
+        <div className="flex items-center justify-end gap-2">
+          <span className="text-sm text-muted-foreground">
+            {messages.aggregation.label}
+          </span>
+          <AggregationToggle />
+        </div>
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {kpis.map((kpi, index) => {
+          const tone = toneForIndex(index)
+          return (
+            <Card key={kpi.label}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <ToneDot tone={tone} />
+                  <HintLabel label={kpi.label} hint={kpi.hint} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p
+                  className={cn(
+                    'text-2xl font-semibold',
+                    toneClasses[tone].text,
+                  )}
+                >
+                  {kpi.value}
+                </p>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }

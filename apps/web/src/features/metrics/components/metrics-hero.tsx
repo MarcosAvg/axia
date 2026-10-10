@@ -1,3 +1,9 @@
+import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
+import {
+  aggregationHint,
+  aggregationLabel,
+  timeValue,
+} from '@/lib/time-aggregation'
 import {
   formatMinutes,
   formatPercent,
@@ -27,10 +33,13 @@ export function MetricsHero({
   satisfaction: SatisfactionSummary
   sla: SlaSummary
 }) {
+  const { aggregation } = useTimeAggregation()
   const k = metricsMessages.kpi
   const hints = metricsMessages.kpiHints
   const change = (pick: (summary: MetricsSummary) => number) =>
     comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
+  const active = (s: MetricsSummary) =>
+    timeValue(aggregation, s.avgActive, s.sumActive)
   const cards: Kpi[] = [
     {
       label: k.tickets,
@@ -39,10 +48,10 @@ export function MetricsHero({
       delta: change((s) => s.tickets),
     },
     {
-      label: k.active,
-      value: formatMinutes(summary.avgActive),
-      hint: hints.active,
-      delta: change((s) => s.avgActive),
+      label: aggregationLabel(k.active, aggregation),
+      value: formatMinutes(active(summary)),
+      hint: aggregationHint(hints.active, aggregation),
+      delta: change(active),
       lowerIsBetter: true,
     },
     { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },

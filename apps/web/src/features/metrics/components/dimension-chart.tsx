@@ -4,7 +4,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import type { DimensionRow } from '../domain/metrics'
+import type { DimensionRow } from '../domain/dimensions'
 import { metricsMessages } from '../i18n'
 
 const config = {

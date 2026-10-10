@@ -68,18 +68,15 @@ export const metricsMessages = {
   kpiHints: {
     tickets: 'Número de tiquets con los filtros y el periodo activos.',
     active:
-      'Tiempo medio de trabajo activo por tiquet: del inicio a la atención, sin contar pausas.',
+      'Trabajo activo por tiquet: del inicio a la atención, sin contar pausas.',
     activeExtra:
-      'Trabajo registrado fuera del horario laboral (noches, fines de semana o festivos).',
+      'Trabajo fuera del horario laboral (noches, fines de semana o festivos).',
     total:
-      'Tiempo medio total por tiquet: del registro al cierre, incluyendo pausas y esperas.',
-    net: 'Tiempo medio neto: el total menos los tramos clasificados como no contables.',
-    response:
-      'Tiempo medio del registro del tiquet a que el supervisor lo toma.',
-    assignment:
-      'Tiempo medio de la toma del supervisor a la asignación del técnico.',
-    validation:
-      'Tiempo medio de la atención del técnico a la validación o el cierre.',
+      'Tiempo total por tiquet: del registro al cierre, incluyendo pausas y esperas.',
+    net: 'Tiempo neto: el total menos los tramos clasificados como no contables.',
+    response: 'Del registro del tiquet a que el supervisor lo toma.',
+    assignment: 'De la toma del supervisor a la asignación del técnico.',
+    validation: 'De la atención del técnico a la validación o el cierre.',
     reassignment:
       'Porcentaje de tiquets en los que cambió el equipo o el supervisor.',
     recapture: 'Porcentaje de tiquets con al menos una recaptura registrada.',
@@ -96,7 +93,7 @@ export const metricsMessages = {
     volume:
       'Tiquets registrados en cada mes del periodo (por fecha de reporte).',
     timesByDimension:
-      'Tiempo medio por agrupación (equipo, edificio, categoría, dependencia o solicitante).',
+      'Tiempo por agrupación (equipo, edificio, categoría, dependencia o solicitante).',
     countsByDimension:
       'Tiquets por agrupación, con su tasa de reasignación y de recaptura.',
     pauses: 'Número de pausas por motivo en el periodo.',
@@ -113,8 +110,8 @@ export const metricsMessages = {
   },
   tableHints: {
     dimensionTickets: 'Tiquets de la agrupación en el periodo.',
-    avgActive: 'Tiempo medio de trabajo activo por tiquet de la agrupación.',
-    avgTotal: 'Tiempo medio total por tiquet de la agrupación.',
+    avgActive: 'Trabajo activo de la agrupación en el periodo.',
+    avgTotal: 'Tiempo total de la agrupación en el periodo.',
     extra: 'Trabajo de la agrupación fuera del horario laboral.',
     reassignment: 'Reasignaciones registradas en la agrupación.',
     recapture: 'Recapturas registradas en la agrupación.',

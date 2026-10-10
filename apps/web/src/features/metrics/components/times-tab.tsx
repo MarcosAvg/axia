@@ -1,4 +1,11 @@
 import { HintLabel } from '@/components/shared/hint'
+import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
+import {
+  aggregationHint,
+  aggregationLabel,
+  timeValue,
+} from '@/lib/time-aggregation'
+import type { TimeAggregation } from '@/lib/time-aggregation'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
@@ -9,65 +16,74 @@ import { DimensionSections } from './dimension-sections'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
+const k = metricsMessages.kpi
+const hints = metricsMessages.kpiHints
+
+interface TimeMetric {
+  label: string
+  hint: string
+  avg: (s: MetricsSummary) => number
+  sum: (s: MetricsSummary) => number
+}
+
+const TIME_METRICS: TimeMetric[] = [
+  {
+    label: k.active,
+    hint: hints.active,
+    avg: (s) => s.avgActive,
+    sum: (s) => s.sumActive,
+  },
+  {
+    label: k.activeExtra,
+    hint: hints.activeExtra,
+    avg: (s) => s.avgActiveExtra,
+    sum: (s) => s.sumActiveExtra,
+  },
+  {
+    label: k.total,
+    hint: hints.total,
+    avg: (s) => s.avgTotal,
+    sum: (s) => s.sumTotal,
+  },
+  { label: k.net, hint: hints.net, avg: (s) => s.avgNet, sum: (s) => s.sumNet },
+  {
+    label: k.response,
+    hint: hints.response,
+    avg: (s) => s.avgResponse,
+    sum: (s) => s.sumResponse,
+  },
+  {
+    label: k.assignment,
+    hint: hints.assignment,
+    avg: (s) => s.avgAssignment,
+    sum: (s) => s.sumAssignment,
+  },
+  {
+    label: k.validation,
+    hint: hints.validation,
+    avg: (s) => s.avgValidation,
+    sum: (s) => s.sumValidation,
+  },
+]
+
 function timeCards(
   summary: MetricsSummary,
   comparison: Comparison | null,
+  aggregation: TimeAggregation,
 ): Kpi[] {
-  const k = metricsMessages.kpi
-  const hints = metricsMessages.kpiHints
   const change = (pick: (s: MetricsSummary) => number) =>
     comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
-  return [
-    {
-      label: k.active,
-      value: formatMinutes(summary.avgActive),
-      hint: hints.active,
-      delta: change((s) => s.avgActive),
+  return TIME_METRICS.map((metric) => {
+    const value = (s: MetricsSummary) =>
+      timeValue(aggregation, metric.avg(s), metric.sum(s))
+    return {
+      label: aggregationLabel(metric.label, aggregation),
+      value: formatMinutes(value(summary)),
+      hint: aggregationHint(metric.hint, aggregation),
+      delta: change(value),
       lowerIsBetter: true,
-    },
-    {
-      label: k.activeExtra,
-      value: formatMinutes(summary.avgActiveExtra),
-      hint: hints.activeExtra,
-      delta: change((s) => s.avgActiveExtra),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.total,
-      value: formatMinutes(summary.avgTotal),
-      hint: hints.total,
-      delta: change((s) => s.avgTotal),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.net,
-      value: formatMinutes(summary.avgNet),
-      hint: hints.net,
-      delta: change((s) => s.avgNet),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.response,
-      value: formatMinutes(summary.avgResponse),
-      hint: hints.response,
-      delta: change((s) => s.avgResponse),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.assignment,
-      value: formatMinutes(summary.avgAssignment),
-      hint: hints.assignment,
-      delta: change((s) => s.avgAssignment),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.validation,
-      value: formatMinutes(summary.avgValidation),
-      hint: hints.validation,
-      delta: change((s) => s.avgValidation),
-      lowerIsBetter: true,
-    },
-  ]
+    }
+  })
 }
 
 /** Tiempos: KPI de duración y desglose por dimensión. */
@@ -82,10 +98,11 @@ export function TimesTab({
   groups: DimensionGroup[]
   nameOf: (dimension: Dimension, id: string) => string
 }) {
+  const { aggregation } = useTimeAggregation()
   return (
     <div className="flex flex-col gap-4">
       <KpiGrid
-        cards={timeCards(summary, comparison)}
+        cards={timeCards(summary, comparison, aggregation)}
         columns={4}
         period={comparison?.label}
       />
@@ -93,7 +110,10 @@ export function TimesTab({
         <h2 className="text-sm font-medium text-muted-foreground">
           <HintLabel
             label={metricsMessages.charts.timesByDimension}
-            hint={metricsMessages.chartHints.timesByDimension}
+            hint={aggregationHint(
+              metricsMessages.chartHints.timesByDimension,
+              aggregation,
+            )}
           />
         </h2>
         <DimensionSections groups={groups} nameOf={nameOf} variant="times" />

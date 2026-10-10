@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button'
+import { AggregationToggle } from '@/components/shared/aggregation-toggle'
 import { FilterChips } from '@/components/shared/filter-chips'
 import type { FilterChip } from '@/components/shared/filter-chips'
 import { SelectField, TextField } from '@/components/shared/form-fields'
+import { messages } from '@/lib/i18n'
 import type { FilterCatalogs, NamedOption } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
 import { formatRangeLabel, rangeForDays } from '../domain/period'
@@ -228,6 +230,12 @@ export function MetricsToolbar({
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-end gap-2">
+        <span className="text-sm text-muted-foreground">
+          {messages.aggregation.label}
+        </span>
+        <AggregationToggle />
+      </div>
       <ToolbarForm
         filters={filters}
         catalogs={catalogs}
