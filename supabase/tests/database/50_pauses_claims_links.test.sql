@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(28);
+select plan(31);
 
 -- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E.
 truncate table public.tickets cascade;
@@ -78,6 +78,12 @@ insert into public.reasons (use, name, parent_id)
 insert into public.reasons (use, name, parent_id, active)
   select 'pause', 'Submotivo inactivo', id, false
   from public.reasons where name = 'Submotivo prueba 2';
+insert into public.reasons (use, name, parent_id)
+  select 'pause', 'Sub-submotivo', id
+  from public.reasons where name = 'Submotivo prueba 2';
+insert into public.reasons (use, name) values ('pause', 'Otro motivo');
+insert into public.reasons (use, name, parent_id)
+  select 'pause', 'Otro hijo', id from public.reasons where name = 'Otro motivo';
 insert into public.reasons (use, name) values ('claim', 'Motivo reclamo');
 insert into public.reasons (use, name) values ('claim_outcome', 'Resultado procedente');
 insert into public.reasons (use, name) values ('recapture', 'Motivo recaptura');
@@ -114,6 +120,21 @@ select is(
   (select status from public.tickets order by ticket_number limit 1),
   'paused'::public.ticket_status, 'el tiquet queda pausado');
 
+select throws_ok(
+  $$ select public.ticket_advance_pause(
+       (select id from public.tickets order by ticket_number limit 1),
+       (select id from public.reasons where name = 'Otro hijo')) $$,
+  'P0001', null, 'no gestiona con un subestado de otro motivo');
+select throws_ok(
+  $$ select public.ticket_resume(
+       (select id from public.tickets order by ticket_number limit 1),
+       (select id from public.reasons where name = 'Sub-submotivo')) $$,
+  'P0001', null, 'no reanuda con un subestado que no es hijo directo del motivo');
+select throws_ok(
+  $$ select public.ticket_resume(
+       (select id from public.tickets order by ticket_number limit 1)) $$,
+  '42883', null, 'reanudar exige un subestado');
+
 select public.ticket_advance_pause(
   (select id from public.tickets order by ticket_number limit 1),
   (select id from public.reasons where name = 'Submotivo prueba 2'));
@@ -139,12 +160,16 @@ select is(
      (select id from public.tickets order by ticket_number limit 1))),
   2, 'la función expone los pasos de la pausa');
 
-select public.ticket_resume((select id from public.tickets order by ticket_number limit 1));
+select public.ticket_resume(
+  (select id from public.tickets order by ticket_number limit 1),
+  (select id from public.reasons where name = 'Submotivo prueba 2'));
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'in_progress'::public.ticket_status, 'al reanudar vuelve a en proceso');
 select throws_ok(
-  $$ select public.ticket_resume((select id from public.tickets order by ticket_number limit 1)) $$,
+  $$ select public.ticket_resume(
+       (select id from public.tickets order by ticket_number limit 1),
+       (select id from public.reasons where name = 'Submotivo prueba 2')) $$,
   'P0001', null, 'no reanuda sin pausa abierta');
 select throws_ok(
   $$ select public.ticket_pause(

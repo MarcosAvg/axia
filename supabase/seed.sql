@@ -788,8 +788,8 @@ begin
 
   -- Pausas cerradas y abiertas (métricas de pausas por motivo).
   insert into public.ticket_pauses (
-    ticket_id, cycle, reason_id, opened_by, opened_at, closed_at)
-  select v.ticket_id, 1, r.id, 'a0000000-0000-4000-8000-000000000003',
+    ticket_id, cycle, reason_id, root_reason_id, opened_by, opened_at, closed_at)
+  select v.ticket_id, 1, r.id, r.id, 'a0000000-0000-4000-8000-000000000003',
          v.opened_at, v.closed_at
   from (values
     ('b0000000-0000-4000-8000-000000000005'::uuid, 'Falta de material',
