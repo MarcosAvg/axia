@@ -106,7 +106,8 @@ disparador) y `active` cuando es catálogo. RLS en todas.
   contacto), `folio_pattern text` (semilla `AX-{yyyy}-{num}`), `timezone text`,
   `default_calendar_id uuid`,
   `request_evidence_policy text` (`optional`|`recommended`|`required`, semilla `recommended`),
-  `requester_visible_event_types event_type[]`.
+  `requester_visible_event_types event_type[]`, `default_priority_id → priorities null`
+  (respaldo cuando el problema no define prioridad).
 - **`work_calendars`**: `name text`, `timezone text`, `active boolean`.
 - **`work_calendar_intervals`**: `calendar_id`, `weekday smallint` (0–6), `start_time time`, `end_time time`.
 - **`work_calendar_holidays`**: `calendar_id`, `holiday date`, `name text`.
@@ -134,10 +135,11 @@ disparador) y `active` cuando es catálogo. RLS en todas.
 - **`dependencies`**: `name text unique`.
 - **`categories`**: `team_id`, `name`, `unique (team_id, name)`.
 - **`subcategories`**: `category_id`, `name`, `unique (category_id, name)`.
-- **`problems`**: `subcategory_id`, `name`, `unique (subcategory_id, name)`.
+- **`problems`**: `subcategory_id`, `name`, `unique (subcategory_id, name)`,
+  `default_priority_id → priorities null` (prioridad que hereda el tiquet).
 - **`service_types`**: `name text unique`.
 - **`priorities`**: `name text unique`, `position smallint`, `target_minutes int null` (tiempo objetivo).
-- **`channels`**: `name text unique`.
+- **`channels`**: `name text unique`, `is_platform boolean not null default false` (canal de la app).
 - **`requesters`**: `full_name text`, `contact text`, `dependency_id → dependencies`,
   `user_id uuid null → auth.users` (`unique`), `active`.
 - **`technicians`**: `full_name text`, `user_id uuid null → auth.users` (`unique`),
@@ -151,7 +153,8 @@ disparador) y `active` cuando es catálogo. RLS en todas.
 - **`tickets`**: `ticket_number bigint` (secuencia global, `unique`), `folio text unique`,
   `status ticket_status not null default 'registered'`, `cycle int not null default 1`,
   `team_id → teams` (instantánea, RN-02), `building_id`, `location_id`, `dependency_id`,
-  `category_id`, `subcategory_id null`, `problem_id null`, `service_type_id`, `priority_id`,
+  `category_id`, `subcategory_id null`, `problem_id null`, `service_type_id null` (se captura en
+  la atención), `priority_id` (derivada del problema o de la instancia),
   `channel_id`, `description text`, `requester_id → requesters`, `requester_name text`,
   `requester_contact text` (instantánea), `registered_by uuid → auth.users`,
   `reported_at timestamptz not null default now()`, `closed_at timestamptz null`,
