@@ -768,4 +768,80 @@ begin
   values ('b0000000-0000-4000-8000-000000000012', 'b0000000-0000-4000-8000-000000000007',
           'duplicate_of', 'a0000000-0000-4000-8000-000000000002')
   on conflict do nothing;
+  -- Tiquets históricos (meses previos), ya cerrados, para dar contexto temporal
+  -- a las gráficas y al panel. Nombres y descripciones legibles.
+  insert into public.tickets (
+    id, status, cycle, team_id, building_id, location_id, dependency_id, category_id,
+    service_type_id, priority_id, channel_id, description,
+    requester_id, requester_name, requester_contact, registered_by, reported_at, closed_at)
+  select
+    v.id, 'closed'::public.ticket_status, 1, cat.team_id, b.id, loc.id, dep.id, cat.id,
+    st.id, pr.id, ch.id, v.description,
+    req.id, req.full_name, req.contact, v.registered_by, v.reported_at, v.closed_at
+  from (values
+    ('c0000000-0000-4000-8000-000000000001'::uuid, 'Eléctrico', 'Correctivo', 'Media', 'Web',
+     'Edificio Central', 'Planta baja', 'Ana Pérez', 'Cambio de balastros del pasillo principal',
+     now() - interval '6 months', now() - interval '6 months' + interval '5 hours',
+     'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000002'::uuid, 'Plomería', 'Correctivo', 'Alta', 'Teléfono',
+     'Edificio Central', 'Piso 1', 'Beto Lima', 'Reparación de fuga en el baño de visitas',
+     now() - interval '5 months', now() - interval '5 months' + interval '1 day 3 hours',
+     'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000003'::uuid, 'Accesos', 'Correctivo', 'Media', 'Web',
+     'Edificio Norte', 'Planta baja', 'Ana Pérez', 'Ajuste de la chapa de la puerta lateral',
+     now() - interval '4 months', now() - interval '4 months' + interval '6 hours',
+     'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000004'::uuid, 'Eléctrico', 'Preventivo', 'Baja', 'Web',
+     'Edificio Central', 'Piso 1', 'Beto Lima', 'Sustitución de contactos dañados del laboratorio',
+     now() - interval '3 months', now() - interval '3 months' + interval '2 days 4 hours',
+     'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000005'::uuid, 'Plomería', 'Correctivo', 'Media', 'Teléfono',
+     'Edificio Central', 'Planta baja', 'Ana Pérez', 'Destape del drenaje del patio trasero',
+     now() - interval '2 months', now() - interval '2 months' + interval '8 hours',
+     'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000006'::uuid, 'Accesos', 'Preventivo', 'Baja', 'Web',
+     'Edificio Norte', 'Planta baja', 'Beto Lima', 'Cambio de manija del acceso al almacén',
+     now() - interval '1 month', now() - interval '1 month' + interval '1 day 2 hours',
+     'a0000000-0000-4000-8000-000000000002'::uuid)
+  ) as v (id, category, service_type, priority, channel, building, location, requester,
+          description, reported_at, closed_at, registered_by)
+  join public.categories cat on cat.name = v.category
+  join public.buildings b on b.name = v.building
+  join public.locations loc on loc.building_id = b.id and loc.name = v.location
+  join public.dependencies dep on dep.name = 'Sistemas'
+  join public.service_types st on st.name = v.service_type
+  join public.priorities pr on pr.name = v.priority
+  join public.channels ch on ch.name = v.channel
+  join public.requesters req on req.full_name = v.requester;
+
+  -- Bitácora mínima de los históricos (registro y validación).
+  insert into public.ticket_events (
+    ticket_id, cycle, type, actor_id, reason_id, subject_technician_id, occurred_at, payload)
+  select v.ticket_id, 1, v.type, v.actor, null, null, v.occurred_at, '{}'::jsonb
+  from (values
+    ('c0000000-0000-4000-8000-000000000001'::uuid, 'created'::public.event_type,
+     now() - interval '6 months', 'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000001'::uuid, 'validated'::public.event_type,
+     now() - interval '6 months' + interval '5 hours', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000002'::uuid, 'created'::public.event_type,
+     now() - interval '5 months', 'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000002'::uuid, 'validated'::public.event_type,
+     now() - interval '5 months' + interval '1 day 3 hours', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000003'::uuid, 'created'::public.event_type,
+     now() - interval '4 months', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000003'::uuid, 'validated'::public.event_type,
+     now() - interval '4 months' + interval '6 hours', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000004'::uuid, 'created'::public.event_type,
+     now() - interval '3 months', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000004'::uuid, 'validated'::public.event_type,
+     now() - interval '3 months' + interval '2 days 4 hours', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000005'::uuid, 'created'::public.event_type,
+     now() - interval '2 months', 'a0000000-0000-4000-8000-000000000004'::uuid),
+    ('c0000000-0000-4000-8000-000000000005'::uuid, 'validated'::public.event_type,
+     now() - interval '2 months' + interval '8 hours', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000006'::uuid, 'created'::public.event_type,
+     now() - interval '1 month', 'a0000000-0000-4000-8000-000000000002'::uuid),
+    ('c0000000-0000-4000-8000-000000000006'::uuid, 'validated'::public.event_type,
+     now() - interval '1 month' + interval '1 day 2 hours', 'a0000000-0000-4000-8000-000000000002'::uuid)
+  ) as v (ticket_id, type, occurred_at, actor);
 end $$;

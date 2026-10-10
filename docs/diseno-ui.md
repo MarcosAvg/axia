@@ -108,8 +108,10 @@ ver ADR 0041 y 0052):
 - **Acciones rápidas** según permisos.
 - Es distinto del **tablero global** de `/metricas` (permiso `metrics.view`).
 
-La **semilla de demostración** (`supabase/seed.sql`) crea tiquets en todos los estados para que
-estas vistas tengan datos al evaluar la interfaz.
+La **semilla de demostración** (`supabase/seed.sql`) crea tiquets en todos los estados, con nombres y
+descripciones legibles, y los reparte a lo largo de **varios meses** para que las gráficas y el panel
+tengan datos al evaluar la interfaz. Las pruebas e2e crean datos temporales que se **purgan** con
+`pnpm db:clean`.
 
 ## 3. Componentes y patrones
 

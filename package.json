@@ -8,7 +8,7 @@
     "build": "pnpm --filter @axia/web build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm -r --if-present test && pnpm db:clean",
     "test:visual": "pnpm --filter @axia/web test:visual",
     "format": "prettier --write .",
     "check:agnostic": "node scripts/check-agnostic.mjs",
@@ -19,6 +19,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
+    "db:clean": "node scripts/clean-test-data.mjs",
     "db:types": "supabase gen types typescript --local | prettier --stdin-filepath packages/shared/src/database.types.ts > packages/shared/src/database.types.ts",
     "env:local": "node scripts/write-local-env.mjs",
     "prepare": "husky"
