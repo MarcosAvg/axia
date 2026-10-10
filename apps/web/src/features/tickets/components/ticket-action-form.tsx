@@ -12,11 +12,10 @@ import {
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
-import { currentPauseReasonId } from '../domain/pause'
 import type { EvidenceType } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useTicketActions } from '../hooks/use-ticket-actions'
-import { useTicketPauseSteps } from '../hooks/use-tickets'
+import { useTicketPauseState } from '../hooks/use-tickets'
 import { TicketActionFields } from './ticket-action-fields'
 import type { ActionValues } from './ticket-action-fields'
 import {
@@ -95,7 +94,7 @@ function ActionFormView({
   reasons,
   priorities,
   serviceTypes,
-  parentReasonId,
+  motiveReasonId,
   values,
   onChange,
   error,
@@ -112,7 +111,7 @@ function ActionFormView({
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
-  parentReasonId: string | null
+  motiveReasonId: string | null
   values: ActionValues
   onChange: (patch: Partial<ActionValues>) => void
   error: unknown
@@ -134,7 +133,7 @@ function ActionFormView({
         reasons={reasons}
         priorities={priorities}
         serviceTypes={serviceTypes}
-        parentReasonId={parentReasonId}
+        motiveReasonId={motiveReasonId}
         values={values}
         onChange={onChange}
       />
@@ -153,12 +152,14 @@ function listTechnicians(
   return all.filter((technician) => !excludeIds.includes(technician.id))
 }
 
-/** Subestado actual de la pausa (para ofrecer solo sus hijos al avanzar). */
-function useParentReasonId(action: ActionKey, ticketId: string): string | null {
-  const steps = useTicketPauseSteps(
-    action === 'advance_pause' ? ticketId : undefined,
-  )
-  return currentPauseReasonId(steps.data ?? [])
+/** Motivo de la pausa abierta (para ofrecer sus subestados al reanudar y al gestionar). */
+function usePauseMotiveReasonId(
+  action: ActionKey,
+  ticketId: string,
+): string | null {
+  const needed = action === 'resume' || action === 'advance_pause'
+  const state = useTicketPauseState(needed ? ticketId : undefined)
+  return state.data?.motiveId ?? null
 }
 
 /** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
@@ -182,7 +183,7 @@ export function TicketActionForm({
   const priorities = usePriorities()
   const reasons = useReasons(reasonUseFor(action))
   const serviceTypes = useServiceTypes()
-  const parentReasonId = useParentReasonId(action, ticketId)
+  const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY)
   const mutation = mutationFor(action, actions)
   const submission = useActionSubmission({
@@ -212,7 +213,7 @@ export function TicketActionForm({
       reasons={reasons.data ?? []}
       priorities={priorities.data ?? []}
       serviceTypes={serviceTypes.data ?? []}
-      parentReasonId={parentReasonId}
+      motiveReasonId={motiveReasonId}
       values={values}
       onChange={onChange}
       error={state.error}

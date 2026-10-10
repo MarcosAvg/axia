@@ -154,6 +154,15 @@ export interface TicketPauseStep {
   actorName: string | null
 }
 
+export interface TicketPauseState {
+  pauseId: string
+  motiveId: string
+  motiveName: string
+  currentId: string
+  currentName: string
+  openedAt: string
+}
+
 export interface TicketParticipant {
   technicianId: string
   technicianName: string

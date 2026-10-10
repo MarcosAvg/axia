@@ -37,3 +37,31 @@ export function childReasons(
 ): ReasonOption[] {
   return reasons.filter((reason) => reason.parentId === (parentId ?? null))
 }
+
+/** Motivos raíz (sin padre): los que se ofrecen al pausar. */
+export function rootReasons(reasons: ReasonOption[]): ReasonOption[] {
+  return reasons.filter((reason) => reason.parentId === null)
+}
+
+/** Todos los descendientes de un nodo (excluye al propio nodo). */
+export function descendantReasons(
+  reasons: ReasonOption[],
+  ancestorId: string | null | undefined,
+): ReasonOption[] {
+  if (!ancestorId) return []
+  const childrenOf = new Map<string, ReasonOption[]>()
+  for (const reason of reasons) {
+    if (!reason.parentId) continue
+    const list = childrenOf.get(reason.parentId) ?? []
+    list.push(reason)
+    childrenOf.set(reason.parentId, list)
+  }
+  const result: ReasonOption[] = []
+  const stack = [...(childrenOf.get(ancestorId) ?? [])]
+  while (stack.length > 0) {
+    const current = stack.pop() as ReasonOption
+    result.push(current)
+    stack.push(...(childrenOf.get(current.id) ?? []))
+  }
+  return result
+}

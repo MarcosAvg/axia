@@ -68,14 +68,14 @@ test('el técnico pausa, avanza el subestado y reanuda', async ({ page }) => {
   await clickAndWait(page, 'Confirmar', 'ticket_start')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 
-  // Pausa con un motivo padre.
+  // Pausa con un motivo (nodo raíz).
   await page.getByRole('button', { name: 'Pausar' }).click()
   await page.getByLabel('Motivo').selectOption({ label: 'Falta de material' })
   await clickAndWait(page, 'Confirmar', 'ticket_pause')
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Subestado actual').first()).toBeVisible()
 
-  // Avanza a un hijo directo.
+  // Gestiona la pausa: cambia el subestado dentro del motivo.
   await page.getByRole('button', { name: 'Avanzar subestado' }).click()
   await page
     .getByLabel('Nuevo subestado')
@@ -83,11 +83,9 @@ test('el técnico pausa, avanza el subestado y reanuda', async ({ page }) => {
   await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
   await expect(page.getByText('Por solicitar').first()).toBeVisible()
 
-  // Reanuda (acción de un clic).
-  const resumed = page.waitForResponse((response) =>
-    response.url().includes('/rpc/ticket_resume'),
-  )
+  // Reanuda: exige un subestado (hijo directo del motivo).
   await page.getByRole('button', { name: 'Reanudar' }).click()
-  await resumed
+  await page.getByLabel('Nuevo subestado').selectOption({ label: 'Solicitado' })
+  await clickAndWait(page, 'Confirmar', 'ticket_resume')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 })

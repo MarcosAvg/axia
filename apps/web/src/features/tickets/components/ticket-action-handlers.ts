@@ -62,6 +62,7 @@ export function mutationFor(action: ActionKey, actions: Mutations) {
     comment: actions.comment,
     pause: actions.pause,
     advance_pause: actions.advancePause,
+    resume: actions.resume,
     reject: actions.reject,
     cancel: actions.cancel,
     open_claim: actions.openClaim,
@@ -90,6 +91,11 @@ function pauseHandlers(
           { reasonId: values.reasonId, note },
           options,
         )
+      }
+    },
+    resume: () => {
+      if (values.reasonId) {
+        actions.resume.mutate({ reasonId: values.reasonId }, options)
       }
     },
   }

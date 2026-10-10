@@ -2,6 +2,7 @@
 
 export const pauseMessages = {
   title: 'Pausa',
+  motive: 'Motivo',
   current: 'Subestado actual',
   history: 'Pasos del subestado',
   substate: 'Nuevo subestado',

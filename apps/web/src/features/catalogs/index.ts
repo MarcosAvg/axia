@@ -25,4 +25,9 @@ export type {
   SubcategoryOption,
   TechnicianOption,
 } from './domain/types'
-export { childReasons, indentReasons } from './domain/reasons'
+export {
+  childReasons,
+  descendantReasons,
+  indentReasons,
+  rootReasons,
+} from './domain/reasons'
