@@ -2,16 +2,11 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { toast } from 'sonner'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { DataTable } from '@/components/shared/data-table'
+import type { DataTableColumn } from '@/components/shared/data-table'
+import { FormSection } from '@/components/shared/form-section'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { TICKET_STATUSES, statusLabels } from '@/features/tickets'
 import type { TicketStatus } from '@/features/tickets'
 import { formatDateTime } from '@/lib/format'
@@ -34,6 +29,10 @@ const statusOptions = TICKET_STATUSES.map((value) => ({
   value,
   label: statusLabels[value],
 }))
+
+function EmptyRow() {
+  return <p className="text-sm text-muted-foreground">{t.empty}</p>
+}
 
 interface StatusMapValues {
   system: string
@@ -113,133 +112,97 @@ function StatusMapForm() {
   return (
     <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
       <StatusMapFields values={values} onChange={onChange} />
-      <Button type="submit" disabled={setMap.isPending} className="min-h-11">
+      <Button type="submit" disabled={setMap.isPending}>
         {t.save}
       </Button>
     </form>
   )
 }
 
-function StatusMapTable({ rows }: { rows: StatusMapRow[] }) {
-  if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t.empty}</p>
-  }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.system}</TableHead>
-          <TableHead>{t.externalStatus}</TableHead>
-          <TableHead>{t.ticketStatus}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>{row.system}</TableCell>
-            <TableCell>{row.externalStatus}</TableCell>
-            <TableCell>{statusLabels[row.ticketStatus]}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+const statusMapColumns: DataTableColumn<StatusMapRow>[] = [
+  { id: 'system', header: t.system, cell: (row) => row.system },
+  {
+    id: 'externalStatus',
+    header: t.externalStatus,
+    cell: (row) => row.externalStatus,
+  },
+  {
+    id: 'ticketStatus',
+    header: t.ticketStatus,
+    cell: (row) => statusLabels[row.ticketStatus],
+  },
+]
 
-function BatchesTable({ rows }: { rows: ImportBatchRow[] }) {
-  if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t.empty}</p>
-  }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.system}</TableHead>
-          <TableHead>{t.mode}</TableHead>
-          <TableHead>{t.status}</TableHead>
-          <TableHead>{t.started}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>{row.system}</TableCell>
-            <TableCell>
-              {row.mode === 'commit' ? t.modes.commit : t.modes.dry_run}
-            </TableCell>
-            <TableCell>{row.status}</TableCell>
-            <TableCell>{formatDateTime(row.startedAt)}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+const batchColumns: DataTableColumn<ImportBatchRow>[] = [
+  { id: 'system', header: t.system, cell: (row) => row.system },
+  {
+    id: 'mode',
+    header: t.mode,
+    cell: (row) => (row.mode === 'commit' ? t.modes.commit : t.modes.dry_run),
+  },
+  { id: 'status', header: t.status, cell: (row) => row.status },
+  {
+    id: 'started',
+    header: t.started,
+    cell: (row) => formatDateTime(row.startedAt),
+  },
+]
 
 function taskStateLabel(status: string): string {
   const states = t.taskStates as Record<string, string>
   return states[status] ?? status
 }
 
-function TasksTable({
-  rows,
-  onResolve,
-}: {
-  rows: IntegrationTaskRow[]
-  onResolve: (id: string) => void
-}) {
-  if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t.empty}</p>
-  }
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.taskTicket}</TableHead>
-          <TableHead>{t.taskDescription}</TableHead>
-          <TableHead>{t.taskDue}</TableHead>
-          <TableHead>{t.taskStatus}</TableHead>
-          <TableHead />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>{row.folio ?? '—'}</TableCell>
-            <TableCell>{row.description}</TableCell>
-            <TableCell>{row.dueDate ?? '—'}</TableCell>
-            <TableCell>{taskStateLabel(row.status)}</TableCell>
-            <TableCell>
-              {row.status === 'open' ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-11"
-                  onClick={() => onResolve(row.id)}
-                >
-                  {t.resolve}
-                </Button>
-              ) : null}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
+function tagColumns(
+  onResolve: (id: string) => void,
+): DataTableColumn<IntegrationTaskRow>[] {
+  return [
+    { id: 'folio', header: t.taskTicket, cell: (row) => row.folio ?? '—' },
+    {
+      id: 'description',
+      header: t.taskDescription,
+      cell: (row) => row.description,
+    },
+    { id: 'due', header: t.taskDue, cell: (row) => row.dueDate ?? '—' },
+    {
+      id: 'status',
+      header: t.taskStatus,
+      cell: (row) => taskStateLabel(row.status),
+    },
+    {
+      id: 'actions',
+      header: '',
+      align: 'right',
+      cell: (row) =>
+        row.status === 'open' ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onResolve(row.id)}
+          >
+            {t.resolve}
+          </Button>
+        ) : null,
+    },
+  ]
 }
 
 function IntegrationTasks() {
   const tasks = useIntegrationTasks()
   const resolve = useResolveIntegrationTask()
   return (
-    <section className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium">{t.tasks}</h3>
+    <FormSection title={t.tasks}>
       {tasks.isLoading ? <LoadingList rows={2} /> : null}
       {tasks.isError ? <ErrorAlert message={adminMessages.list.error} /> : null}
       {tasks.data ? (
-        <TasksTable rows={tasks.data} onResolve={(id) => resolve.mutate(id)} />
+        <DataTable
+          columns={tagColumns((id) => resolve.mutate(id))}
+          rows={tasks.data}
+          getRowId={(row) => row.id}
+          empty={<EmptyRow />}
+        />
       ) : null}
-    </section>
+    </FormSection>
   )
 }
 
@@ -251,23 +214,35 @@ export function IntegrationManager() {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-muted-foreground">{t.help}</p>
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">{t.statusMap}</h3>
+      <FormSection title={t.statusMap}>
         <StatusMapForm />
         {statusMaps.isLoading ? <LoadingList rows={2} /> : null}
         {statusMaps.isError ? (
           <ErrorAlert message={adminMessages.list.error} />
         ) : null}
-        {statusMaps.data ? <StatusMapTable rows={statusMaps.data} /> : null}
-      </section>
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">{t.batches}</h3>
+        {statusMaps.data ? (
+          <DataTable
+            columns={statusMapColumns}
+            rows={statusMaps.data}
+            getRowId={(row) => row.id}
+            empty={<EmptyRow />}
+          />
+        ) : null}
+      </FormSection>
+      <FormSection title={t.batches}>
         {batches.isLoading ? <LoadingList rows={2} /> : null}
         {batches.isError ? (
           <ErrorAlert message={adminMessages.list.error} />
         ) : null}
-        {batches.data ? <BatchesTable rows={batches.data} /> : null}
-      </section>
+        {batches.data ? (
+          <DataTable
+            columns={batchColumns}
+            rows={batches.data}
+            getRowId={(row) => row.id}
+            empty={<EmptyRow />}
+          />
+        ) : null}
+      </FormSection>
       <IntegrationTasks />
     </div>
   )

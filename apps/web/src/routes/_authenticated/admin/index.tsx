@@ -16,11 +16,6 @@ export const Route = createFileRoute('/_authenticated/admin/')({
   component: AdminHome,
 })
 
-const cardClass =
-  'flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50'
-
-const gridClass = 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3'
-
 type AdminPath =
   | '/admin/roles'
   | '/admin/usuarios'
@@ -29,63 +24,112 @@ type AdminPath =
   | '/admin/integraciones'
   | '/admin/configuracion'
 
-function AdminLink({
-  to,
-  icon: Icon,
-  title,
-}: {
-  to: AdminPath
+interface AdminEntry {
   icon: LucideIcon
   title: string
-}) {
+  description: string
+  to: AdminPath | '/admin/catalogos'
+  search?: { catalog: string }
+}
+
+const { nav, descriptions } = adminMessages
+
+const groups: { label: string; items: AdminEntry[] }[] = [
+  {
+    label: 'Catálogos y operación',
+    items: [
+      {
+        icon: LibraryIcon,
+        title: nav.catalogs,
+        description: descriptions.catalogs,
+        to: '/admin/catalogos',
+        search: { catalog: 'teams' },
+      },
+      {
+        icon: CalendarDaysIcon,
+        title: nav.calendars,
+        description: descriptions.calendars,
+        to: '/admin/calendarios',
+      },
+      {
+        icon: PlugIcon,
+        title: nav.integrations,
+        description: descriptions.integrations,
+        to: '/admin/integraciones',
+      },
+      {
+        icon: SettingsIcon,
+        title: nav.settings,
+        description: descriptions.settings,
+        to: '/admin/configuracion',
+      },
+    ],
+  },
+  {
+    label: 'Acceso',
+    items: [
+      {
+        icon: ShieldCheckIcon,
+        title: nav.roles,
+        description: descriptions.roles,
+        to: '/admin/roles',
+      },
+      {
+        icon: UsersIcon,
+        title: nav.users,
+        description: descriptions.users,
+        to: '/admin/usuarios',
+      },
+      {
+        icon: Building2Icon,
+        title: nav.scopes,
+        description: descriptions.scopes,
+        to: '/admin/ambitos',
+      },
+    ],
+  },
+]
+
+function AdminCard({ entry }: { entry: AdminEntry }) {
+  const Icon = entry.icon
   return (
-    <Link to={to} className={cardClass}>
-      <Icon className="size-5 text-muted-foreground" />
-      <span className="font-medium">{title}</span>
+    <Link
+      to={entry.to}
+      search={entry.search}
+      className="flex items-start gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
+    >
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+        <Icon className="size-5" />
+      </span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="font-medium">{entry.title}</span>
+        <span className="text-sm text-muted-foreground">
+          {entry.description}
+        </span>
+      </span>
     </Link>
   )
 }
 
 function AdminHome() {
-  const { nav } = adminMessages
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={adminMessages.title}
         description={adminMessages.subtitle}
       />
-      <div className={gridClass}>
-        <Link
-          to="/admin/catalogos"
-          search={{ catalog: 'teams' }}
-          className={cardClass}
-        >
-          <LibraryIcon className="size-5 text-muted-foreground" />
-          <span className="font-medium">{nav.catalogs}</span>
-        </Link>
-        <AdminLink to="/admin/roles" icon={ShieldCheckIcon} title={nav.roles} />
-        <AdminLink to="/admin/usuarios" icon={UsersIcon} title={nav.users} />
-        <AdminLink
-          to="/admin/ambitos"
-          icon={Building2Icon}
-          title={nav.scopes}
-        />
-        <AdminLink
-          to="/admin/calendarios"
-          icon={CalendarDaysIcon}
-          title={nav.calendars}
-        />
-        <AdminLink
-          to="/admin/integraciones"
-          icon={PlugIcon}
-          title={nav.integrations}
-        />
-        <AdminLink
-          to="/admin/configuracion"
-          icon={SettingsIcon}
-          title={nav.settings}
-        />
-      </div>
+      {groups.map((group) => (
+        <section key={group.label} className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            {group.label}
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {group.items.map((entry) => (
+              <AdminCard key={entry.to} entry={entry} />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   )
 }

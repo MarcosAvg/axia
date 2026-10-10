@@ -1,3 +1,4 @@
+import { TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { TechnicianCategory } from '../domain/access'
 import { adminMessages } from '../i18n'
@@ -11,7 +12,6 @@ interface DesignationRowProps {
 
 /** Fila de una designación: técnico y categoría. */
 export function DesignationRow({
-  designation,
   technicianName,
   categoryName,
   onRemove,
@@ -19,10 +19,7 @@ export function DesignationRow({
   const { scopes: t } = adminMessages
 
   return (
-    <li
-      key={`${designation.technicianId}-${designation.categoryId}`}
-      className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm"
-    >
+    <li className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
       <span>
         {technicianName}
         {' · '}
@@ -31,10 +28,11 @@ export function DesignationRow({
       <Button
         type="button"
         variant="ghost"
-        className="min-h-11"
+        size="icon-sm"
+        aria-label={`${t.remove}: ${technicianName}`}
         onClick={onRemove}
       >
-        {t.remove}
+        <TrashIcon />
       </Button>
     </li>
   )

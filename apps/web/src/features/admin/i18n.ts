@@ -97,6 +97,7 @@ export const adminMessages = {
     scope: 'Ámbito',
     none: 'Sin permiso',
     createTitle: 'Nuevo rol',
+    createHelp: 'Define el nombre interno y la etiqueta visible del rol.',
     listLabel: 'Roles',
   },
   permissionGroups: {
@@ -113,7 +114,10 @@ export const adminMessages = {
   } as Record<string, string>,
   users: {
     title: 'Usuarios',
+    search: 'Buscar por nombre o rol…',
     roles: 'Roles',
+    editRoles: 'Editar roles',
+    rolesHelp: 'Marca los roles que tendrá la cuenta.',
     active: 'Activo',
     links: 'Vínculos con los catálogos',
     requester: 'Solicitante del que es cuenta',
@@ -150,6 +154,8 @@ export const adminMessages = {
     empty: 'Sin registros todavía.',
     loading: 'Cargando…',
     error: 'No se pudo cargar.',
+    search: 'Buscar…',
+    results: 'registros',
   },
   descriptions: {
     catalogs: 'Catálogos maestros y motivos jerárquicos.',
@@ -164,7 +170,11 @@ export const adminMessages = {
   form: {
     newTitle: 'Nuevo registro',
     editTitle: 'Editar registro',
+    newHelp: 'Completa los datos del registro.',
+    editHelp: 'Actualiza los datos del registro.',
     required: 'Este campo es obligatorio.',
+    dataSection: 'Datos',
+    optionsSection: 'Opciones',
   },
   titles: {
     teams: 'Equipos',

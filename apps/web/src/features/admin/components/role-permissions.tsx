@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { fieldSelectClass } from '@/components/shared/form-fields'
 import { SCOPES, groupPermissions } from '../domain/access'
 import type {
   Permission,
@@ -23,8 +24,7 @@ interface RolePermissionsProps {
   onRemove: (permissionId: string) => void
 }
 
-const selectClass =
-  'min-h-9 rounded-lg border border-input bg-transparent px-2 text-sm dark:bg-input/30'
+const selectClass = fieldSelectClass
 
 function scopeOf(
   assignments: RolePermission[],

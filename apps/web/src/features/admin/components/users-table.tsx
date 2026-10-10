@@ -1,102 +1,122 @@
+import { UsersIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
-import type { DataTableColumn } from '@/components/shared/data-table'
+import type { DataTableColumn, SortState } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
 import type { Profile, Role, UserRole } from '../domain/access'
+import { roleLabelsOf } from '../domain/user-list'
 import { adminMessages } from '../i18n'
+import { RowActions } from './row-actions'
+import { StatusSwitch } from './status-switch'
 
-function RoleChips({ roles }: { roles: Role[] }) {
-  if (roles.length === 0) {
+interface UsersTableProps {
+  profiles: Profile[]
+  roles: Role[]
+  assignments: UserRole[]
+  sort: SortState | null
+  onSortChange: (key: string) => void
+  onToggleActive: (profile: Profile) => void
+  onEditRoles: (profile: Profile) => void
+}
+
+function RoleChips({ labels }: { labels: string[] }) {
+  if (labels.length === 0) {
     return <span className="text-muted-foreground">—</span>
   }
   return (
     <div className="flex flex-wrap gap-1">
-      {roles.map((role) => (
-        <Badge key={role.id} variant="secondary">
-          {role.label}
+      {labels.map((label) => (
+        <Badge key={label} variant="secondary">
+          {label}
         </Badge>
       ))}
     </div>
   )
 }
 
-interface UsersTableProps {
-  profiles: Profile[]
-  roles: Role[]
-  assignments: UserRole[]
-  onToggleActive: (profile: Profile) => void
-  onEditRoles: (profile: Profile) => void
-}
-
-function assignedRoles(
+function buildColumns(
   roles: Role[],
   assignments: UserRole[],
-  userId: string,
-): Role[] {
-  return roles.filter((role) =>
-    assignments.some(
-      (item) => item.userId === userId && item.roleId === role.id,
-    ),
-  )
-}
-
-/** Tabla de usuarios: estado y roles, con acción para editar roles. */
-export function UsersTable({
-  profiles,
-  roles,
-  assignments,
-  onToggleActive,
-  onEditRoles,
-}: UsersTableProps) {
-  const { users } = adminMessages
-
-  const columns: DataTableColumn<Profile>[] = [
+  onToggleActive: (profile: Profile) => void,
+  onEditRoles: (profile: Profile) => void,
+): DataTableColumn<Profile>[] {
+  const { users, list, fields } = adminMessages
+  return [
     {
-      id: 'name',
-      header: adminMessages.fields.full_name,
+      id: 'full_name',
+      header: fields.full_name,
+      sortable: true,
       cell: (profile) => (
         <span className="font-medium">{profile.fullName}</span>
-      ),
-    },
-    {
-      id: 'active',
-      header: users.active,
-      cell: (profile) => (
-        <Switch
-          checked={profile.active}
-          aria-label={`${users.active}: ${profile.fullName}`}
-          onCheckedChange={() => onToggleActive(profile)}
-        />
       ),
     },
     {
       id: 'roles',
       header: users.roles,
       cell: (profile) => (
-        <RoleChips roles={assignedRoles(roles, assignments, profile.id)} />
+        <RoleChips labels={roleLabelsOf(roles, assignments, profile.id)} />
+      ),
+    },
+    {
+      id: 'active',
+      header: list.active,
+      align: 'center',
+      className: 'w-24',
+      sortable: true,
+      cell: (profile) => (
+        <div className="flex justify-center">
+          <StatusSwitch
+            active={profile.active}
+            name={profile.fullName}
+            onToggle={() => onToggleActive(profile)}
+          />
+        </div>
       ),
     },
     {
       id: 'actions',
       header: '',
+      align: 'right',
+      className: 'w-14',
       cell: (profile) => (
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-9"
-          onClick={() => onEditRoles(profile)}
-        >
-          {users.roles}
-        </Button>
+        <div className="flex justify-end">
+          <RowActions
+            active={profile.active}
+            name={profile.fullName}
+            editLabel={users.editRoles}
+            onEdit={() => onEditRoles(profile)}
+            onToggle={() => onToggleActive(profile)}
+          />
+        </div>
       ),
     },
   ]
+}
+
+/** Tabla de usuarios: nombre, roles, estado y acciones. */
+export function UsersTable({
+  profiles,
+  roles,
+  assignments,
+  sort,
+  onSortChange,
+  onToggleActive,
+  onEditRoles,
+}: UsersTableProps) {
+  if (profiles.length === 0) {
+    return (
+      <div className="rounded-xl border bg-card">
+        <EmptyState icon={UsersIcon} title={adminMessages.list.empty} />
+      </div>
+    )
+  }
 
   return (
     <DataTable
-      columns={columns}
+      columns={buildColumns(roles, assignments, onToggleActive, onEditRoles)}
       rows={profiles}
+      sort={sort}
+      onSortChange={onSortChange}
       getRowId={(profile) => profile.id}
     />
   )

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminField } from '../domain/catalogs'
 import { initialValues, toAdminValues } from '../domain/form-values'
@@ -8,6 +7,8 @@ import type { RawValues } from '../domain/form-values'
 import type { AdminOption } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 import { CatalogFieldInput } from './catalog-field-input'
+import { EntityForm } from './entity-form'
+import { FormGroup } from './form-group'
 
 interface CatalogFormProps {
   fields: AdminField[]
@@ -16,6 +17,21 @@ interface CatalogFormProps {
   isSaving: boolean
   onSave: (values: Record<string, string | number | boolean | null>) => void
   onCancel: () => void
+}
+
+function groupFields(fields: AdminField[]) {
+  return {
+    data: fields.filter(
+      (field) =>
+        field.kind !== 'boolean' &&
+        field.kind !== 'number' &&
+        field.kind !== 'minutes',
+    ),
+    values: fields.filter(
+      (field) => field.kind === 'number' || field.kind === 'minutes',
+    ),
+    booleans: fields.filter((field) => field.kind === 'boolean'),
+  }
 }
 
 /** Formulario de alta/edición de un registro de catálogo. */
@@ -28,51 +44,54 @@ export function CatalogForm({
   onCancel,
 }: CatalogFormProps) {
   const [raw, setRaw] = useState<RawValues>(() => initialValues(fields, row))
-  const [errorField, setErrorField] = useState<string | null>(null)
-  const { form, actions } = adminMessages
+  const [invalid, setInvalid] = useState<string[]>([])
+  const { form } = adminMessages
+  const groups = groupFields(fields)
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const { values, error } = toAdminValues(fields, raw)
-    setErrorField(error)
-    if (!error) onSave(values)
+    const { values, errors } = toAdminValues(fields, raw)
+    setInvalid(errors)
+    if (errors.length === 0) onSave(values)
   }
 
+  const onChange = (name: string, value: string | number | boolean) =>
+    setRaw((current) => ({ ...current, [name]: value }))
+
+  const renderField = (field: AdminField) => (
+    <CatalogFieldInput
+      key={field.name}
+      field={field}
+      value={raw[field.name] ?? ''}
+      options={field.optionsTable ? optionsFor(field.optionsTable) : []}
+      error={invalid.includes(field.name) ? form.required : undefined}
+      onChange={(value) => onChange(field.name, value)}
+    />
+  )
+
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-4 rounded-xl border p-4"
-    >
-      <h3 className="text-sm font-medium">
-        {row ? form.editTitle : form.newTitle}
-      </h3>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {fields.map((field) => (
-          <CatalogFieldInput
-            key={field.name}
-            field={field}
-            value={raw[field.name] ?? ''}
-            options={field.optionsTable ? optionsFor(field.optionsTable) : []}
-            error={errorField === field.name ? form.required : undefined}
-            onChange={(value) =>
-              setRaw((current) => ({ ...current, [field.name]: value }))
-            }
-          />
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={isSaving} className="min-h-11">
-          {isSaving ? actions.saving : actions.save}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-11"
-          onClick={onCancel}
-        >
-          {actions.cancel}
-        </Button>
-      </div>
-    </form>
+    <EntityForm onSubmit={submit} onCancel={onCancel} isSaving={isSaving}>
+      {groups.data.length > 0 ? (
+        <FormGroup title={form.dataSection}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {groups.data.map(renderField)}
+          </div>
+        </FormGroup>
+      ) : null}
+      {groups.values.length > 0 || groups.booleans.length > 0 ? (
+        <FormGroup title={form.optionsSection}>
+          {groups.values.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {groups.values.map(renderField)}
+            </div>
+          ) : null}
+          {groups.booleans.length > 0 ? (
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              {groups.booleans.map(renderField)}
+            </div>
+          ) : null}
+        </FormGroup>
+      ) : null}
+    </EntityForm>
   )
 }

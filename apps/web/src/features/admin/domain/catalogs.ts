@@ -87,6 +87,7 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
         key: 'target_minutes',
         label: fields.target_minutes,
         format: 'minutes',
+        align: 'right',
       },
       activeColumn,
     ],
@@ -117,11 +118,12 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
     title: titles.priorities,
     columns: [
       nameColumn,
-      { key: 'position', label: fields.position },
+      { key: 'position', label: fields.position, align: 'right' },
       {
         key: 'target_minutes',
         label: fields.target_minutes,
         format: 'minutes',
+        align: 'right',
       },
       activeColumn,
     ],

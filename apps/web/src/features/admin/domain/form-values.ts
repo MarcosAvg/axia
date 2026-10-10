@@ -30,29 +30,36 @@ function textOf(value: RawValues[string] | undefined): string {
 function valueFor(
   field: AdminField,
   raw: RawValues[string] | undefined,
-): { value: string | number | boolean | null } | { error: true } {
+): { value: string | number | boolean | null } | { invalid: true } {
   if (field.kind === 'boolean') return { value: Boolean(raw) }
   const text = textOf(raw)
   if (field.kind === 'number' || field.kind === 'minutes') {
-    return { value: text === '' ? null : Number(text) }
+    if (text === '') return { value: null }
+    const parsed = Number(text)
+    if (!Number.isFinite(parsed)) return { invalid: true }
+    return { value: parsed }
   }
-  if (field.required && text === '') return { error: true }
+  if (field.required && text === '') return { invalid: true }
   return { value: text === '' ? null : text }
 }
 
-/** Convierte los valores del formulario a un objeto para la base; señala el campo inválido. */
+/** Convierte el formulario a un objeto para la base y lista los campos inválidos. */
 export function toAdminValues(
   fields: AdminField[],
   raw: RawValues,
 ): {
   values: Record<string, string | number | boolean | null>
-  error: string | null
+  errors: string[]
 } {
   const values: Record<string, string | number | boolean | null> = {}
+  const errors: string[] = []
   for (const field of fields) {
     const result = valueFor(field, raw[field.name])
-    if ('error' in result) return { values: {}, error: field.name }
+    if ('invalid' in result) {
+      errors.push(field.name)
+      continue
+    }
     values[field.name] = result.value
   }
-  return { values, error: null }
+  return { values, errors }
 }

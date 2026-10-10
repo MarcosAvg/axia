@@ -34,14 +34,24 @@ describe('initialValues', () => {
 })
 
 describe('toAdminValues', () => {
-  it('señala el campo obligatorio vacío', () => {
+  it('señala los campos obligatorios vacíos', () => {
     const result = toAdminValues(fields, {
       name: '   ',
       active: true,
       position: '',
       team_id: '',
     })
-    expect(result.error).toBe('name')
+    expect(result.errors).toEqual(['name'])
+  })
+
+  it('señala un número inválido', () => {
+    const result = toAdminValues(fields, {
+      name: 'Ana',
+      active: true,
+      position: 'no-es-número',
+      team_id: '',
+    })
+    expect(result.errors).toEqual(['position'])
   })
 
   it('convierte números y vacíos a null', () => {
@@ -51,7 +61,7 @@ describe('toAdminValues', () => {
       position: '5',
       team_id: '',
     })
-    expect(result.error).toBeNull()
+    expect(result.errors).toEqual([])
     expect(result.values.position).toBe(5)
     expect(result.values.team_id).toBeNull()
     expect(result.values.active).toBe(true)

@@ -30,7 +30,6 @@ export function LinksManager() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-medium">{users.links}</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-medium">{users.requester}</h3>

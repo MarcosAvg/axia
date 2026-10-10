@@ -1,10 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { adminMessages } from '../i18n'
+import { EntityDialog } from './entity-dialog'
 import { RoleCreateForm } from './role-create-form'
 
 interface RoleCreateDialogProps {
@@ -20,22 +15,19 @@ export function RoleCreateDialog({
   onClose,
 }: RoleCreateDialogProps) {
   return (
-    <Dialog
+    <EntityDialog
       open
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
+      title={adminMessages.roles.createTitle}
+      description={adminMessages.roles.createHelp}
     >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{adminMessages.roles.createTitle}</DialogTitle>
-        </DialogHeader>
-        <RoleCreateForm
-          onCreate={onCreate}
-          isSaving={isSaving}
-          onClose={onClose}
-        />
-      </DialogContent>
-    </Dialog>
+      <RoleCreateForm
+        onCreate={onCreate}
+        isSaving={isSaving}
+        onClose={onClose}
+      />
+    </EntityDialog>
   )
 }
