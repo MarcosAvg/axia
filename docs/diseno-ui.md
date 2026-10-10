@@ -207,8 +207,9 @@ ADR 0059).
 Patrones de lista:
 
 - **Tiquets**: tabla en escritorio (`lg+`) y tarjetas en móvil, en el mismo panel.
-- **Detalle de tiquet**: dos columnas; contenido a la izquierda y rail de acciones/metadatos a la
-  derecha.
+- **Detalle de tiquet**: dos columnas en ~**60/40** (contenido principal a la izquierda y rail de
+  actividad/metadatos a la derecha, con un mínimo de ~20rem para el timeline); el rail es *sticky* en
+  escritorio. El ancho máximo de la página autenticada es de 1800 px.
 - Las **insignias de estado** usan tokens semánticos (`info`, `warning`, `success`,
   `destructive`) y siguen el tema activo.
 

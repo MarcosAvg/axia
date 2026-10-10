@@ -192,7 +192,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <TicketHeader ticket={ticket.data} />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
         <TicketMain
           ticketId={ticketId}
           ticket={ticket.data}
