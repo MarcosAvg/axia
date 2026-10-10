@@ -147,6 +147,11 @@ disparador) y `active` cuando es catálogo. RLS en todas.
 - **`reasons`**: `use reason_use`, `parent_id → reasons null`, `name text`, `position smallint`,
   `requires_note boolean`, `allows_estimated_date boolean`, `clock_class clock_class`, `active`,
   `unique (use, parent_id, name)`; el hijo hereda el `use` del padre (restricción con disparador).
+- **Importación de catálogos** (ADR 0059): `catalog_import_specs` (lista blanca: `catalog_key`,
+  `table_name`, `columns jsonb`, `match_columns jsonb`), `catalog_import_runs` (archivo, modo,
+  estado, resumen, autor) y `catalog_import_rows` (fila cruda, resultado y error). Se escriben solo
+  por las RPCs `catalog_import_start` / `catalog_import_sheet` / `catalog_import_finish` (permiso
+  `catalog.manage`); la lectura está sujeta a RLS.
 
 ### 3.4 Tiquets y su ciclo
 
