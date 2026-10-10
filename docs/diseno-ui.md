@@ -183,7 +183,7 @@ secciones con roles y zona horaria.
 Patrones de administración (ADR 0046): encabezado único por pantalla (`PageHeader`); catálogos y
 usuarios como `DataTable`; **roles en master-detail** con permiso agrupados por área y alta en
 modal; **usuarios** con modal de roles; **ámbitos** en pestañas; **configuración** por secciones con
-barra de guardado.
+barra de guardado, incluida la **visibilidad del solicitante** (casillas por tipo de evento, ADR 0055).
 
 Patrones de lista:
 

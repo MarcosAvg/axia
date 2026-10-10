@@ -1,5 +1,6 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { SelectField, TextField } from '@/components/shared/form-fields'
+import { EVENT_TYPES, eventLabels } from '@/features/tickets'
 import { useCalendars } from '../hooks/use-calendars'
 import type { SettingsFormValues } from '../domain/settings'
 import { adminMessages } from '../i18n'
@@ -108,6 +109,38 @@ export function TimeFields({ register, errors }: SettingsFieldsProps) {
         error={errors.slaClockMode?.message}
         {...register('slaClockMode')}
       />
+    </div>
+  )
+}
+
+/** Tipos de evento que el solicitante ve en la línea de tiempo (RN-23). */
+export function VisibilityFields({ register, errors }: SettingsFieldsProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <span className="text-sm font-medium">
+        {settings.requesterVisibleEvents}
+      </span>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {EVENT_TYPES.map((type) => (
+          <label key={type} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              value={type}
+              className="size-4 rounded border-input accent-primary"
+              {...register('requesterVisibleEventTypes')}
+            />
+            {eventLabels[type]}
+          </label>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {settings.requesterVisibleEventsHelp}
+      </p>
+      {errors.requesterVisibleEventTypes ? (
+        <p className="text-sm text-destructive">
+          {settings.requesterVisibleEventsError}
+        </p>
+      ) : null}
     </div>
   )
 }

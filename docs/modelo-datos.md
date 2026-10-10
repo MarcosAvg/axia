@@ -353,7 +353,9 @@ C=espera inicio, D=trabajo activo, E=pausa, F=validación, G=reclamación/reasig
   usuario), `buildings` (edificios del ámbito del supervisor), `all` (admin).
 - **Visibilidad al solicitante (RN-23)**: las notas son internas; el solicitante solo ve los
   `event_type` de `instance_settings.requester_visible_event_types`. La vista de eventos aplica ese
-  filtro; `ticket_events` no se expone crudo al rol solicitante.
+  filtro; `ticket_events` no se expone crudo al rol solicitante. El conjunto se **configura** en
+  Administración → Configuración y por defecto incluye los cambios de estado, la recaptura y las
+  reclamaciones.
 - La **alerta de duplicados** no expone más campos que `duplicate_shown_fields`.
 - Bitácora, `evidence`, `time_spans` e `idempotency_keys`: solo lectura para roles con permiso;
   sin `update`/`delete` (disparador de bloqueo).

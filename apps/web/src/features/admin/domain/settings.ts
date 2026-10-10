@@ -1,6 +1,16 @@
+import { EVENT_TYPES } from '@/features/tickets'
+import type { EventType } from '@/features/tickets'
+
 export type ValidationPolicy = 'requester' | 'supervisor' | 'both'
 export type EvidencePolicy = 'optional' | 'recommended' | 'required'
 export type SlaClockMode = 'calendar' | 'laboral'
+
+const EVENT_TYPE_SET = new Set<string>(EVENT_TYPES)
+
+/** Verdadero si el valor es un tipo de evento conocido. */
+export function isEventType(value: string): value is EventType {
+  return EVENT_TYPE_SET.has(value)
+}
 
 const SLAL_CLOCK_MODES: SlaClockMode[] = ['calendar', 'laboral']
 
@@ -37,6 +47,7 @@ export interface InstanceSettings {
   timezone: string
   defaultCalendarId: string | null
   slaClockMode: SlaClockMode
+  requesterVisibleEventTypes: EventType[]
 }
 
 /** Días a partir de un intervalo de Postgres (p. ej. `1 day`). */
@@ -56,6 +67,7 @@ export interface SettingsFormValues {
   timezone: string
   defaultCalendarId?: string
   slaClockMode: SlaClockMode
+  requesterVisibleEventTypes: EventType[]
 }
 
 export interface SettingsUpdate {
@@ -68,6 +80,7 @@ export interface SettingsUpdate {
   timezone: string
   default_calendar_id: string | null
   sla_clock_mode: SlaClockMode
+  requester_visible_event_types: EventType[]
 }
 
 export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
@@ -81,5 +94,6 @@ export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
     timezone: settings.timezone,
     default_calendar_id: settings.defaultCalendarId,
     sla_clock_mode: settings.slaClockMode,
+    requester_visible_event_types: settings.requesterVisibleEventTypes,
   }
 }

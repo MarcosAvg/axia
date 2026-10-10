@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import {
   intervalToDays,
+  isEventType,
   isEvidencePolicy,
   isSlaClockMode,
   isValidationPolicy,
@@ -12,7 +13,7 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
   const { data, error } = await supabase
     .from('instance_settings')
     .select(
-      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone, default_calendar_id, sla_clock_mode',
+      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone, default_calendar_id, sla_clock_mode, requester_visible_event_types',
     )
     .limit(1)
     .single()
@@ -33,6 +34,8 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
     slaClockMode: isSlaClockMode(data.sla_clock_mode)
       ? data.sla_clock_mode
       : 'calendar',
+    requesterVisibleEventTypes:
+      data.requester_visible_event_types.filter(isEventType),
   }
 }
 
