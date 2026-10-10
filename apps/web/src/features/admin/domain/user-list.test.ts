@@ -1,4 +1,10 @@
-import { filterProfiles, roleLabelsOf } from './user-list'
+import {
+  accountNameFor,
+  filterPeople,
+  filterProfiles,
+  linkedPersonName,
+  roleLabelsOf,
+} from './user-list'
 import type { Profile, Role, UserRole } from './access'
 
 const roles: Role[] = [
@@ -36,5 +42,27 @@ describe('filterProfiles', () => {
     expect(
       filterProfiles(profiles, roles, assignments, 'admin').map((p) => p.id),
     ).toEqual(['u2'])
+  })
+})
+
+describe('vínculos', () => {
+  const people = [
+    { fullName: 'Luis Gómez', userId: 'u1' },
+    { fullName: 'Pedro Solís', userId: null },
+  ]
+
+  it('encuentra la persona vinculada a una cuenta', () => {
+    expect(linkedPersonName(people, 'u1')).toBe('Luis Gómez')
+    expect(linkedPersonName(people, 'u9')).toBeNull()
+  })
+
+  it('encuentra la cuenta de una persona', () => {
+    expect(accountNameFor(profiles, 'u1')).toBe('Luis Gómez')
+    expect(accountNameFor(profiles, null)).toBeNull()
+  })
+
+  it('filtra por nombre de persona o de su cuenta', () => {
+    expect(filterPeople(people, profiles, 'pedro')).toHaveLength(1)
+    expect(filterPeople(people, profiles, 'ana')).toEqual([])
   })
 })
