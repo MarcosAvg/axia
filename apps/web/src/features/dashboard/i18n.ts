@@ -36,7 +36,7 @@ export const dashboardMessages = {
     unassigned: 'Tiquets registrados que aún no tienen técnico asignado.',
     closed: 'Tiquets cerrados en el periodo consultado.',
     activeTime:
-      'Tiempo medio de trabajo activo por tiquet (del inicio a la atención, sin pausas).',
+      'Trabajo activo por tiquet: del inicio a la atención, sin pausas.',
     firstFix: 'Porcentaje de tiquets cerrados sin reapertura posterior.',
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     satisfaction:

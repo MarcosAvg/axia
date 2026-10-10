@@ -3,21 +3,22 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-09
+**Última actualización:** 2026-10-10
 **Fase actual:** Fase 8 — rediseño de interfaz (UI/UX), enfoque escritorio
 
 ## En curso
 
-**Ayuda explicativa en los títulos (cerrado).** Indicadores, gráficas, tablas, encabezados de columna y
-secciones llevan una explicación con **ícono ⓘ + tooltip** (`HintLabel`; `DataTableColumn.hint` para
-columnas). Los textos detallados viven en i18n por feature. Panel (KPIs), Métricas (KPIs, gráficas,
-tablas y columnas), detalle del tiquet (secciones) y Configuración (secciones). Prueba de `HintLabel`.
-`pnpm check` en verde.
+**Vista de tiempos: promedio o acumulado (cerrado).** Métricas y Panel alternan entre **promedio** y
+**tiempo acumulado** (suma) con un control segmentado; la preferencia se guarda (`localStorage`) y
+afecta los KPI de tiempo, las columnas por dimensión y la exportación. Se agregan sumas a
+`MetricsSummary` y `DimensionRow`. Pruebas de dominio, del módulo y del control, y e2e del
+interruptor. **ADR 0064**. `pnpm check` en verde.
 
-_(Histórico)_ Paleta de acentos (ADR 0063), timeline más ancho, subestados de pausa en cascada (0062),
-pausa por motivo/subestado (0061), subestados de pausa (0060), importación de catálogos (0059) y
-rediseños de Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa.
-Regresión visual **opt-in** (`pnpm test:visual`).
+_(Histórico)_ Ayuda explicativa en los títulos (Etapa 33), paleta de acentos (ADR 0063), timeline más
+ancho, subestados de pausa en cascada (0062), pausa por motivo/subestado (0061), subestados de pausa
+(0060), importación de catálogos (0059) y rediseños de Administración (0057) y de
+Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión visual **opt-in**
+(`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -989,3 +990,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   tiquet y Configuración). Textos en i18n por feature (`kpiHints`, `chartHints`, `tableHints`,
   `duplicateHints`, `detailSectionHints`, `settingsHints`). Prueba de `HintLabel`. `pnpm check` en
   verde. Rama `feat/ayuda-titulos`.
+- **Vista de tiempos: promedio o acumulado (Etapa 34)**: control segmentado que alterna los
+  indicadores de tiempo entre **promedio** y **acumulado** (suma), compartido por Métricas y Panel
+  (`TimeAggregationProvider` + `useTimeAggregation`, persistido en `localStorage`; módulo puro
+  `lib/time-aggregation.ts`). Se agregan `sum*` a `MetricsSummary` y `DimensionRow`; afecta KPI,
+  columnas por dimensión y exportación. Se separa `byDimension`/`DimensionRow` a `domain/dimensions.ts`.
+  Pruebas de dominio, del módulo, del control y e2e; baselines visuales regenerados. **ADR 0064**.
+  `pnpm check` en verde. Rama `feat/tiempo-acumulado`.

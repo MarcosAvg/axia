@@ -46,4 +46,13 @@ export const messages = {
       system: 'Sistema',
     },
   },
+  aggregation: {
+    label: 'Vista de tiempos',
+    aria: 'Cambiar la vista de tiempos entre promedio y acumulado',
+    average: 'Promedio',
+    total: 'Acumulado',
+    totalTag: 'acumulado',
+    averageHint: 'Promedio por tiquet en el periodo.',
+    totalHint: 'Suma (acumulado) de todos los tiquets del periodo.',
+  },
 } as const

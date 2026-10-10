@@ -1,12 +1,22 @@
 import { BarChart3Icon } from 'lucide-react'
 import { HintLabel } from '@/components/shared/hint'
+import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
-import type { Dimension, DimensionGroup } from '../domain/dimensions'
+import {
+  aggregationHint,
+  aggregationLabel,
+  timeValue,
+} from '@/lib/time-aggregation'
+import type { TimeAggregation } from '@/lib/time-aggregation'
+import type {
+  Dimension,
+  DimensionGroup,
+  DimensionRow,
+} from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
-import type { DimensionRow } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 import { DimensionChart } from './dimension-chart'
 
@@ -43,6 +53,7 @@ function countColumns(
 
 function timeColumns(
   nameOf: (id: string) => string,
+  aggregation: TimeAggregation,
 ): DataTableColumn<DimensionRow>[] {
   return [
     { id: 'name', header: t.name, cell: (row) => nameOf(row.id) },
@@ -54,21 +65,26 @@ function timeColumns(
     },
     {
       id: 'avgActive',
-      header: t.avgActive,
+      header: aggregationLabel(t.avgActive, aggregation),
       hint: hints.avgActive,
-      cell: (row) => formatMinutes(row.avgActive),
+      cell: (row) =>
+        formatMinutes(timeValue(aggregation, row.avgActive, row.sumActive)),
     },
     {
       id: 'avgTotal',
-      header: t.avgTotal,
+      header: aggregationLabel(t.avgTotal, aggregation),
       hint: hints.avgTotal,
-      cell: (row) => formatMinutes(row.avgTotal),
+      cell: (row) =>
+        formatMinutes(timeValue(aggregation, row.avgTotal, row.sumTotal)),
     },
     {
       id: 'extra',
       header: t.extra,
       hint: hints.extra,
-      cell: (row) => formatMinutes(row.avgActiveExtra),
+      cell: (row) =>
+        formatMinutes(
+          timeValue(aggregation, row.avgActiveExtra, row.sumActiveExtra),
+        ),
     },
   ]
 }
@@ -87,24 +103,25 @@ export function DimensionSection({
   variant: DimensionVariant
   withChart?: boolean
 }) {
+  const { aggregation } = useTimeAggregation()
   const rows = groups
     .filter((group) => group.dimension === dimension)
     .map((group) => group.row)
   const label = (id: string) => nameOf(dimension, id)
   const columns =
-    variant === 'counts' ? countColumns(label) : timeColumns(label)
+    variant === 'counts' ? countColumns(label) : timeColumns(label, aggregation)
+  const hint =
+    variant === 'times'
+      ? aggregationHint(
+          metricsMessages.chartHints.timesByDimension,
+          aggregation,
+        )
+      : metricsMessages.chartHints.countsByDimension
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          <HintLabel
-            label={dimensionLabels[dimension]}
-            hint={
-              variant === 'times'
-                ? metricsMessages.chartHints.timesByDimension
-                : metricsMessages.chartHints.countsByDimension
-            }
-          />
+          <HintLabel label={dimensionLabels[dimension]} hint={hint} />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

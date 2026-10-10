@@ -1,45 +1,53 @@
 import { Button } from '@/components/ui/button'
+import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { downloadTextFile } from '@/lib/download'
+import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
+import type { TimeAggregation } from '@/lib/time-aggregation'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import { formatMinutes, formatPercent, toCsv } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 
 const t = metricsMessages.table
 
-const XLSX_COLUMNS = [
-  { header: t.dimension, key: 'dimension' },
-  { header: t.name, key: 'name' },
-  { header: t.tickets, key: 'tickets' },
-  { header: t.avgActive, key: 'avgActive' },
-  { header: t.avgTotal, key: 'avgTotal' },
-  { header: t.extra, key: 'extra' },
-  { header: t.reassignment, key: 'reassignment' },
-  { header: t.recapture, key: 'recapture' },
-]
+const XLSX_KEYS = [
+  'dimension',
+  'name',
+  'tickets',
+  'avgActive',
+  'avgTotal',
+  'extra',
+  'reassignment',
+  'recapture',
+] as const
 
-const headers = [
-  t.dimension,
-  t.name,
-  t.tickets,
-  t.avgActive,
-  t.avgTotal,
-  t.extra,
-  t.reassignment,
-  t.recapture,
-]
+function headers(aggregation: TimeAggregation): string[] {
+  return [
+    t.dimension,
+    t.name,
+    t.tickets,
+    aggregationLabel(t.avgActive, aggregation),
+    aggregationLabel(t.avgTotal, aggregation),
+    t.extra,
+    t.reassignment,
+    t.recapture,
+  ]
+}
 
 function rowValues(
   group: DimensionGroup,
   nameOf: (dimension: Dimension, id: string) => string,
-) {
+  aggregation: TimeAggregation,
+): (string | number)[] {
   const { row } = group
   return [
     dimensionLabels[group.dimension],
     nameOf(group.dimension, row.id),
     row.tickets,
-    formatMinutes(row.avgActive),
-    formatMinutes(row.avgTotal),
-    formatMinutes(row.avgActiveExtra),
+    formatMinutes(timeValue(aggregation, row.avgActive, row.sumActive)),
+    formatMinutes(timeValue(aggregation, row.avgTotal, row.sumTotal)),
+    formatMinutes(
+      timeValue(aggregation, row.avgActiveExtra, row.sumActiveExtra),
+    ),
     formatPercent(row.reassignmentRate),
     formatPercent(row.recaptureRate),
   ]
@@ -53,19 +61,24 @@ export function MetricsExport({
   groups: DimensionGroup[]
   nameOf: (dimension: Dimension, id: string) => string
 }) {
+  const { aggregation } = useTimeAggregation()
+  const head = headers(aggregation)
+  const rows = groups.map((group) => rowValues(group, nameOf, aggregation))
+
   async function handleXlsx() {
     const { exportXlsx } = await import('@/lib/excel')
+    const columns = XLSX_KEYS.map((key, index) => ({
+      header: head[index] ?? key,
+      key,
+    }))
     await exportXlsx(
       'metricas.xlsx',
       t.dimension,
-      XLSX_COLUMNS,
+      columns,
       groups.map((group) => {
-        const values = rowValues(group, nameOf)
+        const values = rowValues(group, nameOf, aggregation)
         return Object.fromEntries(
-          XLSX_COLUMNS.map((column, index) => [
-            column.key,
-            values[index] ?? '',
-          ]),
+          columns.map((column, index) => [column.key, values[index] ?? '']),
         )
       }),
     )
@@ -78,15 +91,7 @@ export function MetricsExport({
         variant="outline"
         className="min-h-9"
         disabled={groups.length === 0}
-        onClick={() =>
-          downloadTextFile(
-            'metricas.csv',
-            toCsv(
-              headers,
-              groups.map((group) => rowValues(group, nameOf)),
-            ),
-          )
-        }
+        onClick={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
       >
         {metricsMessages.export}
       </Button>

@@ -45,14 +45,6 @@ export const EMPTY_FILTERS: MetricsFilters = {
 export type Dimension =
   'team' | 'building' | 'category' | 'dependency' | 'requester'
 
-const DIMENSION_ID: Record<Dimension, keyof MetricsTicket> = {
-  team: 'teamId',
-  building: 'buildingId',
-  category: 'categoryId',
-  dependency: 'dependencyId',
-  requester: 'requesterId',
-}
-
 /** Minutos a partir de un intervalo de Postgres (`04:05:00`, `1 day 02:00:00`). */
 export function intervalToMinutes(value: string | null | undefined): number {
   if (!value) return 0
@@ -133,6 +125,13 @@ export interface MetricsSummary {
   avgResponse: number
   avgAssignment: number
   avgValidation: number
+  sumTotal: number
+  sumNet: number
+  sumActive: number
+  sumActiveExtra: number
+  sumResponse: number
+  sumAssignment: number
+  sumValidation: number
 }
 
 function average(
@@ -142,6 +141,13 @@ function average(
   if (tickets.length === 0) return 0
   const total = tickets.reduce((sum, ticket) => sum + pick(ticket), 0)
   return total / tickets.length
+}
+
+function sum(
+  tickets: MetricsTicket[],
+  pick: (ticket: MetricsTicket) => number,
+): number {
+  return tickets.reduce((acc, ticket) => acc + pick(ticket), 0)
 }
 
 /** Resume los KPI del conjunto de tiquets. */
@@ -174,6 +180,13 @@ export function summarize(tickets: MetricsTicket[]): MetricsSummary {
     avgResponse: average(tickets, (t) => t.responseMinutes),
     avgAssignment: average(tickets, (t) => t.assignmentMinutes),
     avgValidation: average(tickets, (t) => t.validationMinutes),
+    sumTotal: sum(tickets, (t) => t.totalMinutes),
+    sumNet: sum(tickets, (t) => t.netMinutes),
+    sumActive: sum(tickets, (t) => t.activeMinutes),
+    sumActiveExtra: sum(tickets, (t) => t.activeExtraMinutes),
+    sumResponse: sum(tickets, (t) => t.responseMinutes),
+    sumAssignment: sum(tickets, (t) => t.assignmentMinutes),
+    sumValidation: sum(tickets, (t) => t.validationMinutes),
   }
 }
 
@@ -192,45 +205,6 @@ export function volumeByMonth(tickets: MetricsTicket[]): VolumePoint[] {
   return [...counts.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, count]) => ({ month, tickets: count }))
-}
-
-export interface DimensionRow {
-  id: string
-  tickets: number
-  avgActive: number
-  avgTotal: number
-  avgActiveExtra: number
-  reassignmentRate: number
-  recaptureRate: number
-}
-
-/** Agrega los tiquets por una dimensión (equipo, edificio, categoría, dependencia). */
-export function byDimension(
-  tickets: MetricsTicket[],
-  dimension: Dimension,
-): DimensionRow[] {
-  const key = DIMENSION_ID[dimension]
-  const groups = new Map<string, MetricsTicket[]>()
-  for (const ticket of tickets) {
-    const id = String(ticket[key])
-    const list = groups.get(id)
-    if (list) list.push(ticket)
-    else groups.set(id, [ticket])
-  }
-  return [...groups.entries()]
-    .map(([id, list]) => {
-      const summary = summarize(list)
-      return {
-        id,
-        tickets: list.length,
-        avgActive: summary.avgActive,
-        avgTotal: summary.avgTotal,
-        avgActiveExtra: summary.avgActiveExtra,
-        reassignmentRate: summary.reassignmentRate,
-        recaptureRate: summary.recaptureRate,
-      }
-    })
-    .sort((a, b) => b.tickets - a.tickets)
 }
 
 /** Arma un CSV simple a partir de encabezados y filas (valores ya formateados). */
