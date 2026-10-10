@@ -897,3 +897,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **"Requiere tu atención"** (abiertos más antiguos) y **actividad reciente**; conserva bandejas y
   acciones. Reutiliza hooks/dominio de métricas (su `index.ts` expone más) y no toca la base. **ADR
   0052**. `pnpm check` en verde (160 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/panel-ampliado`.
+- **Datos locales limpios (Etapa 19)**: los e2e dejaban **70 tiquets y 14 equipos "E2E"** en la base
+  local; se añade `scripts/clean-test-data.mjs` + `pnpm db:clean` (borra tiquets `%E2E%` y equipos
+  "Equipo E2E", deshabilitando los triggers de solo-agregar de `ticket_events`/`evidence` durante la
+  transacción) y se ejecuta **al terminar los e2e** (`pnpm test`, omite en CI). La **semilla** se
+  amplía a **21 tiquets en 7 meses** (históricos cerrados legibles) para dar contexto temporal. Sin
+  cambios de esquema. `pnpm check` en verde (160 Vitest, 12 Playwright, 427 pgTAP). Rama
+  `feat/datos-limpios`.

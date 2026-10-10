@@ -95,17 +95,22 @@ capas (`check:boundaries`), knip, Vitest, Playwright, pgTAP y build.
 | `pnpm dev` | Servidor de desarrollo (http://localhost:5173) |
 | `pnpm build` | Compila a `apps/web/dist` |
 | `pnpm lint` / `pnpm typecheck` | ESLint / tipos |
-| `pnpm test` | Vitest y Playwright |
+| `pnpm test` | Vitest y Playwright (y limpia los datos de prueba de los e2e) |
 | `pnpm format` | Prettier |
 | `pnpm knip` | Código y dependencias sin uso |
 | `pnpm check:agnostic` | Falla si el núcleo menciona plataformas externas |
 | `pnpm check:boundaries` | Reglas de dependencia entre capas |
 | `pnpm db:start` / `pnpm db:stop` | Levanta o apaga el Supabase local |
 | `pnpm db:reset` | Reconstruye la base local (migraciones y semilla) |
+| `pnpm db:clean` | Borra de la base local los tiquets/equipos creados por los e2e |
 | `pnpm db:test` | Pruebas pgTAP |
 | `pnpm db:types` | Regenera los tipos de TypeScript desde la base |
 | `pnpm env:local` | Escribe `apps/web/.env.local` desde el Supabase local |
 | **`pnpm check`** | **Compuerta completa** (todo lo anterior, más `db:test` y build) |
+
+> Las pruebas e2e (Playwright) **crean tiquets y equipos** en la base local. `pnpm test` (y por
+> tanto `pnpm check`) los **borra al terminar** con `pnpm db:clean`; si corres Playwright aparte,
+> ejecuta `pnpm db:clean` a mano. Para volver a la **semilla de demostración**, `pnpm db:reset`.
 
 ## 6. Volver a clonar el repositorio
 
