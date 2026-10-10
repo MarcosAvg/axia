@@ -13,7 +13,7 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
   const { data, error } = await supabase
     .from('instance_settings')
     .select(
-      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone, default_calendar_id, sla_clock_mode, requester_visible_event_types',
+      'team_label, validation_policy, auto_validation_days, claim_window, request_evidence_policy, folio_pattern, timezone, default_calendar_id, sla_clock_mode, requester_visible_event_types, default_priority_id',
     )
     .limit(1)
     .single()
@@ -36,6 +36,7 @@ export async function getInstanceSettings(): Promise<InstanceSettings> {
       : 'calendar',
     requesterVisibleEventTypes:
       data.requester_visible_event_types.filter(isEventType),
+    defaultPriorityId: data.default_priority_id,
   }
 }
 

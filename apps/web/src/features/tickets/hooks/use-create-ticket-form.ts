@@ -12,8 +12,6 @@ const defaultValues: CreateTicketInput = {
   locationId: '',
   dependencyId: '',
   categoryId: '',
-  serviceTypeId: '',
-  priorityId: '',
   channelId: '',
   description: '',
   requesterId: '',
@@ -44,10 +42,10 @@ export function useCreateTicketForm() {
   )
 
   useEffect(() => {
-    if (!canChooseRequester && ownRequester) {
+    if (ownRequester && !form.getValues('requesterId')) {
       form.setValue('requesterId', ownRequester.id)
     }
-  }, [canChooseRequester, ownRequester, form])
+  }, [ownRequester, form])
 
   const [photo, setPhoto] = useState<File | null>(null)
   const submission = useCreateTicketSubmission(form, photo)

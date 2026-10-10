@@ -85,16 +85,20 @@ export async function resumeTicket(
 
 export async function attendTicket(
   ticketId: string,
-  workDescription: string,
   clientRequestId: string,
-  subjectTechnicianId?: string | null,
+  input: {
+    workDescription: string
+    subjectTechnicianId?: string | null
+    serviceTypeId?: string | null
+  },
 ) {
   await run(
     supabase.rpc('ticket_attend', {
       p_ticket_id: ticketId,
-      p_work_description: workDescription,
+      p_work_description: input.workDescription,
       p_client_request_id: clientRequestId,
-      p_subject_technician_id: subjectTechnicianId ?? undefined,
+      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
+      p_service_type_id: input.serviceTypeId ?? undefined,
     }),
   )
 }

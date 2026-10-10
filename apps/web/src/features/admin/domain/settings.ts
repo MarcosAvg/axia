@@ -48,6 +48,7 @@ export interface InstanceSettings {
   defaultCalendarId: string | null
   slaClockMode: SlaClockMode
   requesterVisibleEventTypes: EventType[]
+  defaultPriorityId: string | null
 }
 
 /** Días a partir de un intervalo de Postgres (p. ej. `1 day`). */
@@ -68,6 +69,7 @@ export interface SettingsFormValues {
   defaultCalendarId?: string
   slaClockMode: SlaClockMode
   requesterVisibleEventTypes: EventType[]
+  defaultPriorityId?: string
 }
 
 export interface SettingsUpdate {
@@ -81,6 +83,7 @@ export interface SettingsUpdate {
   default_calendar_id: string | null
   sla_clock_mode: SlaClockMode
   requester_visible_event_types: EventType[]
+  default_priority_id: string | null
 }
 
 export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
@@ -95,5 +98,6 @@ export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
     default_calendar_id: settings.defaultCalendarId,
     sla_clock_mode: settings.slaClockMode,
     requester_visible_event_types: settings.requesterVisibleEventTypes,
+    default_priority_id: settings.defaultPriorityId,
   }
 }

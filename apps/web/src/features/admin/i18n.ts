@@ -26,6 +26,7 @@ export const adminMessages = {
     timezone: 'Zona horaria',
     defaultCalendar: 'Calendario laboral por defecto',
     slaClockMode: 'Modo de reloj de los objetivos (SLA)',
+    defaultPriority: 'Prioridad por defecto',
     requesterVisibleEvents: 'Eventos visibles al solicitante',
     requesterVisibleEventsHelp:
       'Elige qué tipos de evento ve el solicitante en la línea de tiempo. Las notas internas nunca se muestran.',
@@ -199,6 +200,8 @@ export const adminMessages = {
     allows_estimated_date: 'Admite fecha estimada',
     clock_class: 'Clasificación de reloj',
     work_calendar_id: 'Calendario laboral',
+    default_priority_id: 'Prioridad por defecto',
+    is_platform: 'Canal de la plataforma',
   },
   reasonUse: {
     pause: 'Pausa',

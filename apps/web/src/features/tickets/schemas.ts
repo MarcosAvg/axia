@@ -64,7 +64,7 @@ const ticketDetailRowSchema = ticketBaseRowSchema.extend({
   category_id: z.string(),
   subcategory_id: z.string().nullable(),
   problem_id: z.string().nullable(),
-  service_type_id: z.string(),
+  service_type_id: z.string().nullable(),
   priority_id: z.string(),
   requester_contact: z.string().nullable(),
   duplicate_of_id: z.string().nullable(),
@@ -228,17 +228,13 @@ export const createTicketSchema = z.object({
   categoryId: z.string().min(1, 'Selecciona una categoría.'),
   subcategoryId: z.string().optional(),
   problemId: z.string().optional(),
-  serviceTypeId: z.string().min(1, 'Selecciona un tipo de servicio.'),
-  priorityId: z.string().min(1, 'Selecciona una prioridad.'),
-  channelId: z.string().min(1, 'Selecciona un canal.'),
+  channelId: z.string().optional(),
   description: z
     .string()
     .trim()
     .min(5, 'Describe el problema con un poco más de detalle.')
     .max(4000),
   requesterId: z.string().min(1, 'Selecciona un solicitante.'),
-  requesterName: z.string().trim().max(160).optional(),
-  requesterContact: z.string().trim().max(160).optional(),
 })
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 

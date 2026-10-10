@@ -49,9 +49,8 @@ export function TicketCaptureFields({
           categories={catalogs.categories}
           subcategories={catalogs.subcategories}
           problems={catalogs.problems}
-          serviceTypes={catalogs.serviceTypes}
-          priorities={catalogs.priorities}
           channels={catalogs.channels}
+          showChannel={canChooseRequester}
         />
       </FormSection>
       <FormSection

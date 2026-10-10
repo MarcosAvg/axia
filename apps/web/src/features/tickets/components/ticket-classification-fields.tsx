@@ -11,12 +11,7 @@ import type { CreateTicketInput } from '../schemas'
 import { ticketMessages } from '../i18n'
 
 type ClassificationField =
-  | 'categoryId'
-  | 'subcategoryId'
-  | 'problemId'
-  | 'serviceTypeId'
-  | 'priorityId'
-  | 'channelId'
+  'categoryId' | 'subcategoryId' | 'problemId' | 'channelId'
 
 interface TicketClassificationFieldsProps {
   register: UseFormRegister<CreateTicketInput>
@@ -24,20 +19,20 @@ interface TicketClassificationFieldsProps {
   categories: CategoryOption[]
   subcategories: SubcategoryOption[]
   problems: ProblemOption[]
-  serviceTypes: Option[]
-  priorities: Option[]
   channels: Option[]
+  showChannel: boolean
 }
 
+/** Clasificación del alta: categoría, subcategoría y problema. La prioridad se
+ * deriva del problema y el tipo de servicio se captura en la atención. */
 export function TicketClassificationFields({
   register,
   errors,
   categories,
   subcategories,
   problems,
-  serviceTypes,
-  priorities,
   channels,
+  showChannel,
 }: TicketClassificationFieldsProps) {
   const { fields } = ticketMessages.create
   const toOptions = (items: Option[]): SelectOption[] =>
@@ -59,18 +54,14 @@ export function TicketClassificationFields({
       options: toOptions(subcategories),
     },
     { id: 'problemId', label: fields.problem, options: toOptions(problems) },
-    {
-      id: 'serviceTypeId',
-      label: fields.serviceType,
-      options: toOptions(serviceTypes),
-    },
-    {
-      id: 'priorityId',
-      label: fields.priority,
-      options: toOptions(priorities),
-    },
-    { id: 'channelId', label: fields.channel, options: toOptions(channels) },
   ]
+  if (showChannel) {
+    selects.push({
+      id: 'channelId',
+      label: fields.channel,
+      options: toOptions(channels),
+    })
+  }
 
   return (
     <fieldset className="grid gap-4 sm:grid-cols-3">

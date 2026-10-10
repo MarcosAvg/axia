@@ -106,7 +106,11 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
     ),
   resume: (t, a, id) => resumeTicket(t, id, opt(a.subjectTechnicianId)),
   attend: (t, a, id) =>
-    attendTicket(t, str(a.workDescription), id, opt(a.subjectTechnicianId)),
+    attendTicket(t, id, {
+      workDescription: str(a.workDescription),
+      subjectTechnicianId: opt(a.subjectTechnicianId),
+      serviceTypeId: opt(a.serviceTypeId),
+    }),
   validate: (t, _a, id) => validateTicket(t, id),
   reject: (t, a, id) => rejectTicket(t, str(a.reasonId), opt(a.note), id),
   cancel: (t, a, id) => cancelTicket(t, str(a.reasonId), opt(a.note), id),

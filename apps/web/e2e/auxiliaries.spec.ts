@@ -39,10 +39,6 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
-  await page
-    .getByLabel('Tipo de servicio')
-    .selectOption({ label: 'Correctivo' })
-  await page.getByLabel('Prioridad').selectOption({ label: 'Media' })
   await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()

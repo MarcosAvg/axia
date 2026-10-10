@@ -26,6 +26,7 @@ const schema = z.object({
   defaultCalendarId: z.string().optional(),
   slaClockMode: z.enum(['calendar', 'laboral']),
   requesterVisibleEventTypes: z.array(z.enum(EVENT_TYPES)).min(1),
+  defaultPriorityId: z.string().optional(),
 })
 
 type SettingsValues = z.infer<typeof schema>
@@ -97,6 +98,7 @@ export function SettingsForm({
       defaultCalendarId: settings.defaultCalendarId ?? '',
       slaClockMode: settings.slaClockMode,
       requesterVisibleEventTypes: settings.requesterVisibleEventTypes,
+      defaultPriorityId: settings.defaultPriorityId ?? '',
     },
   })
 
@@ -114,6 +116,7 @@ export function SettingsForm({
       defaultCalendarId: values.defaultCalendarId || null,
       slaClockMode: values.slaClockMode,
       requesterVisibleEventTypes: values.requesterVisibleEventTypes,
+      defaultPriorityId: values.defaultPriorityId || null,
     })
   })
 
