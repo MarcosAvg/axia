@@ -1,11 +1,18 @@
 import { Link } from '@tanstack/react-router'
-import { formatDateTime } from '@/lib/format'
+import { ClockIcon } from 'lucide-react'
+import { formatDateTime, formatElapsed } from '@/lib/format'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { StatusBadge } from './status-badge'
 
 /** Lista de tiquets con enlace al detalle. */
-export function TicketList({ items }: { items: TicketListItem[] }) {
+export function TicketList({
+  items,
+  showElapsed = false,
+}: {
+  items: TicketListItem[]
+  showElapsed?: boolean
+}) {
   return (
     <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
       {items.map((ticket) => (
@@ -27,6 +34,16 @@ export function TicketList({ items }: { items: TicketListItem[] }) {
               {ticket.categoryName ? <span>{ticket.categoryName}</span> : null}
               <span>{ticket.requesterName}</span>
               <span>{formatDateTime(ticket.reportedAt)}</span>
+              {showElapsed ? (
+                <span
+                  data-elapsed
+                  className="inline-flex items-center gap-1"
+                  title={ticketMessages.list.elapsed}
+                >
+                  <ClockIcon className="size-3" aria-hidden />
+                  {formatElapsed(ticket.reportedAt)}
+                </span>
+              ) : null}
               {ticket.possibleDuplicate ? (
                 <span className="font-medium text-amber-700 dark:text-amber-400">
                   {ticketMessages.list.duplicateMark}

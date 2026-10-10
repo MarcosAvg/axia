@@ -904,3 +904,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   amplía a **21 tiquets en 7 meses** (históricos cerrados legibles) para dar contexto temporal. Sin
   cambios de esquema. `pnpm check` en verde (160 Vitest, 12 Playwright, 427 pgTAP). Rama
   `feat/datos-limpios`.
+- **Panel: bandejas por rol y tiempo transcurrido (Etapa 20)**: se quita **"Requiere tu atención"**,
+  la bandeja **"Mi trabajo"** y la gráfica **"Por estado"**; quedan indicadores, **"Tiquets por mes"**,
+  **actividad** y **una bandeja por rol** (técnico: sus activos; supervisor: ofertas + equipo; admin:
+  activos + ofertas). Los **banners** muestran el **tiempo transcurrido** (`formatElapsed` en
+  `lib/format`, prop `showElapsed` de `TicketList`). `countByStatus`/`openAging` retirados. `pnpm
+  check` en verde (159 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/panel-bandejas-rol`.

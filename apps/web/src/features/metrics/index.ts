@@ -9,12 +9,10 @@ export {
   formatPercent,
   formatRate,
   formatScore,
-  openAging,
   summarize,
   volumeByMonth,
 } from './domain/metrics'
 export type {
-  AgingRow,
   MetricsSummary,
   MetricsTicket,
   SatisfactionSummary,

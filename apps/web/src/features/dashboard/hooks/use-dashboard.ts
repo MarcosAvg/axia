@@ -1,14 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import {
   EMPTY_FILTERS,
-  openAging,
   summarize,
   useMetricsTickets,
   useSla,
   useSatisfaction,
 } from '@/features/metrics'
 import type {
-  AgingRow,
   MetricsSummary,
   MetricsTicket,
   SatisfactionSummary,
@@ -23,8 +21,8 @@ import {
 import type { TicketListItem } from '@/features/tickets'
 import { fetchRecentActivity } from '../api/dashboard-api'
 import type { ActivityItem } from '../api/dashboard-api'
-import { countByStatus, summarizeWork } from '../domain/summary'
-import type { StatusCount, WorkSummary } from '../domain/summary'
+import { summarizeWork } from '../domain/summary'
+import type { WorkSummary } from '../domain/summary'
 
 const EMPTY_SLA: SlaSummary = {
   withTarget: 0,
@@ -66,7 +64,6 @@ function useRecentActivity() {
 export interface DashboardData {
   work: WorkSummary
   offerItems: TicketListItem[]
-  workItems: TicketListItem[]
   activeItems: TicketListItem[]
   totals: {
     active: number
@@ -77,14 +74,12 @@ export interface DashboardData {
   }
   tickets: MetricsTicket[]
   summary: MetricsSummary
-  statusCounts: StatusCount[]
-  attention: AgingRow[]
   sla: SlaSummary
   satisfaction: SatisfactionSummary
   activity: ActivityItem[]
 }
 
-/** Datos del panel: números, bandejas y métricas del usuario (RLS limita). */
+/** Datos del panel: indicadores, tiquets activos y actividad (RLS limita). */
 export function useDashboardData(userId: string | undefined): DashboardData {
   const myWork = useMyWork(userId)
   const offers = useMyOffers(userId)
@@ -105,7 +100,6 @@ export function useDashboardData(userId: string | undefined): DashboardData {
   return {
     work: summarizeWork(myWork.data ?? []),
     offerItems: offers.data ?? [],
-    workItems: myWork.data ?? [],
     activeItems: pageItems(active.data).slice(0, PREVIEW),
     totals: {
       active: pageTotal(active.data),
@@ -116,8 +110,6 @@ export function useDashboardData(userId: string | undefined): DashboardData {
     },
     tickets,
     summary: summarize(tickets),
-    statusCounts: countByStatus(tickets),
-    attention: openAging(tickets, new Date()).slice(0, PREVIEW),
     sla: or(sla.summary.data, EMPTY_SLA),
     satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
     activity: or(activity.data, []),

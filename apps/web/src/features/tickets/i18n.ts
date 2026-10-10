@@ -125,6 +125,7 @@ export const ticketMessages = {
     next: 'Siguiente',
     page: (page: number) => `Página ${page}`,
     duplicateMark: 'Posible duplicado',
+    elapsed: 'Tiempo transcurrido',
     columns: {
       folio: 'Folio',
       description: 'Descripción',

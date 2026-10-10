@@ -3,13 +3,30 @@ import { PlusIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { can, useAuth } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import { useDashboardData } from '../hooks/use-dashboard'
 import { dashboardMessages as t } from '../i18n'
 import { ActivitySection } from './activity-section'
-import { AttentionSection } from './attention-section'
 import { DashboardCharts } from './dashboard-charts'
 import { DashboardKpis } from './dashboard-kpis'
 import { DashboardSections } from './dashboard-sections'
+import type { DashboardRole } from './dashboard-sections'
+
+function dashboardRole(identity: Identity | null): DashboardRole {
+  if (can(identity, 'user.manage') || can(identity, 'catalog.manage')) {
+    return 'admin'
+  }
+  if (can(identity, 'ticket.start') || can(identity, 'ticket.attend')) {
+    return 'technician'
+  }
+  if (
+    can(identity, 'ticket.take_offer') ||
+    can(identity, 'ticket.assign_technician')
+  ) {
+    return 'supervisor'
+  }
+  return 'other'
+}
 
 function QuickActions({ canCreate }: { canCreate: boolean }) {
   const { identity } = useAuth()
@@ -42,15 +59,10 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
   )
 }
 
-/** Panel de inicio: números, gráficas, pendientes y bandejas del usuario. */
+/** Panel de inicio: indicadores, tiquets activos y actividad del usuario. */
 export function Dashboard() {
   const { identity } = useAuth()
   const data = useDashboardData(identity?.userId)
-  const isAdmin =
-    can(identity, 'user.manage') || can(identity, 'catalog.manage')
-  const isSupervisor =
-    can(identity, 'ticket.take_offer') ||
-    can(identity, 'ticket.assign_technician')
 
   return (
     <div className="flex flex-col gap-6">
@@ -68,19 +80,9 @@ export function Dashboard() {
         sla={data.sla}
         satisfaction={data.satisfaction}
       />
-      <DashboardCharts
-        tickets={data.tickets}
-        statusCounts={data.statusCounts}
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <AttentionSection rows={data.attention} />
-        <ActivitySection items={data.activity} />
-      </div>
-      <DashboardSections
-        data={data}
-        isSupervisor={isSupervisor}
-        isAdmin={isAdmin}
-      />
+      <DashboardCharts tickets={data.tickets} />
+      <ActivitySection items={data.activity} />
+      <DashboardSections data={data} role={dashboardRole(identity)} />
     </div>
   )
 }
