@@ -101,10 +101,12 @@ ver ADR 0041 y 0052):
 - **KPI según rol** (hasta 6): mi trabajo / ofertas / activos / en pausa / por validar / sin asignar /
   cerrados, más **trabajo activo** y **primera resolución** (técnico), **SLA** (supervisor/admin) y
   **satisfacción** (admin); calculados de lo que el RLS deja ver.
-- **Gráficas**: **tiquets por mes** (línea) y **por estado** (barras).
-- **Requiere tu atención**: los tiquets abiertos más antiguos, con enlace al detalle.
+- **Gráfica**: **tiquets por mes** (línea).
 - **Actividad reciente**: últimos eventos visibles (folio, tipo y fecha).
-- **Bandejas**: ofertas para ti, mi trabajo y tiquets activos, con "Ver todos" y estado vacío.
+- **Bandejas según rol**, con el **tiempo transcurrido** en cada tiquet:
+  - **Técnico**: "Tus tiquets activos".
+  - **Supervisor**: "Ofertas para ti" + "Tiquets del equipo".
+  - **Admin**: "Tiquets activos" + "Ofertas para ti" (si las hay).
 - **Acciones rápidas** según permisos.
 - Es distinto del **tablero global** de `/metricas` (permiso `metrics.view`).
 
