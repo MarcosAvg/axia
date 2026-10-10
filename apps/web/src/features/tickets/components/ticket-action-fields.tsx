@@ -1,18 +1,14 @@
 import type { ReactNode } from 'react'
 import type { SelectOption } from '@/components/shared/form-fields'
 import { SelectField, TextAreaField } from '@/components/shared/form-fields'
-import {
-  childReasons,
-  descendantReasons,
-  indentReasons,
-  rootReasons,
-} from '@/features/catalogs'
+import { indentReasons, rootReasons } from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
 import { CLAIM_RESOLUTIONS } from '../domain/types'
 import type { ClaimResolution } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { pauseMessages } from '../pause-i18n'
+import { ReasonCascade } from './reason-cascade'
 
 export interface ActionValues {
   technicianId: string
@@ -142,15 +138,8 @@ const reasonNameOptions = (items: ReasonOption[]): SelectOption[] =>
 function reasonOptionsFor(
   action: ActionKey,
   reasons: ReasonOption[],
-  motiveReasonId: string | null | undefined,
 ): SelectOption[] {
   if (action === 'pause') return reasonNameOptions(rootReasons(reasons))
-  if (action === 'resume') {
-    return reasonNameOptions(childReasons(reasons, motiveReasonId))
-  }
-  if (action === 'advance_pause') {
-    return reasonNameOptions(descendantReasons(reasons, motiveReasonId))
-  }
   return toOptions(
     indentReasons(reasons).map((reason) => ({
       id: reason.id,
@@ -159,13 +148,39 @@ function reasonOptionsFor(
   )
 }
 
+function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
+  const { action, values, onChange, reasons } = props
+  if (action === 'resume' || action === 'advance_pause') {
+    return (
+      <ReasonCascade
+        key="reason-cascade"
+        label={pauseMessages.substate}
+        reasons={reasons}
+        rootId={props.motiveReasonId ?? null}
+        value={values.reasonId}
+        onChange={(reasonId) => onChange({ reasonId })}
+      />
+    )
+  }
+  if (!REASON_ACTIONS.includes(action)) return null
+  return (
+    <SelectBlock
+      key="reason"
+      id="action-reason"
+      label={fields.reason}
+      options={reasonOptionsFor(action, reasons)}
+      value={values.reasonId}
+      onChange={(reasonId) => onChange({ reasonId })}
+    />
+  )
+}
+
 function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
-  const { action, values, onChange, technicians, reasons, priorities } = props
+  const { action, values, onChange, technicians, priorities } = props
   const blocks: ReactNode[] = []
   const technicianOptions = toOptions(
     technicians.map((t) => ({ id: t.id, label: t.fullName })),
   )
-  const reasonOptions = reasonOptionsFor(action, reasons, props.motiveReasonId)
   const priorityOptions = toOptions(
     priorities.map((p) => ({ id: p.id, label: p.name })),
   )
@@ -182,22 +197,8 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
       />,
     )
   }
-  if (REASON_ACTIONS.includes(action)) {
-    blocks.push(
-      <SelectBlock
-        key="reason"
-        id="action-reason"
-        label={
-          action === 'resume' || action === 'advance_pause'
-            ? pauseMessages.substate
-            : fields.reason
-        }
-        options={reasonOptions}
-        value={values.reasonId}
-        onChange={(reasonId) => onChange({ reasonId })}
-      />,
-    )
-  }
+  const reason = reasonBlock(props)
+  if (reason) blocks.push(reason)
   if (action === 'resolve_claim') {
     blocks.push(resolutionSelect(values.resolution, onChange))
   }

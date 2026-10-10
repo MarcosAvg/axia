@@ -75,17 +75,25 @@ test('el técnico pausa, avanza el subestado y reanuda', async ({ page }) => {
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Subestado actual').first()).toBeVisible()
 
-  // Gestiona la pausa: cambia el subestado dentro del motivo.
+  // Gestiona la pausa: baja dos niveles del árbol (cascada).
   await page.getByRole('button', { name: 'Avanzar subestado' }).click()
   await page
     .getByLabel('Nuevo subestado')
     .selectOption({ label: 'Por solicitar' })
+  await page
+    .getByLabel('Subestado · Por solicitar')
+    .selectOption({ label: 'Con proveedor' })
   await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
-  await expect(page.getByText('Por solicitar').first()).toBeVisible()
+  await expect(page.getByText('Con proveedor').first()).toBeVisible()
 
-  // Reanuda: exige un subestado (hijo directo del motivo).
+  // Reanuda: exige un subestado (descendiente del motivo), también en cascada.
   await page.getByRole('button', { name: 'Reanudar' }).click()
-  await page.getByLabel('Nuevo subestado').selectOption({ label: 'Solicitado' })
+  await page
+    .getByLabel('Nuevo subestado')
+    .selectOption({ label: 'Por solicitar' })
+  await page
+    .getByLabel('Subestado · Por solicitar')
+    .selectOption({ label: 'Sin proveedor' })
   await clickAndWait(page, 'Confirmar', 'ticket_resume')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 })
