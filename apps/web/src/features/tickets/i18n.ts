@@ -10,7 +10,7 @@ import type {
 
 export const statusLabels: Record<TicketStatus, string> = {
   registered: 'Registrado',
-  with_supervisor: 'Con supervisor',
+  with_supervisor: 'Tomado por supervisor',
   assigned: 'Asignado',
   in_progress: 'En proceso',
   paused: 'Pausado',
