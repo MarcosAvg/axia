@@ -195,7 +195,9 @@ master-detail** con permisos agrupados por área y alta en diálogo; **usuarios*
 **ámbitos** con tablas (supervisores con edificios en diálogo; designaciones con chips quitables);
 **calendarios** con rail + detalle por secciones, alta/edición en diálogo y franjas/festivos como
 tablas; **configuración** por secciones con barra de guardado, incluida la **visibilidad del
-solicitante** (casillas por tipo de evento, ADR 0055); **integraciones** sobre la misma `DataTable`.
+solicitante** (casillas por tipo de evento, ADR 0055); **integraciones** sobre la misma `DataTable`; e
+**importación de catálogos** por plantilla XLSX (dry run, resolución de referencias e historial,
+ADR 0059).
 
 Patrones de lista:
 

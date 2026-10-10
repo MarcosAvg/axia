@@ -8,17 +8,15 @@
 
 ## En curso
 
-**Rediseño de Usuarios, Ámbitos y Calendarios: cerrado.** Usuarios en pestañas **Cuentas / Vínculos**
-(tabla de cuentas con vínculo y tablas por catálogo con diálogo para asignar la cuenta); Ámbitos con
-**tablas + diálogos** (supervisores con edificios en diálogo con búsqueda; designaciones por técnico
-con chips quitables); Calendarios con **rail + detalle por secciones**, crear/editar en diálogo,
-franjas (por día) y festivos como **tablas**, con guardado explícito de la cabecera y cambios
-inmediatos en franjas/festivos. **Sin backend.** Detalle en `docs/diseno-ui.md` y ADR 0058.
+**Importación de catálogos por plantilla (cerrado).** Se genera una **plantilla XLSX** en la app (una
+hoja por catálogo en orden de dependencias, con listas y validación), se rellena y se sube: **dry run**
+por catálogo (nuevas, a actualizar, inválidas, duplicadas) y **confirmación** que upserta por **clave
+natural** con una **RPC atómica por hoja** y lista blanca, dejando **historial**. Referencias por
+nombre resueltas en cliente; solicitantes/técnicos por nombre + padre; sin borrados. **ADR 0059**.
 `pnpm check` en verde.
 
-_(Histórico)_ Rediseño de Administración (ADR 0057) **cerrado**: marco común, catálogos con rail y
-tablas específicas, diálogos unificados. Fase 8 completa. Regresión visual **opt-in**
-(`pnpm test:visual`).
+_(Histórico)_ Rediseño de Usuarios, Ámbitos y Calendarios (ADR 0058) cerrado; rediseño de
+Administración (ADR 0057) cerrado; fase 8 completa. Regresión visual **opt-in** (`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -952,3 +950,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   franjas y festivos como **tablas**, con guardado explícito de cabecera y cambios inmediatos.
   Utilidades puras probadas (`scope-list`, `user-list`). **ADR 0058**. `pnpm check` en verde (180
   Vitest, 13 Playwright, 440 pgTAP). Rama `feat/admin-usuarios-ambitos-calendarios`.
+- **Importación de catálogos (Etapa 27)**: plantilla **XLSX** generada en la app (una hoja por
+  catálogo en orden de dependencias, hoja de listas y validación de datos), **dry run** por catálogo y
+  **confirmación** que upserta por **clave natural** con RPC **atómica por hoja** y **lista blanca**;
+  referencias por nombre resueltas en cliente (solicitantes/técnicos por nombre + padre); **historial**
+  de cargas. Funciones puras probadas (`catalog-import`). **ADR 0059**. `pnpm check` en verde.
+  Rama `feat/importar-catalogos`.

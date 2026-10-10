@@ -28,3 +28,20 @@ test('el administrador crea un equipo desde la administración', async ({
 
   await expect(page.getByText(name)).toBeVisible()
 })
+
+test('el administrador descarga la plantilla de catálogos', async ({
+  page,
+}) => {
+  await signIn(page, 'admin@axia.test')
+
+  await page.goto('/admin/catalogos')
+  await page.getByRole('button', { name: 'Importar archivo' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Descargar plantilla' }),
+  ).toBeVisible()
+
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Descargar plantilla' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toContain('.xlsx')
+})
