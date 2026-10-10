@@ -84,6 +84,110 @@ export type Database = {
         }
         Relationships: []
       }
+      catalog_import_rows: {
+        Row: {
+          catalog_key: string
+          created_at: string
+          error: string | null
+          id: string
+          raw: NonNullable<Json>
+          record_id: string | null
+          result: string
+          row_number: number | null
+          run_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          catalog_key: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          raw?: NonNullable<Json>
+          record_id?: string | null
+          result: string
+          row_number?: number | null
+          run_id: string
+        }
+        Update: {
+          catalog_key?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          raw?: NonNullable<Json>
+          record_id?: string | null
+          result?: string
+          row_number?: number | null
+          run_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'catalog_import_rows_run_id_fkey'
+            columns: ['run_id']
+            isOneToOne: false
+            referencedRelation: 'catalog_import_runs'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      catalog_import_runs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          finished_at: string | null
+          id: string
+          mode: string
+          source_file: string | null
+          started_at: string
+          status: string
+          summary: NonNullable<Json>
+        }
+        ComputedFields: never
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          source_file?: string | null
+          started_at?: string
+          status?: string
+          summary?: NonNullable<Json>
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          source_file?: string | null
+          started_at?: string
+          status?: string
+          summary?: NonNullable<Json>
+        }
+        Relationships: []
+      }
+      catalog_import_specs: {
+        Row: {
+          catalog_key: string
+          columns: NonNullable<Json>
+          match_columns: NonNullable<Json>
+          table_name: string
+        }
+        ComputedFields: never
+        Insert: {
+          catalog_key: string
+          columns: NonNullable<Json>
+          match_columns: NonNullable<Json>
+          table_name: string
+        }
+        Update: {
+          catalog_key?: string
+          columns?: NonNullable<Json>
+          match_columns?: NonNullable<Json>
+          table_name?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           active: boolean
@@ -3944,6 +4048,18 @@ export type Database = {
     Functions: {
       can_act_on_behalf: { Args: { p_technician_id: string }; Returns: boolean }
       can_see_ticket: { Args: { p_ticket_id: string }; Returns: boolean }
+      catalog_import_finish: {
+        Args: { p_run_id: string; p_status: string; p_summary?: Json }
+        Returns: undefined
+      }
+      catalog_import_sheet: {
+        Args: { p_catalog: string; p_rows: Json; p_run_id: string }
+        Returns: Json
+      }
+      catalog_import_start: {
+        Args: { p_mode?: string; p_source_file?: string }
+        Returns: string
+      }
       evidence_add: {
         Args: {
           p_client_request_id?: string
