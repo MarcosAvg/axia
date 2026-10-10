@@ -28,6 +28,7 @@ export const EMPTY: ActionValues = {
   technicianId: '',
   reasonId: '',
   priorityId: '',
+  serviceTypeId: '',
   note: '',
   text: '',
   resolution: 'upheld',
@@ -87,7 +88,12 @@ function simpleHandlers(
     },
     start: () => actions.start.mutate({}, options),
     attend: () => {
-      if (text) actions.attend.mutate({ workDescription: text }, options)
+      if (text && values.serviceTypeId) {
+        actions.attend.mutate(
+          { workDescription: text, serviceTypeId: values.serviceTypeId },
+          options,
+        )
+      }
     },
     change_priority: () => {
       if (values.priorityId) {

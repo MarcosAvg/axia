@@ -174,7 +174,8 @@ export const ticketMessages = {
       location: 'Ubicación',
       locationHelp: 'Dónde ocurre el problema.',
       classification: 'Clasificación',
-      classificationHelp: 'Qué tipo de problema es y con qué prioridad.',
+      classificationHelp:
+        'Qué tipo de problema es; la prioridad se toma del problema.',
       requester: 'Solicitante',
       requesterHelp: 'Quién reporta la solicitud.',
       description: 'Descripción',
@@ -186,6 +187,8 @@ export const ticketMessages = {
     unsaved: 'Tienes cambios sin guardar. ¿Quieres salir?',
     requesterSelf: 'A mi nombre',
     requesterOnBehalf: 'A nombre de otra persona',
+    requesterFromCatalog:
+      'El nombre y el contacto se toman del catálogo de solicitantes.',
     photo: 'Foto de la solicitud (opcional)',
     duplicateTitle: 'Posibles duplicados',
     duplicateHelp:
@@ -204,8 +207,6 @@ export const ticketMessages = {
       priority: 'Prioridad',
       channel: 'Canal',
       requester: 'Solicitante',
-      requesterName: 'Nombre del solicitante',
-      requesterContact: 'Contacto (extensión o teléfono)',
       description: 'Descripción del problema',
       selectPlaceholder: 'Selecciona…',
     },
@@ -248,6 +249,7 @@ export const ticketMessages = {
     reason: 'Motivo',
     note: 'Nota (opcional)',
     priority: 'Prioridad',
+    serviceType: 'Tipo de servicio',
     workDescription: 'Descripción del trabajo',
     comment: 'Comentario',
     claimDescription: 'Describe la reclamación',

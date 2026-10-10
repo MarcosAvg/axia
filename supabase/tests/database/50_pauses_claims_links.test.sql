@@ -144,7 +144,8 @@ select is(
 insert into public.evidence (ticket_id, cycle, type)
   select id, cycle, 'after' from public.tickets order by ticket_number limit 1;
 select public.ticket_attend(
-  (select id from public.tickets order by ticket_number limit 1), 'Cambio de luminaria');
+  (select id from public.tickets order by ticket_number limit 1), 'Cambio de luminaria',
+  null, null, (select id from public.service_types where name = 'Servicio Alfa'));
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'attended'::public.ticket_status, 'el tiquet queda atendido');

@@ -1,4 +1,4 @@
-import { SelectField, TextField } from '@/components/shared/form-fields'
+import { SelectField } from '@/components/shared/form-fields'
 import type { RequesterOption } from '@/features/catalogs'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import type { CreateTicketInput } from '../schemas'
@@ -12,6 +12,7 @@ interface TicketRequesterFieldsProps {
   ownRequesterName: string | null
 }
 
+/** Solicitante del alta: del catálogo (con la opción de elegirse a sí mismo). */
 export function TicketRequesterFields({
   register,
   errors,
@@ -21,44 +22,33 @@ export function TicketRequesterFields({
 }: TicketRequesterFieldsProps) {
   const { fields } = ticketMessages.create
 
+  if (!canChooseRequester) {
+    return (
+      <div className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">{fields.requester}</span>
+        <span className="text-muted-foreground">
+          {ownRequesterName ?? ticketMessages.create.requesterSelf}
+        </span>
+      </div>
+    )
+  }
+
   return (
-    <fieldset className="flex flex-col gap-4">
-      {canChooseRequester ? (
-        <>
-          <SelectField
-            id="requesterId"
-            label={fields.requester}
-            placeholder={fields.selectPlaceholder}
-            options={requesters.map((requester) => ({
-              value: requester.id,
-              label: requester.fullName,
-            }))}
-            error={errors.requesterId?.message}
-            {...register('requesterId')}
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <TextField
-              id="requesterName"
-              label={fields.requesterName}
-              error={errors.requesterName?.message}
-              {...register('requesterName')}
-            />
-            <TextField
-              id="requesterContact"
-              label={fields.requesterContact}
-              error={errors.requesterContact?.message}
-              {...register('requesterContact')}
-            />
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{fields.requester}</span>
-          <span className="text-muted-foreground">
-            {ownRequesterName ?? ticketMessages.create.requesterSelf}
-          </span>
-        </div>
-      )}
-    </fieldset>
+    <div className="flex flex-col gap-2">
+      <SelectField
+        id="requesterId"
+        label={fields.requester}
+        placeholder={fields.selectPlaceholder}
+        options={requesters.map((requester) => ({
+          value: requester.id,
+          label: requester.fullName,
+        }))}
+        error={errors.requesterId?.message}
+        {...register('requesterId')}
+      />
+      <p className="text-xs text-muted-foreground">
+        {ticketMessages.create.requesterFromCatalog}
+      </p>
+    </div>
   )
 }

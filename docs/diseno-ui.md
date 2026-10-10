@@ -131,7 +131,11 @@ Componentes compartidos en `components/shared` (ver ADR 0040):
 Patrones de operación (ADR 0042):
 
 - **Alta**: secciones (Ubicación, Clasificación, Solicitante, Descripción), dos columnas con el
-  aviso de duplicados al lado y barra de guardado fija; aviso de cambios sin guardar.
+  aviso de duplicados al lado y barra de guardado fija; aviso de cambios sin guardar. La
+  **clasificación** pide categoría, subcategoría y problema; la **prioridad se deriva del problema**
+  (respaldo en la instancia) y el **tipo de servicio se captura en la atención**. El **canal** solo se
+  elige al registrar **a nombre de otro** (el propio solicitante usa el canal de plataforma). El
+  **solicitante** sale del catálogo (preseleccionado "a mi nombre"; ADR 0056).
 - **Detalle**: encabezado con folio/estado/prioridad; la **data es la columna principal**
   (acciones, captura, evidencias, participantes, tiempos, calificación) y la **actividad va en el
   sidebar** derecho.
@@ -142,8 +146,8 @@ Patrones de operación (ADR 0042):
   inferior (bottom sheet) en móvil**, con alto máximo y desplazamiento; sin borde interno en los
   formularios (el contenedor aporta el marco).
 - **Acciones guiadas con evidencia**: cada acción pide lo que exige; iniciar la evidencia "antes",
-  atender la descripción y "después", reclamar motivo, descripción y evidencia, y **`during`** es
-  el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045).
+  atender el **tipo de servicio**, la descripción y "después", reclamar motivo, descripción y
+  evidencia, y **`during`** es el paso "Registrar avance" (archivo + nota) (ADR 0044, 0045, 0056).
 - **Evidencia acotada y por rol**: el subidor ofrece solo los tipos válidos para el estado y se
   muestra únicamente a quien tenga `evidence.attach` (supervisor/admin); el alta permite adjuntar
   la foto de solicitud.

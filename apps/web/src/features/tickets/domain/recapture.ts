@@ -22,7 +22,7 @@ export function initialRecaptureValues(ticket: TicketDetail): RecaptureValues {
     categoryId: ticket.categoryId,
     subcategoryId: ticket.subcategoryId ?? '',
     problemId: ticket.problemId ?? '',
-    serviceTypeId: ticket.serviceTypeId,
+    serviceTypeId: ticket.serviceTypeId ?? '',
     priorityId: ticket.priorityId,
     description: ticket.description,
     reasonId: '',
@@ -57,7 +57,7 @@ export function recaptureChanges(
     category_id: values.categoryId,
     subcategory_id: values.subcategoryId || null,
     problem_id: values.problemId || null,
-    service_type_id: values.serviceTypeId,
+    service_type_id: values.serviceTypeId || null,
     priority_id: values.priorityId,
     description: values.description,
   }

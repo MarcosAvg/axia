@@ -1,5 +1,6 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { SelectField, TextField } from '@/components/shared/form-fields'
+import { usePriorities } from '@/features/catalogs'
 import { EVENT_TYPES, eventLabels } from '@/features/tickets'
 import { useCalendars } from '../hooks/use-calendars'
 import type { SettingsFormValues } from '../domain/settings'
@@ -51,6 +52,11 @@ export function GeneralFields({ register, errors }: SettingsFieldsProps) {
 
 /** Política de validación y evidencia. */
 export function ValidationFields({ register, errors }: SettingsFieldsProps) {
+  const priorities = usePriorities()
+  const priorityOptions = (priorities.data ?? []).map((priority) => ({
+    value: priority.id,
+    label: priority.name,
+  }))
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <SelectField
@@ -80,6 +86,14 @@ export function ValidationFields({ register, errors }: SettingsFieldsProps) {
         options={evidenceOptions}
         error={errors.requestEvidencePolicy?.message}
         {...register('requestEvidencePolicy')}
+      />
+      <SelectField
+        id="settings-default-priority"
+        label={settings.defaultPriority}
+        placeholder={adminMessages.actions.selectPlaceholder}
+        options={priorityOptions}
+        error={errors.defaultPriorityId?.message}
+        {...register('defaultPriorityId')}
       />
     </div>
   )

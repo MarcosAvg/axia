@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0055.
+0038–0056.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -927,3 +927,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   administrador lo **edita en Configuración** (casillas por tipo). Migración que ajusta el default y la
   fila existente; pgTAP de la vista ampliado. **ADR 0055**. `pnpm check` en verde (159 Vitest, 13
   Playwright, 433 pgTAP). Rama `feat/visibilidad-solicitante`.
+- **Clasificación del alta (Etapa 24)**: el alta deja de pedir **tipo de servicio**, **prioridad** y
+  **canal**. El tipo de servicio se captura en la **atención** (`ticket_attend(..., p_service_type_id)`,
+  obligatorio); la **prioridad** se deriva de `problems.default_priority_id` con respaldo en
+  `instance_settings.default_priority_id` (cambiable solo por supervisor/admin); el **canal** se fuerza
+  al de plataforma (`channels.is_platform`) cuando registra el propio solicitante y es elegible a nombre
+  de otro; el **solicitante** sale del catálogo (con "yo" preseleccionado). Administración permite
+  editar prioridad por defecto del problema, canal de plataforma y prioridad por defecto de la
+  instancia. **ADR 0056**. `pnpm check` en verde (159 Vitest, 13 Playwright, 440 pgTAP). Rama
+  `feat/clasificacion-tiquet`.

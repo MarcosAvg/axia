@@ -46,10 +46,6 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
-  await page
-    .getByLabel('Tipo de servicio')
-    .selectOption({ label: 'Correctivo' })
-  await page.getByLabel('Prioridad').selectOption({ label: 'Media' })
   await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()
@@ -78,8 +74,11 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await clickAndWait(page, 'Confirmar', 'ticket_start')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
 
-  // Atender pide descripción y evidencia "después".
+  // Atender pide tipo de servicio, descripción y evidencia "después".
   await page.getByRole('button', { name: 'Marcar atendido' }).click()
+  await page
+    .getByLabel('Tipo de servicio')
+    .selectOption({ label: 'Correctivo' })
   await page
     .getByLabel('Descripción del trabajo')
     .fill('Se revisó la instalación y quedó funcionando')

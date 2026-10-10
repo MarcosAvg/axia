@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(20);
+select plan(27);
 
 -- Aísla las pruebas de tiquets que hayan quedado de la app o de las pruebas E2E:
 -- se vacía el grafo de tiquets dentro de la transacción (se revierte al final).
@@ -82,6 +82,11 @@ insert into public.supervisor_scope_buildings (scope_id, building_id)
 -- La validación será solo del supervisor para este escenario.
 update public.instance_settings set validation_policy = 'supervisor';
 
+-- El problema define su prioridad por defecto.
+update public.problems
+  set default_priority_id = (select id from public.priorities where name = 'Prioridad Beta')
+  where name = 'Chispa';
+
 -- Registrar (como administrador, a nombre del solicitante).
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
@@ -109,6 +114,23 @@ select is(
 select is(
   (select possible_duplicate from public.tickets order by ticket_number limit 1),
   false, 'no marca posible duplicado sin coincidencias');
+select is(
+  (select service_type_id from public.tickets order by ticket_number limit 1),
+  null, 'el tipo de servicio queda para la atención');
+select is(
+  (select priority_id from public.tickets order by ticket_number limit 1),
+  (select id from public.priorities where name = 'Prioridad Beta'),
+  'deriva la prioridad del problema');
+select is(
+  (select channel_id from public.tickets order by ticket_number limit 1),
+  (select id from public.channels where name = 'Canal Alfa'),
+  'a nombre de otro respeta el canal elegido');
+select is(
+  (select requester_name from public.tickets order by ticket_number limit 1),
+  'Solicitante Alfa', 'toma el nombre del catálogo de solicitantes');
+select is(
+  (select requester_contact from public.tickets order by ticket_number limit 1),
+  'ext. 1', 'toma el contacto del catálogo de solicitantes');
 
 -- Tomar como supervisor.
 select set_config('request.jwt.claims',
@@ -152,8 +174,14 @@ select throws_ok(
 insert into public.evidence (ticket_id, cycle, type)
   select id, cycle, 'after' from public.tickets order by ticket_number limit 1;
 
+select throws_ok(
+  $$ select public.ticket_attend(
+       (select id from public.tickets order by ticket_number limit 1), 'Trabajo') $$,
+  'P0001', 'Falta el tipo de servicio', 'exige el tipo de servicio al atender');
+
 select public.ticket_attend(
-  (select id from public.tickets order by ticket_number limit 1), 'Se cambió el apagador');
+  (select id from public.tickets order by ticket_number limit 1), 'Se cambió el apagador',
+  null, null, (select id from public.service_types where name = 'Servicio Alfa'));
 select is(
   (select status from public.tickets order by ticket_number limit 1),
   'attended'::public.ticket_status, 'el tiquet pasa a atendido');
@@ -197,6 +225,23 @@ select is(
   (select p.name from public.tickets t join public.priorities p on p.id = t.priority_id
    order by t.ticket_number limit 1),
   'Prioridad Beta', 'ajusta la prioridad con evento');
+
+-- El propio solicitante registra: se fuerza el canal de plataforma.
+insert into public.channels (name, is_platform) values ('Plataforma Alfa', true);
+select set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-000000000004"}', true);
+select public.ticket_create(jsonb_build_object(
+  'building_id', (select id from public.buildings where name = 'Edificio A'),
+  'location_id', (select id from public.locations where name = 'Nivel A'),
+  'dependency_id', (select id from public.dependencies where name = 'Dependencia Alfa'),
+  'category_id', (select id from public.categories where name = 'Categoría Alfa'),
+  'description', 'No enciende otra luz',
+  'requester_id', (select id from public.requesters
+    where user_id = '00000000-0000-0000-0000-000000000004')));
+select is(
+  (select channel_id from public.tickets where description = 'No enciende otra luz'),
+  (select id from public.channels where name = 'Plataforma Alfa'),
+  'el propio solicitante registra por el canal de plataforma');
 
 select * from finish();
 

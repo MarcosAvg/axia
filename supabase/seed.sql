@@ -207,6 +207,16 @@ insert into public.channels (name)
 values ('Web'), ('Teléfono'), ('Importación')
 on conflict do nothing;
 
+-- Canal de plataforma y prioridades por defecto (problema e instancia).
+update public.channels set is_platform = true where name = 'Web';
+update public.instance_settings
+  set default_priority_id = (select id from public.priorities where name = 'Media');
+update public.problems
+  set default_priority_id = (select id from public.priorities where name = 'Media');
+update public.problems
+  set default_priority_id = (select id from public.priorities where name = 'Alta')
+  where name in ('Chispa o corto', 'Sobrecalentamiento', 'Tubería rota', 'No enfría', 'Fuga de gas');
+
 insert into public.technicians (full_name, team_id)
 select v.name, t.id from public.teams t
 join (values

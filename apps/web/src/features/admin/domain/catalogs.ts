@@ -96,7 +96,21 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
       activeField,
     ],
   },
-  simpleCatalog('channels', 'channels', titles.channels),
+  {
+    key: 'channels',
+    table: 'channels',
+    title: titles.channels,
+    columns: [
+      nameColumn,
+      { key: 'is_platform', label: fields.is_platform },
+      activeColumn,
+    ],
+    fields: [
+      nameField,
+      { name: 'is_platform', label: fields.is_platform, kind: 'boolean' },
+      activeField,
+    ],
+  },
   {
     key: 'priorities',
     table: 'priorities',
@@ -200,6 +214,11 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
         label: fields.subcategory_id,
         optionsTable: 'subcategories',
       },
+      {
+        key: 'default_priority_id',
+        label: fields.default_priority_id,
+        optionsTable: 'priorities',
+      },
       activeColumn,
     ],
     fields: [
@@ -211,6 +230,12 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
         required: true,
       },
       nameField,
+      {
+        name: 'default_priority_id',
+        label: fields.default_priority_id,
+        kind: 'select-table',
+        optionsTable: 'priorities',
+      },
       activeField,
     ],
   },

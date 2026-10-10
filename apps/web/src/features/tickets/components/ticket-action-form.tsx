@@ -3,7 +3,12 @@ import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { FileField } from '@/components/shared/file-field'
-import { usePriorities, useReasons, useTechnicians } from '@/features/catalogs'
+import {
+  usePriorities,
+  useReasons,
+  useServiceTypes,
+  useTechnicians,
+} from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
@@ -49,6 +54,35 @@ function ActionFormFooter({
   )
 }
 
+function EvidenceBlock({
+  evidenceType,
+  evidenceError,
+  evidenceFile,
+  onEvidenceChange,
+}: {
+  evidenceType: EvidenceType | undefined
+  evidenceError: string | null
+  evidenceFile: File | null
+  onEvidenceChange: (file: File | null) => void
+}) {
+  if (!evidenceType) return null
+  return (
+    <div className="flex flex-col gap-1">
+      <FileField
+        id="action-evidence"
+        label={`${ticketMessages.actionFields.evidence}: ${evidenceTypeLabels[evidenceType]}`}
+        file={evidenceFile}
+        onChange={onEvidenceChange}
+        accept="image/*,application/pdf"
+        camera
+      />
+      {evidenceError ? (
+        <p className="text-sm text-destructive">{evidenceError}</p>
+      ) : null}
+    </div>
+  )
+}
+
 function ActionFormView({
   evidenceType,
   evidenceError,
@@ -58,6 +92,7 @@ function ActionFormView({
   technicians,
   reasons,
   priorities,
+  serviceTypes,
   values,
   onChange,
   error,
@@ -73,6 +108,7 @@ function ActionFormView({
   technicians: TechnicianOption[]
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
+  serviceTypes: { id: string; name: string }[]
   values: ActionValues
   onChange: (patch: Partial<ActionValues>) => void
   error: unknown
@@ -82,32 +118,34 @@ function ActionFormView({
 }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      {evidenceType ? (
-        <div className="flex flex-col gap-1">
-          <FileField
-            id="action-evidence"
-            label={`${ticketMessages.actionFields.evidence}: ${evidenceTypeLabels[evidenceType]}`}
-            file={evidenceFile}
-            onChange={onEvidenceChange}
-            accept="image/*,application/pdf"
-            camera
-          />
-          {evidenceError ? (
-            <p className="text-sm text-destructive">{evidenceError}</p>
-          ) : null}
-        </div>
-      ) : null}
+      <EvidenceBlock
+        evidenceType={evidenceType}
+        evidenceError={evidenceError}
+        evidenceFile={evidenceFile}
+        onEvidenceChange={onEvidenceChange}
+      />
       <TicketActionFields
         action={action}
         technicians={technicians}
         reasons={reasons}
         priorities={priorities}
+        serviceTypes={serviceTypes}
         values={values}
         onChange={onChange}
       />
       <ActionFormFooter error={error} isPending={isPending} onClose={onClose} />
     </form>
   )
+}
+
+function listTechnicians(
+  data: TechnicianOption[] | undefined,
+  action: ActionKey,
+  excludeIds: string[] | undefined,
+): TechnicianOption[] {
+  const all = data ?? []
+  if (action !== 'add_auxiliary' || !excludeIds) return all
+  return all.filter((technician) => !excludeIds.includes(technician.id))
 }
 
 /** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
@@ -130,6 +168,7 @@ export function TicketActionForm({
   const technicians = useTechnicians()
   const priorities = usePriorities()
   const reasons = useReasons(reasonUseFor(action))
+  const serviceTypes = useServiceTypes()
   const [values, setValues] = useState<ActionValues>(EMPTY)
   const mutation = mutationFor(action, actions)
   const submission = useActionSubmission({
@@ -146,12 +185,7 @@ export function TicketActionForm({
 
   const onChange = (patch: Partial<ActionValues>) =>
     setValues((current) => ({ ...current, ...patch }))
-  const techniciansList =
-    action === 'add_auxiliary' && excludeIds
-      ? (technicians.data ?? []).filter(
-          (technician) => !excludeIds.includes(technician.id),
-        )
-      : (technicians.data ?? [])
+  const techniciansList = listTechnicians(technicians.data, action, excludeIds)
 
   return (
     <ActionFormView
@@ -163,6 +197,7 @@ export function TicketActionForm({
       technicians={techniciansList}
       reasons={reasons.data ?? []}
       priorities={priorities.data ?? []}
+      serviceTypes={serviceTypes.data ?? []}
       values={values}
       onChange={onChange}
       error={state.error}

@@ -121,7 +121,7 @@ export interface TicketDetail extends TicketListItem {
   categoryId: string
   subcategoryId: string | null
   problemId: string | null
-  serviceTypeId: string
+  serviceTypeId: string | null
   priorityId: string
   locationName: string | null
   dependencyName: string | null

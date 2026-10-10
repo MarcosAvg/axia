@@ -125,6 +125,7 @@ export type Database = {
           active: boolean
           created_at: string
           id: string
+          is_platform: boolean
           name: string
           updated_at: string
         }
@@ -133,6 +134,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: string
+          is_platform?: boolean
           name: string
           updated_at?: string
         }
@@ -140,6 +142,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           id?: string
+          is_platform?: boolean
           name?: string
           updated_at?: string
         }
@@ -542,6 +545,7 @@ export type Database = {
           claim_window: string
           created_at: string
           default_calendar_id: string | null
+          default_priority_id: string | null
           duplicate_shown_fields: string[]
           duplicate_similarity: number
           duplicate_window: string
@@ -562,6 +566,7 @@ export type Database = {
           claim_window?: string
           created_at?: string
           default_calendar_id?: string | null
+          default_priority_id?: string | null
           duplicate_shown_fields?: string[]
           duplicate_similarity?: number
           duplicate_window?: string
@@ -581,6 +586,7 @@ export type Database = {
           claim_window?: string
           created_at?: string
           default_calendar_id?: string | null
+          default_priority_id?: string | null
           duplicate_shown_fields?: string[]
           duplicate_similarity?: number
           duplicate_window?: string
@@ -602,6 +608,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'work_calendars'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'instance_settings_default_priority_id_fkey'
+            columns: ['default_priority_id']
+            isOneToOne: false
+            referencedRelation: 'priorities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'instance_settings_default_priority_id_fkey'
+            columns: ['default_priority_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_sla_by_priority'
+            referencedColumns: ['priority_id']
           },
         ]
       }
@@ -924,6 +944,7 @@ export type Database = {
         Row: {
           active: boolean
           created_at: string
+          default_priority_id: string | null
           id: string
           name: string
           subcategory_id: string
@@ -933,6 +954,7 @@ export type Database = {
         Insert: {
           active?: boolean
           created_at?: string
+          default_priority_id?: string | null
           id?: string
           name: string
           subcategory_id: string
@@ -941,12 +963,27 @@ export type Database = {
         Update: {
           active?: boolean
           created_at?: string
+          default_priority_id?: string | null
           id?: string
           name?: string
           subcategory_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'problems_default_priority_id_fkey'
+            columns: ['default_priority_id']
+            isOneToOne: false
+            referencedRelation: 'priorities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'problems_default_priority_id_fkey'
+            columns: ['default_priority_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_sla_by_priority'
+            referencedColumns: ['priority_id']
+          },
           {
             foreignKeyName: 'problems_subcategory_id_fkey'
             columns: ['subcategory_id']
@@ -2739,7 +2776,7 @@ export type Database = {
           requester_contact: string | null
           requester_id: string
           requester_name: string
-          service_type_id: string
+          service_type_id: string | null
           status: Database['public']['Enums']['ticket_status']
           status_before_discard:
             Database['public']['Enums']['ticket_status'] | null
@@ -2770,7 +2807,7 @@ export type Database = {
           requester_contact?: string | null
           requester_id: string
           requester_name: string
-          service_type_id: string
+          service_type_id?: string | null
           status?: Database['public']['Enums']['ticket_status']
           status_before_discard?:
             Database['public']['Enums']['ticket_status'] | null
@@ -2800,7 +2837,7 @@ export type Database = {
           requester_contact?: string | null
           requester_id?: string
           requester_name?: string
-          service_type_id?: string
+          service_type_id?: string | null
           status?: Database['public']['Enums']['ticket_status']
           status_before_discard?:
             Database['public']['Enums']['ticket_status'] | null
@@ -4254,6 +4291,7 @@ export type Database = {
       ticket_attend: {
         Args: {
           p_client_request_id?: string
+          p_service_type_id?: string
           p_subject_technician_id?: string
           p_ticket_id: string
           p_work_description: string

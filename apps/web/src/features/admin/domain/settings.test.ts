@@ -39,6 +39,7 @@ describe('settingsToUpdate', () => {
       defaultCalendarId: null,
       slaClockMode: 'calendar',
       requesterVisibleEventTypes: ['created', 'taken'],
+      defaultPriorityId: null,
     })
     expect(update.claim_window).toBe('2 days')
     expect(update.auto_validation_days).toBeNull()

@@ -11,6 +11,7 @@ export interface ActionValues {
   technicianId: string
   reasonId: string
   priorityId: string
+  serviceTypeId: string
   note: string
   text: string
   resolution: ClaimResolution
@@ -21,6 +22,7 @@ export interface TicketActionFieldsProps {
   technicians: TechnicianOption[]
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
+  serviceTypes: { id: string; name: string }[]
   values: ActionValues
   onChange: (patch: Partial<ActionValues>) => void
 }
@@ -105,18 +107,45 @@ function TextBlock({
   )
 }
 
-function selectFields(props: TicketActionFieldsProps): ReactNode[] {
+function resolutionSelect(
+  value: string,
+  onChange: (patch: Partial<ActionValues>) => void,
+): ReactNode {
+  return (
+    <SelectBlock
+      key="resolution"
+      id="action-resolution"
+      label={fields.resolution}
+      options={resolutionOptions}
+      value={value}
+      onChange={(raw) => {
+        const next = CLAIM_RESOLUTIONS.find((candidate) => candidate === raw)
+        if (next) onChange({ resolution: next })
+      }}
+    />
+  )
+}
+
+function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
   const { action, values, onChange, technicians, reasons, priorities } = props
   const blocks: ReactNode[] = []
+  const technicianOptions = toOptions(
+    technicians.map((t) => ({ id: t.id, label: t.fullName })),
+  )
+  const reasonOptions = toOptions(
+    reasons.map((r) => ({ id: r.id, label: r.name })),
+  )
+  const priorityOptions = toOptions(
+    priorities.map((p) => ({ id: p.id, label: p.name })),
+  )
+
   if (action === 'assign_technician' || action === 'add_auxiliary') {
     blocks.push(
       <SelectBlock
         key="technician"
         id="action-technician"
         label={fields.technician}
-        options={toOptions(
-          technicians.map((t) => ({ id: t.id, label: t.fullName })),
-        )}
+        options={technicianOptions}
         value={values.technicianId}
         onChange={(technicianId) => onChange({ technicianId })}
       />,
@@ -128,26 +157,14 @@ function selectFields(props: TicketActionFieldsProps): ReactNode[] {
         key="reason"
         id="action-reason"
         label={fields.reason}
-        options={toOptions(reasons.map((r) => ({ id: r.id, label: r.name })))}
+        options={reasonOptions}
         value={values.reasonId}
         onChange={(reasonId) => onChange({ reasonId })}
       />,
     )
   }
   if (action === 'resolve_claim') {
-    blocks.push(
-      <SelectBlock
-        key="resolution"
-        id="action-resolution"
-        label={fields.resolution}
-        options={resolutionOptions}
-        value={values.resolution}
-        onChange={(raw) => {
-          const next = CLAIM_RESOLUTIONS.find((candidate) => candidate === raw)
-          if (next) onChange({ resolution: next })
-        }}
-      />,
-    )
+    blocks.push(resolutionSelect(values.resolution, onChange))
   }
   if (action === 'change_priority') {
     blocks.push(
@@ -155,11 +172,32 @@ function selectFields(props: TicketActionFieldsProps): ReactNode[] {
         key="priority"
         id="action-priority"
         label={fields.priority}
-        options={toOptions(
-          priorities.map((p) => ({ id: p.id, label: p.name })),
-        )}
+        options={priorityOptions}
         value={values.priorityId}
         onChange={(priorityId) => onChange({ priorityId })}
+      />,
+    )
+  }
+  return blocks
+}
+
+function selectFields(props: TicketActionFieldsProps): ReactNode[] {
+  const blocks = actionSelects(props)
+  if (props.action === 'attend') {
+    const serviceOptions = toOptions(
+      props.serviceTypes.map((service) => ({
+        id: service.id,
+        label: service.name,
+      })),
+    )
+    blocks.unshift(
+      <SelectBlock
+        key="service"
+        id="action-service-type"
+        label={fields.serviceType}
+        options={serviceOptions}
+        value={props.values.serviceTypeId}
+        onChange={(serviceTypeId) => props.onChange({ serviceTypeId })}
       />,
     )
   }
