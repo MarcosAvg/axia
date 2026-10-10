@@ -8,16 +8,16 @@
 
 ## En curso
 
-**Fase 8 — rediseño de interfaz (UI/UX).** Objetivo: layout de escritorio estilo Jira/Linear,
-sistema de temas (azul `ocean` por defecto + `neutral`/`emerald`/`violet`/`contrast`),
-claro/oscuro/sistema, sidebar responsive, búsqueda global y componentes de datos. **No se toca
-lógica** (API, dominio, RLS/RPC). Fases: 0 temas ✅, 1 shell ✅, 2 componentes de datos ✅,
-3 operación ✅, 4 métricas+admin ✅, 5 pulido ✅. Detalle en `docs/diseno-ui.md`.
-En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostración, Panel como
-centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
-Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
-quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0056.
+**Rediseño de Administración (desktop-first): cerrado.** Marco común (`AdminPage` + barra de lista),
+catálogos con **rail lateral** y **tablas específicas** (columnas reales alineadas, búsqueda y orden
+en cliente, estado con switch y acciones en menú `⋯`), **diálogos unificados** (`EntityDialog`/
+`EntityForm` con secciones y pie fijo), y `DataTable` compartida extendida. Alcance: toda la sección
+(catálogos, roles, usuarios, ámbitos, calendarios, configuración, integraciones). **Sin backend.**
+Detalle en `docs/diseno-ui.md` y ADR 0057. `pnpm check` en verde.
+
+_(Histórico)_ Rediseño de vistas 8.0–8.5 **cerrado**; fase 8 completa (Panel, Operación,
+Administración, Métricas, Acceso/perfil). La regresión visual con Playwright es **opt-in**
+(`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR 0038–0057.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -936,3 +936,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   editar prioridad por defecto del problema, canal de plataforma y prioridad por defecto de la
   instancia. **ADR 0056**. `pnpm check` en verde (159 Vitest, 13 Playwright, 440 pgTAP). Rama
   `feat/clasificacion-tiquet`.
+- **Rediseño de Administración (Etapa 25)**: marco común (`AdminPage`/`AdminToolbar`), catálogos con
+  **rail lateral** (escritorio) y **tablas específicas por entidad** (columnas reales alineadas,
+  relaciones con nombre, estado como `Switch`, acciones en menú `⋯`), **búsqueda y orden en cliente**
+  (`lib/sort`, `catalog-list`, `user-list`, con pruebas); **diálogos unificados** (`EntityDialog`
+  centrado/hoja inferior + `EntityForm` con pie fijo + secciones); `DataTable` compartida extendida
+  (`align`/`sortable`/`empty`); roles, usuarios, ámbitos e integraciones sobre las mismas piezas. El
+  inicio `/admin` se agrupa por áreas. **ADR 0057**. `pnpm check` en verde (174 Vitest, 13 Playwright,
+  440 pgTAP). Rama `feat/admin-rediseno`.
