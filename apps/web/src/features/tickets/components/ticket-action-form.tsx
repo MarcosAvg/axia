@@ -116,12 +116,14 @@ export function TicketActionForm({
   cycle,
   action,
   subjectTechnicianId,
+  excludeIds,
   onClose,
 }: {
   ticketId: string
   cycle: number
   action: ActionKey
   subjectTechnicianId?: string
+  excludeIds?: string[]
   onClose: () => void
 }) {
   const actions = useTicketActions(ticketId, subjectTechnicianId)
@@ -144,6 +146,12 @@ export function TicketActionForm({
 
   const onChange = (patch: Partial<ActionValues>) =>
     setValues((current) => ({ ...current, ...patch }))
+  const techniciansList =
+    action === 'add_auxiliary' && excludeIds
+      ? (technicians.data ?? []).filter(
+          (technician) => !excludeIds.includes(technician.id),
+        )
+      : (technicians.data ?? [])
 
   return (
     <ActionFormView
@@ -152,7 +160,7 @@ export function TicketActionForm({
       evidenceFile={submission.file}
       onEvidenceChange={submission.setFile}
       action={action}
-      technicians={technicians.data ?? []}
+      technicians={techniciansList}
       reasons={reasons.data ?? []}
       priorities={priorities.data ?? []}
       values={values}

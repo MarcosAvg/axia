@@ -180,6 +180,9 @@ export function TicketActionsPanel({
   )
   if (visible.length === 0) return null
   const blocked = actionsRequiringSubject(identity, visible, Boolean(subject))
+  const activeIds = participants
+    .filter((item) => item.endedAt === null)
+    .map((item) => item.technicianId)
   const close = () => setFormAction(null)
 
   return (
@@ -203,6 +206,7 @@ export function TicketActionsPanel({
         ticket={ticket}
         formAction={formAction}
         subject={subject}
+        excludeIds={activeIds}
         onClose={close}
       />
     </div>

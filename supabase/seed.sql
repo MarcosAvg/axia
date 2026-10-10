@@ -152,11 +152,48 @@ on conflict do nothing;
 insert into public.categories (team_id, name)
 select t.id, 'Accesos' from public.teams t where t.name = 'Seguridad'
 on conflict do nothing;
+insert into public.categories (team_id, name)
+select t.id, v.name from public.teams t,
+  (values ('Clima'), ('Pintura'), ('Herrería')) as v (name)
+where t.name = 'Mantenimiento'
+on conflict do nothing;
+insert into public.categories (team_id, name)
+select t.id, v.name from public.teams t,
+  (values ('Cámaras'), ('Alarma'), ('Control de acceso')) as v (name)
+where t.name = 'Seguridad'
+on conflict do nothing;
 insert into public.subcategories (category_id, name)
-select c.id, 'Contacto' from public.categories c where c.name = 'Eléctrico'
+select c.id, v.name from public.categories c
+join (values
+  ('Eléctrico', 'Contacto'), ('Eléctrico', 'Iluminación'), ('Eléctrico', 'Tablero'),
+  ('Plomería', 'Fuga'), ('Plomería', 'Drenaje'),
+  ('Accesos', 'Puertas'), ('Accesos', 'Cerraduras'),
+  ('Clima', 'Aire acondicionado'), ('Clima', 'Ventilación'),
+  ('Pintura', 'Muros'),
+  ('Herrería', 'Estructuras'),
+  ('Cámaras', 'Video'),
+  ('Alarma', 'Sensores'),
+  ('Control de acceso', 'Lectores')
+) as v (category, name) on v.category = c.name
 on conflict do nothing;
 insert into public.problems (subcategory_id, name)
-select s.id, 'Chispa o corto' from public.subcategories s where s.name = 'Contacto'
+select s.id, v.name from public.subcategories s
+join (values
+  ('Contacto', 'Chispa o corto'), ('Contacto', 'Cable suelto'),
+  ('Iluminación', 'Lámpara fundida'), ('Iluminación', 'Balastro dañado'),
+  ('Tablero', 'Sobrecalentamiento'),
+  ('Fuga', 'Goteo'), ('Fuga', 'Tubería rota'),
+  ('Drenaje', 'Taponamiento'),
+  ('Puertas', 'No cierra'), ('Puertas', 'Chapa dañada'),
+  ('Cerraduras', 'Atascada'),
+  ('Aire acondicionado', 'No enfría'), ('Aire acondicionado', 'Fuga de gas'),
+  ('Ventilación', 'Ruido'),
+  ('Muros', 'Humedad'), ('Muros', 'Despintado'),
+  ('Estructuras', 'Soldadura'), ('Estructuras', 'Oxidación'),
+  ('Video', 'Sin señal'), ('Video', 'Imagen borrosa'),
+  ('Sensores', 'Falsa alarma'), ('Sensores', 'Sin respuesta'),
+  ('Lectores', 'No lee tarjeta')
+) as v (subcategory, name) on v.subcategory = s.name
 on conflict do nothing;
 insert into public.service_types (name)
 values ('Correctivo'), ('Preventivo'), ('Inspección'),
@@ -171,9 +208,34 @@ values ('Web'), ('Teléfono'), ('Importación')
 on conflict do nothing;
 
 insert into public.technicians (full_name, team_id)
-select v.name, t.id from public.teams t, (values ('Luis Gómez'), ('Marta Ruiz')) as v (name)
-where t.name = 'Mantenimiento'
-  and not exists (select 1 from public.technicians where full_name = v.name);
+select v.name, t.id from public.teams t
+join (values
+  ('Luis Gómez', 'Mantenimiento'), ('Marta Ruiz', 'Mantenimiento'),
+  ('Carlos Méndez', 'Mantenimiento'), ('Paola Ríos', 'Mantenimiento'),
+  ('Jorge Salinas', 'Mantenimiento'),
+  ('Diana Torres', 'Seguridad'), ('Iván Cortés', 'Seguridad')
+) as v (name, team) on v.team = t.name
+where not exists (select 1 from public.technicians where full_name = v.name);
+
+-- Designaciones: quién es "líder" para cada categoría (RN-07).
+insert into public.technician_categories (technician_id, category_id)
+select te.id, c.id from public.technicians te
+join (values
+  ('Luis Gómez', 'Eléctrico'),
+  ('Marta Ruiz', 'Plomería'),
+  ('Carlos Méndez', 'Clima'),
+  ('Paola Ríos', 'Pintura'),
+  ('Jorge Salinas', 'Herrería'),
+  ('Diana Torres', 'Cámaras'),
+  ('Diana Torres', 'Accesos'),
+  ('Iván Cortés', 'Alarma'),
+  ('Iván Cortés', 'Control de acceso')
+) as v (technician, category) on v.technician = te.full_name
+join public.categories c on c.name = v.category
+where not exists (
+  select 1 from public.technician_categories tc
+  where tc.technician_id = te.id and tc.category_id = c.id
+);
 
 insert into public.requesters (full_name, contact, dependency_id)
 select v.name, v.contact, d.id
