@@ -1,7 +1,9 @@
 import { ErrorAlert } from '@/components/shared/async-state'
+import { ToneDot } from '@/components/shared/tone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { can, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
+import { toneForId } from '@/lib/tones'
 import { allowedActions } from '../domain/actions'
 import type { ActionKey } from '../domain/actions'
 import type {
@@ -38,7 +40,10 @@ function Section({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <ToneDot tone={toneForId(title)} />
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>

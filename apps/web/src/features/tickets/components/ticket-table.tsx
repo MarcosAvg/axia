@@ -1,9 +1,12 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
+import { ToneDot } from '@/components/shared/tone'
 import { formatDateTime } from '@/lib/format'
+import { toneForId } from '@/lib/tones'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { PriorityBadge } from './priority-badge'
 import { StatusBadge } from './status-badge'
 
 const { columns } = ticketMessages.list
@@ -50,19 +53,40 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     id: 'priority',
     header: columns.priority,
     hideBelow: 'lg',
-    cell: (ticket) => ticket.priorityName ?? placeholder,
+    cell: (ticket) => (
+      <PriorityBadge
+        name={ticket.priorityName}
+        position={ticket.priorityPosition}
+      />
+    ),
   },
   {
     id: 'building',
     header: columns.building,
     hideBelow: 'lg',
-    cell: (ticket) => ticket.buildingName ?? placeholder,
+    cell: (ticket) =>
+      ticket.buildingName ? (
+        <span className="inline-flex items-center gap-2">
+          <ToneDot tone={toneForId(ticket.buildingName)} />
+          {ticket.buildingName}
+        </span>
+      ) : (
+        placeholder
+      ),
   },
   {
     id: 'team',
     header: columns.team,
     hideBelow: 'lg',
-    cell: (ticket) => ticket.teamName ?? placeholder,
+    cell: (ticket) =>
+      ticket.teamName ? (
+        <span className="inline-flex items-center gap-2">
+          <ToneDot tone={toneForId(ticket.teamName)} />
+          {ticket.teamName}
+        </span>
+      ) : (
+        placeholder
+      ),
   },
   {
     id: 'reported',

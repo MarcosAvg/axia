@@ -47,6 +47,9 @@ Los tokens de shadcn/ui más los propios de Axia:
 - **Barra lateral**: `--sidebar`, `--sidebar-foreground`, `--sidebar-primary`,
   `--sidebar-accent`, `--sidebar-border`, `--sidebar-ring` (y sus `-foreground`).
 - **Gráficos**: `--chart-1` … `--chart-5`, cinco tonos distinguibles en todos los temas.
+- **Acentos**: `--tone-1` … `--tone-6` (azul, teal, violeta, ámbar, rosa, verde), **iguales en todos
+  los temas**; se usan como acentos sutiles (`bg-tone-N/10 text-tone-N`, puntos y prioridad). Ver
+  ADR 0063 y `lib/tones.ts`.
 - **Semánticos** (propios de Axia): `--success`, `--warning`, `--info` (y sus `-foreground`).
 - **Radio**: `--radius`.
 

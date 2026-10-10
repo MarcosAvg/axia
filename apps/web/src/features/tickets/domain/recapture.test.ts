@@ -28,6 +28,7 @@ const ticket = {
   problemId: 'p1',
   serviceTypeId: 's1',
   priorityId: 'pr1',
+  priorityPosition: null,
   locationName: null,
   dependencyName: null,
   subcategoryName: null,

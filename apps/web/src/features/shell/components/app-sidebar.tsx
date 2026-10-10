@@ -8,6 +8,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from 'cn'
+import { ToneDot } from '@/components/shared/tone'
+import { toneForId } from '@/lib/tones'
 import { can, useAuth } from '@/features/auth'
 import { shellMessages } from '../i18n'
 import { NAV_SECTIONS } from './nav-items'
@@ -95,10 +97,11 @@ function SectionLinks({
     <div className="flex flex-col gap-0.5">
       <p
         className={cn(
-          'px-2.5 pt-3 pb-1 text-xs font-medium text-muted-foreground',
+          'flex items-center gap-2 px-2.5 pt-3 pb-1 text-xs font-medium text-muted-foreground',
           collapsed && 'sr-only',
         )}
       >
+        <ToneDot tone={toneForId(section.id)} />
         {section.label}
       </p>
       {items.map((item) => (

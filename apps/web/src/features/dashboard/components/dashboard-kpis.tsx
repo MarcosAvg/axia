@@ -1,4 +1,7 @@
+import { cn } from 'cn'
+import { ToneDot } from '@/components/shared/tone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toneClasses, toneForIndex } from '@/lib/tones'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import {
@@ -99,18 +102,26 @@ export function DashboardKpis({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {kpis.map((kpi) => (
-        <Card key={kpi.label}>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {kpi.label}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{kpi.value}</p>
-          </CardContent>
-        </Card>
-      ))}
+      {kpis.map((kpi, index) => {
+        const tone = toneForIndex(index)
+        return (
+          <Card key={kpi.label}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <ToneDot tone={tone} />
+                {kpi.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p
+                className={cn('text-2xl font-semibold', toneClasses[tone].text)}
+              >
+                {kpi.value}
+              </p>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }

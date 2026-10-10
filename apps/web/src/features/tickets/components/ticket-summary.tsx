@@ -1,12 +1,27 @@
+import { ToneDot } from '@/components/shared/tone'
 import { formatDateTime } from '@/lib/format'
+import { toneForId } from '@/lib/tones'
+import type { Tone } from '@/lib/tones'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { PriorityBadge } from './priority-badge'
 
-function Field({ label, value }: { label: string; value: string | null }) {
+function Field({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string | null
+  tone?: Tone
+}) {
   return (
     <div className="flex flex-col gap-0.5">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm">{value ?? '—'}</dd>
+      <dd className="flex items-center gap-2 text-sm">
+        {tone ? <ToneDot tone={tone} /> : null}
+        {value ?? '—'}
+      </dd>
     </div>
   )
 }
@@ -18,16 +33,40 @@ export function TicketSummary({ ticket }: { ticket: TicketDetail }) {
   return (
     <div className="flex flex-col gap-4">
       <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
-        <Field label={fields.building} value={ticket.buildingName} />
+        <Field
+          label={fields.building}
+          value={ticket.buildingName}
+          tone={
+            ticket.buildingName ? toneForId(ticket.buildingName) : undefined
+          }
+        />
         <Field label={fields.location} value={ticket.locationName} />
         <Field label={fields.dependency} value={ticket.dependencyName} />
-        <Field label={fields.category} value={ticket.categoryName} />
+        <Field
+          label={fields.category}
+          value={ticket.categoryName}
+          tone={
+            ticket.categoryName ? toneForId(ticket.categoryName) : undefined
+          }
+        />
         <Field label={fields.subcategory} value={ticket.subcategoryName} />
         <Field label={fields.problem} value={ticket.problemName} />
         <Field label={fields.serviceType} value={ticket.serviceTypeName} />
-        <Field label={fields.priority} value={ticket.priorityName} />
+        <div className="flex flex-col gap-0.5">
+          <dt className="text-xs text-muted-foreground">{fields.priority}</dt>
+          <dd>
+            <PriorityBadge
+              name={ticket.priorityName}
+              position={ticket.priorityPosition}
+            />
+          </dd>
+        </div>
         <Field label={fields.channel} value={ticket.channelName} />
-        <Field label={fields.team} value={ticket.teamName} />
+        <Field
+          label={fields.team}
+          value={ticket.teamName}
+          tone={ticket.teamName ? toneForId(ticket.teamName) : undefined}
+        />
         <Field label={fields.requester} value={ticket.requesterName} />
         <Field
           label={fields.requesterContact}

@@ -28,7 +28,7 @@ import type { CreateTicketInput } from '../schemas'
 const TICKETS_PAGE_SIZE = 20
 
 const LIST_SELECT =
-  'id, folio, status, reported_at, closed_at, description, requester_name, possible_duplicate, building:buildings(name), category:categories(name), priority:priorities(name), team:teams(name)'
+  'id, folio, status, reported_at, closed_at, description, requester_name, possible_duplicate, building:buildings(name), category:categories(name), priority:priorities(name, position), team:teams(name)'
 
 const DETAIL_SELECT = `${LIST_SELECT}, cycle, building_id, location_id, dependency_id, category_id, subcategory_id, problem_id, service_type_id, priority_id, requester_contact, duplicate_of_id, location:locations(name), dependency:dependencies(name), subcategory:subcategories(name), problem:problems(name), service_type:service_types(name), channel:channels(name)`
 
