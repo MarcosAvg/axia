@@ -94,7 +94,8 @@ select public.ticket_resume((select id from public.tickets order by ticket_numbe
 insert into public.evidence (ticket_id, cycle, type)
   select id, cycle, 'after' from public.tickets order by ticket_number limit 1;
 select public.ticket_attend(
-  (select id from public.tickets order by ticket_number limit 1), 'Listo');
+  (select id from public.tickets order by ticket_number limit 1), 'Listo',
+  null, null, (select id from public.service_types where name = 'Servicio Alfa'));
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000002"}', true);
 select public.ticket_validate((select id from public.tickets order by ticket_number limit 1));
