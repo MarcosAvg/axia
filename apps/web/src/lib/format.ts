@@ -46,3 +46,15 @@ export function formatDuration(
   if (rest === 0) return `${hours} h`
   return `${hours} h ${rest} min`
 }
+
+/** Tiempo transcurrido desde un instante ISO, con días ("3 d 4 h"). */
+export function formatElapsed(iso: string, now: Date = new Date()): string {
+  const minutes = Math.round((now.getTime() - new Date(iso).getTime()) / 60000)
+  if (minutes <= 0) return '0 min'
+  const days = Math.floor(minutes / 1440)
+  const hours = Math.floor((minutes % 1440) / 60)
+  const rest = minutes % 60
+  if (days > 0) return hours > 0 ? `${days} d ${hours} h` : `${days} d`
+  if (hours > 0) return rest > 0 ? `${hours} h ${rest} min` : `${hours} h`
+  return `${rest} min`
+}

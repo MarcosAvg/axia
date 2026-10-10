@@ -25,11 +25,6 @@ export const dashboardMessages = {
   },
   charts: {
     volume: 'Tiquets por mes',
-    status: 'Por estado',
-  },
-  attention: {
-    title: 'Requiere tu atención',
-    empty: 'Nada pendiente.',
   },
   activity: {
     title: 'Actividad reciente',
@@ -37,14 +32,12 @@ export const dashboardMessages = {
   },
   sections: {
     offers: 'Ofertas para ti',
-    myWork: 'Mi trabajo',
     team: 'Tiquets del equipo',
+    active: 'Tiquets activos',
     myActive: 'Tus tiquets activos',
   },
   viewAll: 'Ver todos',
   empty: {
-    offers: 'No tienes ofertas pendientes.',
-    myWork: 'No tienes tiquets asignados.',
     team: 'No hay tiquets activos.',
   },
 } as const

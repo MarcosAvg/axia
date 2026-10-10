@@ -3,6 +3,7 @@ import {
   formatBytes,
   formatDateTime,
   formatDuration,
+  formatElapsed,
   setDisplayTimezone,
 } from './format'
 
@@ -38,5 +39,15 @@ describe('formatBytes', () => {
     expect(formatBytes(512)).toBe('512 B')
     expect(formatBytes(2048)).toBe('2 KB')
     expect(formatBytes(null)).toBe('')
+  })
+})
+
+describe('formatElapsed', () => {
+  it('muestra días, horas y minutos transcurridos', () => {
+    const now = new Date('2026-10-10T12:00:00Z')
+    expect(formatElapsed('2026-10-10T11:30:00Z', now)).toBe('30 min')
+    expect(formatElapsed('2026-10-10T09:45:00Z', now)).toBe('2 h 15 min')
+    expect(formatElapsed('2026-10-07T08:00:00Z', now)).toBe('3 d 4 h')
+    expect(formatElapsed('2026-10-07T12:00:00Z', now)).toBe('3 d')
   })
 })

@@ -27,9 +27,7 @@ test('panel y métricas', async ({ page }) => {
     mask: [
       page.locator('time'),
       page.locator('svg.recharts-surface'),
-      page
-        .locator('[data-slot="card"]')
-        .filter({ hasText: 'Requiere tu atención' }),
+      page.locator('[data-elapsed]'),
     ],
   })
 
