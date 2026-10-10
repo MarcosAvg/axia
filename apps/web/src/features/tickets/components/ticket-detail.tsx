@@ -19,6 +19,7 @@ import {
 import { manualTimeMessages, ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
 import { ManualTimePanel } from './manual-time-panel'
+import { PausePanel } from './pause-panel'
 import { PendingEvidence } from './pending-evidence'
 import { StatusBadge } from './status-badge'
 import { TicketActionsPanel } from './ticket-actions-panel'
@@ -132,6 +133,7 @@ function TicketMain({
       <Section title={detail.capture}>
         <TicketSummary ticket={ticket} />
       </Section>
+      <PausePanel ticketId={ticketId} />
       <EvidenceSection
         ticketId={ticketId}
         cycle={ticket.cycle}

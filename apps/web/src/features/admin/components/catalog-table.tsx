@@ -63,15 +63,83 @@ function displayName(
   return value === null || value === undefined ? '' : String(value)
 }
 
-function buildTableColumns(
-  dataColumns: AdminColumn[],
-  optionsFor: (table: AdminTable) => AdminOption[],
+interface BuildColumnsOptions {
+  rows: Record<string, unknown>[]
+  dataColumns: AdminColumn[]
+  optionsFor: (table: AdminTable) => AdminOption[]
+  onEdit: (row: Record<string, unknown>) => void
+  onToggle: (row: Record<string, unknown>) => void
+}
+
+function depthFunction(
+  rows: Record<string, unknown>[],
+  indentBy: string,
+): (row: Record<string, unknown>) => number {
+  const byId = new Map(rows.map((row) => [String(row.id), row]))
+  return (row) => {
+    let depth = 0
+    let cursor = row[indentBy]
+    while (cursor && byId.has(String(cursor)) && depth < 50) {
+      depth += 1
+      cursor = byId.get(String(cursor))?.[indentBy]
+    }
+    return depth
+  }
+}
+
+function activeColumn(
+  nameOf: (row: Record<string, unknown>) => string,
+  onToggle: (row: Record<string, unknown>) => void,
+): DataTableColumn<Record<string, unknown>> {
+  return {
+    id: 'active',
+    header: adminMessages.list.active,
+    align: 'center',
+    className: 'w-24',
+    cell: (row) => (
+      <div className="flex justify-center">
+        <StatusSwitch
+          active={row.active !== false}
+          name={nameOf(row)}
+          onToggle={() => onToggle(row)}
+        />
+      </div>
+    ),
+  }
+}
+
+function actionsColumn(
+  nameOf: (row: Record<string, unknown>) => string,
   onEdit: (row: Record<string, unknown>) => void,
   onToggle: (row: Record<string, unknown>) => void,
+): DataTableColumn<Record<string, unknown>> {
+  return {
+    id: 'actions',
+    header: '',
+    align: 'right',
+    className: 'w-14',
+    cell: (row) => (
+      <div className="flex justify-end">
+        <RowActions
+          active={row.active !== false}
+          name={nameOf(row)}
+          onEdit={() => onEdit(row)}
+          onToggle={() => onToggle(row)}
+        />
+      </div>
+    ),
+  }
+}
+
+function buildTableColumns(
+  options: BuildColumnsOptions,
 ): DataTableColumn<Record<string, unknown>>[] {
+  const { rows, dataColumns, optionsFor, onEdit, onToggle } = options
   const nameColumn = dataColumns[0]
   const nameOf = (row: Record<string, unknown>) =>
     nameColumn ? displayName(row, nameColumn) : ''
+  const indentBy = nameColumn?.indentBy
+  const depthOf = indentBy ? depthFunction(rows, indentBy) : undefined
 
   return [
     ...dataColumns.map((column, index) => ({
@@ -83,44 +151,18 @@ function buildTableColumns(
         const content: ReactNode = (
           <CellContent row={row} column={column} optionsFor={optionsFor} />
         )
-        return index === 0 ? (
-          <span className="font-medium text-foreground">{content}</span>
-        ) : (
-          content
+        if (index !== 0) return content
+        const prefix = indentBy && depthOf ? '— '.repeat(depthOf(row)) : ''
+        return (
+          <span className="font-medium text-foreground">
+            {prefix}
+            {content}
+          </span>
         )
       },
     })),
-    {
-      id: 'active',
-      header: adminMessages.list.active,
-      align: 'center' as const,
-      className: 'w-24',
-      cell: (row: Record<string, unknown>) => (
-        <div className="flex justify-center">
-          <StatusSwitch
-            active={row.active !== false}
-            name={nameOf(row)}
-            onToggle={() => onToggle(row)}
-          />
-        </div>
-      ),
-    },
-    {
-      id: 'actions',
-      header: '',
-      align: 'right' as const,
-      className: 'w-14',
-      cell: (row: Record<string, unknown>) => (
-        <div className="flex justify-end">
-          <RowActions
-            active={row.active !== false}
-            name={nameOf(row)}
-            onEdit={() => onEdit(row)}
-            onToggle={() => onToggle(row)}
-          />
-        </div>
-      ),
-    },
+    activeColumn(nameOf, onToggle),
+    actionsColumn(nameOf, onEdit, onToggle),
   ]
 }
 
@@ -146,7 +188,13 @@ export function CatalogTable({
 
   return (
     <DataTable
-      columns={buildTableColumns(dataColumns, optionsFor, onEdit, onToggle)}
+      columns={buildTableColumns({
+        rows,
+        dataColumns,
+        optionsFor,
+        onEdit,
+        onToggle,
+      })}
       rows={rows}
       sort={sort}
       onSortChange={onSortChange}

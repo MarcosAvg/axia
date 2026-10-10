@@ -226,6 +226,7 @@ export const ticketMessages = {
     start: 'Iniciar',
     record_progress: 'Registrar avance',
     pause: 'Pausar',
+    advance_pause: 'Avanzar subestado',
     resume: 'Reanudar',
     attend: 'Marcar atendido',
     validate: 'Validar',

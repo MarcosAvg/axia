@@ -8,6 +8,7 @@ export type ActionKey =
   | 'add_auxiliary'
   | 'start'
   | 'pause'
+  | 'advance_pause'
   | 'resume'
   | 'record_progress'
   | 'attend'
@@ -61,6 +62,7 @@ const PROXY_ACTIONS: ActionKey[] = [
   'start',
   'attend',
   'pause',
+  'advance_pause',
   'resume',
   'recapture',
 ]
@@ -68,6 +70,7 @@ const DIRECT_PERMISSION: Partial<Record<ActionKey, string>> = {
   start: 'ticket.start',
   attend: 'ticket.attend',
   pause: 'ticket.pause',
+  advance_pause: 'ticket.pause',
   resume: 'ticket.resume',
   recapture: 'ticket.recapture',
 }
@@ -107,6 +110,8 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
     has(c, 'ticket.record_progress'),
   pause: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.pause'),
+  advance_pause: (c) =>
+    c.status === 'paused' && technicianAction(c, 'ticket.pause'),
   resume: (c) => c.status === 'paused' && technicianAction(c, 'ticket.resume'),
   attend: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.attend'),

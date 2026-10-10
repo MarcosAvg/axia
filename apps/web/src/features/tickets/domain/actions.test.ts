@@ -57,6 +57,14 @@ describe('allowedActions', () => {
     expect(actions).toContain('pause')
   })
 
+  it('el técnico avanza el subestado cuando el tiquet está pausado', () => {
+    const actions = allowedActions(
+      context(['ticket.pause', 'ticket.resume'], 'paused'),
+    )
+    expect(actions).toContain('advance_pause')
+    expect(actions).toContain('resume')
+  })
+
   it('el solicitante valida un tiquet atendido', () => {
     expect(allowedActions(context(['ticket.validate'], 'attended'))).toContain(
       'validate',
@@ -157,6 +165,10 @@ describe('pickPrimaryAction', () => {
 
   it('prefiere atender sobre pausar en proceso', () => {
     expect(pickPrimaryAction(['pause', 'attend', 'comment'])).toBe('attend')
+  })
+
+  it('prefiere reanudar sobre avanzar el subestado', () => {
+    expect(pickPrimaryAction(['advance_pause', 'resume'])).toBe('resume')
   })
 
   it('elige iniciar cuando el tiquet está asignado', () => {

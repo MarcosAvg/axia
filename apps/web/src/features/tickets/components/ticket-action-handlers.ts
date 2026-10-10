@@ -16,6 +16,7 @@ export const DEDICATED: ActionKey[] = [
 
 const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   pause: 'pause',
+  advance_pause: 'pause',
   reject: 'rejection',
   cancel: 'cancellation',
   open_claim: 'claim',
@@ -60,6 +61,7 @@ export function mutationFor(action: ActionKey, actions: Mutations) {
     change_priority: actions.changePriority,
     comment: actions.comment,
     pause: actions.pause,
+    advance_pause: actions.advancePause,
     reject: actions.reject,
     cancel: actions.cancel,
     open_claim: actions.openClaim,
@@ -70,6 +72,29 @@ export function mutationFor(action: ActionKey, actions: Mutations) {
   return map[action]
 }
 
+function pauseHandlers(
+  actions: Mutations,
+  values: ActionValues,
+  options: MutateOptions,
+): Handlers {
+  const note = values.note || null
+  return {
+    pause: () => {
+      if (values.reasonId) {
+        actions.pause.mutate({ reasonId: values.reasonId, note }, options)
+      }
+    },
+    advance_pause: () => {
+      if (values.reasonId) {
+        actions.advancePause.mutate(
+          { reasonId: values.reasonId, note },
+          options,
+        )
+      }
+    },
+  }
+}
+
 function simpleHandlers(
   actions: Mutations,
   values: ActionValues,
@@ -78,6 +103,7 @@ function simpleHandlers(
   const note = values.note || null
   const text = values.text.trim()
   return {
+    ...pauseHandlers(actions, values, options),
     assign_technician: () => {
       if (values.technicianId) {
         actions.assignTechnician.mutate(
@@ -105,11 +131,6 @@ function simpleHandlers(
     },
     comment: () => {
       if (text) actions.comment.mutate({ text }, options)
-    },
-    pause: () => {
-      if (values.reasonId) {
-        actions.pause.mutate({ reasonId: values.reasonId, note }, options)
-      }
     },
     reject: () => {
       if (values.reasonId) {

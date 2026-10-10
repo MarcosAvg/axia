@@ -5,6 +5,7 @@ import { CLAIM_RESOLUTIONS } from '../domain/types'
 import type { ClaimResolution } from '../domain/types'
 import {
   addAuxiliary,
+  advancePause,
   assignSupervisor,
   assignTechnician,
   attendTicket,
@@ -31,6 +32,7 @@ export type TicketOperation =
   | 'add_auxiliary'
   | 'start'
   | 'pause'
+  | 'advance_pause'
   | 'resume'
   | 'attend'
   | 'validate'
@@ -96,6 +98,16 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
   start: (t, a, id) => startTicket(t, id, opt(a.subjectTechnicianId)),
   pause: (t, a, id) =>
     pauseTicket(
+      t,
+      {
+        reasonId: str(a.reasonId),
+        note: opt(a.note),
+        subjectTechnicianId: opt(a.subjectTechnicianId),
+      },
+      id,
+    ),
+  advance_pause: (t, a, id) =>
+    advancePause(
       t,
       {
         reasonId: str(a.reasonId),

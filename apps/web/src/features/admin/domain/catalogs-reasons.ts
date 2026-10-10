@@ -18,7 +18,7 @@ export const reasonsCatalog: AdminCatalogConfig = {
   table: 'reasons',
   title: titles.reasons,
   columns: [
-    { key: 'name', label: fields.name },
+    { key: 'name', label: fields.name, indentBy: 'parent_id' },
     { key: 'use', label: fields.use },
     { key: 'active', label: list.active },
   ],

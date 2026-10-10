@@ -21,6 +21,7 @@ const FORM_ACTIONS: ActionKey[] = [
   'assign_technician',
   'add_auxiliary',
   'pause',
+  'advance_pause',
   'reject',
   'cancel',
   'change_priority',
