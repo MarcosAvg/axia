@@ -20,29 +20,38 @@ function CatalogsPage() {
   const config = catalogByKey(catalog)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={adminMessages.nav.catalogs}
         description={adminMessages.descriptions.catalogs}
       />
-      <nav className="flex flex-wrap gap-1" aria-label="Catálogos">
-        {ADMIN_CATALOGS.map((item) => (
-          <Link
-            key={item.key}
-            to="/admin/catalogos"
-            search={{ catalog: item.key }}
-            className={cn(
-              'inline-flex min-h-11 items-center rounded-full px-3 text-sm',
-              item.key === config.key
-                ? 'bg-muted font-medium text-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {item.title}
-          </Link>
-        ))}
-      </nav>
-      <CatalogManager config={config} />
+      <div className="grid gap-6 lg:grid-cols-[15rem_1fr]">
+        <nav
+          aria-label="Catálogos"
+          className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+        >
+          {ADMIN_CATALOGS.map((item) => {
+            const active = item.key === config.key
+            return (
+              <Link
+                key={item.key}
+                to="/admin/catalogos"
+                search={{ catalog: item.key }}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
+                  active
+                    ? 'bg-muted font-medium text-foreground'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+                )}
+              >
+                {item.title}
+              </Link>
+            )
+          })}
+        </nav>
+        <CatalogManager config={config} />
+      </div>
     </div>
   )
 }

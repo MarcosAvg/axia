@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { TextField } from '@/components/shared/form-fields'
 import type { Role } from '../domain/access'
 import { adminMessages } from '../i18n'
@@ -22,28 +23,26 @@ export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
         event.preventDefault()
         onSave({ label: label.trim() || role.label, active })
       }}
-      className="flex flex-wrap items-end gap-3"
+      className="flex flex-wrap items-end gap-4"
     >
-      <div className="w-56">
+      <div className="w-full max-w-sm">
         <TextField
           id="role-edit-label"
           label={roles.label}
-          className="min-h-11"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
         />
       </div>
       <label className="flex min-h-11 items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-5"
+        <Switch
           checked={active}
-          onChange={(event) => setActive(event.target.checked)}
+          aria-label={fields.active}
+          onCheckedChange={setActive}
         />
         {fields.active}
       </label>
-      <Button type="submit" disabled={isSaving} className="min-h-11">
-        {actions.save}
+      <Button type="submit" disabled={isSaving}>
+        {isSaving ? actions.saving : actions.save}
       </Button>
     </form>
   )

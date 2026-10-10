@@ -18,6 +18,8 @@ export interface AdminColumn {
   optionsTable?: AdminTable
   /** Formato de presentación del valor (`minutes` = tiempo objetivo). */
   format?: 'minutes'
+  /** Alineación de la columna; por defecto a la izquierda. */
+  align?: 'left' | 'right' | 'center'
 }
 
 export interface AdminCatalogConfig {

@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PageHeader } from '@/components/shared/page-header'
-import { adminMessages, CalendarManager } from '@/features/admin'
+import { AdminPage, adminMessages, CalendarManager } from '@/features/admin'
 import { RequirePermission } from '@/features/auth'
 
 export const Route = createFileRoute('/_authenticated/admin/calendarios')({
@@ -10,13 +9,12 @@ export const Route = createFileRoute('/_authenticated/admin/calendarios')({
 function CalendarsPage() {
   return (
     <RequirePermission permission="catalog.manage">
-      <div className="flex flex-col gap-6">
-        <PageHeader
-          title={adminMessages.nav.calendars}
-          description={adminMessages.descriptions.calendars}
-        />
+      <AdminPage
+        title={adminMessages.nav.calendars}
+        description={adminMessages.descriptions.calendars}
+      >
         <CalendarManager />
-      </div>
+      </AdminPage>
     </RequirePermission>
   )
 }

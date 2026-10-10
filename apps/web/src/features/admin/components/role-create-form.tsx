@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
 import { TextField } from '@/components/shared/form-fields'
 import { adminMessages } from '../i18n'
+import { EntityForm } from './entity-form'
+import { FormGroup } from './form-group'
 
 interface RoleCreateFormProps {
   onCreate: (values: { name: string; label: string }) => void
@@ -30,28 +31,28 @@ export function RoleCreateForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
-      <div className="w-48">
-        <TextField
-          id="role-name"
-          label={roles.name}
-          className="min-h-11"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </div>
-      <div className="w-56">
-        <TextField
-          id="role-label"
-          label={roles.label}
-          className="min-h-11"
-          value={label}
-          onChange={(event) => setLabel(event.target.value)}
-        />
-      </div>
-      <Button type="submit" disabled={isSaving} className="min-h-11">
-        {actions.add}
-      </Button>
-    </form>
+    <EntityForm
+      onSubmit={submit}
+      onCancel={() => onClose?.()}
+      isSaving={isSaving}
+      submitLabel={actions.add}
+    >
+      <FormGroup title={roles.createTitle}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TextField
+            id="role-name"
+            label={roles.name}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+          <TextField
+            id="role-label"
+            label={roles.label}
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+          />
+        </div>
+      </FormGroup>
+    </EntityForm>
   )
 }

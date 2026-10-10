@@ -10,11 +10,12 @@ import {
   useAdminSave,
 } from './use-admin-catalog'
 import type { AdminOption } from './use-admin-catalog'
+import { useCatalogList } from './use-catalog-list'
 
 type Editing = Record<string, unknown> | 'new' | null
 type Values = Record<string, string | number | boolean | null>
 
-/** Estado y acciones del gestor de un catálogo. */
+/** Estado y acciones del gestor de un catálogo: lista, búsqueda, orden y guardado. */
 export function useCatalogManager(config: AdminCatalogConfig) {
   const rows = useAdminRows(config.table, config.orderBy)
   const options = useAdminOptions(optionSourcesFor(config))
@@ -23,6 +24,7 @@ export function useCatalogManager(config: AdminCatalogConfig) {
 
   const optionsFor = (table: AdminTable): AdminOption[] =>
     options.get(table) ?? []
+  const list = useCatalogList(config, rows.data ?? [], optionsFor)
 
   function handleSave(values: Values) {
     const id = editing && editing !== 'new' ? String(editing.id) : undefined
@@ -45,14 +47,13 @@ export function useCatalogManager(config: AdminCatalogConfig) {
         id: String(row.id),
         values: { active: row.active !== true },
       },
-      {
-        onError: () => toast.error(adminMessages.actions.error),
-      },
+      { onError: () => toast.error(adminMessages.actions.error) },
     )
   }
 
   return {
     rows,
+    ...list,
     editing,
     setEditing,
     optionsFor,
