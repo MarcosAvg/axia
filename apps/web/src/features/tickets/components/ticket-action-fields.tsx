@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
 import type { SelectOption } from '@/components/shared/form-fields'
 import { SelectField, TextAreaField } from '@/components/shared/form-fields'
-import { childReasons, indentReasons } from '@/features/catalogs'
+import {
+  childReasons,
+  descendantReasons,
+  indentReasons,
+  rootReasons,
+} from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionKey } from '../domain/actions'
 import { CLAIM_RESOLUTIONS } from '../domain/types'
@@ -25,7 +30,7 @@ export interface TicketActionFieldsProps {
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
-  parentReasonId?: string | null
+  motiveReasonId?: string | null
   values: ActionValues
   onChange: (patch: Partial<ActionValues>) => void
 }
@@ -34,6 +39,7 @@ const fields = ticketMessages.actionFields
 const REASON_ACTIONS: ActionKey[] = [
   'pause',
   'advance_pause',
+  'resume',
   'reject',
   'cancel',
   'open_claim',
@@ -130,18 +136,20 @@ function resolutionSelect(
   )
 }
 
+const reasonNameOptions = (items: ReasonOption[]): SelectOption[] =>
+  toOptions(items.map((reason) => ({ id: reason.id, label: reason.name })))
+
 function reasonOptionsFor(
   action: ActionKey,
   reasons: ReasonOption[],
-  parentReasonId: string | null | undefined,
+  motiveReasonId: string | null | undefined,
 ): SelectOption[] {
+  if (action === 'pause') return reasonNameOptions(rootReasons(reasons))
+  if (action === 'resume') {
+    return reasonNameOptions(childReasons(reasons, motiveReasonId))
+  }
   if (action === 'advance_pause') {
-    return toOptions(
-      childReasons(reasons, parentReasonId).map((reason) => ({
-        id: reason.id,
-        label: reason.name,
-      })),
-    )
+    return reasonNameOptions(descendantReasons(reasons, motiveReasonId))
   }
   return toOptions(
     indentReasons(reasons).map((reason) => ({
@@ -157,7 +165,7 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
   const technicianOptions = toOptions(
     technicians.map((t) => ({ id: t.id, label: t.fullName })),
   )
-  const reasonOptions = reasonOptionsFor(action, reasons, props.parentReasonId)
+  const reasonOptions = reasonOptionsFor(action, reasons, props.motiveReasonId)
   const priorityOptions = toOptions(
     priorities.map((p) => ({ id: p.id, label: p.name })),
   )
@@ -180,7 +188,9 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
         key="reason"
         id="action-reason"
         label={
-          action === 'advance_pause' ? pauseMessages.substate : fields.reason
+          action === 'resume' || action === 'advance_pause'
+            ? pauseMessages.substate
+            : fields.reason
         }
         options={reasonOptions}
         value={values.reasonId}

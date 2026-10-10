@@ -10,6 +10,7 @@ import type {
   TicketEvidenceItem,
   TicketListItem,
   TicketParticipant,
+  TicketPauseState,
   TicketPauseStep,
   TicketStatus,
   TicketTimelineItem,
@@ -119,6 +120,35 @@ export async function fetchPauseSteps(
     note: row.note,
     actorName: row.actor_name,
   }))
+}
+
+interface PauseStateRow {
+  pause_id: string
+  motive_id: string
+  motive_name: string
+  current_id: string
+  current_name: string
+  opened_at: string
+}
+
+/** Pausa abierta del tiquet (motivo y subestado actual) o `null`. */
+export async function fetchPauseState(
+  ticketId: string,
+): Promise<TicketPauseState | null> {
+  const { data, error } = await supabase.rpc('ticket_pause_state', {
+    p_ticket_id: ticketId,
+  })
+  if (error) throw error
+  const row = ((data ?? []) as PauseStateRow[])[0]
+  if (!row) return null
+  return {
+    pauseId: row.pause_id,
+    motiveId: row.motive_id,
+    motiveName: row.motive_name,
+    currentId: row.current_id,
+    currentName: row.current_name,
+    openedAt: row.opened_at,
+  }
 }
 
 export async function fetchTimeline(

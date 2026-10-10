@@ -8,15 +8,16 @@
 
 ## En curso
 
-**Subestados de pausa en la interfaz (cerrado).** El núcleo ya los modelaba; ahora la app los usa:
-la acción **"Avanzar subestado"** (solo a un **hijo directo**, validado en la RPC), selector de motivo
-**jerárquico** al pausar, **panel de pausa** con subestado actual e historial de pasos, y el árbol de
-**Motivos** en Administración. `ticket_pause` exige motivo del uso `pause`; `ticket_advance_pause`
-exige hijo directo activo; nueva función `ticket_pause_steps`. **ADR 0060**. `pnpm check` en verde.
+**Pausa por motivo/subestado y subestado obligatorio al reanudar (cerrado).** Al pausar se elige el
+**motivo** (raíz); mientras está pausada se **gestiona** el **subestado** (cualquier descendiente del
+motivo); **al reanudar es obligatorio** un **subestado** (hijo directo del motivo). Nueva columna
+`ticket_pauses.root_reason_id`, función `ticket_pause_state`, nueva firma de `ticket_resume` y tramos
+de tiempo **por subestado**. Panel con motivo, subestado actual e historial. **ADR 0061**.
+`pnpm check` en verde.
 
-_(Histórico)_ Importación de catálogos (ADR 0059), rediseños de Administración (0057) y de
-Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión visual **opt-in**
-(`pnpm test:visual`).
+_(Histórico)_ Subestados de pausa (ADR 0060), importación de catálogos (0059) y rediseños de
+Administración (0057) y de Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión
+visual **opt-in** (`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -962,3 +963,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   **panel de pausa** con subestado actual y pasos, y árbol de **Motivos** en Administración. Funciones
   puras probadas (`reasons`, `pause`); e2e de pausa → avanzar → reanudar. **ADR 0060**. `pnpm check`
   en verde. Rama `feat/pausa-subestados`.
+- **Pausa por motivo/subestado (Etapa 29)**: al pausar se elige el **motivo** (raíz); **gestionar**
+  cambia el **subestado** (cualquier descendiente del motivo); **reanudar exige un subestado** (hijo
+  directo del motivo). `ticket_pauses.root_reason_id`, `ticket_pause_state`, nueva firma de
+  `ticket_resume`, helper `reason_is_descendant_or_self` y **tramos por subestado**. Panel con motivo,
+  subestado actual e historial. **ADR 0061**. `pnpm check` en verde. Rama
+  `feat/pausa-motivo-subestados`.

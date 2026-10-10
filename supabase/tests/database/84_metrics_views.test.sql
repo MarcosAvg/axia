@@ -83,8 +83,9 @@ insert into public.ticket_offers (ticket_id, cycle, supervisor_user_id, status, 
   select id, 1, '00000000-0000-0000-0000-0000000000f1', 'taken',
     '2026-10-05 08:00:00+00', '2026-10-05 08:30:00+00'
   from public.tickets where description = 'T1 métricas';
-insert into public.ticket_pauses (ticket_id, cycle, reason_id, opened_at, closed_at)
+insert into public.ticket_pauses (ticket_id, cycle, reason_id, root_reason_id, opened_at, closed_at)
   select id, 1, (select id from public.reasons where name = 'Pausa métricas'),
+    (select id from public.reasons where name = 'Pausa métricas'),
     '2026-10-05 10:00:00+00', '2026-10-05 11:00:00+00'
   from public.tickets where description = 'T1 métricas';
 insert into public.ticket_events (ticket_id, cycle, type, reason_id)

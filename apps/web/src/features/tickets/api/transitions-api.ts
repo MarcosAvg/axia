@@ -2,13 +2,7 @@
 
 import { supabase } from '@/lib/supabase'
 import type { ClaimResolution } from '../domain/types'
-
-async function run(
-  promise: { error: unknown } | PromiseLike<{ error: unknown }>,
-): Promise<void> {
-  const { error } = await promise
-  if (error) throw error
-}
+import { run } from './rpc'
 
 export async function takeTicket(ticketId: string, clientRequestId: string) {
   await run(
@@ -40,58 +34,6 @@ export async function startTicket(
 ) {
   await run(
     supabase.rpc('ticket_start', {
-      p_ticket_id: ticketId,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: subjectTechnicianId ?? undefined,
-    }),
-  )
-}
-
-export interface PauseTicketInput {
-  reasonId: string
-  note: string | null
-  subjectTechnicianId?: string | null
-}
-
-export async function pauseTicket(
-  ticketId: string,
-  input: PauseTicketInput,
-  clientRequestId: string,
-) {
-  await run(
-    supabase.rpc('ticket_pause', {
-      p_ticket_id: ticketId,
-      p_reason_id: input.reasonId,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-    }),
-  )
-}
-
-export async function advancePause(
-  ticketId: string,
-  input: PauseTicketInput,
-  clientRequestId: string,
-) {
-  await run(
-    supabase.rpc('ticket_advance_pause', {
-      p_ticket_id: ticketId,
-      p_reason_id: input.reasonId,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-    }),
-  )
-}
-
-export async function resumeTicket(
-  ticketId: string,
-  clientRequestId: string,
-  subjectTechnicianId?: string | null,
-) {
-  await run(
-    supabase.rpc('ticket_resume', {
       p_ticket_id: ticketId,
       p_client_request_id: clientRequestId,
       p_subject_technician_id: subjectTechnicianId ?? undefined,

@@ -2604,6 +2604,7 @@ export type Database = {
           origin: Database['public']['Enums']['span_origin']
           reason_id: string
           recorded_by: string | null
+          root_reason_id: string
           ticket_id: string
         }
         ComputedFields: never
@@ -2620,6 +2621,7 @@ export type Database = {
           origin?: Database['public']['Enums']['span_origin']
           reason_id: string
           recorded_by?: string | null
+          root_reason_id: string
           ticket_id: string
         }
         Update: {
@@ -2635,6 +2637,7 @@ export type Database = {
           origin?: Database['public']['Enums']['span_origin']
           reason_id?: string
           recorded_by?: string | null
+          root_reason_id?: string
           ticket_id?: string
         }
         Relationships: [
@@ -2655,6 +2658,27 @@ export type Database = {
           {
             foreignKeyName: 'ticket_pauses_reason_id_fkey'
             columns: ['reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_reject_cancel_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_root_reason_id_fkey'
+            columns: ['root_reason_id']
+            isOneToOne: false
+            referencedRelation: 'reasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_root_reason_id_fkey'
+            columns: ['root_reason_id']
+            isOneToOne: false
+            referencedRelation: 'v_metrics_pauses_by_reason'
+            referencedColumns: ['reason_id']
+          },
+          {
+            foreignKeyName: 'ticket_pauses_root_reason_id_fkey'
+            columns: ['root_reason_id']
             isOneToOne: false
             referencedRelation: 'v_metrics_reject_cancel_by_reason'
             referencedColumns: ['reason_id']
@@ -4350,6 +4374,10 @@ export type Database = {
         Args: { p_full_name: string; p_phone?: string }
         Returns: undefined
       }
+      reason_is_descendant_or_self: {
+        Args: { p_ancestor_id: string; p_reason_id: string }
+        Returns: boolean
+      }
       request_already_handled: {
         Args: { p_client_request_id: string }
         Returns: boolean
@@ -4478,6 +4506,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      ticket_pause_state: {
+        Args: { p_ticket_id: string }
+        Returns: {
+          current_id: string
+          current_name: string
+          motive_id: string
+          motive_name: string
+          opened_at: string
+          pause_id: string
+        }[]
+      }
       ticket_pause_steps: {
         Args: { p_ticket_id: string }
         Returns: {
@@ -4539,6 +4578,7 @@ export type Database = {
       ticket_resume: {
         Args: {
           p_client_request_id?: string
+          p_reason_id: string
           p_subject_technician_id?: string
           p_ticket_id: string
         }

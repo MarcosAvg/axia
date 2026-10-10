@@ -3,9 +3,9 @@
 
 import { CLAIM_RESOLUTIONS } from '../domain/types'
 import type { ClaimResolution } from '../domain/types'
+import { advancePause, pauseTicket, resumeTicket } from './pause-api'
 import {
   addAuxiliary,
-  advancePause,
   assignSupervisor,
   assignTechnician,
   attendTicket,
@@ -14,12 +14,10 @@ import {
   commentTicket,
   markDuplicate,
   openClaim,
-  pauseTicket,
   reactivateTicket,
   recaptureTicket,
   rejectTicket,
   resolveClaim,
-  resumeTicket,
   startTicket,
   takeTicket,
   validateTicket,
@@ -116,7 +114,8 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
       },
       id,
     ),
-  resume: (t, a, id) => resumeTicket(t, id, opt(a.subjectTechnicianId)),
+  resume: (t, a, id) =>
+    resumeTicket(t, str(a.reasonId), id, opt(a.subjectTechnicianId)),
   attend: (t, a, id) =>
     attendTicket(t, id, {
       workDescription: str(a.workDescription),

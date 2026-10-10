@@ -1,4 +1,9 @@
-import { childReasons, indentReasons } from './reasons'
+import {
+  childReasons,
+  descendantReasons,
+  indentReasons,
+  rootReasons,
+} from './reasons'
 import type { ReasonOption } from './types'
 
 const reasons: ReasonOption[] = [
@@ -22,5 +27,22 @@ describe('childReasons', () => {
     expect(childReasons(reasons, 'r1').map((r) => r.id)).toEqual(['r2'])
     expect(childReasons(reasons, null).map((r) => r.id)).toEqual(['r1', 'r4'])
     expect(childReasons(reasons, 'r3')).toEqual([])
+  })
+})
+
+describe('rootReasons', () => {
+  it('devuelve solo las raíces', () => {
+    expect(rootReasons(reasons).map((r) => r.id)).toEqual(['r1', 'r4'])
+  })
+})
+
+describe('descendantReasons', () => {
+  it('devuelve todos los descendientes', () => {
+    expect(descendantReasons(reasons, 'r1').map((r) => r.id)).toEqual([
+      'r2',
+      'r3',
+    ])
+    expect(descendantReasons(reasons, 'r4')).toEqual([])
+    expect(descendantReasons(reasons, null)).toEqual([])
   })
 })

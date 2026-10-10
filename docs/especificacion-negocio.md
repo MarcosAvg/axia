@@ -193,11 +193,13 @@ precondiciones y efectos.
   calidad de la captura (quién se equivoca y en qué).
 - **RN-12 Inicio.** Solo con evidencia `before` del ciclo de atención actual (tomada cuando el técnico
   llega). Pasa a `in_progress`.
-- **RN-13 Pausa.** La inician técnico, supervisor o administrador. Elige un nodo del catálogo
-  jerárquico de motivos (niveles ilimitados), con nota y fecha estimada opcionales. Mientras dura puede
-  avanzar de subestado y cada paso queda registrado con su fecha. Se reanuda a `in_progress`. Un
-  tiquet tiene como máximo **una pausa abierta**; modélalo de forma que relajar esa regla no exija
-  rediseño.
+- **RN-13 Pausa.** La inician técnico, supervisor o administrador. Se elige un **motivo** (nodo raíz del
+  catálogo jerárquico de pausa) y se capturan nota y fecha estimada opcionales. Mientras dura se puede
+  **gestionar** la pausa cambiando de **subestado** (cualquier descendiente del motivo) y cada paso
+  queda registrado con su fecha. Al **reanudar** es **obligatorio** indicar un **subestado** (hijo
+  directo del motivo) que esclarezca el estado de la pausa, y luego se vuelve a `in_progress`; el tiempo
+  de pausa se mide por subestado. Un tiquet tiene como máximo **una pausa abierta**; modélalo de forma
+  que relajar esa regla no exija rediseño.
 - **RN-14 Atendido.** El técnico lo marca con descripción del trabajo y evidencia `after` del ciclo.
 - **RN-15 Validación.** Política de la instancia (no por tiquet): solo solicitante, solo supervisor, o
   ambos en cualquier orden. Opcionalmente, validación automática tras N días sin respuesta (**apagada

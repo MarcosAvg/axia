@@ -12,7 +12,7 @@ import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
 import { DEDICATED } from './ticket-action-handlers'
 
-const ONE_CLICK: ActionKey[] = ['resume', 'validate']
+const ONE_CLICK: ActionKey[] = ['validate']
 /** Acciones que se separan al final por ser de descarte. */
 const DESTRUCTIVE: ActionKey[] = ['reject', 'cancel', 'mark_duplicate']
 const FORM_ACTIONS: ActionKey[] = [
@@ -22,6 +22,7 @@ const FORM_ACTIONS: ActionKey[] = [
   'add_auxiliary',
   'pause',
   'advance_pause',
+  'resume',
   'reject',
   'cancel',
   'change_priority',
@@ -186,11 +187,9 @@ export function TicketActionsPanel({
   useAutoTakeOffer(ticket, identity?.userId, mutations.take)
 
   const oneClick: Partial<Record<ActionKey, () => void>> = {
-    resume: () => mutations.resume.mutate({}),
     validate: () => mutations.validate.mutate({}),
   }
   const pending: Partial<Record<ActionKey, boolean>> = {
-    resume: mutations.resume.isPending,
     validate: mutations.validate.isPending,
   }
 

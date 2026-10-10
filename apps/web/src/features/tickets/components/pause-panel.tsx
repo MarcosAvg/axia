@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDateTime } from '@/lib/format'
-import { currentPauseReasonId } from '../domain/pause'
-import { useTicketPauseSteps } from '../hooks/use-tickets'
+import { useTicketPauseState, useTicketPauseSteps } from '../hooks/use-tickets'
 import { pauseMessages } from '../pause-i18n'
 
 function StepLine({
@@ -22,14 +21,14 @@ function StepLine({
   )
 }
 
-/** Pausa del tiquet: subestado actual e historial de pasos. Se oculta si no hay pausas. */
+/** Pausa del tiquet: motivo, subestado actual e historial de pasos. Se oculta si no hay pausas. */
 export function PausePanel({ ticketId }: { ticketId: string }) {
+  const state = useTicketPauseState(ticketId)
   const steps = useTicketPauseSteps(ticketId)
   const list = steps.data ?? []
-  if (list.length === 0) return null
+  const current = state.data
 
-  const currentId = currentPauseReasonId(list)
-  const current = list.find((step) => step.reasonId === currentId)
+  if (!current && list.length === 0) return null
 
   return (
     <Card>
@@ -41,34 +40,41 @@ export function PausePanel({ ticketId }: { ticketId: string }) {
           {current ? (
             <p className="text-sm">
               <span className="text-muted-foreground">
+                {pauseMessages.motive}:{' '}
+              </span>
+              <span className="font-medium">{current.motiveName}</span>
+              <span className="text-muted-foreground">
+                {' · '}
                 {pauseMessages.current}:{' '}
               </span>
-              <span className="font-medium">{current.reasonName}</span>
+              <span className="font-medium">{current.currentName}</span>
             </p>
           ) : null}
-          <ul className="flex flex-col gap-2">
-            {list.map((step, index) => (
-              <li
-                key={`${step.pauseId}-${index}`}
-                className="flex flex-col gap-0.5 rounded-lg border p-2 text-sm"
-              >
-                <span className="font-medium">
-                  {step.reasonName}
-                  {step.exitedAt === null ? ` · ${pauseMessages.open}` : ''}
-                </span>
-                <StepLine
-                  enteredAt={step.enteredAt}
-                  exitedAt={step.exitedAt}
-                  actorName={step.actorName}
-                />
-                {step.note ? (
-                  <span className="text-xs text-muted-foreground">
-                    {step.note}
+          {list.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {list.map((step, index) => (
+                <li
+                  key={`${step.pauseId}-${index}`}
+                  className="flex flex-col gap-0.5 rounded-lg border p-2 text-sm"
+                >
+                  <span className="font-medium">
+                    {step.reasonName}
+                    {step.exitedAt === null ? ` · ${pauseMessages.open}` : ''}
                   </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+                  <StepLine
+                    enteredAt={step.enteredAt}
+                    exitedAt={step.exitedAt}
+                    actorName={step.actorName}
+                  />
+                  {step.note ? (
+                    <span className="text-xs text-muted-foreground">
+                      {step.note}
+                    </span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </CardContent>
     </Card>

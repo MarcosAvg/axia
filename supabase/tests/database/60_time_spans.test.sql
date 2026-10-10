@@ -59,6 +59,9 @@ update public.instance_settings set validation_policy = 'supervisor';
 -- Motivo de pausa no contable (para probar el tiempo neto).
 insert into public.reasons (use, name, clock_class)
   values ('pause', 'Esperando al solicitante', 'not_counted');
+insert into public.reasons (use, name, parent_id, clock_class)
+  select 'pause', 'Sin respuesta', id, 'not_counted'
+  from public.reasons where name = 'Esperando al solicitante';
 
 -- Recorre el flujo.
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
@@ -90,7 +93,9 @@ select public.ticket_start((select id from public.tickets order by ticket_number
 select public.ticket_pause(
   (select id from public.tickets order by ticket_number limit 1),
   (select id from public.reasons where name = 'Esperando al solicitante'));
-select public.ticket_resume((select id from public.tickets order by ticket_number limit 1));
+select public.ticket_resume(
+  (select id from public.tickets order by ticket_number limit 1),
+  (select id from public.reasons where name = 'Sin respuesta'));
 insert into public.evidence (ticket_id, cycle, type)
   select id, cycle, 'after' from public.tickets order by ticket_number limit 1;
 select public.ticket_attend(

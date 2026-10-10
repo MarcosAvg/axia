@@ -11,6 +11,7 @@ import {
   fetchMyOffers,
   fetchMyWork,
   fetchParticipants,
+  fetchPauseState,
   fetchPauseSteps,
   fetchTicket,
   fetchTickets,
@@ -31,6 +32,7 @@ const ticketKeys = {
   participants: (id: string) => ['tickets', 'participants', id] as const,
   evidence: (id: string) => ['tickets', 'evidence', id] as const,
   pauseSteps: (id: string) => ['tickets', 'pause-steps', id] as const,
+  pauseState: (id: string) => ['tickets', 'pause-state', id] as const,
 }
 
 export function useTicketsList(filters: TicketFilters, page: number) {
@@ -53,6 +55,14 @@ export function useTicketPauseSteps(id: string | undefined) {
   return useQuery({
     queryKey: ticketKeys.pauseSteps(id ?? ''),
     queryFn: () => (id ? fetchPauseSteps(id) : Promise.resolve([])),
+    enabled: Boolean(id),
+  })
+}
+
+export function useTicketPauseState(id: string | undefined) {
+  return useQuery({
+    queryKey: ticketKeys.pauseState(id ?? ''),
+    queryFn: () => (id ? fetchPauseState(id) : Promise.resolve(null)),
     enabled: Boolean(id),
   })
 }
