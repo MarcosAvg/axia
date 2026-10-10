@@ -144,6 +144,16 @@ export interface TicketTimelineItem {
   payload: Record<string, unknown>
 }
 
+export interface TicketPauseStep {
+  pauseId: string
+  reasonId: string
+  reasonName: string
+  enteredAt: string
+  exitedAt: string | null
+  note: string | null
+  actorName: string | null
+}
+
 export interface TicketParticipant {
   technicianId: string
   technicianName: string

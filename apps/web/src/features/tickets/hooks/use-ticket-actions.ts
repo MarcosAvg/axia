@@ -49,6 +49,11 @@ export function useTicketActions(
     addAuxiliary: useTicketMutation('add_auxiliary', ticketId),
     start: useTicketMutation('start', ticketId, subjectTechnicianId),
     pause: useTicketMutation('pause', ticketId, subjectTechnicianId),
+    advancePause: useTicketMutation(
+      'advance_pause',
+      ticketId,
+      subjectTechnicianId,
+    ),
     resume: useTicketMutation('resume', ticketId, subjectTechnicianId),
     attend: useTicketMutation('attend', ticketId, subjectTechnicianId),
     validate: useTicketMutation('validate', ticketId),

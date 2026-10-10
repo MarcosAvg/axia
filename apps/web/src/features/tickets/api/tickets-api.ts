@@ -10,6 +10,7 @@ import type {
   TicketEvidenceItem,
   TicketListItem,
   TicketParticipant,
+  TicketPauseStep,
   TicketStatus,
   TicketTimelineItem,
 } from '../domain/types'
@@ -89,6 +90,35 @@ export async function fetchTicket(id: string): Promise<TicketDetail | null> {
     .maybeSingle()
   if (error) throw error
   return data ? parseTicketDetail(data) : null
+}
+
+interface PauseStepRow {
+  pause_id: string
+  reason_id: string
+  reason_name: string
+  entered_at: string
+  exited_at: string | null
+  note: string | null
+  actor_name: string | null
+}
+
+/** Pasos (subestados) de las pausas de un tiquet, con sus fechas. */
+export async function fetchPauseSteps(
+  ticketId: string,
+): Promise<TicketPauseStep[]> {
+  const { data, error } = await supabase.rpc('ticket_pause_steps', {
+    p_ticket_id: ticketId,
+  })
+  if (error) throw error
+  return ((data ?? []) as PauseStepRow[]).map((row) => ({
+    pauseId: row.pause_id,
+    reasonId: row.reason_id,
+    reasonName: row.reason_name,
+    enteredAt: row.entered_at,
+    exitedAt: row.exited_at,
+    note: row.note,
+    actorName: row.actor_name,
+  }))
 }
 
 export async function fetchTimeline(

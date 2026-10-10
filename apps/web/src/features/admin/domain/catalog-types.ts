@@ -20,6 +20,8 @@ export interface AdminColumn {
   format?: 'minutes'
   /** Alineación de la columna; por defecto a la izquierda. */
   align?: 'left' | 'right' | 'center'
+  /** Columna que referencia al padre para sangrar el árbol (p. ej. `parent_id`). */
+  indentBy?: string
 }
 
 export interface AdminCatalogConfig {

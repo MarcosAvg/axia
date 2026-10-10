@@ -11,6 +11,7 @@ import {
   fetchMyOffers,
   fetchMyWork,
   fetchParticipants,
+  fetchPauseSteps,
   fetchTicket,
   fetchTickets,
   fetchTimeline,
@@ -29,6 +30,7 @@ const ticketKeys = {
   timeline: (id: string) => ['tickets', 'timeline', id] as const,
   participants: (id: string) => ['tickets', 'participants', id] as const,
   evidence: (id: string) => ['tickets', 'evidence', id] as const,
+  pauseSteps: (id: string) => ['tickets', 'pause-steps', id] as const,
 }
 
 export function useTicketsList(filters: TicketFilters, page: number) {
@@ -43,6 +45,14 @@ export function useTicket(id: string | undefined) {
   return useQuery({
     queryKey: ticketKeys.detail(id ?? ''),
     queryFn: () => (id ? fetchTicket(id) : Promise.resolve(null)),
+    enabled: Boolean(id),
+  })
+}
+
+export function useTicketPauseSteps(id: string | undefined) {
+  return useQuery({
+    queryKey: ticketKeys.pauseSteps(id ?? ''),
+    queryFn: () => (id ? fetchPauseSteps(id) : Promise.resolve([])),
     enabled: Boolean(id),
   })
 }
