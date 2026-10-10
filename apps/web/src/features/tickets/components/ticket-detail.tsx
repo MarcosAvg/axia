@@ -1,4 +1,5 @@
 import { ErrorAlert } from '@/components/shared/async-state'
+import { HintLabel } from '@/components/shared/hint'
 import { ToneDot } from '@/components/shared/tone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { can, useAuth } from '@/features/auth'
@@ -6,6 +7,7 @@ import type { Identity } from '@/features/auth'
 import { toneForId } from '@/lib/tones'
 import { allowedActions } from '../domain/actions'
 import type { ActionKey } from '../domain/actions'
+import { detailSectionHints } from '../detail-hints'
 import type {
   TicketDetail,
   TicketParticipant,
@@ -32,9 +34,11 @@ import { ParticipantList, TicketSummary } from './ticket-summary'
 
 function Section({
   title,
+  hint,
   children,
 }: {
   title: string
+  hint?: string
   children: React.ReactNode
 }) {
   return (
@@ -42,7 +46,7 @@ function Section({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ToneDot tone={toneForId(title)} />
-          {title}
+          <HintLabel label={title} hint={hint} />
         </CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
@@ -63,7 +67,10 @@ function EvidenceSection({
 }) {
   const evidence = useTicketEvidence(ticketId)
   return (
-    <Section title={ticketMessages.detail.evidence}>
+    <Section
+      title={ticketMessages.detail.evidence}
+      hint={detailSectionHints.evidence}
+    >
       <div className="flex flex-col gap-4">
         <PendingEvidence ticketId={ticketId} />
         <TicketEvidenceList items={evidence.data ?? []} />
@@ -103,6 +110,46 @@ function TicketHeader({ ticket }: { ticket: TicketDetail }) {
 }
 
 /** Columna principal: la data del tiquet. */
+function TicketExtras({
+  ticketId,
+  participants,
+  canRecordTime,
+  canRate,
+}: {
+  ticketId: string
+  participants: TicketParticipant[]
+  canRecordTime: boolean
+  canRate: boolean
+}) {
+  const { detail } = ticketMessages
+  return (
+    <>
+      <Section
+        title={detail.participants}
+        hint={detailSectionHints.participants}
+      >
+        <ParticipantList participants={participants} />
+      </Section>
+      {canRecordTime ? (
+        <Section
+          title={manualTimeMessages.title}
+          hint={detailSectionHints.times}
+        >
+          <ManualTimePanel ticketId={ticketId} />
+        </Section>
+      ) : null}
+      {canRate ? (
+        <Section
+          title={ticketMessages.rating.title}
+          hint={detailSectionHints.rating}
+        >
+          <TicketRatingPanel ticketId={ticketId} />
+        </Section>
+      ) : null}
+    </>
+  )
+}
+
 function TicketMain({
   ticketId,
   ticket,
@@ -126,7 +173,7 @@ function TicketMain({
   return (
     <div className="flex flex-col gap-6">
       {actions.length > 0 ? (
-        <Section title={detail.actions}>
+        <Section title={detail.actions} hint={detailSectionHints.actions}>
           <TicketActionsPanel
             ticket={ticket}
             actions={actions}
@@ -135,7 +182,7 @@ function TicketMain({
           />
         </Section>
       ) : null}
-      <Section title={detail.capture}>
+      <Section title={detail.capture} hint={detailSectionHints.capture}>
         <TicketSummary ticket={ticket} />
       </Section>
       <PausePanel ticketId={ticketId} />
@@ -145,19 +192,12 @@ function TicketMain({
         status={ticket.status}
         canAttach={canAttachEvidence}
       />
-      <Section title={detail.participants}>
-        <ParticipantList participants={participants} />
-      </Section>
-      {canRecordTime ? (
-        <Section title={manualTimeMessages.title}>
-          <ManualTimePanel ticketId={ticketId} />
-        </Section>
-      ) : null}
-      {canRate ? (
-        <Section title={ticketMessages.rating.title}>
-          <TicketRatingPanel ticketId={ticketId} />
-        </Section>
-      ) : null}
+      <TicketExtras
+        ticketId={ticketId}
+        participants={participants}
+        canRecordTime={canRecordTime}
+        canRate={canRate}
+      />
     </div>
   )
 }

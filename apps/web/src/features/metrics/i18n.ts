@@ -66,13 +66,70 @@ export const metricsMessages = {
     sla: 'SLA y satisfacción',
   },
   kpiHints: {
+    tickets: 'Número de tiquets con los filtros y el periodo activos.',
+    active:
+      'Tiempo medio de trabajo activo por tiquet: del inicio a la atención, sin contar pausas.',
     activeExtra:
       'Trabajo registrado fuera del horario laboral (noches, fines de semana o festivos).',
+    total:
+      'Tiempo medio total por tiquet: del registro al cierre, incluyendo pausas y esperas.',
+    net: 'Tiempo medio neto: el total menos los tramos clasificados como no contables.',
+    response:
+      'Tiempo medio del registro del tiquet a que el supervisor lo toma.',
+    assignment:
+      'Tiempo medio de la toma del supervisor a la asignación del técnico.',
+    validation:
+      'Tiempo medio de la atención del técnico a la validación o el cierre.',
+    reassignment:
+      'Porcentaje de tiquets en los que cambió el equipo o el supervisor.',
+    recapture: 'Porcentaje de tiquets con al menos una recaptura registrada.',
+    reopen:
+      'Porcentaje de tiquets reabiertos (por reclamación procedente o reactivación).',
+    firstFix: 'Porcentaje de tiquets cerrados sin reapertura posterior.',
+    satisfaction:
+      'Promedio de las calificaciones del solicitante (escala 1 a 5).',
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
-    satisfaction: 'Promedio de las calificaciones del solicitante (1 a 5).',
-    firstFix: 'Tiquets cerrados sin reapertura.',
     reassignedTechnician:
-      'Tiquets en los que el técnico cambió después de la asignación.',
+      'Porcentaje de tiquets en los que el técnico cambió después de la asignación.',
+  },
+  chartHints: {
+    volume:
+      'Tiquets registrados en cada mes del periodo (por fecha de reporte).',
+    timesByDimension:
+      'Tiempo medio por agrupación (equipo, edificio, categoría, dependencia o solicitante).',
+    countsByDimension:
+      'Tiquets por agrupación, con su tasa de reasignación y de recaptura.',
+    pauses: 'Número de pausas por motivo en el periodo.',
+    routing:
+      'Ofertas a supervisores: pendientes, tomadas y tiempo medio hasta la toma.',
+    aging: 'Tiquets abiertos más antiguos, ordenados por tiempo transcurrido.',
+    sla: 'Cumplimiento del tiempo objetivo por prioridad.',
+    duplicatesByDimension:
+      'Tasa de duplicados por agrupación: duplicados entre los tiquets.',
+    rejectCancel: 'Tiquets rechazados o cancelados, desglosados por motivo.',
+    techniciansChart: 'Tiquets por técnico en el periodo.',
+    techniciansTable:
+      'Carga y participación por técnico: tiquets como líder y auxiliar, y minutos de participación.',
+  },
+  tableHints: {
+    dimensionTickets: 'Tiquets de la agrupación en el periodo.',
+    avgActive: 'Tiempo medio de trabajo activo por tiquet de la agrupación.',
+    avgTotal: 'Tiempo medio total por tiquet de la agrupación.',
+    extra: 'Trabajo de la agrupación fuera del horario laboral.',
+    reassignment: 'Reasignaciones registradas en la agrupación.',
+    recapture: 'Recapturas registradas en la agrupación.',
+    participation:
+      'Tiempo total participando, ya sea como líder o como auxiliar.',
+    leader: 'Veces que el técnico fue líder de la atención.',
+    auxiliary: 'Veces que el técnico participó como auxiliar.',
+    assigned: 'Veces que el tiquet se le asignó como técnico.',
+    duplicateRate: 'Duplicados entre los tiquets de la agrupación.',
+    age: 'Tiempo transcurrido desde el registro.',
+  },
+  duplicateHints: {
+    timeToMark: 'Tiempo medio desde el registro hasta marcar el duplicado.',
+    alerts:
+      'Tiquets señalados como posible duplicado, según la decisión tomada.',
   },
   delta: {
     vsPrevious: 'vs periodo anterior',

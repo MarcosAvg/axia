@@ -29,11 +29,17 @@ export function SummaryTab({
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
         <div className="lg:col-span-2">
-          <ChartCard title={metricsMessages.charts.volume}>
+          <ChartCard
+            title={metricsMessages.charts.volume}
+            hint={metricsMessages.chartHints.volume}
+          >
             <VolumeChart data={volumeByMonth(filtered)} />
           </ChartCard>
         </div>
-        <ChartCard title={metricsMessages.routing.title}>
+        <ChartCard
+          title={metricsMessages.routing.title}
+          hint={metricsMessages.chartHints.routing}
+        >
           <RoutingCards routing={routing} columns={2} />
         </ChartCard>
       </div>
@@ -43,7 +49,10 @@ export function SummaryTab({
         variant="counts"
         withChart
       />
-      <ChartCard title={metricsMessages.aging.title}>
+      <ChartCard
+        title={metricsMessages.aging.title}
+        hint={metricsMessages.chartHints.aging}
+      >
         <div className="max-h-80 overflow-auto">
           <AgingList
             rows={openAging(filtered, new Date()).slice(0, 8)}

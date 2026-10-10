@@ -1,4 +1,5 @@
 import { BarChart3Icon } from 'lucide-react'
+import { HintLabel } from '@/components/shared/hint'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
@@ -10,6 +11,7 @@ import { dimensionLabels, metricsMessages } from '../i18n'
 import { DimensionChart } from './dimension-chart'
 
 const t = metricsMessages.table
+const hints = metricsMessages.tableHints
 
 export type DimensionVariant = 'counts' | 'times'
 
@@ -18,15 +20,22 @@ function countColumns(
 ): DataTableColumn<DimensionRow>[] {
   return [
     { id: 'name', header: t.name, cell: (row) => nameOf(row.id) },
-    { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
+    {
+      id: 'tickets',
+      header: t.tickets,
+      hint: hints.dimensionTickets,
+      cell: (row) => row.tickets,
+    },
     {
       id: 'reassignment',
       header: t.reassignment,
+      hint: hints.reassignment,
       cell: (row) => formatPercent(row.reassignmentRate),
     },
     {
       id: 'recapture',
       header: t.recapture,
+      hint: hints.recapture,
       cell: (row) => formatPercent(row.recaptureRate),
     },
   ]
@@ -37,20 +46,28 @@ function timeColumns(
 ): DataTableColumn<DimensionRow>[] {
   return [
     { id: 'name', header: t.name, cell: (row) => nameOf(row.id) },
-    { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
+    {
+      id: 'tickets',
+      header: t.tickets,
+      hint: hints.dimensionTickets,
+      cell: (row) => row.tickets,
+    },
     {
       id: 'avgActive',
       header: t.avgActive,
+      hint: hints.avgActive,
       cell: (row) => formatMinutes(row.avgActive),
     },
     {
       id: 'avgTotal',
       header: t.avgTotal,
+      hint: hints.avgTotal,
       cell: (row) => formatMinutes(row.avgTotal),
     },
     {
       id: 'extra',
       header: t.extra,
+      hint: hints.extra,
       cell: (row) => formatMinutes(row.avgActiveExtra),
     },
   ]
@@ -80,7 +97,14 @@ export function DimensionSection({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          {dimensionLabels[dimension]}
+          <HintLabel
+            label={dimensionLabels[dimension]}
+            hint={
+              variant === 'times'
+                ? metricsMessages.chartHints.timesByDimension
+                : metricsMessages.chartHints.countsByDimension
+            }
+          />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

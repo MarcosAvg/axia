@@ -35,11 +35,13 @@ export function MetricsHero({
     {
       label: k.tickets,
       value: String(summary.tickets),
+      hint: hints.tickets,
       delta: change((s) => s.tickets),
     },
     {
       label: k.active,
       value: formatMinutes(summary.avgActive),
+      hint: hints.active,
       delta: change((s) => s.avgActive),
       lowerIsBetter: true,
     },

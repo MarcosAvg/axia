@@ -33,7 +33,10 @@ export function SlaTab({
   return (
     <div className="flex flex-col gap-4">
       <KpiGrid cards={cards} columns={4} />
-      <ChartCard title={metricsMessages.sla.title}>
+      <ChartCard
+        title={metricsMessages.sla.title}
+        hint={metricsMessages.chartHints.sla}
+      >
         <SlaPriorityChart rows={slaRows} />
       </ChartCard>
     </div>

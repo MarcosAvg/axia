@@ -1,4 +1,5 @@
 import { CopyIcon } from 'lucide-react'
+import { HintLabel } from '@/components/shared/hint'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
@@ -10,6 +11,7 @@ import type { DuplicateDimensionRow } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
 
 const t = metricsMessages.duplicates
+const hints = metricsMessages.tableHints
 
 const columns: DataTableColumn<DuplicateDimensionRow>[] = [
   {
@@ -22,6 +24,7 @@ const columns: DataTableColumn<DuplicateDimensionRow>[] = [
   {
     id: 'rate',
     header: t.rate,
+    hint: hints.duplicateRate,
     cell: (row) => formatPercent(row.duplicateRate),
   },
 ]
@@ -37,7 +40,10 @@ function DuplicateDimensionCard({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          {dimensionLabels[dimension]}
+          <HintLabel
+            label={dimensionLabels[dimension]}
+            hint={metricsMessages.chartHints.duplicatesByDimension}
+          />
         </CardTitle>
       </CardHeader>
       <CardContent>
