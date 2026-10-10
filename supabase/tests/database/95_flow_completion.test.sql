@@ -2,7 +2,7 @@ begin;
 
 set search_path = extensions, public;
 
-select plan(34);
+select plan(38);
 
 -- 1. Evidencia en Storage.
 select is(
@@ -259,6 +259,55 @@ select throws_ok(
        (select id from public.technicians where full_name = 'Técnico Beta'),
        (select id from public.reasons where use = 'auxiliary_support' limit 1)) $$,
   '42501', null, 'el técnico no agrega auxiliares');
+
+-- 4.bis Integridad de participantes: una activa por técnico y tiquet.
+select set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-0000-0000-000000000001"}', true);
+select public.ticket_assign_technician(
+  (select id from public.tickets where description = 'Fuga de agua'),
+  (select id from public.technicians where full_name = 'Técnico Alfa'));
+select is(
+  (select count(*)::int from public.ticket_participants p
+   join public.tickets tk on tk.id = p.ticket_id
+   join public.technicians te on te.id = p.technician_id
+   where tk.description = 'Fuga de agua' and te.full_name = 'Técnico Alfa'
+     and p.ended_at is null),
+  1, 'reasignar al mismo técnico no duplica su participación');
+
+insert into public.technician_categories (technician_id, category_id)
+  select te.id, c.id from public.technicians te, public.categories c
+  where te.full_name = 'Técnico Alfa' and c.name = 'Categoría Alfa';
+select public.ticket_assign_technician(
+  (select id from public.tickets where description = 'Fuga de agua'),
+  (select id from public.technicians where full_name = 'Técnico Alfa'));
+select is(
+  (select p.participation_type::text from public.ticket_participants p
+   join public.tickets tk on tk.id = p.ticket_id
+   join public.technicians te on te.id = p.technician_id
+   where tk.description = 'Fuga de agua' and te.full_name = 'Técnico Alfa'
+     and p.ended_at is null),
+  'leader', 'el técnico designado se promueve a líder sin duplicar');
+
+update public.tickets set status = 'closed', closed_at = now()
+where description = 'Fuga de agua';
+select is(
+  (select count(*)::int from public.ticket_participants p
+   join public.tickets tk on tk.id = p.ticket_id
+   where tk.description = 'Fuga de agua' and p.ended_at is null),
+  0, 'cerrar el tiquet cierra las participaciones');
+
+select throws_ok(
+  $$ insert into public.ticket_participants (
+       ticket_id, cycle, technician_id, participation_type)
+     select tk.id, tk.cycle, te.id, 'auxiliary'
+     from public.tickets tk, public.technicians te
+     where tk.description = 'Fuga de agua' and te.full_name = 'Técnico Beta';
+     insert into public.ticket_participants (
+       ticket_id, cycle, technician_id, participation_type)
+     select tk.id, tk.cycle, te.id, 'auxiliary'
+     from public.tickets tk, public.technicians te
+     where tk.description = 'Fuga de agua' and te.full_name = 'Técnico Beta'; $$,
+  '23505', null, 'no se permiten dos participaciones activas del mismo técnico');
 
 -- 5. Pre-chequeo de duplicados (RN-29).
 update public.instance_settings set duplicate_shown_fields = '{folio}';

@@ -17,7 +17,7 @@ En curso: **cerrado**. El rediseño de vistas se completó: semilla de demostrac
 centro de bandejas con métricas propias, Operación (lista/alta/detalle/bandejas), Administración,
 Métricas globales **rediseñadas por pestañas**, y Acceso/perfil. La regresión visual con Playwright
 quedó como script **opt-in** (`pnpm test:visual`). Detalle en `docs/diseno-ui.md` y los ADR
-0038–0052.
+0038–0053.
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -910,3 +910,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   activos + ofertas). Los **banners** muestran el **tiempo transcurrido** (`formatElapsed` en
   `lib/format`, prop `showElapsed` de `TicketList`). `countByStatus`/`openAging` retirados. `pnpm
   check` en verde (159 Vitest, 12 Playwright, 427 pgTAP). Rama `feat/panel-bandejas-rol`.
+- **Integridad de participantes (Etapa 21)**: se impide que un mismo técnico quede **duplicado** en
+  `ticket_participants` (activo) con un **índice único parcial** y saneo previo; asignar técnico
+  **reutiliza/promueve** y cierra al líder anterior; agregar auxiliar valida cualquier activa; un
+  **trigger** cierra participaciones al cerrar/terminar el tiquet o cambiar de ciclo; la UI **excluye**
+  a los activos. La **semilla** estrena **7 técnicos, 9 categorías, 14 subcategorías, 23 problemas** y
+  **designaciones** (`technician_categories`). **ADR 0053**. `pnpm check` en verde (159 Vitest, 12
+  Playwright, 431 pgTAP). Rama `feat/participantes-integridad`.

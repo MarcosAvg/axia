@@ -24,6 +24,7 @@ interface ActionFormsProps {
   ticket: TicketDetail
   formAction: ActionKey | null
   subject: string | undefined
+  excludeIds?: string[]
   onClose: () => void
 }
 
@@ -31,6 +32,7 @@ function ActionForms({
   ticket,
   formAction,
   subject,
+  excludeIds,
   onClose,
 }: ActionFormsProps) {
   if (formAction === 'recapture') {
@@ -55,6 +57,7 @@ function ActionForms({
         cycle={ticket.cycle}
         action={formAction}
         subjectTechnicianId={subject}
+        excludeIds={excludeIds}
         onClose={onClose}
       />
     )
@@ -67,6 +70,7 @@ export function ActionContainer({
   ticket,
   formAction,
   subject,
+  excludeIds,
   onClose,
 }: ActionFormsProps) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -77,6 +81,7 @@ export function ActionContainer({
       ticket={ticket}
       formAction={formAction}
       subject={subject}
+      excludeIds={excludeIds}
       onClose={onClose}
     />
   )
