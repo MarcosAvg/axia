@@ -203,6 +203,8 @@ export const ticketMessages = {
       category: 'Categoría',
       subcategory: 'Subcategoría',
       problem: 'Problema',
+      serviceType: 'Tipo de servicio',
+      priority: 'Prioridad',
       channel: 'Canal',
       requester: 'Solicitante',
       description: 'Descripción del problema',
