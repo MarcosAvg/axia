@@ -65,7 +65,7 @@ export function AppShell() {
         />
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1600px] flex-1 p-4 lg:p-6"
+          className="mx-auto w-full max-w-[1800px] flex-1 p-4 lg:p-6"
         >
           <Outlet />
         </main>

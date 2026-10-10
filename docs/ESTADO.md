@@ -8,15 +8,14 @@
 
 ## En curso
 
-**Subestados de pausa en cascada (cerrado).** La pausa se clasifica **bajando por la rama**: un select
-por nivel (cada uno con los hijos del anterior), tanto al **gestionar** como al **reanudar**; el
-subestado final puede ser de **cualquier profundidad**. `ticket_resume` acepta cualquier **descendiente
-del motivo**. Componente `ReasonCascade` y helper `pathToReason`; tercer nivel en la semilla. **ADR
-0062**. `pnpm check` en verde.
+**Detalle del tiquet: más espacio para el timeline (cerrado).** En escritorio la rejilla pasa a
+~**60/40** (contenido principal / timeline, con mínimo de ~20rem para el timeline) y el ancho máximo
+de la página autenticada sube a **1800 px**. Sin cambios en móvil. `pnpm check` en verde.
 
-_(Histórico)_ Pausa por motivo/subestado y reanudar obligatorio (ADR 0061), subestados de pausa (0060),
-importación de catálogos (0059) y rediseños de Administración (0057) y de Usuarios/Ámbitos/Calendarios
-(0058) cerrados; fase 8 completa. Regresión visual **opt-in** (`pnpm test:visual`).
+_(Histórico)_ Subestados de pausa en cascada (ADR 0062), pausa por motivo/subestado (0061), subestados
+de pausa (0060), importación de catálogos (0059) y rediseños de Administración (0057) y de
+Usuarios/Ámbitos/Calendarios (0058) cerrados; fase 8 completa. Regresión visual **opt-in**
+(`pnpm test:visual`).
 
 _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la persona
 (`deploy/README.md`, `docs/notificaciones-push.md`).
@@ -973,3 +972,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   ser de **cualquier profundidad** y `ticket_resume` acepta cualquier **descendiente del motivo**.
   Componente `ReasonCascade` y helper `pathToReason`; tercer nivel en la semilla. **ADR 0062**.
   `pnpm check` en verde. Rama `feat/pausa-subestados-cascada`.
+- **Timeline con más espacio (Etapa 31)**: el detalle del tiquet pasa a rejilla ~**60/40**
+  (contenido / timeline, mínimo ~20rem para el timeline) y el ancho máximo de la página autenticada
+  sube a **1800 px**. Sin cambios en móvil; sin ADR (ajuste de layout). `pnpm check` en verde. Rama
+  `feat/detalle-timeline-espacio`.
