@@ -3,10 +3,16 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-10
+**Última actualización:** 2026-10-13
 **Fase actual:** Fase 8 — rediseño de interfaz (UI/UX), enfoque escritorio
 
 ## En curso
+
+**Arreglo del inicio de sesión (cerrado).** El acceso fallaba con `email_provider_disabled` porque
+`[auth.email] enable_signup = false` en `supabase/config.toml` **apaga todo el proveedor de correo**
+(mapea a `GOTRUE_EXTERNAL_EMAIL_ENABLED`), no solo el registro. Se pone en `true`; el auto-registro
+sigue bloqueado por `[auth] enable_signup = false` (`GOTRUE_DISABLE_SIGNUP`). Sin migraciones. Rama
+`fix/auth-email-provider`.
 
 **Vista de tiempos: promedio o acumulado (cerrado).** Métricas y Panel alternan entre **promedio** y
 **tiempo acumulado** (suma) con un control segmentado; la preferencia se guarda (`localStorage`) y
@@ -488,6 +494,12 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - `pnpm check` ahora incluye `db:test`, por lo que **requiere el Supabase local levantado**; el
   README lo advierte. Los tipos generados viven en `packages/shared/src/database.types.ts` y se
   exportan desde `packages/shared/src/index.ts`.
+- **`[auth.email] enable_signup` es el interruptor del PROVEEDOR de correo, no del registro**: con
+  `false` GoTrue apaga todo el login por contraseña (`email_provider_disabled`). El auto-registro se
+  controla aparte con `[auth] enable_signup` (`GOTRUE_DISABLE_SIGNUP`). En Axia el primero va `true`
+  y el segundo `false`. Los cambios de `config.toml` **no se aplican en caliente**: hay que recrear
+  el stack (`pnpm exec supabase stop && pnpm db:start`), por lo que el E2E puede pasar contra
+  contenedores viejos. Verificado en la fuente del CLI (`gotrue.service.ts`, v2.120.0).
 - **Iconos provisionales**: fondo `#0f172a`, "A" blanca en `Adwaita-Sans-Bold`, generados con
   ImageMagick (`magick -size 512x512 xc:'#0f172a' ... -annotate 0 'A'`); el maskable lleva la "A"
   más pequeña (zona segura). Reemplazar cuando la institución entregue el logo.
@@ -997,3 +1009,14 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   columnas por dimensión y exportación. Se separa `byDimension`/`DimensionRow` a `domain/dimensions.ts`.
   Pruebas de dominio, del módulo, del control y e2e; baselines visuales regenerados. **ADR 0064**.
   `pnpm check` en verde. Rama `feat/tiempo-acumulado`.
+- 2026-10-13: arreglo del inicio de sesión. `[auth.email] enable_signup = false` en
+  `supabase/config.toml` apagaba el proveedor de correo completo (`email_provider_disabled` en
+  GoTrue), no solo el registro; se pone en `true` y el auto-registro sigue bloqueado por
+  `[auth] enable_signup = false`. Verificado con `curl` al endpoint de token (HTTP 200 y `me()`),
+  signup bloqueado (HTTP 422 `signup_disabled`) y `e2e/auth.spec.ts` (4/4). Aclarado en el ADR 0016
+  y en las notas de entorno. Sin migraciones.
+  - De paso, dos fallos preexistentes del arnés de pruebas (no relacionados con la config):
+    `router.test.tsx` agotaba el timeout de 1 s mientras Vite transformaba el chunk diferido del
+    panel (se precargan las rutas una vez con `router.load()` en `beforeAll`, sin inflar timeouts);
+    y el suite E2E fallaba por contención al compartir un solo dev server y una sola instancia de
+    Supabase (se fija `workers: 2` en `playwright.config.ts`). Rama `fix/auth-email-provider`.
