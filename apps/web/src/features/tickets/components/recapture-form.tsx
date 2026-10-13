@@ -1,4 +1,5 @@
 import { ErrorAlert } from '@/components/shared/async-state'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { toTicketError } from '../domain/errors'
 import type { TicketDetail } from '../domain/types'
@@ -31,7 +32,7 @@ export function RecaptureForm({
       {form.mutationError ? (
         <ErrorAlert message={toTicketError(form.mutationError).message} />
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <ButtonGrid>
         <Button type="submit" disabled={form.isPending} className="min-h-11">
           {ticketMessages.actionFields.submit}
         </Button>
@@ -43,7 +44,7 @@ export function RecaptureForm({
         >
           {ticketMessages.actionFields.cancel}
         </Button>
-      </div>
+      </ButtonGrid>
     </form>
   )
 }

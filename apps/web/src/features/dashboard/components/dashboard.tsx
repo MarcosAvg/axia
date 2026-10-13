@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { can, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
@@ -31,9 +32,9 @@ function dashboardRole(identity: Identity | null): DashboardRole {
 function QuickActions({ canCreate }: { canCreate: boolean }) {
   const { identity } = useAuth()
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <ButtonGrid>
       {canCreate ? (
-        <Button asChild className="min-h-11">
+        <Button asChild className="col-span-2 min-h-11">
           <Link to="/tickets/nuevo">
             <PlusIcon />
             {t.actions.newTicket}
@@ -55,7 +56,7 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
           <Link to="/admin">{t.actions.admin}</Link>
         </Button>
       ) : null}
-    </div>
+    </ButtonGrid>
   )
 }
 

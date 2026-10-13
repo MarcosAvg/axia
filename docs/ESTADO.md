@@ -8,6 +8,14 @@
 
 ## En curso
 
+**Énfasis de color en las acciones y pasada móvil (en curso).** Los botones de acción ganan
+variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
+existía) con un mapeo puro `actionEmphasis(action)`; la acción primaria sigue sólida. Las filas de
+botones usan el nuevo `ButtonGrid` (**rejilla de dos columnas en móvil**, fila en `sm+`) y los
+campos con ancho fijo pasan a `w-full sm:w-*`. Alcance: acciones del tiquet, pies de formularios,
+acciones rápidas del Panel, Métricas (rangos/exportación/filtros) y filtros de Operación. **ADR
+0065**. Rama `feat/acciones-color-movil`.
+
 **Arreglo del inicio de sesión (cerrado).** El acceso fallaba con `email_provider_disabled` porque
 `[auth.email] enable_signup = false` en `supabase/config.toml` **apaga todo el proveedor de correo**
 (mapea a `GOTRUE_EXTERNAL_EMAIL_ENABLED`), no solo el registro. Se pone en `true`; el auto-registro
@@ -1020,3 +1028,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
     panel (se precargan las rutas una vez con `router.load()` en `beforeAll`, sin inflar timeouts);
     y el suite E2E fallaba por contención al compartir un solo dev server y una sola instancia de
     Supabase (se fija `workers: 2` en `playwright.config.ts`). Rama `fix/auth-email-provider`.
+- 2026-10-13: énfasis de color en las acciones y pasada móvil. Variantes semánticas de tinte suave
+  (`success`/`info`/`warning`) en el botón del sistema; mapeo puro `actionEmphasis(action)`
+  (`domain/action-emphasis`) con pruebas; componente `ButtonGrid` (rejilla de dos columnas en móvil,
+  fila en `sm+`) aplicado a las acciones del tiquet, pies de formulario, acciones rápidas del Panel,
+  Métricas y filtros de Operación; campos de ancho fijo a `w-full sm:w-*`. **ADR 0065**. Rama
+  `feat/acciones-color-movil`.

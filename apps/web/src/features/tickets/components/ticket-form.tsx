@@ -113,12 +113,12 @@ export function TicketForm() {
         />
       </div>
       <FormActionsBar>
-        <Button type="button" variant="ghost" asChild>
+        <Button type="button" variant="ghost" asChild className="min-h-11">
           <Link to="/tickets" search={{ page: 1 }}>
             {ticketMessages.create.cancel}
           </Link>
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} className="min-h-11">
           {isSubmitting
             ? ticketMessages.create.submitting
             : ticketMessages.create.submit}

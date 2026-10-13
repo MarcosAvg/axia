@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { SelectField } from '@/components/shared/form-fields'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
 import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
+import { actionEmphasis } from '../domain/action-emphasis'
+import type { ActionEmphasis } from '../domain/action-emphasis'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useMyOffers } from '../hooks/use-tickets'
 import { useTicketActions } from '../hooks/use-ticket-actions'
@@ -13,8 +16,6 @@ import { ActionContainer } from './action-container'
 import { DEDICATED } from './ticket-action-handlers'
 
 const ONE_CLICK: ActionKey[] = ['validate']
-/** Acciones que se separan al final por ser de descarte. */
-const DESTRUCTIVE: ActionKey[] = ['reject', 'cancel', 'mark_duplicate']
 const FORM_ACTIONS: ActionKey[] = [
   'start',
   'record_progress',
@@ -33,12 +34,50 @@ const FORM_ACTIONS: ActionKey[] = [
   'reactivate',
 ]
 
+/** Variante del botón para cada énfasis (tinte suave; ver `domain/action-emphasis`). */
+const EMPHASIS_VARIANT = {
+  primary: 'default',
+  success: 'success',
+  info: 'info',
+  warning: 'warning',
+  danger: 'destructive',
+  neutral: 'outline',
+} as const satisfies Record<ActionEmphasis, string>
+
 interface ActionControlsProps {
   visible: ActionKey[]
   oneClick: Partial<Record<ActionKey, () => void>>
   pending: Partial<Record<ActionKey, boolean>>
   blocked: ActionKey[]
   onOpenForm: (action: ActionKey) => void
+}
+
+type ActionButtonVariant = (typeof EMPHASIS_VARIANT)[ActionEmphasis]
+
+function ActionButton({
+  action,
+  variant,
+  className,
+  disabled,
+  onClick,
+}: {
+  action: ActionKey
+  variant: ActionButtonVariant
+  className: string
+  disabled: boolean
+  onClick: () => void
+}) {
+  return (
+    <Button
+      type="button"
+      variant={variant}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {ticketMessages.actions[action]}
+    </Button>
+  )
 }
 
 function ActionControls({
@@ -50,53 +89,55 @@ function ActionControls({
 }: ActionControlsProps) {
   const primary = pickPrimaryAction(visible)
   const others = visible.filter((action) => action !== primary)
-  const normal = others.filter((action) => !DESTRUCTIVE.includes(action))
-  const destructive = others.filter((action) => DESTRUCTIVE.includes(action))
+  const dangerous = others.filter(
+    (action) => actionEmphasis(action) === 'danger',
+  )
+  const normal = others.filter((action) => actionEmphasis(action) !== 'danger')
   const run = (action: ActionKey) => () =>
     (oneClick[action] ?? (() => onOpenForm(action)))()
-  const isDisabled = (action: ActionKey) =>
+  const disabled = (action: ActionKey) =>
     Boolean(pending[action]) || blocked.includes(action)
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <ButtonGrid>
       {primary ? (
-        <Button
-          type="button"
-          className="min-h-11"
-          disabled={isDisabled(primary)}
+        <ActionButton
+          action={primary}
+          variant={
+            actionEmphasis(primary) === 'danger' ? 'destructive' : 'default'
+          }
+          className="col-span-2 min-h-11"
+          disabled={disabled(primary)}
           onClick={run(primary)}
-        >
-          {ticketMessages.actions[primary]}
-        </Button>
+        />
       ) : null}
       {normal.map((action) => (
-        <Button
+        <ActionButton
           key={action}
-          type="button"
-          variant="outline"
+          action={action}
+          variant={EMPHASIS_VARIANT[actionEmphasis(action)]}
           className="min-h-11"
-          disabled={isDisabled(action)}
+          disabled={disabled(action)}
           onClick={run(action)}
-        >
-          {ticketMessages.actions[action]}
-        </Button>
+        />
       ))}
-      {destructive.length > 0 ? (
-        <span className="mx-1 hidden h-6 w-px bg-border sm:block" />
+      {dangerous.length > 0 ? (
+        <span
+          aria-hidden
+          className="col-span-2 h-px bg-border sm:col-auto sm:mx-1 sm:h-6 sm:w-px"
+        />
       ) : null}
-      {destructive.map((action) => (
-        <Button
+      {dangerous.map((action) => (
+        <ActionButton
           key={action}
-          type="button"
+          action={action}
           variant="destructive"
           className="min-h-11"
-          disabled={isDisabled(action)}
+          disabled={disabled(action)}
           onClick={run(action)}
-        >
-          {ticketMessages.actions[action]}
-        </Button>
+        />
       ))}
-    </div>
+    </ButtonGrid>
   )
 }
 
