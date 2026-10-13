@@ -17,7 +17,9 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
         ) : null}
       </div>
       {actions ? (
-        <div className="flex shrink-0 items-center gap-2">{actions}</div>
+        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+          {actions}
+        </div>
       ) : null}
     </header>
   )
