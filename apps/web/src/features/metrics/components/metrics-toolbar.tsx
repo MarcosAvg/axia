@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { AggregationToggle } from '@/components/shared/aggregation-toggle'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { FilterChips } from '@/components/shared/filter-chips'
 import type { FilterChip } from '@/components/shared/filter-chips'
 import { SelectField, TextField } from '@/components/shared/form-fields'
@@ -67,7 +68,7 @@ function filterSelects(catalogs: FilterCatalogs) {
 
 function QuickRanges({ onRange }: { onRange: (days: number | null) => void }) {
   return (
-    <div className="flex items-center gap-2">
+    <ButtonGrid className="w-full sm:w-auto">
       <Button
         type="button"
         variant="ghost"
@@ -87,7 +88,7 @@ function QuickRanges({ onRange }: { onRange: (days: number | null) => void }) {
           {quick[item.key]}
         </Button>
       ))}
-    </div>
+    </ButtonGrid>
   )
 }
 
@@ -135,7 +136,7 @@ function CatalogFields({
   return (
     <>
       {filterSelects(catalogs).map((field) => (
-        <div key={field.key} className="w-44">
+        <div key={field.key} className="w-full sm:w-44">
           <FilterSelect
             id={`metrics-${field.key}`}
             label={field.label}
@@ -168,7 +169,7 @@ function ToolbarForm({
       className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
     >
       <QuickRanges onRange={onRange} />
-      <div className="w-40">
+      <div className="w-full sm:w-40">
         <TextField
           id="metrics-from"
           type="date"
@@ -179,7 +180,7 @@ function ToolbarForm({
           }
         />
       </div>
-      <div className="w-40">
+      <div className="w-full sm:w-40">
         <TextField
           id="metrics-to"
           type="date"
@@ -230,7 +231,7 @@ export function MetricsToolbar({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-between gap-2 sm:justify-end">
         <span className="text-sm text-muted-foreground">
           {messages.aggregation.label}
         </span>

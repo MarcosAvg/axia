@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { downloadTextFile } from '@/lib/download'
 import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
@@ -85,7 +86,7 @@ export function MetricsExport({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <ButtonGrid>
       <Button
         type="button"
         variant="outline"
@@ -104,6 +105,6 @@ export function MetricsExport({
       >
         {metricsMessages.exportXlsx}
       </Button>
-    </div>
+    </ButtonGrid>
   )
 }
