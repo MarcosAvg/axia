@@ -132,7 +132,7 @@ export function TicketFilters({
       }}
     >
       <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
-        <div className="min-w-56 flex-1">
+        <div className="w-full sm:min-w-56 sm:flex-1">
           <TextField
             key={value.search ?? ''}
             id="filter-search"
@@ -144,11 +144,15 @@ export function TicketFilters({
           />
         </div>
         {selects.map((select) => (
-          <div key={select.id} className="w-44">
+          <div key={select.id} className="w-full sm:w-44">
             <SelectField {...select} placeholder={list.filters.all} />
           </div>
         ))}
-        <Button type="submit" variant="secondary" className="min-h-11">
+        <Button
+          type="submit"
+          variant="secondary"
+          className="min-h-11 w-full sm:w-auto"
+        >
           {list.filters.search}
         </Button>
       </div>

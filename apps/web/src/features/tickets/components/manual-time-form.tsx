@@ -1,6 +1,7 @@
 import { ErrorAlert } from '@/components/shared/async-state'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import { useTechnicians } from '@/features/catalogs'
@@ -117,7 +118,7 @@ function ManualTimeFooter({
   return (
     <>
       {message ? <ErrorAlert message={message} /> : null}
-      <div className="flex flex-wrap gap-2">
+      <ButtonGrid>
         <Button type="submit" disabled={pending} className="min-h-11">
           {pending ? manualTimeMessages.submitting : manualTimeMessages.submit}
         </Button>
@@ -129,7 +130,7 @@ function ManualTimeFooter({
         >
           {ticketMessages.actionFields.cancel}
         </Button>
-      </div>
+      </ButtonGrid>
     </>
   )
 }

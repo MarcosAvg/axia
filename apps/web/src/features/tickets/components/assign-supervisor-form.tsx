@@ -1,4 +1,5 @@
 import { ErrorAlert } from '@/components/shared/async-state'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { toTicketError } from '../domain/errors'
 import { useAssignSupervisorForm } from '../hooks/use-assign-supervisor-form'
@@ -36,7 +37,7 @@ export function AssignSupervisorForm({
       {form.error ? (
         <ErrorAlert message={toTicketError(form.error).message} />
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <ButtonGrid>
         <Button type="submit" disabled={form.isPending} className="min-h-11">
           {actionFields.submit}
         </Button>
@@ -48,7 +49,7 @@ export function AssignSupervisorForm({
         >
           {actionFields.cancel}
         </Button>
-      </div>
+      </ButtonGrid>
     </form>
   )
 }

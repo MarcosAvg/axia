@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import {
   Card,
   CardContent,
@@ -66,7 +67,7 @@ export function DuplicateAlert({
             />
           ))}
         </ul>
-        <div className="flex flex-wrap gap-3">
+        <ButtonGrid>
           <Button
             type="button"
             onClick={onConfirm}
@@ -84,7 +85,7 @@ export function DuplicateAlert({
           >
             {create.duplicateCancel}
           </Button>
-        </div>
+        </ButtonGrid>
       </CardContent>
     </Card>
   )

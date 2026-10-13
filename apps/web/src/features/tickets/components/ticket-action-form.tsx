@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { ButtonGrid } from '@/components/shared/button-grid'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { FileField } from '@/components/shared/file-field'
 import {
@@ -38,7 +39,7 @@ function ActionFormFooter({
   return (
     <>
       {error ? <ErrorAlert message={toTicketError(error).message} /> : null}
-      <div className="flex flex-wrap gap-2">
+      <ButtonGrid>
         <Button type="submit" disabled={isPending} className="min-h-11">
           {ticketMessages.actionFields.submit}
         </Button>
@@ -50,7 +51,7 @@ function ActionFormFooter({
         >
           {ticketMessages.actionFields.cancel}
         </Button>
-      </div>
+      </ButtonGrid>
     </>
   )
 }
