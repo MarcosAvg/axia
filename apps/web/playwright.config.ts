@@ -5,6 +5,10 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // Los flujos comparten un solo servidor de dev y una sola instancia de Supabase;
+  // con más workers, las pruebas pesadas (offline, pausas) agotan su timeout por
+  // contención. Dos es el máximo estable verificado en local.
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',

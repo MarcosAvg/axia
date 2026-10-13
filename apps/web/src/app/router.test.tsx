@@ -54,11 +54,15 @@ const supervisor = {
   timezone: 'America/Mexico_City',
 }
 
-function renderAtPath(path: string, auth: AuthContextValue) {
-  const router = createRouter({
+function makeRouter(path: string) {
+  return createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [path] }),
   })
+}
+
+function renderAtPath(path: string, auth: AuthContextValue) {
+  const router = makeRouter(path)
 
   render(
     <QueryClientProvider client={new QueryClient()}>
@@ -76,6 +80,13 @@ function renderAtPath(path: string, auth: AuthContextValue) {
 }
 
 describe('enrutado y sesión', () => {
+  // Con `autoCodeSplitting`, la primera navegación transforma los chunks de las
+  // rutas (el panel carga dependencias pesadas). Se precargan una vez para que el
+  // tiempo de transformación no se confunda con un fallo de la aserción.
+  beforeAll(async () => {
+    await Promise.all([makeRouter('/').load(), makeRouter('/admin').load()])
+  }, 60_000)
+
   it('sin sesión, "/" redirige a la pantalla de acceso', async () => {
     renderAtPath('/', makeAuthValue())
 
