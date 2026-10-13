@@ -12,9 +12,13 @@ identidad (perfil, roles y permisos) y la estructura de la interfaz.
 
 ## Decisión
 
-- **Supabase Auth** con **correo y contraseña**. Sin auto-registro: `enable_signup = false`; las
-  cuentas las crea o invita un administrador. La recuperación de contraseña y el enlace mágico
-  quedan fuera de esta fase.
+- **Supabase Auth** con **correo y contraseña**. Sin auto-registro: `[auth] enable_signup = false`
+  (`GOTRUE_DISABLE_SIGNUP`); las cuentas las crea o invita un administrador. La recuperación de
+  contraseña y el enlace mágico quedan fuera de esta fase.
+  - Ojo: `[auth.email] enable_signup` **no** es el registro, es el interruptor del **proveedor de
+    correo** (`GOTRUE_EXTERNAL_EMAIL_ENABLED`); con `false` se apaga el propio login con contraseña
+    (`email_provider_disabled`). En Axia va `true`. Corregido el 2026-10-13 (rama
+    `fix/auth-email-provider`).
 - Un **disparador** (`on_auth_user_created`) crea la fila de `profiles` a partir de
   `raw_user_meta_data` (respaldo: el prefijo del correo y, si no, el identificador).
 - El cliente conoce su identidad con la RPC **`me()`**, que devuelve perfil, roles y permisos (con
