@@ -3,12 +3,16 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-13
+**Última actualización:** 2026-10-18
 **Fase actual:** Fase 8 — rediseño de interfaz (UI/UX), enfoque escritorio
 
 ## En curso
 
-**Énfasis de color en las acciones y pasada móvil (en curso).** Los botones de acción ganan
+**Sin trabajo en curso.** El tramo **Administración con red de seguridad** se
+cerró el 2026-10-18 (ver “Hecho”, ADR 0066 y el registro de sesiones). Lo
+pendiente está en “Siguiente”.
+
+_(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
 existía) con un mapeo puro `actionEmphasis(action)`; la acción primaria sigue sólida. Las filas de
 botones usan el nuevo `ButtonGrid` (**rejilla de dos columnas en móvil**, fila en `sm+`) y los
@@ -39,6 +43,16 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Administración con red de seguridad (2026-10-18)**, rama `feat/admin-red-seguridad`:
+  `ConfirmDialog` reutilizable; guardarraíles de último administrador, cuenta propia y rol
+  `administrator`; matriz de permisos con búsqueda, etiquetas de ámbito y lectura protegida del
+  rol administrativo; guardado explícito con estado sucio y aviso de salida en Configuración;
+  feedback de éxito/error en mutaciones de acceso; diálogos que cierran solo con éxito; Motivos
+  con etiquetas en español; fechas de calendario en la zona de la institución; usuarios en
+  tarjetas y roles sin desborde en móvil; selector de catálogo en móvil; Panel con skeletons,
+  error con reintento e identidad esperada; toma de oferta explícita; KPI sin colores por
+  índice; contraste AA, foco y objetivos táctiles. **ADR 0066**. `pnpm check` en verde
+  (237 Vitest, 16 Playwright, 466 pgTAP) y `pnpm test:visual` actualizado.
 - Reglas del agente (`AGENTS.md`), convenciones (`docs/convenciones-codigo.md`), dominio del
   núcleo (`docs/dominio.md`) e integraciones y migración (`docs/integraciones-y-migracion.md`)
   redactados por la persona con ayuda externa.
@@ -286,6 +300,14 @@ No hay fases pendientes. Lo que queda es **operativo** y lo hace la persona: des
 (`deploy/README.md`), aplicar migraciones, activar correo/push/escalamiento
 (`docs/notificaciones-push.md`) y, si se quiere, Capacitor. Mejoras futuras posibles: iconos con el
 logo definitivo, bandeja de notificaciones in-app y afinado de parámetros por la operación real.
+
+Mejoras de UI/UX identificadas en la auditoría (no bloquean la operación):
+correo y alta/restablecimiento de cuentas; administración de reglas de
+notificación/escalamiento y de parámetros de duplicados; auditoría de cambios
+administrativos; rediseño completo de la matriz de roles y del shell de
+administración; filtros de Métricas en la URL y plegables en móvil; técnico,
+SLA y motivo de pausa en la lista de tiquets; línea de vida del tiquet y bandeja
+“Requieren atención” en el Panel; cobertura visual de administración y móvil.
 
 ## Hoja de ruta
 
@@ -1034,3 +1056,15 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   fila en `sm+`) aplicado a las acciones del tiquet, pies de formulario, acciones rápidas del Panel,
   Métricas y filtros de Operación; campos de ancho fijo a `w-full sm:w-*`. **ADR 0065**. Rama
   `feat/acciones-color-movil`.
+- 2026-10-18: auditoría de UI/UX con la aplicación en vivo (1440×900, 390×844 y 360×800, claro y
+  oscuro) y tramo de administración con red de seguridad. Se añadió `ConfirmDialog`; guardarraíles
+  de último administrador/cuenta propia/rol `administrator` con pruebas puras; búsqueda y lectura
+  protegida del rol administrativo; filas de permisos apiladas en móvil; usuarios en tarjetas;
+  selector de catálogo en móvil; guardado con estado sucio y aviso de salida en Configuración;
+  feedback de éxito/error y cierre de diálogos tras éxito; etiquetas de “Uso” en Motivos; fechas
+  de calendario en zona de la institución; confirmaciones de borrado en ámbitos y calendarios;
+  Panel con skeletons, error con reintento e identidad esperada; toma de oferta explícita; KPI
+  sin colores por índice; contraste AA, foco y objetivos táctiles; paginación con rango y
+  antigüedad en la lista; SLA sin tarjetas duplicadas y tablas de tiempos sin recorte. **ADR 0066**.
+  `pnpm check` en verde (237 Vitest, 16 Playwright, 466 pgTAP); baselines visuales regenerados.
+  Rama `feat/admin-red-seguridad`.
