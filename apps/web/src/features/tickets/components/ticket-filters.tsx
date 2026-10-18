@@ -136,7 +136,9 @@ function FilterFields({
       {selects.map((select) => (
         <div key={`${select.id}:${select.value}`} className="w-full sm:w-44">
           <SelectField
-            {...select}
+            id={select.id}
+            label={select.label}
+            options={select.options}
             name={select.id}
             defaultValue={select.value}
             placeholder={list.filters.all}
