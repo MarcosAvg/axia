@@ -4,12 +4,19 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-18
-**Fase actual:** Fase 8 — rediseño de interfaz (UI/UX), enfoque escritorio
+**Fase actual:** Migración fuera de Supabase — Etapa A (auditoría y plan), pendiente de aprobación
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo **Administración con red de seguridad** se
-cerró el 2026-10-18 (ver “Hecho”, ADR 0066 y el registro de sesiones). Lo
+**Migración fuera de Supabase — Etapa A entregada, pendiente de aprobación
+(2026-10-18).** El plan completo está en `docs/migracion-sin-supabase.md`:
+inventario, reemplazos, esquema propuesto, autorización, tiempo real, offline,
+pruebas, semillas, secretos, ADR y tramos. **No se ha modificado código de la
+aplicación**; se espera la aprobación de la persona y las respuestas de la
+sección 9 antes de iniciar la Etapa B.
+
+**Sin otro trabajo en curso.** El tramo **Administración con red de seguridad**
+se cerró el 2026-10-18 (ver “Hecho”, ADR 0066 y el registro de sesiones). Lo
 pendiente está en “Siguiente”.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
@@ -442,9 +449,11 @@ concreta, opciones y recomendación.
 | 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | **Resuelta**: "primero gana" |
 | 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | **Resuelta**: una instancia por base |
 | 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | **Resuelta**: folio, estado, fecha, ubicación, problema y contacto |
+| 14 | Aprobación de la Etapa A de la migración fuera de Supabase y respuestas de `docs/migracion-sin-supabase.md` §9 | Etapa B completa | **Pendiente**: revisar el documento y responder las 13 preguntas |
 
 Las preguntas de la Fase 1 quedaron resueltas; las decisiones están en el bloque de correcciones de
-`docs/especificacion-negocio.md` y en `docs/modelo-datos.md`.
+`docs/especificacion-negocio.md` y en `docs/modelo-datos.md`. La migración fuera de Supabase está
+detenida a la espera de la aprobación de la Etapa A.
 
 ## Decisiones registradas
 
@@ -1068,3 +1077,13 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   antigüedad en la lista; SLA sin tarjetas duplicadas y tablas de tiempos sin recorte. **ADR 0066**.
   `pnpm check` en verde (237 Vitest, 16 Playwright, 466 pgTAP); baselines visuales regenerados.
   Rama `feat/admin-red-seguridad`.
+- 2026-10-18: **migración fuera de Supabase — Etapa A**. Auditoría de 42 migraciones, 40 tablas con
+  RLS, 32 FKs a `auth.users`, 117 usos de `auth.uid()`, 53 funciones `security definer`, 30 archivos
+  pgTAP, 42 archivos Vitest, 11 specs Playwright, semilla de 928 líneas, scripts/CI/despliegue y
+  documentación. Se entregó `docs/migracion-sin-supabase.md` con inventario, mapa de reemplazo,
+  esquema propuesto (usuarios, sesiones, permisos, notificaciones), autorización sin RLS, SSE,
+  contrato offline, inventario de pruebas, separación de semillas, inventario de secretos, ADR y 10
+  tramos. **Sin cambios de código**; se espera aprobación. Hallazgos: Realtime y push no están
+  implementados; `idempotency_keys` no se usa; contraseña fija demo versionada; `fetchDuplicateTickets`
+  pasa filtros dos veces; métricas dependen de RLS. Sin secretos reales en archivos versionados
+  revisados; `.env.local` y `supabase/.temp` están ignorados y no aparecen en el historial de rutas.
