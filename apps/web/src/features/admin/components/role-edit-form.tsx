@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { TextField } from '@/components/shared/form-fields'
 import type { Role } from '../domain/access'
+import { isAdminRole } from '../domain/access-guards'
 import { adminMessages } from '../i18n'
 
 interface RoleEditFormProps {
@@ -15,6 +16,7 @@ interface RoleEditFormProps {
 export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
   const [label, setLabel] = useState(role.label)
   const [active, setActive] = useState(role.active)
+  const protectedRole = isAdminRole(role)
   const { roles, fields, actions } = adminMessages
 
   return (
@@ -36,10 +38,16 @@ export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
       <label className="flex min-h-11 items-center gap-2 text-sm">
         <Switch
           checked={active}
+          disabled={protectedRole}
           aria-label={fields.active}
           onCheckedChange={setActive}
         />
         {fields.active}
+        {protectedRole ? (
+          <span className="text-xs text-muted-foreground">
+            {roles.protected}
+          </span>
+        ) : null}
       </label>
       <Button type="submit" disabled={isSaving}>
         {isSaving ? actions.saving : actions.save}

@@ -75,7 +75,6 @@ export function DesignationDialog({
     event.preventDefault()
     if (!values.technicianId || !values.categoryId) return
     onCreate(values.technicianId, values.categoryId)
-    onClose()
   }
 
   return (

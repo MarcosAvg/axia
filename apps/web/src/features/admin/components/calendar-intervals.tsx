@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { PlusIcon, TrashIcon } from 'lucide-react'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { SelectField, TextField } from '@/components/shared/form-fields'
@@ -161,6 +162,34 @@ function IntervalDialog({
   )
 }
 
+function IntervalRemoveDialog({
+  interval,
+  isPending,
+  onConfirm,
+  onClose,
+}: {
+  interval: CalendarInterval | null
+  isPending: boolean
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  if (!interval) return null
+  return (
+    <ConfirmDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+      title="Quitar franja semanal"
+      description={`Se quitará ${dayLabel(interval.weekday)} de ${interval.startTime} a ${interval.endTime}.`}
+      confirmLabel="Quitar franja"
+      destructive
+      isPending={isPending}
+      onConfirm={onConfirm}
+    />
+  )
+}
+
 /** Franjas semanales de un calendario. */
 export function CalendarIntervals({
   calendarId,
@@ -172,6 +201,7 @@ export function CalendarIntervals({
   const add = useAddInterval()
   const remove = useRemoveInterval()
   const [adding, setAdding] = useState(false)
+  const [removing, setRemoving] = useState<CalendarInterval | null>(null)
   const rows = sortIntervals(intervals)
 
   return (
@@ -192,13 +222,20 @@ export function CalendarIntervals({
         <p className="text-sm text-muted-foreground">{t.noIntervals}</p>
       ) : (
         <DataTable
-          columns={buildIntervalColumns((interval) =>
-            remove.mutate(interval.id),
-          )}
+          columns={buildIntervalColumns(setRemoving)}
           rows={rows}
           getRowId={(row) => row.id}
         />
       )}
+      <IntervalRemoveDialog
+        interval={removing}
+        isPending={remove.isPending}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => {
+          if (!removing) return
+          remove.mutate(removing.id, { onSuccess: () => setRemoving(null) })
+        }}
+      />
       {adding ? (
         <IntervalDialog
           isSaving={add.isPending}

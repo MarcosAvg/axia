@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import * as api from '../api/access-api'
 import type { Scope } from '../domain/access'
+import { adminMessages } from '../i18n'
 
 const accessKeys = {
   roles: ['admin', 'roles'] as const,
@@ -15,13 +17,16 @@ const accessKeys = {
 
 function useAccessMutation<TVariables>(
   fn: (variables: TVariables) => Promise<unknown>,
+  successMessage?: string,
 ) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: fn,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
+      if (successMessage) toast.success(successMessage)
     },
+    onError: () => toast.error(adminMessages.actions.error),
   })
 }
 
@@ -68,13 +73,16 @@ export function useTechnicianCategories() {
   })
 }
 
+const actions = adminMessages.actions
+
 export function useCreateRole() {
-  return useAccessMutation(api.createRole)
+  return useAccessMutation(api.createRole, actions.roleCreated)
 }
 export function useUpdateRole() {
   return useAccessMutation(
     (variables: { id: string; values: { label?: string; active?: boolean } }) =>
       api.updateRole(variables.id, variables.values),
+    actions.roleUpdated,
   )
 }
 export function useSetRolePermission() {
@@ -85,67 +93,83 @@ export function useSetRolePermission() {
         variables.permissionId,
         variables.scope,
       ),
+    actions.permissionUpdated,
   )
 }
 export function useRemoveRolePermission() {
   return useAccessMutation(
     (variables: { roleId: string; permissionId: string }) =>
       api.removeRolePermission(variables.roleId, variables.permissionId),
+    actions.permissionRemoved,
   )
 }
 export function useAssignUserRole() {
-  return useAccessMutation((variables: { userId: string; roleId: string }) =>
-    api.assignUserRole(variables.userId, variables.roleId),
+  return useAccessMutation(
+    (variables: { userId: string; roleId: string }) =>
+      api.assignUserRole(variables.userId, variables.roleId),
+    actions.roleAssigned,
   )
 }
 export function useRemoveUserRole() {
-  return useAccessMutation((variables: { userId: string; roleId: string }) =>
-    api.removeUserRole(variables.userId, variables.roleId),
+  return useAccessMutation(
+    (variables: { userId: string; roleId: string }) =>
+      api.removeUserRole(variables.userId, variables.roleId),
+    actions.roleRemoved,
   )
 }
 export function useSetProfileActive() {
-  return useAccessMutation((variables: { id: string; active: boolean }) =>
-    api.setProfileActive(variables.id, variables.active),
+  return useAccessMutation(
+    (variables: { id: string; active: boolean }) =>
+      api.setProfileActive(variables.id, variables.active),
+    actions.accountUpdated,
   )
 }
 export function useLinkRequesterUser() {
   return useAccessMutation(
     (variables: { requesterId: string; userId: string | null }) =>
       api.linkRequesterUser(variables.requesterId, variables.userId),
+    actions.linkUpdated,
   )
 }
 export function useLinkTechnicianUser() {
   return useAccessMutation(
     (variables: { technicianId: string; userId: string | null }) =>
       api.linkTechnicianUser(variables.technicianId, variables.userId),
+    actions.linkUpdated,
   )
 }
 export function useCreateSupervisorScope() {
-  return useAccessMutation((variables: { userId: string; teamId: string }) =>
-    api.createSupervisorScope(variables.userId, variables.teamId),
+  return useAccessMutation(
+    (variables: { userId: string; teamId: string }) =>
+      api.createSupervisorScope(variables.userId, variables.teamId),
+    actions.scopeCreated,
   )
 }
 export function useDeleteSupervisorScope() {
-  return useAccessMutation((variables: { id: string }) =>
-    api.deleteSupervisorScope(variables.id),
+  return useAccessMutation(
+    (variables: { id: string }) => api.deleteSupervisorScope(variables.id),
+    actions.scopeRemoved,
   )
 }
 export function useAddScopeBuilding() {
   return useAccessMutation(
     (variables: { scopeId: string; buildingId: string }) =>
       api.addScopeBuilding(variables.scopeId, variables.buildingId),
+    actions.buildingsUpdated,
   )
 }
 export function useRemoveScopeBuilding() {
   return useAccessMutation(
     (variables: { scopeId: string; buildingId: string }) =>
       api.removeScopeBuilding(variables.scopeId, variables.buildingId),
+    actions.buildingsUpdated,
   )
 }
 export function useAddTechnicianCategory() {
   return useAccessMutation(
     (variables: { technicianId: string; categoryId: string }) =>
       api.addTechnicianCategory(variables.technicianId, variables.categoryId),
+    actions.designationCreated,
   )
 }
 export function useRemoveTechnicianCategory() {
@@ -155,5 +179,6 @@ export function useRemoveTechnicianCategory() {
         variables.technicianId,
         variables.categoryId,
       ),
+    actions.designationRemoved,
   )
 }

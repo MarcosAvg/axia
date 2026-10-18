@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { PlusIcon, TrashIcon } from 'lucide-react'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { TextField } from '@/components/shared/form-fields'
 import { Button } from '@/components/ui/button'
+import { formatDateOnly } from '@/lib/format'
 import { sortHolidays } from '../domain/calendar'
 import type { CalendarHoliday } from '../domain/calendar'
 import { useAddHoliday, useRemoveHoliday } from '../hooks/use-calendars'
@@ -23,7 +25,9 @@ function buildHolidayColumns(
       id: 'holiday',
       header: t.holiday,
       sortable: true,
-      cell: (holiday) => <span className="font-medium">{holiday.holiday}</span>,
+      cell: (holiday) => (
+        <span className="font-medium">{formatDateOnly(holiday.holiday)}</span>
+      ),
     },
     {
       id: 'name',
@@ -107,6 +111,34 @@ function HolidayDialog({
   )
 }
 
+function HolidayRemoveDialog({
+  holiday,
+  isPending,
+  onConfirm,
+  onClose,
+}: {
+  holiday: CalendarHoliday | null
+  isPending: boolean
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  if (!holiday) return null
+  return (
+    <ConfirmDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+      title="Quitar día no laborable"
+      description={`Se quitará ${formatDateOnly(holiday.holiday)} del calendario.`}
+      confirmLabel="Quitar día"
+      destructive
+      isPending={isPending}
+      onConfirm={onConfirm}
+    />
+  )
+}
+
 /** Días no laborables de un calendario. */
 export function CalendarHolidays({
   calendarId,
@@ -118,6 +150,7 @@ export function CalendarHolidays({
   const add = useAddHoliday()
   const remove = useRemoveHoliday()
   const [adding, setAdding] = useState(false)
+  const [removing, setRemoving] = useState<CalendarHoliday | null>(null)
   const rows = sortHolidays(holidays)
 
   return (
@@ -138,11 +171,20 @@ export function CalendarHolidays({
         <p className="text-sm text-muted-foreground">{t.noHolidays}</p>
       ) : (
         <DataTable
-          columns={buildHolidayColumns((holiday) => remove.mutate(holiday.id))}
+          columns={buildHolidayColumns(setRemoving)}
           rows={rows}
           getRowId={(row) => row.id}
         />
       )}
+      <HolidayRemoveDialog
+        holiday={removing}
+        isPending={remove.isPending}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => {
+          if (!removing) return
+          remove.mutate(removing.id, { onSuccess: () => setRemoving(null) })
+        }}
+      />
       {adding ? (
         <HolidayDialog
           isSaving={add.isPending}

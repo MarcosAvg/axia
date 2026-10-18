@@ -25,9 +25,6 @@ export function RoleCreateForm({
     event.preventDefault()
     if (!name.trim() || !label.trim()) return
     onCreate({ name: name.trim(), label: label.trim() })
-    setName('')
-    setLabel('')
-    onClose?.()
   }
 
   return (

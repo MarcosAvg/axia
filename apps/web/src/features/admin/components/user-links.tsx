@@ -91,10 +91,11 @@ function LinkEditor({
   const person = linking.person
   const isRequester = linking.kind === 'requester'
   function save(userId: string | null) {
+    const options = { onSuccess: onClose }
     if (isRequester) {
-      linkRequester.mutate({ requesterId: person.id, userId })
+      linkRequester.mutate({ requesterId: person.id, userId }, options)
     } else {
-      linkTechnician.mutate({ technicianId: person.id, userId })
+      linkTechnician.mutate({ technicianId: person.id, userId }, options)
     }
   }
 

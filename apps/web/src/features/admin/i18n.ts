@@ -1,5 +1,7 @@
 // Textos de la administración (es-MX).
 
+import { settingsMessages } from './settings-i18n'
+
 export const adminMessages = {
   title: 'Administración',
   subtitle: 'Catálogos, motivos, roles y usuarios de la instancia.',
@@ -15,30 +17,7 @@ export const adminMessages = {
     integrations: 'Integraciones',
     settings: 'Configuración',
   },
-  settings: {
-    title: 'Configuración de la instancia',
-    teamLabel: 'Etiqueta de equipo',
-    validationPolicy: 'Política de validación',
-    autoValidationDays: 'Días para validación automática (vacío = apagada)',
-    claimWindowDays: 'Ventana de reclamación (días)',
-    evidencePolicy: 'Política de evidencia al registrar',
-    folioPattern: 'Patrón de folio',
-    timezone: 'Zona horaria',
-    defaultCalendar: 'Calendario laboral por defecto',
-    slaClockMode: 'Modo de reloj de los objetivos (SLA)',
-    defaultPriority: 'Prioridad por defecto',
-    requesterVisibleEvents: 'Eventos visibles al solicitante',
-    requesterVisibleEventsHelp:
-      'Elige qué tipos de evento ve el solicitante en la línea de tiempo. Las notas internas nunca se muestran.',
-    requesterVisibleEventsError: 'Elige al menos un tipo de evento.',
-    saved: 'Configuración guardada.',
-    sections: {
-      general: 'General',
-      validation: 'Validación y evidencia',
-      time: 'Tiempos y SLA',
-      visibility: 'Visibilidad del solicitante',
-    },
-  },
+  settings: settingsMessages,
   slaClockModes: {
     calendar: 'Calendario (continuo)',
     laboral: 'Laboral (según calendario)',
@@ -100,6 +79,12 @@ export const adminMessages = {
     createTitle: 'Nuevo rol',
     createHelp: 'Define el nombre interno y la etiqueta visible del rol.',
     listLabel: 'Roles',
+    autoSave: 'Los cambios de permisos se guardan al instante.',
+    adminProtected:
+      'El rol Administrador conserva todos los permisos para evitar bloqueos.',
+    protected: 'Protegido',
+    searchPermissions: 'Buscar permiso…',
+    noMatches: 'No hay permisos que coincidan con la búsqueda.',
   },
   permissionGroups: {
     ticket: 'Tiquets',
@@ -119,6 +104,7 @@ export const adminMessages = {
     roles: 'Roles',
     editRoles: 'Editar roles',
     rolesHelp: 'Marca los roles que tendrá la cuenta.',
+    rolesAutoSave: 'Los cambios se guardan al instante.',
     active: 'Activo',
     accountsTab: 'Cuentas',
     linksTab: 'Vínculos',
@@ -154,6 +140,10 @@ export const adminMessages = {
     addSupervisorHelp: 'Elige el usuario supervisor y su equipo.',
     editBuildings: 'Editar edificios',
     buildingsHelp: 'Marca los edificios que cubre este supervisor.',
+    searchBuildings: 'Buscar edificio…',
+    selectedBuildings: (selected: number, total: number) =>
+      `${selected} de ${total} edificios seleccionados`,
+    noSupervisors: 'No hay usuarios con el rol Supervisor.',
     addDesignation: 'Agregar designación',
     addDesignationHelp: 'Elige el técnico y la categoría que atiende.',
     searchScopes: 'Buscar supervisor o equipo…',
@@ -171,6 +161,19 @@ export const adminMessages = {
     activate: 'Activar',
     deactivate: 'Desactivar',
     selectPlaceholder: 'Selecciona…',
+    roleCreated: 'Rol creado.',
+    roleUpdated: 'Rol actualizado.',
+    permissionUpdated: 'Permiso actualizado.',
+    permissionRemoved: 'Permiso retirado.',
+    roleAssigned: 'Rol asignado.',
+    roleRemoved: 'Rol retirado.',
+    accountUpdated: 'Cuenta actualizada.',
+    linkUpdated: 'Vínculo actualizado.',
+    scopeCreated: 'Ámbito agregado.',
+    scopeRemoved: 'Ámbito eliminado.',
+    buildingsUpdated: 'Edificios actualizados.',
+    designationCreated: 'Designación agregada.',
+    designationRemoved: 'Designación retirada.',
   },
   list: {
     active: 'Activo',

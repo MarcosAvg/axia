@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { Profile, Role, UserRole } from '../domain/access'
 import { adminMessages } from '../i18n'
@@ -28,7 +29,7 @@ export function UserRolesDialog({
         if (!open) onClose()
       }}
       title={profile.fullName}
-      description={adminMessages.users.rolesHelp}
+      description={`${adminMessages.users.rolesHelp} ${adminMessages.users.rolesAutoSave}`}
     >
       <div className="flex flex-col gap-3 pb-2">
         {roles.map((role) => {
@@ -55,6 +56,11 @@ export function UserRolesDialog({
           )
         })}
       </div>
+      <footer className="flex justify-end border-t pt-4">
+        <Button type="button" variant="outline" onClick={onClose}>
+          {adminMessages.actions.close}
+        </Button>
+      </footer>
     </EntityDialog>
   )
 }

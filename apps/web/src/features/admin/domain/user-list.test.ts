@@ -3,6 +3,7 @@ import {
   filterPeople,
   filterProfiles,
   linkedPersonName,
+  profilesWithRole,
   roleLabelsOf,
 } from './user-list'
 import type { Profile, Role, UserRole } from './access'
@@ -24,6 +25,20 @@ describe('roleLabelsOf', () => {
   it('devuelve las etiquetas de los roles asignados', () => {
     expect(roleLabelsOf(roles, assignments, 'u2')).toEqual(['Administrador'])
     expect(roleLabelsOf(roles, assignments, 'u3')).toEqual([])
+  })
+})
+
+describe('profilesWithRole', () => {
+  it('devuelve solo los perfiles con el rol indicado', () => {
+    expect(
+      profilesWithRole(profiles, roles, assignments, 'admin').map((p) => p.id),
+    ).toEqual(['u2'])
+  })
+
+  it('devuelve una lista vacía si el rol no existe', () => {
+    expect(
+      profilesWithRole(profiles, roles, assignments, 'supervisor'),
+    ).toEqual([])
   })
 })
 

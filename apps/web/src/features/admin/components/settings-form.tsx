@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { z } from 'zod'
@@ -6,6 +7,7 @@ import { FormActionsBar } from '@/components/shared/form-actions-bar'
 import { FormSection } from '@/components/shared/form-section'
 import { Button } from '@/components/ui/button'
 import { EVENT_TYPES } from '@/features/tickets'
+import { useUnsavedChangesGuard } from '@/lib/use-unsaved-changes-guard'
 import type { InstanceSettings } from '../domain/settings'
 import { settingsHints } from '../hints'
 import { adminMessages } from '../i18n'
@@ -36,11 +38,13 @@ function SettingsFormView({
   register,
   errors,
   isSaving,
+  isDirty,
   onSubmit,
 }: {
   register: UseFormRegister<SettingsValues>
   errors: FieldErrors<SettingsValues>
   isSaving: boolean
+  isDirty: boolean
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
   const { sections } = adminMessages.settings
@@ -59,7 +63,11 @@ function SettingsFormView({
         <VisibilityFields register={register} errors={errors} />
       </FormSection>
       <FormActionsBar>
-        <Button type="submit" disabled={isSaving} className="min-h-11">
+        <Button
+          type="submit"
+          disabled={isSaving || !isDirty}
+          className="min-h-11"
+        >
           {isSaving ? adminMessages.actions.saving : adminMessages.actions.save}
         </Button>
       </FormActionsBar>
@@ -73,6 +81,25 @@ interface SettingsFormProps {
   onSave: (settings: InstanceSettings) => void
 }
 
+function toFormValues(settings: InstanceSettings): SettingsValues {
+  return {
+    teamLabel: settings.teamLabel,
+    validationPolicy: settings.validationPolicy,
+    autoValidationDays:
+      settings.autoValidationDays === null
+        ? ''
+        : String(settings.autoValidationDays),
+    claimWindowDays: String(settings.claimWindowDays),
+    requestEvidencePolicy: settings.requestEvidencePolicy,
+    folioPattern: settings.folioPattern,
+    timezone: settings.timezone,
+    defaultCalendarId: settings.defaultCalendarId ?? '',
+    slaClockMode: settings.slaClockMode,
+    requesterVisibleEventTypes: settings.requesterVisibleEventTypes,
+    defaultPriorityId: settings.defaultPriorityId ?? '',
+  }
+}
+
 /** Formulario de la configuración esencial de la instancia. */
 export function SettingsForm({
   settings,
@@ -82,26 +109,18 @@ export function SettingsForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<SettingsValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      teamLabel: settings.teamLabel,
-      validationPolicy: settings.validationPolicy,
-      autoValidationDays:
-        settings.autoValidationDays === null
-          ? ''
-          : String(settings.autoValidationDays),
-      claimWindowDays: String(settings.claimWindowDays),
-      requestEvidencePolicy: settings.requestEvidencePolicy,
-      folioPattern: settings.folioPattern,
-      timezone: settings.timezone,
-      defaultCalendarId: settings.defaultCalendarId ?? '',
-      slaClockMode: settings.slaClockMode,
-      requesterVisibleEventTypes: settings.requesterVisibleEventTypes,
-      defaultPriorityId: settings.defaultPriorityId ?? '',
-    },
+    defaultValues: toFormValues(settings),
   })
+
+  useEffect(() => {
+    reset(toFormValues(settings))
+  }, [settings, reset])
+
+  useUnsavedChangesGuard(isDirty, adminMessages.settings.unsaved)
 
   const onSubmit = handleSubmit((values) => {
     onSave({
@@ -126,6 +145,7 @@ export function SettingsForm({
       register={register}
       errors={errors}
       isSaving={isSaving}
+      isDirty={isDirty}
       onSubmit={onSubmit}
     />
   )

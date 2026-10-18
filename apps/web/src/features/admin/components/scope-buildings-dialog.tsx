@@ -22,9 +22,11 @@ function BuildingsList({ options, selectedIds, onToggle }: BuildingsListProps) {
         return (
           <label
             key={id}
+            htmlFor={`scope-building-${id}`}
             className="flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm"
           >
             <Checkbox
+              id={`scope-building-${id}`}
               checked={selectedIds.includes(id)}
               onCheckedChange={(value) => onToggle(id, value === true)}
             />
@@ -79,11 +81,14 @@ export function ScopeBuildingsDialog({
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={actions.selectPlaceholder}
-            aria-label={t.buildings}
+            placeholder={t.searchBuildings}
+            aria-label={t.searchBuildings}
             className="pl-9"
           />
         </div>
+        <p className="text-xs text-muted-foreground">
+          {t.selectedBuildings(scope.buildingIds.length, buildings.length)}
+        </p>
         <BuildingsList
           options={options}
           selectedIds={scope.buildingIds}

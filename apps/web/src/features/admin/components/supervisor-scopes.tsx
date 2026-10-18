@@ -8,18 +8,22 @@ import type { AdminRow } from '../api/admin-api'
 import type { Profile, SupervisorScope } from '../domain/access'
 import { nameById } from '../domain/lookups'
 import { filterSupervisorScopes } from '../domain/scope-list'
+import { profilesWithRole } from '../domain/user-list'
 import {
   useAddScopeBuilding,
   useCreateSupervisorScope,
   useDeleteSupervisorScope,
   useProfiles,
   useRemoveScopeBuilding,
+  useRoles,
   useSupervisorScopes,
+  useUserRoles,
 } from '../hooks/use-access'
 import { useAdminRows } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { ScopeBuildingsDialog } from './scope-buildings-dialog'
+import { ScopeRemoveDialog } from './scope-remove-dialog'
 import { SupervisorScopeDialog } from './supervisor-scope-dialog'
 
 function orEmpty<T>(rows: T[] | undefined): T[] {
@@ -173,6 +177,8 @@ function ScopesDialogs({ model }: { model: ScopesDialogsModel }) {
 function useScopesController() {
   const scopes = useSupervisorScopes()
   const profiles = useProfiles()
+  const roles = useRoles()
+  const userRoles = useUserRoles()
   const teams = useAdminRows('teams')
   const buildings = useAdminRows('buildings')
   const create = useCreateSupervisorScope()
@@ -184,6 +190,10 @@ function useScopesController() {
   const [query, setQuery] = useState('')
 
   const profileRows = orEmpty(profiles.data)
+  const supervisorProfiles =
+    roles.data && userRoles.data
+      ? profilesWithRole(profileRows, roles.data, userRoles.data, 'supervisor')
+      : profileRows
   const supervisor = (id: string) => supervisorName(profileRows, id)
   const team = (id: string) => nameById(teams.data, id)
   const visible = filterSupervisorScopes(
@@ -195,6 +205,7 @@ function useScopesController() {
   return {
     scopes,
     profiles: profileRows,
+    supervisorProfiles,
     teams: orEmpty(teams.data),
     buildings: orEmpty(buildings.data),
     create,
@@ -213,9 +224,36 @@ function useScopesController() {
   }
 }
 
+function dialogsModel(
+  c: ReturnType<typeof useScopesController>,
+): ScopesDialogsModel {
+  return {
+    creating: c.creating,
+    onCloseCreating: () => c.setCreating(false),
+    profiles: c.supervisorProfiles,
+    teams: c.teams,
+    isCreating: c.create.isPending,
+    onCreate: (userId, teamId) =>
+      c.create.mutate(
+        { userId, teamId },
+        { onSuccess: () => c.setCreating(false) },
+      ),
+    editing: c.editing,
+    onCloseEditing: () => c.setEditing(null),
+    supervisor: c.supervisor,
+    team: c.team,
+    buildings: c.buildings,
+    onAddBuilding: (scopeId, buildingId) =>
+      c.addBuilding.mutate({ scopeId, buildingId }),
+    onRemoveBuilding: (scopeId, buildingId) =>
+      c.removeBuilding.mutate({ scopeId, buildingId }),
+  }
+}
+
 /** Ámbitos de supervisor: equipo y edificios cubiertos. */
 export function SupervisorScopes() {
   const c = useScopesController()
+  const [removing, setRemoving] = useState<SupervisorScope | null>(null)
   const { scopes: t, list } = adminMessages
 
   return (
@@ -237,29 +275,25 @@ export function SupervisorScopes() {
             team: c.team,
             buildings: (ids) => buildingLabels(c.buildings, ids),
             onEdit: c.setEditing,
-            onRemove: (scope) => c.removeScope.mutate({ id: scope.id }),
+            onRemove: setRemoving,
           })}
           rows={c.visible}
           getRowId={(scope) => scope.id}
         />
       ) : null}
-      <ScopesDialogs
-        model={{
-          creating: c.creating,
-          onCloseCreating: () => c.setCreating(false),
-          profiles: c.profiles,
-          teams: c.teams,
-          isCreating: c.create.isPending,
-          onCreate: (userId, teamId) => c.create.mutate({ userId, teamId }),
-          editing: c.editing,
-          onCloseEditing: () => c.setEditing(null),
-          supervisor: c.supervisor,
-          team: c.team,
-          buildings: c.buildings,
-          onAddBuilding: (scopeId, buildingId) =>
-            c.addBuilding.mutate({ scopeId, buildingId }),
-          onRemoveBuilding: (scopeId, buildingId) =>
-            c.removeBuilding.mutate({ scopeId, buildingId }),
+      <ScopesDialogs model={dialogsModel(c)} />
+      <ScopeRemoveDialog
+        scope={removing}
+        supervisor={c.supervisor}
+        team={c.team}
+        isPending={c.removeScope.isPending}
+        onClose={() => setRemoving(null)}
+        onConfirm={() => {
+          if (!removing) return
+          c.removeScope.mutate(
+            { id: removing.id },
+            { onSuccess: () => setRemoving(null) },
+          )
         }}
       />
     </div>

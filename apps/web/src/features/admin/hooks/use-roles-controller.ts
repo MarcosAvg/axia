@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { toast } from 'sonner'
-import { adminMessages } from '../i18n'
 import {
   useCreateRole,
   usePermissions,
@@ -46,7 +44,6 @@ export function useRolesController() {
     create: (values: { name: string; label: string }) =>
       createRole.mutate(values, {
         onSuccess: () => setCreating(false),
-        onError: () => toast.error(adminMessages.actions.error),
       }),
     save: (values: { label: string; active: boolean }) => {
       if (selected) updateRole.mutate({ id: selected.id, values })

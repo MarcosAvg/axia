@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { UsersIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn, SortState } from '@/components/shared/data-table'
@@ -33,6 +34,71 @@ function RoleChips({ labels }: { labels: string[] }) {
         </Badge>
       ))}
     </div>
+  )
+}
+
+function linksText(
+  profile: Profile,
+  requesters: LinkablePerson[],
+  technicians: LinkablePerson[],
+): string | null {
+  const names = [
+    linkedPersonName(requesters, profile.id),
+    linkedPersonName(technicians, profile.id),
+  ].filter((name): name is string => Boolean(name))
+  return names.length > 0 ? names.join(' · ') : null
+}
+
+function UsersCards({
+  profiles,
+  roles,
+  assignments,
+  requesters,
+  technicians,
+  onToggleActive,
+  onEditRoles,
+}: Omit<UsersTableProps, 'sort' | 'onSortChange'>) {
+  return (
+    <ul className="flex flex-col gap-2 lg:hidden">
+      {profiles.map((profile) => {
+        const labels = roleLabelsOf(roles, assignments, profile.id)
+        const links = linksText(profile, requesters, technicians)
+        return (
+          <li
+            key={profile.id}
+            className="flex flex-col gap-3 rounded-xl border bg-card p-3"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{profile.fullName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {profile.phone ?? '—'}
+                </p>
+              </div>
+              <StatusSwitch
+                active={profile.active}
+                name={profile.fullName}
+                onToggle={() => onToggleActive(profile)}
+              />
+            </div>
+            <RoleChips labels={labels} />
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate text-xs text-muted-foreground">
+                {links ?? '—'}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onEditRoles(profile)}
+              >
+                {adminMessages.users.editRoles}
+              </Button>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -162,12 +228,25 @@ export function UsersTable({
   ]
 
   return (
-    <DataTable
-      columns={columns}
-      rows={profiles}
-      sort={sort}
-      onSortChange={onSortChange}
-      getRowId={(profile) => profile.id}
-    />
+    <>
+      <UsersCards
+        profiles={profiles}
+        roles={roles}
+        assignments={assignments}
+        requesters={requesters}
+        technicians={technicians}
+        onToggleActive={onToggleActive}
+        onEditRoles={onEditRoles}
+      />
+      <div className="hidden lg:block">
+        <DataTable
+          columns={columns}
+          rows={profiles}
+          sort={sort}
+          onSortChange={onSortChange}
+          getRowId={(profile) => profile.id}
+        />
+      </div>
+    </>
   )
 }

@@ -1,5 +1,6 @@
 import { FormSection } from '@/components/shared/form-section'
 import type { Permission, Role, RolePermission, Scope } from '../domain/access'
+import { canEditRolePermissions } from '../domain/access-guards'
 import { adminMessages } from '../i18n'
 import { RoleEditForm } from './role-edit-form'
 import { RolePermissions } from './role-permissions'
@@ -39,6 +40,7 @@ export function RolePanel({
           roleId={role.id}
           permissions={permissions}
           assignments={assignments}
+          readOnly={!canEditRolePermissions(role)}
           onSet={onSet}
           onRemove={onRemove}
         />

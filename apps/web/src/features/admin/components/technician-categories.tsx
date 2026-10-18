@@ -41,10 +41,10 @@ function CategoryChip({
       <button
         type="button"
         aria-label={`${t.remove}: ${label}`}
-        className="rounded-full outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="inline-flex size-6 items-center justify-center rounded-full outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         onClick={onRemove}
       >
-        <XIcon className="size-3" />
+        <XIcon className="size-3.5" />
       </button>
     </span>
   )
@@ -96,6 +96,50 @@ function buildDesignationColumns(
   ]
 }
 
+function DesignationTable({
+  rows,
+  technician,
+  category,
+  onRemove,
+}: {
+  rows: TechnicianDesignation[]
+  technician: (id: string) => string
+  category: (id: string) => string
+  onRemove: (technicianId: string, categoryId: string) => void
+}) {
+  return (
+    <DataTable
+      columns={buildDesignationColumns({ technician, category, onRemove })}
+      rows={rows}
+      getRowId={(designation) => designation.technicianId}
+    />
+  )
+}
+
+function DesignationToolbar({
+  query,
+  count,
+  onQuery,
+  onAdd,
+}: {
+  query: string
+  count: number
+  onQuery: (value: string) => void
+  onAdd: () => void
+}) {
+  const { scopes: t, list } = adminMessages
+  return (
+    <AdminToolbar
+      query={query}
+      onQueryChange={onQuery}
+      searchPlaceholder={t.searchDesignations}
+      countText={`${count} ${list.results}`}
+      addLabel={t.addDesignation}
+      onAdd={onAdd}
+    />
+  )
+}
+
 /** Designaciones de técnicos a categorías. */
 export function TechnicianCategories() {
   const designations = useTechnicianCategories()
@@ -105,7 +149,7 @@ export function TechnicianCategories() {
   const remove = useRemoveTechnicianCategory()
   const [creating, setCreating] = useState(false)
   const [query, setQuery] = useState('')
-  const { scopes: t, list } = adminMessages
+  const { list } = adminMessages
 
   const technicians = orEmpty(people.data?.technicians)
   const categoryRows = orEmpty(categories.data)
@@ -123,26 +167,22 @@ export function TechnicianCategories() {
 
   return (
     <div className="flex flex-col gap-4">
-      <AdminToolbar
+      <DesignationToolbar
         query={query}
-        onQueryChange={setQuery}
-        searchPlaceholder={t.searchDesignations}
-        countText={`${visible.length} ${list.results}`}
-        addLabel={t.addDesignation}
+        count={visible.length}
+        onQuery={setQuery}
         onAdd={() => setCreating(true)}
       />
       {designations.isLoading ? <LoadingList rows={3} /> : null}
       {designations.isError ? <ErrorAlert message={list.error} /> : null}
       {designations.data ? (
-        <DataTable
-          columns={buildDesignationColumns({
-            technician,
-            category,
-            onRemove: (technicianId, categoryId) =>
-              remove.mutate({ technicianId, categoryId }),
-          })}
+        <DesignationTable
           rows={visible}
-          getRowId={(designation) => designation.technicianId}
+          technician={technician}
+          category={category}
+          onRemove={(technicianId, categoryId) =>
+            remove.mutate({ technicianId, categoryId })
+          }
         />
       ) : null}
       {creating ? (
@@ -151,7 +191,10 @@ export function TechnicianCategories() {
           categories={categoryRows}
           isSaving={add.isPending}
           onCreate={(technicianId, categoryId) =>
-            add.mutate({ technicianId, categoryId })
+            add.mutate(
+              { technicianId, categoryId },
+              { onSuccess: () => setCreating(false) },
+            )
           }
           onClose={() => setCreating(false)}
         />

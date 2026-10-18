@@ -15,6 +15,28 @@ export function roleLabelsOf(
     .map((role) => role.label)
 }
 
+/** Perfiles que tienen un rol con el nombre indicado. */
+export function profilesWithRole(
+  profiles: Profile[],
+  roles: Role[],
+  assignments: UserRole[],
+  roleName: string,
+): Profile[] {
+  const roleIds = new Set(
+    roles
+      .filter((role) => role.active && role.name === roleName)
+      .map((role) => role.id),
+  )
+  return profiles.filter(
+    (profile) =>
+      profile.active &&
+      assignments.some(
+        (assignment) =>
+          assignment.userId === profile.id && roleIds.has(assignment.roleId),
+      ),
+  )
+}
+
 /** Filtra usuarios por nombre o etiqueta de rol (vacío = todos). */
 export function filterProfiles(
   profiles: Profile[],

@@ -1,4 +1,4 @@
-import { filterCatalogRows } from './catalog-list'
+import { filterCatalogRows, fixedOptionLabel } from './catalog-list'
 import type { AdminColumn } from './catalogs'
 
 const columns: AdminColumn[] = [
@@ -19,6 +19,21 @@ const rows = [
   { id: 'c1', name: 'Eléctrico', team_id: 't1', active: true },
   { id: 'c2', name: 'Vigilancia', team_id: 't2', active: false },
 ]
+
+describe('fixedOptionLabel', () => {
+  const options = [
+    { value: 'cancellation', label: 'Cancelación' },
+    { value: 'pause', label: 'Pausa' },
+  ]
+
+  it('traduce el valor interno a su etiqueta', () => {
+    expect(fixedOptionLabel(options, 'cancellation')).toBe('Cancelación')
+  })
+
+  it('conserva el valor si no hay etiqueta', () => {
+    expect(fixedOptionLabel(options, 'otro')).toBe('otro')
+  })
+})
 
 describe('filterCatalogRows', () => {
   it('sin término devuelve todas las filas', () => {

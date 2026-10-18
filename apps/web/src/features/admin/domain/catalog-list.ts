@@ -3,6 +3,15 @@ import type { AdminColumn } from './catalogs'
 
 type OptionsFor = (table: AdminTable) => { id: string; label: string }[]
 
+/** Etiqueta legible de un valor de columna con opciones fijas. */
+export function fixedOptionLabel(
+  options: { value: string; label: string }[],
+  value: unknown,
+): string {
+  const option = options.find((item) => item.value === String(value))
+  return option?.label ?? String(value ?? '')
+}
+
 /** Texto buscable de una fila: valores crudos más las etiquetas de sus relaciones. */
 function catalogSearchText(
   row: Record<string, unknown>,
@@ -21,6 +30,7 @@ function catalogSearchText(
       )
       if (option) parts.push(option.label)
     }
+    if (column.options) parts.push(fixedOptionLabel(column.options, value))
   }
   return parts.join(' ').toLocaleLowerCase('es-MX')
 }

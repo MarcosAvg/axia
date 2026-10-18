@@ -59,6 +59,25 @@ function permissionGroup(permissionId: string): string {
   return dot === -1 ? permissionId : permissionId.slice(0, dot)
 }
 
+/** Filtra grupos de permisos por descripción o identificador. */
+export function filterPermissionGroups(
+  groups: PermissionGroup[],
+  query: string,
+): PermissionGroup[] {
+  const term = query.trim().toLocaleLowerCase('es-MX')
+  if (!term) return groups
+  return groups
+    .map((group) => ({
+      ...group,
+      permissions: group.permissions.filter((permission) =>
+        `${permission.id} ${permission.description}`
+          .toLocaleLowerCase('es-MX')
+          .includes(term),
+      ),
+    }))
+    .filter((group) => group.permissions.length > 0)
+}
+
 /** Agrupa los permisos por área, en un orden estable. */
 export function groupPermissions(permissions: Permission[]): PermissionGroup[] {
   const map = new Map<string, Permission[]>()

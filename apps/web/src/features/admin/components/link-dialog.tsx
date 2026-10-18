@@ -99,7 +99,6 @@ export function LinkDialog({
   function submit(event: FormEvent) {
     event.preventDefault()
     onSave(selected)
-    onClose()
   }
 
   return (

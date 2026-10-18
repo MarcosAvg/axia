@@ -24,6 +24,18 @@ const slaClockOptions = (
   Object.keys(slaClockModes) as (keyof typeof slaClockModes)[]
 ).map((value) => ({ value, label: slaClockModes[value] }))
 
+const TIMEZONES = [
+  'America/Mexico_City',
+  'America/Monterrey',
+  'America/Cancun',
+  'America/Tijuana',
+  'America/Bogota',
+  'America/Lima',
+  'America/Santiago',
+  'America/Argentina/Buenos_Aires',
+  'UTC',
+]
+
 /** Campos generales de la instancia. */
 export function GeneralFields({ register, errors }: SettingsFieldsProps) {
   return (
@@ -38,14 +50,23 @@ export function GeneralFields({ register, errors }: SettingsFieldsProps) {
         id="settings-timezone"
         label={settings.timezone}
         error={errors.timezone?.message}
+        list="settings-timezones"
         {...register('timezone')}
       />
-      <TextField
-        id="settings-folio"
-        label={settings.folioPattern}
-        error={errors.folioPattern?.message}
-        {...register('folioPattern')}
-      />
+      <datalist id="settings-timezones">
+        {TIMEZONES.map((timezone) => (
+          <option key={timezone} value={timezone} />
+        ))}
+      </datalist>
+      <div className="flex flex-col gap-1">
+        <TextField
+          id="settings-folio"
+          label={settings.folioPattern}
+          error={errors.folioPattern?.message}
+          {...register('folioPattern')}
+        />
+        <p className="text-xs text-muted-foreground">{settings.folioExample}</p>
+      </div>
     </div>
   )
 }

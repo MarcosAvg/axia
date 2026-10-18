@@ -1,86 +1,184 @@
-import { useState } from 'react'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { nextSort, sortRows } from '@/lib/sort'
-import type { SortState } from '@/lib/sort'
-import type { LinkablePerson, Profile } from '../domain/access'
+import { sortRows } from '@/lib/sort'
+import { useAuth } from '@/features/auth'
+import type { Profile } from '../domain/access'
 import { filterProfiles } from '../domain/user-list'
-import {
-  useAssignUserRole,
-  usePeople,
-  useProfiles,
-  useRemoveUserRole,
-  useRoles,
-  useSetProfileActive,
-  useUserRoles,
-} from '../hooks/use-access'
+import { useAccountsActions, useAccountsData } from '../hooks/use-accounts'
 import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { UserLinks } from './user-links'
 import { UserRolesDialog } from './user-roles-dialog'
 import { UsersTable } from './users-table'
 
-const EMPTY_PEOPLE: {
-  requesters: LinkablePerson[]
-  technicians: LinkablePerson[]
-} = { requesters: [], technicians: [] }
+function UsersConfirmDialog({
+  profile,
+  isPending,
+  onConfirm,
+  onClose,
+}: {
+  profile: Profile | null
+  isPending: boolean
+  onConfirm: () => void
+  onClose: () => void
+}) {
+  if (!profile) return null
+  return (
+    <ConfirmDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+      title={profile.active ? 'Desactivar cuenta' : 'Activar cuenta'}
+      description={
+        profile.active
+          ? `${profile.fullName} dejará de poder iniciar sesión.`
+          : `${profile.fullName} podrá volver a iniciar sesión.`
+      }
+      confirmLabel={profile.active ? 'Desactivar' : 'Activar'}
+      destructive={profile.active}
+      isPending={isPending}
+      onConfirm={onConfirm}
+    />
+  )
+}
+
+function AccountsRoleDialog({
+  profile,
+  roles,
+  assignments,
+  onAssign,
+  onRemove,
+  onClose,
+}: {
+  profile: Profile | null
+  roles: Parameters<typeof UserRolesDialog>[0]['roles']
+  assignments: Parameters<typeof UserRolesDialog>[0]['assignments']
+  onAssign: (roleId: string) => void
+  onRemove: (roleId: string) => void
+  onClose: () => void
+}) {
+  if (!profile) return null
+  return (
+    <UserRolesDialog
+      profile={profile}
+      roles={roles}
+      assignments={assignments}
+      onAssign={onAssign}
+      onRemove={onRemove}
+      onClose={onClose}
+    />
+  )
+}
+
+function AccountsToolbar({
+  query,
+  count,
+  onQuery,
+}: {
+  query: string
+  count: number
+  onQuery: (value: string) => void
+}) {
+  const { users, list } = adminMessages
+  return (
+    <AdminToolbar
+      query={query}
+      onQueryChange={onQuery}
+      searchPlaceholder={users.search}
+      countText={`${count} ${list.results}`}
+    />
+  )
+}
+
+function AccountsTable({
+  visible,
+  data,
+  sort,
+  onSort,
+  onToggle,
+  onEdit,
+}: {
+  visible: Profile[]
+  data: ReturnType<typeof useAccountsData>
+  sort: Parameters<typeof UsersTable>[0]['sort']
+  onSort: Parameters<typeof UsersTable>[0]['onSortChange']
+  onToggle: Parameters<typeof UsersTable>[0]['onToggleActive']
+  onEdit: Parameters<typeof UsersTable>[0]['onEditRoles']
+}) {
+  return (
+    <UsersTable
+      profiles={visible}
+      roles={data.roleList}
+      assignments={data.assignmentList}
+      requesters={data.peopleData.requesters}
+      technicians={data.peopleData.technicians}
+      sort={sort}
+      onSortChange={onSort}
+      onToggleActive={onToggle}
+      onEditRoles={onEdit}
+    />
+  )
+}
 
 function AccountsPanel() {
-  const profiles = useProfiles()
-  const roles = useRoles()
-  const userRoles = useUserRoles()
-  const people = usePeople()
-  const assign = useAssignUserRole()
-  const remove = useRemoveUserRole()
-  const setActive = useSetProfileActive()
-  const [editing, setEditing] = useState<Profile | null>(null)
-  const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<SortState | null>(null)
-  const { users, list } = adminMessages
-
-  const roleList = roles.data ?? []
-  const assignmentList = userRoles.data ?? []
-  const peopleData = people.data ?? EMPTY_PEOPLE
+  const { identity } = useAuth()
+  const data = useAccountsData()
+  const actions = useAccountsActions({
+    currentUserId: identity?.userId,
+    profileList: data.profileList,
+    roleList: data.roleList,
+    assignmentList: data.assignmentList,
+  })
+  const editing = actions.editing
   const visible = sortRows(
-    filterProfiles(profiles.data ?? [], roleList, assignmentList, query),
-    sort,
+    filterProfiles(
+      data.profileList,
+      data.roleList,
+      data.assignmentList,
+      actions.query,
+    ),
+    actions.sort,
   )
 
   return (
     <div className="flex flex-col gap-4">
-      <AdminToolbar
-        query={query}
-        onQueryChange={setQuery}
-        searchPlaceholder={users.search}
-        countText={`${visible.length} ${list.results}`}
+      <AccountsToolbar
+        query={actions.query}
+        count={visible.length}
+        onQuery={actions.setQuery}
       />
-      {profiles.isLoading ? <LoadingList rows={4} /> : null}
-      {profiles.isError ? <ErrorAlert message={list.error} /> : null}
-      {profiles.data ? (
-        <UsersTable
-          profiles={visible}
-          roles={roleList}
-          assignments={assignmentList}
-          requesters={peopleData.requesters}
-          technicians={peopleData.technicians}
-          sort={sort}
-          onSortChange={(key) => setSort((current) => nextSort(current, key))}
-          onToggleActive={(profile) =>
-            setActive.mutate({ id: profile.id, active: !profile.active })
-          }
-          onEditRoles={setEditing}
+      {data.profiles.isLoading ? <LoadingList rows={4} /> : null}
+      {data.profiles.isError ? (
+        <ErrorAlert message={adminMessages.list.error} />
+      ) : null}
+      {data.profiles.data ? (
+        <AccountsTable
+          visible={visible}
+          data={data}
+          sort={actions.sort}
+          onSort={actions.toggleSort}
+          onToggle={actions.requestToggle}
+          onEdit={actions.setEditing}
         />
       ) : null}
-      {editing ? (
-        <UserRolesDialog
-          profile={editing}
-          roles={roleList}
-          assignments={assignmentList}
-          onAssign={(roleId) => assign.mutate({ userId: editing.id, roleId })}
-          onRemove={(roleId) => remove.mutate({ userId: editing.id, roleId })}
-          onClose={() => setEditing(null)}
-        />
-      ) : null}
+      <AccountsRoleDialog
+        profile={editing}
+        roles={data.roleList}
+        assignments={data.assignmentList}
+        onAssign={(roleId) =>
+          editing && actions.assign.mutate({ userId: editing.id, roleId })
+        }
+        onRemove={actions.removeRole}
+        onClose={() => actions.setEditing(null)}
+      />
+      <UsersConfirmDialog
+        profile={actions.confirming}
+        isPending={actions.setActive.isPending}
+        onConfirm={actions.confirmToggle}
+        onClose={() => actions.setConfirming(null)}
+      />
     </div>
   )
 }

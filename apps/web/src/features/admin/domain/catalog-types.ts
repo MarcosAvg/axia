@@ -22,6 +22,8 @@ export interface AdminColumn {
   align?: 'left' | 'right' | 'center'
   /** Columna que referencia al padre para sangrar el árbol (p. ej. `parent_id`). */
   indentBy?: string
+  /** Etiquetas fijas para valores de un enumerado (p. ej. `use`). */
+  options?: { value: string; label: string }[]
 }
 
 export interface AdminCatalogConfig {

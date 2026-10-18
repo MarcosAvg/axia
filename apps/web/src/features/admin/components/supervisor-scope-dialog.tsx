@@ -24,6 +24,9 @@ function ScopeFields({
   onChange,
 }: ScopeFieldsProps) {
   const { scopes: t, actions } = adminMessages
+  if (profiles.length === 0) {
+    return <p className="text-sm text-muted-foreground">{t.noSupervisors}</p>
+  }
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <SelectField
@@ -75,7 +78,6 @@ export function SupervisorScopeDialog({
     event.preventDefault()
     if (!values.userId || !values.teamId) return
     onCreate(values.userId, values.teamId)
-    onClose()
   }
 
   return (

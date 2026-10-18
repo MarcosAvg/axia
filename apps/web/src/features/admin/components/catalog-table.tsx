@@ -5,6 +5,7 @@ import type { DataTableColumn, SortState } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminColumn } from '../domain/catalogs'
+import { fixedOptionLabel } from '../domain/catalog-list'
 import { formatTargetMinutes } from '../domain/target'
 import type { AdminOption } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
@@ -21,6 +22,16 @@ interface CatalogTableProps {
   onToggle: (row: Record<string, unknown>) => void
 }
 
+function relationLabel(options: AdminOption[], value: unknown): string | null {
+  return options.find((option) => option.id === String(value))?.label ?? null
+}
+
+function plainValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—'
+  if (typeof value === 'boolean') return value ? 'Sí' : 'No'
+  return String(value)
+}
+
 function CellContent({
   row,
   column,
@@ -32,14 +43,15 @@ function CellContent({
 }) {
   const value = row[column.key]
   if (column.optionsTable) {
-    const option = optionsFor(column.optionsTable).find(
-      (candidate) => candidate.id === String(value),
-    )
-    return option ? (
-      <span>{option.label}</span>
+    const label = relationLabel(optionsFor(column.optionsTable), value)
+    return label ? (
+      <span>{label}</span>
     ) : (
       <span className="text-muted-foreground">—</span>
     )
+  }
+  if (column.options) {
+    return <span>{fixedOptionLabel(column.options, value)}</span>
   }
   if (column.format === 'minutes') {
     return (
@@ -51,8 +63,7 @@ function CellContent({
   if (value === null || value === undefined || value === '') {
     return <span className="text-muted-foreground">—</span>
   }
-  if (typeof value === 'boolean') return <span>{value ? 'Sí' : 'No'}</span>
-  return <span>{String(value)}</span>
+  return <span>{plainValue(value)}</span>
 }
 
 function displayName(
