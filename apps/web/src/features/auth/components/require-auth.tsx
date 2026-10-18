@@ -7,8 +7,8 @@ import { LoadingScreen } from './loading-screen'
 
 /** Redirige a `/login` si no hay sesión; si la hay, muestra el contenido. */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { status } = useAuth()
-  if (status === 'loading') return <LoadingScreen />
+  const { status, isIdentityLoading } = useAuth()
+  if (status === 'loading' || isIdentityLoading) return <LoadingScreen />
   if (status === 'signed-out') return <Navigate to="/login" replace />
   return <>{children}</>
 }

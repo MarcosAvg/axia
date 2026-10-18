@@ -1,17 +1,12 @@
+import { Link } from '@tanstack/react-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { eventLabels } from '@/features/tickets'
+import { formatDateTime } from '@/lib/format'
 import type { ActivityItem } from '../api/dashboard-api'
 import { dashboardMessages as t } from '../i18n'
 
 function eventLabel(type: string): string {
   return (eventLabels as Record<string, string>)[type] ?? type
-}
-
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('es-MX', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  })
 }
 
 /** Últimos eventos visibles para el usuario. */
@@ -29,12 +24,27 @@ export function ActivitySection({ items }: { items: ActivityItem[] }) {
             {items.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-3 py-2 text-sm"
+                className="flex flex-col gap-1 py-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               >
-                <span className="font-medium">{item.folio || '—'}</span>
-                <span className="text-muted-foreground">
-                  {eventLabel(item.type)}
-                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <div className="flex flex-wrap items-center gap-x-2">
+                    <Link
+                      to="/tickets/$ticketId"
+                      params={{ ticketId: item.ticketId }}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {item.folio || '—'}
+                    </Link>
+                    <span className="text-muted-foreground">
+                      {eventLabel(item.type)}
+                    </span>
+                  </div>
+                  {item.actorName ? (
+                    <span className="text-xs text-muted-foreground">
+                      {item.actorName}
+                    </span>
+                  ) : null}
+                </div>
                 <time
                   dateTime={item.occurredAt}
                   className="text-xs text-muted-foreground"

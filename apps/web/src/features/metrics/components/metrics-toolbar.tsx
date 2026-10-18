@@ -7,7 +7,11 @@ import { SelectField, TextField } from '@/components/shared/form-fields'
 import { messages } from '@/lib/i18n'
 import type { FilterCatalogs, NamedOption } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
-import { formatRangeLabel, rangeForDays } from '../domain/period'
+import {
+  formatRangeLabel,
+  isQuickRangeActive,
+  rangeForDays,
+} from '../domain/period'
 import type { MetricsFilters } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
@@ -66,28 +70,40 @@ function filterSelects(catalogs: FilterCatalogs) {
   ]
 }
 
-function QuickRanges({ onRange }: { onRange: (days: number | null) => void }) {
+function QuickRanges({
+  filters,
+  onRange,
+}: {
+  filters: MetricsFilters
+  onRange: (days: number | null) => void
+}) {
+  const allActive = isQuickRangeActive(filters, null)
   return (
     <ButtonGrid className="w-full sm:w-auto">
       <Button
         type="button"
-        variant="ghost"
+        variant={allActive ? 'secondary' : 'outline'}
+        aria-pressed={allActive}
         className="min-h-11"
         onClick={() => onRange(null)}
       >
         {quick.all}
       </Button>
-      {QUICK_RANGES.map((item) => (
-        <Button
-          key={item.key}
-          type="button"
-          variant="outline"
-          className="min-h-11"
-          onClick={() => onRange(item.days)}
-        >
-          {quick[item.key]}
-        </Button>
-      ))}
+      {QUICK_RANGES.map((item) => {
+        const active = isQuickRangeActive(filters, item.days)
+        return (
+          <Button
+            key={item.key}
+            type="button"
+            variant={active ? 'secondary' : 'outline'}
+            aria-pressed={active}
+            className="min-h-11"
+            onClick={() => onRange(item.days)}
+          >
+            {quick[item.key]}
+          </Button>
+        )
+      })}
     </ButtonGrid>
   )
 }
@@ -168,7 +184,7 @@ function ToolbarForm({
       onSubmit={(event) => event.preventDefault()}
       className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
     >
-      <QuickRanges onRange={onRange} />
+      <QuickRanges filters={filters} onRange={onRange} />
       <div className="w-full sm:w-40">
         <TextField
           id="metrics-from"

@@ -1,4 +1,3 @@
-import { formatRate, formatScore } from '../domain/metrics'
 import type {
   SatisfactionSummary,
   SlaPriorityRow,
@@ -6,11 +5,9 @@ import type {
 } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { KpiGrid } from './metrics-kpis'
-import type { Kpi } from './metrics-kpis'
 import { SlaPriorityChart } from './sla-priority-chart'
 
-/** SLA y satisfacción: cumplimiento, detalle por prioridad y calificación. */
+/** SLA y satisfacción: detalle por prioridad y contexto de la calificación. */
 export function SlaTab({
   sla,
   slaRows,
@@ -20,19 +17,15 @@ export function SlaTab({
   slaRows: SlaPriorityRow[]
   satisfaction: SatisfactionSummary
 }) {
-  const k = metricsMessages.kpi
-  const hints = metricsMessages.kpiHints
-  const cards: Kpi[] = [
-    { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },
-    {
-      label: k.satisfaction,
-      value: formatScore(satisfaction.average),
-      hint: hints.satisfaction,
-    },
-  ]
   return (
     <div className="flex flex-col gap-4">
-      <KpiGrid cards={cards} columns={4} />
+      <p className="text-sm text-muted-foreground">
+        {metricsMessages.sla.summary(
+          sla.met,
+          sla.withTarget,
+          satisfaction.ratings,
+        )}
+      </p>
       <ChartCard
         title={metricsMessages.sla.title}
         hint={metricsMessages.chartHints.sla}

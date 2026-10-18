@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react'
 import { HintLabel } from '@/components/shared/hint'
-import { ToneDot } from '@/components/shared/tone'
-import { toneForId } from '@/lib/tones'
 
 interface FormSectionProps {
   title: string
@@ -21,7 +19,6 @@ export function FormSection({
     <section className="flex flex-col gap-4 rounded-xl border bg-card p-4 lg:p-5">
       <div className="flex flex-col gap-0.5">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <ToneDot tone={toneForId(title)} />
           <HintLabel label={title} hint={hint} />
         </h2>
         {description ? (

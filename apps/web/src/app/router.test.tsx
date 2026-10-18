@@ -63,9 +63,12 @@ function makeRouter(path: string) {
 
 function renderAtPath(path: string, auth: AuthContextValue) {
   const router = makeRouter(path)
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
 
   render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TimeAggregationProvider>
           <TooltipProvider>
@@ -102,7 +105,7 @@ describe('enrutado y sesión', () => {
     )
 
     expect(await screen.findByText(/Hola, Admin Demo/)).toBeInTheDocument()
-    expect(screen.getByText('Sin asignar')).toBeInTheDocument()
+    expect(await screen.findByText('Sin asignar')).toBeInTheDocument()
   })
 
   it('con permiso, "/admin" muestra la administración', async () => {

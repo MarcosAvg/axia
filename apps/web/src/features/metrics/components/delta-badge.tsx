@@ -33,7 +33,7 @@ export function DeltaBadge({
     isGood === undefined
       ? 'text-muted-foreground'
       : isGood
-        ? 'text-emerald-600 dark:text-emerald-400'
+        ? 'text-success'
         : 'text-destructive'
   const Icon =
     rounded === 0

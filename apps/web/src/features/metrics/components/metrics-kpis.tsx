@@ -1,4 +1,3 @@
-import { toneForIndex } from '@/lib/tones'
 import { MetricCard } from './metric-card'
 
 export interface Kpi {
@@ -29,7 +28,7 @@ export function KpiGrid({
 }) {
   return (
     <div className={`grid gap-3 ${COLUMNS[columns]}`}>
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <MetricCard
           key={card.label}
           label={card.label}
@@ -38,7 +37,6 @@ export function KpiGrid({
           delta={card.delta}
           lowerIsBetter={card.lowerIsBetter}
           period={card.delta !== undefined ? period : undefined}
-          tone={toneForIndex(index)}
         />
       ))}
     </div>

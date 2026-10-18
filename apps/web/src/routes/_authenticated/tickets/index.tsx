@@ -8,6 +8,7 @@ import {
   TicketListPanel,
   ticketListSearchSchema,
   ticketMessages,
+  ticketPageInfo,
   useTicketsList,
 } from '@/features/tickets'
 import type { TicketListSearch } from '@/features/tickets'
@@ -32,10 +33,7 @@ function TicketsPage() {
     },
     search.page,
   )
-  const totalPages = Math.max(
-    1,
-    Math.ceil((query.data?.total ?? 0) / (query.data?.pageSize ?? 20)),
-  )
+  const page = ticketPageInfo(query.data)
   const applySearch = (next: TicketListSearch) => {
     void navigate({ to: '/tickets', search: next })
   }
@@ -60,16 +58,18 @@ function TicketsPage() {
         />
         {query.data ? (
           <p className="text-sm text-muted-foreground">
-            {ticketMessages.list.count(query.data.total)}
+            {ticketMessages.list.count(page.total)}
           </p>
         ) : null}
         <TicketListPanel
           isLoading={query.isLoading}
           isError={query.isError}
-          items={query.data?.items ?? []}
+          items={page.items}
           page={search.page}
-          totalPages={totalPages}
-          onPage={(page) => applySearch({ ...search, page })}
+          pageSize={page.pageSize}
+          total={page.total}
+          totalPages={page.totalPages}
+          onPage={(next) => applySearch({ ...search, page: next })}
         />
       </div>
     </RequirePermission>

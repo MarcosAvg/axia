@@ -140,6 +140,8 @@ export const metricsMessages = {
     met: 'Cumplidos',
     rate: 'Cumplimiento',
     empty: 'Sin tiquets con objetivo.',
+    summary: (met: number, withTarget: number, ratings: number) =>
+      `${met} de ${withTarget} tiquets con objetivo cumplido · ${ratings} calificaciones.`,
   },
   charts: {
     volume: 'Tiquets por mes',

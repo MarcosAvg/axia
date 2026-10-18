@@ -2,7 +2,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { ToneDot } from '@/components/shared/tone'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, formatElapsed } from '@/lib/format'
 import { toneForId } from '@/lib/tones'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
@@ -89,9 +89,16 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
       ),
   },
   {
+    id: 'elapsed',
+    header: ticketMessages.list.elapsed,
+    hideBelow: 'md',
+    className: 'tabular-nums',
+    cell: (ticket) => formatElapsed(ticket.reportedAt),
+  },
+  {
     id: 'reported',
     header: columns.reported,
-    hideBelow: 'md',
+    hideBelow: 'lg',
     cell: (ticket) => formatDateTime(ticket.reportedAt),
   },
 ]

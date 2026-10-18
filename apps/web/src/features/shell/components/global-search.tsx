@@ -136,6 +136,8 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
             value={term}
             onChange={(event) => setTerm(event.target.value)}
             placeholder={shellMessages.search.placeholder}
+            aria-label={shellMessages.search.placeholder}
+            autoComplete="off"
             className="h-11 border-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>

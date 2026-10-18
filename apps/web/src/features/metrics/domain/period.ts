@@ -18,6 +18,17 @@ export function rangeForDays(
   return { from: toDateString(from), to: toDateString(now) }
 }
 
+/** Verdadero si el filtro coincide con el rango rápido de `days` (null = todo). */
+export function isQuickRangeActive(
+  filters: MetricsFilters,
+  days: number | null,
+  now: Date = new Date(),
+): boolean {
+  if (days === null) return !filters.from && !filters.to
+  const range = rangeForDays(days, now)
+  return filters.from === range.from && filters.to === range.to
+}
+
 /**
  * Rango inmediatamente anterior de la misma longitud que `filters`.
  * Devuelve `null` si no hay un rango cerrado que comparar.

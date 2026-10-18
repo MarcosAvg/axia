@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { MetricsFilters } from '../domain/metrics'
 import {
   fetchByTechnician,
@@ -28,6 +28,18 @@ const metricsKeys = {
   routing: ['metrics', 'routing'] as const,
 }
 
+function useFilteredQuery<T>(
+  key: readonly unknown[],
+  filters: MetricsFilters,
+  fn: (filters: MetricsFilters) => Promise<T>,
+) {
+  return useQuery({
+    queryKey: [...key, filters],
+    queryFn: () => fn(filters),
+    placeholderData: keepPreviousData,
+  })
+}
+
 export function useMetricsTickets() {
   return useQuery({
     queryKey: metricsKeys.tickets,
@@ -36,64 +48,52 @@ export function useMetricsTickets() {
 }
 
 export function usePausesByReason(filters: MetricsFilters) {
-  return useQuery({
-    queryKey: [...metricsKeys.pauses, filters],
-    queryFn: () => fetchPausesByReason(filters),
-  })
+  return useFilteredQuery(metricsKeys.pauses, filters, fetchPausesByReason)
 }
 
 export function useDuplicates(filters: MetricsFilters) {
-  const tickets = useQuery({
-    queryKey: [...metricsKeys.duplicateTickets, filters],
-    queryFn: () => fetchDuplicateTickets(filters),
-  })
-  const alerts = useQuery({
-    queryKey: [...metricsKeys.duplicateAlerts, filters],
-    queryFn: () => fetchDuplicateAlerts(filters),
-  })
-  const byDimension = useQuery({
-    queryKey: [...metricsKeys.duplicatesByDimension, filters],
-    queryFn: () => fetchDuplicatesByDimension(filters),
-  })
-  return { tickets, alerts, byDimension }
+  return {
+    tickets: useFilteredQuery(
+      metricsKeys.duplicateTickets,
+      filters,
+      fetchDuplicateTickets,
+    ),
+    alerts: useFilteredQuery(
+      metricsKeys.duplicateAlerts,
+      filters,
+      fetchDuplicateAlerts,
+    ),
+    byDimension: useFilteredQuery(
+      metricsKeys.duplicatesByDimension,
+      filters,
+      fetchDuplicatesByDimension,
+    ),
+  }
 }
 
 export function useSatisfaction(filters: MetricsFilters) {
-  return useQuery({
-    queryKey: [...metricsKeys.satisfaction, filters],
-    queryFn: () => fetchSatisfaction(filters),
-  })
+  return useFilteredQuery(metricsKeys.satisfaction, filters, fetchSatisfaction)
 }
 
 export function useSla(filters: MetricsFilters) {
-  const summary = useQuery({
-    queryKey: [...metricsKeys.sla, filters],
-    queryFn: () => fetchSla(filters),
-  })
-  const byPriority = useQuery({
-    queryKey: [...metricsKeys.slaByPriority, filters],
-    queryFn: () => fetchSlaByPriority(filters),
-  })
-  return { summary, byPriority }
+  return {
+    summary: useFilteredQuery(metricsKeys.sla, filters, fetchSla),
+    byPriority: useFilteredQuery(
+      metricsKeys.slaByPriority,
+      filters,
+      fetchSlaByPriority,
+    ),
+  }
 }
 
 export function useByTechnician(filters: MetricsFilters) {
-  return useQuery({
-    queryKey: [...metricsKeys.byTechnician, filters],
-    queryFn: () => fetchByTechnician(filters),
-  })
+  return useFilteredQuery(metricsKeys.byTechnician, filters, fetchByTechnician)
 }
 
 export function useRejectCancel(filters: MetricsFilters) {
-  return useQuery({
-    queryKey: [...metricsKeys.rejectCancel, filters],
-    queryFn: () => fetchRejectCancel(filters),
-  })
+  return useFilteredQuery(metricsKeys.rejectCancel, filters, fetchRejectCancel)
 }
 
 export function useRouting(filters: MetricsFilters) {
-  return useQuery({
-    queryKey: [...metricsKeys.routing, filters],
-    queryFn: () => fetchRouting(filters),
-  })
+  return useFilteredQuery(metricsKeys.routing, filters, fetchRouting)
 }

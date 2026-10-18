@@ -12,10 +12,7 @@
         // Kit de shadcn/ui generado por el CLI: se mantiene completo (input,
         // label y variantes) aunque hoy no todo se use; se repone con
         // `shadcn add` cuando haga falta.
-        "src/components/ui/**",
-        // `public/` son assets servidos tal cual; `config.js` lo reescribe el
-        // contenedor en producción (no lo importa nadie).
-        "public/**"
+        "src/components/ui/**"
       ]
     }
   }

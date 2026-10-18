@@ -23,6 +23,15 @@ export function formatDateTime(iso: string): string {
   )
 }
 
+/** Fecha sin hora (`YYYY-MM-DD`) en la zona de la institución. */
+export function formatDateOnly(isoDate: string): string {
+  const date = new Date(`${isoDate}T12:00:00`)
+  if (Number.isNaN(date.getTime())) return isoDate
+  const options: Intl.DateTimeFormatOptions = { dateStyle: 'medium' }
+  if (displayTimezone) options.timeZone = displayTimezone
+  return new Intl.DateTimeFormat('es-MX', options).format(date)
+}
+
 export function formatBytes(bytes: number | null): string {
   if (bytes === null) return ''
   if (bytes < 1024) return `${bytes} B`

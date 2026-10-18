@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -12,11 +13,18 @@ export function LoadingList({ rows = 3 }: { rows?: number }) {
   )
 }
 
-/** Aviso de error de carga. */
-export function ErrorAlert({ message }: { message: string }) {
+/** Aviso de error de carga, con una acción opcional para reintentar. */
+export function ErrorAlert({
+  message,
+  action,
+}: {
+  message: string
+  action?: ReactNode
+}) {
   return (
     <Alert variant="destructive">
       <AlertTitle>{message}</AlertTitle>
+      {action ? <div className="mt-2">{action}</div> : null}
     </Alert>
   )
 }

@@ -16,7 +16,9 @@ async function signOut(page: Page) {
   await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
 }
 
-test('el supervisor toma la oferta al abrir el tiquet', async ({ page }) => {
+test('el supervisor toma la oferta al pulsar Tomar tiquet', async ({
+  page,
+}) => {
   const description = `Toma E2E ${crypto.randomUUID()}`
   await signIn(page, 'admin@axia.test')
 
@@ -42,7 +44,11 @@ test('el supervisor toma la oferta al abrir el tiquet', async ({ page }) => {
   await signIn(page, 'supervisor@axia.test')
   await page.goto(ticketUrl)
 
-  // Al abrirlo, el supervisor con oferta activa lo toma.
+  // La oferta se muestra como una acción explícita; no se toma al abrir.
+  await expect(
+    page.getByText('Tienes una oferta para este tiquet'),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Tomar tiquet' }).click()
   await expect(
     page.getByText('Tomado por supervisor', { exact: true }).first(),
   ).toBeVisible()

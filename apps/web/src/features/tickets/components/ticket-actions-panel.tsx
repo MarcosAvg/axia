@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ButtonGrid } from '@/components/shared/button-grid'
 import { SelectField } from '@/components/shared/form-fields'
@@ -186,21 +186,81 @@ function ProxyRequiredHint({ show }: { show: boolean }) {
   )
 }
 
-function useAutoTakeOffer(
+function TakeOfferBanner({
+  pending,
+  onTake,
+}: {
+  pending: boolean
+  onTake: () => void
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-0.5">
+        <p className="text-sm font-medium">
+          Tienes una oferta para este tiquet
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Tómalo para asignarlo y continuar con la atención.
+        </p>
+      </div>
+      <Button
+        type="button"
+        className="min-h-11"
+        disabled={pending}
+        onClick={onTake}
+      >
+        Tomar tiquet
+      </Button>
+    </div>
+  )
+}
+
+function useActionPanel(
   ticket: TicketDetail,
-  userId: string | undefined,
-  take: ReturnType<typeof useTicketActions>['take'],
+  actions: ActionKey[],
+  identity: Identity | null,
+  participants: TicketParticipant[],
 ) {
-  const offers = useMyOffers(userId)
+  const canProxy = can(identity, 'act_on_behalf')
+  const [subjectTechnicianId, setSubject] = useState('')
+  const [formAction, setFormAction] = useState<ActionKey | null>(null)
+  const subject =
+    canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
+  const mutations = useTicketActions(ticket.id, subject)
+  const offers = useMyOffers(identity?.userId)
   const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
-  const took = useRef(false)
-  useEffect(() => {
-    if (took.current) return
-    if (ticket.status === 'registered' && hasOffer) {
-      took.current = true
-      take.mutate({})
-    }
-  }, [ticket.status, hasOffer, take])
+  const oneClick: Partial<Record<ActionKey, () => void>> = {
+    validate: () => mutations.validate.mutate({}),
+  }
+  const pending: Partial<Record<ActionKey, boolean>> = {
+    validate: mutations.validate.isPending,
+  }
+  const visible = actions.filter(
+    (action) =>
+      ONE_CLICK.includes(action) ||
+      FORM_ACTIONS.includes(action) ||
+      DEDICATED.includes(action),
+  )
+  const blocked = actionsRequiringSubject(identity, visible, Boolean(subject))
+  const activeIds = participants
+    .filter((item) => item.endedAt === null)
+    .map((item) => item.technicianId)
+  return {
+    canProxy,
+    subjectTechnicianId,
+    setSubject,
+    subject,
+    mutations,
+    hasOffer,
+    oneClick,
+    pending,
+    visible,
+    blocked,
+    activeIds,
+    formAction,
+    setFormAction,
+    close: () => setFormAction(null),
+  }
 }
 
 interface TicketActionsPanelProps {
@@ -217,59 +277,38 @@ export function TicketActionsPanel({
   identity,
   participants,
 }: TicketActionsPanelProps) {
-  const canProxy = can(identity, 'act_on_behalf')
-  const [subjectTechnicianId, setSubject] = useState('')
-  const [formAction, setFormAction] = useState<ActionKey | null>(null)
-  const subject =
-    canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
-  const mutations = useTicketActions(ticket.id, subject)
-
-  // Al abrir el detalle, el supervisor con oferta activa toma el tiquet.
-  useAutoTakeOffer(ticket, identity?.userId, mutations.take)
-
-  const oneClick: Partial<Record<ActionKey, () => void>> = {
-    validate: () => mutations.validate.mutate({}),
-  }
-  const pending: Partial<Record<ActionKey, boolean>> = {
-    validate: mutations.validate.isPending,
-  }
-
-  const visible = actions.filter(
-    (action) =>
-      ONE_CLICK.includes(action) ||
-      FORM_ACTIONS.includes(action) ||
-      DEDICATED.includes(action),
-  )
-  if (visible.length === 0) return null
-  const blocked = actionsRequiringSubject(identity, visible, Boolean(subject))
-  const activeIds = participants
-    .filter((item) => item.endedAt === null)
-    .map((item) => item.technicianId)
-  const close = () => setFormAction(null)
+  const panel = useActionPanel(ticket, actions, identity, participants)
+  if (panel.visible.length === 0) return null
 
   return (
     <div className="flex flex-col gap-4">
-      {canProxy ? (
+      {ticket.status === 'registered' && panel.hasOffer ? (
+        <TakeOfferBanner
+          pending={panel.mutations.take.isPending}
+          onTake={() => panel.mutations.take.mutate({})}
+        />
+      ) : null}
+      {panel.canProxy ? (
         <ProxySelector
           participants={participants}
-          value={subjectTechnicianId}
-          onChange={setSubject}
+          value={panel.subjectTechnicianId}
+          onChange={panel.setSubject}
         />
       ) : null}
       <ActionControls
-        visible={visible}
-        oneClick={oneClick}
-        pending={pending}
-        blocked={blocked}
-        onOpenForm={setFormAction}
+        visible={panel.visible}
+        oneClick={panel.oneClick}
+        pending={panel.pending}
+        blocked={panel.blocked}
+        onOpenForm={panel.setFormAction}
       />
-      <ProxyRequiredHint show={blocked.length > 0} />
+      <ProxyRequiredHint show={panel.blocked.length > 0} />
       <ActionContainer
         ticket={ticket}
-        formAction={formAction}
-        subject={subject}
-        excludeIds={activeIds}
-        onClose={close}
+        formAction={panel.formAction}
+        subject={panel.subject}
+        excludeIds={panel.activeIds}
+        onClose={panel.close}
       />
     </div>
   )

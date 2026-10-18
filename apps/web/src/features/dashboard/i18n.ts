@@ -3,6 +3,8 @@
 export const dashboardMessages = {
   greeting: 'Hola',
   subtitle: 'Tu resumen y tus bandejas.',
+  error: 'No se pudo cargar el panel.',
+  retry: 'Reintentar',
   actions: {
     newTicket: 'Nuevo tiquet',
     tickets: 'Ver tiquets',

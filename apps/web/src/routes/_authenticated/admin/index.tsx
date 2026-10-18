@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { cn } from 'cn'
 import type { LucideIcon } from 'lucide-react'
 import {
   Building2Icon,
@@ -34,9 +35,15 @@ interface AdminEntry {
 
 const { nav, descriptions } = adminMessages
 
-const groups: { label: string; items: AdminEntry[] }[] = [
+const GROUP_GRID = {
+  3: 'sm:grid-cols-2 xl:grid-cols-3',
+  4: 'sm:grid-cols-2 xl:grid-cols-4',
+} as const
+
+const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
   {
     label: 'Catálogos y operación',
+    columns: 4,
     items: [
       {
         icon: LibraryIcon,
@@ -67,6 +74,7 @@ const groups: { label: string; items: AdminEntry[] }[] = [
   },
   {
     label: 'Acceso',
+    columns: 3,
     items: [
       {
         icon: ShieldCheckIcon,
@@ -123,7 +131,7 @@ function AdminHome() {
           <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
             {group.label}
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className={cn('grid gap-3', GROUP_GRID[group.columns])}>
             {group.items.map((entry) => (
               <AdminCard key={entry.to} entry={entry} />
             ))}

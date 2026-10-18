@@ -82,6 +82,14 @@ function SortIcon({
   )
 }
 
+function sortAria(
+  active: boolean,
+  dir: 'asc' | 'desc' | undefined,
+): 'none' | 'ascending' | 'descending' {
+  if (!active) return 'none'
+  return dir === 'asc' ? 'ascending' : 'descending'
+}
+
 function HeaderCell<T>({
   column,
   sort,
@@ -92,17 +100,17 @@ function HeaderCell<T>({
   onSortChange?: (key: string) => void
 }) {
   const active = sort?.key === column.id
+  const ariaSort = sortAria(active, sort?.dir)
   return (
-    <TableHead className={columnClass(column)}>
+    <TableHead scope="col" aria-sort={ariaSort} className={columnClass(column)}>
       <span className="inline-flex items-center gap-1">
         {column.sortable && onSortChange ? (
           <button
             type="button"
             onClick={() => onSortChange(column.id)}
             title={`Ordenar por ${typeof column.header === 'string' ? column.header : column.id}`}
-            aria-pressed={active}
             className={cn(
-              'group inline-flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50',
+              'group inline-flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
               column.align === 'right' && 'flex-row-reverse',
             )}
           >
@@ -134,16 +142,8 @@ function BodyRow<T>({
   return (
     <TableRow
       key={getRowId(row)}
-      tabIndex={onRowClick ? 0 : undefined}
       className={cn(onRowClick && 'cursor-pointer')}
       onClick={onRowClick ? () => onRowClick(row) : undefined}
-      onKeyDown={
-        onRowClick
-          ? (event) => {
-              if (event.key === 'Enter') onRowClick(row)
-            }
-          : undefined
-      }
     >
       {columns.map((column) => (
         <TableCell key={column.id} className={columnClass(column)}>

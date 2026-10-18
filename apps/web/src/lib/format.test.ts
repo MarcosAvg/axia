@@ -1,6 +1,7 @@
 import { afterEach } from 'vitest'
 import {
   formatBytes,
+  formatDateOnly,
   formatDateTime,
   formatDuration,
   formatElapsed,
@@ -19,6 +20,15 @@ describe('formatDateTime', () => {
     setDisplayTimezone('America/Mexico_City')
     const mexico = formatDateTime(iso)
     expect(utc).not.toBe(mexico)
+  })
+})
+
+describe('formatDateOnly', () => {
+  it('formatea una fecha sin hora en la zona de la institución', () => {
+    setDisplayTimezone('America/Mexico_City')
+    expect(formatDateOnly('2026-01-01')).toContain('2026')
+    expect(formatDateOnly('2026-01-01')).toContain('ene')
+    expect(formatDateOnly('no-es-fecha')).toBe('no-es-fecha')
   })
 })
 

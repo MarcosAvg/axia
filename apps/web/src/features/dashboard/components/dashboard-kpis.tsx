@@ -1,11 +1,8 @@
-import { cn } from 'cn'
 import { AggregationToggle } from '@/components/shared/aggregation-toggle'
 import { HintLabel } from '@/components/shared/hint'
-import { ToneDot } from '@/components/shared/tone'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { messages } from '@/lib/i18n'
-import { toneClasses, toneForIndex } from '@/lib/tones'
 import {
   aggregationHint,
   aggregationLabel,
@@ -188,29 +185,18 @@ export function DashboardKpis({
         </div>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {kpis.map((kpi, index) => {
-          const tone = toneForIndex(index)
-          return (
-            <Card key={kpi.label}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <ToneDot tone={tone} />
-                  <HintLabel label={kpi.label} hint={kpi.hint} />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p
-                  className={cn(
-                    'text-2xl font-semibold',
-                    toneClasses[tone].text,
-                  )}
-                >
-                  {kpi.value}
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
+        {kpis.map((kpi) => (
+          <Card key={kpi.label}>
+            <CardHeader className="min-h-16">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                <HintLabel label={kpi.label} hint={kpi.hint} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-semibold tabular-nums">{kpi.value}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   )

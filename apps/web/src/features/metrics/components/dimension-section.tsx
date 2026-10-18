@@ -77,15 +77,6 @@ function timeColumns(
       cell: (row) =>
         formatMinutes(timeValue(aggregation, row.avgTotal, row.sumTotal)),
     },
-    {
-      id: 'extra',
-      header: t.extra,
-      hint: hints.extra,
-      cell: (row) =>
-        formatMinutes(
-          timeValue(aggregation, row.avgActiveExtra, row.sumActiveExtra),
-        ),
-    },
   ]
 }
 

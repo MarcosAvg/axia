@@ -26,11 +26,11 @@ function LoginPage() {
 
   return (
     <main className="flex min-h-svh bg-background text-foreground">
-      <aside className="hidden flex-1 flex-col justify-between bg-primary/5 p-10 lg:flex">
+      <aside className="hidden flex-1 flex-col bg-primary/5 p-10 lg:flex">
         <span className="text-2xl font-semibold tracking-tight">
           {messages.app.name}
         </span>
-        <div className="flex flex-col gap-3">
+        <div className="my-auto flex flex-col gap-3">
           <h2 className="max-w-md text-3xl font-semibold tracking-tight">
             {messages.app.tagline}
           </h2>
@@ -38,9 +38,6 @@ function LoginPage() {
             {authMessages.login.brandDescription}
           </p>
         </div>
-        <span className="text-xs text-muted-foreground">
-          {messages.app.name}
-        </span>
       </aside>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6">

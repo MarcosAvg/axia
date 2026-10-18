@@ -13,6 +13,8 @@ interface TicketListPanelProps {
   isError: boolean
   items: TicketListItem[]
   page: number
+  pageSize: number
+  total: number
   totalPages: number
   onPage: (page: number) => void
 }
@@ -23,6 +25,8 @@ export function TicketListPanel({
   isError,
   items,
   page,
+  pageSize,
+  total,
   totalPages,
   onPage,
 }: TicketListPanelProps) {
@@ -39,8 +43,18 @@ export function TicketListPanel({
   }
   return (
     <>
-      {isDesktop ? <TicketTable items={items} /> : <TicketList items={items} />}
-      <TicketPagination page={page} totalPages={totalPages} onPage={onPage} />
+      {isDesktop ? (
+        <TicketTable items={items} />
+      ) : (
+        <TicketList items={items} showElapsed />
+      )}
+      <TicketPagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        totalPages={totalPages}
+        onPage={onPage}
+      />
     </>
   )
 }

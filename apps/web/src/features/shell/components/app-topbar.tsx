@@ -11,6 +11,11 @@ interface AppTopbarProps {
   onOpenSearch: () => void
 }
 
+function searchShortcut(): string {
+  if (typeof navigator === 'undefined') return 'Ctrl K'
+  return /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘K' : 'Ctrl K'
+}
+
 /** Barra superior: menú móvil, migas de pan, búsqueda, tema y usuario. */
 export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
   return (
@@ -38,7 +43,7 @@ export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
           <SearchIcon />
           <span className="hidden sm:inline">{shellMessages.search.open}</span>
           <kbd className="hidden items-center rounded border bg-muted px-1.5 font-mono text-[10px] md:inline-flex">
-            ⌘{shellMessages.search.shortcut}
+            {searchShortcut()}
           </kbd>
         </Button>
         <OfflineIndicator />

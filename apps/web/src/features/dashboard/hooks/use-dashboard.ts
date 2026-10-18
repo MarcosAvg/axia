@@ -62,6 +62,8 @@ function useRecentActivity() {
 }
 
 export interface DashboardData {
+  loading: boolean
+  isError: boolean
   work: WorkSummary
   offerItems: TicketListItem[]
   activeItems: TicketListItem[]
@@ -97,7 +99,22 @@ export function useDashboardData(userId: string | undefined): DashboardData {
   const activity = useRecentActivity()
 
   const tickets = or(metrics.data, [])
+  const queries = [
+    myWork,
+    offers,
+    active,
+    paused,
+    attended,
+    unassigned,
+    closed,
+    metrics,
+    sla.summary,
+    satisfaction,
+    activity,
+  ]
   return {
+    loading: queries.some((query) => query.isLoading),
+    isError: queries.some((query) => query.isError),
     work: summarizeWork(myWork.data ?? []),
     offerItems: offers.data ?? [],
     activeItems: pageItems(active.data).slice(0, PREVIEW),
