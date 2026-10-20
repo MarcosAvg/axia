@@ -3,21 +3,19 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-18
-**Fase actual:** Migración fuera de Supabase — Etapa A (auditoría y plan), pendiente de aprobación
+**Última actualización:** 2026-10-20
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 1 (base de datos) cerrado
 
 ## En curso
 
-**Migración fuera de Supabase — Etapa A entregada, pendiente de aprobación
-(2026-10-18).** El plan completo está en `docs/migracion-sin-supabase.md`:
-inventario, reemplazos, esquema propuesto, autorización, tiempo real, offline,
-pruebas, semillas, secretos, ADR y tramos. **No se ha modificado código de la
-aplicación**; se espera la aprobación de la persona y las respuestas de la
-sección 9 antes de iniciar la Etapa B.
+**Sin trabajo en curso.** El tramo 1 de la Etapa B se cerró el 2026-10-20:
+esquema base autoalojado, Drizzle, roles `axia_owner`/`axia_app`, Compose con
+`db` + `migrate`, pruebas contra PostgreSQL 17 y comparación de esquema. La
+aplicación actual sigue sobre Supabase; el corte funcional será único al final.
 
-**Sin otro trabajo en curso.** El tramo **Administración con red de seguridad**
-se cerró el 2026-10-18 (ver “Hecho”, ADR 0066 y el registro de sesiones). Lo
-pendiente está en “Siguiente”.
+**Siguiente:** tramo 2 (servidor mínimo) cuando se retome. Antes de los tramos
+3-9 siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9
+(política de sesión, push, semillas, reparto SQL/TS y pgTAP híbrido).
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -50,6 +48,21 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 1 — base de datos (2026-10-20)**, rama
+  `feat/migracion-base-datos`:
+  - Nuevo `apps/server` con Drizzle, `pg` y TypeScript estricto; esquema de 58 tablas,
+    17 enums, 15 vistas y 31 funciones, sin RLS, `auth`, Storage ni RPC de flujo.
+  - `profiles` → `users` con credenciales Argon2id y ciclo de vida; `sessions`,
+    `login_attempts` y `notification_deliveries`; metadatos de evidencia e idempotencia.
+  - Migración base `0000_base.sql` y grants `0001_grants.sql`; roles `axia_owner` (DDL)
+    y `axia_app` (mínimo privilegio, sin `CREATE` ni borrado de historial/evidencia).
+  - `compose.yaml` + `compose.dev.yaml`: PostgreSQL 17 con volumen y healthcheck,
+    `migrate` de una ejecución con advisory lock y puerto de desarrollo solo en
+    `127.0.0.1:5433`. Sin puerto público para `db`.
+  - Pruebas: 3 unitarias, 12 de integración contra PostgreSQL 17, `drizzle-kit check`,
+    migración idempotente y Docker Compose verificado. Informe en
+    `docs/migracion/esquema-diferencias.md`. **ADR 0067**. `pnpm check` sigue en verde
+    (237 Vitest, 16 Playwright, 466 pgTAP) y `pnpm check:next` también.
 - **Administración con red de seguridad (2026-10-18)**, rama `feat/admin-red-seguridad`:
   `ConfirmDialog` reutilizable; guardarraíles de último administrador, cuenta propia y rol
   `administrator`; matriz de permisos con búsqueda, etiquetas de ámbito y lectura protegida del
@@ -303,7 +316,11 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Siguiente
 
-No hay fases pendientes. Lo que queda es **operativo** y lo hace la persona: desplegar
+La migración sigue con el **tramo 2: servidor mínimo** (`apps/server` con Fastify, configuración
+validada, salud, estáticos y cabeceras). Después vienen auth, autorización, dominio, archivos,
+tiempo real, offline y corte. Antes de los tramos 3-9 hay que cerrar las decisiones de §9 del plan.
+
+Fuera de la migración, lo operativo lo hace la persona: desplegar el stack actual
 (`deploy/README.md`), aplicar migraciones, activar correo/push/escalamiento
 (`docs/notificaciones-push.md`) y, si se quiere, Capacitor. Mejoras futuras posibles: iconos con el
 logo definitivo, bandeja de notificaciones in-app y afinado de parámetros por la operación real.
@@ -449,11 +466,12 @@ concreta, opciones y recomendación.
 | 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | **Resuelta**: "primero gana" |
 | 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | **Resuelta**: una instancia por base |
 | 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | **Resuelta**: folio, estado, fecha, ubicación, problema y contacto |
-| 14 | Aprobación de la Etapa A de la migración fuera de Supabase y respuestas de `docs/migracion-sin-supabase.md` §9 | Etapa B completa | **Pendiente**: revisar el documento y responder las 13 preguntas |
+| 14 | Respuestas de `docs/migracion-sin-supabase.md` §9 (política de sesión, push, semillas, reparto SQL/TS y pgTAP híbrido) | Tramos 3-9 de la Etapa B | **Parcial**: se autorizó implementar el tramo 1; faltan las decisiones de los tramos siguientes |
 
 Las preguntas de la Fase 1 quedaron resueltas; las decisiones están en el bloque de correcciones de
-`docs/especificacion-negocio.md` y en `docs/modelo-datos.md`. La migración fuera de Supabase está
-detenida a la espera de la aprobación de la Etapa A.
+`docs/especificacion-negocio.md` y en `docs/modelo-datos.md`. La migración fuera de Supabase ya
+tiene su base de datos autoalojada; los tramos de servidor/auth/dominio esperan las decisiones de
+§9, no la aprobación de la Etapa A.
 
 ## Decisiones registradas
 
@@ -1087,3 +1105,13 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   implementados; `idempotency_keys` no se usa; contraseña fija demo versionada; `fetchDuplicateTickets`
   pasa filtros dos veces; métricas dependen de RLS. Sin secretos reales en archivos versionados
   revisados; `.env.local` y `supabase/.temp` están ignorados y no aparecen en el historial de rutas.
+- 2026-10-20: **migración fuera de Supabase — Etapa B, tramo 1**. Se creó `apps/server` con
+  Drizzle + `pg`, el esquema autoalojado de 58 tablas/17 enums/15 vistas/31 funciones, la migración
+  base `0000_base.sql` y los grants `0001_grants.sql` con roles `axia_owner` y `axia_app`.
+  `profiles` pasó a `users` (Argon2id, sesiones, intentos de acceso) y se añadieron
+  `notification_deliveries`, metadatos de evidencia e idempotencia. Compose con `db` (sin puerto
+  público) y `migrate` de una ejecución con advisory lock; `compose.dev.yaml` publica solo
+  `127.0.0.1:5433`. Pruebas: 3 unitarias, 12 de integración, migración idempotente y `drizzle-kit
+  check`; Docker Compose verificado. Informe en `docs/migracion/esquema-diferencias.md`. La app
+  actual y `pnpm check` siguen intactos; el corte será único al final. Rama
+  `feat/migracion-base-datos`.

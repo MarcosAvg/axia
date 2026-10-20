@@ -593,9 +593,12 @@ Reglas:
   reloj.
 - Las acciones se ejecutan con el mismo servicio transaccional y la misma idempotencia que las
   acciones en línea.
-- Evidencias: se suben aparte con TUS; el evento/acción que las requiere se ejecuta después de que
-  la evidencia esté `ready`. Si la subida falla, la acción queda bloqueada con
-  `evidence_pending`, no se aplica a medias.
+- Evidencias: al iniciar la subida TUS se crea la fila `evidence` en `pending` con
+  `client_request_id`, ticket, ciclo y tipo. La acción que exige evidencia puede aplicarse si la
+  fila `pending` existe; el evento se registra con `evidence_pending: true`. Al completar la subida,
+  el servidor procesa, marca `ready` y actualiza el vínculo. Si falla, la evidencia queda `failed` y
+  la interfaz muestra el pendiente; no se aplica una acción sin la fila de evidencia. La limpieza
+  elimina temporales expirados y evidencias `pending` sin archivo tras el plazo.
 - Disparadores de sincronización: abrir la app, `online` y `visibilitychange`; no se depende de
   Background Sync.
 - Prueba Playwright: técnico sin red registra evidencia, pausa y atendido; al volver la red se

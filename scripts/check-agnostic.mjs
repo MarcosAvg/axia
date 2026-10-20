@@ -17,6 +17,7 @@ const ALLOWED_PATTERNS = [
   'apps/web/src/features/integrations/**',
   'supabase/functions/integration-*/**',
   'docs/integraciones-y-migracion.md',
+  'docs/migracion-sin-supabase.md',
   'docs/ESTADO.md',
   'docs/decisions/**',
   'scripts/**',

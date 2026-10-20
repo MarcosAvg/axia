@@ -21,6 +21,12 @@
     "db:test": "supabase test db",
     "db:clean": "node scripts/clean-test-data.mjs",
     "db:types": "supabase gen types typescript --local | prettier --stdin-filepath packages/shared/src/database.types.ts > packages/shared/src/database.types.ts",
+    "db:next:up": "docker compose -f compose.yaml -f compose.dev.yaml up -d db",
+    "db:next:migrate": "pnpm --filter @axia/server db:migrate",
+    "db:next:reset": "pnpm --filter @axia/server db:reset",
+    "db:next:test": "pnpm --filter @axia/server test:db",
+    "db:next:check": "pnpm --filter @axia/server db:check",
+    "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
     "env:local": "node scripts/write-local-env.mjs",
     "prepare": "husky"
   },
