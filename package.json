@@ -5,7 +5,7 @@
   "packageManager": "pnpm@12.8.1",
   "scripts": {
     "dev": "pnpm --filter @axia/web dev",
-    "build": "pnpm --filter @axia/web build",
+    "build": "pnpm --filter @axia/server build && pnpm --filter @axia/web build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test && pnpm db:clean",
@@ -27,7 +27,7 @@
     "db:next:test": "pnpm --filter @axia/server test:db",
     "db:next:check": "pnpm --filter @axia/server db:check",
     "db:next:indexes": "pnpm --filter @axia/server db:indexes",
-    "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
+    "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server build && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
     "env:local": "node scripts/write-local-env.mjs",
     "prepare": "husky"
   },

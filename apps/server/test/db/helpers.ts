@@ -1,6 +1,6 @@
 import { Client } from 'pg'
 
-import { ensureAppRole, runMigrations } from '../../src/db/migrate'
+import { ensureAppRole, runMigrations } from '../../src/db/migrate.js'
 
 const APP_USER = process.env.AXIA_APP_USER ?? 'axia_app'
 

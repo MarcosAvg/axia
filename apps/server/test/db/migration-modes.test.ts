@@ -5,8 +5,8 @@ import { join } from 'node:path'
 import { Client } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { runMigrations } from '../../src/db/migrate'
-import { ownerConnectionString, prepareTestDatabase } from './helpers'
+import { runMigrations } from '../../src/db/migrate.js'
+import { ownerConnectionString, prepareTestDatabase } from './helpers.js'
 
 let owner: Client
 

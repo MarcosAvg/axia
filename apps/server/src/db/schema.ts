@@ -1130,16 +1130,14 @@ export const ticketEvents = pgTable(
   'ticket_events',
   {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    id: bigint({ mode: 'number' })
-      .primaryKey()
-      .generatedAlwaysAsIdentity({
-        name: 'ticket_events_id_seq',
-        startWith: 1,
-        increment: 1,
-        minValue: 1,
-        maxValue: 9223372036854775807,
-        cache: 1,
-      }),
+    id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity({
+      name: 'ticket_events_id_seq',
+      startWith: 1,
+      increment: 1,
+      minValue: 1,
+      maxValue: 9223372036854775807,
+      cache: 1,
+    }),
     ticketId: uuid('ticket_id').notNull(),
     cycle: integer().notNull(),
     type: eventType().notNull(),
@@ -1373,16 +1371,14 @@ export const loginAttempts = pgTable(
   'login_attempts',
   {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    id: bigint({ mode: 'number' })
-      .primaryKey()
-      .generatedAlwaysAsIdentity({
-        name: 'login_attempts_id_seq',
-        startWith: 1,
-        increment: 1,
-        minValue: 1,
-        maxValue: 9223372036854775807,
-        cache: 1,
-      }),
+    id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity({
+      name: 'login_attempts_id_seq',
+      startWith: 1,
+      increment: 1,
+      minValue: 1,
+      maxValue: 9223372036854775807,
+      cache: 1,
+    }),
     username: text().notNull(),
     userId: uuid('user_id'),
     ip: inet(),

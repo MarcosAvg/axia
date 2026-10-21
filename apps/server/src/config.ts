@@ -1,0 +1,61 @@
+import { z } from 'zod'
+
+const booleanString = z
+  .string()
+  .default('false')
+  .pipe(z.enum(['true', 'false', '1', '0']))
+  .transform((value) => value === 'true' || value === '1')
+
+const environmentSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'test', 'production'])
+    .default('development'),
+  HOST: z.string().min(1).default('0.0.0.0'),
+  PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+  DATABASE_URL: z
+    .string()
+    .refine(
+      (value) => /^postgres(ql)?:\/\//.test(value),
+      'DATABASE_URL must use postgres:// or postgresql://',
+    ),
+  STATIC_DIR: z.string().min(1).optional(),
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+    .default('info'),
+  TRUST_PROXY: booleanString,
+  BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(1_048_576),
+  HEALTH_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(100)
+    .max(30_000)
+    .default(2_000),
+  SHUTDOWN_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .min(1_000)
+    .max(60_000)
+    .default(10_000),
+})
+
+export type AppConfig = z.infer<typeof environmentSchema> & {
+  isProduction: boolean
+}
+
+export function loadConfig(
+  source: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+): AppConfig {
+  const parsed = environmentSchema.safeParse(source)
+
+  if (!parsed.success) {
+    const details = parsed.error.issues
+      .map((issue) => `${issue.path.join('.') || 'env'}: ${issue.message}`)
+      .join('; ')
+    throw new Error(`Invalid environment configuration: ${details}`)
+  }
+
+  return {
+    ...parsed.data,
+    isProduction: parsed.data.NODE_ENV === 'production',
+  }
+}

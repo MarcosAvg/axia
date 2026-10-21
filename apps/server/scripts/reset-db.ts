@@ -1,6 +1,6 @@
 import { Client } from 'pg'
 
-import { ensureAppRole, runMigrations } from '../src/db/migrate'
+import { ensureAppRole, runMigrations } from '../src/db/migrate.js'
 
 function assertLocal(databaseUrl: string) {
   const url = new URL(databaseUrl)

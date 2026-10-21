@@ -1,12 +1,12 @@
 import { Client } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { runMigrations } from '../../src/db/migrate'
+import { runMigrations } from '../../src/db/migrate.js'
 import {
   appConnectionString,
   ownerConnectionString,
   prepareTestDatabase,
-} from './helpers'
+} from './helpers.js'
 
 let owner: Client
 let app: Client

@@ -3,20 +3,19 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-20
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 1 (base de datos) cerrado
+**Última actualización:** 2026-10-21
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 2 (servidor mínimo) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 1 de la Etapa B se cerró el 2026-10-20:
-esquema base autoalojado, Drizzle, roles `axia_owner`/`axia_app`, Compose con
-`db` + `migrate`, pruebas contra PostgreSQL 17, comparación de esquema y ajustes de
-operación (migraciones no transaccionales, parámetros de memoria y auditoría de índices).
-La aplicación actual sigue sobre Supabase; el corte funcional será único al final.
+**Sin trabajo en curso.** El tramo 2 de la Etapa B se cerró el 2026-10-21:
+Fastify 5, configuración validada, salud, seguridad, errores, estáticos opcionales,
+apagado ordenado y Compose con `app`. La aplicación actual sigue sobre Supabase; el
+servidor nuevo no publica todavía la web. El corte funcional será único al final.
 
-**Siguiente:** tramo 2 (servidor mínimo) cuando se retome. Antes de los tramos
-3-9 siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9
-(política de sesión, push, semillas, reparto SQL/TS y pgTAP híbrido).
+**Siguiente:** tramo 3 (auth y usuarios). Antes de auth/dominio siguen abiertas las
+decisiones de `docs/migracion-sin-supabase.md` §9 (política de sesión, push, semillas,
+reparto SQL/TS y pgTAP híbrido).
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -49,6 +48,18 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 2 — servidor mínimo (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Fastify 5 con configuración Zod, compilación NodeNext, `build`/`start`/`dev`, health
+    `live`/`ready`, Helmet/CSP, contrato de errores con `requestId`, límite de cuerpo y
+    apagado ordenado con cierre del pool.
+  - Estáticos opcionales con fallback SPA probado con fixtures; **no se publica el build actual**
+    de la web porque depende de Supabase en runtime. Se activará en el corte final.
+  - Dockerfile multi-stage `migrate`/`app`, usuario `node`, dependencias de producción; Compose
+    añade `app` sin puerto público y `compose.dev.yaml` publica solo `127.0.0.1:${APP_PORT}`.
+    Healthcheck con `/api/health/ready`.
+  - Pruebas: 18 unitarias/HTTP y 15 de integración; contenedor levantado, health 200, 404 API
+    JSON, cabeceras y SIGTERM verificado. **ADR 0069**. `pnpm check` y `pnpm check:next` en verde.
 - **Migración sin Supabase, Etapa B, tramo 1 — base de datos (2026-10-20)**, rama
   `feat/migracion-base-datos`:
   - Nuevo `apps/server` con Drizzle, `pg` y TypeScript estricto; esquema de 58 tablas,
@@ -1129,3 +1140,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `pnpm db:next:indexes` para auditar FKs sin índice, índices sin uso y actividad por tabla.
   Runbook en `docs/migracion/rendimiento-postgres.md` y **ADR 0068**. Sin PgBouncer ni particiones
   todavía; las vistas internas siguen sin exponerse. `pnpm check` y `pnpm check:next` en verde.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 2**. Fastify 5 con configuración
+  Zod y build NodeNext (`tsc`) para producción; `live`/`ready`, Helmet/CSP, contrato de errores con
+  `requestId`, límite de cuerpo y cierre ordenado de Fastify y pool con timeout. Estáticos
+  opcionales con fallback SPA probados con fixtures; no se publica el build actual porque depende
+  de Supabase en runtime. Dockerfile multi-stage `migrate`/`app` como usuario `node`, dependencias
+  de producción y Compose con `app` sin puerto público; `compose.dev.yaml` publica solo
+  `127.0.0.1:${APP_PORT}`. Verificado en contenedor: health 200, 404 API JSON, cabeceras y SIGTERM.
+  **ADR 0069**. `pnpm check` y `pnpm check:next` en verde.

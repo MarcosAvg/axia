@@ -35,6 +35,7 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
+      target: migrate
     image: axia-migrate:local
     depends_on:
       db:
@@ -44,6 +45,40 @@ services:
       AXIA_APP_USER: ${AXIA_APP_USER:-axia_app}
       AXIA_APP_PASSWORD: ${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}
     restart: 'no'
+
+  app:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+      target: app
+    image: axia-app:local
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://${AXIA_APP_USER:-axia_app}:${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      BODY_LIMIT_BYTES: ${BODY_LIMIT_BYTES:-1048576}
+      HEALTH_TIMEOUT_MS: ${HEALTH_TIMEOUT_MS:-2000}
+      SHUTDOWN_TIMEOUT_MS: ${SHUTDOWN_TIMEOUT_MS:-10000}
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    stop_grace_period: 15s
 
 volumes:
   axia_db_data:

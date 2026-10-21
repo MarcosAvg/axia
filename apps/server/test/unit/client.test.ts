@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { createDb, createPool } from '../../src/db/client'
-import { usesNoTransaction } from '../../src/db/migrate'
+import { createDb, createPool } from '../../src/db/client.js'
+import { usesNoTransaction } from '../../src/db/migrate.js'
 
 describe('database pool', () => {
   it('fails fast without a connection string', () => {
