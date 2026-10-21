@@ -83,7 +83,7 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
   `feat/migracion-base-datos`:
   - Cliente HTTP con `credentials: 'include'`, `VITE_API_URL` y sobre de errores; lote hacia
     `/api/sync/actions` y mapeo del outbox a `applied`/`duplicate`/`rejected`/`conflict`/`blocked`.
-  - La web sigue sobre Supabase; el cliente se activa en el corte final. Pruebas: 244 web.
+  - La web se conectó en el corte final (tramo 10). Pruebas del tramo: 244 web.
 - **Migración sin Supabase, Etapa B, tramo 8A — sincronización offline en servidor (2026-10-21)**,
   rama `feat/migracion-base-datos`:
   - `POST /api/sync/actions` procesa hasta 100 acciones por lote, en orden, con el mismo
