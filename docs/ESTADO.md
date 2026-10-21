@@ -10,8 +10,9 @@
 
 **Sin trabajo en curso.** El tramo 1 de la Etapa B se cerró el 2026-10-20:
 esquema base autoalojado, Drizzle, roles `axia_owner`/`axia_app`, Compose con
-`db` + `migrate`, pruebas contra PostgreSQL 17 y comparación de esquema. La
-aplicación actual sigue sobre Supabase; el corte funcional será único al final.
+`db` + `migrate`, pruebas contra PostgreSQL 17, comparación de esquema y ajustes de
+operación (migraciones no transaccionales, parámetros de memoria y auditoría de índices).
+La aplicación actual sigue sobre Supabase; el corte funcional será único al final.
 
 **Siguiente:** tramo 2 (servidor mínimo) cuando se retome. Antes de los tramos
 3-9 siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9
@@ -59,10 +60,15 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
   - `compose.yaml` + `compose.dev.yaml`: PostgreSQL 17 con volumen y healthcheck,
     `migrate` de una ejecución con advisory lock y puerto de desarrollo solo en
     `127.0.0.1:5433`. Sin puerto público para `db`.
-  - Pruebas: 3 unitarias, 12 de integración contra PostgreSQL 17, `drizzle-kit check`,
+  - Pruebas: 4 unitarias, 13 de integración contra PostgreSQL 17, `drizzle-kit check`,
     migración idempotente y Docker Compose verificado. Informe en
     `docs/migracion/esquema-diferencias.md`. **ADR 0067**. `pnpm check` sigue en verde
     (237 Vitest, 16 Playwright, 466 pgTAP) y `pnpm check:next` también.
+  - Ajustes de operación PostgreSQL: migraciones `-- axia:no-transaction` para
+    `CREATE INDEX CONCURRENTLY` (una sentencia idempotente), parámetros de memoria en
+    Compose configurables por entorno, script `db:next:indexes` para auditar FKs/índices y
+    runbook en `docs/migracion/rendimiento-postgres.md`. **ADR 0068**. Las vistas de métricas
+    y timeline no se publican hasta que exista alcance en la API.
 - **Administración con red de seguridad (2026-10-18)**, rama `feat/admin-red-seguridad`:
   `ConfirmDialog` reutilizable; guardarraíles de último administrador, cuenta propia y rol
   `administrator`; matriz de permisos con búsqueda, etiquetas de ámbito y lectura protegida del
@@ -1115,3 +1121,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   check`; Docker Compose verificado. Informe en `docs/migracion/esquema-diferencias.md`. La app
   actual y `pnpm check` siguen intactos; el corte será único al final. Rama
   `feat/migracion-base-datos`.
+- 2026-10-20: **ajustes de operación PostgreSQL del tramo 1**. El runner de migraciones acepta
+  `-- axia:no-transaction` para `CREATE INDEX CONCURRENTLY`/`VACUUM` (una sentencia idempotente por
+  archivo, sin rollback automático); se probó con un índice concurrente real. Compose fija
+  `shared_buffers`, `effective_cache_size`, `work_mem`, `maintenance_work_mem`, `max_connections` y
+  `track_io_timing` por entorno, y la imagen pasa a `postgres:17.11-alpine`. Se añadió
+  `pnpm db:next:indexes` para auditar FKs sin índice, índices sin uso y actividad por tabla.
+  Runbook en `docs/migracion/rendimiento-postgres.md` y **ADR 0068**. Sin PgBouncer ni particiones
+  todavía; las vistas internas siguen sin exponerse. `pnpm check` y `pnpm check:next` en verde.

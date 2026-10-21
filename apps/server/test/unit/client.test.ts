@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createDb, createPool } from '../../src/db/client'
+import { usesNoTransaction } from '../../src/db/migrate'
 
 describe('database pool', () => {
   it('fails fast without a connection string', () => {
@@ -18,5 +19,14 @@ describe('database pool', () => {
     const { pool, db } = createDb('postgres://axia_app@127.0.0.1:5432/axia')
     expect(db.select).toBeTypeOf('function')
     await pool.end()
+  })
+
+  it('detects the no-transaction migration marker', () => {
+    expect(usesNoTransaction('-- axia:no-transaction\ncreate index ...')).toBe(
+      true,
+    )
+    expect(usesNoTransaction('-- normal migration\ncreate table ...')).toBe(
+      false,
+    )
   })
 })

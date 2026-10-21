@@ -8,10 +8,17 @@ const MIGRATIONS_DIR = fileURLToPath(
   new URL('../../db/migrations', import.meta.url),
 )
 const MIGRATION_LOCK_KEY = 1_096_112_449 // "AXIA"
+// A no-transaction migration must be idempotent and contain one statement:
+// CREATE INDEX CONCURRENTLY, VACUUM, REINDEX CONCURRENTLY, etc.
+const NO_TRANSACTION_MARKER = /^\s*--\s*axia:no-transaction\s*$/m
 
 export type MigrationOptions = {
   appUser?: string
   appPassword?: string
+}
+
+export function usesNoTransaction(sql: string): boolean {
+  return NO_TRANSACTION_MARKER.test(sql)
 }
 
 async function createAppRole(
@@ -62,6 +69,42 @@ export async function ensureAppRole(
   }
 }
 
+async function recordMigration(client: Client, file: string) {
+  await client.query(
+    'insert into axia_migrations.schema_migrations (name) values ($1)',
+    [file],
+  )
+}
+
+async function applyMigration(client: Client, file: string, sql: string) {
+  if (usesNoTransaction(sql)) {
+    try {
+      await client.query(sql)
+      await recordMigration(client, file)
+    } catch (error) {
+      throw new Error(
+        `Migration ${file} failed (no transaction): ${error instanceof Error ? error.message : error}`,
+      )
+    }
+    console.log(`Applied ${file} (no transaction)`)
+    return
+  }
+
+  await client.query('begin')
+  try {
+    await client.query(sql)
+    await recordMigration(client, file)
+    await client.query('commit')
+  } catch (error) {
+    await client.query('rollback')
+    throw new Error(
+      `Migration ${file} failed: ${error instanceof Error ? error.message : error}`,
+    )
+  }
+
+  console.log(`Applied ${file}`)
+}
+
 export async function runMigrations(
   client: Client,
   migrationsDir = MIGRATIONS_DIR,
@@ -91,24 +134,11 @@ export async function runMigrations(
         continue
       }
 
-      const sql = readFileSync(join(migrationsDir, file), 'utf8')
-
-      await client.query('begin')
-      try {
-        await client.query(sql)
-        await client.query(
-          'insert into axia_migrations.schema_migrations (name) values ($1)',
-          [file],
-        )
-        await client.query('commit')
-      } catch (error) {
-        await client.query('rollback')
-        throw new Error(
-          `Migration ${file} failed: ${error instanceof Error ? error.message : error}`,
-        )
-      }
-
-      console.log(`Applied ${file}`)
+      await applyMigration(
+        client,
+        file,
+        readFileSync(join(migrationsDir, file), 'utf8'),
+      )
     }
   } finally {
     await client.query('select pg_advisory_unlock($1)', [MIGRATION_LOCK_KEY])

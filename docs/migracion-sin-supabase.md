@@ -455,12 +455,22 @@ roles propios.
   ampliación natural, sin cambiar el esquema; no entra en este despliegue.
 - Revisar con `EXPLAIN (ANALYZE, BUFFERS)` las consultas de bandeja, detalle, timeline, métricas,
   notificaciones y sesiones. Los índices nuevos sobre una base con datos se crean con
-  `CREATE INDEX CONCURRENTLY` en migraciones no transaccionales.
+  `CREATE INDEX CONCURRENTLY` en migraciones marcadas con `-- axia:no-transaction`; el runner
+  ejecuta esas migraciones fuera de transacción y exige una sola sentencia idempotente.
+- `pnpm db:next:indexes` audita FKs sin índice, índices no usados y actividad por tabla. Es una
+  herramienta de revisión, no una orden de indexar todos los FKs.
 - `shared_buffers` se ajusta al 25 % de la RAM del servidor dedicado; para una instalación pequeña,
-  un valor conservador (256 MB) y `work_mem` moderado. Documentar el ajuste en el runbook, no
-  incrustarlo en la imagen.
+  un valor conservador (256 MB) y `work_mem` moderado. El compose fija valores configurables por
+  entorno; el runbook está en `docs/migracion/rendimiento-postgres.md`.
 - Autovacuum se mantiene; las tablas de sesiones, intentos y entregas tienen limpieza programada.
-  No se depende de autovacuum para el mantenimiento de esas colas.
+  No se depende de autovacuum para el mantenimiento de esas colas. Ejecutar `ANALYZE` tras una
+  semilla o importación masiva.
+- No se particiona ninguna tabla todavía. Si `ticket_events` llega a decenas de millones de filas o
+  varios GB, se evaluará partición por rango y/o un BRIN sobre `recorded_at`, con un ADR aparte.
+- `LISTEN/NOTIFY` usará una conexión dedicada fuera del pool; no consumirá una de las 10 conexiones
+  de peticiones normales.
+- Las vistas de métricas y `v_ticket_timeline` no se exponen hasta que exista `can` + alcance por
+  repositorio y pruebas negativas; sin RLS, una vista sin alcance filtra todo.
 
 ### 3.9 Índices mínimos a revisar
 
