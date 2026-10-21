@@ -58,7 +58,10 @@ pnpm dev
 
 El instalador genera `.env` con secretos aleatorios, levanta PostgreSQL, aplica las migraciones y
 arranca la API. Con `--demo` carga usuarios y tiquets ficticios. La API queda en
-`http://127.0.0.1:3000` y el SPA en `http://localhost:5173`; Vite reenvía `/api` al servidor.
+`http://127.0.0.1:3100` y el SPA en `http://localhost:5173`; Vite reenvía `/api` al servidor.
+
+Para desarrollo sin el contenedor `app`, la API se inicia en otra terminal con `pnpm dev:api`.
+Ese comando carga `.env` y usa el puerto `3100`; la web se inicia con `pnpm dev`.
 
 La primera cuenta de administración se crea desde la pantalla de primer arranque (o con
 `POST /api/setup`). La contraseña debe tener al menos 12 caracteres.
@@ -74,6 +77,7 @@ contraseña fija en el repositorio.**
 | Comando | Descripción |
 |---|---|
 | `pnpm dev` | SPA en desarrollo (http://localhost:5173) |
+| `pnpm dev:api` | API en desarrollo (http://127.0.0.1:3100) |
 | `pnpm build` | Compila servidor y SPA |
 | `pnpm lint` / `pnpm typecheck` | ESLint y TypeScript en todo el monorepo |
 | `pnpm test` | Vitest y Playwright |

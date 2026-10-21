@@ -8,4 +8,4 @@ services:
       NODE_ENV: development
       LOG_LEVEL: ${LOG_LEVEL:-debug}
     ports:
-      - '127.0.0.1:${APP_PORT:-3000}:3000'
+      - '127.0.0.1:${APP_PORT:-3100}:3100'

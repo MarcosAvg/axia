@@ -69,7 +69,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: process.env.AXIA_API_URL ?? 'http://127.0.0.1:3000',
+        target: process.env.AXIA_API_URL ?? 'http://127.0.0.1:3100',
         changeOrigin: false,
       },
     },

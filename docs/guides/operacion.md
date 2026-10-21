@@ -12,7 +12,7 @@ Guía para desplegar, actualizar y respaldar una instalación de Axia. La instal
 | `app` | API Fastify y SPA; volumen de evidencias |
 
 El reverse proxy TLS es infraestructura de destino. Debe enrutar al servicio `app` en el puerto
-`3000`, conservar las cabeceras de proxy y permitir el tamaño de las evidencias. La base no se
+`3100`, conservar las cabeceras de proxy y permitir el tamaño de las evidencias. La base no se
 publica.
 
 ## Puesta en marcha en producción
@@ -32,7 +32,7 @@ Comprobaciones:
 ```bash
 docker compose ps
 docker compose logs --tail=100 app
-curl -fsS http://127.0.0.1:3000/api/health/ready
+curl -fsS http://127.0.0.1:3100/api/health/ready
 ```
 
 La primera cuenta se crea desde `/login` o con `POST /api/setup`. La contraseña debe tener al menos

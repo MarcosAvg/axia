@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const apiUrl = process.env.AXIA_API_URL ?? 'http://127.0.0.1:3000'
+const apiUrl = process.env.AXIA_API_URL ?? 'http://127.0.0.1:3100'
 
 // Pruebas de extremo a extremo: pocas y bien elegidas (convenciones, §13).
 // El flujo del técnico sin conexión llega en la Fase 5.

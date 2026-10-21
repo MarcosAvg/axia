@@ -21,8 +21,8 @@ Variables de entorno del servidor y del compose. Los valores reales viven en `.e
 | Variable | Valor por defecto | Uso |
 |---|---|---|
 | `HOST` | `0.0.0.0` | Interfaz de escucha |
-| `PORT` | `3000` | Puerto HTTP |
-| `APP_PORT` | `3000` | Puerto publicado en desarrollo |
+| `PORT` | `3100` | Puerto HTTP |
+| `APP_PORT` | `3100` | Puerto publicado en desarrollo |
 | `NODE_ENV` | `development` | `production` en producción |
 | `LOG_LEVEL` | `info` | Nivel de registro |
 | `TRUST_PROXY` | `false` | Activar solo detrás de un proxy de confianza |

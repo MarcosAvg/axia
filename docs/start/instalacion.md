@@ -36,7 +36,10 @@ El instalador:
 5. espera a `GET /api/health/ready`;
 6. con `--demo`, carga la semilla de demostración.
 
-La API queda en `http://127.0.0.1:3000` y la web en `http://localhost:5173`. Vite reenvía `/api`.
+La API queda en `http://127.0.0.1:3100` y la web en `http://localhost:5173`. Vite reenvía `/api`.
+
+Para desarrollo sin el contenedor `app`, ejecutar `pnpm dev:api` en otra terminal. El comando carga
+`.env` y usa el puerto `3100`; la web se inicia con `pnpm dev`.
 
 La opción `--dry-run` muestra los pasos sin escribir archivos ni tocar contenedores. Las variables
 `APP_PORT` y `DB_PORT` permiten cambiar los puertos locales.
@@ -49,7 +52,7 @@ el formulario de primer arranque.
 También se puede usar la API:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:3000/api/setup \
+curl -sS -X POST http://127.0.0.1:3100/api/setup \
   -H 'content-type: application/json' \
   -d '{"username":"admin","fullName":"Administrador","password":"<contraseña>"}'
 ```
@@ -72,7 +75,7 @@ docker compose up -d app
 
 En producción no se usa `compose.dev.yaml`: ese archivo solo publica puertos en `127.0.0.1` para
 desarrollo. El reverse proxy debe alcanzar el servicio `app` por la red interna de Compose, en el
-puerto `3000`, o mediante un overlay de infraestructura.
+puerto `3100`, o mediante un overlay de infraestructura.
 
 `TRUST_PROXY=true` solo se activa si el proxy reenvía `X-Forwarded-*` y está en una red de
 confianza.

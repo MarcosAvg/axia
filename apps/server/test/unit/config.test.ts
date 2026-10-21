@@ -11,7 +11,7 @@ describe('configuration', () => {
     const config = loadConfig(base)
 
     expect(config.HOST).toBe('0.0.0.0')
-    expect(config.PORT).toBe(3000)
+    expect(config.PORT).toBe(3100)
     expect(config.LOG_LEVEL).toBe('info')
     expect(config.TRUST_PROXY).toBe(false)
     expect(config.BODY_LIMIT_BYTES).toBe(1_048_576)

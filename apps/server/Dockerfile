@@ -48,7 +48,7 @@ RUN mkdir -p /data/evidence && chown node:node /data/evidence
 USER node
 ENV NODE_ENV=production
 ENV STATIC_DIR=/app/web
-EXPOSE 3000
+EXPOSE 3100
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
-  CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+  CMD ["node", "-e", "fetch('http://127.0.0.1:3100/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
 CMD ["node", "dist/server.js"]

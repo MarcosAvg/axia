@@ -11,7 +11,7 @@ const environmentSchema = z.object({
     .enum(['development', 'test', 'production'])
     .default('development'),
   HOST: z.string().min(1).default('0.0.0.0'),
-  PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+  PORT: z.coerce.number().int().min(1).max(65_535).default(3100),
   DATABASE_URL: z
     .string()
     .refine(

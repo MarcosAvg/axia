@@ -7,7 +7,7 @@ import type { ReadinessProbe } from '../../src/http/health.js'
 export const testConfig: AppConfig = {
   NODE_ENV: 'test',
   HOST: '127.0.0.1',
-  PORT: 3000,
+  PORT: 3100,
   DATABASE_URL: 'postgres://axia_app@127.0.0.1:5432/axia',
   LOG_LEVEL: 'silent',
   TRUST_PROXY: false,

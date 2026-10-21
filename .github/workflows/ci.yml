@@ -27,8 +27,8 @@ jobs:
       AXIA_APP_PASSWORD: test-app-password
       DATABASE_URL: postgres://axia_app:test-app-password@127.0.0.1:5432/axia_test
       AXIA_DEMO_PASSWORD: E2ePassword123!
-      PORT: 3000
-      AXIA_API_URL: http://127.0.0.1:3000
+      PORT: 3100
+      AXIA_API_URL: http://127.0.0.1:3100
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

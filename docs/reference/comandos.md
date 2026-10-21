@@ -7,6 +7,7 @@ Comandos disponibles desde la raíz del repositorio.
 | Comando | Efecto |
 |---|---|
 | `pnpm dev` | SPA en `http://localhost:5173`; Vite reenvía `/api` |
+| `pnpm dev:api` | API local en `http://127.0.0.1:3100` |
 | `pnpm build` | Compila servidor y SPA |
 | `pnpm lint` | ESLint en todo el monorepo |
 | `pnpm typecheck` | TypeScript en todo el monorepo |

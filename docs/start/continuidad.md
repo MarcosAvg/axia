@@ -45,7 +45,7 @@ permisos `0600`.
 | `pnpm check` falla en `db:test` | Revisar `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y el puerto de PostgreSQL |
 | Playwright no encuentra Chromium | `pnpm --filter @axia/web exec playwright install chromium` |
 | No se puede iniciar sesión | Ejecutar `pnpm db:reset` y la semilla demo; revisar `AXIA_DEMO_PASSWORD` |
-| El puerto 3000 está ocupado | Cambiar `PORT` y `AXIA_API_URL`; Vite reenvía `/api` |
+| El puerto 3100 está ocupado | Cambiar `PORT` y `AXIA_API_URL`; Vite reenvía `/api` |
 | La API no responde | Revisar `docker compose ps` y `docker compose logs app` |
 
 ## Seguridad

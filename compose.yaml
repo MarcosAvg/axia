@@ -61,7 +61,7 @@ services:
     environment:
       DATABASE_URL: postgres://${AXIA_APP_USER:-axia_app}:${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
       HOST: 0.0.0.0
-      PORT: 3000
+      PORT: 3100
       NODE_ENV: production
       LOG_LEVEL: ${LOG_LEVEL:-info}
       TRUST_PROXY: ${TRUST_PROXY:-false}
@@ -84,7 +84,7 @@ services:
         - CMD
         - node
         - -e
-        - "fetch('http://127.0.0.1:3000/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        - "fetch('http://127.0.0.1:3100/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 10s
       timeout: 3s
       retries: 3

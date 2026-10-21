@@ -8,7 +8,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${AXIA_ENV_FILE:-$ROOT_DIR/.env}"
 COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose.yaml" -f "$ROOT_DIR/compose.dev.yaml")
-APP_PORT="${APP_PORT:-3000}"
+APP_PORT="${APP_PORT:-3100}"
 DB_PORT="${DB_PORT:-5433}"
 DRY_RUN=0
 DEMO=0
@@ -100,7 +100,7 @@ info "Esperando a que la API responda…"
 ready=0
 for _ in $(seq 1 30); do
   if "${COMPOSE[@]}" exec -T app node -e \
-    "fetch('http://127.0.0.1:3000/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))" \
+    "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))" \
     >/dev/null 2>&1; then
     ready=1
     break
