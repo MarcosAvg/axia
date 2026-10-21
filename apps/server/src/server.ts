@@ -7,6 +7,8 @@ import { buildApp } from './app.js'
 import { createAuthService } from './auth/service.js'
 import { createCatalogService } from './catalogs/service.js'
 import { createEvidenceService } from './evidence/service.js'
+import { createEventBridge } from './realtime/bridge.js'
+import { createEventHub } from './realtime/hub.js'
 import { loadConfig, type AppConfig } from './config.js'
 import { createDb } from './db/client.js'
 import { checkDatabase } from './db/health.js'
@@ -16,6 +18,7 @@ function installShutdownHandlers(
   app: FastifyInstance,
   pool: Pool,
   config: AppConfig,
+  closeRealtime?: () => Promise<void>,
 ) {
   let shuttingDown = false
 
@@ -31,6 +34,7 @@ function installShutdownHandlers(
     force.unref()
 
     try {
+      await closeRealtime?.()
       await app.close()
       await pool.end()
       clearTimeout(force)
@@ -64,16 +68,20 @@ async function main() {
   const tickets = createTicketService(db)
   const catalogs = createCatalogService(db)
   const evidence = createEvidenceService(db, config)
+  const events = createEventHub(db)
   const app = await buildApp({
     config,
     auth,
     tickets,
     catalogs,
     evidence,
+    realtime: { db, events },
     readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
   })
+  const bridge = createEventBridge(config.DATABASE_URL, events)
+  await bridge.start()
 
-  installShutdownHandlers(app, pool, config)
+  installShutdownHandlers(app, pool, config, bridge.stop)
 
   try {
     const address = await app.listen({

@@ -12,6 +12,10 @@ import type { CatalogService } from './catalogs/service.js'
 import { registerEvidenceRoutes } from './evidence/routes.js'
 import type { EvidenceService } from './evidence/service.js'
 import { createTusServer } from './evidence/tus.js'
+import { registerNotificationRoutes } from './realtime/notifications.js'
+import { registerRealtimeRoutes } from './realtime/routes.js'
+import type { EventHub } from './realtime/hub.js'
+import type { Database } from './db/client.js'
 import type { AppConfig } from './config.js'
 import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
@@ -27,6 +31,7 @@ export type BuildAppOptions = {
   tickets?: TicketService
   catalogs?: CatalogService
   evidence?: EvidenceService
+  realtime?: { db: Database; events: EventHub }
   logger?: FastifyServerOptions['logger']
 }
 
@@ -48,6 +53,33 @@ function buildLogger(config: AppConfig): FastifyServerOptions['logger'] {
   }
 }
 
+type OptionalServices = {
+  auth?: AuthService
+  tickets?: TicketService
+  catalogs?: CatalogService
+  evidence?: EvidenceService
+  realtime?: { db: Database; events: EventHub }
+}
+
+async function registerOptionalRoutes(
+  app: FastifyInstance,
+  config: AppConfig,
+  services: OptionalServices,
+) {
+  const { auth, tickets, catalogs, evidence, realtime } = services
+  if (auth) await registerAuthRoutes(app, auth, config)
+  if (auth && tickets) registerTicketRoutes(app, { auth, config, tickets })
+  if (auth && catalogs) registerCatalogRoutes(app, { auth, config, catalogs })
+  if (auth && evidence) {
+    registerEvidenceRoutes(app, { auth, config, evidence })
+    createTusServer(app, auth, config, evidence)
+  }
+  if (auth && realtime) {
+    registerRealtimeRoutes(app, { auth, config, ...realtime })
+    registerNotificationRoutes(app, { auth, config, db: realtime.db })
+  }
+}
+
 export async function buildApp({
   config,
   readiness,
@@ -55,6 +87,7 @@ export async function buildApp({
   tickets,
   catalogs,
   evidence,
+  realtime,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -73,22 +106,13 @@ export async function buildApp({
   await registerSecurity(app, config.isProduction)
   registerHealthRoutes(app, readiness, config.HEALTH_TIMEOUT_MS)
 
-  if (auth) {
-    await registerAuthRoutes(app, auth, config)
-  }
-
-  if (auth && tickets) {
-    registerTicketRoutes(app, { auth, config, tickets })
-  }
-
-  if (auth && catalogs) {
-    registerCatalogRoutes(app, { auth, config, catalogs })
-  }
-
-  if (auth && evidence) {
-    registerEvidenceRoutes(app, { auth, config, evidence })
-    createTusServer(app, auth, config, evidence)
-  }
+  await registerOptionalRoutes(app, config, {
+    auth,
+    tickets,
+    catalogs,
+    evidence,
+    realtime,
+  })
 
   if (config.STATIC_DIR) {
     await registerStatic(app, config.STATIC_DIR)

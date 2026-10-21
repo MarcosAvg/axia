@@ -547,6 +547,11 @@ otro equipo, otro edificio, otro solicitante y usuario desactivado son obligator
 - Pruebas: dos sesiones, cambio visible sin recargar; una sesión sin permiso no recibe nada;
   reconexión y catch-up.
 
+**Implementado en tramo 7A:** `GET /api/events` con heartbeat y filtro por alcance, `GET
+/api/events/changes?since=...` para catch-up y bandeja `GET /api/notifications` con marcado de
+lectura. La migración `0006_notifications_realtime.sql` siembra reglas y difunde solo identificadores
+por `pg_notify`. Push y scheduler quedan opcionales.
+
 ### 4.3 Modo sin conexión
 
 Se conserva Dexie y la cola, pero cambia el destino y el contrato.
@@ -1000,7 +1005,7 @@ hará `push` ni se tocará producción sin confirmación.
 | Tiempos | `time_span_record`, `time_span_void` | Servicio de tiempos |
 | Tiempos (cálculo) | `ticket_time_total`, `ticket_time_net`, `ticket_time_by_kind`, `ticket_time_total_laboral`, `ticket_time_net_laboral`, `ticket_time_by_kind_laboral`, `ticket_time_by_kind_extra`, `ticket_calendar`, `work_calendar_overlap` | Conservar SQL |
 | Historial/tramos | `write_event`, `ticket_events_record_spans`, `prevent_mutation`, `tickets_*` triggers | Conservar/adaptar (actor explícito) |
-| Notificaciones | `notify_event`, `ticket_events_notify`, `notification_mark_read` | Conservar fan-out; mover lectura a servicio |
+| Notificaciones | `notify_event`, `ticket_events_notify`, `notification_mark_read` | Fan-out en SQL; lectura y SSE en el servidor; implementado en 7A |
 | Evidencias | `evidence_add` | Servicio de archivos/evidencias |
 | Importación | `import_system`, `import_batch_start/finish`, `import_record_add`, `import_alias_get/set`, `import_status_get/set`, `import_ticket_upsert`, `import_ticket_assign`, `import_ticket_timeline` | Servicios de importación |
 | Catálogos | `catalog_import_start/finish/sheet` | Servicio de importación de catálogos |

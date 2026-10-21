@@ -48,7 +48,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'",
       ),
-    ).toBe(31)
+    ).toBe(32)
     expect(
       await scalar(
         owner,
@@ -168,6 +168,7 @@ describe('base schema views and triggers', () => {
     expect(names.has('evidence_no_delete')).toBe(true)
     expect(names.has('ticket_events_record_spans')).toBe(true)
     expect(names.has('ticket_events_notify')).toBe(true)
+    expect(names.has('ticket_events_broadcast')).toBe(true)
     expect(names.has('users_set_updated_at')).toBe(true)
     expect(names.has('tickets_set_folio')).toBe(true)
   })
@@ -282,7 +283,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(6)
+    ).toBe(7)
   })
 
   it('enforces username normalization and uniqueness', async () => {

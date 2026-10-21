@@ -120,6 +120,7 @@ async function assignToTeam(
     cycle,
     teamId,
     buildingId: ticketBuildingId,
+    actorId: actor.id,
   })
   await writeEvent(tx, {
     ticketId: input.ticketId,

@@ -6,6 +6,7 @@ import { buildApp } from '../../src/app.js'
 import { createAuthService } from '../../src/auth/service.js'
 import { createCatalogService } from '../../src/catalogs/service.js'
 import { createEvidenceService } from '../../src/evidence/service.js'
+import { createEventHub, type EventHub } from '../../src/realtime/hub.js'
 import { hashPassword } from '../../src/auth/password.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
@@ -39,6 +40,7 @@ export type TicketHttpContext = {
   pool: Pool
   ids: TicketFixtureIds
   cookies: TicketHttpCookies
+  events: EventHub
 }
 
 async function loginCookie(app: FastifyInstance, username: string) {
@@ -91,12 +93,14 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   const tickets = createTicketService(created.db)
   const catalogs = createCatalogService(created.db)
   const evidence = createEvidenceService(created.db, testConfig)
+  const events = createEventHub(created.db)
   const app = await buildApp({
     config: testConfig,
     auth,
     tickets,
     catalogs,
     evidence,
+    realtime: { db: created.db, events },
     readiness: () => checkDatabase(created.pool),
     logger: false,
   })
@@ -110,7 +114,7 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
     noAccess: await loginCookie(app, 'no-access'),
   }
 
-  return { app, db: created.db, pool: created.pool, ids, cookies }
+  return { app, db: created.db, pool: created.pool, ids, cookies, events }
 }
 
 export async function closeTicketHttpApp(context: TicketHttpContext) {

@@ -47,6 +47,12 @@ const environmentSchema = z.object({
     .int()
     .positive()
     .default(500 * 1024 * 1024),
+  SSE_HEARTBEAT_MS: z.coerce
+    .number()
+    .int()
+    .min(1_000)
+    .max(60_000)
+    .default(15_000),
   HEALTH_TIMEOUT_MS: z.coerce
     .number()
     .int()

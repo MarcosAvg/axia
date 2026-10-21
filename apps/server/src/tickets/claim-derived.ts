@@ -43,6 +43,7 @@ export async function copyDerivedTicket(
     cycle: created.cycle,
     teamId: ticket.team_id,
     buildingId: ticket.building_id,
+    actorId: actor.id,
   })
   return created.id
 }

@@ -135,6 +135,13 @@ Se añadió igualmente `idx_evidence_uploaded_by_ready` en
 se ejecuta al crear y al terminar cada evidencia. Debe revisarse con una distribución real de
 usuarios.
 
+### 3.4 SSE y notificaciones (tramo 7A)
+
+El catch-up usa la PK de `ticket_events` y el predicado de alcance; la bandeja usa
+`idx_notifications_recipient` (`recipient_user_id, read_at`). Cada evento SSE se filtra con una
+consulta por PK del tiquet. No se añadieron índices nuevos.
+
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una

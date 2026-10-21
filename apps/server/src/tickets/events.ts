@@ -10,7 +10,7 @@ export type HandledEvent = {
 export type EventInput = {
   ticketId: string
   type: string
-  actorId: string
+  actorId?: string | null
   clientRequestId?: string | null
   payload?: Record<string, unknown>
   reasonId?: string | null
@@ -51,7 +51,7 @@ export async function writeEvent(
       reason_id, payload, client_request_id
     )
     select
-      t.id, t.cycle, ${type}, ${actorId}, ${subjectUserId},
+      t.id, t.cycle, ${type}, ${actorId ?? null}, ${subjectUserId},
       ${subjectTechnicianId}, ${reasonId}, ${JSON.stringify(payload)}::jsonb,
       ${clientRequestId ?? null}
     from public.tickets t

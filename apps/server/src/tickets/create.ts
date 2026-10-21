@@ -51,6 +51,7 @@ export type RouteInput = {
   cycle: number
   teamId: string
   buildingId: string
+  actorId?: string | null
 }
 
 export async function routeTicket({
@@ -59,8 +60,9 @@ export async function routeTicket({
   cycle,
   teamId,
   buildingId,
+  actorId = null,
 }: RouteInput) {
-  await tx.execute(sql`
+  const inserted = await tx.execute(sql`
     insert into public.ticket_offers (ticket_id, cycle, supervisor_user_id)
     select ${ticketId}, ${cycle}, ss.user_id
     from public.supervisor_scopes ss
@@ -70,7 +72,15 @@ export async function routeTicket({
       and ssb.building_id = ${buildingId}
       and ss.active
     on conflict do nothing
+    returning id
   `)
+  if (inserted.rows[0]) {
+    await writeEvent(tx, {
+      ticketId,
+      type: 'offered',
+      actorId,
+    })
+  }
 }
 
 async function detectDuplicates(
@@ -207,6 +217,7 @@ async function createInTransaction(
     cycle: ticket.cycle,
     teamId: category.team_id,
     buildingId: input.buildingId,
+    actorId: actor.id,
   })
   const summary = await detectDuplicates(tx, ticket.id, input)
   return {

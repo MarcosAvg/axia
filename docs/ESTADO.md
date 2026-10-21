@@ -4,17 +4,16 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 6 (evidencias y archivos) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 7A (SSE y notificaciones in-app) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 6 se cerró el 2026-10-21: evidencias en volumen local, subida TUS,
-procesamiento con Sharp, normalización a WebP, miniaturas, entrega autenticada y cuota por usuario.
-La web sigue sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 7A se cerró el 2026-10-21: SSE con `LISTEN/NOTIFY`, catch-up,
+bandeja de notificaciones in-app y lectura. La web sigue sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 7 (SSE, bandeja de notificaciones, listener y push opcional). Siguen abiertas las
-decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP
-híbrido.
+**Siguiente:** tramo 8 (modo sin conexión y sincronización). Push y el planificador de escalamiento
+quedan opcionales y no bloquean el corte. Siguen abiertas las decisiones de
+`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -47,6 +46,17 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 7A — SSE y notificaciones in-app (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Migración `0006_notifications_realtime.sql`: reglas de notificación y disparador
+    `ticket_events_broadcast` con `pg_notify` de identificadores.
+  - `GET /api/events` con autenticación, filtro por alcance, filtro de eventos visibles al
+    solicitante, heartbeat y cabeceras sin buffering.
+  - `GET /api/events/changes` para recuperar eventos perdidos desde un `since`.
+  - `GET /api/notifications`, contador de no leídas, marcar una y marcar todas.
+  - Listener dedicado con reconexión; el hub no usa una conexión del pool.
+  - Pruebas: 35 unitarias/HTTP y 106 de integración, incluidas SSE real, catch-up, LISTEN y
+    notificaciones por regla. **ADR 0073**.
 - **Migración sin Supabase, Etapa B, tramo 6 — evidencias y archivos (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - `POST /api/tickets/:id/evidence` crea la fila `pending` con `clientRequestId` y devuelve la URL
@@ -1286,3 +1296,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   procesamiento Sharp, normalización WebP, miniaturas, entrega autenticada y cuota. Se añadió el
   índice parcial de cuota por usuario. 35 pruebas unitarias/HTTP y 101 de integración. Siguiente:
   tiempo real y notificaciones.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 7A**. Se añadieron SSE con listener
+  dedicado, catch-up de eventos, bandeja in-app y lectura de notificaciones. 35 pruebas
+  unitarias/HTTP y 106 de integración. Push y scheduler quedan opcionales; siguiente: modo sin
+  conexión.
