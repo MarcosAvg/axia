@@ -4,18 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 3 (auth y usuarios) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 4 (autorización y alcance) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 3 de la Etapa B se cerró el 2026-10-21:
-setup del primer administrador, login con Argon2id, sesiones en PostgreSQL, bloqueo de
-intentos, CSRF por origen, cambio/reset de contraseña y administración de usuarios. La
-aplicación actual sigue sobre Supabase; el login de la web se conectará en el corte final.
+**Sin trabajo en curso.** El tramo 4 de la Etapa B se cerró el 2026-10-21:
+`can` central, ámbitos `own/team/buildings/all`, repositorio de tiquets con alcance, timeline
+filtrada para solicitante y 404 opacos. No se expusieron rutas nuevas. La aplicación actual
+sigue sobre Supabase; el frontend se conectará en el corte final.
 
-**Siguiente:** tramo 4 (autorización y consultas con alcance). Siguen abiertas las decisiones
-de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP
-híbrido; la política de sesión ya se implementó con los valores propuestos.
+**Siguiente:** tramo 5 (dominio y API). Siguen abiertas las decisiones de
+`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -48,6 +47,17 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 4 — autorización y alcance (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - `Actor` ampliado con solicitante, técnico, equipos y ámbitos de supervisor.
+  - `can` puro con ámbito máximo por permiso y semántica específica de `own`; `canAct` exige
+    `ticket.view` antes de una acción.
+  - Repositorio de tiquets con predicado SQL único: lista, acceso y timeline; solicitante oculto
+    recibe 404 y la timeline del solicitante filtra eventos internos.
+  - Fixtures propios con dos equipos, tres edificios, técnico, auxiliar, supervisor, solicitante y
+    casos de otro equipo/edificio. Sin rutas nuevas.
+  - Pruebas: 35 unitarias/HTTP y 34 de integración; matriz de alcance y timeline. **ADR 0071**.
+    `pnpm check` y `pnpm check:next` en verde.
 - **Migración sin Supabase, Etapa B, tramo 3 — auth y usuarios (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - Semilla de referencia `0002_reference_core.sql` (permisos, roles y matriz; sin datos demo) e
@@ -1168,3 +1178,10 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   administrador. La web actual no cambia; el login se conectará en el corte. **ADR 0070**.
   `pnpm check` y `pnpm check:next` en verde; smoke de setup/login/me/logout en contenedor y Argon2
   nativo verificado. Rama `feat/migracion-base-datos`.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 4**. Se añadió alcance al `Actor`
+  (solicitante, técnico, equipos y pares equipo+edificio), `can`/`canAct` puros con ámbito máximo por
+  permiso, `own` por tipo de permiso y un repositorio único de tiquets con lista, acceso y timeline.
+  El solicitante oculta eventos internos; fuera de alcance se devuelve 404. Fixtures de dos equipos,
+  tres edificios, técnico/auxiliar, supervisor, solicitante y casos negativos. **ADR 0071**. Sin
+  rutas nuevas; se probó el repositorio con PostgreSQL real. `pnpm check` y `pnpm check:next` en
+  verde. Rama `feat/migracion-base-datos`.

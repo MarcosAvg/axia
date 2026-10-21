@@ -505,7 +505,7 @@ Servicio único, por ejemplo `can(actor, permiso, contexto)`:
   - administrador.
 - Toda consulta y acción pasa por el servicio. Las respuestas fuera de alcance son **404**, no 403,
   para no revelar existencia.
-- Se prohíbe leer tablas de tiquets fuera de `repositories/tickets-scoped.ts`. Se implementará una
+- Se prohíbe leer tablas de tiquets fuera de `apps/server/src/tickets/repository.ts`. Se implementará una
   regla de lint/sintaxis y una revisión de dependencias; las rutas y servicios no reciben un
   `QueryBuilder` libre.
 - Se aplica a: lectura, historial, búsqueda, exportaciones, evidencias y miniaturas, difusión SSE,

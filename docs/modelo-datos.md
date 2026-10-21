@@ -354,7 +354,12 @@ C=espera inicio, D=trabajo activo, E=pausa, F=validación, G=reclamación/reasig
 
 ## 8. RLS y visibilidad al solicitante
 
-- RLS activado en **todas** las tablas del esquema expuesto; sin excepción.
+> **Nota de la versión autoalojada:** RLS se sustituye por `can(actor, permiso, tiquet)` y por
+> repositorios con alcance. Los ámbitos (`own`, `team`, `buildings`, `all`) y la visibilidad del
+> solicitante no cambian. Ver ADR 0071 y `docs/migracion/rendimiento-postgres.md`.
+
+- En la versión anterior, RLS estaba activado en **todas** las tablas del esquema expuesto; sin
+  excepción.
 - Permisos desde datos: `user_roles` → `role_permissions` → `permissions` + `scope`. Funciones
   `stable` `has_permission(uid, permission)` y `can_see_ticket(uid, ticket)` con `(select auth.uid())`.
 - Ámbito por permiso: `own` (solicitante del tiquet o técnico asignado), `team` (equipo del

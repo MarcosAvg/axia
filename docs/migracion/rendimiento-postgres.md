@@ -64,6 +64,25 @@ No se particiona ninguna tabla todavía. Umbral inicial para revisar `ticket_eve
 millones de filas o varios GB, con un patrón de consulta por rango de fechas. Si se decide, la clave
 primaria y las FKs deben rediseñarse para incluir la clave de partición; no es un cambio cosmético.
 
+### 3.1 Consultas de alcance (tramo 4)
+
+La lista de tiquets usa un predicado de alcance con `EXISTS` sobre asignaciones y participantes.
+Las consultas por tiquet se apoyan en los índices existentes `ticket_assignments(ticket_id)`,
+`ticket_participants(ticket_id)`, `tickets(team_id)`, `tickets(building_id)` y
+`tickets(status, reported_at)`. El timeline filtra por `ticket_id` y ordena por `occurred_at`.
+
+Con los fixtures del tramo 4 (cuatro tiquets) el planificador elige exploraciones secuenciales
+porque las tablas son minúsculas; **no es una señal para crear índices**. Antes de producción se
+repetirá `EXPLAIN (ANALYZE, BUFFERS)` con volumen representativo. Candidatos a evaluar entonces,
+solo si el plan los justifica:
+
+- índices parciales por asignado activo (`assignee_user_id`, `assignee_technician_id` con
+  `ended_at is null`);
+- índice parcial por participante activo (`technician_id` con `ended_at is null`);
+- índice de timeline `(ticket_id, occurred_at, id)`.
+
+No se añadió ninguno en el tramo 4.
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una
