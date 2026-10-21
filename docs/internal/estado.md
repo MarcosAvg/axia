@@ -11,8 +11,10 @@
 **Sin trabajo en curso.** La web, la API, la base y las pruebas usan el stack propio. No hay
 dependencias de plataformas externas en el código ni en la configuración.
 
-**Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
-de restauración en el host definitivo. Después, si se decide, Web Push y escalamiento programado.
+**Siguiente:** Tanda B de UI (notificaciones y SSE en la web, alta/reset de usuarios, detalle del
+tiquet y evidencias ampliables). Después, puesta en marcha real (servidor, TLS, reverse proxy),
+respaldos programados y prueba de restauración en el host definitivo. Si se decide, Web Push y
+escalamiento programado.
 
 ## Hecho
 
@@ -37,8 +39,12 @@ de restauración en el host definitivo. Después, si se decide, Web Push y escal
   evidencias y restauración probada.
 - **Corte final:** la PWA usa la API propia, se retiró el stack anterior y se dejó la etiqueta local
   `pre-corte-legacy`.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 237 web, 15 Playwright y 130 de integración contra
-  PostgreSQL real. `pnpm check` en verde.
+- **UI (Tanda A):** barra superior y pantallas de administración adaptadas de 320 a 1440 px,
+  tarjetas móviles para catálogos/ámbitos/designaciones, objetivos táctiles, contraste de estados,
+  `prefers-reduced-motion`, jerarquía de encabezados, títulos de pestaña, estado vacío de búsqueda y
+  regresión visual actualizada (incluye panel móvil).
+- **Pruebas:** 39 unitarias/HTTP del servidor, 237 web, 24 Playwright y 130 de integración contra
+  PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 

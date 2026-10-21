@@ -28,6 +28,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - La PWA usa la API propia y el servidor sirve el SPA compilado.
 - La compuerta de calidad usa PostgreSQL real, Vitest y Playwright.
 - La documentación se reorganizó en inicio, guías, referencia, conceptos, decisiones e histórico.
+- UI móvil: barra superior y administración adaptadas de 320 a 1440 px, con tarjetas para catálogos,
+  ámbitos y designaciones; objetivos táctiles, contraste, movimiento reducido, jerarquía de
+  encabezados y títulos de pestaña corregidos.
+- La búsqueda global muestra un estado vacío; la tarjeta de Integraciones indica que no está
+  disponible en esta versión.
+- La regresión visual se actualizó a la interfaz actual e incluye una captura del panel móvil.
 
 ### Retirado
 
