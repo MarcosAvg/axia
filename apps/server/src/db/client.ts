@@ -23,3 +23,5 @@ export function createDb(connectionString?: string) {
 
   return { pool, db }
 }
+
+export type Database = ReturnType<typeof createDb>['db']

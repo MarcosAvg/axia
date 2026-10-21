@@ -36,6 +36,29 @@ const environmentSchema = z.object({
     .min(1_000)
     .max(60_000)
     .default(10_000),
+  SESSION_COOKIE_NAME: z.string().min(1).default('axia_session'),
+  SESSION_ABSOLUTE_TTL_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 365)
+    .default(24 * 7),
+  SESSION_IDLE_TTL_HOURS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
+  SESSION_TOUCH_INTERVAL_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(3_600)
+    .default(60),
+  LOGIN_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(5),
+  LOGIN_MAX_IP_ATTEMPTS: z.coerce.number().int().min(1).max(1_000).default(20),
+  LOGIN_WINDOW_MINUTES: z.coerce.number().int().min(1).max(1_440).default(15),
+  PASSWORD_MIN_LENGTH: z.coerce.number().int().min(8).max(128).default(12),
 })
 
 export type AppConfig = z.infer<typeof environmentSchema> & {

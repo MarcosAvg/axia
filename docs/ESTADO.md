@@ -4,18 +4,18 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 2 (servidor mínimo) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 3 (auth y usuarios) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 2 de la Etapa B se cerró el 2026-10-21:
-Fastify 5, configuración validada, salud, seguridad, errores, estáticos opcionales,
-apagado ordenado y Compose con `app`. La aplicación actual sigue sobre Supabase; el
-servidor nuevo no publica todavía la web. El corte funcional será único al final.
+**Sin trabajo en curso.** El tramo 3 de la Etapa B se cerró el 2026-10-21:
+setup del primer administrador, login con Argon2id, sesiones en PostgreSQL, bloqueo de
+intentos, CSRF por origen, cambio/reset de contraseña y administración de usuarios. La
+aplicación actual sigue sobre Supabase; el login de la web se conectará en el corte final.
 
-**Siguiente:** tramo 3 (auth y usuarios). Antes de auth/dominio siguen abiertas las
-decisiones de `docs/migracion-sin-supabase.md` §9 (política de sesión, push, semillas,
-reparto SQL/TS y pgTAP híbrido).
+**Siguiente:** tramo 4 (autorización y consultas con alcance). Siguen abiertas las decisiones
+de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP
+híbrido; la política de sesión ya se implementó con los valores propuestos.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -48,6 +48,18 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 3 — auth y usuarios (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Semilla de referencia `0002_reference_core.sql` (permisos, roles y matriz; sin datos demo) e
+    índice `0003_auth_indexes.sql` para el límite por IP.
+  - Setup del primer administrador con advisory lock; login usuario/contraseña con Argon2id,
+    cookie `HttpOnly`/`SameSite=Lax`, sesiones opacas en base, bloqueo por usuario+IP e IP y
+    validación de origen en mutaciones.
+  - Cambio y reset de contraseña, `mustChangePassword`, revocación de sesiones, administración de
+    usuarios, protección de la cuenta propia y del último administrador.
+  - Pruebas: 24 unitarias/HTTP y 26 de integración contra PostgreSQL 17; smoke en contenedor con
+    cookie real, `/api/auth/me`, logout y comprobación de Argon2 nativo. **ADR 0070**.
+    `pnpm check` y `pnpm check:next` en verde.
 - **Migración sin Supabase, Etapa B, tramo 2 — servidor mínimo (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - Fastify 5 con configuración Zod, compilación NodeNext, `build`/`start`/`dev`, health
@@ -483,7 +495,7 @@ concreta, opciones y recomendación.
 | 11 | Reglas de acciones tardías sin conexión y de concurrencia | Fase 1 (tramo 4) | **Resuelta**: "primero gana" |
 | 12 | ¿Basta una sola fila de configuración de instancia por base? | Fase 1 (tramo 1) | **Resuelta**: una instancia por base |
 | 13 | Definición del contenido de la alerta de duplicados | Fase 1 (tramo 4) | **Resuelta**: folio, estado, fecha, ubicación, problema y contacto |
-| 14 | Respuestas de `docs/migracion-sin-supabase.md` §9 (política de sesión, push, semillas, reparto SQL/TS y pgTAP híbrido) | Tramos 3-9 de la Etapa B | **Parcial**: se autorizó implementar el tramo 1; faltan las decisiones de los tramos siguientes |
+| 14 | Respuestas de `docs/migracion-sin-supabase.md` §9 (push, semillas, reparto SQL/TS y pgTAP híbrido) | Tramos 4-9 de la Etapa B | **Parcial**: auth y sesiones ya se implementaron con los valores propuestos; faltan las decisiones restantes |
 
 Las preguntas de la Fase 1 quedaron resueltas; las decisiones están en el bloque de correcciones de
 `docs/especificacion-negocio.md` y en `docs/modelo-datos.md`. La migración fuera de Supabase ya
@@ -1148,3 +1160,11 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   de producción y Compose con `app` sin puerto público; `compose.dev.yaml` publica solo
   `127.0.0.1:${APP_PORT}`. Verificado en contenedor: health 200, 404 API JSON, cabeceras y SIGTERM.
   **ADR 0069**. `pnpm check` y `pnpm check:next` en verde.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 3**. Autenticación local completa:
+  semilla de referencia de permisos/roles, `login_attempts` con índice por IP, setup transaccional
+  del primer administrador, Argon2id, sesiones opacas en PostgreSQL con cookie `HttpOnly`/`SameSite`,
+  bloqueo por usuario+IP e IP, validación de origen, cambio/reset de contraseña, `mustChangePassword`,
+  revocación de sesiones y administración de usuarios con guardas de cuenta propia y último
+  administrador. La web actual no cambia; el login se conectará en el corte. **ADR 0070**.
+  `pnpm check` y `pnpm check:next` en verde; smoke de setup/login/me/logout en contenedor y Argon2
+  nativo verificado. Rama `feat/migracion-base-datos`.

@@ -5,6 +5,8 @@ import Fastify, {
   type FastifyServerOptions,
 } from 'fastify'
 
+import { registerAuthRoutes } from './auth/routes.js'
+import type { AuthService } from './auth/service.js'
 import type { AppConfig } from './config.js'
 import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
@@ -14,6 +16,7 @@ import { registerStatic } from './http/static.js'
 export type BuildAppOptions = {
   config: AppConfig
   readiness: ReadinessProbe
+  auth?: AuthService
   logger?: FastifyServerOptions['logger']
 }
 
@@ -38,6 +41,7 @@ function buildLogger(config: AppConfig): FastifyServerOptions['logger'] {
 export async function buildApp({
   config,
   readiness,
+  auth,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -55,6 +59,10 @@ export async function buildApp({
 
   await registerSecurity(app, config.isProduction)
   registerHealthRoutes(app, readiness, config.HEALTH_TIMEOUT_MS)
+
+  if (auth) {
+    await registerAuthRoutes(app, auth, config)
+  }
 
   if (config.STATIC_DIR) {
     await registerStatic(app, config.STATIC_DIR)

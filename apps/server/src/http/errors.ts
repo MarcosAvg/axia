@@ -1,28 +1,31 @@
 import { extname } from 'node:path'
 
-import type {
-  FastifyError,
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-} from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { ZodError } from 'zod'
+
+export type AppErrorOptions = {
+  details?: unknown
+  headers?: Record<string, string>
+}
 
 export class AppError extends Error {
   readonly statusCode: number
   readonly code: string
   readonly details?: unknown
+  readonly headers?: Record<string, string>
 
   constructor(
     statusCode: number,
     code: string,
     message: string,
-    details?: unknown,
+    options?: AppErrorOptions,
   ) {
     super(message)
     this.name = 'AppError'
     this.statusCode = statusCode
     this.code = code
-    this.details = details
+    this.details = options?.details
+    this.headers = options?.headers
   }
 }
 
@@ -42,6 +45,7 @@ type ApiErrorOptions = {
   code: string
   message: string
   details?: unknown
+  headers?: Record<string, string>
 }
 
 function sendApiError({
@@ -51,7 +55,10 @@ function sendApiError({
   code,
   message,
   details,
+  headers,
 }: ApiErrorOptions): FastifyReply {
+  if (headers) reply.headers(headers)
+
   const body: ApiErrorBody = {
     error: {
       code,
@@ -64,8 +71,29 @@ function sendApiError({
   return reply.status(statusCode).send(body)
 }
 
+function errorStatusCode(error: unknown): number | undefined {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'statusCode' in error &&
+    typeof error.statusCode === 'number'
+  ) {
+    return error.statusCode
+  }
+  return undefined
+}
+
+function isValidationError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'validation' in error &&
+    Boolean(error.validation)
+  )
+}
+
 export function errorHandler(
-  error: FastifyError,
+  error: unknown,
   request: FastifyRequest,
   reply: FastifyReply,
 ): FastifyReply {
@@ -77,10 +105,25 @@ export function errorHandler(
       code: error.code,
       message: error.message,
       details: error.details,
+      headers: error.headers,
     })
   }
 
-  if (error.validation) {
+  if (error instanceof ZodError) {
+    return sendApiError({
+      reply,
+      request,
+      statusCode: 400,
+      code: 'validation_error',
+      message: 'La petición no es válida',
+      details: error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      })),
+    })
+  }
+
+  if (isValidationError(error)) {
     return sendApiError({
       reply,
       request,
@@ -90,13 +133,14 @@ export function errorHandler(
     })
   }
 
-  if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+  const statusCode = errorStatusCode(error)
+  if (statusCode && statusCode >= 400 && statusCode < 500) {
     return sendApiError({
       reply,
       request,
-      statusCode: error.statusCode,
+      statusCode,
       code: 'request_error',
-      message: error.message,
+      message: error instanceof Error ? error.message : 'Petición inválida',
     })
   }
 

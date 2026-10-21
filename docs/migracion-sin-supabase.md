@@ -764,6 +764,10 @@ Pregunta abierta: si se quiere que las categorías/equipos iniciales formen part
 solo de demostración. Propuesta: referencia mínima (roles, permisos, reglas, motivos, tipos,
 prioridades, canales, calendario y festivos); el resto es demo.
 
+**Nota de implementación:** permisos, roles y configuración inicial se adelantaron al tramo 3 como
+migración `0002_reference_core.sql`, porque el login y la administración los necesitan. El tramo 9
+conserva el resto de la referencia y toda la semilla demo.
+
 ### 6.3 Usuarios y contraseñas de demostración
 
 - La semilla actual inserta usuarios en `auth.users` con una contraseña fija versionada. **No se

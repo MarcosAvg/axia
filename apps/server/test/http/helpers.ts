@@ -4,7 +4,7 @@ import { buildApp } from '../../src/app.js'
 import type { AppConfig } from '../../src/config.js'
 import type { ReadinessProbe } from '../../src/http/health.js'
 
-const testConfig: AppConfig = {
+export const testConfig: AppConfig = {
   NODE_ENV: 'test',
   HOST: '127.0.0.1',
   PORT: 3000,
@@ -14,6 +14,14 @@ const testConfig: AppConfig = {
   BODY_LIMIT_BYTES: 1_048_576,
   HEALTH_TIMEOUT_MS: 100,
   SHUTDOWN_TIMEOUT_MS: 5_000,
+  SESSION_COOKIE_NAME: 'axia_session',
+  SESSION_ABSOLUTE_TTL_HOURS: 24 * 7,
+  SESSION_IDLE_TTL_HOURS: 24,
+  SESSION_TOUCH_INTERVAL_SECONDS: 60,
+  LOGIN_MAX_ATTEMPTS: 5,
+  LOGIN_MAX_IP_ATTEMPTS: 20,
+  LOGIN_WINDOW_MINUTES: 15,
+  PASSWORD_MIN_LENGTH: 12,
   isProduction: false,
 }
 

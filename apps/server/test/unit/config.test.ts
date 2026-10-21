@@ -17,6 +17,11 @@ describe('configuration', () => {
     expect(config.BODY_LIMIT_BYTES).toBe(1_048_576)
     expect(config.HEALTH_TIMEOUT_MS).toBe(2000)
     expect(config.SHUTDOWN_TIMEOUT_MS).toBe(10_000)
+    expect(config.SESSION_COOKIE_NAME).toBe('axia_session')
+    expect(config.SESSION_ABSOLUTE_TTL_HOURS).toBe(168)
+    expect(config.SESSION_IDLE_TTL_HOURS).toBe(24)
+    expect(config.LOGIN_MAX_ATTEMPTS).toBe(5)
+    expect(config.PASSWORD_MIN_LENGTH).toBe(12)
     expect(config.isProduction).toBe(false)
   })
 

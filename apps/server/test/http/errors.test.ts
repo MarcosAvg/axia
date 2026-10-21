@@ -8,7 +8,7 @@ describe('error contract', () => {
     const app = await buildTestApp()
     app.get('/boom', async () => {
       throw new AppError(409, 'conflict', 'El recurso ya existe', {
-        field: 'folio',
+        details: { field: 'folio' },
       })
     })
 

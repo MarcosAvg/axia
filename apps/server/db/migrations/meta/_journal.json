@@ -15,6 +15,20 @@
       "when": 1792534407112,
       "tag": "0001_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792548541548,
+      "tag": "0002_reference_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792548542548,
+      "tag": "0003_auth_indexes",
+      "breakpoints": true
     }
   ]
 }
