@@ -25,15 +25,20 @@ const statusListSchema = z.preprocess(
   z.array(z.enum(TICKET_STATUSES)).min(1).optional(),
 )
 
-export const listTicketsQuerySchema = z.object({
+const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+})
+
+export const listTicketsQuerySchema = paginationSchema.extend({
   status: z.enum(TICKET_STATUSES).optional(),
   statuses: statusListSchema,
   buildingId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
   search: z.string().trim().max(100).optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
+
+export const paginationQuerySchema = paginationSchema
 
 export const ticketIdParamsSchema = z.object({
   id: z.string().uuid(),

@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url'
 
 import { buildApp } from './app.js'
 import { createAuthService } from './auth/service.js'
+import { createCatalogService } from './catalogs/service.js'
 import { loadConfig } from './config.js'
 import { createDb } from './db/client.js'
 import { checkDatabase } from './db/health.js'
@@ -12,10 +13,12 @@ async function main() {
   const { pool, db } = createDb(config.DATABASE_URL)
   const auth = createAuthService(db, config)
   const tickets = createTicketService(db)
+  const catalogs = createCatalogService(db)
   const app = await buildApp({
     config,
     auth,
     tickets,
+    catalogs,
     readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
   })
 

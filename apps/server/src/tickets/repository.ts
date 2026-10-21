@@ -1,19 +1,12 @@
-import { sql, type SQL } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
+import { filterConditions, type TicketFilters } from './filters.js'
 import { iso, optionalIso } from './format.js'
 import { AppError } from '../http/errors.js'
 import { can, canAct, type TicketAccess } from './access.js'
 import { scopePredicate } from './scope.js'
-
-type TicketFilters = {
-  status?: string
-  statuses?: string[]
-  buildingId?: string
-  categoryId?: string
-  search?: string
-}
 
 type TicketListItem = {
   id: string
@@ -179,27 +172,6 @@ export function assertTicketAction(
       'No tienes permiso para realizar esta acción',
     )
   }
-}
-
-function filterConditions(filters: TicketFilters): SQL[] {
-  const conditions: SQL[] = []
-  if (filters.status) conditions.push(sql`t.status = ${filters.status}`)
-  if (filters.statuses?.length) {
-    const statuses = filters.statuses.map((status) => sql`${status}`)
-    conditions.push(sql`t.status in (${sql.join(statuses, sql`, `)})`)
-  }
-  if (filters.buildingId) {
-    conditions.push(sql`t.building_id = ${filters.buildingId}`)
-  }
-  if (filters.categoryId) {
-    conditions.push(sql`t.category_id = ${filters.categoryId}`)
-  }
-  const search = filters.search?.replace(/[\\%_(),]/g, '').trim()
-  if (search) {
-    const term = `%${search}%`
-    conditions.push(sql`(t.folio ilike ${term} or t.description ilike ${term})`)
-  }
-  return conditions
 }
 
 export type ListTicketsOptions = {

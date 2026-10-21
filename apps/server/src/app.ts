@@ -7,6 +7,8 @@ import Fastify, {
 
 import { registerAuthRoutes } from './auth/routes.js'
 import type { AuthService } from './auth/service.js'
+import { registerCatalogRoutes } from './catalogs/routes.js'
+import type { CatalogService } from './catalogs/service.js'
 import type { AppConfig } from './config.js'
 import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
@@ -20,6 +22,7 @@ export type BuildAppOptions = {
   readiness: ReadinessProbe
   auth?: AuthService
   tickets?: TicketService
+  catalogs?: CatalogService
   logger?: FastifyServerOptions['logger']
 }
 
@@ -46,6 +49,7 @@ export async function buildApp({
   readiness,
   auth,
   tickets,
+  catalogs,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -70,6 +74,10 @@ export async function buildApp({
 
   if (auth && tickets) {
     registerTicketRoutes(app, { auth, config, tickets })
+  }
+
+  if (auth && catalogs) {
+    registerCatalogRoutes(app, { auth, config, catalogs })
   }
 
   if (config.STATIC_DIR) {

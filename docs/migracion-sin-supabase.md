@@ -102,7 +102,7 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `admin/api/import-api.ts` | Mapa de estatus, lotes, tareas + 2 RPC | `/api/admin/imports` |
 | `admin/api/settings-api.ts` | Lectura/escritura de `instance_settings` | `/api/admin/settings` |
 | `auth/api/auth-api.ts` | Auth + `me` + `profile_update` | `/api/auth/*`, `/api/me` |
-| `catalogs/api/catalogs-api.ts` | 9 catálogos (`teams`, `priorities`, `locations`, `categories`, `subcategories`, `problems`, `requesters`, `technicians`, `reasons`) | `/api/catalogs/:catalog` |
+| `catalogs/api/catalogs-api.ts` | 9 catálogos (`teams`, `priorities`, `locations`, `categories`, `subcategories`, `problems`, `requesters`, `technicians`, `reasons`) | `/api/catalogs/:catalog`; implementado con 13 catálogos y filtros por padre |
 | `dashboard/api/dashboard-api.ts` | `v_ticket_timeline` + `tickets` | `/api/dashboard` |
 | `integrations/api/import-run-api.ts` | 10 RPC de importación + `instance_settings` + catálogos | `/api/admin/imports/:id/...` |
 | `metrics/api/metrics-api.ts` | `v_ticket_metrics_base` + 11 RPC de indicadores | `/api/metrics/...` (mismas vistas/funciones SQL con alcance) |
@@ -110,7 +110,7 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `tickets/api/offline-evidence.ts` | TUS a Storage + `evidence_add` | TUS propio + `/api/evidence` |
 | `tickets/api/pause-api.ts` | 3 RPC | Acciones de pausa |
 | `tickets/api/rating-api.ts` | `ticket_ratings` + `ticket_rate` | `/api/tickets/:id/rating` |
-| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; altas y evidencias en tramos posteriores |
+| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; altas y evidencias en tramos posteriores |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
 | `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions` |
 | `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
@@ -635,6 +635,14 @@ con filtros `status`, `statuses`, `buildingId`, `categoryId`, `search`, `page` y
 100). `GET /api/tickets/:id` devuelve `{ ticket }`; timeline y participantes devuelven `{ items }`.
 Sin `ticket.view` se responde `403`; con el permiso pero fuera de alcance, `404` opaco. El contrato
 es camelCase y las rutas no se publican en la web hasta el corte final.
+
+**Implementado en 5B (lecturas auxiliares):** `GET /api/catalogs/:catalog` con lista blanca de
+`teams`, `buildings`, `dependencies`, `service-types`, `channels`, `priorities`, `locations`,
+`categories`, `subcategories`, `problems`, `requesters`, `technicians` y `reasons`; los catálogos
+dependientes exigen `buildingId`, `categoryId`, `subcategoryId` o `use`. `GET /api/tickets/mine` y
+`GET /api/tickets/offers` devuelven páginas de `TicketListItem`; `GET /api/supervisors` devuelve
+supervisores con ámbitos visibles para el actor. La bandeja de ofertas y la lista de supervisores
+exigen `ticket.take_offer` y `ticket.assign_supervisor`, respectivamente.
 
 ## 5. Inventario de pruebas actuales y destino
 

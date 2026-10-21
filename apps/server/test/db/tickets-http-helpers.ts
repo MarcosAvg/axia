@@ -4,6 +4,7 @@ import type { Pool } from 'pg'
 
 import { buildApp } from '../../src/app.js'
 import { createAuthService } from '../../src/auth/service.js'
+import { createCatalogService } from '../../src/catalogs/service.js'
 import { hashPassword } from '../../src/auth/password.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
@@ -65,6 +66,21 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
     ) values ('no-access', 'Sin acceso', ${passwordHash}, false)
     returning id`,
   )
+  const otherSupervisor = await insertOne(
+    created.db,
+    sql`insert into public.users (
+      username, full_name, password_hash, must_change_password
+    ) values ('other-supervisor', 'Otro supervisor', ${passwordHash}, false)
+    returning id`,
+  )
+  await created.db.execute(sql`
+    insert into public.user_roles (user_id, role_id)
+    select ${otherSupervisor.id}, id from public.roles where name = 'supervisor'
+  `)
+  await created.db.execute(sql`
+    insert into public.supervisor_scopes (user_id, team_id)
+    select ${otherSupervisor.id}, id from public.teams where name = 'Equipo B'
+  `)
   await created.db.execute(sql`
     update public.users
     set password_hash = ${passwordHash}, must_change_password = false
@@ -72,10 +88,12 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
 
   const auth = createAuthService(created.db, testConfig)
   const tickets = createTicketService(created.db)
+  const catalogs = createCatalogService(created.db)
   const app = await buildApp({
     config: testConfig,
     auth,
     tickets,
+    catalogs,
     readiness: () => checkDatabase(created.pool),
     logger: false,
   })

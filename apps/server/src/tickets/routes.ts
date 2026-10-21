@@ -9,7 +9,11 @@ import {
 } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
-import { listTicketsQuerySchema, ticketIdParamsSchema } from './schemas.js'
+import {
+  listTicketsQuerySchema,
+  paginationQuerySchema,
+  ticketIdParamsSchema,
+} from './schemas.js'
 import type { TicketService } from './service.js'
 
 export type TicketRoutesOptions = {
@@ -18,17 +22,37 @@ export type TicketRoutesOptions = {
   tickets: TicketService
 }
 
+type TicketGuards = {
+  canView: Guard[]
+  canTakeOffer: Guard[]
+  canAssignSupervisor: Guard[]
+}
+
 function notFound(): AppError {
   return new AppError(404, 'not_found', 'Tiquet no encontrado')
 }
 
-export function registerTicketRoutes(
-  app: FastifyInstance,
-  { auth, config, tickets }: TicketRoutesOptions,
-) {
+function createGuards(auth: AuthService, config: AppConfig): TicketGuards {
   const active = authGuards(auth, config, false)
-  const canView: Guard[] = [active, requirePermission('ticket.view')]
+  return {
+    canView: [active, requirePermission('ticket.view')],
+    canTakeOffer: [
+      active,
+      requirePermission('ticket.take_offer'),
+      requirePermission('ticket.view'),
+    ],
+    canAssignSupervisor: [
+      active,
+      requirePermission('ticket.assign_supervisor'),
+    ],
+  }
+}
 
+function registerListRoute(
+  app: FastifyInstance,
+  tickets: TicketService,
+  canView: Guard[],
+) {
   app.get('/api/tickets', { preHandler: canView }, async (request) => {
     const query = listTicketsQuerySchema.parse(request.query)
     return tickets.list(currentActor(request), {
@@ -43,7 +67,45 @@ export function registerTicketRoutes(
       pageSize: query.pageSize,
     })
   })
+}
 
+function registerWorklistRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  guards: TicketGuards,
+) {
+  app.get(
+    '/api/tickets/mine',
+    { preHandler: guards.canView },
+    async (request) => {
+      const query = paginationQuerySchema.parse(request.query)
+      return tickets.myWork(currentActor(request), query.page, query.pageSize)
+    },
+  )
+
+  app.get(
+    '/api/tickets/offers',
+    { preHandler: guards.canTakeOffer },
+    async (request) => {
+      const query = paginationQuerySchema.parse(request.query)
+      return tickets.offers(currentActor(request), query.page, query.pageSize)
+    },
+  )
+
+  app.get(
+    '/api/supervisors',
+    { preHandler: guards.canAssignSupervisor },
+    async (request) => ({
+      items: await tickets.supervisors(currentActor(request)),
+    }),
+  )
+}
+
+function registerDetailRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  canView: Guard[],
+) {
   app.get('/api/tickets/:id', { preHandler: canView }, async (request) => {
     const { id } = ticketIdParamsSchema.parse(request.params)
     const ticket = await tickets.detail(currentActor(request), id)
@@ -72,4 +134,14 @@ export function registerTicketRoutes(
       return { items }
     },
   )
+}
+
+export function registerTicketRoutes(
+  app: FastifyInstance,
+  { auth, config, tickets }: TicketRoutesOptions,
+) {
+  const guards = createGuards(auth, config)
+  registerListRoute(app, tickets, guards.canView)
+  registerWorklistRoutes(app, tickets, guards)
+  registerDetailRoutes(app, tickets, guards.canView)
 }

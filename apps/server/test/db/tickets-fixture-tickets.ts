@@ -112,6 +112,10 @@ export async function createTicketActivity(
     ) values (${ids.ticketAux}, 1, ${people.technicianRow.id}, 'leader', ${catalog.categoryA.id})
   `)
   await db.execute(sql`
+    insert into public.ticket_offers (ticket_id, cycle, supervisor_user_id)
+    values (${ids.ticketAux}, 1, ${people.supervisorUserId})
+  `)
+  await db.execute(sql`
     insert into public.ticket_events (ticket_id, cycle, type, actor_id, payload)
     values (${ids.ticketA1}, 1, 'created', ${people.adminId}, '{}'::jsonb)
   `)

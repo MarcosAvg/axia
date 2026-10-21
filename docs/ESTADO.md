@@ -4,18 +4,18 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5A (API de lectura de tiquets) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5B (lecturas auxiliares y bandejas) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 5A se cerró el 2026-10-21: API de lectura
-`GET /api/tickets`, `GET /api/tickets/:id`, `GET /api/tickets/:id/timeline` y
-`GET /api/tickets/:id/participants`, con guards reutilizables, alcance por repositorio y pruebas
-HTTP contra PostgreSQL real. No hay cambios en la web; sigue sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 5B se cerró el 2026-10-21: catálogos de lectura,
+bandejas `GET /api/tickets/mine` y `GET /api/tickets/offers`, y `GET /api/supervisors` con alcance.
+Todo pasa por PostgreSQL real y guards de sesión/permiso. No hay cambios en la web; sigue sobre
+Supabase hasta el corte final.
 
-**Siguiente:** tramo 5B (lecturas auxiliares: catálogos, bandejas y supervisores) y después 5C
-(transiciones y escrituras). Siguen abiertas las decisiones de
-`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 5C (transiciones y escrituras con idempotencia y concurrencia). Siguen abiertas
+las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y
+pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -48,6 +48,17 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 5B — lecturas auxiliares y bandejas (2026-10-21)**,
+  rama `feat/migracion-base-datos`:
+  - `GET /api/catalogs/:catalog` con lista blanca de 13 catálogos, filtros por padre y validación
+    Zod; `GET /api/supervisors` filtrado por ámbito.
+  - Bandejas `GET /api/tickets/mine` (asignaciones activas, sin estados finales) y
+    `GET /api/tickets/offers` (ofertas dirigidas al actor), ambas paginadas.
+  - Guards reutilizables y permisos `ticket.view`, `ticket.take_offer` y
+    `ticket.assign_supervisor`.
+  - Medición con 20 000 tiquets y 3 333 ofertas: bandeja propia 27 ms, ofertas 13 ms; no se
+    añadieron índices nuevos. Candidatos parciales de asignaciones/ofertas documentados.
+  - Pruebas: 35 unitarias/HTTP y 66 de integración; catálogos, alcance de bandejas y supervisores.
 - **Migración sin Supabase, Etapa B, tramo 5A — API de lectura de tiquets (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - Endpoints `GET /api/tickets`, `GET /api/tickets/:id`, `GET /api/tickets/:id/timeline` y
@@ -1203,4 +1214,9 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   lectura de tiquets con guards reutilizables, Zod, detalle, timeline y participantes. Se midió la
   lista con 20 000 tiquets y se añadió solo el índice trigram de folio; los índices parciales de
   asignaciones quedaron como candidatos. 35 pruebas unitarias/HTTP y 51 de integración. Rama
+  `feat/migracion-base-datos`.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 5B**. Se añadieron catálogos de lectura
+  con lista blanca y filtros por padre, bandejas de trabajo/ofertas paginadas y supervisores
+  filtrados por ámbito. Se midieron las consultas con 20 000 tiquets y 3 333 ofertas; no se
+  justificaron índices nuevos. 35 pruebas unitarias/HTTP y 66 de integración. Rama
   `feat/migracion-base-datos`.

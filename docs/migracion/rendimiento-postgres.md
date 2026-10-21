@@ -85,9 +85,19 @@ Medición con 20 000 tiquets, 5 476 asignaciones, 2 000 participantes y 40 000 e
 | Timeline de un tiquet | 0,6 ms | Sin cambio |
 
 Se añadió `idx_tickets_folio_trgm` en la migración no transaccional
-`0004_tickets_search_index.sql`. Los índices parciales por asignado/participante activo siguen como
-candidatos y solo se crearán si un volumen mayor y `EXPLAIN` demuestran que se usan. No se añadió
-particionado ni PgBouncer; el pool de la aplicación sigue limitado a 10 conexiones.
+`0004_tickets_search_index.sql`.
+
+Para las bandejas del tramo 5B se midió con 3 333 ofertas activas y 5 476 asignaciones:
+
+| Consulta | Antes | Decisión |
+|---|---:|---|
+| Bandeja propia (`ticket_assignments` activas) | 27 ms | Sin índice nuevo; el filtro por técnico usa recorrido secuencial porque 5 000 de 5 476 asignaciones son del mismo técnico |
+| Bandeja de ofertas (`ticket_offers` por supervisor y estado) | 13 ms | Sin índice nuevo; candidato parcial si hay muchos supervisores |
+| Supervisores por ámbito | < 1 ms | Sin índice; tablas pequeñas |
+
+Los índices parciales por asignado/participante activo y por oferta dirigida siguen como candidatos
+y solo se crearán si un volumen mayor y `EXPLAIN` demuestran que se usan. No se añadió particionado
+ni PgBouncer; el pool de la aplicación sigue limitado a 10 conexiones.
 
 ## 4. Migraciones no transaccionales
 
