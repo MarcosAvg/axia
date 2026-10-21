@@ -101,6 +101,7 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
     catalogs,
     evidence,
     realtime: { db: created.db, events },
+    sync: { db: created.db },
     readiness: () => checkDatabase(created.pool),
     logger: false,
   })

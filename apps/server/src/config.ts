@@ -53,6 +53,17 @@ const environmentSchema = z.object({
     .min(1_000)
     .max(60_000)
     .default(15_000),
+  SYNC_FUTURE_TOLERANCE_MS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 60 * 1000)
+    .default(5 * 60 * 1000),
+  SYNC_MAX_AGE_MS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(30 * 24 * 60 * 60 * 1000),
   HEALTH_TIMEOUT_MS: z.coerce
     .number()
     .int()

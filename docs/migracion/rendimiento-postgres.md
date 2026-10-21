@@ -142,6 +142,12 @@ El catch-up usa la PK de `ticket_events` y el predicado de alcance; la bandeja u
 consulta por PK del tiquet. No se añadieron índices nuevos.
 
 
+### 3.5 Sincronización offline (tramo 8A)
+
+Cada ítem se valida y aplica en su propia transacción, igual que la acción online. La idempotencia
+usa el índice único de `ticket_events(client_request_id)`; no se añadieron índices nuevos.
+
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una

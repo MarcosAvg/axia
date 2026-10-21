@@ -113,7 +113,7 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`, `/api/tickets/:id/evidence`; alta y evidencias implementadas |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
 | `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions`; implementadas las 20 acciones del flujo: toma, asignaciones, inicio, pausa/subestados, reanudación, atendido, validación, rechazo, cancelación, prioridad, comentario, recaptura, reclamaciones, duplicado, reactivación, apoyo auxiliar y calificación |
-| `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
+| `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa al endpoint `/api/tickets/:id/actions`; lote `/api/sync/actions` implementado en servidor |
 | `tickets/api/rpc.ts` | Helper de error de RPC | Sustituir por cliente HTTP |
 | `lib/offline/tus.ts` | Endpoint `storage/v1/upload/resumable` | Endpoint TUS `/api/uploads` |
 | `lib/offline/image.ts` | Compresión en canvas | Conservar; el servidor vuelve a normalizar |
@@ -618,6 +618,11 @@ Reglas:
   Background Sync.
 - Prueba Playwright: técnico sin red registra evidencia, pausa y atendido; al volver la red se
   sincroniza; un conflicto se muestra al usuario.
+
+**Implementado en tramo 8A:** `POST /api/sync/actions` procesa lotes en orden con la misma lógica y
+idempotencia que la API online. `occurredAt` se valida contra la creación del tiquet, 5 minutos de
+futuro y 30 días de antigüedad. Los resultados son `applied`, `duplicate`, `rejected`, `conflict` o
+`blocked`; un fallo bloquea las acciones posteriores del mismo tiquet. Ver ADR 0074.
 
 ### 4.4 Contrato de la API
 

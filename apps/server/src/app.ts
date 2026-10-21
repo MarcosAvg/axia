@@ -14,6 +14,7 @@ import type { EvidenceService } from './evidence/service.js'
 import { createTusServer } from './evidence/tus.js'
 import { registerNotificationRoutes } from './realtime/notifications.js'
 import { registerRealtimeRoutes } from './realtime/routes.js'
+import { registerSyncRoutes } from './sync/routes.js'
 import type { EventHub } from './realtime/hub.js'
 import type { Database } from './db/client.js'
 import type { AppConfig } from './config.js'
@@ -32,6 +33,7 @@ export type BuildAppOptions = {
   catalogs?: CatalogService
   evidence?: EvidenceService
   realtime?: { db: Database; events: EventHub }
+  sync?: { db: Database }
   logger?: FastifyServerOptions['logger']
 }
 
@@ -59,17 +61,24 @@ type OptionalServices = {
   catalogs?: CatalogService
   evidence?: EvidenceService
   realtime?: { db: Database; events: EventHub }
+  sync?: { db: Database }
 }
 
-async function registerOptionalRoutes(
+async function registerCoreRoutes(
   app: FastifyInstance,
   config: AppConfig,
-  services: OptionalServices,
+  { auth, tickets, catalogs }: OptionalServices,
 ) {
-  const { auth, tickets, catalogs, evidence, realtime } = services
   if (auth) await registerAuthRoutes(app, auth, config)
   if (auth && tickets) registerTicketRoutes(app, { auth, config, tickets })
   if (auth && catalogs) registerCatalogRoutes(app, { auth, config, catalogs })
+}
+
+async function registerExtraRoutes(
+  app: FastifyInstance,
+  config: AppConfig,
+  { auth, evidence, realtime, sync }: OptionalServices,
+) {
   if (auth && evidence) {
     registerEvidenceRoutes(app, { auth, config, evidence })
     createTusServer(app, auth, config, evidence)
@@ -78,6 +87,18 @@ async function registerOptionalRoutes(
     registerRealtimeRoutes(app, { auth, config, ...realtime })
     registerNotificationRoutes(app, { auth, config, db: realtime.db })
   }
+  if (auth && sync) {
+    registerSyncRoutes(app, { auth, config, db: sync.db })
+  }
+}
+
+async function registerOptionalRoutes(
+  app: FastifyInstance,
+  config: AppConfig,
+  services: OptionalServices,
+) {
+  await registerCoreRoutes(app, config, services)
+  await registerExtraRoutes(app, config, services)
 }
 
 export async function buildApp({
@@ -88,6 +109,7 @@ export async function buildApp({
   catalogs,
   evidence,
   realtime,
+  sync,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -112,6 +134,7 @@ export async function buildApp({
     catalogs,
     evidence,
     realtime,
+    sync,
   })
 
   if (config.STATIC_DIR) {

@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 
 import type { DbExecutor } from './db.js'
+import { currentOccurredAt } from './event-context.js'
 
 export type HandledEvent = {
   ticketId: string
@@ -48,12 +49,13 @@ export async function writeEvent(
   await executor.execute(sql`
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
-      reason_id, payload, client_request_id
+      reason_id, payload, client_request_id, occurred_at
     )
     select
       t.id, t.cycle, ${type}, ${actorId ?? null}, ${subjectUserId},
       ${subjectTechnicianId}, ${reasonId}, ${JSON.stringify(payload)}::jsonb,
-      ${clientRequestId ?? null}
+      ${clientRequestId ?? null},
+      ${currentOccurredAt() ?? new Date().toISOString()}::timestamptz
     from public.tickets t
     where t.id = ${ticketId}
   `)

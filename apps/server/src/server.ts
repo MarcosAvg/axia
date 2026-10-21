@@ -76,6 +76,7 @@ async function main() {
     catalogs,
     evidence,
     realtime: { db, events },
+    sync: { db },
     readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
   })
   const bridge = createEventBridge(config.DATABASE_URL, events)

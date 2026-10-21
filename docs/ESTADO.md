@@ -4,15 +4,16 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 7A (SSE y notificaciones in-app) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 8A (sincronización offline en servidor) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 7A se cerró el 2026-10-21: SSE con `LISTEN/NOTIFY`, catch-up,
-bandeja de notificaciones in-app y lectura. La web sigue sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 8A se cerró el 2026-10-21: contrato `POST /api/sync/actions`,
+validación de `occurredAt`, idempotencia, orden por tiquet y bloqueo de dependientes. La web sigue
+sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 8 (modo sin conexión y sincronización). Push y el planificador de escalamiento
-quedan opcionales y no bloquean el corte. Siguen abiertas las decisiones de
+**Siguiente:** tramo 8B (adaptar Dexie/outbox y el cliente HTTP al contrato nuevo) y después tramo 9
+(semillas, instalación limpia y retirada final de Supabase). Siguen abiertas las decisiones de
 `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
@@ -46,6 +47,16 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 8A — sincronización offline en servidor (2026-10-21)**,
+  rama `feat/migracion-base-datos`:
+  - `POST /api/sync/actions` procesa hasta 100 acciones por lote, en orden, con el mismo
+    `runTicketAction` y la misma idempotencia que las acciones en línea.
+  - `occurredAt` se valida contra la creación del tiquet, 5 minutos de futuro y 30 días de
+    antigüedad; el evento se guarda con la hora del cliente y `recorded_at` del servidor.
+  - Resultado por ítem: `applied`, `duplicate`, `rejected`, `conflict` o `blocked`; un fallo bloquea
+    las acciones posteriores del mismo tiquet.
+  - Pruebas: 35 unitarias/HTTP y 111 de integración; hora del cliente, duplicado, conflicto,
+    bloqueo, fechas inválidas y alcance. **ADR 0074**.
 - **Migración sin Supabase, Etapa B, tramo 7A — SSE y notificaciones in-app (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - Migración `0006_notifications_realtime.sql`: reglas de notificación y disparador
@@ -1300,3 +1311,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   dedicado, catch-up de eventos, bandeja in-app y lectura de notificaciones. 35 pruebas
   unitarias/HTTP y 106 de integración. Push y scheduler quedan opcionales; siguiente: modo sin
   conexión.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 8A**. Se añadió el contrato de
+  sincronización offline en el servidor: lote ordenado, idempotencia, `occurredAt`, estados
+  `applied`/`duplicate`/`rejected`/`conflict`/`blocked` y bloqueo por tiquet. 35 pruebas
+  unitarias/HTTP y 111 de integración. Siguiente: adaptar el outbox del cliente.
