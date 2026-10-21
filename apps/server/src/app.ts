@@ -9,6 +9,9 @@ import { registerAuthRoutes } from './auth/routes.js'
 import type { AuthService } from './auth/service.js'
 import { registerCatalogRoutes } from './catalogs/routes.js'
 import type { CatalogService } from './catalogs/service.js'
+import { registerEvidenceRoutes } from './evidence/routes.js'
+import type { EvidenceService } from './evidence/service.js'
+import { createTusServer } from './evidence/tus.js'
 import type { AppConfig } from './config.js'
 import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
@@ -23,6 +26,7 @@ export type BuildAppOptions = {
   auth?: AuthService
   tickets?: TicketService
   catalogs?: CatalogService
+  evidence?: EvidenceService
   logger?: FastifyServerOptions['logger']
 }
 
@@ -50,6 +54,7 @@ export async function buildApp({
   auth,
   tickets,
   catalogs,
+  evidence,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -78,6 +83,11 @@ export async function buildApp({
 
   if (auth && catalogs) {
     registerCatalogRoutes(app, { auth, config, catalogs })
+  }
+
+  if (auth && evidence) {
+    registerEvidenceRoutes(app, { auth, config, evidence })
+    createTusServer(app, auth, config, evidence)
   }
 
   if (config.STATIC_DIR) {

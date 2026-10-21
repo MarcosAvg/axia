@@ -4,17 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.3 (pausas, recaptura, reclamaciones y apoyos) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 6 (evidencias y archivos) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 5C.3 se cerró el 2026-10-21: pausa con subestados, recaptura,
-reclamaciones, reasignación de supervisor y apoyo auxiliar. Se completó el conjunto de acciones del
-flujo de tiquets; la web sigue sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 6 se cerró el 2026-10-21: evidencias en volumen local, subida TUS,
+procesamiento con Sharp, normalización a WebP, miniaturas, entrega autenticada y cuota por usuario.
+La web sigue sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 6 (archivos y evidencias: TUS, Sharp, EXIF, miniaturas, entrega autenticada y
-cuotas). Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas
-demo, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 7 (SSE, bandeja de notificaciones, listener y push opcional). Siguen abiertas las
+decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP
+híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -47,6 +47,19 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 6 — evidencias y archivos (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - `POST /api/tickets/:id/evidence` crea la fila `pending` con `clientRequestId` y devuelve la URL
+    TUS; `GET /api/tickets/:id/evidence` lista metadatos.
+  - `/api/uploads` con `@tus/server` y `@tus/file-store`, autenticación por cookie y comprobación de
+    que la evidencia pertenece al actor. Las evidencias no se eliminan.
+  - Sharp valida JPEG/PNG/WebP, corrige orientación EXIF, limita a 4096 px, normaliza a WebP y genera
+    miniatura de 320 px; se guardan hash, dimensiones y tamaño.
+  - `GET /api/evidence/:id/file` y `/thumbnail` sirven solo dentro del alcance del tiquet.
+  - Cuota configurable de 500 MiB por usuario y máximo de 20 MiB por archivo; volumen
+    `axia_evidence` en Compose. **ADR 0072**.
+  - Pruebas: 35 unitarias/HTTP y 101 de integración, incluida subida TUS completa, procesamiento,
+    entrega de archivo/miniatura y rechazo de acceso ajeno. Sin cambios en la web.
 - **Migración sin Supabase, Etapa B, tramo 5C.3 — pausas, recaptura, reclamaciones y apoyos
   (2026-10-21)**, rama `feat/migracion-base-datos`:
   - Acciones `pause`, `advance_pause` y `resume` con motivo raíz, subestados en cascada, una pausa
@@ -1269,3 +1282,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   subestados, recaptura, reclamaciones, reasignación de supervisor y apoyo auxiliar. 35 pruebas
   unitarias/HTTP y 96 de integración. El flujo de tiquets queda cubierto en la API; el siguiente
   tramo es archivos y evidencias.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 6**. Se añadieron evidencias con TUS,
+  procesamiento Sharp, normalización WebP, miniaturas, entrega autenticada y cuota. Se añadió el
+  índice parcial de cuota por usuario. 35 pruebas unitarias/HTTP y 101 de integración. Siguiente:
+  tiempo real y notificaciones.

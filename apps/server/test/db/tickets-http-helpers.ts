@@ -5,6 +5,7 @@ import type { Pool } from 'pg'
 import { buildApp } from '../../src/app.js'
 import { createAuthService } from '../../src/auth/service.js'
 import { createCatalogService } from '../../src/catalogs/service.js'
+import { createEvidenceService } from '../../src/evidence/service.js'
 import { hashPassword } from '../../src/auth/password.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
@@ -89,11 +90,13 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   const auth = createAuthService(created.db, testConfig)
   const tickets = createTicketService(created.db)
   const catalogs = createCatalogService(created.db)
+  const evidence = createEvidenceService(created.db, testConfig)
   const app = await buildApp({
     config: testConfig,
     auth,
     tickets,
     catalogs,
+    evidence,
     readiness: () => checkDatabase(created.pool),
     logger: false,
   })

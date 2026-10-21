@@ -29,3 +29,6 @@ test-results
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# Evidencias locales de desarrollo
+apps/server/data/

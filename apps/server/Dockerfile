@@ -45,6 +45,9 @@ CMD ["node", "dist/db/migrate.js"]
 
 FROM runtime AS app
 WORKDIR /app/apps/server
+USER root
+RUN mkdir -p /data/evidence && chown node:node /data/evidence
+USER node
 ENV NODE_ENV=production
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \

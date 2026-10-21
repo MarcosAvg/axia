@@ -171,7 +171,9 @@ describe('base schema views and triggers', () => {
     expect(names.has('users_set_updated_at')).toBe(true)
     expect(names.has('tickets_set_folio')).toBe(true)
   })
+})
 
+describe('indexes', () => {
   it('creates the trigram extension and the required indexes', async () => {
     expect(
       await scalar(
@@ -189,6 +191,12 @@ describe('base schema views and triggers', () => {
       await scalar(
         owner,
         "select count(*)::text as value from pg_indexes where schemaname = 'public' and indexname = 'idx_tickets_folio_trgm'",
+      ),
+    ).toBe(1)
+    expect(
+      await scalar(
+        owner,
+        "select count(*)::text as value from pg_indexes where schemaname = 'public' and indexname = 'idx_evidence_uploaded_by_ready'",
       ),
     ).toBe(1)
     expect(
@@ -274,7 +282,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(5)
+    ).toBe(6)
   })
 
   it('enforces username normalization and uniqueness', async () => {

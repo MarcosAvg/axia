@@ -106,11 +106,11 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `dashboard/api/dashboard-api.ts` | `v_ticket_timeline` + `tickets` | `/api/dashboard` |
 | `integrations/api/import-run-api.ts` | 10 RPC de importación + `instance_settings` + catálogos | `/api/admin/imports/:id/...` |
 | `metrics/api/metrics-api.ts` | `v_ticket_metrics_base` + 11 RPC de indicadores | `/api/metrics/...` (mismas vistas/funciones SQL con alcance) |
-| `tickets/api/evidence-api.ts` | `storage.createSignedUrl` | `/api/evidence/:id/file` y `/thumbnail` |
-| `tickets/api/offline-evidence.ts` | TUS a Storage + `evidence_add` | TUS propio + `/api/evidence` |
+| `tickets/api/evidence-api.ts` | `storage.createSignedUrl` | `GET /api/evidence/:id/file` y `/thumbnail`; implementado |
+| `tickets/api/offline-evidence.ts` | TUS a Storage + `evidence_add` | TUS propio `/api/uploads` + `POST /api/tickets/:id/evidence`; implementado |
 | `tickets/api/pause-api.ts` | 3 RPC | Acciones de pausa |
 | `tickets/api/rating-api.ts` | `ticket_ratings` + `ticket_rate` | `/api/tickets/:id/rating` |
-| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; alta implementada, evidencias en tramo 6 |
+| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`, `/api/tickets/:id/evidence`; alta y evidencias implementadas |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
 | `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions`; implementadas las 20 acciones del flujo: toma, asignaciones, inicio, pausa/subestados, reanudación, atendido, validación, rechazo, cancelación, prioridad, comentario, recaptura, reclamaciones, duplicado, reactivación, apoyo auxiliar y calificación |
 | `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
@@ -1027,7 +1027,7 @@ hará `push` ni se tocará producción sin confirmación.
 | `UPLOAD_MAX_DIMENSION` | Lado mayor de imagen |
 | `UPLOAD_THUMBNAIL_PX` | Miniatura |
 | `UPLOAD_QUOTA_BYTES` | Cuota por usuario |
-| `UPLOAD_DIR` | Volumen de evidencias |
+| `STORAGE_DIR` | Volumen de evidencias (`/data/evidence`) |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Web Push |
 | `PUSH_ENABLED` | Activar envío |
 | `APP_PORT` | Puerto interno |

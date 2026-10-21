@@ -1,27 +1,22 @@
 import { pathToFileURL } from 'node:url'
 
+import type { FastifyInstance } from 'fastify'
+import type { Pool } from 'pg'
+
 import { buildApp } from './app.js'
 import { createAuthService } from './auth/service.js'
 import { createCatalogService } from './catalogs/service.js'
-import { loadConfig } from './config.js'
+import { createEvidenceService } from './evidence/service.js'
+import { loadConfig, type AppConfig } from './config.js'
 import { createDb } from './db/client.js'
 import { checkDatabase } from './db/health.js'
 import { createTicketService } from './tickets/service.js'
 
-async function main() {
-  const config = loadConfig()
-  const { pool, db } = createDb(config.DATABASE_URL)
-  const auth = createAuthService(db, config)
-  const tickets = createTicketService(db)
-  const catalogs = createCatalogService(db)
-  const app = await buildApp({
-    config,
-    auth,
-    tickets,
-    catalogs,
-    readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
-  })
-
+function installShutdownHandlers(
+  app: FastifyInstance,
+  pool: Pool,
+  config: AppConfig,
+) {
   let shuttingDown = false
 
   async function shutdown(signal: string) {
@@ -60,6 +55,25 @@ async function main() {
     app.log.fatal({ err: error }, 'uncaught exception')
     void shutdown('uncaughtException')
   })
+}
+
+async function main() {
+  const config = loadConfig()
+  const { pool, db } = createDb(config.DATABASE_URL)
+  const auth = createAuthService(db, config)
+  const tickets = createTicketService(db)
+  const catalogs = createCatalogService(db)
+  const evidence = createEvidenceService(db, config)
+  const app = await buildApp({
+    config,
+    auth,
+    tickets,
+    catalogs,
+    evidence,
+    readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
+  })
+
+  installShutdownHandlers(app, pool, config)
 
   try {
     const address = await app.listen({

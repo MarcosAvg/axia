@@ -122,6 +122,19 @@ En 5C.3 la pausa usa el índice único parcial `ticket_pauses_one_open`; las rec
 usan `idx_ticket_claims_ticket` e `idx_ticket_links_ticket`; la calificación usa el índice único de
 `ticket_ratings(ticket_id)`. No se añadieron índices nuevos.
 
+### 3.3 Evidencias (tramo 6)
+
+La lista de evidencias usa `idx_evidence_ticket`; la comprobación de evidencia del flujo usa
+`idx_evidence_ticket_type`. La cuota por usuario consulta `evidence` por `uploaded_by` y
+`processing_state = 'ready'`.
+
+Con 20 000 evidencias asignadas a un solo usuario, esa consulta tarda 9,2 ms con recorrido
+secuencial; el índice parcial no cambia el plan porque el usuario concentra el 100 % de las filas.
+Se añadió igualmente `idx_evidence_uploaded_by_ready` en
+`0005_evidence_quota_index.sql` porque la consulta de cuota es selectiva por usuario en producción y
+se ejecuta al crear y al terminar cada evidencia. Debe revisarse con una distribución real de
+usuarios.
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una
