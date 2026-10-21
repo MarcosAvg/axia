@@ -17,7 +17,7 @@ RUN HUSKY=0 pnpm install --frozen-lockfile
 FROM base AS build
 COPY --chown=node:node apps/server ./apps/server
 COPY --chown=node:node apps/web ./apps/web
-RUN pnpm --filter @axia/server build
+RUN pnpm --filter @axia/server build && pnpm --filter @axia/web build
 
 FROM node:22.22.2-bookworm-slim AS runtime
 
@@ -35,6 +35,7 @@ RUN HUSKY=0 pnpm install --frozen-lockfile --prod --filter @axia/server... --ign
 
 COPY --from=build --chown=node:node /app/apps/server/dist ./apps/server/dist
 COPY --from=build --chown=node:node /app/apps/server/db ./apps/server/db
+COPY --from=build --chown=node:node /app/apps/web/dist ./web
 
 FROM runtime AS migrate
 WORKDIR /app/apps/server
@@ -46,6 +47,7 @@ USER root
 RUN mkdir -p /data/evidence && chown node:node /data/evidence
 USER node
 ENV NODE_ENV=production
+ENV STATIC_DIR=/app/web
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
   CMD ["node", "-e", "fetch('http://127.0.0.1:3000/api/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
