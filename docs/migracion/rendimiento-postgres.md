@@ -56,7 +56,8 @@ Candidatos que ya existen o que se revisarán primero:
 - B-tree para `tickets (status, reported_at)`, `ticket_events (ticket_id, occurred_at)`,
   `notifications (recipient_user_id, read_at)`, `sessions (user_id, revoked_at)` y
   `notification_deliveries (status, next_attempt_at)`.
-- GIN trigram para búsqueda/duplicados en `tickets.description`; ya está creado.
+- GIN trigram para búsqueda/duplicados en `tickets.description` y `tickets.folio`; ambos creados
+  (`0004_tickets_search_index.sql`).
 - BRIN sobre `ticket_events (recorded_at)` **solo** si el volumen y las consultas por rango lo
   justifican. No sustituye al B-tree por `ticket_id`.
 
