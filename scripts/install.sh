@@ -9,6 +9,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${AXIA_ENV_FILE:-$ROOT_DIR/.env}"
 COMPOSE=(docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose.yaml" -f "$ROOT_DIR/compose.dev.yaml")
 APP_PORT="${APP_PORT:-3000}"
+DB_PORT="${DB_PORT:-5433}"
 DRY_RUN=0
 DEMO=0
 
@@ -73,8 +74,10 @@ app_password="$(openssl rand -hex 32)"
 sed -i \
   -e "s|^POSTGRES_OWNER_PASSWORD=.*|POSTGRES_OWNER_PASSWORD=$owner_password|" \
   -e "s|^AXIA_APP_PASSWORD=.*|AXIA_APP_PASSWORD=$app_password|" \
-  -e "s|^MIGRATION_DATABASE_URL=.*|MIGRATION_DATABASE_URL=postgres://axia_owner:$owner_password@127.0.0.1:5433/axia|" \
-  -e "s|^DATABASE_URL=.*|DATABASE_URL=postgres://axia_app:$app_password@127.0.0.1:5433/axia|" \
+  -e "s|^DB_PORT=.*|DB_PORT=$DB_PORT|" \
+  -e "s|^APP_PORT=.*|APP_PORT=$APP_PORT|" \
+  -e "s|^MIGRATION_DATABASE_URL=.*|MIGRATION_DATABASE_URL=postgres://axia_owner:$owner_password@127.0.0.1:$DB_PORT/axia|" \
+  -e "s|^DATABASE_URL=.*|DATABASE_URL=postgres://axia_app:$app_password@127.0.0.1:$DB_PORT/axia|" \
   "$ENV_FILE"
 chmod 600 "$ENV_FILE"
 configured_app_port="$(sed -n 's/^APP_PORT=//p' "$ENV_FILE" | tail -1)"
