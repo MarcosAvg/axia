@@ -148,7 +148,7 @@ describe('ticket detail', () => {
       dependencyName: 'Dependencia',
       categoryName: 'Categoría A',
       priorityName: 'Media',
-      priorityPosition: 2,
+      priorityPosition: 3,
       teamName: 'Equipo A',
     })
   })

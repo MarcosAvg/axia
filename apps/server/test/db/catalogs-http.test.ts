@@ -51,7 +51,7 @@ describe('catalog reads', () => {
     const media = (priorities.json() as ItemsBody).items.find(
       (item) => item.name === 'Media',
     )
-    expect(media).toMatchObject({ name: 'Media', position: 2 })
+    expect(media).toMatchObject({ name: 'Media', position: 3 })
   })
 
   it('returns requesters and technicians', async () => {

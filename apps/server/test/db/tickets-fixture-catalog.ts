@@ -94,15 +94,15 @@ export async function createCatalog(db: Database): Promise<Catalog> {
   )
   const serviceType = await insertOne(
     db,
-    sql`insert into public.service_types (name) values ('Correctivo') returning id`,
+    sql`select id from public.service_types where name = 'Correctivo'`,
   )
   const priority = await insertOne(
     db,
-    sql`insert into public.priorities (name, position) values ('Media', 2) returning id`,
+    sql`select id from public.priorities where name = 'Media'`,
   )
   const channel = await insertOne(
     db,
-    sql`insert into public.channels (name) values ('Teléfono') returning id`,
+    sql`select id from public.channels where name = 'Teléfono'`,
   )
   return {
     ...places,

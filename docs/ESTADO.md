@@ -4,17 +4,18 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 8B (cliente de sincronización) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9A (semilla de referencia) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 8B se cerró el 2026-10-21: cliente HTTP, contrato de lote de
-sincronización, mapeo del outbox y estados de resultado. La web sigue sobre Supabase; el nuevo
-cliente se activará en el corte final.
+**Sin trabajo en curso.** El tramo 9A se cerró el 2026-10-21: la instalación limpia ya recibe los
+catálogos de referencia (tipos de servicio, prioridades, canales, calendarios, festivos, motivos y
+reglas de escalamiento), sin personas, equipos, edificios ni tiquets. La web sigue sobre Supabase
+hasta el corte final.
 
-**Siguiente:** tramo 9 (semillas, instalación limpia, respaldos y retirada final de Supabase). Siguen
-abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto
-SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 9B (semilla de demostración explícita, instalación y respaldos). Siguen abiertas
+las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y
+pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -1319,3 +1320,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   adaptador de outbox al contrato de sincronización, con estados applied/duplicate/rejected/
   conflict/blocked. 244 pruebas web; el cliente se activará en el corte final. Siguiente: semillas,
   instalación y retirada de Supabase.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9A**. La migración de referencia ya
+  llena catálogos, calendarios, festivos, motivos y reglas de escalamiento sin datos demo. 116
+  pruebas de integración; siguiente: demo explícita, instalación y respaldos.
