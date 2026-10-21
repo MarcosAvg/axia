@@ -118,6 +118,10 @@ En 5C.2 las comprobaciones de evidencia usan `idx_evidence_ticket_type` y la val
 índice único `ticket_validations(ticket_id, cycle, validator_role)`. Las transiciones bloquean por
 PK; no se añadieron índices nuevos.
 
+En 5C.3 la pausa usa el índice único parcial `ticket_pauses_one_open`; las reclamaciones y enlaces
+usan `idx_ticket_claims_ticket` e `idx_ticket_links_ticket`; la calificación usa el índice único de
+`ticket_ratings(ticket_id)`. No se añadieron índices nuevos.
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una

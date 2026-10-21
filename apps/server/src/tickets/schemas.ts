@@ -123,6 +123,81 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
     reasonId: z.string().uuid(),
     ...actionBase,
   }),
+  z.object({
+    action: z.literal('pause'),
+    reasonId: z.string().uuid(),
+    note: z.string().trim().max(2000).optional(),
+    estimatedDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('advance_pause'),
+    reasonId: z.string().uuid(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('resume'),
+    reasonId: z.string().uuid(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('recapture'),
+    changes: z
+      .object({
+        buildingId: z.string().uuid().optional(),
+        locationId: z.string().uuid().optional(),
+        dependencyId: z.string().uuid().optional(),
+        categoryId: z.string().uuid().optional(),
+        subcategoryId: z.string().uuid().optional(),
+        problemId: z.string().uuid().optional(),
+        serviceTypeId: z.string().uuid().optional(),
+        priorityId: z.string().uuid().optional(),
+        description: z.string().trim().min(5).max(4000).optional(),
+      })
+      .refine((changes) => Object.keys(changes).length > 0, {
+        message: 'Indica al menos un cambio',
+      }),
+    reasonId: z.string().uuid().optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('open_claim'),
+    reasonId: z.string().uuid(),
+    description: z.string().trim().min(5).max(4000),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('resolve_claim'),
+    resolution: z.enum(['upheld', 'dismissed', 'new_ticket']),
+    resultId: z.string().uuid().optional(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('assign_supervisor'),
+    reasonId: z.string().uuid(),
+    supervisorUserId: z.string().uuid().optional(),
+    teamId: z.string().uuid().optional(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('add_auxiliary'),
+    technicianId: z.string().uuid(),
+    reasonId: z.string().uuid(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('rate'),
+    score: z.number().int().min(1).max(5),
+    comment: z.string().trim().max(1000).optional(),
+    ...actionBase,
+  }),
 ])
 
 export type TicketActionInput = z.infer<typeof ticketActionSchema>

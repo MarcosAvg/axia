@@ -45,7 +45,7 @@ async function authorizeRequester(
   return { requester, onBehalf }
 }
 
-type RouteInput = {
+export type RouteInput = {
   tx: DbExecutor
   ticketId: string
   cycle: number
@@ -53,7 +53,7 @@ type RouteInput = {
   buildingId: string
 }
 
-async function routeTicket({
+export async function routeTicket({
   tx,
   ticketId,
   cycle,

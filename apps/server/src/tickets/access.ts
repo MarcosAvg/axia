@@ -25,6 +25,7 @@ const TECHNICIAN_OWN = new Set([
   'ticket.resume',
   'ticket.recapture',
   'ticket.record_progress',
+  'ticket.recapture',
 ])
 
 const FLOW_OWN = new Set([

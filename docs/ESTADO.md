@@ -4,18 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.2 (transiciones simples) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.3 (pausas, recaptura, reclamaciones y apoyos) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 5C.2 se cerró el 2026-10-21: inicio y atendido con evidencia,
-validación por política, rechazo, cancelación, comentario, prioridad, duplicado y reactivación. Las
-acciones comparten idempotencia, bloqueo de fila e historial. No hay cambios en la web; sigue sobre
-Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 5C.3 se cerró el 2026-10-21: pausa con subestados, recaptura,
+reclamaciones, reasignación de supervisor y apoyo auxiliar. Se completó el conjunto de acciones del
+flujo de tiquets; la web sigue sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 5C.3 (pausa con subestados, recaptura, reclamaciones, reasignación de supervisor
-y apoyos auxiliares). Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre
-push, semillas demo, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 6 (archivos y evidencias: TUS, Sharp, EXIF, miniaturas, entrega autenticada y
+cuotas). Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas
+demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -48,6 +47,18 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 5C.3 — pausas, recaptura, reclamaciones y apoyos
+  (2026-10-21)**, rama `feat/migracion-base-datos`:
+  - Acciones `pause`, `advance_pause` y `resume` con motivo raíz, subestados en cascada, una pausa
+    abierta como máximo y eventos que alimentan los tramos de tiempo.
+  - `recapture` conserva versiones en `ticket_captures`, actualiza el equipo y devuelve al supervisor
+    cuando el técnico deja de corresponder al área.
+  - `open_claim` y `resolve_claim` con ventana de reclamación, evidencia `claim`, resoluciones
+    `upheld`/`dismissed`/`new_ticket`, reapertura de ciclo y tiquet derivado enlazado.
+  - `assign_supervisor` para reasignar a supervisor o equipo, solo para quien tiene el tiquet o un
+    administrador; `add_auxiliary` con motivo de apoyo.
+  - Pruebas: 35 unitarias/HTTP y 96 de integración; pausa completa, recaptura, reclamación,
+    reasignación, apoyo auxiliar y calificación. Sin índices nuevos.
 - **Migración sin Supabase, Etapa B, tramo 5C.2 — transiciones simples (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - Acciones `start`, `attend`, `validate`, `reject`, `cancel`, `comment`, `change_priority`,
@@ -1254,3 +1265,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   simples: inicio y atendido con evidencia, validación por política, rechazo, cancelación,
   comentario, prioridad, duplicado y reactivación. 35 pruebas unitarias/HTTP y 89 de integración.
   Quedan para 5C.3 la pausa con subestados, la recaptura, las reclamaciones y las reasignaciones.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 5C.3**. Se completaron pausa con
+  subestados, recaptura, reclamaciones, reasignación de supervisor y apoyo auxiliar. 35 pruebas
+  unitarias/HTTP y 96 de integración. El flujo de tiquets queda cubierto en la API; el siguiente
+  tramo es archivos y evidencias.

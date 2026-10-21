@@ -112,7 +112,7 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `tickets/api/rating-api.ts` | `ticket_ratings` + `ticket_rate` | `/api/tickets/:id/rating` |
 | `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; alta implementada, evidencias en tramo 6 |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
-| `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions`; implementados `take`, `assign_technician`, `start`, `attend`, `validate`, `reject`, `cancel`, `comment`, `change_priority`, `mark_duplicate` y `reactivate`; pausa/recaptura/reclamaciones en 5C.3 |
+| `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions`; implementadas las 20 acciones del flujo: toma, asignaciones, inicio, pausa/subestados, reanudación, atendido, validación, rechazo, cancelación, prioridad, comentario, recaptura, reclamaciones, duplicado, reactivación, apoyo auxiliar y calificación |
 | `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
 | `tickets/api/rpc.ts` | Helper de error de RPC | Sustituir por cliente HTTP |
 | `lib/offline/tus.ts` | Endpoint `storage/v1/upload/resumable` | Endpoint TUS `/api/uploads` |
@@ -655,6 +655,13 @@ estado bloquean la fila del tiquet (`FOR UPDATE`) y devuelven `409` si el estado
 `requester`/`supervisor`/`both`), `reject`, `cancel`, `comment`, `change_priority`,
 `mark_duplicate` y `reactivate`. Pausa con subestados, recaptura, reclamaciones y reasignaciones
 quedan para 5C.3.
+
+**Implementado en 5C.3 (flujo completo):** se añadieron `pause`, `advance_pause`, `resume`,
+`recapture`, `open_claim`, `resolve_claim`, `assign_supervisor` y `add_auxiliary`. La pausa exige un
+motivo raíz y subestados descendientes; la reclamación exige evidencia `claim` y admite resolución
+procedente, improcedente o con tiquet nuevo. La reasignación de supervisor solo la puede hacer quien
+tiene el tiquet o un administrador. `rate` registra la calificación de satisfacción. Con esto quedan
+cubiertas las acciones del flujo de tiquets en la API.
 
 ## 5. Inventario de pruebas actuales y destino
 
