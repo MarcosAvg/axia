@@ -1,50 +1,29 @@
 #!/usr/bin/env bash
 # Axia — arranque reproducible en un equipo nuevo.
-# Idempotente: se puede correr las veces que haga falta. Ver docs/empezar-aqui.md.
+# Idempotente: instala dependencias y usa el instalador del stack propio.
 set -euo pipefail
 
-info() { printf '\033[1;34m→\033[0m %s\n' "$*"; }
-ok() { printf '\033[1;32m✓\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33m!\033[0m %s\n' "$*"; }
-fail() { printf '\033[1;31m✗\033[0m %s\n' "$*" >&2; exit 1; }
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
 
-# Estar en la raíz del repositorio.
-[ -f package.json ] && [ -f pnpm-workspace.yaml ] \
-  || fail "Ejecuta este script desde la raíz del repositorio (donde está pnpm-workspace.yaml)."
+command -v node >/dev/null || { echo 'Falta Node.js LTS.' >&2; exit 1; }
+command -v corepack >/dev/null || { echo 'Falta corepack.' >&2; exit 1; }
+command -v docker >/dev/null || { echo 'Falta Docker.' >&2; exit 1; }
 
-command -v node >/dev/null || fail "Falta Node.js (LTS). Instálalo y vuelve a intentar."
-command -v corepack >/dev/null || fail "Falta corepack (viene con Node). Instala Node LTS."
-command -v git >/dev/null || fail "Falta Git."
-command -v docker >/dev/null || fail "Falta Docker (lo necesita el Supabase local)."
+info() { printf '→ %s\n' "$*"; }
 
-info "Node $(node -v)"
-
-info "Activando pnpm con corepack…"
+info "Activando pnpm…"
 corepack enable
 
-info "Instalando dependencias (pnpm install)…"
+info "Instalando dependencias…"
 pnpm install
 
-info "Comprobando Docker…"
-if ! docker info >/dev/null 2>&1; then
-  warn "No puedo hablar con Docker. Si es Linux, agrega tu usuario al grupo 'docker' y"
-  warn "cierra y reabre la sesión:  sudo usermod -aG docker \$USER"
-  fail "Docker no está disponible."
-fi
-ok "Docker responde."
-
-info "Levantando Supabase local (la primera vez descarga las imágenes)…"
-pnpm db:start
-
-info "Aplicando migraciones y semilla (pnpm db:reset)…"
-pnpm db:reset
-
-info "Instalando el navegador de Playwright (Chromium)…"
+info "Instalando Chromium para Playwright…"
 pnpm --filter @axia/web exec playwright install chromium
 
-info "Generando apps/web/.env.local desde el Supabase local…"
-pnpm env:local
+info "Instalando el stack y la semilla demo…"
+./scripts/install.sh --demo
 
-ok "Listo. Verificación recomendada:  pnpm check"
-ok "Servidor de desarrollo:            pnpm dev  (http://localhost:5173)"
-ok "Usuarios demo (contraseña AxiaDemo2026!): admin@axia.test, supervisor@axia.test, tecnico@axia.test, solicitante@axia.test"
+printf '\nListo.\n'
+printf 'Servidor de desarrollo: pnpm dev (http://localhost:5173)\n'
+printf 'Primer administrador: abre /login o usa POST /api/setup\n'

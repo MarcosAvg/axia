@@ -7,7 +7,7 @@
 
 En la Fase 7A/7B se incluyó un `deploy/Caddyfile` como proxy por defecto (TLS automático,
 frontend estático y proxy de la API). Al revisarlo: Axia es una **SPA estática** más un endpoint de
-Supabase (Kong, que ya es un proxy), así que el proxy de borde es **infraestructura del despliegue**,
+el stack anterior (Kong, que ya es un proxy), así que el proxy de borde es **infraestructura del despliegue**,
 no del producto. Imponer Caddy es una opinión y puede ser redundante con el proxy que la institución
 ya tenga (Traefik, nginx, Apache, un balanceador de nube…).
 
@@ -20,7 +20,7 @@ ya tenga (Traefik, nginx, Apache, un balanceador de nube…).
 - Se ofrecen **ejemplos opcionales** en `deploy/examples/` (nginx y Traefik) como referencia, no como
   requisito.
 - El **stack** se levanta con un comando (`deploy/scripts/up.sh`) que trae el compose oficial de
-  Supabase (que **sigue sin versionarse**) y aplica migraciones; no incluye servidor web.
+  el stack anterior (que **sigue sin versionarse**) y aplica migraciones; no incluye servidor web.
 
 ## Alternativas consideradas
 

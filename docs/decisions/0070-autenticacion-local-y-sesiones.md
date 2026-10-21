@@ -5,7 +5,7 @@
 
 ## Contexto
 
-La app todavía usa Supabase Auth, pero el objetivo es eliminarlo. El servidor nuevo ya tiene
+La app todavía usa la autenticación anterior, pero el objetivo es eliminarlo. El servidor nuevo ya tiene
 Fastify, PostgreSQL y un contrato de errores. La identidad no puede migrarse parcialmente: si el
 login cambia antes que los datos, la UI y la API quedan con identidades distintas.
 
@@ -35,7 +35,7 @@ login cambia antes que los datos, la UI y la API quedan con identidades distinta
    se serializa con un advisory lock.
 9. **Semilla de referencia.** Se añaden permisos y roles base (incluido `administrator`) como datos
    de referencia, no como datos demo.
-10. **La UI no cambia en este tramo.** El login de la web actual sigue en Supabase hasta el corte
+10. **La UI no cambia en este tramo.** El login de la web actual sigue en el stack anterior hasta el corte
     final; la API local se prueba con HTTP e integración.
 
 ## Consecuencias
@@ -50,7 +50,7 @@ login cambia antes que los datos, la UI y la API quedan con identidades distinta
 
 ## Alternativas descartadas
 
-- **Seguir usando Supabase Auth:** mantiene la dependencia que la migración quiere eliminar.
+- **Seguir usando la autenticación anterior:** mantiene la dependencia que la migración quiere eliminar.
 - **JWT en `localStorage`:** no permite revocación inmediata y expone el token a XSS.
 - **Sesiones en memoria:** se pierden al reiniciar y no permiten revocar desde la base.
 - **Token CSRF adicional:** `SameSite=Lax` + validación de origen cubre el mismo escenario sin

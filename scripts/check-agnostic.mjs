@@ -14,10 +14,7 @@ const repoRoot = resolve(scriptDir, '..')
 
 // Rutas donde se permite nombrar plataformas de terceros (sección 4).
 const ALLOWED_PATTERNS = [
-  'apps/web/src/features/integrations/**',
-  'supabase/functions/integration-*/**',
   'docs/integraciones-y-migracion.md',
-  'docs/migracion-sin-supabase.md',
   'docs/ESTADO.md',
   'docs/decisions/**',
   'scripts/**',

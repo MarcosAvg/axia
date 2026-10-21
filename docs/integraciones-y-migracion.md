@@ -32,7 +32,7 @@ trabajo para importadores e integraciones.
 2. **Referencia, no dependencia.** Los sistemas descritos aquí son el origen *actual* de los
    datos. Sirven para migrar y, mientras convivan, para alimentar a Axia.
 3. **Adaptadores aislados.** Cada fuente es un adaptador en `apps/web/src/features/integrations/`
-   (interfaz) o `supabase/functions/integration-<nombre>/` (proceso). El núcleo no los importa;
+   (interfaz) o `un adaptador externo` (proceso). El núcleo no los importa;
    ellos sí usan la API pública del núcleo.
 4. **Por defecto, de entrada.** Se importa hacia Axia. Una integración de salida (avisar o
    escribir en otro sistema) se considera una función aparte y opcional (sección 7).

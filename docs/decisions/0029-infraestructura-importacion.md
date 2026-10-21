@@ -24,7 +24,7 @@ infraestructura **genérica** que cualquier adaptador use, sin acoplarse a una f
   `imported` con `source = 'import'`.
 - **RPCs de apoyo**: abrir/cerrar lote, guardar fila, resolver/definir alias y estatus.
 - **Adaptadores aislados** (lectura y normalización de la fuente) quedan para 6B, en
-  `features/integrations/**` o `supabase/functions/integration-*/**`, fuera del núcleo.
+  `features/integrations/**` o `adaptadores externos/**`, fuera del núcleo.
 - **UI de administración** `/admin/integraciones`: mapeo de estatus y lista de lotes (el CRUD de
   alias y el reporte de calidad se completan con el adaptador en 6B).
 

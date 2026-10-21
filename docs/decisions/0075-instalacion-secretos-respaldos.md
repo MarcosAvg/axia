@@ -24,7 +24,7 @@ final del SPA será posterior.
    de restauración periódica.
 5. **CI del stack nuevo.** El flujo añade `check-next` con PostgreSQL 17 como servicio real:
    migraciones, pruebas unitarias/HTTP, integración, `drizzle-kit check` y build. La compuerta
-   existente con Supabase se mantiene hasta el corte final.
+   existente con el stack anterior se mantiene hasta el corte final.
 6. **Sin secretos en CI.** Los valores de CI son de prueba y no se reutilizan en producción.
 
 ## Consecuencias
@@ -43,4 +43,4 @@ final del SPA será posterior.
   herramientas distintos.
 - **Publicar `app` directamente en producción:** impide terminar TLS y validar el origen en un
   proxy de confianza.
-- **Sustituir ya la compuerta con Supabase:** rompería la web actual antes del corte final.
+- **Sustituir ya la compuerta con el stack anterior:** rompería la web actual antes del corte final.

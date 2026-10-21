@@ -89,7 +89,7 @@ para SQL. Los adaptadores externos, si se añaden, viven aislados y no modifican
 - Sin dependencias circulares.
 - **Independencia del núcleo:**
   - **Los nombres de plataformas de terceros solo pueden aparecer** en
-    `docs/integraciones-y-migracion.md`, `docs/migracion-sin-supabase.md`, `docs/ESTADO.md`,
+    `docs/integraciones-y-migracion.md`, `docs/ESTADO.md`, `docs/ESTADO.md`,
     `docs/decisions/**` y `scripts/**`. Esto incluye identificadores, textos, comentarios, enums,
     columnas, valores de semillas y pruebas del núcleo. Lo verifica `pnpm check:agnostic`.
   - El núcleo trata los sistemas externos solo como datos genéricos: `system` en

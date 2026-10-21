@@ -382,7 +382,7 @@ y los índices necesarios.
 - **Auditoría:** historial inmutable; ningún borrado físico en datos de negocio.
 - **Rendimiento:** índices para las consultas previsibles (bandejas por rol, listas por estado,
   antigüedad, métricas y búsqueda de posibles duplicados; puedes apoyarte en extensiones de Postgres
-  disponibles en Supabase, como `pg_trgm`, justificándolo en un ADR).
+  disponibles en PostgreSQL, como `pg_trgm`, justificándolo en un ADR).
 - **Agnóstico:** nada del núcleo menciona plataformas externas. Conserva `ticket_external_refs`
   genérico para integraciones futuras.
 - **Pruebas pgTAP** de: cada transición válida e inválida, cada permiso, ruteo y retiro de ofertas,

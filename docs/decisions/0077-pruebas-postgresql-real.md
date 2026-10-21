@@ -14,7 +14,7 @@ como compuerta obligaría a conservar el esquema antiguo y probaría código que
 1. **Vitest contra PostgreSQL real** es la prueba principal del servidor: migraciones, permisos,
    alcance, transiciones, concurrencia e idempotencia.
 2. **Playwright** cubre los flujos críticos de la PWA, incluido el trabajo sin conexión.
-3. La suite pgTAP anterior se retira junto con el esquema Supabase. Las invariantes que siguen
+3. La suite pgTAP anterior se retira junto con el esquema anterior. Las invariantes que siguen
    vigentes se expresan como pruebas de integración en `apps/server/test/db/`.
 4. No se sustituyen pruebas por mocks de base: cada prueba de servidor usa una base real y limpia.
 
@@ -26,6 +26,6 @@ como compuerta obligaría a conservar el esquema antiguo y probaría código que
 
 ## Alternativas descartadas
 
-- **Mantener pgTAP y el esquema Supabase:** contradice la retirada y prueba código muerto.
+- **Mantener pgTAP y el esquema anterior:** contradice la retirada y prueba código muerto.
 - **Mocks de base para todo:** no detectan restricciones, concurrencia ni SQL real.
 - **Dejar pgTAP sin ejecutarse:** deuda y falsa sensación de cobertura.

@@ -5,7 +5,7 @@
 
 ## Contexto
 
-Los datos de demostración (`supabase/seed.sql`) llevaban el sufijo `(ejemplo)` en cada nombre
+Los datos de demostración (la semilla anterior) llevaban el sufijo `(ejemplo)` en cada nombre
 (catálogos, personas, motivos y descripciones) y usaban nombres como `Admin Demo`. Servía para no
 chocar con los datos de las pruebas, pero hacía que la aplicación se viera artificial.
 

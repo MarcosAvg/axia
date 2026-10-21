@@ -10,7 +10,7 @@ similares, dentro de una ventana de tiempo y con la misma ubicación/problema.
 
 ## Decisión
 
-Usar la extensión **`pg_trgm`** (disponible en Supabase): índice GIN sobre `tickets.description` y
+Usar la extensión **`pg_trgm`** (disponible en PostgreSQL): índice GIN sobre `tickets.description` y
 la función `similarity` con umbral y ventana configurables (`instance_settings`). Los candidatos se
 guardan en `ticket_duplicate_candidates` y el tiquet se marca `possible_duplicate`. **No bloquea.**
 

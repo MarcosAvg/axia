@@ -317,7 +317,7 @@ candidatos = tiquets **no finales** con misma ubicación y/o problema, dentro de
 con similitud de `description` ≥ `duplicate_similarity` (extensión `pg_trgm`). Se muestran los
 campos de `duplicate_shown_fields`, se registran en `ticket_duplicate_candidates` y el tiquet se
 marca `possible_duplicate`. **No bloquea**. Índice GIN `pg_trgm` sobre `tickets.description`.
-ADR 0013 justifica `pg_trgm` (extensión disponible en Supabase).
+ADR 0013 justifica `pg_trgm` (extensión disponible en PostgreSQL).
 
 ## 7. Modelo de tiempos
 
@@ -376,7 +376,7 @@ C=espera inicio, D=trabajo activo, E=pausa, F=validación, G=reclamación/reasig
 - Bitácora, `evidence`, `time_spans` e `idempotency_keys`: solo lectura para roles con permiso;
   sin `update`/`delete` (disparador de bloqueo).
 
-## 9. Semillas (`supabase/seed.sql`, ficticias e idempotentes)
+## 9. Semillas (la semilla anterior, ficticias e idempotentes)
 
 - **Equipos y categorías:** mantenimiento y seguridad, con categorías/subcategorías/problemas de ejemplo.
 - **Edificios/ubicaciones:** dos edificios con ubicaciones. **Dependencias:** un par.

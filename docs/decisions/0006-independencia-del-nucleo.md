@@ -14,7 +14,7 @@ requisito, fuente de verdad ni parte de su diseño.
 
 - El **núcleo de Axia funciona completo por sí solo**. Ninguna plataforma externa es requisito.
 - Toda integración vive detrás de **adaptadores aislados**: `apps/web/src/features/integrations/`
-  y `supabase/functions/integration-*`. Se pueden añadir o quitar sin tocar el núcleo.
+  y `adaptadores externos`. Se pueden añadir o quitar sin tocar el núcleo.
 - El núcleo trata a los sistemas externos como **datos genéricos**: `system` en
   `ticket_external_refs`, `source` en los eventos, `channel` en los tiquets. No contiene nombres,
   campos, estados ni reglas de otra plataforma.
