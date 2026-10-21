@@ -624,6 +624,10 @@ idempotencia que la API online. `occurredAt` se valida contra la creación del t
 futuro y 30 días de antigüedad. Los resultados son `applied`, `duplicate`, `rejected`, `conflict` o
 `blocked`; un fallo bloquea las acciones posteriores del mismo tiquet. Ver ADR 0074.
 
+En 8B se añadió el cliente web (`lib/api-client.ts` y `features/tickets/api/sync-api.ts`) y el
+mapeo del outbox a los estados del servidor. No se activa todavía: la web sigue usando Supabase hasta
+el corte final.
+
 ### 4.4 Contrato de la API
 
 - Zod compartido en `packages/shared` para entradas y respuestas.

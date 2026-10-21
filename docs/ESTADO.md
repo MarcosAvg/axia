@@ -4,17 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 8A (sincronización offline en servidor) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 8B (cliente de sincronización) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 8A se cerró el 2026-10-21: contrato `POST /api/sync/actions`,
-validación de `occurredAt`, idempotencia, orden por tiquet y bloqueo de dependientes. La web sigue
-sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 8B se cerró el 2026-10-21: cliente HTTP, contrato de lote de
+sincronización, mapeo del outbox y estados de resultado. La web sigue sobre Supabase; el nuevo
+cliente se activará en el corte final.
 
-**Siguiente:** tramo 8B (adaptar Dexie/outbox y el cliente HTTP al contrato nuevo) y después tramo 9
-(semillas, instalación limpia y retirada final de Supabase). Siguen abiertas las decisiones de
-`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 9 (semillas, instalación limpia, respaldos y retirada final de Supabase). Siguen
+abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto
+SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -1315,3 +1315,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   sincronización offline en el servidor: lote ordenado, idempotencia, `occurredAt`, estados
   `applied`/`duplicate`/`rejected`/`conflict`/`blocked` y bloqueo por tiquet. 35 pruebas
   unitarias/HTTP y 111 de integración. Siguiente: adaptar el outbox del cliente.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 8B**. Se añadieron el cliente HTTP y el
+  adaptador de outbox al contrato de sincronización, con estados applied/duplicate/rejected/
+  conflict/blocked. 244 pruebas web; el cliente se activará en el corte final. Siguiente: semillas,
+  instalación y retirada de Supabase.

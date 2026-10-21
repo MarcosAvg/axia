@@ -7,11 +7,12 @@ import type { TicketOperation } from './ticket-operations'
 
 const TICKET_ACTION = 'ticket_action'
 
-interface TicketActionPayload {
+export interface TicketActionPayload {
   operation: TicketOperation
   ticketId: string
   args: Record<string, unknown>
   clientRequestId: string
+  occurredAt: string
 }
 
 export async function enqueueTicketAction(
@@ -25,6 +26,7 @@ export async function enqueueTicketAction(
     ticketId,
     args,
     clientRequestId,
+    occurredAt: new Date().toISOString(),
   } satisfies TicketActionPayload)
 }
 

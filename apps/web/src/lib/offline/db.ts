@@ -11,9 +11,10 @@ export interface OutboxItem {
   seq: number
   type: string
   payload: unknown
-  state: 'pending' | 'sending' | 'error'
+  state: 'pending' | 'sending' | 'error' | 'blocked'
   attempts: number
   lastError: string | null
+  result?: unknown
   createdAt: number
 }
 
