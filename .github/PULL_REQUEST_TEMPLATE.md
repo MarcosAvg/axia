@@ -14,4 +14,5 @@
 - [ ] `pnpm check` en verde.
 - [ ] Pruebas añadidas o actualizadas.
 - [ ] Documentación actualizada en el mismo cambio.
+- [ ] `pnpm check:docs` sin enlaces rotos.
 - [ ] Sin secretos en el diff.

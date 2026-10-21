@@ -40,7 +40,7 @@ docs(deploy): documenta el contrato de reverse proxy
 
 ## Compuerta de calidad
 
-`pnpm check` es la fuente única de verdad: lint, tipos, independencia del núcleo, fronteras,
+`pnpm check` es la fuente única de verdad: lint, tipos, docs, independencia del núcleo, fronteras,
 knip, pruebas (Vitest y Playwright), integración contra PostgreSQL real y build. Necesita las
 variables `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; Playwright prepara su
 propia base con la semilla demo.
@@ -49,6 +49,7 @@ propia base con la semilla demo.
 |---|---|
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Tipos |
+| `pnpm check:docs` | Enlaces relativos de la documentación |
 | `pnpm check:agnostic` | El núcleo no menciona plataformas externas |
 | `pnpm check:boundaries` | Dependencias entre capas |
 | `pnpm knip` | Código y dependencias sin uso |
@@ -60,6 +61,7 @@ propia base con la semilla demo.
 Antes de abrir una pull request:
 
 - [ ] `pnpm check` en verde.
+- [ ] `pnpm check:docs` sin enlaces rotos.
 - [ ] Pruebas añadidas o actualizadas para el cambio.
 - [ ] Documentación actualizada en el mismo cambio.
 - [ ] Sin secretos ni claves en el diff.

@@ -12,6 +12,19 @@ campo, autoalojable y open source.
 El núcleo es **agnóstico**: funciona completo por sí solo. Las integraciones con otros sistemas son
 adaptadores opcionales y no forman parte del núcleo.
 
+## Para quién es
+
+Axia está dirigida a equipos de mantenimiento que necesitan registrar solicitudes, asignar trabajo,
+justificar demoras y medir tiempos sin depender de una plataforma externa. También sirve como base
+autoalojable para instituciones que requieren control de sus datos.
+
+## Primer paso
+
+- Instalación y primer administrador: [`docs/start/instalacion.md`](docs/start/instalacion.md).
+- Operación, respaldos y despliegue: [`docs/guides/operacion.md`](docs/guides/operacion.md).
+- Flujo de un tiquet: [`docs/guides/uso.md`](docs/guides/uso.md).
+- Índice completo: [`docs/README.md`](docs/README.md).
+
 ## Arquitectura
 
 - **`apps/web`**: PWA en Vite + React + TypeScript. Las rutas se organizan con TanStack Router y los
@@ -21,8 +34,7 @@ adaptadores opcionales y no forman parte del núcleo.
 - **`deploy`**: scripts de operación y respaldos. El despliegue real lo ejecuta la persona.
 - **`docs`**: especificación de negocio, modelo de datos, convenciones, ADR y estado del proyecto.
 
-No hay RLS en esta versión: la autorización vive en el servidor y se aplica con `can`/`canAct` y
-repositorios con alcance. Cada cambio de estado pasa por una acción del servidor y escribe un evento
+La autorización vive en el servidor y se aplica con `can`/`canAct` y repositorios con alcance. Cada cambio de estado pasa por una acción del servidor y escribe un evento
 en la misma transacción.
 
 ## Requisitos
@@ -69,10 +81,12 @@ contraseña fija en el repositorio.**
 | `pnpm db:reset` | Reconstruye la base local con migraciones |
 | `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
 | `pnpm db:next:demo -- --demo` | Carga la semilla demo en una base local |
+| `pnpm test:scripts` | Prueba el instalador en modo dry-run |
+| `pnpm check:docs` | Verifica enlaces relativos de la documentación |
 | `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas externas |
 | `pnpm check:boundaries` | Reglas de dependencia entre capas |
 | `pnpm knip` | Código y dependencias sin uso |
-| **`pnpm check`** | **Compuerta completa**: lint, tipos, scripts, fronteras, knip, Vitest, Playwright, PostgreSQL real y build |
+| **`pnpm check`** | **Compuerta completa**: lint, tipos, scripts, docs, fronteras, knip, Vitest, Playwright, PostgreSQL real y build |
 
 `pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; en CI se
 configuran contra el servicio PostgreSQL. Playwright prepara su propia base con la semilla demo.
