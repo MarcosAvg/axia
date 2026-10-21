@@ -141,7 +141,7 @@ export function RolePermissions({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={adminMessages.roles.searchPermissions}
             aria-label={adminMessages.roles.searchPermissions}
-            className="pl-9"
+            className="min-h-11 pl-9"
           />
         </div>
         <p className="text-xs text-muted-foreground">

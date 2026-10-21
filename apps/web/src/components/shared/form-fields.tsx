@@ -30,7 +30,10 @@ function FieldShell({
     <Field data-invalid={Boolean(error)}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       {children}
-      <FieldError errors={error ? [{ message: error }] : undefined} />
+      <FieldError
+        id={`${id}-error`}
+        errors={error ? [{ message: error }] : undefined}
+      />
     </Field>
   )
 }
@@ -54,6 +57,7 @@ export function TextField({
       <Input
         id={id}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
         className={cn('min-h-11', className)}
         {...inputProps}
       />
@@ -89,6 +93,7 @@ export function SelectField({
       <select
         id={id}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
         className={cn(selectClass, className)}
         {...selectProps}
       >
@@ -122,6 +127,7 @@ export function TextAreaField({
       <Textarea
         id={id}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
         className={cn('min-h-24', className)}
         {...textareaProps}
       />

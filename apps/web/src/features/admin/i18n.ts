@@ -190,7 +190,8 @@ export const adminMessages = {
     users: 'Cuentas, roles y vínculos con los catálogos.',
     scopes: 'Ámbitos de supervisor y designaciones de técnicos.',
     calendars: 'Jornadas por equipo, franjas y días no laborables.',
-    integrations: 'Mapeo de estatus, lotes de importación y convivencia.',
+    integrations:
+      'No disponible en esta versión; el núcleo funciona sin ellas.',
     settings: 'Parámetros generales de la instancia.',
   },
   catalogPicker: 'Catálogo',

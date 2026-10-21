@@ -7,12 +7,12 @@ import { TechnicianCategories } from './technician-categories'
 export function ScopesManager() {
   const { scopes } = adminMessages
   return (
-    <Tabs defaultValue="supervisor" className="flex flex-col gap-4">
-      <TabsList>
-        <TabsTrigger value="supervisor" className="min-h-9">
+    <Tabs defaultValue="supervisor" className="flex min-w-0 flex-col gap-4">
+      <TabsList className="h-auto w-full flex-wrap">
+        <TabsTrigger value="supervisor" className="min-h-11">
           {scopes.supervisor}
         </TabsTrigger>
-        <TabsTrigger value="technician" className="min-h-9">
+        <TabsTrigger value="technician" className="min-h-11">
           {scopes.technician}
         </TabsTrigger>
       </TabsList>

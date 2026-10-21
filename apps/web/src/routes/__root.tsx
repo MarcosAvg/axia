@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { messages } from '@/lib/i18n'
+import { useDocumentTitle } from '@/lib/use-document-title'
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -19,6 +20,8 @@ function RootLayout() {
 }
 
 function NotFoundPage() {
+  useDocumentTitle(messages.notFound.title)
+
   return (
     <main className="flex min-h-svh items-center justify-center bg-background p-6 text-foreground">
       <Card className="w-full max-w-md">
@@ -27,7 +30,7 @@ function NotFoundPage() {
           <CardDescription>{messages.notFound.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button asChild className="w-full">
+          <Button asChild className="min-h-11 w-full">
             <Link to="/">{messages.notFound.action}</Link>
           </Button>
         </CardContent>

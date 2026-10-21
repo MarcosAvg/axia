@@ -49,7 +49,7 @@ export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
           </span>
         ) : null}
       </label>
-      <Button type="submit" disabled={isSaving}>
+      <Button type="submit" className="min-h-11" disabled={isSaving}>
         {isSaving ? actions.saving : actions.save}
       </Button>
     </form>

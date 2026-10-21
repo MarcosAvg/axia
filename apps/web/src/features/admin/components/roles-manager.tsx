@@ -99,7 +99,7 @@ export function RolesManager() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
       <RolesSidebar
         roles={controller.roleList}
         selectedId={controller.selected ? controller.selected.id : null}

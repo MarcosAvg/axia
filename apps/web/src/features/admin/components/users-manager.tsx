@@ -187,12 +187,12 @@ function AccountsPanel() {
 export function UsersManager() {
   const { users } = adminMessages
   return (
-    <Tabs defaultValue="accounts" className="flex flex-col gap-6">
-      <TabsList>
-        <TabsTrigger value="accounts" className="min-h-9">
+    <Tabs defaultValue="accounts" className="flex min-w-0 flex-col gap-6">
+      <TabsList className="h-auto w-full flex-wrap">
+        <TabsTrigger value="accounts" className="min-h-11">
           {users.accountsTab}
         </TabsTrigger>
-        <TabsTrigger value="links" className="min-h-9">
+        <TabsTrigger value="links" className="min-h-11">
           {users.linksTab}
         </TabsTrigger>
       </TabsList>

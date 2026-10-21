@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { Building2Icon, TrashIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
-import { Button } from '@/components/ui/button'
 import type { AdminRow } from '../api/admin-api'
 import type { Profile, SupervisorScope } from '../domain/access'
 import { nameById } from '../domain/lookups'
@@ -24,6 +22,8 @@ import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { ScopeBuildingsDialog } from './scope-buildings-dialog'
 import { ScopeRemoveDialog } from './scope-remove-dialog'
+import { ScopeActions, ScopeCards } from './supervisor-scope-cards'
+import type { ScopeLabels } from './supervisor-scope-cards'
 import { SupervisorScopeDialog } from './supervisor-scope-dialog'
 
 function orEmpty<T>(rows: T[] | undefined): T[] {
@@ -37,48 +37,6 @@ function supervisorName(profiles: Profile[], id: string): string {
 
 function buildingLabels(rows: AdminRow[] | undefined, ids: string[]): string[] {
   return ids.map((id) => nameById(rows, id)).filter((name) => name !== '—')
-}
-
-function ScopeActions({
-  name,
-  onEditBuildings,
-  onRemove,
-}: {
-  name: string
-  onEditBuildings: () => void
-  onRemove: () => void
-}) {
-  const { scopes: t } = adminMessages
-  return (
-    <div className="flex justify-end gap-1">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        aria-label={`${t.editBuildings}: ${name}`}
-        onClick={onEditBuildings}
-      >
-        <Building2Icon />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        aria-label={`${t.remove}: ${name}`}
-        onClick={onRemove}
-      >
-        <TrashIcon />
-      </Button>
-    </div>
-  )
-}
-
-interface ScopeLabels {
-  supervisor: (id: string) => string
-  team: (id: string) => string
-  buildings: (ids: string[]) => string[]
-  onEdit: (scope: SupervisorScope) => void
-  onRemove: (scope: SupervisorScope) => void
 }
 
 function buildScopeColumns(
@@ -255,6 +213,13 @@ export function SupervisorScopes() {
   const c = useScopesController()
   const [removing, setRemoving] = useState<SupervisorScope | null>(null)
   const { scopes: t, list } = adminMessages
+  const labels: ScopeLabels = {
+    supervisor: c.supervisor,
+    team: c.team,
+    buildings: (ids) => buildingLabels(c.buildings, ids),
+    onEdit: c.setEditing,
+    onRemove: setRemoving,
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -269,17 +234,16 @@ export function SupervisorScopes() {
       {c.scopes.isLoading ? <LoadingList rows={3} /> : null}
       {c.scopes.isError ? <ErrorAlert message={list.error} /> : null}
       {c.scopes.data ? (
-        <DataTable
-          columns={buildScopeColumns({
-            supervisor: c.supervisor,
-            team: c.team,
-            buildings: (ids) => buildingLabels(c.buildings, ids),
-            onEdit: c.setEditing,
-            onRemove: setRemoving,
-          })}
-          rows={c.visible}
-          getRowId={(scope) => scope.id}
-        />
+        <>
+          <ScopeCards scopes={c.visible} labels={labels} />
+          <div className="hidden lg:block">
+            <DataTable
+              columns={buildScopeColumns(labels)}
+              rows={c.visible}
+              getRowId={(scope) => scope.id}
+            />
+          </div>
+        </>
       ) : null}
       <ScopesDialogs model={dialogsModel(c)} />
       <ScopeRemoveDialog

@@ -31,7 +31,7 @@ export function ActivitySection({ items }: { items: ActivityItem[] }) {
                     <Link
                       to="/tickets/$ticketId"
                       params={{ ticketId: item.ticketId }}
-                      className="font-medium text-primary hover:underline"
+                      className="inline-flex min-h-11 items-center font-medium text-primary hover:underline"
                     >
                       {item.folio || '—'}
                     </Link>

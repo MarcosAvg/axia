@@ -177,6 +177,74 @@ function buildTableColumns(
   ]
 }
 
+interface CatalogCardProps {
+  row: Record<string, unknown>
+  columns: AdminColumn[]
+  optionsFor: (table: AdminTable) => AdminOption[]
+  onEdit: (row: Record<string, unknown>) => void
+  onToggle: (row: Record<string, unknown>) => void
+}
+
+function CatalogCard({
+  row,
+  columns,
+  optionsFor,
+  onEdit,
+  onToggle,
+}: CatalogCardProps) {
+  const dataColumns = columns.filter((column) => column.key !== 'active')
+  const nameColumn = dataColumns[0]
+  const name = nameColumn ? displayName(row, nameColumn) : ''
+
+  return (
+    <li className="flex flex-col gap-3 rounded-xl border bg-card p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-words font-medium">{name || '—'}</p>
+          {dataColumns[1] ? (
+            <p className="truncate text-xs text-muted-foreground">
+              <CellContent
+                row={row}
+                column={dataColumns[1]}
+                optionsFor={optionsFor}
+              />
+            </p>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <StatusSwitch
+            active={row.active !== false}
+            name={name}
+            onToggle={() => onToggle(row)}
+          />
+          <RowActions
+            active={row.active !== false}
+            name={name}
+            onEdit={() => onEdit(row)}
+            onToggle={() => onToggle(row)}
+          />
+        </div>
+      </div>
+      {dataColumns.length > 2 ? (
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
+          {dataColumns.slice(2).map((column) => (
+            <div key={column.key} className="contents">
+              <dt className="text-muted-foreground">{column.label}</dt>
+              <dd className="min-w-0 break-words">
+                <CellContent
+                  row={row}
+                  column={column}
+                  optionsFor={optionsFor}
+                />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </li>
+  )
+}
+
 /** Lista de registros de un catálogo con columnas propias, orden y acciones. */
 export function CatalogTable({
   rows,
@@ -198,18 +266,34 @@ export function CatalogTable({
   const dataColumns = columns.filter((column) => column.key !== 'active')
 
   return (
-    <DataTable
-      columns={buildTableColumns({
-        rows,
-        dataColumns,
-        optionsFor,
-        onEdit,
-        onToggle,
-      })}
-      rows={rows}
-      sort={sort}
-      onSortChange={onSortChange}
-      getRowId={(row) => String(row.id)}
-    />
+    <>
+      <ul className="flex flex-col gap-2 lg:hidden">
+        {rows.map((row) => (
+          <CatalogCard
+            key={String(row.id)}
+            row={row}
+            columns={columns}
+            optionsFor={optionsFor}
+            onEdit={onEdit}
+            onToggle={onToggle}
+          />
+        ))}
+      </ul>
+      <div className="hidden lg:block">
+        <DataTable
+          columns={buildTableColumns({
+            rows,
+            dataColumns,
+            optionsFor,
+            onEdit,
+            onToggle,
+          })}
+          rows={rows}
+          sort={sort}
+          onSortChange={onSortChange}
+          getRowId={(row) => String(row.id)}
+        />
+      </div>
+    </>
   )
 }

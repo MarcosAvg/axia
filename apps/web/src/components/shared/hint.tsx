@@ -26,7 +26,7 @@ export function HintIcon({
           type="button"
           aria-label={aria}
           className={cn(
-            'inline-flex size-6 shrink-0 cursor-help items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring',
+            "relative inline-flex size-6 shrink-0 cursor-help items-center justify-center rounded-sm text-muted-foreground outline-none after:absolute after:-inset-2.5 after:content-[''] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
             className,
           )}
         >

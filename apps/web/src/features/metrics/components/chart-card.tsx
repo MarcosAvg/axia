@@ -15,7 +15,7 @@ export function ChartCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
+        <CardTitle as="h2" className="text-base">
           <HintLabel label={title} hint={hint} />
         </CardTitle>
       </CardHeader>

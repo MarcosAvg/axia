@@ -11,6 +11,7 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
+import { Badge } from '@/components/ui/badge'
 import { adminMessages } from '@/features/admin'
 
 export const Route = createFileRoute('/_authenticated/admin/')({
@@ -31,6 +32,7 @@ interface AdminEntry {
   description: string
   to: AdminPath | '/admin/catalogos'
   search?: { catalog: string }
+  disabled?: boolean
 }
 
 const { nav, descriptions } = adminMessages
@@ -63,6 +65,7 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         title: nav.integrations,
         description: descriptions.integrations,
         to: '/admin/integraciones',
+        disabled: true,
       },
       {
         icon: SettingsIcon,
@@ -100,21 +103,43 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
 
 function AdminCard({ entry }: { entry: AdminEntry }) {
   const Icon = entry.icon
+  const content = (
+    <>
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+        <Icon className="size-5" />
+      </span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex flex-wrap items-center gap-2 font-medium">
+          {entry.title}
+          {entry.disabled ? (
+            <Badge variant="outline">No disponible</Badge>
+          ) : null}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {entry.description}
+        </span>
+      </span>
+    </>
+  )
+
+  if (entry.disabled) {
+    return (
+      <div
+        aria-disabled="true"
+        className="flex items-start gap-3 rounded-xl border bg-card p-4 opacity-70"
+      >
+        {content}
+      </div>
+    )
+  }
+
   return (
     <Link
       to={entry.to}
       search={entry.search}
       className="flex items-start gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
     >
-      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        <Icon className="size-5" />
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="font-medium">{entry.title}</span>
-        <span className="text-sm text-muted-foreground">
-          {entry.description}
-        </span>
-      </span>
+      {content}
     </Link>
   )
 }

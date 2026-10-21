@@ -167,7 +167,7 @@ export function DataTable<T>({
   if (rows.length === 0 && empty) return <>{empty}</>
 
   return (
-    <div className="overflow-x-auto rounded-xl border">
+    <div className="min-w-0 overflow-x-auto rounded-xl border">
       <Table>
         <TableHeader>
           <TableRow>

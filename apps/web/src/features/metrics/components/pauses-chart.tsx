@@ -1,9 +1,11 @@
+import { PauseIcon } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { EmptyState } from '@/components/shared/empty-state'
 import type { PauseReasonRow } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
@@ -13,6 +15,10 @@ const config = {
 
 /** Pausas por motivo. */
 export function PausesChart({ data }: { data: PauseReasonRow[] }) {
+  if (data.length === 0) {
+    return <EmptyState icon={PauseIcon} title={metricsMessages.empty} />
+  }
+
   const chartData = data.slice(0, 8).map((row) => ({
     name: row.reasonName,
     pauses: row.pauses,
@@ -43,7 +49,12 @@ export function PausesChart({ data }: { data: PauseReasonRow[] }) {
           fontSize={11}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="pauses" fill="var(--chart-3)" radius={4} />
+        <Bar
+          dataKey="pauses"
+          fill="var(--chart-3)"
+          radius={4}
+          isAnimationActive={false}
+        />
       </BarChart>
     </ChartContainer>
   )

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { can, useAuth } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import { useTicketSearchByFolio } from '@/features/tickets'
 import { shellMessages } from '../i18n'
 import { NAV_SECTIONS } from './nav-items'
@@ -20,7 +21,7 @@ interface GlobalSearchProps {
 }
 
 const resultClass =
-  'flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground'
+  'flex min-h-11 w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground'
 
 function useDestination() {
   const navigate = useNavigate()
@@ -35,20 +36,21 @@ function useDestination() {
   }
 }
 
+function navigationItems(term: string, identity: Identity | null): NavItem[] {
+  const needle = term.toLocaleLowerCase('es-MX')
+  return NAV_SECTIONS.flatMap((section) => section.items).filter((item) => {
+    if (item.permission && !can(identity, item.permission)) return false
+    return item.label.toLocaleLowerCase('es-MX').includes(needle)
+  })
+}
+
 function NavigationResults({
-  term,
+  items,
   onSelect,
 }: {
-  term: string
+  items: NavItem[]
   onSelect: (item: NavItem) => void
 }) {
-  const { identity } = useAuth()
-  const items = NAV_SECTIONS.flatMap((section) => section.items).filter(
-    (item) => {
-      if (item.permission && !can(identity, item.permission)) return false
-      return item.label.toLowerCase().includes(term.toLowerCase())
-    },
-  )
   if (items.length === 0) return null
 
   return (
@@ -75,14 +77,12 @@ function NavigationResults({
 }
 
 function TicketResults({
-  term,
+  items,
   onSelect,
 }: {
-  term: string
+  items: { id: string; folio: string; description: string }[]
   onSelect: (id: string) => void
 }) {
-  const query = useTicketSearchByFolio(term)
-  const items = query.data ?? []
   if (items.length === 0) return null
 
   return (
@@ -107,9 +107,44 @@ function TicketResults({
   )
 }
 
+function SearchResults({
+  navItems,
+  ticketItems,
+  hasTerm,
+  showEmpty,
+  onNav,
+  onTicket,
+}: {
+  navItems: NavItem[]
+  ticketItems: { id: string; folio: string; description: string }[]
+  hasTerm: boolean
+  showEmpty: boolean
+  onNav: (item: NavItem) => void
+  onTicket: (id: string) => void
+}) {
+  return (
+    <div className="max-h-80 overflow-y-auto p-2">
+      <NavigationResults items={navItems} onSelect={onNav} />
+      {hasTerm ? (
+        <TicketResults items={ticketItems} onSelect={onTicket} />
+      ) : null}
+      {showEmpty ? (
+        <p
+          role="status"
+          className="px-2 py-6 text-center text-sm text-muted-foreground"
+        >
+          {shellMessages.search.empty}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 /** Paleta de comandos: navegación rápida y búsqueda de tiquets por folio. */
 export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const [term, setTerm] = useState('')
+  const { identity } = useAuth()
+  const tickets = useTicketSearchByFolio(term)
   const goTo = useDestination()
   const navigate = useNavigate()
 
@@ -123,6 +158,13 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   }
 
   const hasTerm = term.trim().length >= 2
+  const navItems = navigationItems(term.trim(), identity)
+  const ticketItems = tickets.data ?? []
+  const showEmpty =
+    term.trim().length > 0 &&
+    navItems.length === 0 &&
+    ticketItems.length === 0 &&
+    !tickets.isLoading
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -141,27 +183,23 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
             className="h-11 border-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>
-        <div className="max-h-80 overflow-y-auto p-2">
-          <NavigationResults
-            term={term}
-            onSelect={(item) => {
-              goTo(item)
-              close()
-            }}
-          />
-          {hasTerm ? (
-            <TicketResults
-              term={term}
-              onSelect={(id) => {
-                void navigate({
-                  to: '/tickets/$ticketId',
-                  params: { ticketId: id },
-                })
-                close()
-              }}
-            />
-          ) : null}
-        </div>
+        <SearchResults
+          navItems={navItems}
+          ticketItems={ticketItems}
+          hasTerm={hasTerm}
+          showEmpty={showEmpty}
+          onNav={(item) => {
+            goTo(item)
+            close()
+          }}
+          onTicket={(id) => {
+            void navigate({
+              to: '/tickets/$ticketId',
+              params: { ticketId: id },
+            })
+            close()
+          }}
+        />
       </DialogContent>
     </Dialog>
   )

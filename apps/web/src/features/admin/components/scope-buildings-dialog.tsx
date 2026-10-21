@@ -23,7 +23,7 @@ function BuildingsList({ options, selectedIds, onToggle }: BuildingsListProps) {
           <label
             key={id}
             htmlFor={`scope-building-${id}`}
-            className="flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm"
+            className="flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm"
           >
             <Checkbox
               id={`scope-building-${id}`}
@@ -83,7 +83,7 @@ export function ScopeBuildingsDialog({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t.searchBuildings}
             aria-label={t.searchBuildings}
-            className="pl-9"
+            className="min-h-11 pl-9"
           />
         </div>
         <p className="text-xs text-muted-foreground">

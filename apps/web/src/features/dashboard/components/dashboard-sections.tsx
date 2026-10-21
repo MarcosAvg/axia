@@ -9,7 +9,8 @@ import { BandejaSection } from './bandeja-section'
 
 export type DashboardRole = 'admin' | 'technician' | 'supervisor' | 'other'
 
-const linkClass = 'text-sm text-muted-foreground hover:text-foreground'
+const linkClass =
+  'inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground'
 
 function activeTitle(role: DashboardRole): string {
   if (role === 'supervisor') return t.sections.team

@@ -27,7 +27,7 @@ export function KpiGrid({
   period?: string
 }) {
   return (
-    <div className={`grid gap-3 ${COLUMNS[columns]}`}>
+    <div className={`grid grid-cols-2 gap-3 ${COLUMNS[columns]}`}>
       {cards.map((card) => (
         <MetricCard
           key={card.label}

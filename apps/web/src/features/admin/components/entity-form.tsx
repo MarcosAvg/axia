@@ -31,10 +31,15 @@ export function EntityForm({
         {children}
       </div>
       <footer className="flex items-center justify-end gap-2 border-t pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-11"
+          onClick={onCancel}
+        >
           {cancelLabel ?? actions.cancel}
         </Button>
-        <Button type="submit" disabled={isSaving}>
+        <Button type="submit" className="min-h-11" disabled={isSaving}>
           {isSaving ? actions.saving : (submitLabel ?? actions.save)}
         </Button>
       </footer>

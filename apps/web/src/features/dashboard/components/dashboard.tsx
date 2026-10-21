@@ -89,6 +89,7 @@ export function Dashboard() {
       <PageHeader
         title={`${t.greeting}${identity ? `, ${identity.fullName}` : ''}`}
         description={t.subtitle}
+        documentTitle="Panel"
         actions={<QuickActions canCreate={can(identity, 'ticket.create')} />}
       />
       {data.isError ? (

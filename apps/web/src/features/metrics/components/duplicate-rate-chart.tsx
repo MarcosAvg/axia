@@ -52,7 +52,12 @@ export function DuplicateRateChart({
           fontSize={11}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="rate" fill="var(--chart-3)" radius={4} />
+        <Bar
+          dataKey="rate"
+          fill="var(--chart-3)"
+          radius={4}
+          isAnimationActive={false}
+        />
       </BarChart>
     </ChartContainer>
   )

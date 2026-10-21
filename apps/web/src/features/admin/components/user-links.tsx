@@ -47,7 +47,12 @@ function LinkTable({ title, people, profiles, onChange }: LinkTableProps) {
       header: '',
       align: 'right',
       cell: (person) => (
-        <Button variant="outline" size="sm" onClick={() => onChange(person)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="min-h-11"
+          onClick={() => onChange(person)}
+        >
           {users.changeLink}
         </Button>
       ),

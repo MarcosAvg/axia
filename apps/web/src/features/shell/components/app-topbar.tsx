@@ -24,7 +24,7 @@ export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
         type="button"
         variant="ghost"
         size="icon"
-        className="lg:hidden"
+        className="size-11 lg:hidden lg:size-8"
         aria-label={shellMessages.sidebar.open}
         onClick={onOpenSidebar}
       >
@@ -36,13 +36,13 @@ export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
           type="button"
           variant="outline"
           size="lg"
-          className="gap-2 text-muted-foreground"
+          className="size-11 gap-2 px-0 text-muted-foreground sm:h-9 sm:w-auto sm:px-2.5"
           aria-label={shellMessages.search.aria}
           onClick={onOpenSearch}
         >
           <SearchIcon />
           <span className="hidden sm:inline">{shellMessages.search.open}</span>
-          <kbd className="hidden items-center rounded border bg-muted px-1.5 font-mono text-[10px] md:inline-flex">
+          <kbd className="hidden items-center rounded border bg-muted px-1.5 font-mono text-[10px] text-foreground/70 md:inline-flex">
             {searchShortcut()}
           </kbd>
         </Button>

@@ -68,7 +68,7 @@ function CalendarDetail({
 }) {
   const { list, actions, settings } = adminMessages
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">{calendar.name}</h2>
@@ -76,7 +76,13 @@ function CalendarDetail({
             {calendar.active ? list.active : list.inactive}
           </Badge>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="min-h-11"
+          onClick={onEdit}
+        >
           <PencilIcon />
           {actions.edit}
         </Button>
@@ -174,7 +180,7 @@ export function CalendarManager() {
         <p className="text-sm text-muted-foreground">{list.empty}</p>
       ) : null}
       {c.calendars.data && c.selected ? (
-        <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
           <CalendarPicker
             calendars={c.items}
             selectedId={c.selected.id}

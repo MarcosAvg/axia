@@ -51,7 +51,12 @@ export function TechnicianChart({ rows }: { rows: TechnicianRow[] }) {
           fontSize={11}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="tickets" fill="var(--chart-1)" radius={4} />
+        <Bar
+          dataKey="tickets"
+          fill="var(--chart-1)"
+          radius={4}
+          isAnimationActive={false}
+        />
       </BarChart>
     </ChartContainer>
   )

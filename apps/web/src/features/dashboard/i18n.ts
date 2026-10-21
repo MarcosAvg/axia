@@ -27,6 +27,7 @@ export const dashboardMessages = {
   },
   charts: {
     volume: 'Tiquets por mes',
+    empty: 'Sin tiquets en el periodo.',
   },
   kpiHints: {
     myWork: 'Tiquets en los que participas actualmente.',

@@ -1,4 +1,6 @@
+import { TicketIcon } from 'lucide-react'
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
+import { EmptyState } from '@/components/shared/empty-state'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartContainer,
@@ -15,46 +17,51 @@ const volumeConfig = {
 
 /** Tiquets por mes del usuario. */
 export function DashboardCharts({ tickets }: { tickets: MetricsTicket[] }) {
+  const volume = volumeByMonth(tickets)
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t.charts.volume}</CardTitle>
+        <CardTitle as="h2" className="text-base">
+          {t.charts.volume}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer
-          id="dashboard-volume"
-          config={volumeConfig}
-          className="aspect-auto h-56"
-        >
-          <LineChart
-            data={volumeByMonth(tickets)}
-            margin={{ left: 4, right: 8 }}
+        {volume.length === 0 ? (
+          <EmptyState icon={TicketIcon} title={t.charts.empty} />
+        ) : (
+          <ChartContainer
+            id="dashboard-volume"
+            config={volumeConfig}
+            className="aspect-auto h-56"
           >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              fontSize={11}
-              tickFormatter={formatMonthLabel}
-            />
-            <YAxis
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              width={28}
-              fontSize={11}
-            />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Line
-              dataKey="tickets"
-              type="monotone"
-              stroke="var(--chart-1)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
+            <LineChart data={volume} margin={{ left: 4, right: 8 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+                tickFormatter={formatMonthLabel}
+              />
+              <YAxis
+                allowDecimals={false}
+                tickLine={false}
+                axisLine={false}
+                width={28}
+                fontSize={11}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Line
+                dataKey="tickets"
+                type="monotone"
+                isAnimationActive={false}
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                dot={volume.length === 1}
+              />
+            </LineChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )

@@ -26,5 +26,5 @@ test('el administrador crea un equipo desde la administración', async ({
   await page.getByLabel('Nombre').fill(name)
   await page.getByRole('button', { name: 'Guardar' }).click()
 
-  await expect(page.getByText(name)).toBeVisible()
+  await expect(page.getByRole('table').getByText(name)).toBeVisible()
 })

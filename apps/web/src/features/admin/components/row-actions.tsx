@@ -32,6 +32,7 @@ export function RowActions({
         <Button
           variant="ghost"
           size="icon-sm"
+          className="size-11 lg:size-7"
           aria-label={`${editLabel ?? actions.edit}: ${name}`}
         >
           <EllipsisIcon />

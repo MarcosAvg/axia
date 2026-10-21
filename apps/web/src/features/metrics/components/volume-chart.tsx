@@ -40,9 +40,10 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
         <Line
           dataKey="tickets"
           type="monotone"
+          isAnimationActive={false}
           stroke="var(--chart-1)"
           strokeWidth={2}
-          dot={false}
+          dot={data.length === 1}
         />
       </LineChart>
     </ChartContainer>

@@ -48,9 +48,9 @@ const TAB_VALUES = ['summary', 'times', 'quality', 'sla', 'team'] as const
 
 function MetricsTabList() {
   return (
-    <TabsList className="flex-wrap">
+    <TabsList className="h-auto flex-wrap">
       {TAB_VALUES.map((value) => (
-        <TabsTrigger key={value} value={value} className="min-h-9">
+        <TabsTrigger key={value} value={value} className="min-h-11">
           {metricsMessages.tabs[value]}
         </TabsTrigger>
       ))}

@@ -32,6 +32,7 @@ export function ThemeToggle() {
           type="button"
           variant="ghost"
           size="icon-lg"
+          className="size-11 lg:size-9"
           aria-label={messages.theme.aria}
         >
           <PaletteIcon />

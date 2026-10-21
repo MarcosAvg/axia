@@ -157,7 +157,10 @@ export function VisibilityFields({ register, errors }: SettingsFieldsProps) {
       </span>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {EVENT_TYPES.map((type) => (
-          <label key={type} className="flex items-center gap-2 text-sm">
+          <label
+            key={type}
+            className="flex min-h-11 items-center gap-2 text-sm"
+          >
             <input
               type="checkbox"
               value={type}

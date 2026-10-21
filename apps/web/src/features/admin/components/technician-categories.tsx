@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { XIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
@@ -17,6 +16,7 @@ import { useAdminRows } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { DesignationDialog } from './designation-dialog'
+import { CategoryChip, DesignationCards } from './technician-designation-cards'
 
 function orEmpty<T>(rows: T[] | undefined): T[] {
   return rows ?? []
@@ -25,29 +25,6 @@ function orEmpty<T>(rows: T[] | undefined): T[] {
 function technicianName(people: LinkablePerson[], id: string): string {
   const found = people.find((person) => person.id === id)
   return found ? found.fullName : '—'
-}
-
-function CategoryChip({
-  label,
-  onRemove,
-}: {
-  label: string
-  onRemove: () => void
-}) {
-  const { scopes: t } = adminMessages
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-      {label}
-      <button
-        type="button"
-        aria-label={`${t.remove}: ${label}`}
-        className="inline-flex size-6 items-center justify-center rounded-full outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        onClick={onRemove}
-      >
-        <XIcon className="size-3.5" />
-      </button>
-    </span>
-  )
 }
 
 interface DesignationLabels {
@@ -116,6 +93,37 @@ function DesignationTable({
   )
 }
 
+function DesignationList({
+  rows,
+  technician,
+  category,
+  onRemove,
+}: {
+  rows: TechnicianDesignation[]
+  technician: (id: string) => string
+  category: (id: string) => string
+  onRemove: (technicianId: string, categoryId: string) => void
+}) {
+  return (
+    <>
+      <DesignationCards
+        rows={rows}
+        technician={technician}
+        category={category}
+        onRemove={onRemove}
+      />
+      <div className="hidden lg:block">
+        <DesignationTable
+          rows={rows}
+          technician={technician}
+          category={category}
+          onRemove={onRemove}
+        />
+      </div>
+    </>
+  )
+}
+
 function DesignationToolbar({
   query,
   count,
@@ -140,17 +148,12 @@ function DesignationToolbar({
   )
 }
 
-/** Designaciones de técnicos a categorías. */
-export function TechnicianCategories() {
+function useDesignations(query: string) {
   const designations = useTechnicianCategories()
   const people = usePeople()
   const categories = useAdminRows('categories')
   const add = useAddTechnicianCategory()
   const remove = useRemoveTechnicianCategory()
-  const [creating, setCreating] = useState(false)
-  const [query, setQuery] = useState('')
-  const { list } = adminMessages
-
   const technicians = orEmpty(people.data?.technicians)
   const categoryRows = orEmpty(categories.data)
   const technician = (id: string) => technicianName(technicians, id)
@@ -165,6 +168,35 @@ export function TechnicianCategories() {
     query,
   )
 
+  return {
+    designations,
+    add,
+    remove,
+    visible,
+    technician,
+    category,
+    technicians,
+    categoryRows,
+    list: adminMessages.list,
+  }
+}
+
+/** Designaciones de técnicos a categorías. */
+export function TechnicianCategories() {
+  const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
+  const {
+    designations,
+    add,
+    remove,
+    visible,
+    technician,
+    category,
+    technicians,
+    categoryRows,
+    list,
+  } = useDesignations(query)
+
   return (
     <div className="flex flex-col gap-4">
       <DesignationToolbar
@@ -176,7 +208,7 @@ export function TechnicianCategories() {
       {designations.isLoading ? <LoadingList rows={3} /> : null}
       {designations.isError ? <ErrorAlert message={list.error} /> : null}
       {designations.data ? (
-        <DesignationTable
+        <DesignationList
           rows={visible}
           technician={technician}
           category={category}

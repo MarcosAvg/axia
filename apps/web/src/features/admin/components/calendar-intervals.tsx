@@ -58,6 +58,7 @@ function buildIntervalColumns(
             type="button"
             variant="ghost"
             size="icon-sm"
+            className="size-11 lg:size-7"
             aria-label={`${t.remove}: ${dayLabel(interval.weekday)} ${interval.startTime}-${interval.endTime}`}
             onClick={() => onRemove(interval)}
           >
@@ -212,6 +213,7 @@ export function CalendarIntervals({
           type="button"
           variant="outline"
           size="sm"
+          className="min-h-11"
           onClick={() => setAdding(true)}
         >
           <PlusIcon />

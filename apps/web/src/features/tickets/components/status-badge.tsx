@@ -6,7 +6,7 @@ import type { TicketStatus } from '../domain/types'
 import { statusLabels } from '../i18n'
 
 const toneClasses: Record<StatusTone, string> = {
-  neutral: 'bg-muted text-muted-foreground',
+  neutral: 'bg-muted text-foreground/80',
   progress: 'bg-info/10 text-info dark:bg-info/20',
   paused:
     'bg-warning/15 text-warning-foreground dark:bg-warning/20 dark:text-warning',

@@ -34,7 +34,7 @@ export function FilterChips({
             type="button"
             aria-label={`${removeLabel} ${item.label}`}
             onClick={item.onRemove}
-            className="inline-flex size-6 items-center justify-center rounded-full hover:bg-background/60 focus-visible:ring-2 focus-visible:ring-ring"
+            className="relative inline-flex size-6 items-center justify-center rounded-full after:absolute after:-inset-2.5 after:content-[''] hover:bg-background/60 focus-visible:ring-2 focus-visible:ring-ring"
           >
             <XIcon className="size-3.5" />
           </button>
@@ -43,7 +43,7 @@ export function FilterChips({
       <button
         type="button"
         onClick={onClear}
-        className="text-xs text-muted-foreground hover:text-foreground"
+        className="min-h-11 text-xs text-muted-foreground hover:text-foreground"
       >
         {clearLabel}
       </button>

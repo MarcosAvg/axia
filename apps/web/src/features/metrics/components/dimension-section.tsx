@@ -116,7 +116,7 @@ export function DimensionSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {withChart ? (
+        {withChart && rows.length > 0 ? (
           <DimensionChart
             id={`metrics-dim-${dimension}`}
             rows={rows}

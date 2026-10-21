@@ -14,7 +14,7 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
   const editing = manager.editing
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4">
       <h2 className="text-lg font-semibold">{config.title}</h2>
       <AdminToolbar
         query={manager.query}

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
+import { useDocumentTitle } from '@/lib/use-document-title'
 import type { Identity } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
 import type { ActionKey } from '../domain/actions'
@@ -47,7 +48,7 @@ function Section({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
+        <CardTitle as="h2">
           <HintLabel label={title} hint={hint} />
         </CardTitle>
       </CardHeader>
@@ -255,6 +256,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const ticket = useTicket(ticketId)
   const timeline = useTicketTimeline(ticketId)
   const participants = useTicketParticipants(ticketId)
+  useDocumentTitle(ticket.data?.folio ?? ticketMessages.detail.title)
 
   if (ticket.isLoading) return <TicketLoading />
   if (ticket.isError) {

@@ -11,6 +11,15 @@ import {
 import { authMessages, useAuth } from '@/features/auth'
 import { shellMessages } from '../i18n'
 
+function initialsOf(name: string | undefined): string {
+  if (!name) return '?'
+  const words = name.trim().split(/\s+/).filter(Boolean)
+  return words
+    .slice(0, 2)
+    .map((word) => word[0]?.toLocaleUpperCase('es-MX') ?? '')
+    .join('')
+}
+
 /** Menú del usuario: perfil y cerrar sesión. */
 export function UserMenu() {
   const { identity, signOut } = useAuth()
@@ -27,11 +36,16 @@ export function UserMenu() {
         <Button
           type="button"
           variant="ghost"
-          className="gap-1.5"
+          className="size-11 gap-0 px-0 font-semibold sm:h-8 sm:w-auto sm:gap-1.5 sm:px-2.5 sm:font-medium"
           aria-label={shellMessages.userMenu.label}
         >
-          <span className="max-w-40 truncate">{identity?.fullName}</span>
-          <ChevronDownIcon />
+          <span className="sm:hidden" aria-hidden>
+            {initialsOf(identity?.fullName)}
+          </span>
+          <span className="hidden max-w-40 truncate sm:inline">
+            {identity?.fullName}
+          </span>
+          <ChevronDownIcon className="hidden sm:block" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

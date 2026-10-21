@@ -31,7 +31,7 @@ export function AdminToolbar({
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="pl-9"
+          className="min-h-11 pl-9"
         />
       </div>
       <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export function AdminToolbar({
           <span className="text-sm text-muted-foreground">{countText}</span>
         ) : null}
         {addLabel && onAdd ? (
-          <Button type="button" onClick={onAdd}>
+          <Button type="button" className="min-h-11" onClick={onAdd}>
             <PlusIcon />
             {addLabel}
           </Button>

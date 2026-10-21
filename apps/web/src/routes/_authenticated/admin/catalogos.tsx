@@ -51,7 +51,7 @@ function CatalogsPage() {
         title={adminMessages.nav.catalogs}
         description={adminMessages.descriptions.catalogs}
       />
-      <div className="grid gap-6 lg:grid-cols-[15rem_1fr]">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <CatalogPicker current={config.key} />
         <nav aria-label="Catálogos" className="hidden flex-col gap-1 lg:flex">
           {ADMIN_CATALOGS.map((item) => {

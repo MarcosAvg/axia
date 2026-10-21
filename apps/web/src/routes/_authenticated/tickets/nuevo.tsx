@@ -1,12 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RequirePermission } from '@/features/auth'
 import { TicketForm, ticketMessages } from '@/features/tickets'
+import { useDocumentTitle } from '@/lib/use-document-title'
 
 export const Route = createFileRoute('/_authenticated/tickets/nuevo')({
   component: NewTicketPage,
 })
 
 function NewTicketPage() {
+  useDocumentTitle(ticketMessages.create.title)
+
   return (
     <RequirePermission permission="ticket.create">
       <div className="flex flex-col gap-4">

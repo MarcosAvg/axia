@@ -46,7 +46,12 @@ export function SlaPriorityChart({ rows }: { rows: SlaPriorityRow[] }) {
           fontSize={11}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="rate" fill="var(--chart-2)" radius={4} />
+        <Bar
+          dataKey="rate"
+          fill="var(--chart-2)"
+          radius={4}
+          isAnimationActive={false}
+        />
       </BarChart>
     </ChartContainer>
   )

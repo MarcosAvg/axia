@@ -6,6 +6,7 @@ import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TextField } from '@/components/shared/form-fields'
+import { useDocumentTitle } from '@/lib/use-document-title'
 import { changePassword } from '../api/auth-api'
 import { authMessages } from '../i18n'
 
@@ -23,6 +24,7 @@ const schema = z
 type FormValues = z.infer<typeof schema>
 
 export function ChangePasswordScreen() {
+  useDocumentTitle(authMessages.password.title)
   const [error, setError] = useState<string | null>(null)
   const form = useForm<FormValues>({ resolver: zodResolver(schema) })
   const {

@@ -23,7 +23,7 @@ function OptionButton({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        'flex min-h-10 w-full items-center rounded-lg border px-3 text-left text-sm transition-colors',
+        'flex min-h-11 w-full items-center rounded-lg border px-3 text-left text-sm transition-colors',
         selected
           ? 'border-ring bg-muted font-medium text-foreground'
           : 'border-transparent hover:bg-muted/50',
@@ -118,7 +118,7 @@ export function LinkDialog({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={users.searchProfiles}
             aria-label={users.searchProfiles}
-            className="pl-9"
+            className="min-h-11 pl-9"
           />
         </div>
         <ProfileList

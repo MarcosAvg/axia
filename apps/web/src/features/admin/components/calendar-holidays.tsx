@@ -46,6 +46,7 @@ function buildHolidayColumns(
             type="button"
             variant="ghost"
             size="icon-sm"
+            className="size-11 lg:size-7"
             aria-label={`${t.remove}: ${holiday.holiday}`}
             onClick={() => onRemove(holiday)}
           >
@@ -161,6 +162,7 @@ export function CalendarHolidays({
           type="button"
           variant="outline"
           size="sm"
+          className="min-h-11"
           onClick={() => setAdding(true)}
         >
           <PlusIcon />
