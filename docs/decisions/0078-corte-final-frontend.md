@@ -18,7 +18,7 @@ que migrar.
 3. **Las importaciones externas quedan deshabilitadas** en esta versión. Eran opcionales y no hay
    datos reales que importar; el núcleo funciona sin ellas.
 4. **La instalación y los respaldos** siguen el documento
-   `docs/migracion/instalacion-autoalojada.md`. El despliegue real lo ejecuta la persona.
+   `docs/start/instalacion.md`. El despliegue real lo ejecuta la persona.
 5. **Sin datos reales** no se ejecuta migración de datos ni se toca la nube. La instalación nace
    limpia con la referencia y, opcionalmente, la demo.
 

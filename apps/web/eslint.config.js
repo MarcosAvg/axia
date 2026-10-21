@@ -20,7 +20,7 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // Límites de docs/convenciones-codigo.md, sección 5
+      // Límites de docs/reference/convenciones-codigo.md, sección 5
       'max-lines': [
         'error',
         { max: 300, skipBlankLines: true, skipComments: true },
@@ -32,7 +32,7 @@ export default defineConfig([
       complexity: ['error', 10],
       'max-depth': ['error', 3],
       'max-params': ['error', 4],
-      // Reglas de docs/convenciones-codigo.md, sección 14
+      // Reglas de docs/reference/convenciones-codigo.md, sección 14
       'no-console': ['error', { allow: ['warn', 'error'] }],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': ['error', { 'ts-ignore': true }],

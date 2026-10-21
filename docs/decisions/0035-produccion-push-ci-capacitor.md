@@ -13,7 +13,7 @@ se documenta el resto.
 
 - **Push**: se crea `push_subscriptions` (una fila por endpoint, RLS para que cada usuario administre
   las suyas). La **activación** —claves VAPID, cambio del service worker a `injectManifest` con el
-  evento `push` y Edge Function de envío— se documenta en `docs/notificaciones-push.md`; no se
+  evento `push` y Edge Function de envío— se documenta en `docs/guides/notificaciones.md`; no se
   implementa/despliega aquí porque necesita claves y un entorno.
 - **CI/CD**: workflow **manual** `.github/workflows/deploy.yml` que construye el frontend y lo publica
   por `rsync`/SSH. **No** se dispara en cada push y **falla con un mensaje claro** si faltan los

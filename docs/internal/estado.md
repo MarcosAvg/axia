@@ -1,0 +1,74 @@
+# Axia — Estado del proyecto
+
+> El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
+> Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
+
+**Última actualización:** 2026-10-21
+**Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
+
+## En curso
+
+**Sin trabajo en curso.** La web, la API, la base y las pruebas usan el stack propio. No hay
+dependencias de plataformas externas en el código ni en la configuración.
+
+**Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
+de restauración en el host definitivo. Después, si se decide, Web Push y escalamiento programado.
+
+## Hecho
+
+- **Stack propio:** PostgreSQL 17 + Drizzle + Fastify 5 + TypeScript. Un solo servidor sirve la API
+  y el SPA; Compose define `db`, `migrate` y `app`.
+- **Autenticación:** usuario y contraseña, Argon2id, sesiones opacas en base, bloqueo por intentos,
+  primer arranque, cambio obligatorio de contraseña y administración de cuentas.
+- **Autorización:** `can`/`canAct`, ámbitos por permiso, repositorios con alcance, 404 opacos y
+  matriz positiva/negativa por rol.
+- **Tiquets:** alta, ruteo y ofertas, toma, asignación, inicio, pausa con subestados, atención,
+  validación, rechazo, cancelación, prioridad, comentario, duplicados, reactivación, recaptura,
+  reclamaciones, reasignación, apoyo auxiliar y calificación.
+- **Evidencias:** TUS, Sharp, normalización WebP, miniaturas, cuota y entrega autenticada.
+- **Tiempo real:** `LISTEN/NOTIFY` con conexión dedicada, SSE, catch-up y bandeja in-app.
+- **Offline:** cola Dexie, UUID de cliente, `occurredAt`, lote ordenado, resultados
+  `applied`/`duplicate`/`rejected`/`conflict`/`blocked` y bloqueo de dependientes.
+- **Semillas:** referencia en migraciones (catálogos, calendarios, festivos, motivos y reglas) y demo
+  explícita, local e idempotente, sin contraseña fija.
+- **Administración:** usuarios, roles y permisos, catálogos, calendarios, configuración de instancia,
+  ámbitos, designaciones y métricas.
+- **Instalación y respaldos:** `scripts/install.sh`, `pg_dump -Fc`, respaldo del volumen de
+  evidencias y restauración probada.
+- **Corte final:** la PWA usa la API propia, se retiró el stack anterior y se dejó la etiqueta local
+  `pre-corte-legacy`.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 237 web, 15 Playwright y 130 de integración contra
+  PostgreSQL real. `pnpm check` en verde.
+- **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
+  vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
+
+## Decisiones vigentes
+
+- **ADR 0078:** corte único del frontend y retirada del stack anterior.
+- **ADR 0077:** Vitest contra PostgreSQL real como suite principal; pgTAP se retiró con el esquema
+  anterior porque probaba RLS/RPC que ya no existen.
+- **Migraciones:** SQL propio en `apps/server/db/migrations/` + `drizzle-kit check`. No se usa
+  `drizzle-kit generate`.
+- **Importaciones e integraciones externas:** deshabilitadas en esta versión. Son opcionales y no
+  bloquean el núcleo.
+- **Push y escalamiento:** infraestructura pendiente para una etapa posterior.
+- **Solicitantes sin cuenta:** no reciben bandeja ni push; el tiquet conserva nombre y contacto.
+- **Sin datos reales:** no hubo migración de datos; la instalación nace limpia.
+
+## Verificación
+
+```bash
+pnpm check
+```
+
+La compuerta incluye lint, tipos, independencia del núcleo, fronteras, knip, Vitest, Playwright,
+integración contra PostgreSQL real y build. Requiere `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD`
+y `DATABASE_URL`; Playwright prepara su propia base con la semilla demo.
+
+## Pendientes operativos
+
+- Construir y arrancar la imagen Docker completa en un host limpio.
+- Configurar dominio, TLS, reverse proxy y `TRUST_PROXY` si corresponde.
+- Programar respaldos de base y evidencias, con prueba de restauración trimestral.
+- Revisar logs, retención, monitorización y espacio en disco.
+- Decidir si se implementan Web Push, escalamiento y adaptadores de importación.

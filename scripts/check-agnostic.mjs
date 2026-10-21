@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Verifica que el núcleo no mencione plataformas de terceros.
-// Ver docs/convenciones-codigo.md, secciones 4 y 14.
+// Ver docs/reference/convenciones-codigo.md, secciones 4 y 14.
 //
 // Los nombres a buscar viven en scripts/agnostic-names.json (única excepción
 // permitida). Aquí solo se define dónde sí se pueden nombrar.
@@ -14,8 +14,8 @@ const repoRoot = resolve(scriptDir, '..')
 
 // Rutas donde se permite nombrar plataformas de terceros (sección 4).
 const ALLOWED_PATTERNS = [
-  'docs/integraciones-y-migracion.md',
-  'docs/ESTADO.md',
+  'docs/history/integraciones-y-migracion.md',
+  'docs/internal/estado.md',
   'docs/decisions/**',
   'scripts/**',
 ]
@@ -127,7 +127,7 @@ function main() {
       )
     }
     console.error(
-      `\n${violations.length} coincidencia(s). Ver docs/convenciones-codigo.md, sección 4.`,
+      `\n${violations.length} coincidencia(s). Ver docs/reference/convenciones-codigo.md, sección 4.`,
     )
     process.exit(1)
   }

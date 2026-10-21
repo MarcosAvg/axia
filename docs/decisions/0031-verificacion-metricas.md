@@ -5,7 +5,7 @@
 
 ## Contexto
 
-El criterio de aceptación de la migración (§9 de `docs/integraciones-y-migracion.md`) exige que los
+El criterio de aceptación de la migración (§9 de `docs/history/integraciones-y-migracion.md`) exige que los
 **conteos y los tres intervalos** de Axia coincidan con las cifras de la fuente, verificados con
 **datos ficticios equivalentes**. Los tiquets importados **no reconstruyen la línea de tiempo**
 (`import_ticket_upsert` escribe el tiquet y un evento `imported`, pero no crea tramos), así que sus

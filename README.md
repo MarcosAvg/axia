@@ -102,20 +102,22 @@ axia/
 
 | Documento | Contenido |
 |---|---|
-| [`docs/empezar-aqui.md`](docs/empezar-aqui.md) | Requisitos, arranque y continuidad |
-| [`docs/especificacion-negocio.md`](docs/especificacion-negocio.md) | Fuente de verdad del negocio |
-| [`docs/dominio.md`](docs/dominio.md) | Flujo, modelo conceptual y glosario |
-| [`docs/modelo-datos.md`](docs/modelo-datos.md) | Diseño de la base |
-| [`docs/migracion/instalacion-autoalojada.md`](docs/migracion/instalacion-autoalojada.md) | Instalación, secretos y respaldos |
-| [`docs/convenciones-codigo.md`](docs/convenciones-codigo.md) | Estructura y estilo |
-| [`docs/ESTADO.md`](docs/ESTADO.md) | Estado y decisiones abiertas |
-| [`docs/decisions/`](docs/decisions/) | ADR |
+| [`docs/README.md`](docs/README.md) | Índice de la documentación |
+| [`docs/concepts/negocio.md`](docs/concepts/negocio.md) | Fuente de verdad del negocio |
+| [`docs/concepts/dominio.md`](docs/concepts/dominio.md) | Flujo, modelo conceptual y glosario |
+| [`docs/concepts/datos.md`](docs/concepts/datos.md) | Diseño de la base |
+| [`docs/start/instalacion.md`](docs/start/instalacion.md) | Requisitos, instalación y primer administrador |
+| [`docs/reference/convenciones-codigo.md`](docs/reference/convenciones-codigo.md) | Estructura y estilo |
+| [`docs/internal/estado.md`](docs/internal/estado.md) | Estado y decisiones abiertas |
+| [`docs/guides/operacion.md`](docs/guides/operacion.md) | Despliegue, respaldos y restauración |
+| [`docs/decisions/`](docs/decisions/) | ADR y decisiones vigentes |
 
 ## Despliegue
 
-La instalación y los respaldos están en
-[`docs/migracion/instalacion-autoalojada.md`](docs/migracion/instalacion-autoalojada.md). El
-despliegue en un servidor real lo ejecuta la persona; el agente no toca producción ni la nube.
+La instalación está en
+[`docs/start/instalacion.md`](docs/start/instalacion.md) y la operación en
+[`docs/guides/operacion.md`](docs/guides/operacion.md). El despliegue en un servidor real lo ejecuta
+la persona.
 
 ## Contribución
 

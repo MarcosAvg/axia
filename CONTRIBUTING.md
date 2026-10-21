@@ -9,8 +9,8 @@ de revisión.
 
 - Node.js LTS y pnpm (ver la puesta en marcha en `README.md`).
 - Docker para PostgreSQL local (`pnpm db:start`).
-- Leer `docs/convenciones-codigo.md` (estructura, estilo y reglas de dependencia) y
-  `docs/estilo-documentacion.md` (redacción de la documentación).
+- Leer `docs/reference/convenciones-codigo.md` (estructura, estilo y reglas de dependencia) y
+  `docs/reference/estilo-documentacion.md` (redacción de la documentación).
 
 ## Flujo de trabajo
 
@@ -68,7 +68,7 @@ Antes de abrir una pull request:
 ## Documentación
 
 La documentación forma parte del cambio: si se modifica un comportamiento, se actualiza en el mismo
-commit. La redacción sigue `docs/estilo-documentacion.md` y el índice está en `docs/README.md`.
+commit. La redacción sigue `docs/reference/estilo-documentacion.md` y el índice está en `docs/README.md`.
 
 ## Conducta y seguridad
 

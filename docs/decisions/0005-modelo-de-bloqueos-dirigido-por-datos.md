@@ -34,5 +34,5 @@ Un tiquet puede tener **varios bloqueos activos** a la vez y el estado macro `on
 - El administrador da de alta motivos y flujos sin desplegar.
 - Las transiciones y los campos obligatorios se validan en las funciones RPC.
 - Las vistas de métricas (tiempo en pausa por motivo) se calculan sobre estos datos.
-- La semilla inicial de tipos y subestados está pendiente (pregunta 1 de `docs/ESTADO.md`).
+- La semilla inicial de tipos y subestados está pendiente (pregunta 1 de `docs/internal/estado.md`).
 - Revertir es posible: el flujo vive en datos y puede migrarse.

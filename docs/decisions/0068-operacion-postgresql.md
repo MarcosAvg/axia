@@ -35,7 +35,7 @@ transacción y no podía ejecutarlos.
 - La primera migración que cree un índice en caliente ya tiene un camino válido.
 - No se añade infraestructura de pooling ni particionado prematuro.
 - El rendimiento real se validará cuando haya datos; este ADR no afirma que el esquema sea rápido.
-- El runbook está en `docs/migracion/rendimiento-postgres.md`.
+- El runbook está en `docs/reference/rendimiento-postgres.md`.
 
 ## Alternativas descartadas
 

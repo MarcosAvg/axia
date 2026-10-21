@@ -15,7 +15,7 @@
     "check:agnostic": "node scripts/check-agnostic.mjs",
     "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",
     "knip": "knip",
-    "check": "pnpm lint && pnpm typecheck && pnpm test:scripts && pnpm check:agnostic && pnpm check:boundaries && pnpm knip && pnpm test && pnpm db:test && pnpm build",
+    "check": "pnpm lint && pnpm typecheck && pnpm test:scripts && pnpm check:docs && pnpm check:agnostic && pnpm check:boundaries && pnpm knip && pnpm test && pnpm db:test && pnpm build",
     "db:start": "docker compose -f compose.yaml -f compose.dev.yaml up -d db",
     "db:stop": "docker compose stop db",
     "db:reset": "pnpm --filter @axia/server db:reset",
@@ -28,7 +28,8 @@
     "db:next:indexes": "pnpm --filter @axia/server db:indexes",
     "db:next:demo": "pnpm --filter @axia/server db:demo",
     "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server build && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
-    "prepare": "husky"
+    "prepare": "husky",
+    "check:docs": "node scripts/check-docs.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

@@ -32,4 +32,4 @@ el escritorio, y el perfil, una sola tarjeta.
 - El tablero jerarquiza los indicadores y conserva los filtros a la vista.
 - Acceso y perfil aprovechan el escritorio y muestran la identidad del usuario.
 - La regresión visual con capturas de Playwright queda como mejora opcional (documentada en
-  `docs/ESTADO.md`), para no introducir fragilidad en la compuerta.
+  `docs/internal/estado.md`), para no introducir fragilidad en la compuerta.

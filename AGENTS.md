@@ -18,7 +18,7 @@ y en qué estado está ese motivo, con evidencias en cada paso.
   estados ni reglas de otra plataforma**. Los identificadores externos se guardan solo en la
   tabla genérica `ticket_external_refs(system, external_id)`, y el núcleo no conoce sus valores.
 - Los nombres de plataformas de terceros solo pueden aparecer en el código de los adaptadores
-  y en `docs/integraciones-y-migracion.md`. Lo verifica `pnpm check:agnostic`.
+  y en `docs/history/integraciones-y-migracion.md`. Lo verifica `pnpm check:agnostic`.
 - Prueba de fuego ante la duda: *¿Axia funcionaría igual si esa plataforma dejara de existir?*
   Si no, está mal ubicado.
 - Las integraciones son opcionales y, por defecto, de **entrada** (importar). Nada en Axia
@@ -38,12 +38,12 @@ Tú escribes todo el código y nadie lo revisa línea por línea. Por eso:
 - Solo consultas a la persona para: (1) reglas de negocio ambiguas o no documentadas,
   (2) credenciales, dominios o infraestructura real, (3) acciones de la sección 7.
 - Al consultar: una pregunta concreta, con opciones y tu recomendación. Registra el
-  bloqueo en `docs/ESTADO.md`, pasa a otra tarea que no dependa de la respuesta y, si no
+  bloqueo en `docs/internal/estado.md`, pasa a otra tarea que no dependa de la respuesta y, si no
   hay ninguna, detente. No adivines reglas de negocio ni de seguridad.
 
 ## 3. Continuidad entre sesiones
 
-1. Al iniciar, lee `docs/ESTADO.md` (hecho, siguiente, bloqueos, decisiones).
+1. Al iniciar, lee `docs/internal/estado.md` (hecho, siguiente, bloqueos, decisiones).
 2. Al terminar cada tarea, actualízalo: qué hiciste, qué sigue, preguntas abiertas.
 3. Trabaja en ciclos pequeños: una tarea, sus pruebas, su commit.
 
@@ -61,7 +61,7 @@ Tú escribes todo el código y nadie lo revisa línea por línea. Por eso:
 
 ## 5. Comandos
 
-Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/ESTADO.md`).
+Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/internal/estado.md`).
 
 | Comando | Qué hace |
 |---|---|
@@ -87,11 +87,11 @@ Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/ESTADO.
    el `index.ts` de otro.
 7. La lógica de negocio va en funciones puras, con pruebas.
 8. Nunca inventes datos. En importaciones, los marcadores de "sin dato" de la fuente se
-   convierten en `NULL` (detalle en `docs/integraciones-y-migracion.md`).
+   convierten en `NULL` (detalle en `docs/history/integraciones-y-migracion.md`).
 9. Fechas en `timestamptz`; zona horaria configurable, nunca fija en el código.
 10. Código, tablas y columnas en inglés. Textos de interfaz en español (es-MX).
 11. Actualiza la documentación en el mismo commit que cambia el comportamiento.
-12. Estilo y límites: `docs/convenciones-codigo.md`. Reglas del negocio: `docs/dominio.md`.
+12. Estilo y límites: `docs/reference/convenciones-codigo.md`. Reglas del negocio: `docs/concepts/dominio.md`.
 
 ## 7. Límites: requieren confirmación explícita de la persona
 
@@ -116,16 +116,16 @@ Nunca, sin que la persona lo pida claramente en esta sesión:
   vite-plugin-pwa, Recharts): no confíes en tu memoria. Revisa los tipos instalados en
   `node_modules` o la documentación oficial de la versión instalada.
 - Si un comando falla, lee el error completo. Tras 3 intentos sin avance, cambia de
-  enfoque o registra el bloqueo en `docs/ESTADO.md`. No repitas lo mismo a ciegas.
+  enfoque o registra el bloqueo en `docs/internal/estado.md`. No repitas lo mismo a ciegas.
 - Todo bug corregido lleva una prueba que lo reproduce.
 
 ## 9. Proceso por tarea
 
-1. Lee `docs/ESTADO.md` y los documentos relevantes.
-2. Escribe un plan de 3 a 7 líneas en `docs/ESTADO.md` (sección "En curso") y avanza.
+1. Lee `docs/internal/estado.md` y los documentos relevantes.
+2. Escribe un plan de 3 a 7 líneas en `docs/internal/estado.md` (sección "En curso") y avanza.
 3. Crea una rama (`feat/...`, `fix/...`), haz commits pequeños con Conventional Commits.
 4. Escribe o actualiza pruebas, implementa, corre `pnpm check`.
-5. Integra a `main` solo con la compuerta en verde. Actualiza `docs/ESTADO.md`.
+5. Integra a `main` solo con la compuerta en verde. Actualiza `docs/internal/estado.md`.
 6. Entrega el informe final (sección 10).
 
 ## 10. Informe final de cada tarea
@@ -139,17 +139,15 @@ Breve y en español:
 
 ## 11. Documentos del proyecto
 
-- `docs/ESTADO.md`: estado, hoja de ruta y bloqueos. Se lee siempre al iniciar.
-- `docs/empezar-aqui.md`: guía para llegar a un equipo nuevo o retomar el proyecto (requisitos,
-  arranque, continuidad entre equipos y solución de problemas).
-- `docs/especificacion-negocio.md`: **fuente de verdad del negocio** (flujo, estados, reglas,
+- `docs/internal/estado.md`: estado, hoja de ruta y bloqueos. Se lee siempre al iniciar.
+- `docs/start/continuidad.md`: actualización, continuidad entre equipos y solución de problemas.
+- `docs/concepts/negocio.md`: **fuente de verdad del negocio** (flujo, estados, reglas,
   tiempos y permisos). **Léela antes de tocar cualquiera de esos temas.** Si algo contradice a la
   especificación, manda la especificación.
-- `docs/dominio.md`: resumen consistente del núcleo (flujo, modelo conceptual y glosario).
-- `docs/modelo-datos.md`: diseño de la base del núcleo (ER, estados, transiciones, permisos,
-  tiempos, RLS e indicadores). Se aprueba antes de escribir migraciones.
-- `docs/convenciones-codigo.md`: estructura, estilo, pruebas, SQL, git, herramientas.
-- `docs/configuracion-inicial.md`: guía de arranque del entorno (Fase 0) y despliegue.
-- `docs/integraciones-y-migracion.md`: **solo léelo al trabajar en importadores o
+- `docs/concepts/dominio.md`: resumen consistente del núcleo (flujo, modelo conceptual y glosario).
+- `docs/concepts/datos.md`: modelo de datos actual (dominios, relaciones y reglas).
+- `docs/reference/convenciones-codigo.md`: estructura, estilo, pruebas, SQL, git, herramientas.
+- `docs/start/instalacion.md`: requisitos, instalación y primer administrador.
+- `docs/history/integraciones-y-migracion.md`: **solo léelo al trabajar en importadores o
   integraciones**. Describe el origen actual de los datos como referencia.
 - `docs/decisions/`: decisiones de arquitectura (ADR).

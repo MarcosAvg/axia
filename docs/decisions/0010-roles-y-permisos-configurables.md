@@ -23,5 +23,5 @@ consultan permisos con `has_permission`.
 ## Consecuencias
 
 - Roles semilla: solicitante, supervisor, técnico y administrador.
-- La matriz de permisos vive en `docs/modelo-datos.md` §5.
+- La matriz de permisos vive en `docs/concepts/datos.md` §5.
 - `has_permission` es `security definer` para leer los roles sin depender de la RLS.
