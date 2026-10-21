@@ -1,6 +1,6 @@
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
-import { assignTechnician, type AssignTechnicianInput } from './assign.js'
+import { runTicketAction } from './actions.js'
 import { createTicket } from './create.js'
 import type { CreateTicketInput } from './create-types.js'
 import { getTicketDetail } from './detail.js'
@@ -11,8 +11,8 @@ import {
   type ListTicketsOptions,
   type TicketPage,
 } from './repository.js'
+import type { TicketActionInput } from './schemas.js'
 import { listSupervisors } from './supervisors.js'
-import { takeTicket } from './take.js'
 
 function emptyPage(page: number, pageSize: number): TicketPage {
   return { items: [], total: 0, page, pageSize }
@@ -48,10 +48,8 @@ export function createTicketService(db: Database) {
     supervisors: (actor: Actor) => listSupervisors(db, actor),
     create: (actor: Actor, input: CreateTicketInput) =>
       createTicket(db, actor, input),
-    take: (actor: Actor, ticketId: string, clientRequestId: string) =>
-      takeTicket(db, actor, ticketId, clientRequestId),
-    assignTechnician: (actor: Actor, input: AssignTechnicianInput) =>
-      assignTechnician(db, actor, input),
+    action: (actor: Actor, ticketId: string, input: TicketActionInput) =>
+      runTicketAction(db, actor, ticketId, input),
   }
 }
 

@@ -133,16 +133,7 @@ function registerWriteRoutes(
     async (request) => {
       const { id } = ticketIdParamsSchema.parse(request.params)
       const body = ticketActionSchema.parse(request.body)
-      const actor = currentActor(request)
-      if (body.action === 'take') {
-        return tickets.take(actor, id, body.clientRequestId)
-      }
-      return tickets.assignTechnician(actor, {
-        ticketId: id,
-        technicianId: body.technicianId,
-        reasonId: body.reasonId ?? null,
-        clientRequestId: body.clientRequestId,
-      })
+      return tickets.action(currentActor(request), id, body)
     },
   )
 }

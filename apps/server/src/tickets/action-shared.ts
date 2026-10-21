@@ -64,3 +64,39 @@ export async function lockTicket(
   if (!row) throw notFound()
   return row
 }
+
+export function isFinalStatus(status: string): boolean {
+  return ['closed', 'rejected', 'cancelled', 'duplicate'].includes(status)
+}
+
+export async function requireReason(
+  tx: DbExecutor,
+  reasonId: string,
+  use: string,
+  label: string,
+) {
+  const result = await tx.execute(sql`
+    select id
+    from public.reasons
+    where id = ${reasonId} and active and use = ${use}
+    limit 1
+  `)
+  if (!result.rows[0]) {
+    throw new AppError(400, 'validation_error', `${label} no válido`)
+  }
+}
+
+export async function hasEvidence(
+  tx: DbExecutor,
+  ticketId: string,
+  cycle: number,
+  type: string,
+): Promise<boolean> {
+  const result = await tx.execute(sql`
+    select 1
+    from public.evidence
+    where ticket_id = ${ticketId} and cycle = ${cycle} and type = ${type}
+    limit 1
+  `)
+  return Boolean(result.rows[0])
+}

@@ -114,6 +114,10 @@ idempotencia se apoyan en el índice único de `ticket_events(client_request_id)
 No se añadieron índices en 5C.1. Las pruebas de concurrencia cubren dos altas con la misma clave y
 dos supervisores tomando el mismo tiquet; solo una operación gana.
 
+En 5C.2 las comprobaciones de evidencia usan `idx_evidence_ticket_type` y la validación usa el
+índice único `ticket_validations(ticket_id, cycle, validator_role)`. Las transiciones bloquean por
+PK; no se añadieron índices nuevos.
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una

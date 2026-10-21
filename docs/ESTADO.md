@@ -4,19 +4,18 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.1 (altas, ruteo, tomar y asignar) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.2 (transiciones simples) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 5C.1 se cerró el 2026-10-21: alta de tiquets con ruteo y
-detección de posibles duplicados, toma de ofertas y asignación de técnico, con idempotencia por
-`clientRequestId`, bloqueo de fila y pruebas de concurrencia. No hay cambios en la web; sigue sobre
+**Sin trabajo en curso.** El tramo 5C.2 se cerró el 2026-10-21: inicio y atendido con evidencia,
+validación por política, rechazo, cancelación, comentario, prioridad, duplicado y reactivación. Las
+acciones comparten idempotencia, bloqueo de fila e historial. No hay cambios en la web; sigue sobre
 Supabase hasta el corte final.
 
-**Siguiente:** tramo 5C.2 (resto de transiciones: inicio, pausa, atendido, validación, rechazo,
-cancelación, comentarios, prioridad, recaptura, reclamaciones, duplicado y reactivación). Inicio y
-atendido dependen de evidencias (tramo 6). Siguen abiertas las decisiones de
-`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 5C.3 (pausa con subestados, recaptura, reclamaciones, reasignación de supervisor
+y apoyos auxiliares). Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre
+push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -49,6 +48,18 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 5C.2 — transiciones simples (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Acciones `start`, `attend`, `validate`, `reject`, `cancel`, `comment`, `change_priority`,
+    `mark_duplicate` y `reactivate` en `POST /api/tickets/:id/actions`.
+  - Inicio y atendido exigen evidencia del ciclo; la validación respeta
+    `validation_policy` y registra validaciones por rol; el resto conserva motivo, estado previo e
+    historial.
+  - Todas usan `clientRequestId`, bloqueo `FOR UPDATE` y eventos append-only. El duplicado crea el
+    enlace `duplicate_of` y la reactivación recupera `status_before_discard`.
+  - Pruebas: 35 unitarias/HTTP y 89 de integración, incluido el ciclo completo hasta `closed`.
+  - Sin índices nuevos; las acciones usan PK, `ticket_validations`, `evidence` y los índices únicos
+    existentes.
 - **Migración sin Supabase, Etapa B, tramo 5C.1 — altas, ruteo y asignación (2026-10-21)**,
   rama `feat/migracion-base-datos`:
   - `POST /api/tickets` con validación de catálogos, dependencia solicitante, permiso
@@ -1239,3 +1250,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   `ticket_events.client_request_id`; las acciones bloquean la fila del tiquet y se probaron dos
   creaciones y dos tomas concurrentes. 35 pruebas unitarias/HTTP y 81 de integración. Queda 5C.2
   para el resto de transiciones; inicio y atendido esperan evidencias del tramo 6.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 5C.2**. Se añadieron las transiciones
+  simples: inicio y atendido con evidencia, validación por política, rechazo, cancelación,
+  comentario, prioridad, duplicado y reactivación. 35 pruebas unitarias/HTTP y 89 de integración.
+  Quedan para 5C.3 la pausa con subestados, la recaptura, las reclamaciones y las reasignaciones.

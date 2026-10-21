@@ -61,15 +61,68 @@ export const createTicketSchema = z.object({
   clientRequestId: z.string().uuid(),
 })
 
+const actionBase = {
+  clientRequestId: z.string().uuid(),
+}
+
 export const ticketActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('take'),
-    clientRequestId: z.string().uuid(),
+    ...actionBase,
   }),
   z.object({
     action: z.literal('assign_technician'),
     technicianId: z.string().uuid(),
     reasonId: z.string().uuid().optional(),
-    clientRequestId: z.string().uuid(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('start'),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('attend'),
+    workDescription: z.string().trim().min(5).max(4000),
+    serviceTypeId: z.string().uuid().optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('validate'),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('reject'),
+    reasonId: z.string().uuid(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('cancel'),
+    reasonId: z.string().uuid(),
+    note: z.string().trim().max(2000).optional(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('change_priority'),
+    priorityId: z.string().uuid(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('comment'),
+    text: z.string().trim().min(1).max(4000),
+    isInternal: z.boolean().default(true),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('mark_duplicate'),
+    originalId: z.string().uuid(),
+    ...actionBase,
+  }),
+  z.object({
+    action: z.literal('reactivate'),
+    reasonId: z.string().uuid(),
+    ...actionBase,
   }),
 ])
+
+export type TicketActionInput = z.infer<typeof ticketActionSchema>

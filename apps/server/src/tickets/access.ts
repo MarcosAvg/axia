@@ -27,7 +27,11 @@ const TECHNICIAN_OWN = new Set([
   'ticket.record_progress',
 ])
 
-const FLOW_OWN = new Set(['ticket.cancel', 'ticket.mark_duplicate'])
+const FLOW_OWN = new Set([
+  'ticket.cancel',
+  'ticket.reject',
+  'ticket.mark_duplicate',
+])
 
 export type OwnKind = 'view' | 'requester' | 'technician' | 'flow' | 'none'
 
