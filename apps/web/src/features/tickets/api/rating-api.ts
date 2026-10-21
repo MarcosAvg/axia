@@ -1,20 +1,20 @@
-// Calificación de satisfacción de un tiquet (RPC ticket_rate).
-
-import { supabase } from '@/lib/supabase'
+import { apiFetch, ApiError } from '@/lib/api-client'
 import type { TicketRating } from '../domain/types'
-import { parseRating } from '../schemas'
 import type { RatingInput } from '../schemas'
+import { ticketAction } from './rpc'
 
 export async function fetchRating(
   ticketId: string,
 ): Promise<TicketRating | null> {
-  const { data, error } = await supabase
-    .from('ticket_ratings')
-    .select('score, comment')
-    .eq('ticket_id', ticketId)
-    .maybeSingle()
-  if (error) throw error
-  return data ? parseRating(data) : null
+  try {
+    const body = await apiFetch<{ item: TicketRating | null }>(
+      `/api/tickets/${ticketId}/rating`,
+    )
+    return body.item
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null
+    throw error
+  }
 }
 
 export async function rateTicket(
@@ -22,11 +22,8 @@ export async function rateTicket(
   input: RatingInput,
   clientRequestId: string,
 ): Promise<void> {
-  const { error } = await supabase.rpc('ticket_rate', {
-    p_ticket_id: ticketId,
-    p_score: input.score,
-    p_comment: input.comment || undefined,
-    p_client_request_id: clientRequestId,
+  await ticketAction(ticketId, 'rate', clientRequestId, {
+    score: input.score,
+    comment: input.comment || undefined,
   })
-  if (error) throw error
 }

@@ -1,8 +1,8 @@
 // Cola de acciones del tiquet: cuando no hay conexión, la acción se encola y se
-// reenvía al recuperar la red (mismo `client_request_id` para idempotencia).
+// reenvía con el contrato de sincronización, conservando `occurredAt` y el UUID.
 
 import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
-import { TICKET_OPERATIONS } from './ticket-operations'
+import { sendSyncBatch } from './sync-api'
 import type { TicketOperation } from './ticket-operations'
 
 const TICKET_ACTION = 'ticket_action'
@@ -33,8 +33,18 @@ export async function enqueueTicketAction(
 /** Registra el reenvío de acciones del tiquet en la cola de salida. */
 export function registerTicketActionHandler() {
   registerOutboxHandler(TICKET_ACTION, async (payload) => {
-    const { operation, ticketId, args, clientRequestId } =
-      payload as TicketActionPayload
-    await TICKET_OPERATIONS[operation](ticketId, args, clientRequestId)
+    const data = payload as TicketActionPayload
+    const [result] = await sendSyncBatch([
+      {
+        clientRequestId: data.clientRequestId,
+        ticketId: data.ticketId,
+        type: data.operation,
+        args: data.args,
+        occurredAt: data.occurredAt,
+      },
+    ])
+    if (!result) throw new Error('La sincronización no devolvió resultado')
+    if (result.status === 'applied' || result.status === 'duplicate') return
+    throw new Error(result.message ?? result.code ?? result.status)
   })
 }

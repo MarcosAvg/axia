@@ -2,14 +2,16 @@ import { Navigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { can } from '../domain/identity'
 import { useAuth } from '../hooks/auth-context'
+import { ChangePasswordScreen } from './change-password-screen'
 import { ForbiddenCard } from './forbidden-card'
 import { LoadingScreen } from './loading-screen'
 
 /** Redirige a `/login` si no hay sesión; si la hay, muestra el contenido. */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { status, isIdentityLoading } = useAuth()
+  const { status, identity, isIdentityLoading } = useAuth()
   if (status === 'loading' || isIdentityLoading) return <LoadingScreen />
   if (status === 'signed-out') return <Navigate to="/login" replace />
+  if (identity?.mustChangePassword) return <ChangePasswordScreen />
   return <>{children}</>
 }
 

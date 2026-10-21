@@ -16,7 +16,7 @@ const identityQueryKey = (userId: string | undefined) =>
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
-  const { status, session } = useAuthSession()
+  const { status, session, refresh } = useAuthSession()
   const userId = session?.user.id
 
   const {
@@ -34,14 +34,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDisplayTimezone(identity?.timezone)
   }, [identity?.timezone])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    await signInWithPassword(email, password)
-  }, [])
+  const signIn = useCallback(
+    async (username: string, password: string) => {
+      await signInWithPassword(username, password)
+      await refresh()
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'identity'] })
+    },
+    [queryClient, refresh],
+  )
 
   const signOut = useCallback(async () => {
     await signOutRequest()
+    await refresh()
     queryClient.clear()
-  }, [queryClient])
+  }, [queryClient, refresh])
 
   const refreshIdentity = useCallback(async () => {
     await refetch()

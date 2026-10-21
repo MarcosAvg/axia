@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
-const DEMO_PASSWORD = 'AxiaDemo2026!'
+const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Correo electrónico').fill(email)
+  await page.getByLabel('Usuario').fill(email)
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
@@ -15,7 +15,7 @@ async function signIn(page: Page, email: string) {
 
 test('el administrador crea un rol en la administración', async ({ page }) => {
   const label = `Rol E2E ${crypto.randomUUID().slice(0, 8)}`
-  await signIn(page, 'admin@axia.test')
+  await signIn(page, 'demo.admin')
 
   await page.goto('/admin/roles')
   await page.getByRole('button', { name: 'Nuevo rol' }).click()

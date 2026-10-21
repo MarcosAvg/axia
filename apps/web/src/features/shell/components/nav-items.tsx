@@ -7,7 +7,6 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   LibraryIcon,
-  PlugIcon,
   SettingsIcon,
   ShieldCheckIcon,
   TicketIcon,
@@ -27,7 +26,6 @@ type PlainPath =
   | '/admin/usuarios'
   | '/admin/ambitos'
   | '/admin/calendarios'
-  | '/admin/integraciones'
   | '/admin/configuracion'
 
 interface NavItemBase {
@@ -147,14 +145,6 @@ export const NAV_SECTIONS: NavSection[] = [
         to: '/admin/calendarios',
         label: nav.calendars,
         icon: CalendarDaysIcon,
-        permission: 'catalog.manage',
-      },
-      {
-        id: 'integrations',
-        kind: 'plain',
-        to: '/admin/integraciones',
-        label: nav.integrations,
-        icon: PlugIcon,
         permission: 'catalog.manage',
       },
       {

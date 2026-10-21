@@ -52,9 +52,9 @@ Las secciones que no apliquen se omiten.
 | Término | Significado |
 |---|---|
 | Frontend | Aplicación web (SPA/PWA) de Axia |
-| Backend | Stack de Supabase (Postgres, Auth, Storage, Realtime, Kong) |
+| Backend | PostgreSQL 17 + Drizzle + Fastify 5 |
 | Reverse proxy | Servidor que termina TLS y enruta hacia la app y la API |
-| Migración | Archivo SQL versionado en `supabase/migrations/` |
+| Migración | Archivo SQL versionado en `apps/server/db/migrations/` |
 | Imagen | Imagen de contenedor del frontend o de las migraciones |
 | Instancia | Despliegue concreto de Axia con su base de datos y su configuración |
 

@@ -62,42 +62,36 @@ apps/web/src/
 ├── features/
 │   ├── <feature>/       → tickets, assignments, blockers, evidence, catalogs,
 │   │   │                  metrics, auth, admin
-│   │   ├── api/         → queries y mutaciones (TanStack Query + Supabase)
+│   │   ├── api/         → queries y mutaciones (TanStack Query + HTTP)
 │   │   ├── components/  → interfaz propia del feature
 │   │   ├── hooks/       → lógica de pantalla
 │   │   ├── domain/      → funciones puras de negocio (cálculos, mapeos, reglas)
 │   │   ├── i18n.ts      → textos en español del feature
 │   │   ├── schemas.ts   → validación con Zod
 │   │   └── index.ts     → único punto de entrada público del feature
-│   └── integrations/    → ADAPTADORES de sistemas externos (aislados del núcleo)
-│       └── <adapter>/   → un directorio por fuente; misma forma que un feature
 ├── components/
 │   ├── ui/              → shadcn/ui (no editar salvo necesidad justificada)
 │   └── shared/          → componentes genéricos reutilizables
-└── lib/                 → cliente Supabase, offline (Dexie), formateadores, utilidades
+└── lib/                 → cliente HTTP, offline (Dexie), formateadores, utilidades
 ```
 
-En el servidor: `supabase/functions/integration-<nombre>/` para procesos de integración; el
-resto de funciones no llevan el prefijo `integration-`.
+En el servidor: `apps/server/src/<dominio>/` para rutas y servicios, `apps/server/db/migrations/`
+para SQL. Los adaptadores externos, si se añaden, viven aislados y no modifican el núcleo.
 
 ## 4. Reglas de dependencia (se verifican con herramienta)
 
 - `routes/` puede importar de `features/*` (vía su `index.ts`) y de `components/`.
 - `features/A` **no importa** archivos internos de `features/B`; solo `features/B/index.ts`.
 - `components/` y `lib/` **no importan** de `features/` ni de `routes/`.
-- **Solo `features/*/api` y `lib/` pueden importar el cliente de Supabase.** Ningún
-  componente, hook de interfaz ni ruta lo hace directamente.
-- `domain/` no importa React, TanStack, Supabase ni Dexie: es TypeScript puro.
+- **Solo `features/*/api` y `lib/` pueden usar el cliente HTTP.** Ningún componente, hook de
+  interfaz ni ruta llama a `/api` directamente.
+- `domain/` no importa React, TanStack, cliente HTTP ni Dexie: es TypeScript puro.
 - Sin dependencias circulares.
 - **Independencia del núcleo:**
-  - Ningún módulo fuera de `features/integrations/` importa de `features/integrations/`.
-  - Los adaptadores pueden usar la API pública (`index.ts`) de los features del núcleo, nunca
-    sus archivos internos.
   - **Los nombres de plataformas de terceros solo pueden aparecer** en
-    `apps/web/src/features/integrations/**`, `supabase/functions/integration-*/**`,
-    `docs/integraciones-y-migracion.md`, `docs/ESTADO.md` y `docs/decisions/**`.
-    Esto incluye identificadores, textos, comentarios, enums, columnas, valores de semillas y
-    pruebas del núcleo. Lo verifica `pnpm check:agnostic`.
+    `docs/integraciones-y-migracion.md`, `docs/migracion-sin-supabase.md`, `docs/ESTADO.md`,
+    `docs/decisions/**` y `scripts/**`. Esto incluye identificadores, textos, comentarios, enums,
+    columnas, valores de semillas y pruebas del núcleo. Lo verifica `pnpm check:agnostic`.
   - El núcleo trata los sistemas externos solo como datos genéricos: `system` en
     `ticket_external_refs`, `source` en eventos, `channel` en tiquets.
 
@@ -120,11 +114,11 @@ estas reglas requiere un comentario con la razón y se evita.
 - `strict: true`, `noUncheckedIndexedAccess: true`, `noFallthroughCasesInSwitch: true`.
 - **Prohibido `any`**, `@ts-ignore` y `as` para forzar tipos. Si no hay alternativa, se usa
   `@ts-expect-error` con una explicación.
-- Los tipos de la base de datos vienen de `pnpm db:types`; no se escriben a mano. Los tipos de
-  interfaz se derivan a partir de ellos.
+- Los tipos del esquema viven en `apps/server/src/db/schema.ts` (Drizzle). La API define sus
+  contratos con Zod; la web no genera tipos desde la base.
 - **Validación en las fronteras con Zod**: formularios, datos importados, respuestas externas y
   entradas de Edge Functions. Dentro del sistema se confía en los tipos.
-- Estados, roles y tipos como uniones literales o enums compartidos en `packages/shared`.
+- Estados, roles y tipos como uniones literales en el feature o el servidor.
 - Se prefiere `type` para uniones e `interface` para formas de objetos públicos.
 - Sin exportaciones por defecto, excepto donde el framework lo exija.
 
@@ -148,13 +142,12 @@ estas reglas requiere un comentario con la razón y se evita.
 
 ## 8. Acceso a datos desde el cliente
 
-- Toda llamada a Supabase está en `features/*/api/` o `lib/`, con tipos de retorno explícitos.
-- Las **mutaciones que cambian el flujo** (asignar, iniciar, pausar, resolver, etc.) usan
-  **solo RPC**. Está prohibido el `update` directo a `tickets.status`.
-- Se seleccionan solo las columnas necesarias; no se usa `select('*')` en listas.
-- Las consultas se paginan y filtran en el servidor.
-- Los errores de Supabase se convierten en errores de dominio tipados antes de llegar a la
-  interfaz.
+- Toda llamada HTTP está en `features/*/api/` o `lib/`, con tipos de retorno explícitos.
+- Las **mutaciones que cambian el flujo** usan `POST /api/tickets/:id/actions` o
+  `POST /api/sync/actions`. No se actualiza el estado directamente.
+- Se piden solo los datos necesarios; las listas se paginan y filtran en el servidor.
+- Los errores de la API (`ApiError`) se convierten en errores de dominio tipados antes de llegar a
+  la interfaz.
 
 ## 9. Offline y evidencias
 
@@ -196,23 +189,19 @@ estas reglas requiere un comentario con la razón y se evita.
 - Una migración ya integrada a `main` no se edita: se agrega otra.
 - Toda migración debe aplicarse limpia con `pnpm db:reset` y dejar las pruebas en verde.
 - Se incluye `comment on table` / `comment on column` para todo lo que no sea obvio.
-- Datos semilla de catálogos en `supabase/seed.sql`, idempotentes y ficticios.
+- Datos de referencia en migraciones y demo explícita en `apps/server/src/db/seed-demo/`.
 
-### Seguridad (RLS)
+### Seguridad (autorización en el servidor)
 
-- RLS activado en **toda** tabla del esquema expuesto, sin excepción, con política explícita
-  por operación y rol.
-- Se usa `(select auth.uid())` dentro de las políticas (mejor rendimiento) y funciones auxiliares
-  `stable` como `has_role(...)`.
-- **Los roles viven en una tabla (`user_roles`)**; nunca en metadatos editables por el usuario.
-- Funciones `security invoker` por defecto. `security definer` solo con justificación escrita,
-  `set search_path = ''`, nombres calificados con esquema y permisos explícitos:
-  `revoke execute ... from public; grant execute ... to authenticated;`.
-- `ticket_events` es **solo de agregar**: sin políticas ni permisos de `update`/`delete`, y un
-  disparador que lo impida.
-- Las funciones de transición validan: rol, transición permitida, campos obligatorios e
-  idempotencia (`client_request_id` único), y escriben el evento en la misma transacción.
-- Una función por transición; nada de una función gigante con `case`.
+- **No hay RLS.** Toda consulta de tiquets pasa por un repositorio con alcance
+  (`scopePredicate`).
+- Los permisos se evalúan con `can`/`canAct`; un acceso fuera de alcance devuelve 404 opaco.
+- **Los roles viven en `users`/`user_roles`**; nunca en metadatos editables por el usuario.
+- `ticket_events` es **solo de agregar**: sin permisos de `update`/`delete` y con un disparador
+  que lo impida.
+- Las acciones validan: permiso, transición permitida, campos obligatorios e idempotencia
+  (`client_request_id`), y escriben el evento en la misma transacción.
+- Una acción por transición; nada de una función gigante con `case`.
 
 ### Rendimiento
 
@@ -245,13 +234,13 @@ estas reglas requiere un comentario con la razón y se evita.
 
 | Nivel | Qué cubre | Prioridad |
 |---|---|---|
-| pgTAP | RLS y transiciones: quién ve qué y qué pasos se permiten | **Máxima** |
+| Vitest + PostgreSQL | API, permisos, transacciones, migraciones e invariantes del esquema | **Máxima** |
 | Vitest | Funciones de `domain/`, esquemas Zod, hooks con lógica | Alta |
 | Playwright | Flujos críticos, incluido el del técnico sin conexión | Pocos y bien elegidos |
 
-- Toda función `domain/` nueva lleva pruebas. Toda tabla nueva, pruebas RLS. Toda función de
-  transición, pruebas de caso válido, rol incorrecto, transición inválida y repetición
-  idempotente.
+- Toda función `domain/` nueva lleva pruebas. Toda ruta y tabla nueva lleva pruebas positivas y
+  negativas de permiso y alcance. Toda acción, pruebas de caso válido, rol incorrecto, transición
+  inválida y repetición idempotente.
 - Las pruebas son deterministas: sin dependencia de hora real (se inyecta el reloj), de orden
   ni de red externa.
 - Nombres de prueba descriptivos en español: `rechaza la transición si el rol no es supervisor`.
@@ -279,24 +268,23 @@ rules: {
 }
 ```
 
-- **Fronteras entre capas** con `dependency-cruiser` o `eslint-plugin-boundaries`, que hagan
-  fallar el build al violar la sección 4 (incluida la restricción de importar el cliente de
-  Supabase solo desde `features/*/api` y `lib/`, la prohibición de que el núcleo importe de
-  `features/integrations/` y la ausencia de ciclos).
+- **Fronteras entre capas** con `dependency-cruiser`, que hagan fallar el build al violar la
+  sección 4 (uso del cliente HTTP solo desde `features/*/api` y `lib/`, dominio puro y ausencia de
+  ciclos).
 - **`pnpm check:agnostic`** (por ejemplo `scripts/check-agnostic.mjs`): busca una lista
   configurable de nombres de plataformas de terceros (mayúsculas y minúsculas) en todo el
   repositorio y falla si aparecen fuera de las rutas permitidas de la sección 4. La lista vive
   en un archivo de configuración dentro de `scripts/`, que es la única excepción.
 - **Prettier** para formato; **knip** para código y dependencias sin uso.
 - **Husky + lint-staged** (formato y lint al confirmar) y **commitlint** (Conventional Commits).
-- **`supabase db lint`** para revisar el esquema.
+- **`drizzle-kit check`** para revisar el esquema y las migraciones.
 - **CI** (GitHub Actions o Forgejo) ejecutando la compuerta completa en cada cambio.
 
 ## 15. Definición de terminado (toda tarea)
 
-- [ ] `pnpm check` en verde (lint, tipos, independencia, pruebas, pgTAP, build), con la salida mostrada.
+- [ ] `pnpm check` en verde (lint, tipos, independencia, Vitest, Playwright, PostgreSQL y build), con la salida mostrada.
 - [ ] Pruebas nuevas o actualizadas para el comportamiento cambiado.
-- [ ] Si hubo migración: `pnpm db:reset` limpio y `pnpm db:types` ejecutado y confirmado.
+- [ ] Si hubo migración: `pnpm db:reset` limpio y `drizzle-kit check` en verde.
 - [ ] Documentación actualizada en el mismo commit (incluido `docs/dominio.md` si cambió el negocio).
 - [ ] Sin `console.log`, sin código comentado, sin `TODO` sin registrar en `docs/ESTADO.md`.
 - [ ] Sin secretos, `.env.example` al día.
@@ -338,9 +326,9 @@ Y por qué se descartaron.
 Qué se gana, qué se paga y cómo revertirlo.
 ```
 
-- Decisiones que ya merecen ADR desde el arranque: Vite + React como SPA, Supabase, Recharts
-  en lugar de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por datos e
-  independencia del núcleo respecto a plataformas externas.
+- Decisiones que ya merecen ADR desde el arranque: Vite + React como SPA, PostgreSQL + Drizzle +
+  Fastify, Recharts en lugar de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por
+  datos e independencia del núcleo respecto a plataformas externas.
 - **Regla clave:** un cambio que altera el comportamiento actualiza su documentación en el
   mismo commit.
 
@@ -367,14 +355,14 @@ Qué se gana, qué se paga y cómo revertirlo.
 
 ## 19. Anti-patrones prohibidos
 
-- Componentes con llamadas directas a Supabase.
-- `update` directo al estatus del tiquet desde el cliente.
+- Componentes con llamadas directas a `/api`.
+- `update` directo al estatus del tiquet fuera de una acción del servidor.
 - Lógica de negocio dentro de componentes o rutas.
 - Archivos "utils" o "helpers" genéricos que crecen sin límite: se nombran por propósito.
 - Estado del servidor copiado a `useState`.
 - Valores mágicos (cadenas de estado, roles, IDs) repetidos en varios archivos.
 - `any`, `@ts-ignore`, `eslint-disable` sin razón escrita.
-- Tablas sin RLS; funciones `security definer` sin `search_path` fijo.
+- Consultas de tiquets fuera de un repositorio con alcance; acciones sin transacción e idempotencia.
 - Modificar migraciones ya integradas.
 - Nombres, campos, estados o reglas de otra plataforma dentro del núcleo; hacer que el núcleo
   espere o dependa de un sistema externo.

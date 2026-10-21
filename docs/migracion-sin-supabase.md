@@ -929,8 +929,8 @@ ADR que se sustituyen o ajustan: 0002, 0004, 0006 (independencia, se refuerza), 
 Cada tramo: pruebas, `pnpm check` en verde, commit propio y actualización de `docs/ESTADO.md`. No se
 hará `push` ni se tocará producción sin confirmación.
 
-**Estado al 2026-10-21:** tramos 1–9 cerrados. Falta el tramo 10 (corte final del frontend y retirada
-de Supabase). La compuerta `check-next` del stack nuevo ya está en CI.
+**Estado al 2026-10-21:** tramos 1–10 cerrados. La web usa la API nueva, el stack anterior se retiró
+y la compuerta única corre con PostgreSQL 17 real y Playwright. Documento histórico de la migración.
 
 ## 9. Preguntas abiertas para la persona
 

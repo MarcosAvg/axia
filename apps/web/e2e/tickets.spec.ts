@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
-const DEMO_PASSWORD = 'AxiaDemo2026!'
+const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Correo electrónico').fill(email)
+  await page.getByLabel('Usuario').fill(email)
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
@@ -17,7 +17,7 @@ test('un solicitante registra un tiquet y lo ve en la lista y el detalle', async
   page,
 }) => {
   const description = `Prueba E2E ${crypto.randomUUID()}`
-  await signIn(page, 'solicitante@axia.test')
+  await signIn(page, 'demo.requester')
 
   await page.goto('/tickets/nuevo')
   await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })

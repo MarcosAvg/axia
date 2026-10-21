@@ -1,6 +1,6 @@
-// Lectura de indicadores. Única capa que habla con Supabase.
+// Lectura de indicadores contra la API de Axia.
 
-import { supabase } from '@/lib/supabase'
+import { apiFetch } from '@/lib/api-client'
 import type {
   RejectCancelRow,
   RoutingSummary,
@@ -18,12 +18,6 @@ import type {
   SlaPriorityRow,
   SlaSummary,
 } from '../domain/metrics'
-
-const TICKET_SELECT =
-  'id, folio, status, reported_at, building_id, category_id, team_id, dependency_id, requester_id, ' +
-  'total_time, net_time, active_work_time, active_work_time_labor, active_work_time_extra, ' +
-  'response_time, assignment_time, validation_time, ' +
-  'reassigned_supervisor, reassigned_technician, recaptured, reopened'
 
 interface TicketRow {
   id: string
@@ -75,36 +69,41 @@ function parseTicket(row: TicketRow): MetricsTicket {
   }
 }
 
-export async function fetchMetricsTickets(): Promise<MetricsTicket[]> {
-  const { data, error } = await supabase
-    .from('v_ticket_metrics_base')
-    .select(TICKET_SELECT)
-    .order('reported_at', { ascending: true })
-  if (error) throw error
-  return ((data ?? []) as unknown as TicketRow[]).map(parseTicket)
+function filtersQuery(filters: MetricsFilters) {
+  const params = new URLSearchParams()
+  if (filters.from) params.set('from', filters.from)
+  if (filters.to) params.set('to', filters.to)
+  if (filters.buildingId) params.set('buildingId', filters.buildingId)
+  if (filters.teamId) params.set('teamId', filters.teamId)
+  if (filters.categoryId) params.set('categoryId', filters.categoryId)
+  if (filters.dependencyId) params.set('dependencyId', filters.dependencyId)
+  return params.toString()
 }
 
-/** Parámetros de filtro para las funciones de indicadores (vacío = sin filtro). */
-function filterParams(filters: MetricsFilters) {
-  return {
-    p_from: filters.from || undefined,
-    p_to: filters.to || undefined,
-    p_building: filters.buildingId || undefined,
-    p_team: filters.teamId || undefined,
-    p_category: filters.categoryId || undefined,
-    p_dependency: filters.dependencyId || undefined,
-  }
+async function fetchItems<T>(
+  path: string,
+  filters?: MetricsFilters,
+): Promise<T[]> {
+  const query = filters ? filtersQuery(filters) : ''
+  const body = await apiFetch<{ items: T[] }>(query ? `${path}?${query}` : path)
+  return body.items
+}
+
+export async function fetchMetricsTickets(): Promise<MetricsTicket[]> {
+  const items = await fetchItems<TicketRow>('/api/metrics/tickets')
+  return items.map(parseTicket)
 }
 
 export async function fetchPausesByReason(
   filters: MetricsFilters,
 ): Promise<PauseReasonRow[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_pauses_by_reason',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    reason_name: string
+    pauses: number
+    pause_time: string | null
+    pause_time_labor: string | null
+  }>('/api/metrics/pauses', filters)
+  return items.map((row) => ({
     reasonName: row.reason_name,
     pauses: row.pauses,
     pauseMinutes: intervalToMinutes(row.pause_time),
@@ -115,12 +114,11 @@ export async function fetchPausesByReason(
 export async function fetchDuplicateTickets(
   filters: MetricsFilters,
 ): Promise<DuplicateTicket[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_duplicate_tickets',
-    filterParams(filters),
+  const items = await fetchItems<{ time_to_mark: string | null }>(
+    '/api/metrics/duplicate-tickets',
+    filters,
   )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  return items.map((row) => ({
     timeToMarkMinutes: intervalToMinutes(row.time_to_mark),
   }))
 }
@@ -128,12 +126,12 @@ export async function fetchDuplicateTickets(
 export async function fetchDuplicateAlerts(
   filters: MetricsFilters,
 ): Promise<DuplicateAlert[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_duplicate_alerts',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    decision: string
+    candidates: number
+    tickets: number
+  }>('/api/metrics/duplicate-alerts', filters)
+  return items.map((row) => ({
     decision: row.decision,
     candidates: row.candidates,
     tickets: row.tickets,
@@ -143,12 +141,15 @@ export async function fetchDuplicateAlerts(
 export async function fetchDuplicatesByDimension(
   filters: MetricsFilters,
 ): Promise<DuplicateDimensionRow[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_duplicates_by_dimension',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    dimension: string
+    dimension_id: string
+    dimension_name: string | null
+    tickets: number
+    duplicates: number
+    duplicate_rate: number
+  }>('/api/metrics/duplicates-by-dimension', filters)
+  return items.map((row) => ({
     dimension: row.dimension,
     dimensionId: row.dimension_id,
     dimensionName: row.dimension_name,
@@ -161,22 +162,13 @@ export async function fetchDuplicatesByDimension(
 export async function fetchSatisfaction(
   filters: MetricsFilters,
 ): Promise<SatisfactionSummary> {
-  const { data, error } = await supabase.rpc(
-    'metrics_satisfaction',
-    filterParams(filters),
-  )
-  if (error) throw error
-  const row = data?.[0]
-  return { average: row?.average_score ?? null, ratings: row?.ratings ?? 0 }
-}
-
-export async function fetchSla(filters: MetricsFilters): Promise<SlaSummary> {
-  const { data, error } = await supabase.rpc(
-    'metrics_sla',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return parseSla(data?.[0] ?? null)
+  const item = (
+    await fetchItems<{ average_score: number | null; ratings: number }>(
+      '/api/metrics/satisfaction',
+      filters,
+    )
+  )[0]
+  return { average: item?.average_score ?? null, ratings: item?.ratings ?? 0 }
 }
 
 interface SlaRow {
@@ -195,26 +187,32 @@ const EMPTY_SLA_ROW: SlaRow = {
   avg_resolution_minutes: null,
 }
 
-function parseSla(data: SlaRow | null): SlaSummary {
-  const row = data ?? EMPTY_SLA_ROW
+function toSla(row: SlaRow | undefined): SlaSummary {
+  const data = row ?? EMPTY_SLA_ROW
   return {
-    withTarget: row.with_target ?? 0,
-    met: row.met ?? 0,
-    complianceRate: row.compliance_rate,
-    avgTargetMinutes: row.avg_target_minutes,
-    avgResolutionMinutes: row.avg_resolution_minutes,
+    withTarget: data.with_target ?? 0,
+    met: data.met ?? 0,
+    complianceRate: data.compliance_rate,
+    avgTargetMinutes: data.avg_target_minutes,
+    avgResolutionMinutes: data.avg_resolution_minutes,
   }
+}
+
+export async function fetchSla(filters: MetricsFilters): Promise<SlaSummary> {
+  return toSla((await fetchItems<SlaRow>('/api/metrics/sla', filters))[0])
 }
 
 export async function fetchSlaByPriority(
   filters: MetricsFilters,
 ): Promise<SlaPriorityRow[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_sla_by_priority',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    priority_id: string
+    priority_name: string
+    with_target: number
+    met: number
+    compliance_rate: number | null
+  }>('/api/metrics/sla-by-priority', filters)
+  return items.map((row) => ({
     priorityId: row.priority_id,
     priorityName: row.priority_name,
     withTarget: row.with_target,
@@ -226,12 +224,18 @@ export async function fetchSlaByPriority(
 export async function fetchByTechnician(
   filters: MetricsFilters,
 ): Promise<TechnicianRow[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_by_technician',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    technician_id: string
+    technician_name: string
+    tickets: number
+    leader_count: number
+    auxiliary_count: number
+    participation_time: string | null
+    participation_time_labor: string | null
+    participation_time_extra: string | null
+    assigned_count: number
+  }>('/api/metrics/by-technician', filters)
+  return items.map((row) => ({
     technicianId: row.technician_id,
     name: row.technician_name,
     tickets: row.tickets,
@@ -247,12 +251,12 @@ export async function fetchByTechnician(
 export async function fetchRejectCancel(
   filters: MetricsFilters,
 ): Promise<RejectCancelRow[]> {
-  const { data, error } = await supabase.rpc(
-    'metrics_reject_cancel_by_reason',
-    filterParams(filters),
-  )
-  if (error) throw error
-  return (data ?? []).map((row) => ({
+  const items = await fetchItems<{
+    event_type: string
+    reason_name: string
+    tickets: number
+  }>('/api/metrics/reject-cancel', filters)
+  return items.map((row) => ({
     eventType: row.event_type,
     reasonName: row.reason_name,
     tickets: row.tickets,
@@ -262,12 +266,14 @@ export async function fetchRejectCancel(
 export async function fetchRouting(
   filters: MetricsFilters,
 ): Promise<RoutingSummary> {
-  const { data, error } = await supabase.rpc(
-    'metrics_routing',
-    filterParams(filters),
-  )
-  if (error) throw error
-  const row = data?.[0]
+  const row = (
+    await fetchItems<{
+      offers: number
+      pending_offers: number
+      taken: number
+      avg_time_to_take: string | null
+    }>('/api/metrics/routing', filters)
+  )[0]
   return {
     offers: row?.offers ?? 0,
     pendingOffers: row?.pending_offers ?? 0,

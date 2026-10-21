@@ -17,6 +17,7 @@ import {
   createUserSchema,
   listUsersQuerySchema,
   loginSchema,
+  profileSchema,
   setupSchema,
   updateUserSchema,
 } from './schemas.js'
@@ -37,9 +38,15 @@ function actorResponse(actor: Actor) {
     id: actor.id,
     username: actor.username,
     fullName: actor.fullName,
+    phone: actor.phone,
+    active: actor.active,
+    timezone: actor.timezone,
     mustChangePassword: actor.mustChangePassword,
-    roles: actor.roles,
-    permissions: actor.permissions,
+    roles: actor.roles.map((role) => role.name),
+    permissions: actor.permissions.map((grant) => ({
+      permission: grant.id,
+      scope: grant.scope,
+    })),
   }
 }
 
@@ -95,6 +102,16 @@ async function registerSessionRoutes(
   app.get('/api/auth/me', { preHandler: allowPending }, async (request) => ({
     user: actorResponse(currentActor(request)),
   }))
+
+  app.patch(
+    '/api/auth/profile',
+    { preHandler: allowPending },
+    async (request) => {
+      const body = profileSchema.parse(request.body)
+      const actor = await auth.updateProfile(currentActor(request), body)
+      return { user: actorResponse(actor) }
+    },
+  )
 
   app.post(
     '/api/auth/change-password',

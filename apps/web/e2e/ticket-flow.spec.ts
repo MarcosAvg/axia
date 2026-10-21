@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { testImage } from './fixtures.js'
 
-const DEMO_PASSWORD = 'AxiaDemo2026!'
+const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Correo electrónico').fill(email)
+  await page.getByLabel('Usuario').fill(email)
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
@@ -19,9 +20,12 @@ async function signOut(page: Page) {
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 }
 
-async function clickAndWait(page: Page, name: string, rpc: string) {
-  const done = page.waitForResponse((response) =>
-    response.url().includes(`/rpc/${rpc}`),
+async function clickAndWait(page: Page, name: string, action: string) {
+  void action
+  const done = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/api/tickets/'),
   )
   await page.getByRole('button', { name }).click()
   await done
@@ -33,7 +37,7 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   const description = `Flujo técnico E2E ${crypto.randomUUID()}`
 
   // El administrador registra y asigna el tiquet al técnico.
-  await signIn(page, 'admin@axia.test')
+  await signIn(page, 'demo.admin')
   await page.goto('/tickets/nuevo')
   await page
     .getByLabel('Solicitante', { exact: true })
@@ -60,16 +64,16 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
   await signOut(page)
 
   // El técnico ve el tiquet en su bandeja, sube evidencia e inicia.
-  await signIn(page, 'tecnico@axia.test')
+  await signIn(page, 'demo.technician')
   await page.goto('/mi-trabajo')
   await page.getByText(description).click()
 
   // Iniciar pide la evidencia "antes".
   await page.getByRole('button', { name: 'Iniciar' }).click()
   await page.getByLabel('Evidencia: Antes').setInputFiles({
-    name: 'antes.jpg',
-    mimeType: 'image/jpeg',
-    buffer: Buffer.from('antes'),
+    name: 'antes.png',
+    mimeType: 'image/png',
+    buffer: testImage,
   })
   await clickAndWait(page, 'Confirmar', 'ticket_start')
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
@@ -83,9 +87,9 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
     .getByLabel('Descripción del trabajo')
     .fill('Se revisó la instalación y quedó funcionando')
   await page.getByLabel('Evidencia: Después').setInputFiles({
-    name: 'despues.jpg',
-    mimeType: 'image/jpeg',
-    buffer: Buffer.from('despues'),
+    name: 'despues.png',
+    mimeType: 'image/png',
+    buffer: testImage,
   })
   await clickAndWait(page, 'Confirmar', 'ticket_attend')
   await expect(

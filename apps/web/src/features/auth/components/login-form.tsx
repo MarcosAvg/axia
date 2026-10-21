@@ -20,13 +20,13 @@ export function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { username: '', password: '' },
   })
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(null)
     try {
-      await signIn(values.email, values.password)
+      await signIn(values.username, values.password)
     } catch (error) {
       setSubmitError(
         isInvalidCredentials(error)
@@ -39,12 +39,11 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <TextField
-        id="email"
-        label={authMessages.login.email}
-        type="email"
-        autoComplete="email"
-        error={errors.email?.message}
-        {...register('email')}
+        id="username"
+        label={authMessages.login.username}
+        autoComplete="username"
+        error={errors.username?.message}
+        {...register('username')}
       />
       <TextField
         id="password"

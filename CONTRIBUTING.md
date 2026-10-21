@@ -8,7 +8,7 @@ de revisión.
 ## Requisitos
 
 - Node.js LTS y pnpm (ver la puesta en marcha en `README.md`).
-- Docker para el Supabase local (`pnpm db:start`).
+- Docker para PostgreSQL local (`pnpm db:start`).
 - Leer `docs/convenciones-codigo.md` (estructura, estilo y reglas de dependencia) y
   `docs/estilo-documentacion.md` (redacción de la documentación).
 
@@ -41,8 +41,9 @@ docs(deploy): documenta el contrato de reverse proxy
 ## Compuerta de calidad
 
 `pnpm check` es la fuente única de verdad: lint, tipos, independencia del núcleo, fronteras,
-knip, pruebas (Vitest y Playwright), pgTAP y build. Requiere el Supabase local levantado
-(`pnpm db:start`).
+knip, pruebas (Vitest y Playwright), integración contra PostgreSQL real y build. Necesita las
+variables `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; Playwright prepara su
+propia base con la semilla demo.
 
 | Comando | Verificación |
 |---|---|
@@ -52,7 +53,7 @@ knip, pruebas (Vitest y Playwright), pgTAP y build. Requiere el Supabase local l
 | `pnpm check:boundaries` | Dependencias entre capas |
 | `pnpm knip` | Código y dependencias sin uso |
 | `pnpm test` | Pruebas de frontend y de flujo |
-| `pnpm db:test` | Pruebas pgTAP |
+| `pnpm db:test` | Integración contra PostgreSQL real |
 
 ## Pull requests
 

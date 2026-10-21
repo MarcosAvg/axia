@@ -1,6 +1,7 @@
 export const MIN_PASSWORD_LENGTH = 12
 
 export const ID = {
+  userAdmin: 'd0000000-0000-4000-8000-000000000004',
   userSupervisor: 'd0000000-0000-4000-8000-000000000001',
   userTechnician: 'd0000000-0000-4000-8000-000000000002',
   userRequester: 'd0000000-0000-4000-8000-000000000003',
@@ -23,10 +24,16 @@ export type UserSpec = {
   id: string
   username: string
   fullName: string
-  role: 'supervisor' | 'technician' | 'requester'
+  role: 'administrator' | 'supervisor' | 'technician' | 'requester'
 }
 
 export const USERS: UserSpec[] = [
+  {
+    id: ID.userAdmin,
+    username: 'demo.admin',
+    fullName: 'Administrador Demo',
+    role: 'administrator',
+  },
   {
     id: ID.userSupervisor,
     username: 'demo.supervisor',

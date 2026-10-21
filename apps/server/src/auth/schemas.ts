@@ -30,6 +30,11 @@ export const setupSchema = (minLength: number) =>
     password: passwordSchema(minLength),
   })
 
+export const profileSchema = z.object({
+  fullName: z.string().trim().min(1).max(120),
+  phone: z.string().trim().max(40).nullable().optional(),
+})
+
 export const changePasswordSchema = (minLength: number) =>
   z.object({
     currentPassword: z.string().min(1).max(128),

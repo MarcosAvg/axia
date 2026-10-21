@@ -12,11 +12,6 @@ dist-ssr
 .env.*
 !.env.example
 
-# Supabase
-supabase/.branches
-supabase/.temp
-deploy/supabase/.env
-deploy/supabase/volumes
 
 # Registros y reportes
 *.log

@@ -42,6 +42,7 @@ const administrator = {
     { permission: 'catalog.manage', scope: 'all' as const },
   ],
   timezone: 'America/Mexico_City',
+  mustChangePassword: false,
 }
 
 const supervisor = {
@@ -52,6 +53,7 @@ const supervisor = {
   roles: ['supervisor'],
   permissions: [{ permission: 'ticket.view', scope: 'buildings' as const }],
   timezone: 'America/Mexico_City',
+  mustChangePassword: false,
 }
 
 function makeRouter(path: string) {

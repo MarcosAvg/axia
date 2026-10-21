@@ -1,4 +1,4 @@
-// Tipos y funciones puras de los indicadores. Sin React, Supabase ni TanStack.
+// Tipos y funciones puras de los indicadores. Sin React, el cliente HTTP ni TanStack.
 
 export interface MetricsTicket {
   id: string

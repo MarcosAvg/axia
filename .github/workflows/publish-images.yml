@@ -18,10 +18,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: web
-            dockerfile: deploy/web.Dockerfile
+          - name: app
+            target: app
           - name: migrate
-            dockerfile: deploy/migrate.Dockerfile
+            target: migrate
     steps:
       - uses: actions/checkout@v4
       - id: img
@@ -36,7 +36,8 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: apps/server/Dockerfile
+          target: ${{ matrix.target }}
           push: true
           tags: |
             ghcr.io/${{ steps.img.outputs.repo }}/axia-${{ matrix.name }}:latest

@@ -27,7 +27,6 @@ body:
       options:
         - Desarrollo local
         - Autoalojado
-        - Supabase Cloud
     validations:
       required: true
   - type: input

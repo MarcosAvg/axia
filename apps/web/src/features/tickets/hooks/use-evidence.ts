@@ -45,12 +45,12 @@ export function useLocalEvidence(ticketId: string | undefined) {
   )
 }
 
-export function useEvidenceUrl(storagePath: string | null) {
+export function useEvidenceUrl(evidenceId: string | null) {
   return useQuery({
-    queryKey: evidenceKeys.url(storagePath ?? ''),
+    queryKey: evidenceKeys.url(evidenceId ?? ''),
     queryFn: () =>
-      storagePath ? getEvidenceUrl(storagePath) : Promise.resolve(null),
-    enabled: Boolean(storagePath),
+      evidenceId ? getEvidenceUrl(evidenceId) : Promise.resolve(null),
+    enabled: Boolean(evidenceId),
     staleTime: 5 * 60 * 1000,
   })
 }

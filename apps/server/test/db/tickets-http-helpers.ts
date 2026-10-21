@@ -53,6 +53,35 @@ async function loginCookie(app: FastifyInstance, username: string) {
   return cookieFrom(response)
 }
 
+async function seedLoginUsers(db: Database, passwordHash: string) {
+  await insertOne(
+    db,
+    sql`insert into public.users (
+      username, full_name, password_hash, must_change_password
+    ) values ('no-access', 'Sin acceso', ${passwordHash}, false)
+    returning id`,
+  )
+  const otherSupervisor = await insertOne(
+    db,
+    sql`insert into public.users (
+      username, full_name, password_hash, must_change_password
+    ) values ('other-supervisor', 'Otro supervisor', ${passwordHash}, false)
+    returning id`,
+  )
+  await db.execute(sql`
+    insert into public.user_roles (user_id, role_id)
+    select ${otherSupervisor.id}, id from public.roles where name = 'supervisor'
+  `)
+  await db.execute(sql`
+    insert into public.supervisor_scopes (user_id, team_id)
+    select ${otherSupervisor.id}, id from public.teams where name = 'Equipo B'
+  `)
+  await db.execute(sql`
+    update public.users
+    set password_hash = ${passwordHash}, must_change_password = false
+  `)
+}
+
 export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   await prepareTestDatabase()
   const created = createDb(ownerConnectionString())
@@ -62,32 +91,7 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   await createTicketActivity(created.db, catalog, people, ids)
 
   const passwordHash = await hashPassword(PASSWORD)
-  await insertOne(
-    created.db,
-    sql`insert into public.users (
-      username, full_name, password_hash, must_change_password
-    ) values ('no-access', 'Sin acceso', ${passwordHash}, false)
-    returning id`,
-  )
-  const otherSupervisor = await insertOne(
-    created.db,
-    sql`insert into public.users (
-      username, full_name, password_hash, must_change_password
-    ) values ('other-supervisor', 'Otro supervisor', ${passwordHash}, false)
-    returning id`,
-  )
-  await created.db.execute(sql`
-    insert into public.user_roles (user_id, role_id)
-    select ${otherSupervisor.id}, id from public.roles where name = 'supervisor'
-  `)
-  await created.db.execute(sql`
-    insert into public.supervisor_scopes (user_id, team_id)
-    select ${otherSupervisor.id}, id from public.teams where name = 'Equipo B'
-  `)
-  await created.db.execute(sql`
-    update public.users
-    set password_hash = ${passwordHash}, must_change_password = false
-  `)
+  await seedLoginUsers(created.db, passwordHash)
 
   const auth = createAuthService(created.db, testConfig)
   const tickets = createTicketService(created.db)
@@ -97,6 +101,7 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   const app = await buildApp({
     config: testConfig,
     auth,
+    db: created.db,
     tickets,
     catalogs,
     evidence,

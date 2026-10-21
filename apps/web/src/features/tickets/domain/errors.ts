@@ -19,7 +19,7 @@ function codeOf(error: unknown): string | undefined {
   return typeof code === 'string' ? code : undefined
 }
 
-/** Convierte un error de Postgres/Supabase en un error de dominio con mensaje claro. */
+/** Convierte un error de Postgres/API en un error de dominio con mensaje claro. */
 export function toTicketError(error: unknown): TicketError {
   switch (codeOf(error)) {
     case '42501':

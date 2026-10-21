@@ -5,9 +5,9 @@ export type CreateTicketInput = {
   categoryId: string
   subcategoryId?: string
   problemId?: string
-  serviceTypeId: string
-  priorityId: string
-  channelId: string
+  serviceTypeId?: string
+  priorityId?: string
+  channelId?: string
   description: string
   requesterId: string
   requesterName?: string

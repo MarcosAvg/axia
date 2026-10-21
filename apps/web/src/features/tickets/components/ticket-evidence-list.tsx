@@ -4,7 +4,7 @@ import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useEvidenceUrl } from '../hooks/use-evidence'
 
 function EvidenceItem({ evidence }: { evidence: TicketEvidenceItem }) {
-  const { data: url } = useEvidenceUrl(evidence.storagePath)
+  const { data: url } = useEvidenceUrl(evidence.id)
   const isImage = evidence.mimeType?.startsWith('image/') ?? false
 
   return (

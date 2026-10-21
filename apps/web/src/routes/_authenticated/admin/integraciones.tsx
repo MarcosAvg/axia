@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { AdminPage, adminMessages, IntegrationManager } from '@/features/admin'
+import { AdminPage, adminMessages } from '@/features/admin'
 import { RequirePermission } from '@/features/auth'
-import { ImportPanel } from '@/features/integrations'
 
 export const Route = createFileRoute('/_authenticated/admin/integraciones')({
   component: IntegrationsPage,
@@ -9,13 +8,15 @@ export const Route = createFileRoute('/_authenticated/admin/integraciones')({
 
 function IntegrationsPage() {
   return (
-    <RequirePermission permission="data.import">
+    <RequirePermission permission="catalog.manage">
       <AdminPage
         title={adminMessages.nav.integrations}
         description={adminMessages.descriptions.integrations}
       >
-        <ImportPanel />
-        <IntegrationManager />
+        <p className="text-sm text-muted-foreground">
+          Las importaciones e integraciones externas quedan deshabilitadas en
+          esta versión. El núcleo de Axia funciona sin ellas.
+        </p>
       </AdminPage>
     </RequirePermission>
   )

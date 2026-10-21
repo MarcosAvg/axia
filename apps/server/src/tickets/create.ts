@@ -6,8 +6,10 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
   loadRequester,
+  resolveCreateDefaults,
   validateCreateInputs,
   type CategoryRow,
+  type ResolvedCreateInput,
   type RequesterRow,
 } from './create-validation.js'
 import type {
@@ -143,7 +145,7 @@ async function ticketSummary(
 type InsertTicketInput = {
   tx: DbExecutor
   actor: Actor
-  input: CreateTicketInput
+  input: ResolvedCreateInput
   requester: RequesterRow
   category: CategoryRow
 }
@@ -195,12 +197,13 @@ async function createInTransaction(
     }
   }
 
-  const { requester, onBehalf } = await authorizeRequester(tx, actor, input)
-  const category = await validateCreateInputs(tx, input)
+  const resolved = await resolveCreateDefaults(tx, input)
+  const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
+  const category = await validateCreateInputs(tx, resolved)
   const ticket = await insertTicket({
     tx,
     actor,
-    input,
+    input: resolved,
     requester,
     category,
   })
@@ -219,7 +222,7 @@ async function createInTransaction(
     buildingId: input.buildingId,
     actorId: actor.id,
   })
-  const summary = await detectDuplicates(tx, ticket.id, input)
+  const summary = await detectDuplicates(tx, ticket.id, resolved)
   return {
     ticketId: summary.id,
     folio: summary.folio,

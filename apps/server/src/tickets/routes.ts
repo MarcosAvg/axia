@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify'
+import { z } from 'zod'
 
 import type { AppConfig } from '../config.js'
 import {
@@ -9,8 +10,10 @@ import {
 } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
+import { manualTimeSchema } from './manual-time.js'
 import {
   createTicketSchema,
+  duplicateCheckSchema,
   listTicketsQuerySchema,
   paginationQuerySchema,
   ticketActionSchema,
@@ -138,7 +141,24 @@ function registerWriteRoutes(
   )
 }
 
-function registerDetailRoutes(
+function registerDuplicateRoute(
+  app: FastifyInstance,
+  tickets: TicketService,
+  guard: Guard[],
+) {
+  app.post(
+    '/api/tickets/duplicates',
+    { preHandler: guard },
+    async (request) => ({
+      items: await tickets.duplicateCandidates(
+        currentActor(request),
+        duplicateCheckSchema.parse(request.body),
+      ),
+    }),
+  )
+}
+
+function registerCoreDetailRoutes(
   app: FastifyInstance,
   tickets: TicketService,
   canView: Guard[],
@@ -173,6 +193,94 @@ function registerDetailRoutes(
   )
 }
 
+function registerPauseReadRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  canView: Guard[],
+) {
+  app.get(
+    '/api/tickets/:id/pause-steps',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const items = await tickets.pauseSteps(currentActor(request), id)
+      if (!items) throw notFound()
+      return { items }
+    },
+  )
+
+  app.get(
+    '/api/tickets/:id/pause-state',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const item = await tickets.pauseState(currentActor(request), id)
+      if (item === undefined) throw notFound()
+      return { item }
+    },
+  )
+}
+
+function registerManualTimeRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  canView: Guard[],
+) {
+  app.get(
+    '/api/tickets/:id/manual-time',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const items = await tickets.manualTime(currentActor(request), id)
+      if (!items) throw notFound()
+      return { items }
+    },
+  )
+
+  app.post(
+    '/api/tickets/:id/manual-time',
+    { preHandler: canView },
+    async (request, reply) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      await tickets.recordManualTime(
+        currentActor(request),
+        id,
+        manualTimeSchema.parse(request.body),
+      )
+      return reply.status(204).send()
+    },
+  )
+
+  app.post(
+    '/api/tickets/:id/manual-time/:spanId/void',
+    { preHandler: canView },
+    async (request, reply) => {
+      const { id, spanId } = z
+        .object({ id: z.string().uuid(), spanId: z.string().uuid() })
+        .parse(request.params)
+      await tickets.voidManualTime(currentActor(request), id, spanId)
+      return reply.status(204).send()
+    },
+  )
+}
+
+function registerRatingRoute(
+  app: FastifyInstance,
+  tickets: TicketService,
+  canView: Guard[],
+) {
+  app.get(
+    '/api/tickets/:id/rating',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const item = await tickets.rating(currentActor(request), id)
+      if (item === undefined) throw notFound()
+      return { item }
+    },
+  )
+}
+
 export function registerTicketRoutes(
   app: FastifyInstance,
   { auth, config, tickets }: TicketRoutesOptions,
@@ -181,5 +289,9 @@ export function registerTicketRoutes(
   registerListRoute(app, tickets, guards.canView)
   registerWorklistRoutes(app, tickets, guards)
   registerWriteRoutes(app, tickets, guards)
-  registerDetailRoutes(app, tickets, guards.canView)
+  registerDuplicateRoute(app, tickets, guards.canView)
+  registerCoreDetailRoutes(app, tickets, guards.canView)
+  registerPauseReadRoutes(app, tickets, guards.canView)
+  registerManualTimeRoutes(app, tickets, guards.canView)
+  registerRatingRoute(app, tickets, guards.canView)
 }

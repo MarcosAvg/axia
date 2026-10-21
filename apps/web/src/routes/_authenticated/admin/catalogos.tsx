@@ -4,7 +4,6 @@ import { fieldSelectClass } from '@/components/shared/form-fields'
 import { PageHeader } from '@/components/shared/page-header'
 import {
   ADMIN_CATALOGS,
-  CatalogImportDialog,
   CatalogManager,
   adminMessages,
   catalogByKey,
@@ -51,7 +50,6 @@ function CatalogsPage() {
       <PageHeader
         title={adminMessages.nav.catalogs}
         description={adminMessages.descriptions.catalogs}
-        actions={<CatalogImportDialog />}
       />
       <div className="grid gap-6 lg:grid-cols-[15rem_1fr]">
         <CatalogPicker current={config.key} />

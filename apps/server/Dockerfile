@@ -10,7 +10,6 @@ RUN chown node:node /app
 COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY --chown=node:node apps/server/package.json ./apps/server/package.json
 COPY --chown=node:node apps/web/package.json ./apps/web/package.json
-COPY --chown=node:node packages/shared/package.json ./packages/shared/package.json
 
 USER node
 RUN HUSKY=0 pnpm install --frozen-lockfile
@@ -18,7 +17,6 @@ RUN HUSKY=0 pnpm install --frozen-lockfile
 FROM base AS build
 COPY --chown=node:node apps/server ./apps/server
 COPY --chown=node:node apps/web ./apps/web
-COPY --chown=node:node packages/shared ./packages/shared
 RUN pnpm --filter @axia/server build
 
 FROM node:22.22.2-bookworm-slim AS runtime
@@ -31,7 +29,6 @@ RUN chown node:node /app
 COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY --chown=node:node apps/server/package.json ./apps/server/package.json
 COPY --chown=node:node apps/web/package.json ./apps/web/package.json
-COPY --chown=node:node packages/shared/package.json ./packages/shared/package.json
 
 USER node
 RUN HUSKY=0 pnpm install --frozen-lockfile --prod --filter @axia/server... --ignore-scripts

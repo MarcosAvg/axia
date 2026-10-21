@@ -12,9 +12,8 @@ y en qué estado está ese motivo, con evidencias en cada paso.
 - **Ninguna plataforma externa es requisito, fuente de verdad ni parte del diseño del núcleo.**
   Otros sistemas donde hoy viven los datos (plataformas de reporte, hojas de cálculo) son solo
   **referencia** o **fuentes opcionales** de datos.
-- Todo lo que toque un sistema externo vive detrás de **adaptadores aislados**:
-  `apps/web/src/features/integrations/` y `supabase/functions/integration-*`. Se pueden añadir
-  o quitar sin modificar el núcleo.
+- Todo lo que toque un sistema externo vive detrás de **adaptadores aislados**. En esta versión
+  no se publican adaptadores externos; si se añaden, no modifican el núcleo.
 - En el núcleo (esquema SQL, enums, interfaz, lógica, textos) **no aparecen nombres, campos,
   estados ni reglas de otra plataforma**. Los identificadores externos se guardan solo en la
   tabla genérica `ticket_external_refs(system, external_id)`, y el núcleo no conoce sus valores.
@@ -24,8 +23,8 @@ y en qué estado está ese motivo, con evidencias en cada paso.
   Si no, está mal ubicado.
 - Las integraciones son opcionales y, por defecto, de **entrada** (importar). Nada en Axia
   debe quedar esperando a que otro sistema se actualice.
-- Infraestructura: Supabase es la elegida (nube o autoalojada), y el modelo de datos es Postgres
-  estándar; se accede a ella solo desde `features/*/api` y `lib/`.
+- Infraestructura: PostgreSQL 17 autoalojado y un único servidor Fastify. La web habla solo con
+  `/api`; el modelo de datos es Postgres estándar.
 
 ## 2. Modo de trabajo: autónomo, sin revisión humana
 
@@ -50,14 +49,15 @@ Tú escribes todo el código y nadie lo revisa línea por línea. Por eso:
 
 ## 4. Stack
 
-- Monorepo pnpm (no uses npm ni yarn): `apps/web`, `packages/shared`, `supabase/`, `deploy/`, `docs/`.
+- Monorepo pnpm (no uses npm ni yarn): `apps/web`, `apps/server`, `deploy/`, `docs/`.
 - Frontend: Vite + React + TypeScript (SPA/PWA). Sin meta-framework.
 - UI: Tailwind + shadcn/ui. Gráficas: Recharts (componente `chart` de shadcn/ui). No uses ECharts.
 - Datos: TanStack Router (rutas por carpetas), TanStack Query, TanStack Table.
 - Formularios: React Hook Form + Zod.
 - Offline: Dexie (IndexedDB) con cola de salida (`outbox`).
-- Backend: Supabase (Postgres, Auth, Storage, Realtime, Edge Functions), local y autoalojado.
-- Pruebas: pgTAP (base de datos), Vitest (frontend), Playwright (flujos críticos).
+- Backend: PostgreSQL 17 + Drizzle + Fastify 5 + TypeScript; autenticación local con sesiones
+  opacas, SSE, TUS/Sharp y sincronización offline.
+- Pruebas: Vitest contra PostgreSQL real (servidor y base), Vitest (web) y Playwright (flujos).
 
 ## 5. Comandos
 
@@ -68,23 +68,23 @@ Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/ESTADO.
 | `pnpm dev` | Servidor de desarrollo |
 | `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm build` | Chequeos individuales |
 | `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas de terceros |
-| `pnpm db:start` / `pnpm db:reset` | Supabase local / reconstruir base local |
-| `pnpm db:test` | Pruebas pgTAP |
-| `pnpm db:types` | Regenerar tipos de TypeScript desde la base |
-| **`pnpm check`** | **Compuerta completa**: lint + typecheck + check:agnostic + test + db:test + build |
+| `pnpm db:start` / `pnpm db:reset` | PostgreSQL local / reconstruir base local |
+| `pnpm db:test` | Integración del servidor contra PostgreSQL real |
+| `pnpm db:next:demo -- --demo` | Semilla demo explícita, solo local |
+| **`pnpm check`** | **Compuerta completa**: lint + typecheck + scripts + agnóstico + fronteras + knip + Vitest + Playwright + PostgreSQL + build |
 
 ## 6. Reglas de oro (no negociables)
 
-1. Todo cambio de base de datos es una migración en `supabase/migrations/`. Nunca edites
+1. Todo cambio de base de datos es una migración en `apps/server/db/migrations/`. Nunca edites
    una migración ya integrada a `main`: agrega otra.
-2. Toda tabla lleva RLS activado y pruebas pgTAP. Los roles nunca se leen de metadatos
-   que el usuario pueda editar.
-3. El estatus del tiquet solo cambia mediante funciones RPC de transición, y cada cambio
-   escribe un evento en `ticket_events` en la misma transacción. La bitácora es solo de agregar.
-4. La `service role key` jamás va al frontend, al repositorio ni a los logs.
+2. No hay RLS: la autorización vive en el servidor (`can`/`canAct` y repositorios con alcance).
+   Toda tabla y consulta nueva lleva pruebas de permisos positivas y negativas.
+3. El estatus del tiquet solo cambia mediante una acción del servidor, y cada cambio escribe un
+   evento en `ticket_events` en la misma transacción. La bitácora es solo de agregar.
+4. Los secretos de base y sesión jamás van al frontend, al repositorio ni a los logs.
 5. Toda acción offline lleva un UUID generado en el cliente y es idempotente.
-6. Los componentes no llaman a Supabase: usan `features/*/api`. Un feature solo importa
-   el `index.ts` de otro. El núcleo nunca importa de `features/integrations`.
+6. Los componentes no llaman a `/api` directamente: usan `features/*/api`. Un feature solo importa
+   el `index.ts` de otro.
 7. La lógica de negocio va en funciones puras, con pruebas.
 8. Nunca inventes datos. En importaciones, los marcadores de "sin dato" de la fuente se
    convierten en `NULL` (detalle en `docs/integraciones-y-migracion.md`).
@@ -100,9 +100,9 @@ Nunca, sin que la persona lo pida claramente en esta sesión:
 - `git push --force`, `git reset --hard` con trabajo sin confirmar, borrar ramas remotas.
 - `rm -rf` fuera del proyecto, `sudo`, instalar paquetes globales, `curl ... | sh`.
 - Leer, mostrar o registrar el contenido de `.env` o de cualquier clave.
-- Tocar producción o la nube real: `supabase db push`, `supabase functions deploy`,
-  despliegues, DNS, servidor. Trabajas solo con el entorno local; para lo demás,
-  prepara scripts y documenta los pasos y la persona los ejecuta.
+- Tocar producción o la nube real: despliegues, DNS, servidor, bases gestionadas. Trabajas solo
+  con el entorno local; para lo demás, prepara scripts y documenta los pasos y la persona los
+  ejecuta.
 - Debilitar o borrar pruebas, reglas de lint o de tipos para que algo pase. Si una
   prueba es incorrecta, explica por qué en el commit y en un ADR.
 - Añadir una dependencia sin verificar que existe en el registro, que es la oficial,
@@ -112,7 +112,7 @@ Nunca, sin que la persona lo pida claramente en esta sesión:
 ## 8. Cómo verificas tu trabajo
 
 - Corre `pnpm check` antes de cada merge a `main`. Si falla, corrige la causa.
-- Para librerías que cambian rápido (TanStack Router, shadcn/ui, Supabase CLI,
+- Para librerías que cambian rápido (TanStack Router, shadcn/ui, Drizzle, Fastify,
   vite-plugin-pwa, Recharts): no confíes en tu memoria. Revisa los tipos instalados en
   `node_modules` o la documentación oficial de la versión instalada.
 - Si un comando falla, lee el error completo. Tras 3 intentos sin avance, cambia de

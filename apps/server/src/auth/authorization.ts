@@ -11,6 +11,9 @@ export type Actor = {
   id: string
   username: string
   fullName: string
+  phone: string | null
+  active: boolean
+  timezone: string
   mustChangePassword: boolean
   roles: Array<{ id: string; name: string; label: string }>
   permissions: Array<{ id: string; scope: string }>
@@ -26,6 +29,7 @@ type UserRow = {
   id: string
   username: string
   full_name: string
+  phone: string | null
   active: boolean
   must_change_password: boolean
 }
@@ -117,7 +121,7 @@ export async function loadActor(
   userId: string,
 ): Promise<Actor | null> {
   const userResult = await db.execute(sql`
-    select id, username, full_name, active, must_change_password
+    select id, username, full_name, phone, active, must_change_password
     from public.users
     where id = ${userId}
     limit 1
@@ -143,11 +147,20 @@ export async function loadActor(
   `)
 
   const context = await loadActorContext(db, userId)
+  const settings = await db.execute(sql`
+    select timezone from public.instance_settings limit 1
+  `)
+  const timezone =
+    (settings.rows[0] as { timezone: string } | undefined)?.timezone ??
+    'America/Mexico_City'
 
   return {
     id: user.id,
     username: user.username,
     fullName: user.full_name,
+    phone: user.phone,
+    active: user.active,
+    timezone,
     mustChangePassword: user.must_change_password,
     roles: roleResult.rows as RoleRow[],
     permissions: permissionResult.rows as PermissionRow[],

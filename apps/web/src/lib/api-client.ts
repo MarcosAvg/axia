@@ -31,8 +31,12 @@ export class ApiError extends Error {
   }
 }
 
-function baseUrl(): string {
+export function apiBaseUrl(): string {
   return (import.meta.env.VITE_API_URL as string | undefined) ?? ''
+}
+
+function baseUrl(): string {
+  return apiBaseUrl()
 }
 
 async function throwApiError(response: Response): Promise<never> {

@@ -1,7 +1,6 @@
-// Acceso a datos del feature de tiquets (solo lectura + alta). Las transiciones
-// llegan en el tramo de bandejas. Única capa que habla con Supabase.
+// Acceso a datos del feature de tiquets contra la API de Axia.
 
-import { supabase } from '@/lib/supabase'
+import { apiFetch, ApiError } from '@/lib/api-client'
 import { isFinalStatus } from '../domain/status'
 import type {
   DuplicateCandidate,
@@ -15,22 +14,10 @@ import type {
   TicketStatus,
   TicketTimelineItem,
 } from '../domain/types'
-import {
-  parseDuplicateCandidates,
-  parseEvidence,
-  parseParticipant,
-  parseTicketDetail,
-  parseTicketListItem,
-  parseTimelineItem,
-} from '../schemas'
+import { parseDuplicateCandidates } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
 const TICKETS_PAGE_SIZE = 20
-
-const LIST_SELECT =
-  'id, folio, status, reported_at, closed_at, description, requester_name, possible_duplicate, building:buildings(name), category:categories(name), priority:priorities(name, position), team:teams(name)'
-
-const DETAIL_SELECT = `${LIST_SELECT}, cycle, building_id, location_id, dependency_id, category_id, subcategory_id, problem_id, service_type_id, priority_id, requester_contact, duplicate_of_id, location:locations(name), dependency:dependencies(name), subcategory:subcategories(name), problem:problems(name), service_type:service_types(name), channel:channels(name)`
 
 export interface TicketFilters {
   status?: TicketStatus
@@ -47,171 +34,140 @@ export interface TicketPage {
   pageSize: number
 }
 
-function buildTicketsQuery(filters: TicketFilters) {
-  const match = {
-    ...(filters.status ? { status: filters.status } : {}),
-    ...(filters.buildingId ? { building_id: filters.buildingId } : {}),
-    ...(filters.categoryId ? { category_id: filters.categoryId } : {}),
+function queryString(params: Record<string, string | number | undefined>) {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== '') search.set(key, String(value))
   }
-  const term = filters.search?.replace(/[%,()]/g, '')
-
-  let query = supabase
-    .from('tickets')
-    .select(LIST_SELECT, { count: 'exact' })
-    .match(match)
-  if (filters.statuses?.length) query = query.in('status', filters.statuses)
-  if (term) {
-    query = query.or(`folio.ilike.%${term}%,description.ilike.%${term}%`)
-  }
-  return query
+  return search.toString()
 }
 
 export async function fetchTickets(
   filters: TicketFilters,
   page: number,
 ): Promise<TicketPage> {
-  const from = (page - 1) * TICKETS_PAGE_SIZE
-  const { data, error, count } = await buildTicketsQuery(filters)
-    .order('reported_at', { ascending: false })
-    .range(from, from + TICKETS_PAGE_SIZE - 1)
-  if (error) throw error
-  return {
-    items: (data ?? []).map(parseTicketListItem),
-    total: count ?? 0,
+  const query = queryString({
+    status: filters.status,
+    statuses: filters.statuses?.join(','),
+    buildingId: filters.buildingId,
+    categoryId: filters.categoryId,
+    search: filters.search,
     page,
     pageSize: TICKETS_PAGE_SIZE,
-  }
+  })
+  return apiFetch<TicketPage>(`/api/tickets?${query}`)
 }
 
 export async function fetchTicket(id: string): Promise<TicketDetail | null> {
-  const { data, error } = await supabase
-    .from('tickets')
-    .select(DETAIL_SELECT)
-    .eq('id', id)
-    .maybeSingle()
-  if (error) throw error
-  return data ? parseTicketDetail(data) : null
+  try {
+    const body = await apiFetch<{ ticket: TicketDetail }>(`/api/tickets/${id}`)
+    return body.ticket
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null
+    throw error
+  }
 }
 
-interface PauseStepRow {
-  pause_id: string
-  reason_id: string
-  reason_name: string
-  entered_at: string
-  exited_at: string | null
-  note: string | null
-  actor_name: string | null
-}
-
-/** Pasos (subestados) de las pausas de un tiquet, con sus fechas. */
 export async function fetchPauseSteps(
   ticketId: string,
 ): Promise<TicketPauseStep[]> {
-  const { data, error } = await supabase.rpc('ticket_pause_steps', {
-    p_ticket_id: ticketId,
-  })
-  if (error) throw error
-  return ((data ?? []) as PauseStepRow[]).map((row) => ({
-    pauseId: row.pause_id,
-    reasonId: row.reason_id,
-    reasonName: row.reason_name,
-    enteredAt: row.entered_at,
-    exitedAt: row.exited_at,
-    note: row.note,
-    actorName: row.actor_name,
-  }))
+  const body = await apiFetch<{ items: TicketPauseStep[] }>(
+    `/api/tickets/${ticketId}/pause-steps`,
+  )
+  return body.items
 }
 
-interface PauseStateRow {
-  pause_id: string
-  motive_id: string
-  motive_name: string
-  current_id: string
-  current_name: string
-  opened_at: string
-}
-
-/** Pausa abierta del tiquet (motivo y subestado actual) o `null`. */
 export async function fetchPauseState(
   ticketId: string,
 ): Promise<TicketPauseState | null> {
-  const { data, error } = await supabase.rpc('ticket_pause_state', {
-    p_ticket_id: ticketId,
-  })
-  if (error) throw error
-  const row = ((data ?? []) as PauseStateRow[])[0]
-  if (!row) return null
-  return {
-    pauseId: row.pause_id,
-    motiveId: row.motive_id,
-    motiveName: row.motive_name,
-    currentId: row.current_id,
-    currentName: row.current_name,
-    openedAt: row.opened_at,
-  }
+  const body = await apiFetch<{ item: TicketPauseState | null }>(
+    `/api/tickets/${ticketId}/pause-state`,
+  )
+  return body.item
+}
+
+type TimelineResponse = {
+  id: number
+  cycle: number
+  type: TicketTimelineItem['type']
+  payload: Record<string, unknown> | null
+  occurredAt: string
+  actorName: string | null
+  subjectTechnicianName: string | null
+  reasonName: string | null
 }
 
 export async function fetchTimeline(
   ticketId: string,
 ): Promise<TicketTimelineItem[]> {
-  const { data, error } = await supabase
-    .from('v_ticket_timeline')
-    .select(
-      'id, cycle, type, payload, occurred_at, actor_name, subject_technician_name, reason_name',
-    )
-    .eq('ticket_id', ticketId)
-    .order('occurred_at', { ascending: true })
-    .order('id', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map(parseTimelineItem)
+  const body = await apiFetch<{ items: TimelineResponse[] }>(
+    `/api/tickets/${ticketId}/timeline`,
+  )
+  return body.items.map((item) => ({
+    id: item.id,
+    cycle: item.cycle,
+    type: item.type,
+    occurredAt: item.occurredAt,
+    actorName: item.actorName,
+    subjectTechnicianName: item.subjectTechnicianName,
+    reasonName: item.reasonName,
+    payload: item.payload ?? {},
+  }))
 }
 
 export async function fetchParticipants(
   ticketId: string,
 ): Promise<TicketParticipant[]> {
-  const { data, error } = await supabase
-    .from('ticket_participants')
-    .select(
-      'technician:technicians(id, full_name), participation_type, started_at, ended_at',
-    )
-    .eq('ticket_id', ticketId)
-    .order('started_at')
-  if (error) throw error
-  return (data ?? []).map(parseParticipant)
+  const body = await apiFetch<{ items: TicketParticipant[] }>(
+    `/api/tickets/${ticketId}/participants`,
+  )
+  return body.items
+}
+
+type EvidenceResponse = {
+  id: string
+  type: TicketEvidenceItem['type']
+  mimeType: string | null
+  sizeBytes: number | null
+  occurredAt: string
 }
 
 export async function fetchEvidence(
   ticketId: string,
 ): Promise<TicketEvidenceItem[]> {
-  const { data, error } = await supabase
-    .from('evidence')
-    .select('id, type, storage_path, mime_type, size_bytes, occurred_at')
-    .eq('ticket_id', ticketId)
-    .order('occurred_at')
-  if (error) throw error
-  return (data ?? []).map(parseEvidence)
+  const body = await apiFetch<{ items: EvidenceResponse[] }>(
+    `/api/tickets/${ticketId}/evidence`,
+  )
+  return body.items.map((item) => ({
+    id: item.id,
+    type: item.type,
+    storagePath: null,
+    mimeType: item.mimeType,
+    sizeBytes: item.sizeBytes,
+    occurredAt: item.occurredAt,
+  }))
 }
 
 export async function createTicket(
   input: CreateTicketInput,
   clientRequestId: string,
 ): Promise<string> {
-  const { data, error } = await supabase.rpc('ticket_create', {
-    p_data: {
-      building_id: input.buildingId,
-      location_id: input.locationId,
-      dependency_id: input.dependencyId,
-      category_id: input.categoryId,
-      subcategory_id: input.subcategoryId || null,
-      problem_id: input.problemId || null,
-      channel_id: input.channelId || null,
+  const body = await apiFetch<{ ticket: { id: string } }>('/api/tickets', {
+    method: 'POST',
+    body: JSON.stringify({
+      buildingId: input.buildingId,
+      locationId: input.locationId,
+      dependencyId: input.dependencyId,
+      categoryId: input.categoryId,
+      subcategoryId: input.subcategoryId || undefined,
+      problemId: input.problemId || undefined,
+      channelId: input.channelId || undefined,
       description: input.description,
-      requester_id: input.requesterId,
-    },
-    p_client_request_id: clientRequestId,
+      requesterId: input.requesterId,
+      clientRequestId,
+    }),
   })
-  if (error) throw error
-  return data
+  return body.ticket.id
 }
 
 export interface DuplicateCheckInput {
@@ -224,93 +180,53 @@ export interface DuplicateCheckInput {
 export async function checkDuplicates(
   input: DuplicateCheckInput,
 ): Promise<DuplicateCandidate[]> {
-  const { data, error } = await supabase.rpc('ticket_check_duplicates', {
-    p_data: {
-      building_id: input.buildingId,
-      category_id: input.categoryId,
-      problem_id: input.problemId || null,
+  const body = await apiFetch<{ items: unknown }>('/api/tickets/duplicates', {
+    method: 'POST',
+    body: JSON.stringify({
+      buildingId: input.buildingId,
+      categoryId: input.categoryId,
+      problemId: input.problemId || undefined,
       description: input.description,
-    },
+    }),
   })
-  if (error) throw error
-  return parseDuplicateCandidates(data)
+  return parseDuplicateCandidates(body.items)
 }
 
-async function fetchTicketsByIds(ids: string[]): Promise<TicketListItem[]> {
-  if (ids.length === 0) return []
-  const { data, error } = await supabase
-    .from('tickets')
-    .select(LIST_SELECT)
-    .in('id', ids)
-  if (error) throw error
-  return (data ?? []).map(parseTicketListItem)
+export async function fetchMyWork(_userId: string): Promise<TicketListItem[]> {
+  void _userId
+  const body = await apiFetch<{ items: TicketListItem[] }>(
+    `/api/tickets/mine?page=${1}&pageSize=100`,
+  )
+  return body.items.filter((ticket) => !isFinalStatus(ticket.status))
 }
 
-/** Tiquets asignados al técnico vinculado a esta cuenta (bandeja del técnico). */
-export async function fetchMyWork(userId: string): Promise<TicketListItem[]> {
-  const technician = await supabase
-    .from('technicians')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle()
-  if (technician.error) throw technician.error
-  if (!technician.data) return []
-
-  const assignments = await supabase
-    .from('ticket_assignments')
-    .select('ticket_id')
-    .eq('assignee_technician_id', technician.data.id)
-    .is('ended_at', null)
-  if (assignments.error) throw assignments.error
-  const ids = (assignments.data ?? []).map((row) => row.ticket_id)
-  const tickets = await fetchTicketsByIds(ids)
-  return tickets.filter((ticket) => !isFinalStatus(ticket.status))
+export async function fetchMyOffers(
+  _userId: string,
+): Promise<TicketListItem[]> {
+  void _userId
+  const body = await apiFetch<{ items: TicketListItem[] }>(
+    `/api/tickets/offers?page=1&pageSize=100`,
+  )
+  return body.items
 }
 
-/** Tiquets ofrecidos a esta cuenta como supervisor (bandeja de ofertas). */
-export async function fetchMyOffers(userId: string): Promise<TicketListItem[]> {
-  const offers = await supabase
-    .from('ticket_offers')
-    .select('ticket_id')
-    .eq('supervisor_user_id', userId)
-    .eq('status', 'offered')
-  if (offers.error) throw offers.error
-  const ids = (offers.data ?? []).map((row) => row.ticket_id)
-  return fetchTicketsByIds(ids)
-}
-
-/** Tiquets cuyo folio coincide con el término (para marcar duplicados). */
 export async function searchTicketsByFolio(
   term: string,
 ): Promise<TicketListItem[]> {
   const cleaned = term.replace(/[%,()]/g, '').trim()
   if (!cleaned) return []
-  const { data, error } = await supabase
-    .from('tickets')
-    .select(LIST_SELECT)
-    .ilike('folio', `%${cleaned}%`)
-    .limit(10)
-  if (error) throw error
-  return (data ?? []).map(parseTicketListItem)
+  const body = await apiFetch<{ items: TicketListItem[] }>(
+    `/api/tickets?search=${encodeURIComponent(cleaned)}&page=1&pageSize=10`,
+  )
+  return body.items
 }
 
-/** Supervisores con ámbito activo (para reasignar un supervisor concreto). */
 export async function fetchSupervisors(): Promise<SupervisorOption[]> {
-  const scopes = await supabase
-    .from('supervisor_scopes')
-    .select('user_id')
-    .eq('active', true)
-  if (scopes.error) throw scopes.error
-  const ids = [...new Set((scopes.data ?? []).map((row) => row.user_id))]
-  if (ids.length === 0) return []
-  const profiles = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .in('id', ids)
-    .order('full_name')
-  if (profiles.error) throw profiles.error
-  return (profiles.data ?? []).map((row) => ({
-    id: row.id,
-    fullName: row.full_name,
+  const body = await apiFetch<{
+    items: Array<{ id: string; fullName: string }>
+  }>('/api/supervisors')
+  return body.items.map((item) => ({
+    id: item.id,
+    fullName: item.fullName,
   }))
 }

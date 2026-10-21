@@ -12,6 +12,4 @@ test-results
 .vite
 **/.env
 **/.env.*
-deploy/backups
-deploy/supabase/docker
-deploy/supabase/volumes
+backups

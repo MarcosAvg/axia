@@ -1,4 +1,4 @@
-// Funciones puras para interpretar errores de autenticación (sin depender de Supabase).
+// Funciones puras para interpretar errores de autenticación (sin depender de el cliente HTTP).
 
 interface AuthErrorLike {
   message?: string

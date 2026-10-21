@@ -72,6 +72,7 @@ async function main() {
   const app = await buildApp({
     config,
     auth,
+    db,
     tickets,
     catalogs,
     evidence,

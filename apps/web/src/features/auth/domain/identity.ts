@@ -1,5 +1,5 @@
 // Funciones puras de identidad: qué puede hacer el usuario según sus permisos.
-// No depende del cliente de Supabase ni de React (sección 4 de convenciones).
+// No depende del cliente HTTP ni de React (sección 4 de convenciones).
 
 export type PermissionScope = 'own' | 'team' | 'buildings' | 'all'
 
@@ -17,6 +17,7 @@ export interface Identity {
   permissions: Permission[]
   /** Zona horaria de la instancia, para mostrar fechas de forma consistente. */
   timezone: string
+  mustChangePassword: boolean
 }
 
 /** Verdadero si la identidad tiene el permiso, en cualquier ámbito. */

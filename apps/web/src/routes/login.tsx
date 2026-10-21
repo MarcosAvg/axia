@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import {
   Card,
   CardContent,
@@ -10,8 +11,10 @@ import {
   authMessages,
   LoadingScreen,
   LoginForm,
+  SetupForm,
   useAuth,
 } from '@/features/auth'
+import { fetchSetupStatus } from '@/features/auth/api/auth-api'
 import { messages } from '@/lib/i18n'
 
 export const Route = createFileRoute('/login')({
@@ -20,8 +23,13 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const { status } = useAuth()
+  const setup = useQuery({
+    queryKey: ['setup', 'status'],
+    queryFn: fetchSetupStatus,
+    retry: false,
+  })
 
-  if (status === 'loading') return <LoadingScreen />
+  if (status === 'loading' || setup.isLoading) return <LoadingScreen />
   if (status === 'signed-in') return <Navigate to="/" replace />
 
   return (
@@ -51,11 +59,19 @@ function LoginPage() {
         </header>
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>{authMessages.login.title}</CardTitle>
-            <CardDescription>{authMessages.login.description}</CardDescription>
+            <CardTitle>
+              {setup.data?.required
+                ? authMessages.setup.title
+                : authMessages.login.title}
+            </CardTitle>
+            <CardDescription>
+              {setup.data?.required
+                ? authMessages.setup.description
+                : authMessages.login.description}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <LoginForm />
+            {setup.data?.required ? <SetupForm /> : <LoginForm />}
           </CardContent>
         </Card>
       </div>

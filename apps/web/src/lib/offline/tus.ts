@@ -2,27 +2,29 @@ import { Upload } from 'tus-js-client'
 
 export interface ResumableUploadParams {
   endpoint: string
-  token: string
-  bucket: string
-  path: string
+  evidenceId: string
+  ticketId: string
   blob: Blob
   mimeType: string
   onProgress?: (percentage: number) => void
 }
 
-/** Subida reanudable (TUS) a Supabase Storage; reintenta por tramos. */
+/** Subida reanudable (TUS) al servidor de Axia; la sesión viaja en la cookie. */
 export function uploadResumable(params: ResumableUploadParams): Promise<void> {
   return new Promise((resolve, reject) => {
     const upload = new Upload(params.blob, {
       endpoint: params.endpoint,
       retryDelays: [0, 1000],
-      headers: { authorization: `Bearer ${params.token}` },
+      onBeforeRequest: (request) => {
+        const xhr = request.getUnderlyingObject() as XMLHttpRequest
+        xhr.withCredentials = true
+      },
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,
       chunkSize: 6 * 1024 * 1024,
       metadata: {
-        bucketName: params.bucket,
-        objectName: params.path,
+        evidenceId: params.evidenceId,
+        ticketId: params.ticketId,
         contentType: params.mimeType,
       },
       onProgress: (bytesSent, bytesTotal) => {

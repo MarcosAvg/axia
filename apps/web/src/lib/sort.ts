@@ -1,4 +1,4 @@
-// Orden de listas en cliente: pura, sin React ni Supabase.
+// Orden de listas en cliente: pura, sin React ni el cliente HTTP.
 
 type SortDirection = 'asc' | 'desc'
 

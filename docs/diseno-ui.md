@@ -111,7 +111,7 @@ ver ADR 0041 y 0052):
 
 - **KPI según rol** (hasta 6): mi trabajo / ofertas / activos / en pausa / por validar / sin asignar /
   cerrados, más **trabajo activo** y **primera resolución** (técnico), **SLA** (supervisor/admin) y
-  **satisfacción** (admin); calculados de lo que el RLS deja ver.
+  **satisfacción** (admin); calculados de lo que el alcance del usuario deja ver.
 - **Gráfica**: **tiquets por mes** (línea).
 - **Actividad reciente**: últimos eventos visibles (folio, tipo y fecha).
 - **Bandejas según rol**, con el **tiempo transcurrido** en cada tiquet:
@@ -121,7 +121,7 @@ ver ADR 0041 y 0052):
 - **Acciones rápidas** según permisos.
 - Es distinto del **tablero global** de `/metricas` (permiso `metrics.view`).
 
-La **semilla de demostración** (`supabase/seed.sql`) crea tiquets en todos los estados, con nombres y
+La **semilla de demostración** (`apps/server/src/db/seed-demo/`) crea tiquets en todos los estados, con nombres y
 descripciones legibles, y los reparte a lo largo de **varios meses** para que las gráficas y el panel
 tengan datos al evaluar la interfaz. Las pruebas e2e crean datos temporales que se **purgan** con
 `pnpm db:clean`.

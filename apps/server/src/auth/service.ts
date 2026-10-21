@@ -210,6 +210,22 @@ async function changePassword(
   return { actor: refreshed, token: session.token }
 }
 
+async function updateProfile(
+  db: Database,
+  actor: Actor,
+  input: { fullName: string; phone?: string | null },
+): Promise<Actor> {
+  await db.execute(sql`
+    update public.users
+    set full_name = ${input.fullName}, phone = ${input.phone ?? null}
+    where id = ${actor.id}
+  `)
+  const refreshed = await loadActor(db, actor.id)
+  if (!refreshed)
+    throw new AppError(401, 'invalid_credentials', 'Usuario no disponible')
+  return refreshed
+}
+
 async function authenticate(
   db: Database,
   config: AppConfig,
@@ -237,6 +253,10 @@ export function createAuthService(db: Database, config: AppConfig) {
       input: ChangePasswordInput,
       context: SessionContext,
     ) => changePassword(db, config, { actor, input, context }),
+    updateProfile: (
+      actor: Actor,
+      input: { fullName: string; phone?: string | null },
+    ) => updateProfile(db, actor, input),
     authenticate: (token: string) => authenticate(db, config, token),
     ...admin,
   }

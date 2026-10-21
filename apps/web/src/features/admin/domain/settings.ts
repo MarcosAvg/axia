@@ -1,22 +1,8 @@
-import { EVENT_TYPES } from '@/features/tickets'
 import type { EventType } from '@/features/tickets'
 
 export type ValidationPolicy = 'requester' | 'supervisor' | 'both'
 export type EvidencePolicy = 'optional' | 'recommended' | 'required'
-export type SlaClockMode = 'calendar' | 'laboral'
-
-const EVENT_TYPE_SET = new Set<string>(EVENT_TYPES)
-
-/** Verdadero si el valor es un tipo de evento conocido. */
-export function isEventType(value: string): value is EventType {
-  return EVENT_TYPE_SET.has(value)
-}
-
-const SLAL_CLOCK_MODES: SlaClockMode[] = ['calendar', 'laboral']
-
-export function isSlaClockMode(value: string): value is SlaClockMode {
-  return (SLAL_CLOCK_MODES as readonly string[]).includes(value)
-}
+type SlaClockMode = 'calendar' | 'laboral'
 
 const VALIDATION_POLICIES: ValidationPolicy[] = [
   'requester',

@@ -398,21 +398,23 @@ y los índices necesarios.
 
 ## 12. Requisitos transversales
 
-- **Seguridad:** RLS en todas las tablas con políticas por rol y ámbito; los permisos salen de los
-  datos (roles y permisos configurables), nunca de metadatos editables por el usuario. La alerta de
-  duplicados no debe exponer más información de la que la configuración permita.
-- **Transiciones solo por RPC** que validen permiso, estado, precondiciones (evidencias requeridas,
-  motivos, etc.) y escriban el historial en la misma transacción. Idempotentes.
+- **Seguridad:** la autorización vive en el servidor, con permisos y ámbito evaluados por `can` y
+  `canAct` sobre repositorios con alcance. Los permisos salen de los datos (roles y permisos
+  configurables), nunca de metadatos editables por el usuario. La alerta de duplicados no debe
+  exponer más información de la que la configuración permita.
+- **Transiciones solo por acciones del servidor** que validen permiso, estado, precondiciones
+  (evidencias requeridas, motivos, etc.) y escriban el historial en la misma transacción.
+  Idempotentes.
 - **Concurrencia:** dos supervisores que toman a la vez; dos validaciones simultáneas; acciones
   tardías sin conexión. Define y prueba el comportamiento.
 - **Integridad:** restricciones de base de datos para todo lo que pueda garantizarse ahí.
 - **Auditoría:** historial inmutable; ningún borrado físico en datos de negocio.
 - **Rendimiento:** índices para las consultas previsibles (bandejas por rol, listas por estado,
   antigüedad, métricas y búsqueda de posibles duplicados; puedes apoyarte en extensiones de Postgres
-  disponibles en Supabase, como `pg_trgm`, justificándolo en un ADR).
+  estándar de PostgreSQL, como `pg_trgm`, justificándolo en un ADR).
 - **Agnóstico:** nada del núcleo menciona plataformas externas. Conserva `ticket_external_refs`
   genérico para integraciones futuras.
-- **Pruebas pgTAP** de: cada transición válida e inválida, cada permiso, ruteo y retiro de ofertas,
+- **Pruebas de integración** de: cada transición válida e inválida, cada permiso, ruteo y retiro de ofertas,
   recaptura (con y sin cambio de equipo), pausa con subestados, reclamación (procedente e improcedente
   desde `attended` y desde `closed`) y reapertura, detección y marcado de duplicados y su exclusión de
   indicadores, cálculo de tiempos con los ejemplos de la sección 7, visibilidad al solicitante, seeds

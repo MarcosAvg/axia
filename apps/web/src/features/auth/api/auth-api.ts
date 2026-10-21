@@ -1,62 +1,101 @@
-// Acceso a datos del feature de autenticación. Única capa que habla con Supabase
-// (sección 8 de convenciones). Los componentes usan los hooks de `features/auth`.
-
-import type { Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
-import type { Identity } from '../domain/identity'
+import { apiFetch, ApiError } from '@/lib/api-client'
+import type { Identity, Permission } from '../domain/identity'
 import { parseIdentity } from '../schemas'
 
-/** Tipo de sesión, reexportado para no importar `@supabase/supabase-js` fuera de `api/`. */
-export type AuthSession = Session
+/** Sesión mínima de Axia: el servidor guarda el token opaco en una cookie. */
+export type AuthSession = {
+  user: {
+    id: string
+    username: string
+    fullName: string
+  }
+}
 
 export interface ProfileUpdateInput {
   fullName: string
   phone: string | null
 }
 
-/** Sesión actual, o `null` si no hay. */
-export async function getSession(): Promise<Session | null> {
-  const { data, error } = await supabase.auth.getSession()
-  if (error) throw error
-  return data.session
-}
-
-/** Se suscribe a los cambios de sesión y devuelve la función para cancelar. */
-export function subscribeToAuthChanges(
-  onSession: (session: Session | null) => void,
-): () => void {
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-    onSession(session)
-  })
-  return () => {
-    data.subscription.unsubscribe()
+type MeResponse = {
+  user: {
+    id: string
+    username: string
+    fullName: string
+    phone: string | null
+    active: boolean
+    timezone: string
+    mustChangePassword: boolean
+    roles: string[]
+    permissions: Permission[]
   }
 }
 
+/** Sesión actual, o `null` si no hay. */
+export async function getSession(): Promise<AuthSession | null> {
+  try {
+    const me = await apiFetch<MeResponse>('/api/auth/me')
+    return {
+      user: {
+        id: me.user.id,
+        username: me.user.username,
+        fullName: me.user.fullName,
+      },
+    }
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null
+    throw error
+  }
+}
+
+/** La sesión vive en una cookie; no hay eventos del navegador que escuchar. */
+
 export async function signInWithPassword(
-  email: string,
+  username: string,
   password: string,
 ): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) throw error
+  await apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  })
 }
 
 export async function signOut(): Promise<void> {
-  const { error } = await supabase.auth.signOut()
-  if (error) throw error
+  await apiFetch('/api/auth/logout', { method: 'POST' })
 }
 
-/** Identidad del usuario en sesión (perfil, roles y permisos). */
 export async function fetchIdentity(): Promise<Identity> {
-  const { data, error } = await supabase.rpc('me')
-  if (error) throw error
-  return parseIdentity(data)
+  const me = await apiFetch<MeResponse>('/api/auth/me')
+  return parseIdentity(me)
 }
 
 export async function updateProfile(input: ProfileUpdateInput): Promise<void> {
-  const { error } = await supabase.rpc('profile_update', {
-    p_full_name: input.fullName,
-    p_phone: input.phone ?? undefined,
+  await apiFetch('/api/auth/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(input),
   })
-  if (error) throw error
+}
+
+export async function changePassword(input: {
+  currentPassword: string
+  newPassword: string
+}): Promise<void> {
+  await apiFetch('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export async function fetchSetupStatus(): Promise<{ required: boolean }> {
+  return apiFetch('/api/setup/status')
+}
+
+export async function setupAdmin(input: {
+  username: string
+  fullName: string
+  password: string
+}): Promise<void> {
+  await apiFetch('/api/setup', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
 }

@@ -1,5 +1,9 @@
 # Integraciones y migración de datos
 
+> **Estado actual:** las importaciones e integraciones externas están deshabilitadas en esta versión.
+> Este documento se conserva como referencia del origen histórico de los datos y de futuros adaptadores.
+
+
 ## Objeto
 
 Describir la migración de datos hacia Axia y la convivencia con el sistema de origen. Documento de

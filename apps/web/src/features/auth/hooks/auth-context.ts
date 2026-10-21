@@ -9,7 +9,7 @@ export interface AuthContextValue {
   session: AuthSession | null
   identity: Identity | null
   isIdentityLoading: boolean
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (username: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   refreshIdentity: () => Promise<void>
 }

@@ -4,17 +4,16 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9C (instalación, respaldos y CI) cerrado
+**Fase actual:** Migración cerrada — stack propio en producción local
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 9C se cerró el 2026-10-21: instalación local con secretos
-generados, respaldos de base y evidencias, restauración probada y compuerta de CI para el stack nuevo.
-La web sigue sobre Supabase hasta el corte final.
+**Sin trabajo en curso.** El tramo 10 se cerró el 2026-10-21: la web usa la API nueva, se retiró el
+stack anterior y la compuerta `pnpm check` corre con PostgreSQL 17 real y Playwright. El despliegue
+real y los respaldos programados quedan en manos de la persona.
 
-**Siguiente:** tramo 10 (corte final del frontend, retirada de Supabase y cierre de la migración).
-Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, reparto SQL/TS y
-pgTAP híbrido.
+**Siguiente:** operación real (servidor, TLS, respaldos programados) y, si se decide, push y
+escalamiento. No hay bloqueos de código conocidos.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -47,6 +46,16 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 10 — corte final y retirada (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - La web usa `features/*/api` contra `/api`: login con usuario, primer arranque, tiquets,
+    catálogos, evidencias TUS, acciones, SSE/notificaciones, métricas y administración.
+  - El outbox reenvía con `occurredAt`; la evidencia usa TUS del servidor y URL autenticada.
+  - Se retiraron el cliente, migraciones, semillas, pruebas, scripts y dependencias del stack
+    anterior. Las importaciones externas quedan deshabilitadas por ser opcionales.
+  - La compuerta única usa PostgreSQL 17 real, Vitest, Playwright y build; se retiró pgTAP porque
+    probaba RLS/RPC ya inexistentes (**ADR 0077**). **ADR 0078**.
+  - Pruebas: 39 unitarias/HTTP, 237 web, 15 Playwright y 130 de integración.
 - **Migración sin Supabase, Etapa B, tramo 9C — instalación, respaldos y CI (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - `scripts/install.sh`: genera secretos, escribe `.env` con `0600`, construye y levanta
@@ -1356,3 +1365,7 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9C**. Instalación con secretos
   generados, respaldos de base y evidencias, restauración probada y job `check-next`; 39
   unitarias/HTTP y 121 de integración. Siguiente: corte final del frontend y retirada de Supabase.
+- 2026-10-21: **corte final**. La PWA quedó conectada al servidor Fastify, se retiró el stack
+  anterior y la compuerta corre con PostgreSQL real y Playwright. 39 unitarias/HTTP, 237 web, 15
+  Playwright, 130 de integración. Sin bloqueos de código; siguiente: operación real y respaldos
+  programados.

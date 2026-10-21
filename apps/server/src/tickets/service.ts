@@ -5,6 +5,15 @@ import { createTicket } from './create.js'
 import type { CreateTicketInput } from './create-types.js'
 import { getTicketDetail } from './detail.js'
 import { listParticipants } from './participants.js'
+import { getPauseState, getPauseSteps } from './pause-read.js'
+import { getRating } from './rating-read.js'
+import {
+  listManualTime,
+  recordManualTime,
+  voidManualTime,
+  type ManualTimeInput,
+} from './manual-time.js'
+import { checkDuplicateCandidates } from './duplicates.js'
 import {
   getTimeline,
   listTickets,
@@ -28,6 +37,29 @@ export function createTicketService(db: Database) {
       getTimeline(db, actor, ticketId),
     participants: (actor: Actor, ticketId: string) =>
       listParticipants(db, actor, ticketId),
+    pauseSteps: (actor: Actor, ticketId: string) =>
+      getPauseSteps(db, actor, ticketId),
+    pauseState: (actor: Actor, ticketId: string) =>
+      getPauseState(db, actor, ticketId),
+    rating: (actor: Actor, ticketId: string) => getRating(db, actor, ticketId),
+    manualTime: (actor: Actor, ticketId: string) =>
+      listManualTime(db, actor, ticketId),
+    recordManualTime: (
+      actor: Actor,
+      ticketId: string,
+      input: ManualTimeInput,
+    ) => recordManualTime(db, actor, ticketId, input),
+    voidManualTime: (actor: Actor, ticketId: string, spanId: string) =>
+      voidManualTime(db, actor, ticketId, spanId),
+    duplicateCandidates: (
+      actor: Actor,
+      input: {
+        buildingId: string
+        categoryId: string
+        problemId?: string | null
+        description: string
+      },
+    ) => checkDuplicateCandidates(db, actor, input),
     myWork: (actor: Actor, page: number, pageSize: number) => {
       if (!actor.technicianId) return emptyPage(page, pageSize)
       return listTickets(db, actor, {

@@ -1,25 +1,14 @@
-// Tiempos manuales: lectura de tramos registrados a mano y sus RPC de alta/anulación.
-// Solo supervisor y administrador (permiso time.record_manual).
-
-import { supabase } from '@/lib/supabase'
+import { apiFetch } from '@/lib/api-client'
 import type { ManualTimeSpan } from '../domain/types'
-import { parseManualTimeSpan } from '../schemas'
 import type { ManualTimeInput } from '../schemas'
-
-const MANUAL_TIME_SELECT =
-  'id, kind, started_at, ended_at, clock_class, voided_at, technician:technicians(full_name)'
 
 export async function fetchManualTimeSpans(
   ticketId: string,
 ): Promise<ManualTimeSpan[]> {
-  const { data, error } = await supabase
-    .from('time_spans')
-    .select(MANUAL_TIME_SELECT)
-    .eq('ticket_id', ticketId)
-    .eq('origin', 'manual')
-    .order('started_at', { ascending: false })
-  if (error) throw error
-  return (data ?? []).map(parseManualTimeSpan)
+  const body = await apiFetch<{ items: ManualTimeSpan[] }>(
+    `/api/tickets/${ticketId}/manual-time`,
+  )
+  return body.items
 }
 
 export async function recordManualTime(
@@ -27,27 +16,26 @@ export async function recordManualTime(
   input: ManualTimeInput,
   clientRequestId: string,
 ): Promise<void> {
-  const { error } = await supabase.rpc('time_span_record', {
-    p_ticket_id: ticketId,
-    p_kind: input.kind,
-    p_started_at: input.startedAt,
-    p_ended_at: input.endedAt,
-    p_clock_class: input.clockClass,
-    p_subject_technician_id: input.technicianId || undefined,
-    p_client_request_id: clientRequestId,
+  await apiFetch(`/api/tickets/${ticketId}/manual-time`, {
+    method: 'POST',
+    body: JSON.stringify({
+      kind: input.kind,
+      clockClass: input.clockClass,
+      technicianId: input.technicianId || undefined,
+      startedAt: input.startedAt,
+      endedAt: input.endedAt,
+      clientRequestId,
+    }),
   })
-  if (error) throw error
 }
 
 export async function voidManualTime(
   ticketId: string,
   spanId: string,
-  clientRequestId: string,
+  _clientRequestId: string,
 ): Promise<void> {
-  const { error } = await supabase.rpc('time_span_void', {
-    p_ticket_id: ticketId,
-    p_span_id: spanId,
-    p_client_request_id: clientRequestId,
+  void _clientRequestId
+  await apiFetch(`/api/tickets/${ticketId}/manual-time/${spanId}/void`, {
+    method: 'POST',
   })
-  if (error) throw error
 }

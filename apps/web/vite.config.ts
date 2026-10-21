@@ -57,17 +57,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        // `config.js` se genera al arrancar el contenedor: no se precachea (para no
-        // quedarse con valores viejos), pero sí se cachea en runtime para el modo offline.
-        globIgnores: ['**/config.js'],
         navigateFallback: '/index.html',
-        runtimeCaching: [
-          {
-            urlPattern: /\/config\.js$/,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'axia-config' },
-          },
-        ],
       },
     }),
   ],
@@ -76,16 +66,18 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: process.env.AXIA_API_URL ?? 'http://127.0.0.1:3000',
+        changeOrigin: false,
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
-    // El cliente de Supabase exige URL y clave al construirse; en pruebas no llega
-    // a hacer red (los hooks se sustituyen), así que basta con valores ficticios.
-    env: {
-      VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
-      VITE_SUPABASE_ANON_KEY: 'clave-anon-de-prueba',
-    },
     // Lo de `e2e/` y `visual/` lo corre Playwright, no Vitest.
     exclude: ['e2e/**', 'visual/**', 'node_modules/**', 'dist/**'],
   },

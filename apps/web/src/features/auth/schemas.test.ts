@@ -1,17 +1,17 @@
 import { loginSchema, parseIdentity, profileSchema } from './schemas'
 
 describe('loginSchema', () => {
-  it('acepta un correo y una contraseña válidos', () => {
+  it('acepta un usuario y una contraseña válidos', () => {
     const result = loginSchema.safeParse({
-      email: 'persona@axia.test',
+      username: 'persona',
       password: 'secreta',
     })
     expect(result.success).toBe(true)
   })
 
-  it('rechaza un correo inválido', () => {
+  it('rechaza un usuario demasiado corto', () => {
     const result = loginSchema.safeParse({
-      email: 'no-es-correo',
+      username: 'ab',
       password: 'x',
     })
     expect(result.success).toBe(false)
@@ -19,7 +19,7 @@ describe('loginSchema', () => {
 
   it('rechaza una contraseña vacía', () => {
     const result = loginSchema.safeParse({
-      email: 'persona@axia.test',
+      username: 'persona',
       password: '',
     })
     expect(result.success).toBe(false)
@@ -42,16 +42,17 @@ describe('profileSchema', () => {
 
 describe('parseIdentity', () => {
   const respuesta = {
-    user_id: 'u1',
-    profile: {
+    user: {
       id: 'u1',
-      full_name: 'Ana Pérez',
+      username: 'ana',
+      fullName: 'Ana Pérez',
       phone: 'ext. 100',
       active: true,
+      timezone: 'America/Mexico_City',
+      mustChangePassword: false,
+      roles: ['requester'],
+      permissions: [{ permission: 'ticket.view', scope: 'own' }],
     },
-    roles: ['requester'],
-    permissions: [{ permission: 'ticket.view', scope: 'own' }],
-    timezone: 'America/Mexico_City',
   }
 
   it('convierte la respuesta de me() en una identidad', () => {
@@ -64,18 +65,22 @@ describe('parseIdentity', () => {
       roles: ['requester'],
       permissions: [{ permission: 'ticket.view', scope: 'own' }],
       timezone: 'America/Mexico_City',
+      mustChangePassword: false,
     })
   })
 
   it('lanza si el usuario no tiene perfil', () => {
-    expect(() => parseIdentity({ ...respuesta, profile: null })).toThrow()
+    expect(() => parseIdentity({ user: null })).toThrow()
   })
 
   it('lanza si un permiso trae un ámbito desconocido', () => {
     expect(() =>
       parseIdentity({
         ...respuesta,
-        permissions: [{ permission: 'ticket.view', scope: 'galaxia' }],
+        user: {
+          ...respuesta.user,
+          permissions: [{ permission: 'ticket.view', scope: 'galaxia' }],
+        },
       }),
     ).toThrow()
   })

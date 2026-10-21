@@ -5,8 +5,12 @@ import Fastify, {
   type FastifyServerOptions,
 } from 'fastify'
 
+import { registerAdminAccessRoutes } from './auth/access-routes.js'
 import { registerAuthRoutes } from './auth/routes.js'
 import type { AuthService } from './auth/service.js'
+import { registerAdminCatalogRoutes } from './catalogs/admin-routes.js'
+import { registerAdminCalendarRoutes } from './catalogs/calendar-routes.js'
+import { registerAdminSettingsRoutes } from './catalogs/settings-routes.js'
 import { registerCatalogRoutes } from './catalogs/routes.js'
 import type { CatalogService } from './catalogs/service.js'
 import { registerEvidenceRoutes } from './evidence/routes.js'
@@ -20,6 +24,7 @@ import type { Database } from './db/client.js'
 import type { AppConfig } from './config.js'
 import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
+import { registerMetricsRoutes } from './metrics/routes.js'
 import { registerSecurity } from './http/security.js'
 import { registerStatic } from './http/static.js'
 import { registerTicketRoutes } from './tickets/routes.js'
@@ -29,6 +34,7 @@ export type BuildAppOptions = {
   config: AppConfig
   readiness: ReadinessProbe
   auth?: AuthService
+  db?: Database
   tickets?: TicketService
   catalogs?: CatalogService
   evidence?: EvidenceService
@@ -57,6 +63,7 @@ function buildLogger(config: AppConfig): FastifyServerOptions['logger'] {
 
 type OptionalServices = {
   auth?: AuthService
+  db?: Database
   tickets?: TicketService
   catalogs?: CatalogService
   evidence?: EvidenceService
@@ -67,9 +74,16 @@ type OptionalServices = {
 async function registerCoreRoutes(
   app: FastifyInstance,
   config: AppConfig,
-  { auth, tickets, catalogs }: OptionalServices,
+  { auth, db, tickets, catalogs }: OptionalServices,
 ) {
   if (auth) await registerAuthRoutes(app, auth, config)
+  if (auth && db) {
+    registerAdminAccessRoutes(app, auth, config, db)
+    registerAdminCatalogRoutes(app, auth, config, db)
+    registerAdminCalendarRoutes(app, auth, config, db)
+    registerAdminSettingsRoutes(app, auth, config, db)
+    registerMetricsRoutes(app, auth, config, db)
+  }
   if (auth && tickets) registerTicketRoutes(app, { auth, config, tickets })
   if (auth && catalogs) registerCatalogRoutes(app, { auth, config, catalogs })
 }
@@ -105,6 +119,7 @@ export async function buildApp({
   config,
   readiness,
   auth,
+  db,
   tickets,
   catalogs,
   evidence,
@@ -130,6 +145,7 @@ export async function buildApp({
 
   await registerOptionalRoutes(app, config, {
     auth,
+    db,
     tickets,
     catalogs,
     evidence,

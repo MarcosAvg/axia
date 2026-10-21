@@ -19,6 +19,7 @@ function identityWith(permissions: string[]): Identity {
       scope: 'all' as const,
     })),
     timezone: 'America/Mexico_City',
+    mustChangePassword: false,
   }
 }
 

@@ -129,9 +129,15 @@ async function validateProblem(
   }
 }
 
+export type ResolvedCreateInput = CreateTicketInput & {
+  serviceTypeId: string
+  priorityId: string
+  channelId: string
+}
+
 export async function validateCreateInputs(
   tx: DbExecutor,
-  input: CreateTicketInput,
+  input: ResolvedCreateInput,
 ): Promise<CategoryRow> {
   await requireActive(tx, 'buildings', input.buildingId, 'Edificio')
   await requireActive(tx, 'dependencies', input.dependencyId, 'Dependencia')
@@ -155,4 +161,58 @@ export async function validateCreateInputs(
     await validateProblem(tx, input.subcategoryId, input.problemId)
   }
   return category
+}
+
+type DefaultRow = { id: string }
+
+async function firstActive(
+  tx: DbExecutor,
+  table: ActiveTable,
+  preferredName?: string,
+): Promise<string | null> {
+  const result = await tx.execute(sql`
+    select id from ${sql.raw(`public.${table}`)}
+    where active
+    order by (name = ${preferredName ?? ''}) desc, name
+    limit 1
+  `)
+  return (result.rows[0] as DefaultRow | undefined)?.id ?? null
+}
+
+async function resolvePriorityId(
+  tx: DbExecutor,
+  input: CreateTicketInput,
+): Promise<string | undefined> {
+  if (input.priorityId) return input.priorityId
+  if (input.problemId) {
+    const problemDefault = await tx.execute(sql`
+      select default_priority_id as id from public.problems where id = ${input.problemId}
+    `)
+    const id = (problemDefault.rows[0] as DefaultRow | undefined)?.id
+    if (id) return id
+  }
+  const instanceDefault = await tx.execute(sql`
+    select default_priority_id as id from public.instance_settings limit 1
+  `)
+  return (
+    (instanceDefault.rows[0] as DefaultRow | undefined)?.id ??
+    (await firstActive(tx, 'priorities', 'Media')) ??
+    undefined
+  )
+}
+
+export async function resolveCreateDefaults(
+  tx: DbExecutor,
+  input: CreateTicketInput,
+): Promise<ResolvedCreateInput> {
+  const serviceTypeId =
+    input.serviceTypeId ??
+    (await firstActive(tx, 'service_types', 'Correctivo'))
+  const channelId =
+    input.channelId ?? (await firstActive(tx, 'channels', 'Web'))
+  const priorityId = await resolvePriorityId(tx, input)
+  if (!serviceTypeId || !priorityId || !channelId) {
+    throw invalid('Faltan catálogos obligatorios para registrar el tiquet')
+  }
+  return { ...input, serviceTypeId, priorityId, channelId }
 }

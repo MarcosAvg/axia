@@ -1,8 +1,18 @@
-// Ejecuta una RPC de Supabase y lanza el error si lo hay.
+import { apiFetch } from '@/lib/api-client'
 
-export async function run(
-  promise: { error: unknown } | PromiseLike<{ error: unknown }>,
+/** Ejecuta una acción de tiquet; todas pasan por la misma ruta y son idempotentes. */
+export async function ticketAction(
+  ticketId: string,
+  action: string,
+  clientRequestId: string,
+  fields: Record<string, unknown> = {},
 ): Promise<void> {
-  const { error } = await promise
-  if (error) throw error
+  await apiFetch(`/api/tickets/${ticketId}/actions`, {
+    method: 'POST',
+    body: JSON.stringify({
+      action,
+      clientRequestId,
+      ...fields,
+    }),
+  })
 }

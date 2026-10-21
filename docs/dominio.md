@@ -29,7 +29,7 @@ conceptos.
   **fijo de permisos** del sistema más un **ámbito** (`propios`, `equipo`, `edificios`, `todos`).
 - Roles semilla: **solicitante**, **supervisor**, **técnico** y **administrador**. El
   administrador puede todo y sustituye al antiguo "encargado de plataforma" (ese rol ya no existe).
-- Los permisos nunca se leen de metadatos que el usuario pueda editar; se imponen con RLS y RPC.
+- Los permisos nunca se leen de metadatos que el usuario pueda editar; se imponen en el servidor con `can`/`canAct` y acciones transaccionales.
 - Un **solicitante** puede tener cuenta o ser un **contacto sin cuenta** (modelo mixto): en ese
   caso, sus acciones las ejerce quien tenga el permiso, **en su nombre** (ver §13).
 
@@ -121,8 +121,7 @@ Administrables, con activar/desactivar en lugar de borrar. Todo lo que se use en
   registro del tiquet, `ticket_external_refs(ticket_id, system, external_id)` con
   `unique(system, external_id)` (`system` es texto validado por el catálogo `external_systems`) y
   eventos con `source = 'import'` o `'integration'`.
-- Las integraciones son adaptadores **opcionales** en `features/integrations/` y
-  `supabase/functions/integration-*`. Axia se despliega y se usa sin ninguno.
+- Las integraciones son adaptadores **opcionales y aislados**. Esta versión no incluye ninguno; Axia se despliega y se usa sin ellos.
 
 ## 10. Tiempos
 

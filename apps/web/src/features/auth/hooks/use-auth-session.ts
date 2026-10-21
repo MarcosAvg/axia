@@ -1,39 +1,42 @@
-import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { getSession, subscribeToAuthChanges } from '../api/auth-api'
+import { useCallback, useEffect, useState } from 'react'
+
+import { getSession } from '../api/auth-api'
 import type { AuthSession } from '../api/auth-api'
 import type { AuthStatus } from './auth-context'
 
-/** Mantiene la sesión de Supabase (estado inicial y cambios en vivo). */
+/** Mantiene la sesión de Axia (cookie opaca en el servidor). */
 export function useAuthSession() {
   const [status, setStatus] = useState<AuthStatus>('loading')
   const [session, setSession] = useState<AuthSession | null>(null)
-  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    let isMounted = true
-
-    getSession()
-      .then((initial) => {
-        if (!isMounted) return
-        setSession(initial)
-        setStatus(initial ? 'signed-in' : 'signed-out')
-      })
-      .catch(() => {
-        if (isMounted) setStatus('signed-out')
-      })
-
-    const unsubscribe = subscribeToAuthChanges((next) => {
+  const refresh = useCallback(async () => {
+    try {
+      const next = await getSession()
       setSession(next)
       setStatus(next ? 'signed-in' : 'signed-out')
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'identity'] })
-    })
-
-    return () => {
-      isMounted = false
-      unsubscribe()
+      return next
+    } catch {
+      setSession(null)
+      setStatus('signed-out')
+      return null
     }
-  }, [queryClient])
+  }, [])
 
-  return { status, session }
+  useEffect(() => {
+    let active = true
+    getSession()
+      .then((next) => {
+        if (!active) return
+        setSession(next)
+        setStatus(next ? 'signed-in' : 'signed-out')
+      })
+      .catch(() => {
+        if (active) setStatus('signed-out')
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  return { status, session, refresh }
 }

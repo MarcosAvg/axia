@@ -8,7 +8,7 @@
     "build": "pnpm --filter @axia/server build && pnpm --filter @axia/web build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test && pnpm db:clean",
+    "test": "pnpm -r --if-present test",
     "test:visual": "pnpm --filter @axia/web test:visual",
     "test:scripts": "bash scripts/install.test.sh",
     "format": "prettier --write .",
@@ -16,12 +16,10 @@
     "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",
     "knip": "knip",
     "check": "pnpm lint && pnpm typecheck && pnpm test:scripts && pnpm check:agnostic && pnpm check:boundaries && pnpm knip && pnpm test && pnpm db:test && pnpm build",
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:reset": "supabase db reset",
-    "db:test": "supabase test db",
-    "db:clean": "node scripts/clean-test-data.mjs",
-    "db:types": "supabase gen types typescript --local | prettier --stdin-filepath packages/shared/src/database.types.ts > packages/shared/src/database.types.ts",
+    "db:start": "docker compose -f compose.yaml -f compose.dev.yaml up -d db",
+    "db:stop": "docker compose stop db",
+    "db:reset": "pnpm --filter @axia/server db:reset",
+    "db:test": "pnpm --filter @axia/server test:db",
     "db:next:up": "docker compose -f compose.yaml -f compose.dev.yaml up -d db",
     "db:next:migrate": "pnpm --filter @axia/server db:migrate",
     "db:next:reset": "pnpm --filter @axia/server db:reset",
@@ -30,7 +28,6 @@
     "db:next:indexes": "pnpm --filter @axia/server db:indexes",
     "db:next:demo": "pnpm --filter @axia/server db:demo",
     "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server build && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
-    "env:local": "node scripts/write-local-env.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -41,7 +38,6 @@
     "knip": "^6.40.0",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.9",
-    "supabase": "^2.120.0",
     "typescript": "~6.0.3"
   }
 }

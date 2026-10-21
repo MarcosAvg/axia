@@ -1,7 +1,7 @@
-// Evidencia offline: comprime, guarda en Dexie y sube de inmediato si hay red, o encola la
-// subida reanudable + `evidence_add`. El orden de la cola (`seq`) garantiza que la evidencia
-// se registre antes que la acción de flujo que la exige.
+// Evidencia offline: comprime, guarda en Dexie y reserva la evidencia en el servidor antes
+// de subirla por TUS. La cola garantiza que la evidencia se registre antes que la acción.
 
+import { apiBaseUrl, apiFetch } from '@/lib/api-client'
 import { db } from '@/lib/offline/db'
 import { isNetworkError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
@@ -11,12 +11,9 @@ import {
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { uploadResumable } from '@/lib/offline/tus'
-import { getRuntimeConfig } from '@/lib/runtime-config'
-import { supabase } from '@/lib/supabase'
 import { EVIDENCE_TYPES } from '../domain/types'
 import type { EvidenceType } from '../domain/types'
 
-const BUCKET = 'evidence'
 const EVIDENCE_UPLOAD = 'evidence_upload'
 
 interface EvidenceInput {
@@ -25,10 +22,6 @@ interface EvidenceInput {
   type: EvidenceType
   file: File
   note?: string | null
-}
-
-function endpoint(): string {
-  return `${getRuntimeConfig().supabaseUrl}/storage/v1/upload/resumable`
 }
 
 /** Comprime el archivo y lo guarda en el dispositivo, sin subirlo todavía. */
@@ -51,7 +44,7 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
   return id
 }
 
-/** Sube una evidencia ya guardada en el dispositivo y la registra en el servidor. */
+/** Reserva la evidencia y la sube al servidor. */
 async function uploadEvidenceItem(payload: unknown): Promise<void> {
   const { evidenceId } = payload as { evidenceId: string }
   const evidence = await db.evidences.get(evidenceId)
@@ -59,18 +52,26 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
   const type = EVIDENCE_TYPES.find((candidate) => candidate === evidence.type)
   if (!type) throw new Error('Tipo de evidencia inválido')
 
-  const session = await supabase.auth.getSession()
-  const token = session.data.session?.access_token
-  if (!token) throw new Error('Sin sesión')
+  const created = await apiFetch<{ evidence: { id: string } }>(
+    `/api/tickets/${evidence.ticketId}/evidence`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        type,
+        clientRequestId: evidence.id,
+        mimeType: evidence.mimeType,
+        sizeBytes: evidence.blob.size,
+      }),
+    },
+  )
+  const serverId = created.evidence.id
 
   await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
-  const storagePath = `tickets/${evidence.ticketId}/${evidence.cycle}/${evidence.id}.jpg`
   let reported = -1
   await uploadResumable({
-    endpoint: endpoint(),
-    token,
-    bucket: BUCKET,
-    path: storagePath,
+    endpoint: `${apiBaseUrl()}/api/uploads`,
+    evidenceId: serverId,
+    ticketId: evidence.ticketId,
     blob: evidence.blob,
     mimeType: evidence.mimeType,
     onProgress: (percentage) => {
@@ -80,19 +81,6 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
       }
     },
   })
-  const { error } = await supabase.rpc('evidence_add', {
-    p_ticket_id: evidence.ticketId,
-    p_type: type,
-    p_storage_path: storagePath,
-    p_mime_type: evidence.mimeType,
-    p_size_bytes: evidence.blob.size,
-    p_client_request_id: evidence.id,
-    p_note: evidence.note ?? undefined,
-  })
-  if (error) {
-    await db.evidences.update(evidenceId, { state: 'error' })
-    throw error
-  }
   await db.evidences.update(evidenceId, { state: 'uploaded', progress: 100 })
 }
 

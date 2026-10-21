@@ -1,3 +1,0 @@
-# Compose oficial copiado en el servidor y volúmenes de datos: no se versionan.
-docker/
-volumes/

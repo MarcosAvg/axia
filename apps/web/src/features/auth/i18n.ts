@@ -8,15 +8,46 @@ export const authMessages = {
     description: 'Accede con tu cuenta de Axia.',
     brandDescription:
       'Sigue cada tiquet en todo momento: en qué estado está y, si no avanza, por qué.',
-    email: 'Correo electrónico',
+    username: 'Usuario',
     password: 'Contraseña',
     submit: 'Entrar',
     submitting: 'Entrando…',
     errors: {
-      email: 'Escribe un correo válido.',
+      username: 'Escribe tu usuario.',
       password: 'Escribe tu contraseña.',
-      invalid: 'El correo o la contraseña no son correctos.',
+      invalid: 'El usuario o la contraseña no son correctos.',
       unknown: 'No se pudo iniciar sesión. Intenta de nuevo.',
+    },
+  },
+  password: {
+    title: 'Cambia tu contraseña',
+    current: 'Contraseña actual',
+    new: 'Contraseña nueva',
+    confirm: 'Repite la contraseña nueva',
+    submit: 'Guardar contraseña',
+    submitting: 'Guardando…',
+    errors: {
+      confirm: 'Las contraseñas no coinciden.',
+      unknown: 'No se pudo cambiar la contraseña. Intenta de nuevo.',
+    },
+  },
+  setup: {
+    title: 'Primer arranque',
+    description:
+      'Crea la primera cuenta de administración de esta instalación.',
+    username: 'Usuario',
+    fullName: 'Nombre completo',
+    password: 'Contraseña',
+    confirmPassword: 'Repite la contraseña',
+    submit: 'Crear administrador',
+    submitting: 'Creando…',
+    errors: {
+      username:
+        'Usa entre 3 y 64 caracteres: minúsculas, números, punto, guion o guion bajo.',
+      fullName: 'El nombre es obligatorio.',
+      password: 'La contraseña debe tener al menos 12 caracteres.',
+      confirm: 'Las contraseñas no coinciden.',
+      unknown: 'No se pudo crear el administrador. Intenta de nuevo.',
     },
   },
   dashboard: {

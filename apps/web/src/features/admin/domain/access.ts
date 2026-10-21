@@ -1,6 +1,4 @@
-import type { Database } from '@axia/shared'
-
-export type Scope = Database['public']['Enums']['permission_scope']
+export type Scope = 'own' | 'team' | 'buildings' | 'all'
 
 export const SCOPES: Scope[] = ['own', 'team', 'buildings', 'all']
 

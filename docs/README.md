@@ -7,13 +7,14 @@
 | Documento | Contenido |
 |---|---|
 | [`empezar-aqui.md`](empezar-aqui.md) | Requisitos, arranque, continuidad entre equipos y solución de problemas |
-| [`configuracion-inicial.md`](configuracion-inicial.md) | Arranque del entorno y despliegue en producción |
+| [`configuracion-inicial.md`](configuracion-inicial.md) | Arranque del entorno |
+| [`migracion/instalacion-autoalojada.md`](migracion/instalacion-autoalojada.md) | Instalación, secretos, respaldos y restauración |
 
 ## Guías de uso y operación
 
 | Documento | Contenido |
 |---|---|
-| [`notificaciones-push.md`](notificaciones-push.md) | Activación de correo, push y escalamiento |
+| [`notificaciones-push.md`](notificaciones-push.md) | Push y escalamiento (etapa posterior) |
 | [`estilo-documentacion.md`](estilo-documentacion.md) | Normas de redacción de la documentación |
 | [`../deploy/README.md`](../deploy/README.md) | Despliegue en producción y contrato de reverse proxy |
 
@@ -24,7 +25,7 @@
 | [`especificacion-negocio.md`](especificacion-negocio.md) | Fuente de verdad del negocio: flujo, estados, reglas, tiempos y permisos |
 | [`guia-tiquets.md`](guia-tiquets.md) | Ciclo completo de un tiquet: estados, transiciones, tiempos y duplicados |
 | [`dominio.md`](dominio.md) | Flujo de trabajo, modelo conceptual y glosario |
-| [`modelo-datos.md`](modelo-datos.md) | Diseño de la base del núcleo: entidades, transiciones, RLS e indicadores |
+| [`modelo-datos.md`](modelo-datos.md) | Diseño de la base del núcleo: entidades, transiciones e indicadores |
 
 ## Desarrollo
 

@@ -2,12 +2,7 @@
   "$schema": "https://knip.dev/schemas/knip-schema.json",
   "workspaces": {
     "apps/web": {
-      "entry": [
-        // Módulo entregado: el cliente tipado aún no lo importa nadie, pero es
-        // la única vía permitida para hablar con Supabase (convenciones, §4).
-        // El resto de las entradas las detecta knip solo (Vite, Vitest).
-        "src/lib/supabase.ts"
-      ],
+      "entry": [],
       "ignore": [
         // Kit de shadcn/ui generado por el CLI: se mantiene completo (input,
         // label y variantes) aunque hoy no todo se use; se repone con

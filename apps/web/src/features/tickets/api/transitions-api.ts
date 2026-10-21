@@ -1,16 +1,10 @@
-// RPC de transición del tiquet. Toda acción de avance pasa por aquí (RPC, nunca update directo).
+// Acciones de transición del tiquet contra `POST /api/tickets/:id/actions`.
 
-import { supabase } from '@/lib/supabase'
 import type { ClaimResolution } from '../domain/types'
-import { run } from './rpc'
+import { ticketAction } from './rpc'
 
 export async function takeTicket(ticketId: string, clientRequestId: string) {
-  await run(
-    supabase.rpc('ticket_take', {
-      p_ticket_id: ticketId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'take', clientRequestId)
 }
 
 export async function assignTechnician(
@@ -18,27 +12,13 @@ export async function assignTechnician(
   technicianId: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_assign_technician', {
-      p_ticket_id: ticketId,
-      p_technician_id: technicianId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'assign_technician', clientRequestId, {
+    technicianId,
+  })
 }
 
-export async function startTicket(
-  ticketId: string,
-  clientRequestId: string,
-  subjectTechnicianId?: string | null,
-) {
-  await run(
-    supabase.rpc('ticket_start', {
-      p_ticket_id: ticketId,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: subjectTechnicianId ?? undefined,
-    }),
-  )
+export async function startTicket(ticketId: string, clientRequestId: string) {
+  await ticketAction(ticketId, 'start', clientRequestId)
 }
 
 export async function attendTicket(
@@ -50,27 +30,17 @@ export async function attendTicket(
     serviceTypeId?: string | null
   },
 ) {
-  await run(
-    supabase.rpc('ticket_attend', {
-      p_ticket_id: ticketId,
-      p_work_description: input.workDescription,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-      p_service_type_id: input.serviceTypeId ?? undefined,
-    }),
-  )
+  await ticketAction(ticketId, 'attend', clientRequestId, {
+    workDescription: input.workDescription,
+    serviceTypeId: input.serviceTypeId || undefined,
+  })
 }
 
 export async function validateTicket(
   ticketId: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_validate', {
-      p_ticket_id: ticketId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'validate', clientRequestId)
 }
 
 export async function rejectTicket(
@@ -79,14 +49,10 @@ export async function rejectTicket(
   note: string | null,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_reject', {
-      p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_note: note ?? undefined,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'reject', clientRequestId, {
+    reasonId,
+    note: note ?? undefined,
+  })
 }
 
 export async function cancelTicket(
@@ -95,14 +61,10 @@ export async function cancelTicket(
   note: string | null,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_cancel', {
-      p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_note: note ?? undefined,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'cancel', clientRequestId, {
+    reasonId,
+    note: note ?? undefined,
+  })
 }
 
 export async function changePriority(
@@ -110,13 +72,9 @@ export async function changePriority(
   priorityId: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_change_priority', {
-      p_ticket_id: ticketId,
-      p_priority_id: priorityId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'change_priority', clientRequestId, {
+    priorityId,
+  })
 }
 
 export async function commentTicket(
@@ -124,14 +82,10 @@ export async function commentTicket(
   text: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_comment', {
-      p_ticket_id: ticketId,
-      p_text: text,
-      p_is_internal: true,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'comment', clientRequestId, {
+    text,
+    isInternal: true,
+  })
 }
 
 export interface RecaptureTicketInput {
@@ -145,15 +99,10 @@ export async function recaptureTicket(
   input: RecaptureTicketInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_recapture', {
-      p_ticket_id: ticketId,
-      p_changes: input.changes,
-      p_reason_id: input.reasonId ?? undefined,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-    }),
-  )
+  await ticketAction(ticketId, 'recapture', clientRequestId, {
+    changes: input.changes,
+    reasonId: input.reasonId || undefined,
+  })
 }
 
 export async function openClaim(
@@ -162,14 +111,10 @@ export async function openClaim(
   description: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_open_claim', {
-      p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_description: description,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'open_claim', clientRequestId, {
+    reasonId,
+    description,
+  })
 }
 
 export interface ResolveClaimInput {
@@ -183,15 +128,11 @@ export async function resolveClaim(
   input: ResolveClaimInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_resolve_claim', {
-      p_ticket_id: ticketId,
-      p_resolution: input.resolution,
-      p_result_id: input.resultId ?? undefined,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'resolve_claim', clientRequestId, {
+    resolution: input.resolution,
+    resultId: input.resultId || undefined,
+    note: input.note || undefined,
+  })
 }
 
 export async function markDuplicate(
@@ -199,13 +140,9 @@ export async function markDuplicate(
   originalId: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_mark_duplicate', {
-      p_ticket_id: ticketId,
-      p_original_id: originalId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'mark_duplicate', clientRequestId, {
+    originalId,
+  })
 }
 
 export async function reactivateTicket(
@@ -213,13 +150,7 @@ export async function reactivateTicket(
   reasonId: string,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_reactivate', {
-      p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'reactivate', clientRequestId, { reasonId })
 }
 
 export interface AssignSupervisorInput {
@@ -234,16 +165,12 @@ export async function assignSupervisor(
   input: AssignSupervisorInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_assign_supervisor', {
-      p_ticket_id: ticketId,
-      p_reason_id: input.reasonId,
-      p_supervisor_user_id: input.supervisorUserId ?? undefined,
-      p_team_id: input.teamId ?? undefined,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'assign_supervisor', clientRequestId, {
+    reasonId: input.reasonId,
+    supervisorUserId: input.supervisorUserId || undefined,
+    teamId: input.teamId || undefined,
+    note: input.note || undefined,
+  })
 }
 
 export interface AddAuxiliaryInput {
@@ -257,13 +184,9 @@ export async function addAuxiliary(
   input: AddAuxiliaryInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_add_auxiliary', {
-      p_ticket_id: ticketId,
-      p_technician_id: input.technicianId,
-      p_reason_id: input.reasonId,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-    }),
-  )
+  await ticketAction(ticketId, 'add_auxiliary', clientRequestId, {
+    technicianId: input.technicianId,
+    reasonId: input.reasonId,
+    note: input.note || undefined,
+  })
 }

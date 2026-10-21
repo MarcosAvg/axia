@@ -1,11 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const apiUrl = process.env.AXIA_API_URL ?? 'http://127.0.0.1:3000'
+
 // Pruebas de extremo a extremo: pocas y bien elegidas (convenciones, §13).
 // El flujo del técnico sin conexión llega en la Fase 5.
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  // Los flujos comparten un solo servidor de dev y una sola instancia de Supabase;
+  // Los flujos comparten un solo servidor de dev y una sola base PostgreSQL;
   // con más workers, las pruebas pesadas (offline, pausas) agotan su timeout por
   // contención. Dos es el máximo estable verificado en local.
   workers: 2,
@@ -28,9 +30,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: 'bash ../../scripts/e2e-server.sh',
+      url: `${apiUrl}/api/health/live`,
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+    {
+      command: 'pnpm dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 })

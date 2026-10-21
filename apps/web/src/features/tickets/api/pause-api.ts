@@ -1,7 +1,6 @@
-// RPC de pausa y subestados del tiquet.
+// Acciones de pausa y subestados del tiquet.
 
-import { supabase } from '@/lib/supabase'
-import { run } from './rpc'
+import { ticketAction } from './rpc'
 
 export interface PauseTicketInput {
   reasonId: string
@@ -14,47 +13,27 @@ export async function pauseTicket(
   input: PauseTicketInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_pause', {
-      p_ticket_id: ticketId,
-      p_reason_id: input.reasonId,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-    }),
-  )
+  await ticketAction(ticketId, 'pause', clientRequestId, {
+    reasonId: input.reasonId,
+    note: input.note ?? undefined,
+  })
 }
 
-/** Gestiona la pausa: cambia el subestado dentro del motivo. */
 export async function advancePause(
   ticketId: string,
   input: PauseTicketInput,
   clientRequestId: string,
 ) {
-  await run(
-    supabase.rpc('ticket_advance_pause', {
-      p_ticket_id: ticketId,
-      p_reason_id: input.reasonId,
-      p_note: input.note ?? undefined,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: input.subjectTechnicianId ?? undefined,
-    }),
-  )
+  await ticketAction(ticketId, 'advance_pause', clientRequestId, {
+    reasonId: input.reasonId,
+    note: input.note ?? undefined,
+  })
 }
 
-/** Reanuda la pausa con el subestado (hijo directo del motivo) que la esclarece. */
 export async function resumeTicket(
   ticketId: string,
   reasonId: string,
   clientRequestId: string,
-  subjectTechnicianId?: string | null,
 ) {
-  await run(
-    supabase.rpc('ticket_resume', {
-      p_ticket_id: ticketId,
-      p_reason_id: reasonId,
-      p_client_request_id: clientRequestId,
-      p_subject_technician_id: subjectTechnicianId ?? undefined,
-    }),
-  )
+  await ticketAction(ticketId, 'resume', clientRequestId, { reasonId })
 }

@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
   CLOCK_CLASSES,
-  EVIDENCE_TYPES,
   EVENT_TYPES,
   TICKET_STATUSES,
   TIME_SPAN_KINDS,
@@ -10,15 +9,12 @@ import type {
   DuplicateCandidate,
   ManualTimeSpan,
   TicketDetail,
-  TicketEvidenceItem,
   TicketListItem,
-  TicketParticipant,
   TicketRating,
   TicketTimelineItem,
 } from './domain/types'
 
 export const ticketStatusSchema = z.enum(TICKET_STATUSES)
-const evidenceTypeSchema = z.enum(EVIDENCE_TYPES)
 const eventTypeSchema = z.enum(EVENT_TYPES)
 
 const namedRef = z.object({ name: z.string() }).nullable()
@@ -130,45 +126,6 @@ export function parseTimelineItem(raw: unknown): TicketTimelineItem {
     subjectTechnicianName: row.subject_technician_name,
     reasonName: row.reason_name,
     payload: row.payload ?? {},
-  }
-}
-
-const participantRowSchema = z.object({
-  technician: z.object({ id: z.string(), full_name: z.string() }),
-  participation_type: z.enum(['leader', 'auxiliary']),
-  started_at: z.string(),
-  ended_at: z.string().nullable(),
-})
-
-export function parseParticipant(raw: unknown): TicketParticipant {
-  const row = participantRowSchema.parse(raw)
-  return {
-    technicianId: row.technician.id,
-    technicianName: row.technician.full_name,
-    participationType: row.participation_type,
-    startedAt: row.started_at,
-    endedAt: row.ended_at,
-  }
-}
-
-const evidenceRowSchema = z.object({
-  id: z.string(),
-  type: evidenceTypeSchema,
-  storage_path: z.string().nullable(),
-  mime_type: z.string().nullable(),
-  size_bytes: z.number().nullable(),
-  occurred_at: z.string(),
-})
-
-export function parseEvidence(raw: unknown): TicketEvidenceItem {
-  const row = evidenceRowSchema.parse(raw)
-  return {
-    id: row.id,
-    type: row.type,
-    storagePath: row.storage_path,
-    mimeType: row.mime_type,
-    sizeBytes: row.size_bytes,
-    occurredAt: row.occurred_at,
   }
 }
 

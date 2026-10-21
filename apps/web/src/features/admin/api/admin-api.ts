@@ -1,9 +1,4 @@
-// Escritura y lectura de administración. Las tablas son dinámicas pero se restringen a una lista
-// blanca (AdminTable) y los datos se validan con Zod en los formularios; la base aplica sus
-// restricciones. Donde el cliente tipado no puede estrechar una tabla dinámica se documenta con
-// `@ts-expect-error`.
-
-import { supabase } from '@/lib/supabase'
+import { apiFetch } from '@/lib/api-client'
 
 export type AdminTable =
   | 'teams'
@@ -28,18 +23,20 @@ export async function adminList(
   table: AdminTable,
   orderBy = 'name',
 ): Promise<AdminRow[]> {
-  const { data, error } = await supabase.from(table).select('*').order(orderBy)
-  if (error) throw error
-  return data ?? []
+  const body = await apiFetch<{ items: AdminRow[] }>(
+    `/api/admin/catalogs/${table}?orderBy=${encodeURIComponent(orderBy)}`,
+  )
+  return body.items
 }
 
 export async function adminInsert(
   table: AdminTable,
   values: AdminValues,
 ): Promise<void> {
-  // @ts-expect-error la tabla es dinámica (lista blanca en AdminTable).
-  const { error } = await supabase.from(table).insert(values)
-  if (error) throw error
+  await apiFetch(`/api/admin/catalogs/${table}`, {
+    method: 'POST',
+    body: JSON.stringify(values),
+  })
 }
 
 export async function adminUpdate(
@@ -47,7 +44,8 @@ export async function adminUpdate(
   id: string,
   values: AdminValues,
 ): Promise<void> {
-  // @ts-expect-error la tabla es dinámica (lista blanca en AdminTable).
-  const { error } = await supabase.from(table).update(values).eq('id', id)
-  if (error) throw error
+  await apiFetch(`/api/admin/catalogs/${table}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(values),
+  })
 }

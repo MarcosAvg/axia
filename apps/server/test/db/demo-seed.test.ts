@@ -16,7 +16,7 @@ async function scalar(sql: string): Promise<number> {
 
 async function expectDemoCounts() {
   expect(await scalar('select count(*)::text as value from public.users')).toBe(
-    3,
+    4,
   )
   expect(await scalar('select count(*)::text as value from public.teams')).toBe(
     2,
@@ -73,7 +73,7 @@ describe('demo seed', () => {
   it('creates demo users, catalogs and one ticket per state', async () => {
     const result = await seedDemo(owner, { password: DEMO_PASSWORD })
     expect(result).toMatchObject({
-      usersCreated: 3,
+      usersCreated: 4,
       ticketsCreated: 6,
       ticketsSkipped: 0,
       passwordGenerated: false,

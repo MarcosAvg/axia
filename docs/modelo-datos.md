@@ -1,5 +1,8 @@
 # Axia — Modelo de datos del núcleo (Fase 1, Etapa A)
 
+> **Diseño histórico.** Este documento describe el diseño original, incluida la RLS. La versión
+> actual no usa RLS: la autorización vive en el servidor. Se conserva como referencia del modelo.
+
 > **Documento de diseño para aprobación de negocio.** No genera migraciones todavía.
 > Fuente de verdad del negocio: `docs/especificacion-negocio.md`. Resumen: `docs/dominio.md`.
 > Las reglas `RN-xx` son las de la especificación §5.
