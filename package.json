@@ -27,6 +27,7 @@
     "db:next:test": "pnpm --filter @axia/server test:db",
     "db:next:check": "pnpm --filter @axia/server db:check",
     "db:next:indexes": "pnpm --filter @axia/server db:indexes",
+    "db:next:demo": "pnpm --filter @axia/server db:demo",
     "check:next": "pnpm --filter @axia/server lint && pnpm --filter @axia/server typecheck && pnpm --filter @axia/server test && pnpm --filter @axia/server build && pnpm --filter @axia/server db:check && pnpm --filter @axia/server test:db",
     "env:local": "node scripts/write-local-env.mjs",
     "prepare": "husky"

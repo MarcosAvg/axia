@@ -4,18 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9A (semilla de referencia) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9B (semilla de demostración) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 9A se cerró el 2026-10-21: la instalación limpia ya recibe los
-catálogos de referencia (tipos de servicio, prioridades, canales, calendarios, festivos, motivos y
-reglas de escalamiento), sin personas, equipos, edificios ni tiquets. La web sigue sobre Supabase
-hasta el corte final.
+**Sin trabajo en curso.** El tramo 9B se cerró el 2026-10-21: la semilla demo es explícita,
+idempotente, solo local y no usa contraseñas fijas. Crea usuarios, catálogos, tiquets en los seis
+estados principales, eventos, asignaciones y participaciones. La web sigue sobre Supabase hasta el
+corte final.
 
-**Siguiente:** tramo 9B (semilla de demostración explícita, instalación y respaldos). Siguen abiertas
-las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y
-pgTAP híbrido.
+**Siguiente:** tramo 9C (instalación limpia, secretos, respaldos y CI del stack nuevo). Siguen abiertas
+las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -48,6 +47,25 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 9B — semilla de demostración (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - `pnpm db:next:demo -- --demo` crea equipos, edificios, catálogos, usuarios demo, técnicos,
+    solicitantes y seis tiquets (uno por estado principal) con eventos, asignaciones y
+    participaciones.
+  - Contraseña desde `AXIA_DEMO_PASSWORD` o generada una sola vez; `--reset-passwords` la rota.
+    Rechaza producción y bases no locales; es idempotente y no se ejecuta al migrar. **ADR 0076**.
+  - Pruebas: 121 de integración en total.
+- **Migración sin Supabase, Etapa B, tramo 9A — semilla de referencia (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Migración `0007_reference_catalogs.sql`: tipos de servicio, prioridades, canales, calendarios,
+    festivos, motivos jerárquicos y reglas de escalamiento.
+  - Sin usuarios, técnicos, solicitantes, equipos, edificios, categorías ni tiquets.
+  - Pruebas de referencia, límites e idempotencia: 116 de integración en total.
+- **Migración sin Supabase, Etapa B, tramo 8B — cliente de sincronización (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Cliente HTTP con `credentials: 'include'`, `VITE_API_URL` y sobre de errores; lote hacia
+    `/api/sync/actions` y mapeo del outbox a `applied`/`duplicate`/`rejected`/`conflict`/`blocked`.
+  - La web sigue sobre Supabase; el cliente se activa en el corte final. Pruebas: 244 web.
 - **Migración sin Supabase, Etapa B, tramo 8A — sincronización offline en servidor (2026-10-21)**,
   rama `feat/migracion-base-datos`:
   - `POST /api/sync/actions` procesa hasta 100 acciones por lote, en orden, con el mismo
@@ -1323,3 +1341,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9A**. La migración de referencia ya
   llena catálogos, calendarios, festivos, motivos y reglas de escalamiento sin datos demo. 116
   pruebas de integración; siguiente: demo explícita, instalación y respaldos.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9B**. Semilla demo explícita, local e
+  idempotente, sin contraseña fija, con seis tiquets y sus eventos; 121 pruebas de integración.
+  Siguiente: instalación/secretos/respaldos y CI del stack nuevo.

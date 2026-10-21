@@ -805,11 +805,15 @@ Se añadirán pruebas Playwright de:
 | Conjunto | Contenido | Cuándo se ejecuta |
 |---|---|---|
 | **Referencia** | permisos, roles, matriz de roles, configuración inicial, reglas de notificación/escalamiento, tipos de servicio, prioridades, canales, calendario base y festivos, motivos jerárquicos | Siempre, idempotente; seguro en producción |
-| **Demostración** | equipos, edificios, ubicaciones, dependencias, categorías/subcategorías/problemas, solicitantes, técnicos, usuarios ficticios, ámbitos, tiquets de ejemplo | Solo con `--demo`/`SEED_DEMO=1`; se niega si `NODE_ENV=production` o `APP_ENV=production` |
+| **Demostración** | equipos, edificios, ubicaciones, dependencias, categorías/subcategorías/problemas, solicitantes, técnicos, usuarios ficticios, ámbitos, tiquets de ejemplo | Solo con `--demo`; se niega si `NODE_ENV=production` o si la base no es local |
 
 Pregunta abierta: si se quiere que las categorías/equipos iniciales formen parte de referencia o
 solo de demostración. Propuesta: referencia mínima (roles, permisos, reglas, motivos, tipos,
 prioridades, canales, calendario y festivos); el resto es demo.
+
+**Implementado:** la referencia vive en `apps/server/db/migrations/0007_reference_catalogs.sql` y la
+demo en `apps/server/src/db/seed-demo/`. La demo se ejecuta con
+`pnpm db:next:demo -- --demo`, es idempotente y no se aplica automáticamente.
 
 **Nota de implementación:** permisos, roles y configuración inicial se adelantaron al tramo 3 como
 migración `0002_reference_core.sql`, porque el login y la administración los necesitan. El tramo 9
@@ -823,7 +827,7 @@ conserva el resto de la referencia y toda la semilla demo.
   - crea usuarios en `public.users` con `username` (p. ej. `admin`, `supervisor`, `tecnico`,
     `solicitante`);
   - genera contraseñas aleatorias con `crypto.randomBytes` y Argon2id;
-  - las imprime **una sola vez** por consola o las toma de `SEED_DEMO_PASSWORD`;
+  - las imprime **una sola vez** por consola o las toma de `AXIA_DEMO_PASSWORD`;
   - exige `--demo` y rechaza producción;
   - no escribe contraseñas en logs persistentes ni en el repositorio.
 - Las pruebas Playwright crearán sus usuarios/escenarios con la API o con un fixture propio, no con
@@ -1046,7 +1050,7 @@ hará `push` ni se tocará producción sin confirmación.
 | `PUSH_ENABLED` | Activar envío |
 | `APP_PORT` | Puerto interno |
 | `LOG_LEVEL` | Pino |
-| `SEED_DEMO_PASSWORD` | Opcional, solo demo local; nunca en producción |
+| `AXIA_DEMO_PASSWORD` | Opcional, solo demo local; nunca en producción |
 
 ## Apéndice D — Orden de lectura sugerido
 
