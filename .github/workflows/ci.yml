@@ -23,3 +23,34 @@ jobs:
       # Navegador para la prueba de humo de Playwright (incluida en `pnpm test`).
       - run: pnpm --filter @axia/web exec playwright install chromium --with-deps
       - run: pnpm check
+
+  check-next:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.11-alpine
+        env:
+          POSTGRES_DB: axia_test
+          POSTGRES_USER: axia_owner
+          POSTGRES_PASSWORD: owner-test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U axia_owner -d axia_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      MIGRATION_DATABASE_URL: postgres://axia_owner:owner-test@127.0.0.1:5432/axia_test
+      AXIA_APP_PASSWORD: test-app-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Stack nuevo: PostgreSQL 17 real, migraciones, API, sincronización y build.
+      - run: pnpm check:next

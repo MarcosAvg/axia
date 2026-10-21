@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # Restaura un respaldo en una base destino.
-# Uso (host con pg_restore):
+# Uso con el Compose del repositorio (detecta el contenedor db):
+#   ./deploy/scripts/restore.sh <archivo.dump>
+# Uso con pg_restore del host:
 #   DATABASE_URL='postgresql://...' ./deploy/scripts/restore.sh <archivo.dump>
-# Uso (restauración dentro del contenedor de base, base desechable en pruebas):
+# Uso con un contenedor concreto:
 #   DB_CONTAINER=<contenedor-db> PGDATABASE=<db-destino> ./deploy/scripts/restore.sh <archivo.dump>
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BACKUP_FILE="${1:?Uso: restore.sh <archivo.dump>}"
-PGUSER="${PGUSER:-postgres}"
-PGDATABASE="${PGDATABASE:-postgres}"
+PGUSER="${PGUSER:-axia_owner}"
+PGDATABASE="${PGDATABASE:-axia}"
+
+if [[ -z "${DB_CONTAINER:-}" && -z "${DATABASE_URL:-}" ]] \
+  && command -v docker >/dev/null 2>&1; then
+  DB_CONTAINER="$(cd "$ROOT_DIR" && docker compose ps -q db 2>/dev/null || true)"
+fi
 
 if [[ ! -f "$BACKUP_FILE" ]]; then
   echo "No existe el archivo: $BACKUP_FILE" >&2

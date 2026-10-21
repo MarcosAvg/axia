@@ -1,5 +1,9 @@
 # Axia — Despliegue en producción
 
+> **Stack nuevo:** la instalación con PostgreSQL 17, migraciones y servidor Fastify está en
+> `docs/migracion/instalacion-autoalojada.md`. Esta guía describe el despliegue heredado con
+> Supabase y se retirará en el corte final del frontend.
+
 ## Objeto
 
 Documentar el despliegue de Axia en un servidor propio. Los archivos de esta carpeta son scripts y

@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 # Respalda la base de Axia en formato custom (`pg_dump -Fc`) y borra los dumps antiguos.
-# Uso (host con pg_dump):
+# Uso con el Compose del repositorio (detecta el contenedor db):
+#   ./deploy/scripts/backup.sh
+# Uso con pg_dump del host:
 #   DATABASE_URL='postgresql://...' ./deploy/scripts/backup.sh
-# Uso (dump dentro del contenedor de base, p. ej. el compose oficial):
+# Uso con un contenedor concreto:
 #   DB_CONTAINER=<contenedor-db> ./deploy/scripts/backup.sh
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 RETENTION_DAYS="${RETENTION_DAYS:-14}"
-PGUSER="${PGUSER:-postgres}"
-PGDATABASE="${PGDATABASE:-postgres}"
+PGUSER="${PGUSER:-axia_owner}"
+PGDATABASE="${PGDATABASE:-axia}"
+
+if [[ -z "${DB_CONTAINER:-}" && -z "${DATABASE_URL:-}" ]] \
+  && command -v docker >/dev/null 2>&1; then
+  DB_CONTAINER="$(cd "$ROOT_DIR" && docker compose ps -q db 2>/dev/null || true)"
+fi
 
 mkdir -p "$BACKUP_DIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"

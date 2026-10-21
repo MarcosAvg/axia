@@ -4,17 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9B (semilla de demostración) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 9C (instalación, respaldos y CI) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 9B se cerró el 2026-10-21: la semilla demo es explícita,
-idempotente, solo local y no usa contraseñas fijas. Crea usuarios, catálogos, tiquets en los seis
-estados principales, eventos, asignaciones y participaciones. La web sigue sobre Supabase hasta el
-corte final.
+**Sin trabajo en curso.** El tramo 9C se cerró el 2026-10-21: instalación local con secretos
+generados, respaldos de base y evidencias, restauración probada y compuerta de CI para el stack nuevo.
+La web sigue sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 9C (instalación limpia, secretos, respaldos y CI del stack nuevo). Siguen abiertas
-las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, reparto SQL/TS y pgTAP híbrido.
+**Siguiente:** tramo 10 (corte final del frontend, retirada de Supabase y cierre de la migración).
+Siguen abiertas las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, reparto SQL/TS y
+pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -47,6 +47,15 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 9C — instalación, respaldos y CI (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - `scripts/install.sh`: genera secretos, escribe `.env` con `0600`, construye y levanta
+    `db`/`migrate`/`app`; nunca sobrescribe un `.env` y no imprime secretos. Incluye `--demo` y
+    `--dry-run`.
+  - Respaldos `pg_dump -Fc` y del volumen de evidencias, con restauración probada sobre una base
+    desechable y un volumen temporal. Documento `docs/migracion/instalacion-autoalojada.md`.
+  - CI añade `check-next` con PostgreSQL 17 real; la compuerta actual se conserva hasta el corte.
+    **ADR 0075**. Pruebas: 39 unitarias/HTTP, 121 de integración y prueba de `install.sh`.
 - **Migración sin Supabase, Etapa B, tramo 9B — semilla de demostración (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - `pnpm db:next:demo -- --demo` crea equipos, edificios, catálogos, usuarios demo, técnicos,
@@ -1344,3 +1353,6 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
 - 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9B**. Semilla demo explícita, local e
   idempotente, sin contraseña fija, con seis tiquets y sus eventos; 121 pruebas de integración.
   Siguiente: instalación/secretos/respaldos y CI del stack nuevo.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 9C**. Instalación con secretos
+  generados, respaldos de base y evidencias, restauración probada y job `check-next`; 39
+  unitarias/HTTP y 121 de integración. Siguiente: corte final del frontend y retirada de Supabase.

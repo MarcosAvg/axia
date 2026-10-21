@@ -32,3 +32,6 @@ test-results
 
 # Evidencias locales de desarrollo
 apps/server/data/
+
+# Respaldos locales
+backups/

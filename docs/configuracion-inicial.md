@@ -1,5 +1,9 @@
 # Axia — Configuración inicial
 
+> **Migración en curso:** el stack nuevo se instala y respalda según
+> `docs/migracion/instalacion-autoalojada.md`. Esta guía conserva el arranque histórico con Supabase
+> hasta el corte final del frontend.
+
 Guía paso a paso para arrancar el proyecto **Axia** (seguimiento de tiquets de mantenimiento).
 
 > **Antes de empezar:** los nombres de paquetes son estables, pero algunas opciones y comandos cambian entre versiones. Si un comando falla, contrasta con la documentación oficial de la herramienta (Vite, shadcn/ui, TanStack Router, Supabase CLI, vite-plugin-pwa).

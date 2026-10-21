@@ -205,6 +205,7 @@ adelante sin rediseñar.
 | `AGENTS.md` | Nueva arquitectura, dependencias, Drizzle, servidor, sin RLS, pruebas, límites |
 | `docs/convenciones-codigo.md` | Estructura de `apps/server`, capa de datos, autorización, Vitest, secretos |
 | `docs/configuracion-inicial.md` | Reemplazar Supabase por Docker Compose, Drizzle, variables e instalación |
+| `docs/migracion/instalacion-autoalojada.md` | Instalación, secretos, respaldos y restauración del stack propio |
 | `docs/dominio.md` | Solo referencias a RLS/Storage/Supabase |
 | `docs/especificacion-negocio.md` | Solo referencias a RLS/Storage/Supabase; reglas intactas |
 | `docs/modelo-datos.md` | FKs a `auth.users`, RLS, seeds y plan de migraciones |
@@ -927,6 +928,9 @@ ADR que se sustituyen o ajustan: 0002, 0004, 0006 (independencia, se refuerza), 
 
 Cada tramo: pruebas, `pnpm check` en verde, commit propio y actualización de `docs/ESTADO.md`. No se
 hará `push` ni se tocará producción sin confirmación.
+
+**Estado al 2026-10-21:** tramos 1–9 cerrados. Falta el tramo 10 (corte final del frontend y retirada
+de Supabase). La compuerta `check-next` del stack nuevo ya está en CI.
 
 ## 9. Preguntas abiertas para la persona
 
