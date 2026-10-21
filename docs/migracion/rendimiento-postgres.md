@@ -100,6 +100,20 @@ Los índices parciales por asignado/participante activo y por oferta dirigida si
 y solo se crearán si un volumen mayor y `EXPLAIN` demuestran que se usan. No se añadió particionado
 ni PgBouncer; el pool de la aplicación sigue limitado a 10 conexiones.
 
+### 3.2 Escrituras y concurrencia (tramo 5C.1)
+
+Las altas y acciones usan transacciones cortas y bloqueo `FOR UPDATE` sobre el tiquet. Las claves de
+idempotencia se apoyan en el índice único de `ticket_events(client_request_id)`.
+
+| Consulta | Tiempo | Decisión |
+|---|---:|---|
+| Detección de duplicados al registrar (20 000 tiquets) | 1,8 ms | Usa `idx_tickets_building` + `idx_tickets_reported_at`; sin índice nuevo |
+| Buscar oferta activa del supervisor | 0,09 ms | Usa el índice único de `ticket_offers` por `ticket_id`; sin índice nuevo |
+| Bloqueo y actualización del tiquet | por PK | Sin índice nuevo |
+
+No se añadieron índices en 5C.1. Las pruebas de concurrencia cubren dos altas con la misma clave y
+dos supervisores tomando el mismo tiquet; solo una operación gana.
+
 ## 4. Migraciones no transaccionales
 
 `CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una

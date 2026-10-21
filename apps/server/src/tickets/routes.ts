@@ -10,8 +10,10 @@ import {
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
 import {
+  createTicketSchema,
   listTicketsQuerySchema,
   paginationQuerySchema,
+  ticketActionSchema,
   ticketIdParamsSchema,
 } from './schemas.js'
 import type { TicketService } from './service.js'
@@ -23,6 +25,7 @@ export type TicketRoutesOptions = {
 }
 
 type TicketGuards = {
+  active: Guard
   canView: Guard[]
   canTakeOffer: Guard[]
   canAssignSupervisor: Guard[]
@@ -35,6 +38,7 @@ function notFound(): AppError {
 function createGuards(auth: AuthService, config: AppConfig): TicketGuards {
   const active = authGuards(auth, config, false)
   return {
+    active,
     canView: [active, requirePermission('ticket.view')],
     canTakeOffer: [
       active,
@@ -101,6 +105,48 @@ function registerWorklistRoutes(
   )
 }
 
+function registerWriteRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  guards: TicketGuards,
+) {
+  app.post(
+    '/api/tickets',
+    { preHandler: guards.active },
+    async (request, reply) => {
+      const input = createTicketSchema.parse(request.body)
+      const result = await tickets.create(currentActor(request), input)
+      return reply.status(result.replayed ? 200 : 201).send({
+        ticket: {
+          id: result.ticketId,
+          folio: result.folio,
+          possibleDuplicate: result.possibleDuplicate,
+        },
+        replayed: result.replayed,
+      })
+    },
+  )
+
+  app.post(
+    '/api/tickets/:id/actions',
+    { preHandler: guards.canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const body = ticketActionSchema.parse(request.body)
+      const actor = currentActor(request)
+      if (body.action === 'take') {
+        return tickets.take(actor, id, body.clientRequestId)
+      }
+      return tickets.assignTechnician(actor, {
+        ticketId: id,
+        technicianId: body.technicianId,
+        reasonId: body.reasonId ?? null,
+        clientRequestId: body.clientRequestId,
+      })
+    },
+  )
+}
+
 function registerDetailRoutes(
   app: FastifyInstance,
   tickets: TicketService,
@@ -143,5 +189,6 @@ export function registerTicketRoutes(
   const guards = createGuards(auth, config)
   registerListRoute(app, tickets, guards.canView)
   registerWorklistRoutes(app, tickets, guards)
+  registerWriteRoutes(app, tickets, guards)
   registerDetailRoutes(app, tickets, guards.canView)
 }

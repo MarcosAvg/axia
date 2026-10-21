@@ -110,9 +110,9 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `tickets/api/offline-evidence.ts` | TUS a Storage + `evidence_add` | TUS propio + `/api/evidence` |
 | `tickets/api/pause-api.ts` | 3 RPC | Acciones de pausa |
 | `tickets/api/rating-api.ts` | `ticket_ratings` + `ticket_rate` | `/api/tickets/:id/rating` |
-| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; altas y evidencias en tramos posteriores |
+| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/mine`, `/api/tickets/offers`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; alta implementada, evidencias en tramo 6 |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
-| `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions` |
+| `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions`; implementados `take` y `assign_technician`; el resto en 5C.2 |
 | `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
 | `tickets/api/rpc.ts` | Helper de error de RPC | Sustituir por cliente HTTP |
 | `lib/offline/tus.ts` | Endpoint `storage/v1/upload/resumable` | Endpoint TUS `/api/uploads` |
@@ -643,6 +643,12 @@ dependientes exigen `buildingId`, `categoryId`, `subcategoryId` o `use`. `GET /a
 `GET /api/tickets/offers` devuelven páginas de `TicketListItem`; `GET /api/supervisors` devuelve
 supervisores con ámbitos visibles para el actor. La bandeja de ofertas y la lista de supervisores
 exigen `ticket.take_offer` y `ticket.assign_supervisor`, respectivamente.
+
+**Implementado en 5C.1 (escrituras):** `POST /api/tickets` crea el tiquet, deriva el equipo de la
+categoría, genera ofertas a los supervisores del par equipo+edificio y registra posibles duplicados.
+`POST /api/tickets/:id/actions` acepta `take` y `assign_technician`. Toda acción exige
+`clientRequestId` UUID y es idempotente mediante `ticket_events.client_request_id`; las acciones de
+estado bloquean la fila del tiquet (`FOR UPDATE`) y devuelven `409` si el estado ya cambió.
 
 ## 5. Inventario de pruebas actuales y destino
 

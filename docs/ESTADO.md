@@ -4,18 +4,19 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5B (lecturas auxiliares y bandejas) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5C.1 (altas, ruteo, tomar y asignar) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 5B se cerró el 2026-10-21: catálogos de lectura,
-bandejas `GET /api/tickets/mine` y `GET /api/tickets/offers`, y `GET /api/supervisors` con alcance.
-Todo pasa por PostgreSQL real y guards de sesión/permiso. No hay cambios en la web; sigue sobre
+**Sin trabajo en curso.** El tramo 5C.1 se cerró el 2026-10-21: alta de tiquets con ruteo y
+detección de posibles duplicados, toma de ofertas y asignación de técnico, con idempotencia por
+`clientRequestId`, bloqueo de fila y pruebas de concurrencia. No hay cambios en la web; sigue sobre
 Supabase hasta el corte final.
 
-**Siguiente:** tramo 5C (transiciones y escrituras con idempotencia y concurrencia). Siguen abiertas
-las decisiones de `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y
-pgTAP híbrido.
+**Siguiente:** tramo 5C.2 (resto de transiciones: inicio, pausa, atendido, validación, rechazo,
+cancelación, comentarios, prioridad, recaptura, reclamaciones, duplicado y reactivación). Inicio y
+atendido dependen de evidencias (tramo 6). Siguen abiertas las decisiones de
+`docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
 variantes semánticas de tinte suave (`success`/`info`/`warning`, además del `destructive` que ya
@@ -47,6 +48,19 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 (`deploy/README.md`, `docs/notificaciones-push.md`).
 
 ## Hecho
+
+- **Migración sin Supabase, Etapa B, tramo 5C.1 — altas, ruteo y asignación (2026-10-21)**,
+  rama `feat/migracion-base-datos`:
+  - `POST /api/tickets` con validación de catálogos, dependencia solicitante, permiso
+    `ticket.create`/`ticket.create_on_behalf`, snapshot de equipo, ruteo a supervisores y detección
+    de posibles duplicados.
+  - `POST /api/tickets/:id/actions` con `take` y `assign_technician`: bloqueo `FOR UPDATE`,
+    retiro de ofertas, asignación de supervisor/técnico, participación líder/auxiliar e historial.
+  - Idempotencia mediante `ticket_events.client_request_id`; una clave reutilizada para otra acción
+    responde `409`. Pruebas de creación concurrente y de dos supervisores tomando a la vez.
+  - Medición: detección de duplicados 1,8 ms y búsqueda de oferta 0,09 ms con 20 000 tiquets; sin
+    índices nuevos.
+  - Pruebas: 35 unitarias/HTTP y 81 de integración. Sin cambios en la web.
 
 - **Migración sin Supabase, Etapa B, tramo 5B — lecturas auxiliares y bandejas (2026-10-21)**,
   rama `feat/migracion-base-datos`:
@@ -1220,3 +1234,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   filtrados por ámbito. Se midieron las consultas con 20 000 tiquets y 3 333 ofertas; no se
   justificaron índices nuevos. 35 pruebas unitarias/HTTP y 66 de integración. Rama
   `feat/migracion-base-datos`.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 5C.1**. Se añadió el alta de tiquets
+  con ruteo y duplicados, la toma de ofertas y la asignación de técnico. La idempotencia usa
+  `ticket_events.client_request_id`; las acciones bloquean la fila del tiquet y se probaron dos
+  creaciones y dos tomas concurrentes. 35 pruebas unitarias/HTTP y 81 de integración. Queda 5C.2
+  para el resto de transiciones; inicio y atendido esperan evidencias del tramo 6.
