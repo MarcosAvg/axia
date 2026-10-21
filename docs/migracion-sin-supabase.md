@@ -110,7 +110,7 @@ permitida. No se encontraron componentes que importen `@supabase/supabase-js` di
 | `tickets/api/offline-evidence.ts` | TUS a Storage + `evidence_add` | TUS propio + `/api/evidence` |
 | `tickets/api/pause-api.ts` | 3 RPC | Acciones de pausa |
 | `tickets/api/rating-api.ts` | `ticket_ratings` + `ticket_rate` | `/api/tickets/:id/rating` |
-| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets/...` |
+| `tickets/api/tickets-api.ts` | Lista, detalle, timeline, participantes, evidencias, búsqueda, alta, duplicados | `/api/tickets`, `/api/tickets/:id`, `/api/tickets/:id/timeline`, `/api/tickets/:id/participants`; altas y evidencias en tramos posteriores |
 | `tickets/api/time-api.ts` | `time_spans` + 2 RPC | `/api/tickets/:id/time-spans` |
 | `tickets/api/transitions-api.ts` | 17 RPC de transición | `POST /api/tickets/:id/actions` |
 | `tickets/api/ticket-operations.ts` | Registro de 19 operaciones para cola offline | Mapa de acciones del cliente al endpoint nuevo |
@@ -629,6 +629,12 @@ Reglas:
 - Reglas de dependencia nuevas: `apps/web` no importa `apps/server` ni la base; `apps/server` no
   importa `apps/web`; `packages/shared` solo contiene contratos Zod y tipos puros; la web solo habla
   con la API por `features/*/api` y `lib/`.
+
+**Implementado en 5A (lectura):** `GET /api/tickets` devuelve `{ items, total, page, pageSize }`
+con filtros `status`, `statuses`, `buildingId`, `categoryId`, `search`, `page` y `pageSize` (máximo
+100). `GET /api/tickets/:id` devuelve `{ ticket }`; timeline y participantes devuelven `{ items }`.
+Sin `ticket.view` se responde `403`; con el permiso pero fuera de alcance, `404` opaco. El contrato
+es camelCase y las rutas no se publican en la web hasta el corte final.
 
 ## 5. Inventario de pruebas actuales y destino
 

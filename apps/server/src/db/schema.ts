@@ -274,6 +274,10 @@ export const tickets = pgTable(
       'gin',
       table.description.asc().nullsLast().op('gin_trgm_ops'),
     ),
+    index('idx_tickets_folio_trgm').using(
+      'gin',
+      table.folio.asc().nullsLast().op('gin_trgm_ops'),
+    ),
     index('idx_tickets_reported_at').using(
       'btree',
       table.reportedAt.asc().nullsLast().op('timestamptz_ops'),

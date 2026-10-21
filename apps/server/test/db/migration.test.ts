@@ -188,6 +188,12 @@ describe('base schema views and triggers', () => {
     expect(
       await scalar(
         owner,
+        "select count(*)::text as value from pg_indexes where schemaname = 'public' and indexname = 'idx_tickets_folio_trgm'",
+      ),
+    ).toBe(1)
+    expect(
+      await scalar(
+        owner,
         "select count(*)::text as value from pg_indexes where schemaname = 'public' and indexname = 'ticket_pauses_one_open'",
       ),
     ).toBe(1)
@@ -268,7 +274,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(4)
+    ).toBe(5)
   })
 
   it('enforces username normalization and uniqueness', async () => {

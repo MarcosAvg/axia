@@ -3,15 +3,15 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import type { AppConfig } from '../config.js'
-import { AppError } from '../http/errors.js'
 import { registerOriginGuard } from '../http/origin.js'
 import type { Actor } from './authorization.js'
-import { can } from './authorization.js'
+import { clearSessionCookie, setSessionCookie } from './cookies.js'
 import {
-  clearSessionCookie,
-  getSessionToken,
-  setSessionCookie,
-} from './cookies.js'
+  authGuards,
+  currentActor,
+  requirePermission,
+  type Guard,
+} from './guards.js'
 import {
   changePasswordSchema,
   createUserSchema,
@@ -24,8 +24,6 @@ import type { AuthService } from './service.js'
 import type { SessionContext } from './sessions.js'
 
 const idParamsSchema = z.object({ id: z.string().uuid() })
-
-type Guard = (request: FastifyRequest) => Promise<void>
 
 function sessionContext(request: FastifyRequest): SessionContext {
   return {
@@ -42,57 +40,6 @@ function actorResponse(actor: Actor) {
     mustChangePassword: actor.mustChangePassword,
     roles: actor.roles,
     permissions: actor.permissions,
-  }
-}
-
-function currentActor(request: FastifyRequest): Actor {
-  if (!request.actor) {
-    throw new AppError(401, 'unauthorized', 'Inicia sesión para continuar')
-  }
-  return request.actor
-}
-
-async function authenticate(
-  request: FastifyRequest,
-  auth: AuthService,
-  config: AppConfig,
-) {
-  const token = getSessionToken(request, config.SESSION_COOKIE_NAME)
-  if (!token) {
-    throw new AppError(401, 'unauthorized', 'Inicia sesión para continuar')
-  }
-
-  const result = await auth.authenticate(token)
-  if (!result) {
-    throw new AppError(401, 'unauthorized', 'La sesión no es válida')
-  }
-
-  request.actor = result.actor
-  request.sessionId = result.sessionId
-}
-
-function authGuards(
-  auth: AuthService,
-  config: AppConfig,
-  allowPendingPassword: boolean,
-): Guard {
-  return async (request) => {
-    await authenticate(request, auth, config)
-    if (!allowPendingPassword && request.actor?.mustChangePassword === true) {
-      throw new AppError(
-        403,
-        'password_change_required',
-        'Debes cambiar la contraseña antes de continuar',
-      )
-    }
-  }
-}
-
-function requirePermission(permission: string): Guard {
-  return async (request) => {
-    if (!can(currentActor(request), permission)) {
-      throw new AppError(403, 'forbidden', 'No tienes permiso para esta acción')
-    }
   }
 }
 

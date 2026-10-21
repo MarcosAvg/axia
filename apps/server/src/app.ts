@@ -12,11 +12,14 @@ import { errorHandler, registerNotFoundHandler } from './http/errors.js'
 import { registerHealthRoutes, type ReadinessProbe } from './http/health.js'
 import { registerSecurity } from './http/security.js'
 import { registerStatic } from './http/static.js'
+import { registerTicketRoutes } from './tickets/routes.js'
+import type { TicketService } from './tickets/service.js'
 
 export type BuildAppOptions = {
   config: AppConfig
   readiness: ReadinessProbe
   auth?: AuthService
+  tickets?: TicketService
   logger?: FastifyServerOptions['logger']
 }
 
@@ -42,6 +45,7 @@ export async function buildApp({
   config,
   readiness,
   auth,
+  tickets,
   logger,
 }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -62,6 +66,10 @@ export async function buildApp({
 
   if (auth) {
     await registerAuthRoutes(app, auth, config)
+  }
+
+  if (auth && tickets) {
+    registerTicketRoutes(app, { auth, config, tickets })
   }
 
   if (config.STATIC_DIR) {

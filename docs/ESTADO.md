@@ -4,16 +4,17 @@
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
 **Última actualización:** 2026-10-21
-**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 4 (autorización y alcance) cerrado
+**Fase actual:** Migración fuera de Supabase — Etapa B, tramo 5A (API de lectura de tiquets) cerrado
 
 ## En curso
 
-**Sin trabajo en curso.** El tramo 4 de la Etapa B se cerró el 2026-10-21:
-`can` central, ámbitos `own/team/buildings/all`, repositorio de tiquets con alcance, timeline
-filtrada para solicitante y 404 opacos. No se expusieron rutas nuevas. La aplicación actual
-sigue sobre Supabase; el frontend se conectará en el corte final.
+**Sin trabajo en curso.** El tramo 5A se cerró el 2026-10-21: API de lectura
+`GET /api/tickets`, `GET /api/tickets/:id`, `GET /api/tickets/:id/timeline` y
+`GET /api/tickets/:id/participants`, con guards reutilizables, alcance por repositorio y pruebas
+HTTP contra PostgreSQL real. No hay cambios en la web; sigue sobre Supabase hasta el corte final.
 
-**Siguiente:** tramo 5 (dominio y API). Siguen abiertas las decisiones de
+**Siguiente:** tramo 5B (lecturas auxiliares: catálogos, bandejas y supervisores) y después 5C
+(transiciones y escrituras). Siguen abiertas las decisiones de
 `docs/migracion-sin-supabase.md` §9 sobre push, semillas demo, reparto SQL/TS y pgTAP híbrido.
 
 _(Histórico)_ **Énfasis de color en las acciones y pasada móvil (cerrado).** Los botones de acción ganan
@@ -47,6 +48,19 @@ _(Histórico)_ Todas las fases 0–7 estaban cerradas; lo operativo lo hace la p
 
 ## Hecho
 
+- **Migración sin Supabase, Etapa B, tramo 5A — API de lectura de tiquets (2026-10-21)**, rama
+  `feat/migracion-base-datos`:
+  - Endpoints `GET /api/tickets`, `GET /api/tickets/:id`, `GET /api/tickets/:id/timeline` y
+    `GET /api/tickets/:id/participants`, con Zod para query/params y respuestas camelCase.
+  - Guards de autenticación reutilizables (`authGuards`, `requirePermission`) y distinción entre
+    permiso inexistente (`403`) y tiquet fuera de alcance (`404`).
+  - Detalle y participantes pasan por `findVisibleTicket`; la lista usa el predicado SQL de
+    alcance. El solicitante sigue viendo solo eventos visibles.
+  - Migración `0004_tickets_search_index.sql` con `CREATE INDEX CONCURRENTLY` para búsqueda por
+    folio. Medición con 20 000 tiquets: búsqueda de 22 ms a 0,36 ms; no se añadieron índices
+    parciales sin evidencia.
+  - Pruebas: 35 unitarias/HTTP y 51 de integración; matriz de 401/403/404/400/200 por rol.
+    `pnpm check` y `pnpm check:next` en verde.
 - **Migración sin Supabase, Etapa B, tramo 4 — autorización y alcance (2026-10-21)**, rama
   `feat/migracion-base-datos`:
   - `Actor` ampliado con solicitante, técnico, equipos y ámbitos de supervisor.
@@ -1185,3 +1199,8 @@ Sustituidas por la especificación (pendientes de ADR que las reemplace): el mod
   tres edificios, técnico/auxiliar, supervisor, solicitante y casos negativos. **ADR 0071**. Sin
   rutas nuevas; se probó el repositorio con PostgreSQL real. `pnpm check` y `pnpm check:next` en
   verde. Rama `feat/migracion-base-datos`.
+- 2026-10-21: **migración fuera de Supabase — Etapa B, tramo 5A**. Se expusieron cuatro rutas de
+  lectura de tiquets con guards reutilizables, Zod, detalle, timeline y participantes. Se midió la
+  lista con 20 000 tiquets y se añadió solo el índice trigram de folio; los índices parciales de
+  asignaciones quedaron como candidatos. 35 pruebas unitarias/HTTP y 51 de integración. Rama
+  `feat/migracion-base-datos`.

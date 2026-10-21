@@ -64,24 +64,30 @@ No se particiona ninguna tabla todavía. Umbral inicial para revisar `ticket_eve
 millones de filas o varios GB, con un patrón de consulta por rango de fechas. Si se decide, la clave
 primaria y las FKs deben rediseñarse para incluir la clave de partición; no es un cambio cosmético.
 
-### 3.1 Consultas de alcance (tramo 4)
+### 3.1 Consultas de alcance y lectura (tramos 4 y 5A)
 
-La lista de tiquets usa un predicado de alcance con `EXISTS` sobre asignaciones y participantes.
-Las consultas por tiquet se apoyan en los índices existentes `ticket_assignments(ticket_id)`,
-`ticket_participants(ticket_id)`, `tickets(team_id)`, `tickets(building_id)` y
-`tickets(status, reported_at)`. El timeline filtra por `ticket_id` y ordena por `occurred_at`.
+La lista de tiquets usa un predicado de alcance con `EXISTS` sobre asignaciones y participantes,
+o un filtro por equipo/edificio. Las consultas por tiquet se apoyan en los índices existentes
+`ticket_assignments(ticket_id)`, `ticket_participants(ticket_id)`, `tickets(building_id)` y
+`tickets(status, reported_at)`. **No existe un índice por `tickets(team_id)`**; se probó en la base
+de rendimiento y el planificador siguió eligiendo un recorrido secuencial con 20 000 filas, así que
+no se creó. El timeline usa `idx_ticket_events_ticket` y ordena por `occurred_at`.
 
-Con los fixtures del tramo 4 (cuatro tiquets) el planificador elige exploraciones secuenciales
-porque las tablas son minúsculas; **no es una señal para crear índices**. Antes de producción se
-repetirá `EXPLAIN (ANALYZE, BUFFERS)` con volumen representativo. Candidatos a evaluar entonces,
-solo si el plan los justifica:
+Medición con 20 000 tiquets, 5 476 asignaciones, 2 000 participantes y 40 000 eventos:
 
-- índices parciales por asignado activo (`assignee_user_id`, `assignee_technician_id` con
-  `ended_at is null`);
-- índice parcial por participante activo (`technician_id` con `ended_at is null`);
-- índice de timeline `(ticket_id, occurred_at, id)`.
+| Consulta | Antes | Decisión |
+|---|---:|---|
+| Lista sin alcance (administrador) | 56 ms | Sin índice nuevo; el coste está en `count(*) over()` |
+| Lista por edificio (supervisor) | 11 ms | Usa `idx_tickets_building` |
+| Lista por equipo | 27 ms | Sin índice nuevo; 50 % de selectividad no lo justifica |
+| Lista propia (técnico) | 255 ms | Candidatos parciales; no usados por el planificador a este volumen |
+| Búsqueda `%19999%` | 22 ms | Índice trigram de folio: 0,36 ms |
+| Timeline de un tiquet | 0,6 ms | Sin cambio |
 
-No se añadió ninguno en el tramo 4.
+Se añadió `idx_tickets_folio_trgm` en la migración no transaccional
+`0004_tickets_search_index.sql`. Los índices parciales por asignado/participante activo siguen como
+candidatos y solo se crearán si un volumen mayor y `EXPLAIN` demuestran que se usan. No se añadió
+particionado ni PgBouncer; el pool de la aplicación sigue limitado a 10 conexiones.
 
 ## 4. Migraciones no transaccionales
 

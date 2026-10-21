@@ -2,6 +2,7 @@ import { sql, type SQL } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
+import { iso, optionalIso } from './format.js'
 import { AppError } from '../http/errors.js'
 import { can, canAct, type TicketAccess } from './access.js'
 import { scopePredicate } from './scope.js'
@@ -19,6 +20,7 @@ type TicketListItem = {
   folio: string
   status: string
   reportedAt: string
+  closedAt: string | null
   description: string
   requesterName: string
   possibleDuplicate: boolean
@@ -41,7 +43,7 @@ export type TimelineItem = {
   ticketId: string
   cycle: number
   type: string
-  payload: unknown
+  payload: Record<string, unknown>
   occurredAt: string
   recordedAt: string
   actorId: string | null
@@ -69,6 +71,7 @@ type ListRow = {
   folio: string
   status: string
   reported_at: Date | string
+  closed_at: Date | string | null
   description: string
   requester_name: string
   possible_duplicate: boolean
@@ -96,10 +99,6 @@ type TimelineRow = {
   subject_technician_name: string | null
   reason_id: string | null
   reason_name: string | null
-}
-
-function iso(value: Date | string): string {
-  return new Date(value).toISOString()
 }
 
 export async function loadTicketAccess(
@@ -195,8 +194,9 @@ function filterConditions(filters: TicketFilters): SQL[] {
   if (filters.categoryId) {
     conditions.push(sql`t.category_id = ${filters.categoryId}`)
   }
-  if (filters.search) {
-    const term = `%${filters.search.replace(/[%_]/g, '')}%`
+  const search = filters.search?.replace(/[\\%_(),]/g, '').trim()
+  if (search) {
+    const term = `%${search}%`
     conditions.push(sql`(t.folio ilike ${term} or t.description ilike ${term})`)
   }
   return conditions
@@ -221,7 +221,7 @@ export async function listTickets(
   const offset = (page - 1) * pageSize
   const result = await db.execute(sql`
     select
-      t.id, t.folio, t.status, t.reported_at, t.description,
+      t.id, t.folio, t.status, t.reported_at, t.closed_at, t.description,
       t.requester_name, t.possible_duplicate,
       b.name as building_name,
       c.name as category_name,
@@ -247,6 +247,7 @@ export async function listTickets(
       folio: row.folio,
       status: row.status,
       reportedAt: iso(row.reported_at),
+      closedAt: optionalIso(row.closed_at),
       description: row.description,
       requesterName: row.requester_name,
       possibleDuplicate: row.possible_duplicate,
@@ -301,7 +302,7 @@ export async function getTimeline(
     ticketId: row.ticket_id,
     cycle: row.cycle,
     type: row.type,
-    payload: row.payload,
+    payload: (row.payload as Record<string, unknown> | null | undefined) ?? {},
     occurredAt: iso(row.occurred_at),
     recordedAt: iso(row.recorded_at),
     actorId: row.actor_id,
