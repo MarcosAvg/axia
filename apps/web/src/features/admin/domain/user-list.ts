@@ -49,6 +49,7 @@ export function filterProfiles(
   return profiles.filter((profile) => {
     const haystack = [
       profile.fullName,
+      profile.username ?? '',
       ...roleLabelsOf(roles, assignments, profile.id),
     ]
       .join(' ')

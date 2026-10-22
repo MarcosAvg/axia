@@ -93,11 +93,20 @@ describe('enrutado y sesión', () => {
   }, 60_000)
 
   it('sin sesión, "/" redirige a la pantalla de acceso', async () => {
-    renderAtPath('/', makeAuthValue())
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ required: false }),
+    } as Response)
+    try {
+      renderAtPath('/', makeAuthValue())
 
-    expect(
-      await screen.findByText(authMessages.login.title),
-    ).toBeInTheDocument()
+      expect(
+        await screen.findByText(authMessages.login.title),
+      ).toBeInTheDocument()
+    } finally {
+      fetchMock.mockRestore()
+    }
   })
 
   it('con sesión, "/" muestra el panel con el nombre y sus números', async () => {

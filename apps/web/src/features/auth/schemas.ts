@@ -64,6 +64,18 @@ export const profileSchema = z.object({
 })
 export type ProfileInput = z.infer<typeof profileSchema>
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(12, authMessages.setup.errors.password),
+    confirmPassword: z.string().min(1),
+  })
+  .refine((value) => value.newPassword === value.confirmPassword, {
+    path: ['confirmPassword'],
+    message: authMessages.password.errors.confirm,
+  })
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+
 /** Convierte la respuesta de `me()` en una identidad tipada. Lanza si no hay perfil. */
 export function parseIdentity(raw: unknown): Identity {
   const data = identityResponseSchema.parse(raw)

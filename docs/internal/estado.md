@@ -11,10 +11,10 @@
 **Sin trabajo en curso.** La web, la API, la base y las pruebas usan el stack propio. No hay
 dependencias de plataformas externas en el código ni en la configuración.
 
-**Siguiente:** Tanda B de UI (notificaciones y SSE en la web, alta/reset de usuarios, detalle del
-tiquet y evidencias ampliables). Después, puesta en marcha real (servidor, TLS, reverse proxy),
-respaldos programados y prueba de restauración en el host definitivo. Si se decide, Web Push y
-escalamiento programado.
+**Siguiente:** Tanda B2 (avisos y SSE): campana de no leídas, ruta de avisos, marcar leído y
+actualización en vivo. Después, B3 (detalle del tiquet y evidencias ampliables) y la puesta en
+marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el
+host definitivo. Si se decide, Web Push y escalamiento programado.
 
 ## Hecho
 
@@ -43,7 +43,10 @@ escalamiento programado.
   tarjetas móviles para catálogos/ámbitos/designaciones, objetivos táctiles, contraste de estados,
   `prefers-reduced-motion`, jerarquía de encabezados, títulos de pestaña, estado vacío de búsqueda y
   regresión visual actualizada (incluye panel móvil).
-- **Pruebas:** 39 unitarias/HTTP del servidor, 237 web, 24 Playwright y 130 de integración contra
+- **UI (Tanda B1):** alta de usuarios con roles, contraseña temporal de una sola vista, restablecer
+  contraseña, revocar sesiones, usuario/último acceso en la tabla, cambio de contraseña desde el
+  perfil, mensaje de bloqueo de login, error de estado de instalación y cierre de sesión ante 401.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 240 web, 25 Playwright y 130 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

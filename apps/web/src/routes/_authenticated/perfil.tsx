@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { FormSection } from '@/components/shared/form-section'
 import { Badge } from '@/components/ui/badge'
 import {
+  ChangePasswordForm,
   LoadingScreen,
   ProfileForm,
   authMessages,
@@ -49,6 +50,9 @@ function ProfilePage() {
             <span>{identity.timezone}</span>
           </div>
         </div>
+      </FormSection>
+      <FormSection title={authMessages.password.title}>
+        <ChangePasswordForm />
       </FormSection>
     </div>
   )

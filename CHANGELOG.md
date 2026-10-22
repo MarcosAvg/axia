@@ -34,6 +34,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - La búsqueda global muestra un estado vacío; la tarjeta de Integraciones indica que no está
   disponible en esta versión.
 - La regresión visual se actualizó a la interfaz actual e incluye una captura del panel móvil.
+- Administración de cuentas: alta con roles, contraseña temporal visible una sola vez,
+  restablecimiento de contraseña, revocación de sesiones y último acceso.
+- Cambio de contraseña desde el perfil, mensaje claro de bloqueo por intentos, error de estado de
+  instalación con reintento y cierre de sesión ante respuestas 401.
 
 ### Retirado
 

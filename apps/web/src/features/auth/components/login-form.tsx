@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { TextField } from '@/components/shared/form-fields'
-import { isInvalidCredentials } from '../domain/auth-error'
+import { isInvalidCredentials, lockoutMinutes } from '../domain/auth-error'
 import { useAuth } from '../hooks/auth-context'
 import { authMessages } from '../i18n'
 import { loginSchema } from '../schemas'
@@ -28,10 +28,13 @@ export function LoginForm() {
     try {
       await signIn(values.username, values.password)
     } catch (error) {
+      const minutes = lockoutMinutes(error)
       setSubmitError(
-        isInvalidCredentials(error)
-          ? authMessages.login.errors.invalid
-          : authMessages.login.errors.unknown,
+        minutes !== null
+          ? authMessages.login.errors.locked(minutes)
+          : isInvalidCredentials(error)
+            ? authMessages.login.errors.invalid
+            : authMessages.login.errors.unknown,
       )
     }
   })

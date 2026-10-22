@@ -17,8 +17,20 @@ const assignments: UserRole[] = [
   { userId: 'u2', roleId: 'r1' },
 ]
 const profiles: Profile[] = [
-  { id: 'u1', fullName: 'Luis Gómez', phone: null, active: true },
-  { id: 'u2', fullName: 'Ana Pérez', phone: null, active: true },
+  {
+    id: 'u1',
+    fullName: 'Luis Gómez',
+    phone: null,
+    active: true,
+    username: 'luis.gomez',
+  },
+  {
+    id: 'u2',
+    fullName: 'Ana Pérez',
+    phone: null,
+    active: true,
+    username: 'ana.perez',
+  },
 ]
 
 describe('roleLabelsOf', () => {
@@ -56,6 +68,14 @@ describe('filterProfiles', () => {
   it('busca por etiqueta de rol', () => {
     expect(
       filterProfiles(profiles, roles, assignments, 'admin').map((p) => p.id),
+    ).toEqual(['u2'])
+  })
+
+  it('busca por nombre de usuario', () => {
+    expect(
+      filterProfiles(profiles, roles, assignments, 'ana.perez').map(
+        (p) => p.id,
+      ),
     ).toEqual(['u2'])
   })
 })

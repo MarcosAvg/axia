@@ -6,6 +6,8 @@ export const authMessages = {
   login: {
     title: 'Inicia sesión',
     description: 'Accede con tu cuenta de Axia.',
+    setupStatusTitle: 'No se pudo comprobar la instalación',
+    retry: 'Reintentar',
     brandDescription:
       'Sigue cada tiquet en todo momento: en qué estado está y, si no avanza, por qué.',
     username: 'Usuario',
@@ -17,15 +19,22 @@ export const authMessages = {
       password: 'Escribe tu contraseña.',
       invalid: 'El usuario o la contraseña no son correctos.',
       unknown: 'No se pudo iniciar sesión. Intenta de nuevo.',
+      locked: (minutes: number) =>
+        `Demasiados intentos fallidos. Espera ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'} antes de intentar de nuevo.`,
+      setupStatus:
+        'No se pudo comprobar el estado de la instalación. Revisa la conexión e inténtalo de nuevo.',
     },
   },
   password: {
     title: 'Cambia tu contraseña',
+    description:
+      'Usa al menos 12 caracteres. Al guardar se cerrarán tus otras sesiones.',
     current: 'Contraseña actual',
     new: 'Contraseña nueva',
     confirm: 'Repite la contraseña nueva',
     submit: 'Guardar contraseña',
     submitting: 'Guardando…',
+    saved: 'Tu contraseña se actualizó.',
     errors: {
       confirm: 'Las contraseñas no coinciden.',
       unknown: 'No se pudo cambiar la contraseña. Intenta de nuevo.',
@@ -59,7 +68,7 @@ export const authMessages = {
   },
   profile: {
     title: 'Mi perfil',
-    description: 'Tu nombre y tu teléfono o extensión de contacto.',
+    description: 'Tus datos de contacto y la seguridad de tu cuenta.',
     sections: {
       data: 'Datos de la cuenta',
       account: 'Cuenta',

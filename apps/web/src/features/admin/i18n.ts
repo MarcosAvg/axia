@@ -1,6 +1,7 @@
 // Textos de la administración (es-MX).
 
 import { settingsMessages } from './settings-i18n'
+import { usersMessages } from './users-i18n'
 
 export const adminMessages = {
   title: 'Administración',
@@ -98,32 +99,7 @@ export const adminMessages = {
     assignment: 'Designaciones',
     act_on_behalf: 'Otros',
   } as Record<string, string>,
-  users: {
-    title: 'Usuarios',
-    search: 'Buscar por nombre o rol…',
-    roles: 'Roles',
-    editRoles: 'Editar roles',
-    rolesHelp: 'Marca los roles que tendrá la cuenta.',
-    rolesAutoSave: 'Los cambios se guardan al instante.',
-    active: 'Activo',
-    accountsTab: 'Cuentas',
-    linksTab: 'Vínculos',
-    links: 'Vínculos con los catálogos',
-    phone: 'Teléfono',
-    person: 'Persona',
-    link: 'Vínculo',
-    linkedAccount: 'Cuenta vinculada',
-    requesters: 'Solicitantes',
-    technicians: 'Técnicos',
-    searchPeople: 'Buscar por persona o cuenta…',
-    searchProfiles: 'Buscar cuenta…',
-    changeLink: 'Cambiar vínculo',
-    linkTitle: 'Vincular a una cuenta',
-    linkHelp: 'Elige la cuenta que corresponde a esta persona.',
-    requester: 'Solicitante del que es cuenta',
-    technician: 'Técnico del que es cuenta',
-    noLink: 'Sin vínculo',
-  },
+  users: usersMessages,
   scopes: {
     title: 'Ámbitos y designaciones',
     supervisor: 'Ámbitos de supervisor',

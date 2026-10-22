@@ -8,7 +8,7 @@ export function ScopesManager() {
   const { scopes } = adminMessages
   return (
     <Tabs defaultValue="supervisor" className="flex min-w-0 flex-col gap-4">
-      <TabsList className="h-auto w-full flex-wrap">
+      <TabsList className="h-auto w-full flex-wrap sm:w-fit">
         <TabsTrigger value="supervisor" className="min-h-11">
           {scopes.supervisor}
         </TabsTrigger>

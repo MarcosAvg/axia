@@ -1,5 +1,7 @@
 import { createFileRoute, Navigate } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { ErrorAlert } from '@/components/shared/async-state'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -58,6 +60,36 @@ function AccessCard({ setupRequired }: { setupRequired: boolean }) {
   )
 }
 
+function SetupStatusError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <main className="flex min-h-svh bg-background text-foreground">
+      <BrandPanel />
+      <div className="flex flex-1 items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle as="h2">{authMessages.login.setupStatusTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ErrorAlert
+              message={authMessages.login.errors.setupStatus}
+              action={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={onRetry}
+                >
+                  {authMessages.login.retry}
+                </Button>
+              }
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  )
+}
+
 function LoginPage() {
   const { status } = useAuth()
   const setup = useQuery({
@@ -69,6 +101,8 @@ function LoginPage() {
 
   if (status === 'loading' || setup.isLoading) return <LoadingScreen />
   if (status === 'signed-in') return <Navigate to="/" replace />
+  if (setup.isError)
+    return <SetupStatusError onRetry={() => void setup.refetch()} />
 
   return (
     <main className="flex min-h-svh bg-background text-foreground">

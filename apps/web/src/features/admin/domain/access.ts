@@ -25,6 +25,26 @@ export interface Profile {
   fullName: string
   phone: string | null
   active: boolean
+  username?: string
+  lastLoginAt?: string | null
+  mustChangePassword?: boolean
+  accountRoles?: UserAccountRole[]
+}
+
+interface UserAccountRole {
+  id: string
+  name: string
+  label: string
+}
+
+export interface UserAccount {
+  id: string
+  username: string
+  fullName: string
+  active: boolean
+  mustChangePassword: boolean
+  lastLoginAt: string | null
+  roles: UserAccountRole[]
 }
 
 export interface UserRole {

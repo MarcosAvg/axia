@@ -1,9 +1,16 @@
-import { EllipsisIcon, PencilIcon, PowerIcon } from 'lucide-react'
+import {
+  EllipsisIcon,
+  KeyRoundIcon,
+  LogOutIcon,
+  PencilIcon,
+  PowerIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { adminMessages } from '../i18n'
@@ -14,6 +21,8 @@ interface RowActionsProps {
   editLabel?: string
   onEdit: () => void
   onToggle: () => void
+  onResetPassword?: () => void
+  onRevokeSessions?: () => void
 }
 
 /** Acciones de una fila en un menú compacto. */
@@ -23,8 +32,10 @@ export function RowActions({
   editLabel,
   onEdit,
   onToggle,
+  onResetPassword,
+  onRevokeSessions,
 }: RowActionsProps) {
-  const { actions } = adminMessages
+  const { actions, users } = adminMessages
   const toggleLabel = active ? actions.deactivate : actions.activate
   return (
     <DropdownMenu>
@@ -47,6 +58,21 @@ export function RowActions({
           <PowerIcon />
           {toggleLabel}
         </DropdownMenuItem>
+        {onResetPassword ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onResetPassword}>
+              <KeyRoundIcon />
+              {users.resetPassword}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+        {onRevokeSessions ? (
+          <DropdownMenuItem onSelect={onRevokeSessions}>
+            <LogOutIcon />
+            {users.revokeSessions}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

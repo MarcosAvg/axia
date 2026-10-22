@@ -14,6 +14,20 @@ import { useAuthSession } from './use-auth-session'
 const identityQueryKey = (userId: string | undefined) =>
   ['auth', 'identity', userId] as const
 
+function useUnauthorizedHandler(refresh: () => Promise<unknown>) {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    function onUnauthorized() {
+      void refresh()
+      queryClient.clear()
+    }
+    window.addEventListener('axia:unauthorized', onUnauthorized)
+    return () => {
+      window.removeEventListener('axia:unauthorized', onUnauthorized)
+    }
+  }, [queryClient, refresh])
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const { status, session, refresh } = useAuthSession()
@@ -33,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setDisplayTimezone(identity?.timezone)
   }, [identity?.timezone])
+  useUnauthorizedHandler(refresh)
 
   const signIn = useCallback(
     async (username: string, password: string) => {

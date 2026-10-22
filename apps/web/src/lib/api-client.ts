@@ -39,13 +39,26 @@ function baseUrl(): string {
   return apiBaseUrl()
 }
 
-async function throwApiError(response: Response): Promise<never> {
+function notifyUnauthorized(path: string): void {
+  if (
+    typeof window === 'undefined' ||
+    path.startsWith('/api/auth/me') ||
+    path.startsWith('/api/auth/login') ||
+    path.startsWith('/api/setup/status')
+  ) {
+    return
+  }
+  window.dispatchEvent(new Event('axia:unauthorized'))
+}
+
+async function throwApiError(response: Response, path: string): Promise<never> {
   let envelope: ErrorEnvelope = {}
   try {
     envelope = (await response.json()) as ErrorEnvelope
   } catch {
     // Keep a generic message when the server did not return JSON.
   }
+  if (response.status === 401) notifyUnauthorized(path)
   const error = envelope.error
   throw new ApiError({
     status: response.status,
@@ -75,6 +88,6 @@ export async function apiFetch<T>(
     headers,
     credentials: 'include',
   })
-  if (!response.ok) await throwApiError(response)
+  if (!response.ok) await throwApiError(response, path)
   return parseResponse<T>(response)
 }

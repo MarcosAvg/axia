@@ -1,12 +1,13 @@
-import { Button } from '@/components/ui/button'
 import { UsersIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn, SortState } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Badge } from '@/components/ui/badge'
+import { formatDateTime } from '@/lib/format'
 import type { LinkablePerson, Profile, Role, UserRole } from '../domain/access'
 import { linkedPersonName, roleLabelsOf } from '../domain/user-list'
 import { adminMessages } from '../i18n'
+import { RoleChips, UsersCards } from './user-cards'
 import { RowActions } from './row-actions'
 import { StatusSwitch } from './status-switch'
 
@@ -20,103 +21,46 @@ interface UsersTableProps {
   onSortChange: (key: string) => void
   onToggleActive: (profile: Profile) => void
   onEditRoles: (profile: Profile) => void
-}
-
-function RoleChips({ labels }: { labels: string[] }) {
-  if (labels.length === 0) {
-    return <span className="text-muted-foreground">—</span>
-  }
-  return (
-    <div className="flex flex-wrap gap-1">
-      {labels.map((label) => (
-        <Badge key={label} variant="secondary">
-          {label}
-        </Badge>
-      ))}
-    </div>
-  )
-}
-
-function linksText(
-  profile: Profile,
-  requesters: LinkablePerson[],
-  technicians: LinkablePerson[],
-): string | null {
-  const names = [
-    linkedPersonName(requesters, profile.id),
-    linkedPersonName(technicians, profile.id),
-  ].filter((name): name is string => Boolean(name))
-  return names.length > 0 ? names.join(' · ') : null
-}
-
-function UsersCards({
-  profiles,
-  roles,
-  assignments,
-  requesters,
-  technicians,
-  onToggleActive,
-  onEditRoles,
-}: Omit<UsersTableProps, 'sort' | 'onSortChange'>) {
-  return (
-    <ul className="flex flex-col gap-2 lg:hidden">
-      {profiles.map((profile) => {
-        const labels = roleLabelsOf(roles, assignments, profile.id)
-        const links = linksText(profile, requesters, technicians)
-        return (
-          <li
-            key={profile.id}
-            className="flex flex-col gap-3 rounded-xl border bg-card p-3"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate font-medium">{profile.fullName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {profile.phone ?? '—'}
-                </p>
-              </div>
-              <StatusSwitch
-                active={profile.active}
-                name={profile.fullName}
-                onToggle={() => onToggleActive(profile)}
-              />
-            </div>
-            <RoleChips labels={labels} />
-            <div className="flex items-center justify-between gap-2">
-              <span className="truncate text-xs text-muted-foreground">
-                {links ?? '—'}
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onEditRoles(profile)}
-              >
-                {adminMessages.users.editRoles}
-              </Button>
-            </div>
-          </li>
-        )
-      })}
-    </ul>
-  )
+  onResetPassword: (profile: Profile) => void
+  onRevokeSessions: (profile: Profile) => void
 }
 
 function nameColumn(): DataTableColumn<Profile> {
   return {
-    id: 'full_name',
+    id: 'fullName',
     header: adminMessages.fields.full_name,
     sortable: true,
-    cell: (profile) => <span className="font-medium">{profile.fullName}</span>,
+    cell: (profile) => (
+      <span className="flex flex-col">
+        <span className="flex flex-wrap items-center gap-1 font-medium">
+          {profile.fullName}
+          {profile.mustChangePassword ? (
+            <Badge variant="outline">
+              {adminMessages.users.mustChangePassword}
+            </Badge>
+          ) : null}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          @{profile.username ?? '—'}
+        </span>
+      </span>
+    ),
   }
 }
 
-function phoneColumn(): DataTableColumn<Profile> {
+function lastAccessColumn(): DataTableColumn<Profile> {
   return {
-    id: 'phone',
-    header: adminMessages.users.phone,
+    id: 'lastLoginAt',
+    header: adminMessages.users.lastAccess,
+    sortable: true,
     cell: (profile) =>
-      profile.phone ?? <span className="text-muted-foreground">—</span>,
+      profile.lastLoginAt ? (
+        formatDateTime(profile.lastLoginAt)
+      ) : (
+        <span className="text-muted-foreground">
+          {adminMessages.users.never}
+        </span>
+      ),
   }
 }
 
@@ -178,6 +122,8 @@ function activeColumn(
 function actionsColumn(
   onEditRoles: (profile: Profile) => void,
   onToggleActive: (profile: Profile) => void,
+  onResetPassword: (profile: Profile) => void,
+  onRevokeSessions: (profile: Profile) => void,
 ): DataTableColumn<Profile> {
   return {
     id: 'actions',
@@ -192,6 +138,8 @@ function actionsColumn(
           editLabel={adminMessages.users.editRoles}
           onEdit={() => onEditRoles(profile)}
           onToggle={() => onToggleActive(profile)}
+          onResetPassword={() => onResetPassword(profile)}
+          onRevokeSessions={() => onRevokeSessions(profile)}
         />
       </div>
     ),
@@ -209,6 +157,8 @@ export function UsersTable({
   onSortChange,
   onToggleActive,
   onEditRoles,
+  onResetPassword,
+  onRevokeSessions,
 }: UsersTableProps) {
   if (profiles.length === 0) {
     return (
@@ -220,11 +170,16 @@ export function UsersTable({
 
   const columns: DataTableColumn<Profile>[] = [
     nameColumn(),
-    phoneColumn(),
+    lastAccessColumn(),
     rolesColumn(roles, assignments),
     linkColumn(requesters, technicians),
     activeColumn(onToggleActive),
-    actionsColumn(onEditRoles, onToggleActive),
+    actionsColumn(
+      onEditRoles,
+      onToggleActive,
+      onResetPassword,
+      onRevokeSessions,
+    ),
   ]
 
   return (
@@ -237,6 +192,8 @@ export function UsersTable({
         technicians={technicians}
         onToggleActive={onToggleActive}
         onEditRoles={onEditRoles}
+        onResetPassword={onResetPassword}
+        onRevokeSessions={onRevokeSessions}
       />
       <div className="hidden lg:block">
         <DataTable
