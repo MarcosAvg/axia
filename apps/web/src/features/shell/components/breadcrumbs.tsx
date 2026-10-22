@@ -11,6 +11,7 @@ const sectionLabels: Record<string, string> = {
   tickets: shellMessages.nav.tickets,
   'mi-trabajo': shellMessages.nav.myWork,
   inbox: shellMessages.nav.inbox,
+  avisos: shellMessages.nav.notifications,
   metricas: shellMessages.nav.metrics,
   perfil: shellMessages.nav.profile,
   admin: shellMessages.groups.administration,

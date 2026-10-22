@@ -38,6 +38,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   restablecimiento de contraseña, revocación de sesiones y último acceso.
 - Cambio de contraseña desde el perfil, mensaje claro de bloqueo por intentos, error de estado de
   instalación con reintento y cierre de sesión ante respuestas 401.
+- Avisos in-app: campana con no leídas, ruta `/avisos`, marcar uno o todos, folio del tiquet y
+  actualización en vivo por SSE con recuperación de eventos perdidos. Se corrigió el filtro de
+  eventos SSE de solicitantes, que comparaba caracteres en vez de nombres de evento.
 
 ### Retirado
 

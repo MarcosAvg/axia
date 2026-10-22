@@ -15,6 +15,7 @@ export const shellMessages = {
     tickets: 'Tiquets',
     myWork: 'Mi trabajo',
     inbox: 'Bandeja',
+    notifications: 'Avisos',
     metrics: 'Métricas',
     catalogs: 'Catálogos',
     roles: 'Roles',

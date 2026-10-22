@@ -71,6 +71,9 @@ Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add
 | `POST` | `/api/notifications/read-all` | Marcar todas |
 | `POST` | `/api/sync/actions` | Lote de acciones offline |
 
+`GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`
+y `createdAt`.
+
 ## Administración
 
 | Método | Ruta | Uso |

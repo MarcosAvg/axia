@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { useServerEvents } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppSidebar } from './app-sidebar'
 import { AppTopbar } from './app-topbar'
@@ -14,6 +15,7 @@ import { GlobalSearch } from './global-search'
 
 /** Armazón de la aplicación autenticada: barra lateral, barra superior y contenido. */
 export function AppShell() {
+  useServerEvents()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)

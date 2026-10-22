@@ -76,11 +76,12 @@ test('la barra superior tiene controles táctiles y no desborda', async ({
     await page.goto('/')
 
     const topbar = page.locator('header.sticky')
-    const buttons = topbar.getByRole('button')
-    await expect(buttons).toHaveCount(4)
+    const controls = topbar.locator('button, a[href]')
+    await expect(controls).toHaveCount(5)
+    await expect(topbar.getByRole('link', { name: /^Avisos/ })).toBeVisible()
 
-    for (const button of await buttons.all()) {
-      const box = await button.boundingBox()
+    for (const control of await controls.all()) {
+      const box = await control.boundingBox()
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(44)
     }
 

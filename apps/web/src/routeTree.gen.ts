@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAvisosRouteImport } from './routes/_authenticated/avisos'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedMetricasRouteImport } from './routes/_authenticated/metricas'
 import { Route as AuthenticatedMiTrabajoRouteImport } from './routes/_authenticated/mi-trabajo'
@@ -46,6 +47,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAvisosRoute = AuthenticatedAvisosRouteImport.update({
+  id: '/avisos',
+  path: '/avisos',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/metricas': typeof AuthenticatedMetricasRoute
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/avisos': typeof AuthenticatedAvisosRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/metricas': typeof AuthenticatedMetricasRoute
   '/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/avisos': typeof AuthenticatedAvisosRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/metricas': typeof AuthenticatedMetricasRoute
   '/_authenticated/mi-trabajo': typeof AuthenticatedMiTrabajoRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/admin'
+    | '/avisos'
     | '/inbox'
     | '/metricas'
     | '/mi-trabajo'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/avisos'
     | '/inbox'
     | '/metricas'
     | '/mi-trabajo'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/admin'
+    | '/_authenticated/avisos'
     | '/_authenticated/inbox'
     | '/_authenticated/metricas'
     | '/_authenticated/mi-trabajo'
@@ -290,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/avisos': {
+      id: '/_authenticated/avisos'
+      path: '/avisos'
+      fullPath: '/avisos'
+      preLoaderRoute: typeof AuthenticatedAvisosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/inbox': {
@@ -427,6 +446,7 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedAvisosRoute: typeof AuthenticatedAvisosRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedMetricasRoute: typeof AuthenticatedMetricasRoute
   AuthenticatedMiTrabajoRoute: typeof AuthenticatedMiTrabajoRoute
@@ -439,6 +459,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedAvisosRoute: AuthenticatedAvisosRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedMetricasRoute: AuthenticatedMetricasRoute,
   AuthenticatedMiTrabajoRoute: AuthenticatedMiTrabajoRoute,

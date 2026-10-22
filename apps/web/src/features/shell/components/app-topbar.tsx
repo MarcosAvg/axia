@@ -2,6 +2,7 @@ import { MenuIcon, SearchIcon } from 'lucide-react'
 import { OfflineIndicator } from '@/components/shared/offline-indicator'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppBreadcrumbs } from './breadcrumbs'
 import { UserMenu } from './user-menu'
@@ -16,7 +17,7 @@ function searchShortcut(): string {
   return /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘K' : 'Ctrl K'
 }
 
-/** Barra superior: menú móvil, migas de pan, búsqueda, tema y usuario. */
+/** Barra superior: menú móvil, migas de pan, búsqueda, avisos, tema y usuario. */
 export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-3 backdrop-blur lg:px-4">
@@ -46,6 +47,7 @@ export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
             {searchShortcut()}
           </kbd>
         </Button>
+        <NotificationBell />
         <OfflineIndicator />
         <ThemeToggle />
         <UserMenu />

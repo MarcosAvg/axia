@@ -25,6 +25,7 @@ const idParamsSchema = z.object({ id: z.string().uuid() })
 type NotificationRow = {
   id: string
   ticket_id: string | null
+  ticket_folio: string | null
   type: string
   payload: unknown
   read_at: Date | string | null
@@ -48,7 +49,8 @@ async function listNotifications(
 ) {
   const unread = query.unread === 'true'
   const result = await db.execute(sql`
-    select n.id, n.ticket_id, n.type, n.payload, n.read_at, n.created_at
+    select n.id, n.ticket_id, t.folio as ticket_folio, n.type, n.payload,
+           n.read_at, n.created_at
     from public.notifications n
     left join public.tickets t on t.id = n.ticket_id
     left join public.requesters r on r.id = t.requester_id
@@ -61,6 +63,7 @@ async function listNotifications(
   return (result.rows as NotificationRow[]).map((row) => ({
     id: row.id,
     ticketId: row.ticket_id,
+    ticketFolio: row.ticket_folio,
     type: row.type,
     payload: row.payload,
     readAt: row.read_at === null ? null : new Date(row.read_at).toISOString(),

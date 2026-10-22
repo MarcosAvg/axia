@@ -38,6 +38,48 @@ async function get(path: string, cookie: string) {
   })
 }
 
+async function expectTicketStreamEvent(
+  cookie: string,
+  type: string,
+  eventId: number,
+) {
+  const controller = new AbortController()
+  const response = await fetch(`${baseUrl}/api/events`, {
+    headers: { Cookie: cookie },
+    signal: controller.signal,
+  })
+  expect(response.status).toBe(200)
+  const reader = response.body?.getReader()
+  expect(reader).toBeDefined()
+  if (!reader) return
+
+  const decoder = new TextDecoder()
+  const first = await readWithTimeout(reader)
+  expect(decoder.decode(first.value)).toContain('retry:')
+
+  await context.events.publish({
+    eventId,
+    ticketId: context.ids.ticketA1,
+    type,
+    occurredAt: new Date().toISOString(),
+  })
+
+  let received = ''
+  for (
+    let index = 0;
+    index < 5 && !received.includes('event: ticket');
+    index += 1
+  ) {
+    const chunk = await readWithTimeout(reader)
+    received += decoder.decode(chunk.value)
+  }
+  expect(received).toContain('event: ticket')
+  expect(received).toContain(context.ids.ticketA1)
+
+  controller.abort()
+  await reader.cancel().catch(() => {})
+}
+
 beforeAll(async () => {
   context = await buildTicketHttpApp()
   baseUrl = await context.app.listen({ host: '127.0.0.1', port: 0 })
@@ -49,41 +91,15 @@ afterAll(async () => {
 
 describe('SSE', () => {
   it('sends a visible ticket event', async () => {
-    const controller = new AbortController()
-    const response = await fetch(`${baseUrl}/api/events`, {
-      headers: { Cookie: context.cookies.technician },
-      signal: controller.signal,
-    })
-    expect(response.status).toBe(200)
-    const reader = response.body?.getReader()
-    expect(reader).toBeDefined()
-    if (!reader) return
+    await expectTicketStreamEvent(
+      context.cookies.technician,
+      'created',
+      999_999,
+    )
+  })
 
-    const decoder = new TextDecoder()
-    const first = await readWithTimeout(reader)
-    expect(decoder.decode(first.value)).toContain('retry:')
-
-    await context.events.publish({
-      eventId: 999_999,
-      ticketId: context.ids.ticketA1,
-      type: 'created',
-      occurredAt: new Date().toISOString(),
-    })
-
-    let received = ''
-    for (
-      let index = 0;
-      index < 5 && !received.includes('event: ticket');
-      index += 1
-    ) {
-      const chunk = await readWithTimeout(reader)
-      received += decoder.decode(chunk.value)
-    }
-    expect(received).toContain('event: ticket')
-    expect(received).toContain(context.ids.ticketA1)
-
-    controller.abort()
-    await reader.cancel().catch(() => {})
+  it('sends requester-visible events to the requester', async () => {
+    await expectTicketStreamEvent(context.cookies.requester, 'taken', 999_998)
   })
 
   it('returns only the events visible to the requester', async () => {
@@ -125,12 +141,16 @@ describe('notifications', () => {
     const list = await get('/api/notifications', context.cookies.technician)
     expect(list.status).toBe(200)
     const body = (await list.json()) as {
-      items: Array<{ id: string; type: string }>
+      items: Array<{ id: string; type: string; ticketFolio: string | null }>
       unread: number
     }
     expect(body.items.some((item) => item.type === 'assigned_technician')).toBe(
       true,
     )
+    expect(
+      body.items.find((item) => item.type === 'assigned_technician')
+        ?.ticketFolio,
+    ).toBeTruthy()
     expect(body.unread).toBeGreaterThanOrEqual(1)
     const notificationId = body.items.find(
       (item) => item.type === 'assigned_technician',

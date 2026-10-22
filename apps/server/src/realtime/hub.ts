@@ -27,13 +27,12 @@ export function createEventHub(db: Database) {
   async function requesterTypes(): Promise<Set<string>> {
     if (visibleTypes) return visibleTypes
     const result = await db.execute(sql`
-      select requester_visible_event_types
-      from public.instance_settings
-      limit 1
+      select event_type
+      from public.instance_settings s
+      cross join lateral unnest(s.requester_visible_event_types) as event_type
     `)
-    const row = result.rows[0] as
-      { requester_visible_event_types: string[] | null } | undefined
-    visibleTypes = new Set(row?.requester_visible_event_types ?? [])
+    const rows = result.rows as Array<{ event_type: string }>
+    visibleTypes = new Set(rows.map((row) => row.event_type))
     return visibleTypes
   }
 
