@@ -47,10 +47,6 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Navegación por rol: Mi trabajo solo con perfil de técnico, Bandeja solo con permiso de tomar
   ofertas, “Nuevo tiquet” solo con permiso de creación y administración alineada con sus permisos
   específicos. El panel deja de consultar métricas y ofertas que el rol no puede ver.
-- Panel de acciones del detalle: siguiente paso destacado, grupos por intención, rejilla alineada,
-  contexto de actuación separado y zona sensible diferenciada.
-- Accesibilidad: contraste del tono ámbar y de los botones destructivos en modo oscuro ajustado a
-  AA; la ayuda de la zona sensible también cumple contraste.
 
 ### Retirado
 
