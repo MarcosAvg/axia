@@ -3,7 +3,7 @@ import { InboxIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
-import { useAuth } from '@/features/auth'
+import { RequirePermission, useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
   TicketList,
@@ -18,6 +18,14 @@ export const Route = createFileRoute('/_authenticated/inbox')({
 })
 
 function InboxPage() {
+  return (
+    <RequirePermission permission="ticket.take_offer">
+      <InboxContent />
+    </RequirePermission>
+  )
+}
+
+function InboxContent() {
   const { identity } = useAuth()
   const offers = useMyOffers(identity?.userId)
   const team = useTicketsList({ statuses: ACTIVE_STATUSES }, 1)

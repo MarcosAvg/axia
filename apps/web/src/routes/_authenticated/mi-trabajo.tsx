@@ -3,7 +3,7 @@ import { HardHatIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
-import { useAuth } from '@/features/auth'
+import { RequirePermission, RequireTechnician, useAuth } from '@/features/auth'
 import {
   TicketList,
   TicketStatusSummary,
@@ -16,6 +16,16 @@ export const Route = createFileRoute('/_authenticated/mi-trabajo')({
 })
 
 function MyWorkPage() {
+  return (
+    <RequirePermission permission="ticket.view">
+      <RequireTechnician>
+        <MyWorkContent />
+      </RequireTechnician>
+    </RequirePermission>
+  )
+}
+
+function MyWorkContent() {
   const { identity } = useAuth()
   const query = useMyWork(identity?.userId)
   const { myWork } = ticketMessages

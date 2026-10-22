@@ -35,3 +35,23 @@ Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito 
 
 La comprobación se realiza en el servidor con `can` y `canAct`. Un tiquet fuera de alcance devuelve
 404; un permiso ausente devuelve 403.
+
+## Vistas por rol
+
+La navegación combina permisos con capacidades de la cuenta. Una vista oculta tampoco es accesible
+por URL directa: muestra “Sin acceso”.
+
+| Vista | Administrador | Supervisor | Técnico | Solicitante |
+|---|---|---|---|---|
+| Panel | Sí | Sí | Sí | Sí |
+| Tiquets | Sí | Sí | Sí | Sí |
+| Mi trabajo | Solo con perfil de técnico | Solo con perfil de técnico | Sí | No |
+| Bandeja | Sí | Sí | No | No |
+| Métricas | Sí | Sí | No | No |
+| Administración | Según sus permisos | No | No | No |
+| Mi perfil | Sí | Sí | Sí | Sí |
+| Avisos | Campana | Campana | Campana | Campana |
+
+“Mi trabajo” requiere `technicianId`; “Bandeja” requiere `ticket.take_offer`. Las secciones de
+administración usan su permiso específico: `catalog.manage`, `user.manage`, `role.manage` o
+`assignment.manage`. Un rol personalizado ve únicamente las tarjetas y destinos que puede abrir.

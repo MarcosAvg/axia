@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ButtonGrid } from '@/components/shared/button-grid'
 import { SelectField } from '@/components/shared/form-fields'
-import { can } from '@/features/auth'
-import type { Identity } from '@/features/auth'
+import { can, type Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
 import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
 import { actionEmphasis } from '../domain/action-emphasis'
@@ -14,7 +13,6 @@ import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
 import { DEDICATED } from './ticket-action-handlers'
-
 const ONE_CLICK: ActionKey[] = ['validate']
 const FORM_ACTIONS: ActionKey[] = [
   'start',
@@ -227,7 +225,10 @@ function useActionPanel(
   const subject =
     canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
   const mutations = useTicketActions(ticket.id, subject)
-  const offers = useMyOffers(identity?.userId)
+  const offers = useMyOffers(
+    identity?.userId,
+    can(identity, 'ticket.take_offer'),
+  )
   const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
   const oneClick: Partial<Record<ActionKey, () => void>> = {
     validate: () => mutations.validate.mutate({}),

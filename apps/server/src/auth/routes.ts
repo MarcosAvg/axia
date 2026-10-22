@@ -47,6 +47,7 @@ function actorResponse(actor: Actor) {
       permission: grant.id,
       scope: grant.scope,
     })),
+    technicianId: actor.technicianId,
   }
 }
 

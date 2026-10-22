@@ -15,6 +15,8 @@ export interface Identity {
   active: boolean
   roles: string[]
   permissions: Permission[]
+  /** Perfil de técnico vinculado, si existe. */
+  technicianId: string | null
   /** Zona horaria de la instancia, para mostrar fechas de forma consistente. */
   timezone: string
   mustChangePassword: boolean

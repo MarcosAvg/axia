@@ -13,6 +13,8 @@ import {
   UserIcon,
   UsersIcon,
 } from 'lucide-react'
+import { can } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import { shellMessages } from '../i18n'
 
 /** Rutas simples del armazón (sin parámetros de búsqueda obligatorios). */
@@ -33,6 +35,7 @@ interface NavItemBase {
   label: string
   icon: LucideIcon
   permission?: string
+  visible?: (identity: Identity | null) => boolean
 }
 
 /**
@@ -52,6 +55,15 @@ export interface NavSection {
 }
 
 const { nav } = shellMessages
+
+/** Aplica el permiso y la condición de perfil de cada destino. */
+export function isNavItemVisible(
+  item: NavItem,
+  identity: Identity | null,
+): boolean {
+  if (item.permission && !can(identity, item.permission)) return false
+  return item.visible ? item.visible(identity) : true
+}
 
 export const NAV_SECTIONS: NavSection[] = [
   {
@@ -79,6 +91,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.myWork,
         icon: HardHatIcon,
         permission: 'ticket.view',
+        visible: (identity) => Boolean(identity?.technicianId),
       },
       {
         id: 'inbox',
@@ -87,6 +100,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.inbox,
         icon: InboxIcon,
         permission: 'ticket.view',
+        visible: (identity) => can(identity, 'ticket.take_offer'),
       },
     ],
   },
@@ -121,7 +135,7 @@ export const NAV_SECTIONS: NavSection[] = [
         to: '/admin/roles',
         label: nav.roles,
         icon: ShieldCheckIcon,
-        permission: 'catalog.manage',
+        permission: 'role.manage',
       },
       {
         id: 'users',
@@ -129,7 +143,7 @@ export const NAV_SECTIONS: NavSection[] = [
         to: '/admin/usuarios',
         label: nav.users,
         icon: UsersIcon,
-        permission: 'catalog.manage',
+        permission: 'user.manage',
       },
       {
         id: 'scopes',
@@ -137,7 +151,7 @@ export const NAV_SECTIONS: NavSection[] = [
         to: '/admin/ambitos',
         label: nav.scopes,
         icon: Building2Icon,
-        permission: 'catalog.manage',
+        permission: 'assignment.manage',
       },
       {
         id: 'calendars',

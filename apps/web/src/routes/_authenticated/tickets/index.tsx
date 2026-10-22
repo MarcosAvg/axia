@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
-import { RequirePermission } from '@/features/auth'
+import { can, RequirePermission, useAuth } from '@/features/auth'
 import { useBuildings, useCategories } from '@/features/catalogs'
 import {
   TicketFilters,
@@ -20,6 +20,7 @@ export const Route = createFileRoute('/_authenticated/tickets/')({
 })
 
 function TicketsPage() {
+  const { identity } = useAuth()
   const search = Route.useSearch()
   const navigate = useNavigate()
   const buildings = useBuildings()
@@ -45,9 +46,11 @@ function TicketsPage() {
           title={ticketMessages.list.title}
           description={ticketMessages.list.subtitle}
           actions={
-            <Button asChild className="min-h-11">
-              <Link to="/tickets/nuevo">{ticketMessages.list.newAction}</Link>
-            </Button>
+            can(identity, 'ticket.create') ? (
+              <Button asChild className="min-h-11">
+                <Link to="/tickets/nuevo">{ticketMessages.list.newAction}</Link>
+              </Button>
+            ) : undefined
           }
         />
         <TicketFilters

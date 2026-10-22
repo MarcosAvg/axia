@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { can } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import {
   EMPTY_FILTERS,
   summarize,
@@ -81,10 +83,13 @@ export interface DashboardData {
   activity: ActivityItem[]
 }
 
-/** Datos del panel: indicadores, tiquets activos y actividad (RLS limita). */
-export function useDashboardData(userId: string | undefined): DashboardData {
-  const myWork = useMyWork(userId)
-  const offers = useMyOffers(userId)
+/** Datos del panel: indicadores, tiquets activos y actividad según el rol. */
+export function useDashboardData(identity: Identity | null): DashboardData {
+  const userId = identity?.userId
+  const canViewOffers = can(identity, 'ticket.take_offer')
+  const canViewMetrics = can(identity, 'metrics.view')
+  const myWork = useMyWork(userId, Boolean(identity?.technicianId))
+  const offers = useMyOffers(userId, canViewOffers)
   const active = useTicketsList({ statuses: ACTIVE_STATUSES }, 1)
   const paused = useTicketsList({ statuses: ['paused'] }, 1)
   const attended = useTicketsList({ statuses: ['attended'] }, 1)
@@ -94,8 +99,8 @@ export function useDashboardData(userId: string | undefined): DashboardData {
   )
   const closed = useTicketsList({ statuses: ['closed'] }, 1)
   const metrics = useMetricsTickets()
-  const sla = useSla(EMPTY_FILTERS)
-  const satisfaction = useSatisfaction(EMPTY_FILTERS)
+  const sla = useSla(EMPTY_FILTERS, canViewMetrics)
+  const satisfaction = useSatisfaction(EMPTY_FILTERS, canViewMetrics)
   const activity = useRecentActivity()
 
   const tickets = or(metrics.data, [])

@@ -27,6 +27,7 @@ type MeResponse = {
     mustChangePassword: boolean
     roles: string[]
     permissions: Permission[]
+    technicianId: string | null
   }
 }
 

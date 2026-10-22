@@ -18,6 +18,7 @@ const identityResponseSchema = z.object({
     active: z.boolean(),
     roles: z.array(z.string()),
     permissions: z.array(permissionSchema),
+    technicianId: z.string().nullable(),
     timezone: z.string(),
     mustChangePassword: z.boolean(),
   }),
@@ -86,6 +87,7 @@ export function parseIdentity(raw: unknown): Identity {
     active: data.user.active,
     roles: data.user.roles,
     permissions: data.user.permissions as Permission[],
+    technicianId: data.user.technicianId,
     timezone: data.user.timezone,
     mustChangePassword: data.user.mustChangePassword,
   }

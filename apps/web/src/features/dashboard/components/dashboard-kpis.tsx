@@ -9,7 +9,7 @@ import {
   timeValue,
 } from '@/lib/time-aggregation'
 import type { TimeAggregation } from '@/lib/time-aggregation'
-import { can } from '@/features/auth'
+import { can, canAny } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import {
   formatMinutes,
@@ -151,8 +151,12 @@ function buildKpis(
   aggregation: TimeAggregation,
 ): Kpi[] {
   const { work, offers, totals, summary, sla, satisfaction } = input
-  const isAdmin =
-    can(identity, 'user.manage') || can(identity, 'catalog.manage')
+  const isAdmin = canAny(identity, [
+    'catalog.manage',
+    'user.manage',
+    'role.manage',
+    'assignment.manage',
+  ])
   const isSupervisor =
     can(identity, 'ticket.take_offer') ||
     can(identity, 'ticket.assign_technician')

@@ -4,6 +4,7 @@ import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
+import { RequirePermission } from '@/features/auth'
 import {
   NotificationList,
   notificationMessages,
@@ -18,6 +19,14 @@ export const Route = createFileRoute('/_authenticated/avisos')({
 })
 
 function NotificationsPage() {
+  return (
+    <RequirePermission permission="ticket.view">
+      <NotificationsContent />
+    </RequirePermission>
+  )
+}
+
+function NotificationsContent() {
   const notifications = useNotifications()
   const unread = useUnreadCount()
   const markRead = useMarkNotificationRead()

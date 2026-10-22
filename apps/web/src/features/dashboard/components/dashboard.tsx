@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { can, useAuth } from '@/features/auth'
+import { can, canAny, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { useDashboardData } from '../hooks/use-dashboard'
 import { dashboardMessages as t } from '../i18n'
@@ -16,8 +16,15 @@ import { DashboardKpis } from './dashboard-kpis'
 import { DashboardSections } from './dashboard-sections'
 import type { DashboardRole } from './dashboard-sections'
 
+const ADMIN_PERMISSIONS = [
+  'catalog.manage',
+  'user.manage',
+  'role.manage',
+  'assignment.manage',
+]
+
 function dashboardRole(identity: Identity | null): DashboardRole {
-  if (can(identity, 'user.manage') || can(identity, 'catalog.manage')) {
+  if (canAny(identity, ADMIN_PERMISSIONS)) {
     return 'admin'
   }
   if (can(identity, 'ticket.start') || can(identity, 'ticket.attend')) {
@@ -54,7 +61,7 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
           <Link to="/metricas">{t.actions.metrics}</Link>
         </Button>
       ) : null}
-      {can(identity, 'catalog.manage') ? (
+      {canAny(identity, ADMIN_PERMISSIONS) ? (
         <Button asChild variant="outline" className="min-h-11">
           <Link to="/admin">{t.actions.admin}</Link>
         </Button>
@@ -81,7 +88,7 @@ function DashboardLoading() {
 /** Panel de inicio: indicadores, tiquets activos y actividad del usuario. */
 export function Dashboard() {
   const { identity } = useAuth()
-  const data = useDashboardData(identity?.userId)
+  const data = useDashboardData(identity)
   const queryClient = useQueryClient()
 
   return (

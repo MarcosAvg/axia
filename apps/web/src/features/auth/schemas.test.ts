@@ -52,6 +52,7 @@ describe('parseIdentity', () => {
       mustChangePassword: false,
       roles: ['requester'],
       permissions: [{ permission: 'ticket.view', scope: 'own' }],
+      technicianId: null,
     },
   }
 
@@ -64,6 +65,7 @@ describe('parseIdentity', () => {
       active: true,
       roles: ['requester'],
       permissions: [{ permission: 'ticket.view', scope: 'own' }],
+      technicianId: null,
       timezone: 'America/Mexico_City',
       mustChangePassword: false,
     })

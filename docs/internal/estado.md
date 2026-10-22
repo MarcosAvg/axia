@@ -8,7 +8,8 @@
 
 ## En curso
 
-**Sin trabajo en curso.** La Tanda B3 quedó integrada y la compuerta está en verde.
+**Sin trabajo en curso.** La Tanda C1 (coherencia de roles y permisos) quedó integrada y la
+compuerta está en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -50,7 +51,10 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **UI (Tanda B3):** franja de avance por etapas, orden móvil acciones → estado → actividad →
   evidencias, visor ampliado de evidencias sin recorte y validación por campo de las acciones
   incompletas.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 249 web, 29 Playwright y 131 de integración contra
+- **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
+  solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
+  permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 252 web, 37 Playwright y 131 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

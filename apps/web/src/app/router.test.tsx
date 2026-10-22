@@ -41,6 +41,7 @@ const administrator = {
     { permission: 'user.manage', scope: 'all' as const },
     { permission: 'catalog.manage', scope: 'all' as const },
   ],
+  technicianId: null,
   timezone: 'America/Mexico_City',
   mustChangePassword: false,
 }
@@ -52,6 +53,7 @@ const supervisor = {
   active: true,
   roles: ['supervisor'],
   permissions: [{ permission: 'ticket.view', scope: 'buildings' as const }],
+  technicianId: null,
   timezone: 'America/Mexico_City',
   mustChangePassword: false,
 }

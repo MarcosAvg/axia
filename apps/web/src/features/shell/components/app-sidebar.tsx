@@ -10,9 +10,10 @@ import {
 import { cn } from 'cn'
 import { ToneDot } from '@/components/shared/tone'
 import { toneForId } from '@/lib/tones'
-import { can, useAuth } from '@/features/auth'
+import { useAuth } from '@/features/auth'
+import type { Identity } from '@/features/auth'
 import { shellMessages } from '../i18n'
-import { NAV_SECTIONS } from './nav-items'
+import { isNavItemVisible, NAV_SECTIONS } from './nav-items'
 import type { NavItem, NavSection } from './nav-items'
 
 interface NavLinkProps {
@@ -82,15 +83,15 @@ function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
 function SectionLinks({
   section,
   collapsed,
-  canAccess,
+  identity,
   onNavigate,
 }: {
   section: NavSection
   collapsed: boolean
-  canAccess: (permission?: string) => boolean
+  identity: Identity | null
   onNavigate?: () => void
 }) {
-  const items = section.items.filter((item) => canAccess(item.permission))
+  const items = section.items.filter((item) => isNavItemVisible(item, identity))
   if (items.length === 0) return null
 
   return (
@@ -129,8 +130,6 @@ export function AppSidebar({
   onNavigate,
 }: AppSidebarProps) {
   const { identity } = useAuth()
-  const canAccess = (permission?: string) =>
-    permission ? can(identity, permission) : true
 
   return (
     <div className="flex h-full flex-col gap-1 border-sidebar-border bg-sidebar text-sidebar-foreground">
@@ -170,7 +169,7 @@ export function AppSidebar({
             key={section.id}
             section={section}
             collapsed={collapsed}
-            canAccess={canAccess}
+            identity={identity}
             onNavigate={onNavigate}
           />
         ))}

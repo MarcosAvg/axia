@@ -18,7 +18,7 @@ tiquets respetan permisos y alcance. Un recurso fuera de alcance responde 404.
 |---|---|---|
 | `POST` | `/api/auth/login` | Inicio de sesión |
 | `POST` | `/api/auth/logout` | Cierre de sesión |
-| `GET` | `/api/auth/me` | Identidad, roles y permisos |
+| `GET` | `/api/auth/me` | Identidad, roles, permisos y perfil de técnico |
 | `PATCH` | `/api/auth/profile` | Nombre y teléfono propios |
 | `POST` | `/api/auth/change-password` | Cambio de contraseña |
 

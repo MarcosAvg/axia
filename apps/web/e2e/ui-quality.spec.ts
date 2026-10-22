@@ -8,7 +8,6 @@ const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const AUTHENTICATED_ROUTES = [
   '/',
   '/tickets',
-  '/mi-trabajo',
   '/inbox',
   '/metricas',
   '/admin',
@@ -22,9 +21,9 @@ const AUTHENTICATED_ROUTES = [
   '/tickets/nuevo',
 ]
 
-async function signIn(page: Page) {
+async function signIn(page: Page, username = 'demo.admin') {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill('demo.admin')
+  await page.getByLabel('Usuario').fill(username)
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
@@ -65,6 +64,14 @@ for (const width of [320, 360, 390, 768, 1440]) {
     }
   })
 }
+
+test('mi trabajo de técnico no desborda en móvil', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 })
+  await signIn(page, 'demo.technician')
+  await page.goto('/mi-trabajo')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+})
 
 test('la barra superior tiene controles táctiles y no desborda', async ({
   page,

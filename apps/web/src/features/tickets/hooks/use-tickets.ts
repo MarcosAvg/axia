@@ -110,19 +110,19 @@ export function useCheckDuplicates() {
   })
 }
 
-export function useMyWork(userId: string | undefined) {
+export function useMyWork(userId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ticketKeys.myWork(userId ?? ''),
     queryFn: () => (userId ? fetchMyWork(userId) : Promise.resolve([])),
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && enabled,
   })
 }
 
-export function useMyOffers(userId: string | undefined) {
+export function useMyOffers(userId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ticketKeys.myOffers(userId ?? ''),
     queryFn: () => (userId ? fetchMyOffers(userId) : Promise.resolve([])),
-    enabled: Boolean(userId),
+    enabled: Boolean(userId) && enabled,
   })
 }
 

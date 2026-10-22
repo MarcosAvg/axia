@@ -13,6 +13,7 @@ import {
 import { PageHeader } from '@/components/shared/page-header'
 import { Badge } from '@/components/ui/badge'
 import { adminMessages } from '@/features/admin'
+import { can, useAuth } from '@/features/auth'
 
 export const Route = createFileRoute('/_authenticated/admin/')({
   component: AdminHome,
@@ -31,6 +32,7 @@ interface AdminEntry {
   title: string
   description: string
   to: AdminPath | '/admin/catalogos'
+  permission: string
   search?: { catalog: string }
   disabled?: boolean
 }
@@ -52,6 +54,7 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         title: nav.catalogs,
         description: descriptions.catalogs,
         to: '/admin/catalogos',
+        permission: 'catalog.manage',
         search: { catalog: 'teams' },
       },
       {
@@ -59,12 +62,14 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         title: nav.calendars,
         description: descriptions.calendars,
         to: '/admin/calendarios',
+        permission: 'catalog.manage',
       },
       {
         icon: PlugIcon,
         title: nav.integrations,
         description: descriptions.integrations,
         to: '/admin/integraciones',
+        permission: 'catalog.manage',
         disabled: true,
       },
       {
@@ -72,6 +77,7 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         title: nav.settings,
         description: descriptions.settings,
         to: '/admin/configuracion',
+        permission: 'catalog.manage',
       },
     ],
   },
@@ -84,18 +90,21 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         title: nav.roles,
         description: descriptions.roles,
         to: '/admin/roles',
+        permission: 'role.manage',
       },
       {
         icon: UsersIcon,
         title: nav.users,
         description: descriptions.users,
         to: '/admin/usuarios',
+        permission: 'user.manage',
       },
       {
         icon: Building2Icon,
         title: nav.scopes,
         description: descriptions.scopes,
         to: '/admin/ambitos',
+        permission: 'assignment.manage',
       },
     ],
   },
@@ -145,13 +154,21 @@ function AdminCard({ entry }: { entry: AdminEntry }) {
 }
 
 function AdminHome() {
+  const { identity } = useAuth()
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((entry) => can(identity, entry.permission)),
+    }))
+    .filter((group) => group.items.length > 0)
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={adminMessages.title}
         description={adminMessages.subtitle}
       />
-      {groups.map((group) => (
+      {visibleGroups.map((group) => (
         <section key={group.label} className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
             {group.label}

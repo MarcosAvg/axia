@@ -32,11 +32,13 @@ function useFilteredQuery<T>(
   key: readonly unknown[],
   filters: MetricsFilters,
   fn: (filters: MetricsFilters) => Promise<T>,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [...key, filters],
     queryFn: () => fn(filters),
     placeholderData: keepPreviousData,
+    enabled,
   })
 }
 
@@ -71,17 +73,23 @@ export function useDuplicates(filters: MetricsFilters) {
   }
 }
 
-export function useSatisfaction(filters: MetricsFilters) {
-  return useFilteredQuery(metricsKeys.satisfaction, filters, fetchSatisfaction)
+export function useSatisfaction(filters: MetricsFilters, enabled = true) {
+  return useFilteredQuery(
+    metricsKeys.satisfaction,
+    filters,
+    fetchSatisfaction,
+    enabled,
+  )
 }
 
-export function useSla(filters: MetricsFilters) {
+export function useSla(filters: MetricsFilters, enabled = true) {
   return {
-    summary: useFilteredQuery(metricsKeys.sla, filters, fetchSla),
+    summary: useFilteredQuery(metricsKeys.sla, filters, fetchSla, enabled),
     byPriority: useFilteredQuery(
       metricsKeys.slaByPriority,
       filters,
       fetchSlaByPriority,
+      enabled,
     ),
   }
 }

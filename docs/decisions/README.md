@@ -80,6 +80,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0076](0076-semillas-referencia-y-demo.md) | Semillas de referencia y demo |
 | [0077](0077-pruebas-postgresql-real.md) | Pruebas contra PostgreSQL real |
 | [0078](0078-corte-final-frontend.md) | Corte final del frontend |
+| [0079](0079-navegacion-por-capacidad.md) | Navegación por capacidad y permisos |
 
 ## Archivo
 

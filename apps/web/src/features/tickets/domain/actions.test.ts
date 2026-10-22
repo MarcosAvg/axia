@@ -18,6 +18,7 @@ function identityWith(permissions: string[]): Identity {
       permission,
       scope: 'all' as const,
     })),
+    technicianId: null,
     timezone: 'America/Mexico_City',
     mustChangePassword: false,
   }

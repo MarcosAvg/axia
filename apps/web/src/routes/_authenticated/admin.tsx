@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { RequirePermission } from '@/features/auth'
+import { RequireAnyPermission } from '@/features/auth'
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminLayout,
@@ -7,8 +7,15 @@ export const Route = createFileRoute('/_authenticated/admin')({
 
 function AdminLayout() {
   return (
-    <RequirePermission permission="catalog.manage">
+    <RequireAnyPermission
+      permissions={[
+        'catalog.manage',
+        'user.manage',
+        'role.manage',
+        'assignment.manage',
+      ]}
+    >
       <Outlet />
-    </RequirePermission>
+    </RequireAnyPermission>
   )
 }

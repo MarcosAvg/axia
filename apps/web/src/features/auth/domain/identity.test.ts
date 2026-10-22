@@ -9,6 +9,7 @@ function makeIdentity(permissions: Permission[]): Identity {
     active: true,
     roles: ['supervisor'],
     permissions,
+    technicianId: null,
     timezone: 'America/Mexico_City',
     mustChangePassword: false,
   }
