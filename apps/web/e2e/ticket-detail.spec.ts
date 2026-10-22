@@ -40,6 +40,15 @@ test('el detalle muestra avance, valida acciones y amplía evidencias', async ({
   )) as { scroll: number; client: number }
   expect(width.scroll).toBe(width.client)
 
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  const sectionBox = async (text: string) =>
+    page.locator('main h2').filter({ hasText: text }).first().boundingBox()
+  const actionsBox = await sectionBox('Acciones')
+  const captureBox = await sectionBox('Captura')
+  const timelineBox = await sectionBox('Línea de tiempo')
+  expect(actionsBox?.x ?? 0).toBeGreaterThan(captureBox?.x ?? 0)
+  expect(timelineBox?.y ?? 0).toBeGreaterThan(captureBox?.y ?? 0)
+
   await page.getByRole('button', { name: 'Comentar' }).click()
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Completa este campo.')).toBeVisible()

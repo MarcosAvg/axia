@@ -47,6 +47,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Navegación por rol: Mi trabajo solo con perfil de técnico, Bandeja solo con permiso de tomar
   ofertas, “Nuevo tiquet” solo con permiso de creación y administración alineada con sus permisos
   específicos. El panel deja de consultar métricas y ofertas que el rol no puede ver.
+- Detalle del tiquet: las acciones se mueven a un rail derecho sticky en escritorio y la línea de
+  tiempo pasa al bloque principal; el orden móvil se conserva.
 
 ### Retirado
 
