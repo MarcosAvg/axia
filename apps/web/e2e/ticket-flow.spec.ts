@@ -60,7 +60,9 @@ test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
     .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
-  await expect(page.getByText('Asignado', { exact: true })).toBeVisible()
+  await expect(
+    page.getByText('Asignado', { exact: true }).first(),
+  ).toBeVisible()
   await signOut(page)
 
   // El técnico ve el tiquet en su bandeja, sube evidencia e inicia.

@@ -11,6 +11,8 @@ import {
   useTechnicians,
 } from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
+import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
+import type { ActionField } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType } from '../domain/types'
@@ -18,9 +20,7 @@ import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
 import { TicketActionFields } from './ticket-action-fields'
-import type { ActionValues } from './ticket-action-fields'
 import {
-  EMPTY,
   actionFormState,
   mutationFor,
   reasonUseFor,
@@ -97,6 +97,7 @@ function ActionFormView({
   serviceTypes,
   motiveReasonId,
   values,
+  validationErrors,
   onChange,
   error,
   isPending,
@@ -114,6 +115,7 @@ function ActionFormView({
   serviceTypes: { id: string; name: string }[]
   motiveReasonId: string | null
   values: ActionValues
+  validationErrors: Partial<Record<ActionField, string>>
   onChange: (patch: Partial<ActionValues>) => void
   error: unknown
   isPending: boolean
@@ -136,6 +138,7 @@ function ActionFormView({
         serviceTypes={serviceTypes}
         motiveReasonId={motiveReasonId}
         values={values}
+        errors={validationErrors}
         onChange={onChange}
       />
       <ActionFormFooter error={error} isPending={isPending} onClose={onClose} />
@@ -163,30 +166,30 @@ function usePauseMotiveReasonId(
   return state.data?.motiveId ?? null
 }
 
-/** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
-export function TicketActionForm({
-  ticketId,
-  cycle,
-  action,
-  subjectTechnicianId,
-  excludeIds,
-  onClose,
-}: {
+interface TicketActionFormProps {
   ticketId: string
   cycle: number
   action: ActionKey
   subjectTechnicianId?: string
   excludeIds?: string[]
   onClose: () => void
-}) {
+}
+
+function useTicketActionForm({
+  ticketId,
+  cycle,
+  action,
+  subjectTechnicianId,
+  excludeIds,
+  onClose,
+}: TicketActionFormProps) {
   const actions = useTicketActions(ticketId, subjectTechnicianId)
   const technicians = useTechnicians()
   const priorities = usePriorities()
   const reasons = useReasons(reasonUseFor(action))
   const serviceTypes = useServiceTypes()
   const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
-  const [values, setValues] = useState<ActionValues>(EMPTY)
-  const mutation = mutationFor(action, actions)
+  const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
   const submission = useActionSubmission({
     actions,
     values,
@@ -195,34 +198,54 @@ export function TicketActionForm({
     cycle,
     onClose,
   })
-
-  const state = actionFormState(action, mutation, submission.uploading)
-  if (!state.render) return null
-
-  const onChange = (patch: Partial<ActionValues>) =>
+  const state = actionFormState(
+    action,
+    mutationFor(action, actions),
+    submission.uploading,
+  )
+  const onChange = (patch: Partial<ActionValues>) => {
+    submission.clearValidation()
     setValues((current) => ({ ...current, ...patch }))
-  const techniciansList = listTechnicians(technicians.data, action, excludeIds)
+  }
+  return {
+    state,
+    submission,
+    values,
+    onChange,
+    technicians: listTechnicians(technicians.data, action, excludeIds),
+    reasons: reasons.data ?? [],
+    priorities: priorities.data ?? [],
+    serviceTypes: serviceTypes.data ?? [],
+    motiveReasonId,
+  }
+}
+
+/** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
+export function TicketActionForm(props: TicketActionFormProps) {
+  const form = useTicketActionForm(props)
+  if (!form.state.render) return null
 
   return (
     <ActionFormView
-      evidenceType={submission.evidenceType}
-      evidenceError={submission.evidenceError}
-      evidenceFile={submission.file}
-      onEvidenceChange={submission.setFile}
-      action={action}
-      technicians={techniciansList}
-      reasons={reasons.data ?? []}
-      priorities={priorities.data ?? []}
-      serviceTypes={serviceTypes.data ?? []}
-      motiveReasonId={motiveReasonId}
-      values={values}
-      onChange={onChange}
-      error={state.error}
-      isPending={state.isPending}
+      evidenceType={form.submission.evidenceType}
+      evidenceError={form.submission.evidenceError}
+      evidenceFile={form.submission.file}
+      onEvidenceChange={form.submission.setFile}
+      action={props.action}
+      technicians={form.technicians}
+      reasons={form.reasons}
+      priorities={form.priorities}
+      serviceTypes={form.serviceTypes}
+      motiveReasonId={form.motiveReasonId}
+      values={form.values}
+      validationErrors={form.submission.validationErrors}
+      onChange={form.onChange}
+      error={form.state.error}
+      isPending={form.state.isPending}
       onSubmit={(event) => {
-        void submission.submit(event)
+        void form.submission.submit(event)
       }}
-      onClose={onClose}
+      onClose={props.onClose}
     />
   )
 }

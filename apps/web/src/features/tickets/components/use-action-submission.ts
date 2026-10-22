@@ -1,25 +1,100 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import type { ActionValues } from '../domain/action-values'
+import type { ActionField } from '../domain/action-validation'
+import { missingActionFields } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
 import { evidenceForAction } from '../domain/evidence'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { useUploadEvidence } from '../hooks/use-evidence'
-import type { ActionValues } from './ticket-action-fields'
-import { buildSubmitHandlers } from './ticket-action-handlers'
 import type { Mutations } from './ticket-action-handlers'
+import { buildSubmitHandlers } from './ticket-action-handlers'
 
-interface UseActionSubmission {
-  actions: Mutations
-  values: ActionValues
+interface SubmitContext {
+  event: FormEvent
   action: ActionKey
+  values: ActionValues
+  file: File | null
+  actions: Mutations
   ticketId: string
   cycle: number
   onClose: () => void
+  upload: ReturnType<typeof useUploadEvidence>
+  setFilePending: (pending: boolean) => void
+  setEvidenceError: (message: string | null) => void
+  setValidationErrors: (errors: Partial<Record<ActionField, string>>) => void
 }
 
-/** Estado y envío de una acción: sube la evidencia que la acción exige y luego la ejecuta. */
+function errorsForMissing(
+  missing: ActionField[],
+): Partial<Record<ActionField, string>> {
+  return Object.fromEntries(
+    missing
+      .filter((field) => field !== 'evidence')
+      .map((field) => [field, ticketMessages.actionFields.requiredField]),
+  ) as Partial<Record<ActionField, string>>
+}
+
+async function uploadEvidenceForAction({
+  action,
+  values,
+  file,
+  ticketId,
+  cycle,
+  upload,
+  setFilePending,
+  setEvidenceError,
+}: SubmitContext): Promise<boolean> {
+  const evidenceType = evidenceForAction(action)
+  if (!evidenceType) return true
+  if (!file) return false
+
+  setFilePending(true)
+  try {
+    await upload.mutateAsync({
+      ticketId,
+      cycle,
+      type: evidenceType,
+      file,
+      note: action === 'record_progress' ? values.text.trim() || null : null,
+    })
+    return true
+  } catch (error) {
+    setEvidenceError(toTicketError(error).message)
+    return false
+  } finally {
+    setFilePending(false)
+  }
+}
+
+async function submitAction(context: SubmitContext) {
+  context.event.preventDefault()
+  const missing = missingActionFields(
+    context.action,
+    context.values,
+    Boolean(context.file),
+  )
+  context.setValidationErrors(errorsForMissing(missing))
+  context.setEvidenceError(
+    missing.includes('evidence')
+      ? ticketMessages.actionFields.evidenceRequired
+      : null,
+  )
+  if (missing.length > 0) return
+
+  const handler = buildSubmitHandlers(context.actions, context.values, {
+    onSuccess: context.onClose,
+  })[context.action]
+  const isProgress = context.action === 'record_progress'
+  if (!handler && !isProgress) return
+  if (!(await uploadEvidenceForAction(context))) return
+  if (isProgress) context.onClose()
+  else handler?.()
+}
+
+/** Estado y envío de una acción: valida, sube la evidencia y luego ejecuta. */
 export function useActionSubmission({
   actions,
   values,
@@ -27,57 +102,57 @@ export function useActionSubmission({
   ticketId,
   cycle,
   onClose,
-}: UseActionSubmission): {
-  evidenceType: EvidenceType | undefined
-  evidenceError: string | null
-  file: File | null
-  uploading: boolean
-  setFile: (file: File | null) => void
-  submit: (event: FormEvent) => Promise<void>
-} {
+}: {
+  actions: Mutations
+  values: ActionValues
+  action: ActionKey
+  ticketId: string
+  cycle: number
+  onClose: () => void
+}) {
   const upload = useUploadEvidence()
-  const [file, setFile] = useState<File | null>(null)
+  const [file, setFileState] = useState<File | null>(null)
   const [evidenceError, setEvidenceError] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<
+    Partial<Record<ActionField, string>>
+  >({})
   const [uploading, setUploading] = useState(false)
-  const evidenceType = evidenceForAction(action)
-  const isProgress = action === 'record_progress'
+  const evidenceType: EvidenceType | undefined = evidenceForAction(action)
 
-  async function submit(event: FormEvent) {
-    event.preventDefault()
-    const handler = buildSubmitHandlers(actions, values, {
-      onSuccess: onClose,
-    })[action]
-    if (!handler && !isProgress) return
-
-    if (evidenceType) {
-      if (!file) {
-        setEvidenceError(ticketMessages.actionFields.evidenceRequired)
-        return
-      }
-      setEvidenceError(null)
-      setUploading(true)
-      try {
-        await upload.mutateAsync({
-          ticketId,
-          cycle,
-          type: evidenceType,
-          file,
-          note: isProgress ? values.text.trim() || null : null,
-        })
-      } catch (error) {
-        setEvidenceError(toTicketError(error).message)
-        setUploading(false)
-        return
-      }
-      setUploading(false)
-    }
-
-    if (isProgress) {
-      onClose()
-      return
-    }
-    handler?.()
+  function clearValidation() {
+    setValidationErrors({})
+    setEvidenceError(null)
   }
 
-  return { evidenceType, evidenceError, file, uploading, setFile, submit }
+  function setFile(next: File | null) {
+    clearValidation()
+    setFileState(next)
+  }
+
+  const submit = (event: FormEvent) =>
+    submitAction({
+      event,
+      action,
+      values,
+      file,
+      actions,
+      ticketId,
+      cycle,
+      onClose,
+      upload,
+      setFilePending: setUploading,
+      setEvidenceError,
+      setValidationErrors,
+    })
+
+  return {
+    evidenceType,
+    evidenceError,
+    validationErrors,
+    file,
+    uploading,
+    setFile,
+    clearValidation,
+    submit,
+  }
 }

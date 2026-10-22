@@ -4,23 +4,10 @@ import type {
   ClockClass,
   EvidenceType,
   EventType,
-  TicketStatus,
   TimeSpanKind,
 } from './domain/types'
 
-export const statusLabels: Record<TicketStatus, string> = {
-  registered: 'Registrado',
-  with_supervisor: 'Tomado por supervisor',
-  assigned: 'Asignado',
-  in_progress: 'En proceso',
-  paused: 'Pausado',
-  attended: 'Atendido',
-  under_claim: 'En reclamación',
-  closed: 'Cerrado',
-  rejected: 'Rechazado',
-  cancelled: 'Cancelado',
-  duplicate: 'Duplicado',
-}
+export { statusLabels } from './status-i18n'
 
 export const eventLabels: Record<EventType, string> = {
   created: 'Registro',
@@ -264,6 +251,7 @@ export const ticketMessages = {
     submit: 'Confirmar',
     cancel: 'Cancelar',
     required: 'Completa los campos obligatorios.',
+    requiredField: 'Completa este campo.',
   },
   claimResolutions: {
     upheld: 'Procedente (reabrir)',
@@ -283,6 +271,7 @@ export const ticketMessages = {
     submit: 'Subir evidencia',
     uploading: 'Subiendo…',
     pending: 'Pendiente de subir',
+    view: 'Ampliar evidencia',
   },
   rating: {
     title: 'Calificación',

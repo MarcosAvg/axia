@@ -158,6 +158,17 @@ cancelación o marca de duplicado.
 | Calificación | Satisfacción de 1 a 5 con comentario, opcional |
 | Notificaciones | Avisos por destinatario, con reglas configurables |
 
+### La pantalla de detalle
+
+- Una **franja de avance** muestra la etapa actual del flujo, el número de paso y, cuando aplica, la
+  pausa o el descarte. El estado exacto siempre aparece como insignia.
+- En pantallas angostas el orden es **acciones → estado → actividad → evidencias**; en escritorio la
+  actividad se mantiene en la columna lateral.
+- Las evidencias de imagen se ven completas, sin recorte. Al pulsarlas se abre un visor ampliado que
+  se cierra con Escape o con el botón de cerrar.
+- Los formularios de acción validan sus campos obligatorios antes de enviar y muestran el error en el
+  campo correspondiente; una acción incompleta no llega al servidor.
+
 ## 7. Tiempos
 
 Los tramos se distinguen por tipo: respuesta del supervisor, reasignación, asignación de técnico,

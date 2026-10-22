@@ -1,7 +1,7 @@
 import type { ReasonUse } from '@/features/catalogs'
+import type { ActionValues } from '../domain/action-values'
 import type { ActionKey } from '../domain/actions'
 import type { useTicketActions } from '../hooks/use-ticket-actions'
-import type { ActionValues } from './ticket-action-fields'
 
 export type Mutations = ReturnType<typeof useTicketActions>
 export type MutateOptions = { onSuccess: () => void }
@@ -23,16 +23,6 @@ const REASON_USE_BY_ACTION: Partial<Record<ActionKey, ReasonUse>> = {
   resolve_claim: 'claim_outcome',
   reactivate: 'reactivation',
   add_auxiliary: 'auxiliary_support',
-}
-
-export const EMPTY: ActionValues = {
-  technicianId: '',
-  reasonId: '',
-  priorityId: '',
-  serviceTypeId: '',
-  note: '',
-  text: '',
-  resolution: 'upheld',
 }
 
 export function reasonUseFor(action: ActionKey): ReasonUse {

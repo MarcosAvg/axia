@@ -3,22 +3,13 @@ import type { SelectOption } from '@/components/shared/form-fields'
 import { SelectField, TextAreaField } from '@/components/shared/form-fields'
 import { indentReasons, rootReasons } from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
+import type { ActionValues } from '../domain/action-values'
+import type { ActionField } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
 import { CLAIM_RESOLUTIONS } from '../domain/types'
-import type { ClaimResolution } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { pauseMessages } from '../pause-i18n'
 import { ReasonCascade } from './reason-cascade'
-
-export interface ActionValues {
-  technicianId: string
-  reasonId: string
-  priorityId: string
-  serviceTypeId: string
-  note: string
-  text: string
-  resolution: ClaimResolution
-}
 
 export interface TicketActionFieldsProps {
   action: ActionKey
@@ -28,6 +19,7 @@ export interface TicketActionFieldsProps {
   serviceTypes: { id: string; name: string }[]
   motiveReasonId?: string | null
   values: ActionValues
+  errors?: Partial<Record<ActionField, string>>
   onChange: (patch: Partial<ActionValues>) => void
 }
 
@@ -71,12 +63,14 @@ function SelectBlock({
   label,
   options,
   value,
+  error,
   onChange,
 }: {
   id: string
   label: string
   options: SelectOption[]
   value: string
+  error?: string
   onChange: (value: string) => void
 }) {
   return (
@@ -86,6 +80,7 @@ function SelectBlock({
       placeholder={PLACEHOLDER}
       options={options}
       value={value}
+      error={error}
       onChange={(event) => onChange(event.target.value)}
     />
   )
@@ -95,11 +90,13 @@ function TextBlock({
   id,
   label,
   value,
+  error,
   onChange,
 }: {
   id: string
   label: string
   value: string
+  error?: string
   onChange: (value: string) => void
 }) {
   return (
@@ -108,6 +105,7 @@ function TextBlock({
       label={label}
       rows={3}
       value={value}
+      error={error}
       onChange={(event) => onChange(event.target.value)}
     />
   )
@@ -149,7 +147,7 @@ function reasonOptionsFor(
 }
 
 function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
-  const { action, values, onChange, reasons } = props
+  const { action, values, onChange, reasons, errors } = props
   if (action === 'resume' || action === 'advance_pause') {
     return (
       <ReasonCascade
@@ -158,6 +156,7 @@ function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
         reasons={reasons}
         rootId={props.motiveReasonId ?? null}
         value={values.reasonId}
+        error={errors?.reason}
         onChange={(reasonId) => onChange({ reasonId })}
       />
     )
@@ -170,13 +169,14 @@ function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
       label={fields.reason}
       options={reasonOptionsFor(action, reasons)}
       value={values.reasonId}
+      error={errors?.reason}
       onChange={(reasonId) => onChange({ reasonId })}
     />
   )
 }
 
 function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
-  const { action, values, onChange, technicians, priorities } = props
+  const { action, values, onChange, technicians, priorities, errors } = props
   const blocks: ReactNode[] = []
   const technicianOptions = toOptions(
     technicians.map((t) => ({ id: t.id, label: t.fullName })),
@@ -193,6 +193,7 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
         label={fields.technician}
         options={technicianOptions}
         value={values.technicianId}
+        error={errors?.technician}
         onChange={(technicianId) => onChange({ technicianId })}
       />,
     )
@@ -210,6 +211,7 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
         label={fields.priority}
         options={priorityOptions}
         value={values.priorityId}
+        error={errors?.priority}
         onChange={(priorityId) => onChange({ priorityId })}
       />,
     )
@@ -233,6 +235,7 @@ function selectFields(props: TicketActionFieldsProps): ReactNode[] {
         label={fields.serviceType}
         options={serviceOptions}
         value={props.values.serviceTypeId}
+        error={props.errors?.serviceType}
         onChange={(serviceTypeId) => props.onChange({ serviceTypeId })}
       />,
     )
@@ -241,7 +244,7 @@ function selectFields(props: TicketActionFieldsProps): ReactNode[] {
 }
 
 function textFields(props: TicketActionFieldsProps): ReactNode[] {
-  const { action, values, onChange } = props
+  const { action, values, onChange, errors } = props
   const blocks: ReactNode[] = []
   if (TEXT_ACTIONS.includes(action)) {
     blocks.push(
@@ -250,6 +253,7 @@ function textFields(props: TicketActionFieldsProps): ReactNode[] {
         id="action-text"
         label={textLabel(action)}
         value={values.text}
+        error={errors?.text}
         onChange={(text) => onChange({ text })}
       />,
     )

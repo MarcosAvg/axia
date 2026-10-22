@@ -8,12 +8,10 @@
 
 ## En curso
 
-**Sin trabajo en curso.** La web, la API, la base y las pruebas usan el stack propio. No hay
-dependencias de plataformas externas en el código ni en la configuración.
+**Sin trabajo en curso.** La Tanda B3 quedó integrada y la compuerta está en verde.
 
-**Siguiente:** Tanda B3 (detalle del tiquet y evidencias ampliables), y después la puesta en
-marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el
-host definitivo. Si se decide, Web Push y escalamiento programado.
+**Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
+de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
 
 ## Hecho
 
@@ -49,7 +47,10 @@ host definitivo. Si se decide, Web Push y escalamiento programado.
   folio del tiquet, enlace al detalle, marcar una o todas y actualización en vivo por SSE con
   recuperación de eventos perdidos al reconectar. Se corrigió el filtro SSE de solicitantes, que
   interpretaba el arreglo de tipos visibles como una cadena de caracteres.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 243 web, 28 Playwright y 131 de integración contra
+- **UI (Tanda B3):** franja de avance por etapas, orden móvil acciones → estado → actividad →
+  evidencias, visor ampliado de evidencias sin recorte y validación por campo de las acciones
+  incompletas.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 249 web, 29 Playwright y 131 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

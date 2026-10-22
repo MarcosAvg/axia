@@ -1,4 +1,4 @@
-import { isFinalStatus, statusTone } from './status'
+import { isFinalStatus, stageIndex, statusStage, statusTone } from './status'
 
 describe('isFinalStatus', () => {
   it('considera finales a cerrado, rechazado, cancelado y duplicado', () => {
@@ -22,5 +22,21 @@ describe('statusTone', () => {
     expect(statusTone('paused')).toBe('paused')
     expect(statusTone('closed')).toBe('done')
     expect(statusTone('cancelled')).toBe('discarded')
+  })
+})
+
+describe('statusStage', () => {
+  it('ubica los estados activos en su etapa del flujo', () => {
+    expect(statusStage('registered')).toBe('registered')
+    expect(statusStage('assigned')).toBe('assigned')
+    expect(statusStage('paused')).toBe('in_progress')
+    expect(statusStage('under_claim')).toBe('attended')
+    expect(stageIndex('attended')).toBe(4)
+  })
+
+  it('no asigna etapa a los estados de descarte', () => {
+    expect(statusStage('rejected')).toBeNull()
+    expect(statusStage('cancelled')).toBeNull()
+    expect(statusStage('duplicate')).toBeNull()
   })
 })

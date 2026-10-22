@@ -9,6 +9,7 @@ interface ReasonCascadeProps {
   reasons: ReasonOption[]
   rootId: string | null
   value: string
+  error?: string
   onChange: (value: string) => void
 }
 
@@ -23,6 +24,7 @@ export function ReasonCascade({
   reasons,
   rootId,
   value,
+  error,
   onChange,
 }: ReasonCascadeProps) {
   const [path, setPath] = useState<string[]>(() =>
@@ -69,6 +71,7 @@ export function ReasonCascade({
           placeholder={PLACEHOLDER}
           options={level.options}
           value={path[level.index] ?? ''}
+          error={level.index === levels.length - 1 ? error : undefined}
           onChange={(event) => select(level.index, event.target.value)}
         />
       ))}

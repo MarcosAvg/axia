@@ -41,6 +41,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Avisos in-app: campana con no leídas, ruta `/avisos`, marcar uno o todos, folio del tiquet y
   actualización en vivo por SSE con recuperación de eventos perdidos. Se corrigió el filtro de
   eventos SSE de solicitantes, que comparaba caracteres en vez de nombres de evento.
+- Detalle del tiquet: franja de avance por etapas, orden móvil acciones → estado → actividad →
+  evidencias, visor de evidencias con imagen completa y validación por campo de las acciones
+  incompletas antes de enviarlas.
 
 ### Retirado
 
