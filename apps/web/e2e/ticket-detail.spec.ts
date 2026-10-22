@@ -27,6 +27,14 @@ test('el detalle muestra avance, valida acciones y amplía evidencias', async ({
   await openTicket(page)
 
   await expect(page.getByText('Paso 4 de 6')).toBeVisible()
+  const actionHeadings = await page.locator('main h3').allInnerTexts()
+  expect(actionHeadings.slice(0, 5).map((text) => text.toLowerCase())).toEqual([
+    'siguiente paso',
+    'trabajo',
+    'asignación',
+    'ajustes',
+    'zona sensible',
+  ])
   const headings = await page.locator('main h2').allInnerTexts()
   expect(headings.slice(0, 5)).toEqual([
     'Acciones',

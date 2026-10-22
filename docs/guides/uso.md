@@ -168,6 +168,8 @@ cancelación o marca de duplicado.
   se cierra con Escape o con el botón de cerrar.
 - Los formularios de acción validan sus campos obligatorios antes de enviar y muestran el error en el
   campo correspondiente; una acción incompleta no llega al servidor.
+- Las acciones se agrupan por intención: siguiente paso, trabajo, asignación, ajustes,
+  reclamaciones y zona sensible. La acción principal siempre aparece sola y a todo el ancho.
 
 ## 7. Tiempos
 
