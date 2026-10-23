@@ -8,8 +8,8 @@
 
 ## En curso
 
-**Sin trabajo en curso.** El rail derecho de acciones del detalle quedó integrado y la compuerta
-está en verde.
+**Sin trabajo en curso.** La Tanda C1 quedó integrada, se retiró la barra de avance del detalle y
+la compuerta está en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -48,15 +48,13 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   folio del tiquet, enlace al detalle, marcar una o todas y actualización en vivo por SSE con
   recuperación de eventos perdidos al reconectar. Se corrigió el filtro SSE de solicitantes, que
   interpretaba el arreglo de tipos visibles como una cadena de caracteres.
-- **UI (Tanda B3):** franja de avance por etapas, orden móvil acciones → estado → actividad →
-  evidencias, visor ampliado de evidencias sin recorte y validación por campo de las acciones
-  incompletas.
+- **UI (Tanda B3):** orden móvil acciones → estado → actividad → evidencias, visor ampliado de
+  evidencias sin recorte y validación por campo de las acciones incompletas. La barra de avance se
+  retiró; el estado queda como insignia junto al folio.
 - **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
   solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
   permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
-- **Detalle del tiquet:** acciones en un rail derecho sticky en escritorio y línea de tiempo en el
-  bloque principal; en móvil se conserva acciones → estado → actividad → evidencias.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 252 web, 37 Playwright y 131 de integración contra
+- **Pruebas:** 39 unitarias/HTTP del servidor, 250 web, 37 Playwright y 131 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

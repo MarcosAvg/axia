@@ -41,14 +41,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Avisos in-app: campana con no leídas, ruta `/avisos`, marcar uno o todos, folio del tiquet y
   actualización en vivo por SSE con recuperación de eventos perdidos. Se corrigió el filtro de
   eventos SSE de solicitantes, que comparaba caracteres en vez de nombres de evento.
-- Detalle del tiquet: franja de avance por etapas, orden móvil acciones → estado → actividad →
+- Detalle del tiquet: estado como insignia, orden móvil acciones → estado → actividad →
   evidencias, visor de evidencias con imagen completa y validación por campo de las acciones
   incompletas antes de enviarlas.
 - Navegación por rol: Mi trabajo solo con perfil de técnico, Bandeja solo con permiso de tomar
   ofertas, “Nuevo tiquet” solo con permiso de creación y administración alineada con sus permisos
   específicos. El panel deja de consultar métricas y ofertas que el rol no puede ver.
-- Detalle del tiquet: las acciones se mueven a un rail derecho sticky en escritorio y la línea de
-  tiempo pasa al bloque principal; el orden móvil se conserva.
 
 ### Retirado
 

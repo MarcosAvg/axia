@@ -160,10 +160,9 @@ cancelación o marca de duplicado.
 
 ### La pantalla de detalle
 
-- Una **franja de avance** muestra la etapa actual del flujo, el número de paso y, cuando aplica, la
-  pausa o el descarte. El estado exacto siempre aparece como insignia.
-- En pantallas angostas el orden es **acciones → estado → actividad → evidencias**. En escritorio
-  las acciones forman un rail derecho sticky y la actividad acompaña el contenido principal.
+- El **estado actual** aparece como insignia junto al folio; no hay barra de avance por etapas.
+- En pantallas angostas el orden es **acciones → estado → actividad → evidencias**; en escritorio la
+  actividad se mantiene en la columna lateral.
 - Las evidencias de imagen se ven completas, sin recorte. Al pulsarlas se abre un visor ampliado que
   se cierra con Escape o con el botón de cerrar.
 - Los formularios de acción validan sus campos obligatorios antes de enviar y muestran el error en el

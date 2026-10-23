@@ -19,14 +19,14 @@ async function openTicket(page: Page) {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('AX-')
 }
 
-test('el detalle muestra avance, valida acciones y amplía evidencias', async ({
+test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })
   await signIn(page)
   await openTicket(page)
 
-  await expect(page.getByText('Paso 4 de 6')).toBeVisible()
+  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
   const headings = await page.locator('main h2').allInnerTexts()
   expect(headings.slice(0, 5)).toEqual([
     'Acciones',
@@ -39,15 +39,6 @@ test('el detalle muestra avance, valida acciones y amplía evidencias', async ({
     '({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth })',
   )) as { scroll: number; client: number }
   expect(width.scroll).toBe(width.client)
-
-  await page.setViewportSize({ width: 1440, height: 1000 })
-  const sectionBox = async (text: string) =>
-    page.locator('main h2').filter({ hasText: text }).first().boundingBox()
-  const actionsBox = await sectionBox('Acciones')
-  const captureBox = await sectionBox('Captura')
-  const timelineBox = await sectionBox('Línea de tiempo')
-  expect(actionsBox?.x ?? 0).toBeGreaterThan(captureBox?.x ?? 0)
-  expect(timelineBox?.y ?? 0).toBeGreaterThan(captureBox?.y ?? 0)
 
   await page.getByRole('button', { name: 'Comentar' }).click()
   await page.getByRole('button', { name: 'Confirmar' }).click()

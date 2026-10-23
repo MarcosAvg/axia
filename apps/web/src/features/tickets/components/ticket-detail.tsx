@@ -157,15 +157,10 @@ function TicketLayout({
   canRate,
   canAttachEvidence,
 }: TicketLayoutProps) {
-  const showActions = actions.length > 0 || can(identity, 'ticket.take_offer')
-  const contentClass = showActions
-    ? 'contents lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:gap-6'
-    : 'contents lg:col-span-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-6'
-
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
-      {showActions ? (
-        <div className="lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1 lg:max-h-[calc(100svh-6rem)] lg:self-start lg:overflow-y-auto">
+      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+        {actions.length > 0 || can(identity, 'ticket.take_offer') ? (
           <Section
             title={ticketMessages.detail.actions}
             hint={detailSectionHints.actions}
@@ -177,9 +172,7 @@ function TicketLayout({
               participants={participants}
             />
           </Section>
-        </div>
-      ) : null}
-      <div className={contentClass}>
+        ) : null}
         <Section
           title={ticketMessages.detail.capture}
           hint={detailSectionHints.capture}
@@ -187,7 +180,9 @@ function TicketLayout({
           <TicketSummary ticket={ticket} />
         </Section>
         <PausePanel ticketId={ticketId} />
-        <TicketActivity timeline={timeline} />
+      </div>
+      <TicketActivity timeline={timeline} />
+      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
         <EvidenceSection
           ticketId={ticketId}
           cycle={ticket.cycle}
@@ -205,10 +200,10 @@ function TicketLayout({
   )
 }
 
-/** Actividad del tiquet, dentro del bloque principal. */
+/** Sidebar: la actividad del tiquet. */
 function TicketActivity({ timeline }: { timeline: TicketTimelineItem[] }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
       <Section title={ticketMessages.detail.timeline}>
         <TicketTimeline items={timeline} />
       </Section>
