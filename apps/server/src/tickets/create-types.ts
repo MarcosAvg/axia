@@ -12,6 +12,7 @@ export type CreateTicketInput = {
   requesterId: string
   requesterName?: string
   requesterContact?: string
+  occurredAt?: string
   clientRequestId: string
 }
 

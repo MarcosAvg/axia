@@ -1,11 +1,6 @@
 // Textos del feature de tiquets (es-MX).
 
-import type {
-  ClockClass,
-  EvidenceType,
-  EventType,
-  TimeSpanKind,
-} from './domain/types'
+import type { EvidenceType, EventType } from './domain/types'
 
 export { statusLabels } from './status-i18n'
 
@@ -35,6 +30,7 @@ export const eventLabels: Record<EventType, string> = {
   comment: 'Comentario',
   evidence_added: 'Evidencia agregada',
   manual_time_recorded: 'Tiempo manual',
+  event_time_corrected: 'Hora de la acción ajustada',
   rated: 'Calificación',
   imported: 'Importado',
 }
@@ -47,26 +43,6 @@ export const evidenceTypeLabels: Record<EvidenceType, string> = {
   claim: 'Reclamación',
   other: 'Otra',
 }
-
-export const timeSpanKindLabels: Record<TimeSpanKind, string> = {
-  supervisor_response: 'Respuesta del supervisor',
-  reassignment: 'Reasignación',
-  technician_assignment: 'Asignación de técnico',
-  recapture: 'Recaptura',
-  wait_start: 'Espera de inicio',
-  active_work: 'Trabajo efectivo',
-  pause: 'Pausa',
-  validation: 'Validación',
-  claim: 'Reclamación',
-  duplicate_review: 'Revisión de duplicado',
-}
-
-export const clockClassLabels: Record<ClockClass, string> = {
-  counted: 'Cuenta en los indicadores',
-  not_counted: 'No cuenta',
-}
-
-export { manualTimeMessages } from './manual-time-i18n'
 
 export const ticketMessages = {
   loading: 'Cargando…',
@@ -100,6 +76,13 @@ export const ticketMessages = {
       team: 'Equipo',
       reported: 'Registrado',
     },
+  },
+  eventTime: {
+    adjust: 'Ajustar hora',
+    title: 'Ajustar hora de la acción',
+    help: 'La nueva hora debe quedar entre las acciones anterior y siguiente.',
+    submit: 'Guardar hora',
+    error: 'No se pudo ajustar la hora.',
   },
   detail: {
     title: 'Detalle del tiquet',

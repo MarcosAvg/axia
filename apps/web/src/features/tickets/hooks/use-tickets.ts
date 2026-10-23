@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import {
+  adjustEventTime,
   checkDuplicates,
   createTicket,
   fetchEvidence,
@@ -139,5 +140,17 @@ export function useSupervisors() {
     queryKey: ['tickets', 'supervisors'],
     queryFn: fetchSupervisors,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+/** Ajusta la hora de un evento del tiquet. */
+export function useAdjustEventTime(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { eventId: number; occurredAt: string }) =>
+      adjustEventTime(ticketId, variables.eventId, variables.occurredAt),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['tickets'] })
+    },
   })
 }

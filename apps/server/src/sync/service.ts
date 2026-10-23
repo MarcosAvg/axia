@@ -5,6 +5,7 @@ import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import { runTicketAction } from '../tickets/actions.js'
+import { validateManualActionTime } from '../tickets/action-time.js'
 import { withOccurredAt } from '../tickets/event-context.js'
 import { ticketActionSchema } from '../tickets/schemas.js'
 
@@ -14,6 +15,7 @@ export type SyncItem = {
   type: string
   args: Record<string, unknown>
   occurredAt: string
+  manualTime?: boolean
 }
 
 type SyncStatus = 'applied' | 'duplicate' | 'rejected' | 'conflict' | 'blocked'
@@ -73,7 +75,7 @@ function validateOccurredAt(
   if (occurred > now + config.SYNC_FUTURE_TOLERANCE_MS) {
     return 'La acción está demasiado en el futuro'
   }
-  if (occurred < now - config.SYNC_MAX_AGE_MS) {
+  if (!item.manualTime && occurred < now - config.SYNC_MAX_AGE_MS) {
     return 'La acción es demasiado antigua'
   }
   return null
@@ -130,6 +132,14 @@ async function executeItem(
   }
 
   try {
+    if (item.manualTime) {
+      await validateManualActionTime({
+        db,
+        actor,
+        ticketId: item.ticketId,
+        occurredAt: item.occurredAt,
+      })
+    }
     const result = await withOccurredAt(item.occurredAt, () =>
       runTicketAction(db, actor, item.ticketId, parsed.data),
     )

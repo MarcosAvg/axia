@@ -12,7 +12,25 @@ interface PendingDuplicates {
   candidates: DuplicateCandidate[]
 }
 
-async function uploadRequestPhoto(ticketId: string, photo: File | null) {
+type DuplicateCheck = ReturnType<typeof useCheckDuplicates>
+
+async function findDuplicates(
+  check: DuplicateCheck,
+  values: CreateTicketInput,
+): Promise<DuplicateCandidate[]> {
+  return check.mutateAsync({
+    buildingId: values.buildingId,
+    categoryId: values.categoryId,
+    problemId: values.problemId,
+    description: values.description,
+  })
+}
+
+async function uploadRequestPhoto(
+  ticketId: string,
+  photo: File | null,
+  input: CreateTicketInput,
+) {
   if (!photo) return
   try {
     await saveAndUploadEvidence({
@@ -20,6 +38,9 @@ async function uploadRequestPhoto(ticketId: string, photo: File | null) {
       cycle: 1,
       type: 'request',
       file: photo,
+      occurredAt: input.occurredAt
+        ? new Date(input.occurredAt).toISOString()
+        : undefined,
     })
   } catch (error) {
     console.warn('No se pudo subir la foto de la solicitud', error)
@@ -44,7 +65,7 @@ export function useCreateTicketSubmission(
       { input, clientRequestId: crypto.randomUUID() },
       {
         onSuccess: async (ticketId) => {
-          await uploadRequestPhoto(ticketId, photo)
+          await uploadRequestPhoto(ticketId, photo, input)
           void navigate({ to: '/tickets/$ticketId', params: { ticketId } })
         },
       },
@@ -54,12 +75,7 @@ export function useCreateTicketSubmission(
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null)
     try {
-      const found = await checkMutation.mutateAsync({
-        buildingId: values.buildingId,
-        categoryId: values.categoryId,
-        problemId: values.problemId,
-        description: values.description,
-      })
+      const found = await findDuplicates(checkMutation, values)
       if (found.length > 0) {
         setPending({ input: values, candidates: found })
       } else {

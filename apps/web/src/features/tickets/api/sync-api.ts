@@ -6,6 +6,7 @@ export type SyncItem = {
   type: string
   args: Record<string, unknown>
   occurredAt: string
+  manualTime?: boolean
 }
 
 type SyncStatus = 'applied' | 'duplicate' | 'rejected' | 'conflict' | 'blocked'

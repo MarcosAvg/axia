@@ -18,7 +18,7 @@ Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito 
 | Rol | Enfoque |
 |---|---|
 | Solicitante | Crear y seguir sus tiquets, validar, reclamar, cancelar y calificar |
-| Supervisor | Ruteo, asignación, pausas, validación, reclamaciones, prioridad y tiempos manuales |
+| Supervisor | Ruteo, asignación, pausas, validación, reclamaciones, prioridad y ajuste de horas de acciones |
 | Técnico | Trabajo asignado, inicio, pausa, atención y recaptura |
 | Administrador | Todos los permisos y la administración de la instancia |
 
@@ -27,7 +27,7 @@ Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito 
 | Grupo | Permisos |
 |---|---|
 | Tiquets | `ticket.create`, `ticket.create_on_behalf`, `ticket.view`, `ticket.take_offer`, `ticket.assign_supervisor`, `ticket.assign_technician`, `ticket.add_auxiliary`, `ticket.recapture`, `ticket.start`, `ticket.attend`, `ticket.pause`, `ticket.resume`, `ticket.validate`, `ticket.validate_on_behalf`, `ticket.open_claim`, `ticket.open_claim_on_behalf`, `ticket.resolve_claim`, `ticket.reopen`, `ticket.reject`, `ticket.cancel`, `ticket.cancel_on_behalf`, `ticket.mark_duplicate`, `ticket.reactivate`, `ticket.prioritize`, `ticket.rate`, `ticket.rate_on_behalf`, `ticket.record_progress` |
-| Tiempo | `time.record_manual` |
+| Tiempo | `time.record_manual` (ajustar la hora de las acciones) |
 | Evidencia | `evidence.attach` |
 | Métricas | `metrics.view` |
 | Datos | `data.import` |

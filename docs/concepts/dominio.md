@@ -152,7 +152,7 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
   desempeño**; se **avisa al solicitante** y no se crea ninguna relación de seguidor.
 - **Enlaces** entre tiquets: `duplicate_of`, `derived_from`, `related_to`, `blocked_by`.
 
-## 13. Modelo mixto: cuentas, proxy y tiempos manuales
+## 13. Modelo mixto: cuentas, proxy y tiempos por acción
 
 - **Solicitante**: del **catálogo de solicitantes**, con **vínculo opcional** a una cuenta. Un
   administrador (o quien tenga el permiso) registra **a nombre de** un solicitante sin cuenta; el
@@ -162,11 +162,10 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
 - **Proxy ("actuar en nombre de")**: el administrador puede actuar en nombre de cualquiera; el
   supervisor, sobre sus técnicos (asignados o auxiliares). El historial distingue siempre
   **actor** (quién lo hizo) de **sujeto** (a nombre de quién).
-- **Tiempos manuales**: el supervisor o el administrador que lleva el seguimiento registra y
-  corrige tramos a mano, con origen `manual`, autor y validaciones; las correcciones quedan como
-  historial y no cuentan doble. El panel detecta el tramo abierto y ofrece corregirlo (reemplazo
-  auditado) o agregar un periodo faltante. El servidor valida futuro, vida del tiquet, orden y
-  traslapes del mismo tipo y técnico.
+- **Tiempos por acción**: cada evento del tiquet lleva la hora real de la acción. Administrador y
+  supervisor pueden fijarla al ejecutar y ajustarla después si queda entre los eventos vecinos.
+  Los tramos se derivan del historial y se reconstruyen después de un ajuste; no se crean tramos
+  manuales independientes.
 
 ## 14. Glosario (negocio ↔ código)
 
@@ -198,7 +197,7 @@ Valores de enum y nombres de tabla/columna en inglés; etiquetas de interfaz en 
 
 - **Decisiones confirmadas** (además de las §14 de la especificación): modelo mixto de solicitante
   (catálogo con vínculo opcional), técnicos de catálogo con cuenta opcional, proxy para técnicos y
-  solicitantes sin cuenta, tiempos manuales, **recaptura sin aprobación** (se aplica y se avisa;
+  solicitantes sin cuenta, tiempos por acción, **recaptura sin aprobación** (se aplica y se avisa;
   la disconformidad va por reclamación), **concurrencia "primero gana"**, **reactivación al estado
   previo al descarte**, **calificación siempre opcional** y **duplicados sin seguidores** (solo
   enlace y aviso). Detalle y ADR en `docs/concepts/datos.md`.

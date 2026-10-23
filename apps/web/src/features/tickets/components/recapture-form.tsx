@@ -5,6 +5,7 @@ import { toTicketError } from '../domain/errors'
 import type { TicketDetail } from '../domain/types'
 import { useRecaptureForm } from '../hooks/use-recapture-form'
 import { ticketMessages } from '../i18n'
+import { ActionTimeField } from './action-time-field'
 import { RecaptureFields } from './recapture-fields'
 
 /** Recaptura: aplica una captura corregida sobre el mismo tiquet. */
@@ -21,6 +22,12 @@ export function RecaptureForm({
 
   return (
     <form onSubmit={form.submit} className="flex flex-col gap-4">
+      {form.time.show ? (
+        <ActionTimeField
+          value={form.time.value}
+          onChange={form.time.setValue}
+        />
+      ) : null}
       <RecaptureFields
         values={form.values}
         onChange={form.change}

@@ -1,4 +1,5 @@
 import type { Actor } from '../auth/authorization.js'
+import { withActionTime } from './action-time.js'
 import type { Database } from '../db/client.js'
 import type { ActionResult } from './action-shared.js'
 import { assignTechnician } from './assign.js'
@@ -210,7 +211,7 @@ async function runRemainingAction(
   return runClaimAction(db, actor, ticketId, input)
 }
 
-export async function runTicketAction(
+async function runTicketActionNow(
   db: Database,
   actor: Actor,
   ticketId: string,
@@ -242,4 +243,16 @@ export async function runTicketAction(
     return validateTicket(db, actor, ticketId, input.clientRequestId)
   }
   return runRemainingAction(db, actor, ticketId, input)
+}
+
+export async function runTicketAction(
+  db: Database,
+  actor: Actor,
+  ticketId: string,
+  input: TicketActionInput,
+): Promise<ActionResult> {
+  return withActionTime(
+    { db, actor, ticketId, occurredAt: input.occurredAt ?? '' },
+    () => runTicketActionNow(db, actor, ticketId, input),
+  )
 }

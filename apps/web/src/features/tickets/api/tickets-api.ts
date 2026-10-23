@@ -97,6 +97,17 @@ type TimelineResponse = {
   reasonName: string | null
 }
 
+export async function adjustEventTime(
+  ticketId: string,
+  eventId: number,
+  occurredAt: string,
+): Promise<void> {
+  await apiFetch(`/api/tickets/${ticketId}/events/${eventId}/time`, {
+    method: 'PATCH',
+    body: JSON.stringify({ occurredAt }),
+  })
+}
+
 export async function fetchTimeline(
   ticketId: string,
 ): Promise<TicketTimelineItem[]> {
@@ -164,6 +175,9 @@ export async function createTicket(
       channelId: input.channelId || undefined,
       description: input.description,
       requesterId: input.requesterId,
+      occurredAt: input.occurredAt
+        ? new Date(input.occurredAt).toISOString()
+        : undefined,
       clientRequestId,
     }),
   })

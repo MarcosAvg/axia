@@ -20,6 +20,7 @@ interface SubmitContext {
   actions: Mutations
   ticketId: string
   cycle: number
+  occurredAt?: string
   onClose: () => void
   upload: ReturnType<typeof useUploadEvidence>
   setFilePending: (pending: boolean) => void
@@ -43,6 +44,7 @@ async function uploadEvidenceForAction({
   file,
   ticketId,
   cycle,
+  occurredAt,
   upload,
   setFilePending,
   setEvidenceError,
@@ -59,6 +61,7 @@ async function uploadEvidenceForAction({
       type: evidenceType,
       file,
       note: action === 'record_progress' ? values.text.trim() || null : null,
+      occurredAt,
     })
     return true
   } catch (error) {
@@ -101,6 +104,7 @@ export function useActionSubmission({
   action,
   ticketId,
   cycle,
+  occurredAt,
   onClose,
 }: {
   actions: Mutations
@@ -108,6 +112,7 @@ export function useActionSubmission({
   action: ActionKey
   ticketId: string
   cycle: number
+  occurredAt?: string
   onClose: () => void
 }) {
   const upload = useUploadEvidence()
@@ -138,6 +143,7 @@ export function useActionSubmission({
       actions,
       ticketId,
       cycle,
+      occurredAt,
       onClose,
       upload,
       setFilePending: setUploading,

@@ -8,8 +8,7 @@
 
 ## En curso
 
-**Sin trabajo en curso.** Los tiempos manuales contextuales quedaron integrados y la compuerta está
-en verde.
+**Sin trabajo en curso.** La hora real por acción quedó integrada y la compuerta está en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -29,6 +28,9 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tiempo real:** `LISTEN/NOTIFY` con conexión dedicada, SSE, catch-up y bandeja in-app.
 - **Offline:** cola Dexie, UUID de cliente, `occurredAt`, lote ordenado, resultados
   `applied`/`duplicate`/`rejected`/`conflict`/`blocked` y bloqueo de dependientes.
+- **Tiempos por acción:** el alta y las acciones aceptan la hora real; administrador y supervisor
+  pueden ajustar cualquier evento de la línea de tiempo con validación de vecinos, auditoría
+  `event_time_corrected` y reconstrucción de tramos. Se retiraron los tramos manuales (ADR 0081).
 - **Semillas:** referencia en migraciones (catálogos, calendarios, festivos, motivos y reglas) y demo
   explícita, local e idempotente, sin contraseña fija.
 - **Administración:** usuarios, roles y permisos, catálogos, calendarios, configuración de instancia,
@@ -54,10 +56,7 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
   solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
   permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
-- **Tiempos manuales contextuales:** detectan el tramo abierto, permiten corregirlo con reemplazo
-  auditado (`replaces_span_id`) o agregar uno faltante, validan futuro, ciclo, orden y traslapes y
-  no duplican indicadores. Ver ADR 0080.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 252 web, 38 Playwright y 133 de integración contra
+- **Pruebas:** 39 unitarias/HTTP del servidor, 245 web, 38 Playwright y 137 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

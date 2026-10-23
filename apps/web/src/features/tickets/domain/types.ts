@@ -52,58 +52,11 @@ export const EVENT_TYPES = [
   'comment',
   'evidence_added',
   'manual_time_recorded',
+  'event_time_corrected',
   'rated',
   'imported',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
-
-export const TIME_SPAN_KINDS = [
-  'supervisor_response',
-  'reassignment',
-  'technician_assignment',
-  'recapture',
-  'wait_start',
-  'active_work',
-  'pause',
-  'validation',
-  'claim',
-  'duplicate_review',
-] as const
-export type TimeSpanKind = (typeof TIME_SPAN_KINDS)[number]
-
-export const CLOCK_CLASSES = ['counted', 'not_counted'] as const
-export type ClockClass = (typeof CLOCK_CLASSES)[number]
-
-/** Tramo de tiempo registrado a mano por supervisor o administrador (RN §13). */
-export interface ManualTimeSpan {
-  id: string
-  kind: TimeSpanKind
-  startedAt: string
-  endedAt: string | null
-  clockClass: ClockClass
-  subjectTechnicianName: string | null
-  voidedAt: string | null
-  replacesSpanId: string | null
-}
-
-/** Tramo abierto del tiquet, automático o manual. */
-export interface CurrentTimeSpan {
-  id: string
-  kind: TimeSpanKind
-  startedAt: string
-  endedAt: string | null
-  clockClass: ClockClass
-  origin: 'system' | 'manual'
-  subjectTechnicianId: string | null
-  subjectTechnicianName: string | null
-}
-
-export interface ManualTimeContext {
-  status: TicketStatus
-  current: CurrentTimeSpan | null
-  defaultTechnicianId: string | null
-  defaultTechnicianName: string | null
-}
 
 /** Calificación de satisfacción de un tiquet (1-5, opcional). */
 export interface TicketRating {

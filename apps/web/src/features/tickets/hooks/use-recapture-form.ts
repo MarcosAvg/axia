@@ -17,6 +17,7 @@ import {
   recaptureChanges,
 } from '../domain/recapture'
 import type { TicketDetail } from '../domain/types'
+import { useActionTime } from './use-action-time'
 import { useTicketActions } from './use-ticket-actions'
 
 function dataOf<T>(query: { data?: T[] }): T[] {
@@ -33,7 +34,8 @@ export function useRecaptureForm(
   subjectTechnicianId: string | undefined,
   onClose: () => void,
 ) {
-  const actions = useTicketActions(ticket.id, subjectTechnicianId)
+  const time = useActionTime()
+  const actions = useTicketActions(ticket.id, subjectTechnicianId, time.iso)
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)
 
@@ -67,6 +69,7 @@ export function useRecaptureForm(
     values,
     change,
     submit,
+    time,
     hasError,
     isPending: actions.recapture.isPending,
     mutationError: actions.recapture.error,

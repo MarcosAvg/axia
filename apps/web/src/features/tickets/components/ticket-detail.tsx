@@ -24,9 +24,8 @@ import {
   useTicketParticipants,
   useTicketTimeline,
 } from '../hooks/use-tickets'
-import { manualTimeMessages, ticketMessages } from '../i18n'
+import { ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
-import { ManualTimePanel } from './manual-time-panel'
 import { PausePanel } from './pause-panel'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
@@ -97,12 +96,10 @@ function canRateTicket(
 function TicketExtras({
   ticketId,
   participants,
-  canRecordTime,
   canRate,
 }: {
   ticketId: string
   participants: TicketParticipant[]
-  canRecordTime: boolean
   canRate: boolean
 }) {
   const { detail } = ticketMessages
@@ -114,14 +111,6 @@ function TicketExtras({
       >
         <ParticipantList participants={participants} />
       </Section>
-      {canRecordTime ? (
-        <Section
-          title={manualTimeMessages.title}
-          hint={detailSectionHints.times}
-        >
-          <ManualTimePanel ticketId={ticketId} />
-        </Section>
-      ) : null}
       {canRate ? (
         <Section
           title={ticketMessages.rating.title}
@@ -141,7 +130,6 @@ interface TicketLayoutProps {
   identity: Identity | null
   actions: ActionKey[]
   timeline: TicketTimelineItem[]
-  canRecordTime: boolean
   canRate: boolean
   canAttachEvidence: boolean
 }
@@ -153,7 +141,6 @@ function TicketLayout({
   identity,
   actions,
   timeline,
-  canRecordTime,
   canRate,
   canAttachEvidence,
 }: TicketLayoutProps) {
@@ -181,7 +168,7 @@ function TicketLayout({
         </Section>
         <PausePanel ticketId={ticketId} />
       </div>
-      <TicketActivity timeline={timeline} />
+      <TicketActivity ticketId={ticketId} timeline={timeline} />
       <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
         <EvidenceSection
           ticketId={ticketId}
@@ -192,7 +179,6 @@ function TicketLayout({
         <TicketExtras
           ticketId={ticketId}
           participants={participants}
-          canRecordTime={canRecordTime}
           canRate={canRate}
         />
       </div>
@@ -201,11 +187,17 @@ function TicketLayout({
 }
 
 /** Sidebar: la actividad del tiquet. */
-function TicketActivity({ timeline }: { timeline: TicketTimelineItem[] }) {
+function TicketActivity({
+  ticketId,
+  timeline,
+}: {
+  ticketId: string
+  timeline: TicketTimelineItem[]
+}) {
   return (
     <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
       <Section title={ticketMessages.detail.timeline}>
-        <TicketTimeline items={timeline} />
+        <TicketTimeline ticketId={ticketId} items={timeline} />
       </Section>
     </div>
   )
@@ -287,7 +279,6 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
         identity={identity}
         actions={actions}
         timeline={timeline.data ?? []}
-        canRecordTime={can(identity, 'time.record_manual')}
         canRate={canRateTicket(identity, ticket.data.status)}
         canAttachEvidence={can(identity, 'evidence.attach')}
       />

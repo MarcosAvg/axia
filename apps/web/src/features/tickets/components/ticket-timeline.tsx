@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangleIcon,
@@ -22,10 +23,13 @@ import {
   WrenchIcon,
   XIcon,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { can, useAuth } from '@/features/auth'
 import { formatDateTime } from '@/lib/format'
 import { groupTimelineByCycle, timelineNote } from '../domain/timeline'
 import type { EventType, TicketTimelineItem } from '../domain/types'
 import { eventLabels, ticketMessages } from '../i18n'
+import { EventTimeDialog } from './event-time-dialog'
 
 const EVENT_ICONS: Record<EventType, LucideIcon> = {
   created: FilePlus2Icon,
@@ -53,6 +57,7 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
   comment: MessageSquareIcon,
   evidence_added: ImageIcon,
   manual_time_recorded: ClockIcon,
+  event_time_corrected: ClockIcon,
   rated: StarIcon,
   imported: DownloadIcon,
 }
@@ -60,9 +65,13 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
 function FeedItem({
   item,
   isLast,
+  canAdjust,
+  onAdjust,
 }: {
   item: TicketTimelineItem
   isLast: boolean
+  canAdjust: boolean
+  onAdjust: () => void
 }) {
   const Icon = EVENT_ICONS[item.type]
   return (
@@ -92,13 +101,32 @@ function FeedItem({
           </span>
         ) : null}
         {timelineNote(item) ? <p>{timelineNote(item)}</p> : null}
+        {canAdjust ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="min-h-11 self-start px-2 text-xs"
+            onClick={onAdjust}
+          >
+            {ticketMessages.eventTime.adjust}
+          </Button>
+        ) : null}
       </div>
     </li>
   )
 }
 
 /** Línea de actividad del tiquet, agrupada por ciclo de atención. */
-export function TicketTimeline({ items }: { items: TicketTimelineItem[] }) {
+export function TicketTimeline({
+  ticketId,
+  items,
+}: {
+  ticketId: string
+  items: TicketTimelineItem[]
+}) {
+  const { identity } = useAuth()
+  const [selected, setSelected] = useState<TicketTimelineItem | null>(null)
   if (items.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -120,11 +148,23 @@ export function TicketTimeline({ items }: { items: TicketTimelineItem[] }) {
                 key={item.id}
                 item={item}
                 isLast={index === group.items.length - 1}
+                canAdjust={
+                  can(identity, 'time.record_manual') &&
+                  item.type !== 'event_time_corrected'
+                }
+                onAdjust={() => setSelected(item)}
               />
             ))}
           </ol>
         </div>
       ))}
+      {selected ? (
+        <EventTimeDialog
+          ticketId={ticketId}
+          item={selected}
+          onClose={() => setSelected(null)}
+        />
+      ) : null}
     </div>
   )
 }

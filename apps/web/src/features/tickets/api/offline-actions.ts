@@ -15,18 +15,19 @@ export interface TicketActionPayload {
   occurredAt: string
 }
 
-export async function enqueueTicketAction(
-  operation: TicketOperation,
-  ticketId: string,
-  args: Record<string, unknown>,
-  clientRequestId: string,
-): Promise<void> {
+export async function enqueueTicketAction(input: {
+  operation: TicketOperation
+  ticketId: string
+  args: Record<string, unknown>
+  clientRequestId: string
+  occurredAt?: string
+}): Promise<void> {
   await enqueue(TICKET_ACTION, {
-    operation,
-    ticketId,
-    args,
-    clientRequestId,
-    occurredAt: new Date().toISOString(),
+    operation: input.operation,
+    ticketId: input.ticketId,
+    args: input.args,
+    clientRequestId: input.clientRequestId,
+    occurredAt: input.occurredAt ?? new Date().toISOString(),
   } satisfies TicketActionPayload)
 }
 

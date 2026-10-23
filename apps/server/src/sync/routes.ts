@@ -18,6 +18,7 @@ const itemSchema = z.object({
   type: z.string().min(1).max(50),
   args: z.record(z.string(), z.unknown()).default({}),
   occurredAt: z.string().min(1).max(80),
+  manualTime: z.boolean().optional(),
 })
 
 const bodySchema = z.object({

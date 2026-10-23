@@ -17,7 +17,9 @@ import type {
   CreateTicketResult,
   TicketSummaryRow,
 } from './create-types.js'
+import { assertCreateTime } from './action-time.js'
 import type { DbExecutor } from './db.js'
+import { withOccurredAt } from './event-context.js'
 import { findHandledEvent, isUniqueViolation, writeEvent } from './events.js'
 
 type RequesterContext = {
@@ -148,6 +150,7 @@ type InsertTicketInput = {
   input: ResolvedCreateInput
   requester: RequesterRow
   category: CategoryRow
+  occurredAt: string
 }
 
 async function insertTicket({
@@ -156,12 +159,14 @@ async function insertTicket({
   input,
   requester,
   category,
+  occurredAt,
 }: InsertTicketInput): Promise<{ id: string; cycle: number }> {
   const inserted = await tx.execute(sql`
     insert into public.tickets (
       building_id, location_id, dependency_id, category_id, subcategory_id,
       problem_id, service_type_id, priority_id, channel_id, description,
-      requester_id, requester_name, requester_contact, registered_by, team_id
+      requester_id, requester_name, requester_contact, registered_by, team_id,
+      reported_at
     ) values (
       ${input.buildingId}, ${input.locationId}, ${input.dependencyId},
       ${input.categoryId}, ${input.subcategoryId ?? null},
@@ -169,7 +174,7 @@ async function insertTicket({
       ${input.channelId}, ${input.description}, ${requester.id},
       ${input.requesterName ?? requester.full_name},
       ${input.requesterContact ?? requester.contact},
-      ${actor.id}, ${category.team_id}
+      ${actor.id}, ${category.team_id}, ${occurredAt}
     )
     returning id, cycle
   `)
@@ -182,6 +187,7 @@ async function createInTransaction(
   tx: DbExecutor,
   actor: Actor,
   input: CreateTicketInput,
+  occurredAt: string,
 ): Promise<CreateTicketResult> {
   const handled = await findHandledEvent(tx, input.clientRequestId)
   if (handled) {
@@ -206,6 +212,7 @@ async function createInTransaction(
     input: resolved,
     requester,
     category,
+    occurredAt,
   })
   await writeEvent(tx, {
     ticketId: ticket.id,
@@ -236,8 +243,12 @@ export async function createTicket(
   actor: Actor,
   input: CreateTicketInput,
 ): Promise<CreateTicketResult> {
+  assertCreateTime(actor, input.occurredAt)
+  const occurredAt = input.occurredAt ?? new Date().toISOString()
   try {
-    return await db.transaction((tx) => createInTransaction(tx, actor, input))
+    return await withOccurredAt(occurredAt, () =>
+      db.transaction((tx) => createInTransaction(tx, actor, input, occurredAt)),
+    )
   } catch (error) {
     if (!isUniqueViolation(error)) throw error
     const handled = await findHandledEvent(db, input.clientRequestId)

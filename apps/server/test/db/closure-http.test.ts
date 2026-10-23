@@ -136,7 +136,7 @@ describe('calendars and settings', () => {
 })
 
 describe('ticket extras', () => {
-  it('returns pause state, rating and manual time with scope', async () => {
+  it('returns pause state and rating with scope', async () => {
     const id = context.ids.ticketA1
     expect(
       (
@@ -155,61 +155,11 @@ describe('ticket extras', () => {
       (
         await call(
           'GET',
-          `/api/tickets/${id}/manual-time`,
-          context.cookies.admin,
-        )
-      ).statusCode,
-    ).toBe(200)
-    expect(
-      (
-        await call(
-          'GET',
           `/api/tickets/${id}/pause-state`,
           context.cookies.outsider,
         )
       ).statusCode,
     ).toBe(404)
-  })
-})
-
-describe('manual time and duplicates', () => {
-  it('records and voids a manual time span', async () => {
-    const id = context.ids.ticketA1
-    const detail = await call(
-      'GET',
-      `/api/tickets/${id}`,
-      context.cookies.admin,
-    )
-    const reportedAt = (detail.json() as { ticket: { reportedAt: string } })
-      .ticket.reportedAt
-    const startedAt = reportedAt
-    const endedAt = new Date().toISOString()
-    const recorded = await call(
-      'POST',
-      `/api/tickets/${id}/manual-time`,
-      context.cookies.admin,
-      {
-        kind: 'active_work',
-        clockClass: 'counted',
-        startedAt,
-        endedAt,
-        clientRequestId: crypto.randomUUID(),
-      },
-    )
-    expect(recorded.statusCode).toBe(204)
-    const list = await call(
-      'GET',
-      `/api/tickets/${id}/manual-time`,
-      context.cookies.admin,
-    )
-    const item = (list.json() as { items: Array<{ id: string }> }).items[0]
-    expect(item).toBeDefined()
-    const voided = await call(
-      'POST',
-      `/api/tickets/${id}/manual-time/${item?.id}/void`,
-      context.cookies.admin,
-    )
-    expect(voided.statusCode).toBe(204)
   })
 })
 

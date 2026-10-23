@@ -3,16 +3,11 @@ import type { Database } from '../db/client.js'
 import { runTicketAction } from './actions.js'
 import { createTicket } from './create.js'
 import type { CreateTicketInput } from './create-types.js'
+import { adjustEventTime } from './action-time.js'
 import { getTicketDetail } from './detail.js'
 import { listParticipants } from './participants.js'
 import { getPauseState, getPauseSteps } from './pause-read.js'
 import { getRating } from './rating-read.js'
-import {
-  manualTimeContext,
-  recordManualTime,
-  voidManualTime,
-  type ManualTimeInput,
-} from './manual-time.js'
 import { checkDuplicateCandidates } from './duplicates.js'
 import {
   getTimeline,
@@ -42,15 +37,12 @@ export function createTicketService(db: Database) {
     pauseState: (actor: Actor, ticketId: string) =>
       getPauseState(db, actor, ticketId),
     rating: (actor: Actor, ticketId: string) => getRating(db, actor, ticketId),
-    manualTime: (actor: Actor, ticketId: string) =>
-      manualTimeContext(db, actor, ticketId),
-    recordManualTime: (
+    adjustEventTime: (
       actor: Actor,
       ticketId: string,
-      input: ManualTimeInput,
-    ) => recordManualTime(db, actor, ticketId, input),
-    voidManualTime: (actor: Actor, ticketId: string, spanId: string) =>
-      voidManualTime(db, actor, ticketId, spanId),
+      eventId: number,
+      occurredAt: string,
+    ) => adjustEventTime(db, actor, { ticketId, eventId, occurredAt }),
     duplicateCandidates: (
       actor: Actor,
       input: {

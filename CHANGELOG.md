@@ -47,8 +47,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Navegación por rol: Mi trabajo solo con perfil de técnico, Bandeja solo con permiso de tomar
   ofertas, “Nuevo tiquet” solo con permiso de creación y administración alineada con sus permisos
   específicos. El panel deja de consultar métricas y ofertas que el rol no puede ver.
-- Tiempos manuales contextuales: detectan el tramo abierto, permiten corregirlo con reemplazo
-  auditado o agregar uno faltante, y validan fechas, ciclo y traslapes.
+- Tiempos por acción: administradores y supervisores registran la hora real al crear un tiquet o
+  ejecutar una acción, y pueden ajustarla desde la línea de tiempo con validación de vecinos y
+  reconstrucción de tramos.
 
 ### Retirado
 

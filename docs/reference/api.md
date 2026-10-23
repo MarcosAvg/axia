@@ -38,9 +38,7 @@ tiquets respetan permisos y alcance. Un recurso fuera de alcance responde 404.
 | `GET` | `/api/tickets/:id/pause-state` | Pausa abierta |
 | `GET` | `/api/tickets/:id/pause-steps` | Subestados de pausa |
 | `GET` | `/api/tickets/:id/rating` | Calificación |
-| `GET` | `/api/tickets/:id/manual-time` | Tramos manuales y tramo abierto |
-| `POST` | `/api/tickets/:id/manual-time` | Registrar o corregir un tramo manual |
-| `POST` | `/api/tickets/:id/manual-time/:spanId/void` | Anular tramo manual |
+| `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
 
 Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add_auxiliary`,
@@ -48,9 +46,10 @@ Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add
 `change_priority`, `comment`, `recapture`, `open_claim`, `resolve_claim`, `mark_duplicate`,
 `reactivate` y `rate`.
 
-`GET /api/tickets/:id/manual-time` devuelve `items`, el `context` con el tramo abierto y el técnico
-sugerido. `POST` acepta `replacesSpanId` para corregir un tramo y admite `endedAt` vacío solo al
-corregir un tramo que sigue abierto.
+El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
+hora real. El ajuste de un evento valida que la nueva hora quede entre el evento anterior y el
+siguiente, deja auditoría y reconstruye los tramos del tiquet. En la sincronización offline,
+`manualTime: true` exige permiso para ajustar horas y aplica las mismas validaciones.
 
 ## Catálogos y evidencias
 

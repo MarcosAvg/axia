@@ -21,6 +21,7 @@ export function useUploadEvidence() {
       type: EvidenceType
       file: File
       note?: string | null
+      occurredAt?: string
     }) => saveAndUploadEvidence(variables),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({

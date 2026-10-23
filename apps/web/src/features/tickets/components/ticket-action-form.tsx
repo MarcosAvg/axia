@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ButtonGrid } from '@/components/shared/button-grid'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { FileField } from '@/components/shared/file-field'
+import { TextField } from '@/components/shared/form-fields'
 import {
   usePriorities,
   useReasons,
@@ -17,6 +18,7 @@ import type { ActionKey } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
+import { can, useAuth } from '@/features/auth'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
 import { TicketActionFields } from './ticket-action-fields'
@@ -85,6 +87,29 @@ function EvidenceBlock({
   )
 }
 
+interface ActionFormViewProps {
+  evidenceType: EvidenceType | undefined
+  evidenceError: string | null
+  evidenceFile: File | null
+  onEvidenceChange: (file: File | null) => void
+  action: ActionKey
+  technicians: TechnicianOption[]
+  reasons: ReasonOption[]
+  priorities: { id: string; name: string }[]
+  serviceTypes: { id: string; name: string }[]
+  motiveReasonId: string | null
+  values: ActionValues
+  validationErrors: Partial<Record<ActionField, string>>
+  occurredAt: string
+  showOccurredAt: boolean
+  onOccurredAtChange: (value: string) => void
+  onChange: (patch: Partial<ActionValues>) => void
+  error: unknown
+  isPending: boolean
+  onSubmit: (event: FormEvent) => void
+  onClose: () => void
+}
+
 function ActionFormView({
   evidenceType,
   evidenceError,
@@ -98,32 +123,26 @@ function ActionFormView({
   motiveReasonId,
   values,
   validationErrors,
+  occurredAt,
+  showOccurredAt,
+  onOccurredAtChange,
   onChange,
   error,
   isPending,
   onSubmit,
   onClose,
-}: {
-  evidenceType: EvidenceType | undefined
-  evidenceError: string | null
-  evidenceFile: File | null
-  onEvidenceChange: (file: File | null) => void
-  action: ActionKey
-  technicians: TechnicianOption[]
-  reasons: ReasonOption[]
-  priorities: { id: string; name: string }[]
-  serviceTypes: { id: string; name: string }[]
-  motiveReasonId: string | null
-  values: ActionValues
-  validationErrors: Partial<Record<ActionField, string>>
-  onChange: (patch: Partial<ActionValues>) => void
-  error: unknown
-  isPending: boolean
-  onSubmit: (event: FormEvent) => void
-  onClose: () => void
-}) {
+}: ActionFormViewProps) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      {showOccurredAt ? (
+        <TextField
+          id="action-occurred-at"
+          label="Hora real de la acción"
+          type="datetime-local"
+          value={occurredAt}
+          onChange={(event) => onOccurredAtChange(event.target.value)}
+        />
+      ) : null}
       <EvidenceBlock
         evidenceType={evidenceType}
         evidenceError={evidenceError}
@@ -166,6 +185,17 @@ function usePauseMotiveReasonId(
   return state.data?.motiveId ?? null
 }
 
+function localNow(): string {
+  const date = new Date()
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16)
+}
+
+function localToIso(value: string): string | undefined {
+  return value ? new Date(value).toISOString() : undefined
+}
+
 interface TicketActionFormProps {
   ticketId: string
   cycle: number
@@ -183,7 +213,13 @@ function useTicketActionForm({
   excludeIds,
   onClose,
 }: TicketActionFormProps) {
-  const actions = useTicketActions(ticketId, subjectTechnicianId)
+  const { identity } = useAuth()
+  const showOccurredAt = can(identity, 'time.record_manual')
+  const [occurredAt, setOccurredAt] = useState(localNow)
+  const [timeTouched, setTimeTouched] = useState(false)
+  const occurredAtIso =
+    showOccurredAt && timeTouched ? localToIso(occurredAt) : undefined
+  const actions = useTicketActions(ticketId, subjectTechnicianId, occurredAtIso)
   const technicians = useTechnicians()
   const priorities = usePriorities()
   const reasons = useReasons(reasonUseFor(action))
@@ -196,6 +232,7 @@ function useTicketActionForm({
     action,
     ticketId,
     cycle,
+    occurredAt: occurredAtIso,
     onClose,
   })
   const state = actionFormState(
@@ -207,11 +244,18 @@ function useTicketActionForm({
     submission.clearValidation()
     setValues((current) => ({ ...current, ...patch }))
   }
+  const onOccurredAtChange = (value: string) => (
+    setTimeTouched(true),
+    setOccurredAt(value)
+  )
   return {
     state,
     submission,
     values,
     onChange,
+    occurredAt,
+    showOccurredAt,
+    onOccurredAtChange,
     technicians: listTechnicians(technicians.data, action, excludeIds),
     reasons: reasons.data ?? [],
     priorities: priorities.data ?? [],
@@ -239,6 +283,9 @@ export function TicketActionForm(props: TicketActionFormProps) {
       motiveReasonId={form.motiveReasonId}
       values={form.values}
       validationErrors={form.submission.validationErrors}
+      occurredAt={form.occurredAt}
+      showOccurredAt={form.showOccurredAt}
+      onOccurredAtChange={form.onOccurredAtChange}
       onChange={form.onChange}
       error={form.state.error}
       isPending={form.state.isPending}

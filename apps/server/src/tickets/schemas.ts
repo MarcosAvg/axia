@@ -65,11 +65,13 @@ export const createTicketSchema = z.object({
   requesterId: z.string().uuid(),
   requesterName: z.string().trim().min(1).max(120).optional(),
   requesterContact: z.string().trim().min(1).max(120).optional(),
+  occurredAt: z.string().datetime().optional(),
   clientRequestId: z.string().uuid(),
 })
 
 const actionBase = {
   clientRequestId: z.string().uuid(),
+  occurredAt: z.string().datetime().optional(),
 }
 
 export const ticketActionSchema = z.discriminatedUnion('action', [

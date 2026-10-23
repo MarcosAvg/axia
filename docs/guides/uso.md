@@ -119,7 +119,7 @@ cancelación o marca de duplicado.
     versión. Se aplica y se avisa; no hay aprobaciones. Si cambia el equipo, el edificio o el
     técnico ya no corresponde, el tiquet vuelve al supervisor.
 15. **Ajustes.** Cambiar la prioridad (supervisor o administrador), comentar (nota interna) y
-    registrar tiempos manuales (supervisor o administrador).
+    ajustar la hora de una acción (supervisor o administrador).
 
 ## 5. Matriz de transiciones
 
@@ -182,18 +182,21 @@ recaptura, espera de inicio, trabajo activo, pausa, validación, reclamación y 
 Ninguna cifra se almacena suelta: todo se calcula desde el historial. Los duplicados quedan fuera de
 los indicadores de desempeño.
 
-### Corregir o completar tiempos
+### Registrar y ajustar la hora de las acciones
 
-El panel de tiempos manuales detecta el **tramo abierto** del tiquet y muestra su tipo, inicio y
-técnico. Desde ahí se puede:
+Cada acción del tiquet puede registrar su hora real. Al crear un tiquet o ejecutar una acción,
+administradores y supervisores ven un campo **Hora real de la acción**; el valor predeterminado es
+la hora actual.
 
-- **Corregir el tramo actual:** guarda un tramo manual que reemplaza al anterior. El original se
-  conserva en el historial, se marca como anulado y deja de contar en los indicadores.
-- **Agregar un tramo faltante:** registra un periodo que no corresponde al tramo abierto.
+La hora del evento es la que alimenta los tramos de tiempo. Si después se detecta un error, la
+línea de tiempo permite **Ajustar hora** en cualquier evento. La nueva hora debe quedar entre la
+acción anterior y la siguiente. El cambio queda auditado y los tramos se reconstruyen desde el
+historial.
 
-El formulario precarga el tipo y el técnico según el estado del tiquet, valida que las fechas estén
-dentro de la vida del tiquet y evita traslapes del mismo tipo y técnico. Los tiempos manuales siguen
-siendo necesarios cuando las fotos vienen de WhatsApp u otro servicio que elimina sus metadatos.
+Los eventos de una acción no se editan como tramos independientes: no hay formulario de “inicio y
+fin” separado. La evidencia sigue siendo la prueba de la acción; si una foto pierde sus metadatos
+—por ejemplo, al pasar por WhatsApp— la hora se escribe a mano en la acción. La evidencia de un
+avance también conserva la hora real elegida.
 
 ## 8. Duplicados
 
@@ -218,7 +221,7 @@ siendo necesarios cuando las fotos vienen de WhatsApp u otro servicio que elimin
 | Rol | Capacidades principales |
 |---|---|
 | Solicitante | Crear y ver sus tiquets, validar (si la política lo permite), reclamar, cancelar y calificar |
-| Supervisor | Tomar ofertas, asignar y reasignar técnico, agregar auxiliares, pausar y reanudar, validar, reclamar y resolver reclamaciones, priorizar, registrar tiempos manuales y actuar en nombre de sus técnicos |
+| Supervisor | Tomar ofertas, asignar y reasignar técnico, agregar auxiliares, pausar y reanudar, validar, reclamar y resolver reclamaciones, priorizar, ajustar la hora de las acciones y actuar en nombre de sus técnicos |
 | Técnico | Ver lo suyo, iniciar, pausar y reanudar, marcar atendido, recapturar y rechazar en su trabajo |
 | Administrador | Todo, incluida la reactivación y actuar en nombre de cualquiera |
 

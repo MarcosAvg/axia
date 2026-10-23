@@ -29,6 +29,8 @@ export interface Evidence {
   fileName: string
   /** Nota opcional (por ejemplo, el avance al registrar `during`). */
   note?: string | null
+  /** Hora real de la evidencia, si quien la sube puede ajustarla. */
+  occurredAt?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
   /** Porcentaje de subida (0–100). */
   progress: number

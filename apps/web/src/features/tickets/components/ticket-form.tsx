@@ -3,7 +3,7 @@ import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { FormActionsBar } from '@/components/shared/form-actions-bar'
 import { FileField } from '@/components/shared/file-field'
 import { FormSection } from '@/components/shared/form-section'
-import { TextAreaField } from '@/components/shared/form-fields'
+import { TextAreaField, TextField } from '@/components/shared/form-fields'
 import { Button } from '@/components/ui/button'
 import { useCreateTicketForm } from '../hooks/use-create-ticket-form'
 import type { CreateTicketCatalogs } from '../hooks/use-create-ticket-catalogs'
@@ -19,6 +19,7 @@ interface TicketFormFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  showOccurredAt: boolean
   photo: File | null
   onPhotoChange: (file: File | null) => void
 }
@@ -29,6 +30,7 @@ function TicketFormFields({
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  showOccurredAt,
   photo,
   onPhotoChange,
 }: TicketFormFieldsProps) {
@@ -53,6 +55,15 @@ function TicketFormFields({
           error={errors.description?.message}
           {...register('description')}
         />
+        {showOccurredAt ? (
+          <TextField
+            id="create-occurred-at"
+            label="Hora real de registro"
+            type="datetime-local"
+            error={errors.occurredAt?.message}
+            {...register('occurredAt')}
+          />
+        ) : null}
         <FileField
           id="create-photo"
           label={ticketMessages.create.photo}
@@ -72,6 +83,7 @@ export function TicketForm() {
     form,
     catalogs,
     canChooseRequester,
+    canAdjustTime,
     ownRequester,
     candidates,
     onSubmit,
@@ -99,6 +111,7 @@ export function TicketForm() {
           errors={formState.errors}
           catalogs={catalogs}
           canChooseRequester={canChooseRequester}
+          showOccurredAt={canAdjustTime}
           ownRequesterName={ownRequester?.fullName ?? null}
           photo={photo}
           onPhotoChange={setPhoto}

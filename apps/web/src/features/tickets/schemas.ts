@@ -1,13 +1,7 @@
 import { z } from 'zod'
-import {
-  CLOCK_CLASSES,
-  EVENT_TYPES,
-  TICKET_STATUSES,
-  TIME_SPAN_KINDS,
-} from './domain/types'
+import { EVENT_TYPES, TICKET_STATUSES } from './domain/types'
 import type {
   DuplicateCandidate,
-  ManualTimeSpan,
   TicketDetail,
   TicketListItem,
   TicketRating,
@@ -129,51 +123,6 @@ export function parseTimelineItem(raw: unknown): TicketTimelineItem {
   }
 }
 
-const manualTimeSpanRowSchema = z.object({
-  id: z.string(),
-  kind: z.enum(TIME_SPAN_KINDS),
-  started_at: z.string(),
-  ended_at: z.string().nullable(),
-  clock_class: z.enum(CLOCK_CLASSES),
-  voided_at: z.string().nullable(),
-  subject_technician_name: z.string().nullable(),
-  replaces_span_id: z.string().nullable(),
-})
-
-export function parseManualTimeSpan(raw: unknown): ManualTimeSpan {
-  const row = manualTimeSpanRowSchema.parse(raw)
-  return {
-    id: row.id,
-    kind: row.kind,
-    startedAt: row.started_at,
-    endedAt: row.ended_at,
-    clockClass: row.clock_class,
-    subjectTechnicianName: row.subject_technician_name,
-    voidedAt: row.voided_at,
-    replacesSpanId: row.replaces_span_id,
-  }
-}
-
-export const manualTimeSchema = z
-  .object({
-    kind: z.enum(TIME_SPAN_KINDS),
-    clockClass: z.enum(CLOCK_CLASSES),
-    technicianId: z.string().optional(),
-    startedAt: z.string().min(1),
-    endedAt: z.string().optional(),
-    replacesSpanId: z.string().optional(),
-  })
-  .refine(
-    (value) =>
-      !value.endedAt ||
-      new Date(value.endedAt).getTime() > new Date(value.startedAt).getTime(),
-    {
-      path: ['endedAt'],
-      message: 'El fin debe ser posterior al inicio.',
-    },
-  )
-export type ManualTimeInput = z.infer<typeof manualTimeSchema>
-
 export const ratingSchema = z.object({
   score: z.coerce.number().int().min(1).max(5),
   comment: z.string().trim().max(1000).optional(),
@@ -204,6 +153,7 @@ export const createTicketSchema = z.object({
     .min(5, 'Describe el problema con un poco más de detalle.')
     .max(4000),
   requesterId: z.string().min(1, 'Selecciona un solicitante.'),
+  occurredAt: z.string().optional(),
 })
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 

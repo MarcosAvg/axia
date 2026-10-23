@@ -3,9 +3,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TextField } from '@/components/shared/form-fields'
 import { toTicketError } from '../domain/errors'
+import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketSearchByFolio } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
+import { ActionTimeField } from './action-time-field'
 import { DuplicateCandidates } from './duplicate-candidates'
 
 /** Marcar duplicado: buscar el tiquet original por folio y enlazarlo. */
@@ -16,7 +18,8 @@ export function DuplicateForm({
   ticketId: string
   onClose: () => void
 }) {
-  const actions = useTicketActions(ticketId)
+  const time = useActionTime()
+  const actions = useTicketActions(ticketId, undefined, time.iso)
   const [term, setTerm] = useState('')
   const results = useTicketSearchByFolio(term)
   const candidates = (results.data ?? []).filter(
@@ -25,6 +28,9 @@ export function DuplicateForm({
 
   return (
     <div className="flex flex-col gap-4">
+      {time.show ? (
+        <ActionTimeField value={time.value} onChange={time.setValue} />
+      ) : null}
       <TextField
         id="duplicate-search"
         label={ticketMessages.actionFields.searchFolio}

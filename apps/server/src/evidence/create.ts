@@ -5,6 +5,7 @@ import { can as hasPermission } from '../auth/authorization.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
+import { parseActionTime } from '../tickets/action-time.js'
 import { findVisibleTicket } from '../tickets/repository.js'
 import type { CreateEvidenceInput } from './schemas.js'
 
@@ -101,10 +102,11 @@ async function insertEvidence(
   const inserted = await db.execute(sql`
     insert into public.evidence (
       ticket_id, cycle, type, captured_by_technician_id,
-      captured_by_user_id, uploaded_by, client_request_id, mime_type
+      captured_by_user_id, uploaded_by, client_request_id, mime_type, occurred_at
     ) values (
       ${ticketId}, ${cycle}, ${input.type}, ${actor.technicianId},
-      ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null}
+      ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
+      ${input.occurredAt ?? new Date().toISOString()}
     )
     returning id
   `)
@@ -127,6 +129,10 @@ export async function createEvidence(
     !hasPermission(actor, 'ticket.record_progress')
   ) {
     throw forbidden()
+  }
+  if (input.occurredAt) {
+    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
+    parseActionTime(input.occurredAt)
   }
   const existing = await existingEvidence(
     db,

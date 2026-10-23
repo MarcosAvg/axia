@@ -22,14 +22,13 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
    otra persona ejecuta sus acciones y registra sus tiempos. El historial distingue siempre
    **actor** (quién lo hizo) de **sujeto** (a nombre de quién). El **administrador** puede actuar
    en nombre de cualquiera; el **supervisor**, sobre sus técnicos (asignados o auxiliares).
-4. **Tiempos manuales.** Quien lleva el seguimiento (supervisor o administrador) puede
-   **registrar y corregir tramos de tiempo a mano** (porque el técnico sin cuenta se los
-   comunica). Cada tramo lleva marca de origen (`sistema` o `manual`), autor y validaciones (no
-   futuro, fin > inicio, dentro de la vida del tiquet); las correcciones quedan como historial y
-   los indicadores no cuentan doble.
+4. **Tiempos por acción.** Quien lleva el seguimiento (supervisor o administrador) puede fijar la
+   **hora real de la acción** al crear un tiquet o ejecutar cualquier acción, y ajustarla después
+   si queda entre los eventos vecinos. Los tramos se derivan de los eventos; el ajuste queda
+   auditado y reconstruye los tramos. No se crean tramos manuales independientes.
 5. **Permisos nuevos.** Se añaden al conjunto fijo: crear a nombre de, actuar en nombre de
-   técnico, registrar tiempos manuales, y validar / cancelar / reclamar / calificar a nombre del
-   solicitante sin cuenta.
+   técnico, ajustar la hora de las acciones, y validar / cancelar / reclamar / calificar a nombre
+   del solicitante sin cuenta.
 6. **Notificaciones a contactos sin cuenta.** La notificación queda "para el contacto"; su
    entrega es externa o la realiza quien lleva el seguimiento (no hay bandeja en la app).
 7. **Recaptura sin aprobación** (sustituye RN-11 y el supuesto 1 de §14). La recaptura se

@@ -1,8 +1,6 @@
 import {
   createTicketSchema,
-  manualTimeSchema,
   parseDuplicateCandidates,
-  parseManualTimeSpan,
   parseRating,
   parseTicketDetail,
   parseTicketListItem,
@@ -143,67 +141,6 @@ describe('ticketListSearchSchema', () => {
     const parsed = ticketListSearchSchema.parse({ status: 'nope', page: 'x' })
     expect(parsed.status).toBeUndefined()
     expect(parsed.page).toBe(1)
-  })
-})
-
-describe('manualTimeSchema', () => {
-  const valid = {
-    kind: 'active_work',
-    clockClass: 'counted',
-    startedAt: '2026-10-01T10:00:00.000Z',
-    endedAt: '2026-10-01T11:00:00.000Z',
-  }
-
-  it('acepta un tramo con fin posterior al inicio', () => {
-    expect(manualTimeSchema.safeParse(valid).success).toBe(true)
-  })
-
-  it('rechaza un fin anterior al inicio', () => {
-    expect(
-      manualTimeSchema.safeParse({
-        ...valid,
-        endedAt: '2026-10-01T09:00:00.000Z',
-      }).success,
-    ).toBe(false)
-  })
-
-  it('rechaza un tipo de tramo desconocido', () => {
-    expect(
-      manualTimeSchema.safeParse({ ...valid, kind: 'inventado' }).success,
-    ).toBe(false)
-  })
-})
-
-describe('parseManualTimeSpan', () => {
-  it('extrae el nombre del técnico sujeto', () => {
-    const span = parseManualTimeSpan({
-      id: 's1',
-      kind: 'pause',
-      started_at: '2026-10-01T10:00:00Z',
-      ended_at: '2026-10-01T10:30:00Z',
-      clock_class: 'not_counted',
-      voided_at: null,
-      subject_technician_name: 'Luis Gómez',
-      replaces_span_id: null,
-    })
-    expect(span.subjectTechnicianName).toBe('Luis Gómez')
-    expect(span.clockClass).toBe('not_counted')
-    expect(span.voidedAt).toBeNull()
-  })
-
-  it('deja el técnico en nulo si no lo hay', () => {
-    const span = parseManualTimeSpan({
-      id: 's2',
-      kind: 'active_work',
-      started_at: '2026-10-01T10:00:00Z',
-      ended_at: null,
-      clock_class: 'counted',
-      voided_at: '2026-10-01T12:00:00Z',
-      subject_technician_name: null,
-      replaces_span_id: null,
-    })
-    expect(span.subjectTechnicianName).toBeNull()
-    expect(span.endedAt).toBeNull()
   })
 })
 

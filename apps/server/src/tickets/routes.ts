@@ -10,7 +10,7 @@ import {
 } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
-import { manualTimeSchema } from './manual-time.js'
+import { eventTimeSchema } from './action-time.js'
 import {
   createTicketSchema,
   duplicateCheckSchema,
@@ -221,44 +221,28 @@ function registerPauseReadRoutes(
   )
 }
 
-function registerManualTimeRoutes(
+function registerEventTimeRoute(
   app: FastifyInstance,
   tickets: TicketService,
   canView: Guard[],
 ) {
-  app.get(
-    '/api/tickets/:id/manual-time',
-    { preHandler: canView },
-    async (request) => {
-      const { id } = ticketIdParamsSchema.parse(request.params)
-      const data = await tickets.manualTime(currentActor(request), id)
-      if (!data) throw notFound()
-      return data
-    },
-  )
-
-  app.post(
-    '/api/tickets/:id/manual-time',
+  app.patch(
+    '/api/tickets/:id/events/:eventId/time',
     { preHandler: canView },
     async (request, reply) => {
-      const { id } = ticketIdParamsSchema.parse(request.params)
-      await tickets.recordManualTime(
+      const { id, eventId } = z
+        .object({
+          id: z.string().uuid(),
+          eventId: z.coerce.number().int().positive(),
+        })
+        .parse(request.params)
+      const body = eventTimeSchema.parse(request.body)
+      await tickets.adjustEventTime(
         currentActor(request),
         id,
-        manualTimeSchema.parse(request.body),
+        eventId,
+        body.occurredAt,
       )
-      return reply.status(204).send()
-    },
-  )
-
-  app.post(
-    '/api/tickets/:id/manual-time/:spanId/void',
-    { preHandler: canView },
-    async (request, reply) => {
-      const { id, spanId } = z
-        .object({ id: z.string().uuid(), spanId: z.string().uuid() })
-        .parse(request.params)
-      await tickets.voidManualTime(currentActor(request), id, spanId)
       return reply.status(204).send()
     },
   )
@@ -292,6 +276,6 @@ export function registerTicketRoutes(
   registerDuplicateRoute(app, tickets, guards.canView)
   registerCoreDetailRoutes(app, tickets, guards.canView)
   registerPauseReadRoutes(app, tickets, guards.canView)
-  registerManualTimeRoutes(app, tickets, guards.canView)
+  registerEventTimeRoute(app, tickets, guards.canView)
   registerRatingRoute(app, tickets, guards.canView)
 }

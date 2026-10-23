@@ -9,9 +9,12 @@ import { actionEmphasis } from '../domain/action-emphasis'
 import type { ActionEmphasis } from '../domain/action-emphasis'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useMyOffers } from '../hooks/use-tickets'
+import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
+import { ActionTimeField } from './action-time-field'
+import { TakeOfferBanner } from './take-offer-banner'
 import { DEDICATED } from './ticket-action-handlers'
 const ONE_CLICK: ActionKey[] = ['validate']
 const FORM_ACTIONS: ActionKey[] = [
@@ -184,35 +187,6 @@ function ProxyRequiredHint({ show }: { show: boolean }) {
   )
 }
 
-function TakeOfferBanner({
-  pending,
-  onTake,
-}: {
-  pending: boolean
-  onTake: () => void
-}) {
-  return (
-    <div className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-0.5">
-        <p className="text-sm font-medium">
-          Tienes una oferta para este tiquet
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Tómalo para asignarlo y continuar con la atención.
-        </p>
-      </div>
-      <Button
-        type="button"
-        className="min-h-11"
-        disabled={pending}
-        onClick={onTake}
-      >
-        Tomar tiquet
-      </Button>
-    </div>
-  )
-}
-
 function useActionPanel(
   ticket: TicketDetail,
   actions: ActionKey[],
@@ -224,7 +198,8 @@ function useActionPanel(
   const [formAction, setFormAction] = useState<ActionKey | null>(null)
   const subject =
     canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
-  const mutations = useTicketActions(ticket.id, subject)
+  const time = useActionTime()
+  const mutations = useTicketActions(ticket.id, subject, time.iso)
   const offers = useMyOffers(
     identity?.userId,
     can(identity, 'ticket.take_offer'),
@@ -252,6 +227,7 @@ function useActionPanel(
     setSubject,
     subject,
     mutations,
+    time,
     hasOffer,
     oneClick,
     pending,
@@ -283,6 +259,14 @@ export function TicketActionsPanel({
 
   return (
     <div className="flex flex-col gap-4">
+      {panel.time.show ? (
+        <ActionTimeField
+          id="quick-action-occurred-at"
+          label="Hora real para acciones directas"
+          value={panel.time.value}
+          onChange={panel.time.setValue}
+        />
+      ) : null}
       {ticket.status === 'registered' && panel.hasOffer ? (
         <TakeOfferBanner
           pending={panel.mutations.take.isPending}

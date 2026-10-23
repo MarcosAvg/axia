@@ -15,6 +15,7 @@ const defaultValues: CreateTicketInput = {
   channelId: '',
   description: '',
   requesterId: '',
+  occurredAt: '',
 }
 
 /** Lógica del alta de tiquet: formulario, catálogos y registro. */
@@ -37,6 +38,7 @@ export function useCreateTicketForm() {
     subcategoryId || undefined,
   )
   const canChooseRequester = can(identity, 'ticket.create_on_behalf')
+  const canAdjustTime = can(identity, 'time.record_manual')
   const ownRequester = catalogs.requesters.find(
     (requester) => requester.userId === identity?.userId,
   )
@@ -54,6 +56,7 @@ export function useCreateTicketForm() {
     form,
     catalogs,
     canChooseRequester,
+    canAdjustTime,
     ownRequester,
     photo,
     setPhoto,
