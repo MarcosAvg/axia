@@ -136,7 +136,8 @@ const manualTimeSpanRowSchema = z.object({
   ended_at: z.string().nullable(),
   clock_class: z.enum(CLOCK_CLASSES),
   voided_at: z.string().nullable(),
-  technician: z.object({ full_name: z.string() }).nullable(),
+  subject_technician_name: z.string().nullable(),
+  replaces_span_id: z.string().nullable(),
 })
 
 export function parseManualTimeSpan(raw: unknown): ManualTimeSpan {
@@ -147,8 +148,9 @@ export function parseManualTimeSpan(raw: unknown): ManualTimeSpan {
     startedAt: row.started_at,
     endedAt: row.ended_at,
     clockClass: row.clock_class,
-    subjectTechnicianName: row.technician?.full_name ?? null,
+    subjectTechnicianName: row.subject_technician_name,
     voidedAt: row.voided_at,
+    replacesSpanId: row.replaces_span_id,
   }
 }
 
@@ -158,12 +160,18 @@ export const manualTimeSchema = z
     clockClass: z.enum(CLOCK_CLASSES),
     technicianId: z.string().optional(),
     startedAt: z.string().min(1),
-    endedAt: z.string().min(1),
+    endedAt: z.string().optional(),
+    replacesSpanId: z.string().optional(),
   })
-  .refine((value) => new Date(value.endedAt) > new Date(value.startedAt), {
-    path: ['endedAt'],
-    message: 'El fin debe ser posterior al inicio.',
-  })
+  .refine(
+    (value) =>
+      !value.endedAt ||
+      new Date(value.endedAt).getTime() > new Date(value.startedAt).getTime(),
+    {
+      path: ['endedAt'],
+      message: 'El fin debe ser posterior al inicio.',
+    },
+  )
 export type ManualTimeInput = z.infer<typeof manualTimeSchema>
 
 export const ratingSchema = z.object({

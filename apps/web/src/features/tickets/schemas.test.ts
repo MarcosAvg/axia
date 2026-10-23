@@ -183,7 +183,8 @@ describe('parseManualTimeSpan', () => {
       ended_at: '2026-10-01T10:30:00Z',
       clock_class: 'not_counted',
       voided_at: null,
-      technician: { full_name: 'Luis Gómez' },
+      subject_technician_name: 'Luis Gómez',
+      replaces_span_id: null,
     })
     expect(span.subjectTechnicianName).toBe('Luis Gómez')
     expect(span.clockClass).toBe('not_counted')
@@ -198,7 +199,8 @@ describe('parseManualTimeSpan', () => {
       ended_at: null,
       clock_class: 'counted',
       voided_at: '2026-10-01T12:00:00Z',
-      technician: null,
+      subject_technician_name: null,
+      replaces_span_id: null,
     })
     expect(span.subjectTechnicianName).toBeNull()
     expect(span.endedAt).toBeNull()

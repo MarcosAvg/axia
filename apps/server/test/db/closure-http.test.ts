@@ -175,9 +175,15 @@ describe('ticket extras', () => {
 describe('manual time and duplicates', () => {
   it('records and voids a manual time span', async () => {
     const id = context.ids.ticketA1
-    const now = new Date()
-    const startedAt = new Date(now.getTime() - 3600_000).toISOString()
-    const endedAt = now.toISOString()
+    const detail = await call(
+      'GET',
+      `/api/tickets/${id}`,
+      context.cookies.admin,
+    )
+    const reportedAt = (detail.json() as { ticket: { reportedAt: string } })
+      .ticket.reportedAt
+    const startedAt = reportedAt
+    const endedAt = new Date().toISOString()
     const recorded = await call(
       'POST',
       `/api/tickets/${id}/manual-time`,

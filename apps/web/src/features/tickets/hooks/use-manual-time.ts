@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  fetchManualTimeSpans,
+  fetchManualTimeContext,
   recordManualTime,
   voidManualTime,
 } from '../api/time-api'
@@ -17,12 +17,11 @@ function useInvalidateManualTime(ticketId: string) {
   }
 }
 
-/** Tramos de tiempo manuales del tiquet. */
+/** Tramos manuales y tramo abierto del tiquet. */
 export function useManualTime(ticketId: string | undefined) {
   return useQuery({
     queryKey: manualTimeKey(ticketId ?? ''),
-    queryFn: () =>
-      ticketId ? fetchManualTimeSpans(ticketId) : Promise.resolve([]),
+    queryFn: () => fetchManualTimeContext(ticketId as string),
     enabled: Boolean(ticketId),
   })
 }

@@ -83,6 +83,26 @@ export interface ManualTimeSpan {
   clockClass: ClockClass
   subjectTechnicianName: string | null
   voidedAt: string | null
+  replacesSpanId: string | null
+}
+
+/** Tramo abierto del tiquet, automático o manual. */
+export interface CurrentTimeSpan {
+  id: string
+  kind: TimeSpanKind
+  startedAt: string
+  endedAt: string | null
+  clockClass: ClockClass
+  origin: 'system' | 'manual'
+  subjectTechnicianId: string | null
+  subjectTechnicianName: string | null
+}
+
+export interface ManualTimeContext {
+  status: TicketStatus
+  current: CurrentTimeSpan | null
+  defaultTechnicianId: string | null
+  defaultTechnicianName: string | null
 }
 
 /** Calificación de satisfacción de un tiquet (1-5, opcional). */

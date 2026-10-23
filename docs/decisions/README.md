@@ -81,6 +81,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0077](0077-pruebas-postgresql-real.md) | Pruebas contra PostgreSQL real |
 | [0078](0078-corte-final-frontend.md) | Corte final del frontend |
 | [0079](0079-navegacion-por-capacidad.md) | Navegación por capacidad y permisos |
+| [0080](0080-correccion-contextual-de-tiempos.md) | Corrección contextual de tiempos manuales |
 
 ## Archivo
 

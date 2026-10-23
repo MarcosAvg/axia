@@ -4,7 +4,11 @@ import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatDuration } from '@/lib/format'
 import { toTicketError } from '../domain/errors'
-import type { ManualTimeSpan } from '../domain/types'
+import type {
+  CurrentTimeSpan,
+  ManualTimeContext,
+  ManualTimeSpan,
+} from '../domain/types'
 import {
   clockClassLabels,
   manualTimeMessages,
@@ -12,6 +16,38 @@ import {
 } from '../i18n'
 import { useManualTime, useVoidManualTime } from '../hooks/use-manual-time'
 import { ManualTimeForm } from './manual-time-form'
+import type { ManualTimeMode } from './manual-time-form'
+
+function CurrentSpan({
+  current,
+  fallbackTechnicianName,
+}: {
+  current: CurrentTimeSpan
+  fallbackTechnicianName: string | null
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-medium">{manualTimeMessages.current}</span>
+        <span className="text-xs text-muted-foreground">
+          {current.origin === 'system'
+            ? manualTimeMessages.automatic
+            : manualTimeMessages.manualOrigin}
+        </span>
+      </div>
+      <span>
+        {timeSpanKindLabels[current.kind]} · {manualTimeMessages.currentSince}{' '}
+        {formatDateTime(current.startedAt)}
+      </span>
+      <span className="text-muted-foreground">
+        {current.subjectTechnicianName ??
+          fallbackTechnicianName ??
+          manualTimeMessages.fields.noTechnician}
+        {current.endedAt ? null : ` · ${manualTimeMessages.open}`}
+      </span>
+    </div>
+  )
+}
 
 function ManualTimeItem({
   item,
@@ -62,12 +98,80 @@ function ManualTimeItem({
   )
 }
 
-/** Tiempos manuales del tiquet: alta y anulación (supervisor/admin). */
-export function ManualTimePanel({ ticketId }: { ticketId: string }) {
-  const [open, setOpen] = useState(false)
-  const spans = useManualTime(ticketId)
+function TimeActions({
+  canCorrect,
+  onMode,
+}: {
+  canCorrect: boolean
+  onMode: (mode: ManualTimeMode) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {canCorrect ? (
+        <Button
+          type="button"
+          className="min-h-11"
+          onClick={() => onMode('correction')}
+        >
+          {manualTimeMessages.correct}
+        </Button>
+      ) : null}
+      <Button
+        type="button"
+        variant="outline"
+        className="min-h-11"
+        onClick={() => onMode('missing')}
+      >
+        {manualTimeMessages.addMissing}
+      </Button>
+    </div>
+  )
+}
+
+function ManualTimeList({
+  items,
+  voiding,
+  onVoid,
+}: {
+  items: ManualTimeSpan[]
+  voiding: boolean
+  onVoid: (spanId: string) => void
+}) {
+  if (items.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {manualTimeMessages.empty}
+      </p>
+    )
+  }
+  return (
+    <ul className="flex flex-col gap-2">
+      {items.map((item) => (
+        <ManualTimeItem
+          key={item.id}
+          item={item}
+          voiding={voiding}
+          onVoid={onVoid}
+        />
+      ))}
+    </ul>
+  )
+}
+
+function ManualTimeContent({
+  ticketId,
+  data,
+}: {
+  ticketId: string
+  data: {
+    items: ManualTimeSpan[]
+    context: ManualTimeContext
+  }
+}) {
+  const [mode, setMode] = useState<ManualTimeMode | null>(null)
   const voidSpan = useVoidManualTime(ticketId)
-  const items = spans.data ?? []
+  const { items, context } = data
+  const current = context.current
 
   const onVoid = (spanId: string) =>
     voidSpan.mutate({ spanId, clientRequestId: crypto.randomUUID() })
@@ -75,37 +179,50 @@ export function ManualTimePanel({ ticketId }: { ticketId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{manualTimeMessages.help}</p>
-      {open ? (
-        <ManualTimeForm ticketId={ticketId} onClose={() => setOpen(false)} />
+      {current ? (
+        <CurrentSpan
+          current={current}
+          fallbackTechnicianName={context.defaultTechnicianName}
+        />
       ) : (
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11 self-start"
-          onClick={() => setOpen(true)}
-        >
-          {manualTimeMessages.add}
-        </Button>
+        <p className="text-sm text-muted-foreground">
+          {manualTimeMessages.noCurrent}
+        </p>
       )}
+      <TimeActions
+        canCorrect={Boolean(current)}
+        onMode={(next) => setMode(next)}
+      />
+      {mode ? (
+        <ManualTimeForm
+          ticketId={ticketId}
+          mode={mode}
+          context={context}
+          onClose={() => setMode(null)}
+        />
+      ) : null}
       {voidSpan.error ? (
         <ErrorAlert message={toTicketError(voidSpan.error).message} />
       ) : null}
-      {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {manualTimeMessages.empty}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {items.map((item) => (
-            <ManualTimeItem
-              key={item.id}
-              item={item}
-              voiding={voidSpan.isPending}
-              onVoid={onVoid}
-            />
-          ))}
-        </ul>
-      )}
+      <ManualTimeList
+        items={items}
+        voiding={voidSpan.isPending}
+        onVoid={onVoid}
+      />
     </div>
   )
+}
+
+/** Tiempos manuales del tiquet: detecta el tramo abierto y permite corregirlo. */
+export function ManualTimePanel({ ticketId }: { ticketId: string }) {
+  const page = useManualTime(ticketId)
+  if (page.isLoading) {
+    return (
+      <p className="text-sm text-muted-foreground">{manualTimeMessages.help}</p>
+    )
+  }
+  if (page.isError || !page.data) {
+    return <ErrorAlert message={toTicketError(page.error).message} />
+  }
+  return <ManualTimeContent ticketId={ticketId} data={page.data} />
 }

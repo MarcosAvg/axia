@@ -1082,6 +1082,7 @@ export const timeSpans = pgTable(
       .defaultNow()
       .notNull(),
     subjectTechnicianId: uuid('subject_technician_id'),
+    replacesSpanId: uuid('replaces_span_id'),
     voidedAt: timestamp('voided_at', { withTimezone: true, mode: 'string' }),
     voidedBy: uuid('voided_by'),
   },
@@ -1095,6 +1096,10 @@ export const timeSpans = pgTable(
       'btree',
       table.ticketId.asc().nullsLast().op('uuid_ops'),
       table.origin.asc().nullsLast().op('enum_ops'),
+    ),
+    index('idx_time_spans_replaces').using(
+      'btree',
+      table.replacesSpanId.asc().nullsLast().op('uuid_ops'),
     ),
     index('idx_time_spans_ticket').using(
       'btree',

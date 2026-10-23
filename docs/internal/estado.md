@@ -3,13 +3,13 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-22
+**Última actualización:** 2026-10-23
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-**Sin trabajo en curso.** La Tanda C1 quedó integrada, se retiró la barra de avance del detalle y
-la compuerta está en verde.
+**Sin trabajo en curso.** Los tiempos manuales contextuales quedaron integrados y la compuerta está
+en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -54,7 +54,10 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
   solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
   permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 250 web, 37 Playwright y 131 de integración contra
+- **Tiempos manuales contextuales:** detectan el tramo abierto, permiten corregirlo con reemplazo
+  auditado (`replaces_span_id`) o agregar uno faltante, validan futuro, ciclo, orden y traslapes y
+  no duplican indicadores. Ver ADR 0080.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 252 web, 38 Playwright y 133 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

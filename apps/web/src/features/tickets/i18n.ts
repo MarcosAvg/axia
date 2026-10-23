@@ -66,29 +66,7 @@ export const clockClassLabels: Record<ClockClass, string> = {
   not_counted: 'No cuenta',
 }
 
-export const manualTimeMessages = {
-  title: 'Tiempos manuales',
-  help: 'Registra tramos trabajados que no se capturaron en automático.',
-  empty: 'Sin tiempos manuales registrados.',
-  add: 'Registrar tramo',
-  submit: 'Guardar tramo',
-  submitting: 'Guardando…',
-  void: 'Anular',
-  voided: 'Anulado',
-  fields: {
-    kind: 'Tipo de tramo',
-    technician: 'Técnico (opcional)',
-    startedAt: 'Inicio',
-    endedAt: 'Fin',
-    clockClass: 'Clasificación',
-    selectPlaceholder: 'Selecciona…',
-    noTechnician: 'Sin técnico asignado',
-  },
-  errors: {
-    required: 'Completa tipo, inicio y fin.',
-    order: 'El fin debe ser posterior al inicio.',
-  },
-} as const
+export { manualTimeMessages } from './manual-time-i18n'
 
 export const ticketMessages = {
   loading: 'Cargando…',

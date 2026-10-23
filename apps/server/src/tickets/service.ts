@@ -8,7 +8,7 @@ import { listParticipants } from './participants.js'
 import { getPauseState, getPauseSteps } from './pause-read.js'
 import { getRating } from './rating-read.js'
 import {
-  listManualTime,
+  manualTimeContext,
   recordManualTime,
   voidManualTime,
   type ManualTimeInput,
@@ -43,7 +43,7 @@ export function createTicketService(db: Database) {
       getPauseState(db, actor, ticketId),
     rating: (actor: Actor, ticketId: string) => getRating(db, actor, ticketId),
     manualTime: (actor: Actor, ticketId: string) =>
-      listManualTime(db, actor, ticketId),
+      manualTimeContext(db, actor, ticketId),
     recordManualTime: (
       actor: Actor,
       ticketId: string,

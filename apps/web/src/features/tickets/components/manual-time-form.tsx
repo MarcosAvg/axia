@@ -6,9 +6,15 @@ import { Button } from '@/components/ui/button'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import { useTechnicians } from '@/features/catalogs'
 import type { TechnicianOption } from '@/features/catalogs'
+import { formatDateTime, formatDuration } from '@/lib/format'
 import { toTicketError } from '../domain/errors'
+import { suggestedTimeSpanKind } from '../domain/time'
 import { CLOCK_CLASSES, TIME_SPAN_KINDS } from '../domain/types'
-import type { ClockClass, TimeSpanKind } from '../domain/types'
+import type {
+  ClockClass,
+  ManualTimeContext,
+  TimeSpanKind,
+} from '../domain/types'
 import {
   clockClassLabels,
   manualTimeMessages,
@@ -26,13 +32,7 @@ interface FormValues {
   endedAt: string
 }
 
-const EMPTY: FormValues = {
-  kind: 'active_work',
-  clockClass: 'counted',
-  technicianId: '',
-  startedAt: '',
-  endedAt: '',
-}
+export type ManualTimeMode = 'correction' | 'missing'
 
 const fields = manualTimeMessages.fields
 const kindOptions = TIME_SPAN_KINDS.map((kind) => ({
@@ -48,13 +48,46 @@ function toIso(localValue: string): string {
   return localValue ? new Date(localValue).toISOString() : ''
 }
 
+function toLocal(iso: string | null): string {
+  if (!iso) return ''
+  const date = new Date(iso)
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+  return local.toISOString().slice(0, 16)
+}
+
+function initialValues(
+  mode: ManualTimeMode,
+  context: ManualTimeContext,
+): FormValues {
+  const current = context.current
+  if (mode === 'correction' && current) {
+    return {
+      kind: current.kind,
+      clockClass: current.clockClass,
+      technicianId:
+        current.subjectTechnicianId ?? context.defaultTechnicianId ?? '',
+      startedAt: toLocal(current.startedAt),
+      endedAt: toLocal(current.endedAt),
+    }
+  }
+  return {
+    kind: suggestedTimeSpanKind(context.status),
+    clockClass: 'counted',
+    technicianId: context.defaultTechnicianId ?? '',
+    startedAt: '',
+    endedAt: '',
+  }
+}
+
 function ManualTimeFields({
   values,
   technicians,
+  correction,
   onChange,
 }: {
   values: FormValues
   technicians: TechnicianOption[]
+  correction: boolean
   onChange: (patch: Partial<FormValues>) => void
 }) {
   return (
@@ -64,6 +97,7 @@ function ManualTimeFields({
         label={fields.kind}
         options={kindOptions}
         value={values.kind}
+        disabled={correction}
         onChange={(event) =>
           onChange({ kind: event.target.value as TimeSpanKind })
         }
@@ -88,7 +122,7 @@ function ManualTimeFields({
       />
       <TextField
         id="manual-time-end"
-        label={fields.endedAt}
+        label={correction ? manualTimeMessages.endOptional : fields.endedAt}
         type="datetime-local"
         value={values.endedAt}
         onChange={(event) => onChange({ endedAt: event.target.value })}
@@ -135,60 +169,128 @@ function ManualTimeFooter({
   )
 }
 
-/** Formulario para registrar un tramo de tiempo manual atribuido a un técnico. */
-export function ManualTimeForm({
-  ticketId,
-  onClose,
-}: {
-  ticketId: string
-  onClose: () => void
-}) {
-  const technicians = useTechnicians()
+function parseManualTimeForm(
+  mode: ManualTimeMode,
+  values: FormValues,
+  currentId: string | undefined,
+) {
+  if (mode === 'missing' && !values.endedAt) {
+    return { error: manualTimeMessages.errors.endRequired }
+  }
+  const parsed = manualTimeSchema.safeParse({
+    kind: values.kind,
+    clockClass: values.clockClass,
+    technicianId: values.technicianId || undefined,
+    startedAt: toIso(values.startedAt),
+    endedAt: values.endedAt ? toIso(values.endedAt) : undefined,
+    replacesSpanId: currentId,
+  })
+  if (!parsed.success) {
+    return {
+      error:
+        parsed.error.issues[0]?.message ?? manualTimeMessages.errors.required,
+    }
+  }
+  return { input: parsed.data }
+}
+
+function useManualTimeForm(
+  ticketId: string,
+  mode: ManualTimeMode,
+  context: ManualTimeContext,
+  onClose: () => void,
+) {
   const record = useRecordManualTime(ticketId)
-  const [values, setValues] = useState<FormValues>(EMPTY)
+  const technicians = useTechnicians()
+  const [values, setValues] = useState<FormValues>(() =>
+    initialValues(mode, context),
+  )
   const [error, setError] = useState<string | null>(null)
+  const correction = mode === 'correction' && Boolean(context.current)
 
   const patch = (next: Partial<FormValues>) =>
     setValues((current) => ({ ...current, ...next }))
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const parsed = manualTimeSchema.safeParse({
-      kind: values.kind,
-      clockClass: values.clockClass,
-      technicianId: values.technicianId || undefined,
-      startedAt: toIso(values.startedAt),
-      endedAt: toIso(values.endedAt),
-    })
-    if (!parsed.success) {
-      setError(
-        parsed.error.issues[0]?.message ?? manualTimeMessages.errors.required,
-      )
+    const parsed = parseManualTimeForm(
+      mode,
+      values,
+      correction ? context.current?.id : undefined,
+    )
+    if ('error' in parsed) {
+      setError(parsed.error ?? manualTimeMessages.errors.required)
       return
     }
     setError(null)
     record.mutate(
-      { input: parsed.data, clientRequestId: crypto.randomUUID() },
+      { input: parsed.input, clientRequestId: crypto.randomUUID() },
       { onSuccess: onClose },
     )
   }
 
-  const message =
-    error ?? (record.error ? toTicketError(record.error).message : null)
+  return {
+    values,
+    patch,
+    correction,
+    error,
+    record,
+    technicians: technicians.data ?? [],
+    submit,
+    message:
+      error ?? (record.error ? toTicketError(record.error).message : null),
+  }
+}
+
+/** Formulario contextual: corrige el tramo actual o agrega uno faltante. */
+export function ManualTimeForm({
+  ticketId,
+  mode,
+  context,
+  onClose,
+}: {
+  ticketId: string
+  mode: ManualTimeMode
+  context: ManualTimeContext
+  onClose: () => void
+}) {
+  const form = useManualTimeForm(ticketId, mode, context, onClose)
+  const duration =
+    form.values.startedAt && form.values.endedAt
+      ? formatDuration(toIso(form.values.startedAt), toIso(form.values.endedAt))
+      : ''
 
   return (
     <form
-      onSubmit={submit}
+      onSubmit={form.submit}
       className="flex flex-col gap-4 rounded-xl border p-4"
     >
+      <p className="text-sm text-muted-foreground">
+        {form.correction
+          ? manualTimeMessages.correctionHint
+          : manualTimeMessages.missingHint}
+      </p>
+      {form.correction && context.current ? (
+        <p className="text-sm">
+          <span className="text-muted-foreground">
+            {manualTimeMessages.current}:{' '}
+          </span>
+          {timeSpanKindLabels[context.current.kind]} ·{' '}
+          {formatDateTime(context.current.startedAt)}
+        </p>
+      ) : null}
       <ManualTimeFields
-        values={values}
-        technicians={technicians.data ?? []}
-        onChange={patch}
+        values={form.values}
+        technicians={form.technicians}
+        correction={form.correction}
+        onChange={form.patch}
       />
+      {duration ? (
+        <p className="text-sm text-muted-foreground">{duration}</p>
+      ) : null}
       <ManualTimeFooter
-        pending={record.isPending}
-        message={message}
+        pending={form.record.isPending}
+        message={form.message}
         onClose={onClose}
       />
     </form>

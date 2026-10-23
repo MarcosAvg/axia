@@ -164,7 +164,9 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
   **actor** (quién lo hizo) de **sujeto** (a nombre de quién).
 - **Tiempos manuales**: el supervisor o el administrador que lleva el seguimiento registra y
   corrige tramos a mano, con origen `manual`, autor y validaciones; las correcciones quedan como
-  historial y no cuentan doble.
+  historial y no cuentan doble. El panel detecta el tramo abierto y ofrece corregirlo (reemplazo
+  auditado) o agregar un periodo faltante. El servidor valida futuro, vida del tiquet, orden y
+  traslapes del mismo tipo y técnico.
 
 ## 14. Glosario (negocio ↔ código)
 

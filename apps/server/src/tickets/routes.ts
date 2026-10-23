@@ -231,9 +231,9 @@ function registerManualTimeRoutes(
     { preHandler: canView },
     async (request) => {
       const { id } = ticketIdParamsSchema.parse(request.params)
-      const items = await tickets.manualTime(currentActor(request), id)
-      if (!items) throw notFound()
-      return { items }
+      const data = await tickets.manualTime(currentActor(request), id)
+      if (!data) throw notFound()
+      return data
     },
   )
 

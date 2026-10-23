@@ -182,6 +182,19 @@ recaptura, espera de inicio, trabajo activo, pausa, validación, reclamación y 
 Ninguna cifra se almacena suelta: todo se calcula desde el historial. Los duplicados quedan fuera de
 los indicadores de desempeño.
 
+### Corregir o completar tiempos
+
+El panel de tiempos manuales detecta el **tramo abierto** del tiquet y muestra su tipo, inicio y
+técnico. Desde ahí se puede:
+
+- **Corregir el tramo actual:** guarda un tramo manual que reemplaza al anterior. El original se
+  conserva en el historial, se marca como anulado y deja de contar en los indicadores.
+- **Agregar un tramo faltante:** registra un periodo que no corresponde al tramo abierto.
+
+El formulario precarga el tipo y el técnico según el estado del tiquet, valida que las fechas estén
+dentro de la vida del tiquet y evita traslapes del mismo tipo y técnico. Los tiempos manuales siguen
+siendo necesarios cuando las fotos vienen de WhatsApp u otro servicio que elimina sus metadatos.
+
 ## 8. Duplicados
 
 - **Detección al registrar:** compara tiquets no finales por ubicación o problema y similitud de

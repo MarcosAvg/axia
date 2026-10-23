@@ -38,8 +38,8 @@ tiquets respetan permisos y alcance. Un recurso fuera de alcance responde 404.
 | `GET` | `/api/tickets/:id/pause-state` | Pausa abierta |
 | `GET` | `/api/tickets/:id/pause-steps` | Subestados de pausa |
 | `GET` | `/api/tickets/:id/rating` | Calificación |
-| `GET` | `/api/tickets/:id/manual-time` | Tramos manuales |
-| `POST` | `/api/tickets/:id/manual-time` | Registrar tramo manual |
+| `GET` | `/api/tickets/:id/manual-time` | Tramos manuales y tramo abierto |
+| `POST` | `/api/tickets/:id/manual-time` | Registrar o corregir un tramo manual |
 | `POST` | `/api/tickets/:id/manual-time/:spanId/void` | Anular tramo manual |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
 
@@ -47,6 +47,10 @@ Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add
 `start`, `pause`, `advance_pause`, `resume`, `attend`, `validate`, `reject`, `cancel`,
 `change_priority`, `comment`, `recapture`, `open_claim`, `resolve_claim`, `mark_duplicate`,
 `reactivate` y `rate`.
+
+`GET /api/tickets/:id/manual-time` devuelve `items`, el `context` con el tramo abierto y el técnico
+sugerido. `POST` acepta `replacesSpanId` para corregir un tramo y admite `endedAt` vacío solo al
+corregir un tramo que sigue abierto.
 
 ## Catálogos y evidencias
 
