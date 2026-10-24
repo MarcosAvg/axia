@@ -40,4 +40,28 @@ describe('demo seed CLI', () => {
       password: 'DemoPassword123!',
     })
   })
+
+  it('reapplies an explicit env password without requiring the reset flag', () => {
+    expect(
+      parseDemoCli(['--demo'], {
+        MIGRATION_DATABASE_URL: localUrl,
+        AXIA_DEMO_PASSWORD: 'DemoPassword123!',
+      }),
+    ).toMatchObject({
+      resetPasswords: true,
+      password: 'DemoPassword123!',
+    })
+  })
+
+  it('ignores an empty env password', () => {
+    expect(
+      parseDemoCli(['--demo'], {
+        MIGRATION_DATABASE_URL: localUrl,
+        AXIA_DEMO_PASSWORD: '',
+      }),
+    ).toMatchObject({
+      resetPasswords: false,
+      password: undefined,
+    })
+  })
 })

@@ -43,10 +43,14 @@ export function parseDemoCli(
   if (!env.MIGRATION_DATABASE_URL) {
     throw new Error('Define MIGRATION_DATABASE_URL')
   }
+  const password = env.AXIA_DEMO_PASSWORD || undefined
   return {
     connectionString: localConnectionString(env.MIGRATION_DATABASE_URL),
-    password: env.AXIA_DEMO_PASSWORD,
-    resetPasswords: argv.includes('--reset-passwords'),
+    password,
+    // Una contraseña explícita en .env es la fuente de verdad: se reaplica a
+    // los usuarios demo existentes. Sin ella, solo --reset-passwords rota.
+    resetPasswords:
+      argv.includes('--reset-passwords') || password !== undefined,
   }
 }
 
@@ -64,9 +68,13 @@ function printResult(result: DemoSeedResult) {
     process.stdout.write(
       'Guárdala solo en tu equipo. Usa --reset-passwords para generar otra.\n',
     )
-  } else if (!result.passwordApplied) {
+  } else if (result.passwordApplied) {
     process.stdout.write(
-      'Los usuarios demo ya existían; no se cambió su contraseña. Usa --reset-passwords para cambiarla.\n',
+      'Contraseña demo aplicada desde AXIA_DEMO_PASSWORD a todos los usuarios demo.\n',
+    )
+  } else {
+    process.stdout.write(
+      'Los usuarios demo ya existían; no se cambió su contraseña. Define AXIA_DEMO_PASSWORD o usa --reset-passwords para cambiarla.\n',
     )
   }
 }

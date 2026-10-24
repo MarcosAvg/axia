@@ -115,9 +115,10 @@ ok "API lista en http://127.0.0.1:$APP_PORT"
 
 if ((DEMO)); then
   info "Cargando semilla de demostración…"
+  demo_password="${AXIA_DEMO_PASSWORD:-$(sed -n 's/^AXIA_DEMO_PASSWORD=//p' "$ENV_FILE" | tail -1)}"
   demo_env=()
-  if [[ -n "${AXIA_DEMO_PASSWORD:-}" ]]; then
-    demo_env=(-e AXIA_DEMO_PASSWORD)
+  if [[ -n "$demo_password" ]]; then
+    demo_env=(-e "AXIA_DEMO_PASSWORD=$demo_password")
   fi
   "${COMPOSE[@]}" run --rm "${demo_env[@]}" migrate \
     node dist/db/seed-demo/cli.js --demo

@@ -94,11 +94,15 @@ pnpm db:next:demo -- --demo
 ```
 
 La demo crea usuarios, catálogos y seis tiquets ficticios. No se ejecuta al migrar, no se aplica en
-producción y no sobrescribe contraseñas existentes salvo que se pase `--reset-passwords`. Ver
+producción y es idempotente: no duplica datos. Si `AXIA_DEMO_PASSWORD` está definida, la semilla
+aplica esa contraseña también a los usuarios demo existentes; sin ella no rota las contraseñas ya
+creadas salvo que se pase `--reset-passwords`. Ver
 [ADR 0076](../decisions/0076-semillas-referencia-y-demo.md).
 
-La contraseña se toma de `AXIA_DEMO_PASSWORD` o se genera una sola vez. Los usuarios son
-`demo.admin`, `demo.supervisor`, `demo.technician` y `demo.requester`.
+Los scripts de base cargan `.env` (o `AXIA_ENV_FILE`) antes de conectar, así que basta con editar
+`AXIA_DEMO_PASSWORD` y repetir el comando. La contraseña se guarda hasheada en la base al sembrar:
+reiniciar la API o el contenedor no la cambia. Los usuarios son `demo.admin`, `demo.supervisor`,
+`demo.technician` y `demo.requester`.
 
 ## Variables
 

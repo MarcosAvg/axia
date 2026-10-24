@@ -69,8 +69,10 @@ La primera cuenta de administración se crea desde la pantalla de primer arranqu
 ### Usuarios demo
 
 La semilla demo genera `demo.admin`, `demo.supervisor`, `demo.technician` y `demo.requester`. La
-contraseña se toma de `AXIA_DEMO_PASSWORD` o se genera una sola vez al ejecutar la semilla. **No hay
-contraseña fija en el repositorio.**
+contraseña se toma de `AXIA_DEMO_PASSWORD` en `.env` o se genera una sola vez al ejecutar la semilla.
+**No hay contraseña fija en el repositorio.** Si defines o cambias `AXIA_DEMO_PASSWORD`, vuelve a
+ejecutar `pnpm db:next:demo -- --demo`: se reaplica a los usuarios demo existentes. Reiniciar solo la
+API no cambia la contraseña, porque el hash vive en la base.
 
 ## Comandos
 

@@ -69,4 +69,6 @@ Variables de entorno del servidor y del compose. Los valores reales viven en `.e
 |---|---|
 | `AXIA_DEMO_PASSWORD` | Contraseña de la semilla demo; solo local |
 
+Al cambiarla, vuelve a ejecutar la semilla demo para reaplicarla a los usuarios existentes.
+
 Las contraseñas de base, aplicación y demo nunca se versionan ni se imprimen en producción.

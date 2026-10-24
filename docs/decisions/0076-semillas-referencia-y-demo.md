@@ -19,11 +19,13 @@ contraseña fija de demostración.
    `--demo` no hace nada; con `NODE_ENV=production` se niega; solo acepta una base local
    (`127.0.0.1`, `localhost`, `::1` o el servicio `db` de Compose).
 3. **Sin contraseña fija.** La contraseña se toma de `AXIA_DEMO_PASSWORD` o se genera con
-   `crypto.randomBytes`; debe tener al menos 12 caracteres. Si se genera, se muestra una sola vez.
-   `--reset-passwords` permite rotarla.
+   `crypto.randomBytes`; debe tener al menos 12 caracteres. Si se define explícitamente, cada
+   ejecución de la semilla la vuelve a aplicar a los usuarios demo existentes. Si se genera, se
+   muestra una sola vez y `--reset-passwords` permite rotarla.
 4. **Idempotencia.** Los identificadores demo son fijos, las claves naturales usan `on conflict` y
    los eventos, asignaciones y participaciones solo se insertan cuando el tiquet es nuevo. Una
-   segunda ejecución no duplica datos ni rota contraseñas.
+   segunda ejecución no duplica datos. Con `AXIA_DEMO_PASSWORD` definida se reaplica la misma
+   contraseña; sin ella no se rotan las contraseñas ya creadas.
 5. **Cobertura de estados.** La demo crea un tiquet por cada estado principal de lectura
    (`registered`, `with_supervisor`, `assigned`, `in_progress`, `attended`, `closed`) para que las
    bandejas, la bitácora, los tiempos y los indicadores tengan datos.
