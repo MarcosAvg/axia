@@ -83,6 +83,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0079](0079-navegacion-por-capacidad.md) | Navegación por capacidad y permisos |
 | [0081](0081-hora-por-accion.md) | Hora por acción y ajuste auditado |
 | [0082](0082-pruebas-por-cambio.md) | Pruebas por cambio y compuerta por niveles |
+| [0083](0083-react-compiler-solo-al-compilar.md) | React Compiler solo al compilar |
 
 ## Archivo
 

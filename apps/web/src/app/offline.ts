@@ -1,8 +1,8 @@
 import { queryClient } from '@/app/query-client'
-import {
-  registerEvidenceUploadHandler,
-  registerTicketActionHandler,
-} from '@/features/tickets'
+// Importaciones directas: el índice de `features/tickets` reexporta toda la
+// interfaz del feature y arrancar la cola no debe cargarla (ADR 0083).
+import { registerEvidenceUploadHandler } from '@/features/tickets/api/offline-evidence'
+import { registerTicketActionHandler } from '@/features/tickets/api/offline-actions'
 import { onOutboxProcessed, processOutbox } from '@/lib/offline/outbox'
 import { startSync } from '@/lib/offline/sync'
 

@@ -6,12 +6,15 @@ import { useBuildings, useCategories } from '@/features/catalogs'
 import {
   TicketFilters,
   TicketListPanel,
-  ticketListSearchSchema,
   ticketMessages,
   ticketPageInfo,
   useTicketsList,
 } from '@/features/tickets'
-import type { TicketListSearch } from '@/features/tickets'
+// El esquema se importa directo: `validateSearch` vive en el módulo de la ruta,
+// que se carga al arrancar. Pasar por el índice del feature arrastraría toda su
+// interfaz a `/login` (ADR 0083).
+import { ticketListSearchSchema } from '@/features/tickets/schemas'
+import type { TicketListSearch } from '@/features/tickets/schemas'
 
 export const Route = createFileRoute('/_authenticated/tickets/')({
   validateSearch: (search: Record<string, unknown>) =>

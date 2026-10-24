@@ -52,6 +52,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   reconstrucción de tramos.
 - Pruebas por cambio: `check:fast`, `test:affected`, smoke E2E y compuerta completa reservada al
   cierre; la integración reutiliza una base plantilla ya migrada.
+- Arranque en desarrollo: React Compiler solo se aplica al compilar (ADR 0083) y la cola offline se
+  carga cuando hay sesión. La pantalla de acceso ya no descarga el feature completo de tiquets.
+- `pnpm dev:api` y el servidor E2E guardan evidencias en el repositorio, no en `/data/evidence`, que
+  solo existe dentro del contenedor. Esto corrige el error de instalación en el login local.
 
 ### Retirado
 

@@ -13,12 +13,8 @@ export {
   useTicketsList,
 } from './hooks/use-tickets'
 export type { TicketListItem } from './domain/types'
-export { registerEvidenceUploadHandler } from './api/offline-evidence'
-export { registerTicketActionHandler } from './api/offline-actions'
 export { ticketMessages, statusLabels, eventLabels } from './i18n'
 export { EVENT_TYPES } from './domain/types'
 export type { TicketStatus, EventType } from './domain/types'
 export { ACTIVE_STATUSES } from './domain/status'
-export { ticketListSearchSchema } from './schemas'
-export type { TicketListSearch } from './schemas'
 export { ticketPageInfo } from './domain/ticket-page'

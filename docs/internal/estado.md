@@ -3,12 +3,13 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-23
+**Última actualización:** 2026-10-24
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-**Sin trabajo en curso.** La hora real por acción quedó integrada y la compuerta está en verde.
+**Sin trabajo en curso.** Se corrigió el arranque local del API y el coste del compilador en
+desarrollo (ADR 0083). La compuerta está en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -56,13 +57,18 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
   solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
   permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 245 web, 36 Playwright y 137 de integración contra
+- **Arranque en desarrollo:** React Compiler solo al compilar (ADR 0083) y la cola offline se carga
+  cuando hay sesión; `/login` pasó de 6.47 s y 207 módulos a 1.74 s y 99 módulos en frío. `dev:api`
+  usa `apps/server/data/evidence` en local en lugar de la ruta `/data/evidence` del contenedor.
+- **Pruebas:** 39 unitarias/HTTP del servidor, 248 web, 36 Playwright y 137 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0083:** React Compiler solo al compilar; en desarrollo se puede forzar con
+  `AXIA_REACT_COMPILER=1`.
 - **ADR 0082:** pruebas por cambio, ciclo local rápido y compuerta completa al cierre.
 - **ADR 0078:** corte único del frontend y retirada del stack anterior.
 - **ADR 0077:** Vitest contra PostgreSQL real como suite principal; pgTAP se retiró con el esquema
