@@ -1,14 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useReasons, useTeams } from '@/features/catalogs'
-import { useActionTime } from './use-action-time'
 import { useTicketActions } from './use-ticket-actions'
 import { useSupervisors } from './use-tickets'
 
 /** Estado y envío de la reasignación de supervisor. */
 export function useAssignSupervisorForm(ticketId: string, onClose: () => void) {
-  const time = useActionTime()
-  const actions = useTicketActions(ticketId, undefined, time.iso)
+  const actions = useTicketActions(ticketId)
   const teams = useTeams()
   const supervisors = useSupervisors()
   const reasons = useReasons('supervisor_reassignment')
@@ -46,7 +44,6 @@ export function useAssignSupervisorForm(ticketId: string, onClose: () => void) {
     note,
     setNote,
     submit,
-    time,
     teams: teams.data ?? [],
     supervisors: supervisors.data ?? [],
     reasons: reasons.data ?? [],

@@ -205,6 +205,13 @@ async function createInTransaction(
 
   const resolved = await resolveCreateDefaults(tx, input)
   const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
+  if (input.occurredAt && !onBehalf) {
+    throw new AppError(
+      400,
+      'validation',
+      'La hora real de registro solo se puede fijar al registrar a nombre de otra persona',
+    )
+  }
   const category = await validateCreateInputs(tx, resolved)
   const ticket = await insertTicket({
     tx,

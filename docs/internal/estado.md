@@ -8,8 +8,7 @@
 
 ## En curso
 
-**Sin trabajo en curso.** Se corrigió el arranque local del API y el coste del compilador en
-desarrollo (ADR 0083). La compuerta está en verde.
+**Sin trabajo en curso.**
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -29,9 +28,13 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tiempo real:** `LISTEN/NOTIFY` con conexión dedicada, SSE, catch-up y bandeja in-app.
 - **Offline:** cola Dexie, UUID de cliente, `occurredAt`, lote ordenado, resultados
   `applied`/`duplicate`/`rejected`/`conflict`/`blocked` y bloqueo de dependientes.
-- **Tiempos por acción:** el alta y las acciones aceptan la hora real; administrador y supervisor
-  pueden ajustar cualquier evento de la línea de tiempo con validación de vecinos, auditoría
-  `event_time_corrected` y reconstrucción de tramos. Se retiraron los tramos manuales (ADR 0081).
+- **Tiempos por acción:** la hora manual solo se ofrece al actuar a nombre de un técnico o al
+  registrar el tiquet a nombre de otra persona; las acciones directas usan la hora del servidor.
+  Administrador y supervisor pueden ajustar cualquier evento de la línea de tiempo con validación
+  de vecinos, auditoría `event_time_corrected` y reconstrucción de tramos (ADR 0081 y 0084).
+- **Proxy del técnico:** la API recibe `subjectTechnicianId` en las acciones de técnico, valida
+  `act_on_behalf` por alcance y la participación, y guarda actor y sujeto por separado. La hora
+  manual exige sujeto.
 - **Semillas:** referencia en migraciones (catálogos, calendarios, festivos, motivos y reglas) y demo
   explícita, local e idempotente, sin contraseña fija.
 - **Administración:** usuarios, roles y permisos, catálogos, calendarios, configuración de instancia,
@@ -60,8 +63,8 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Arranque en desarrollo:** React Compiler solo al compilar (ADR 0083) y la cola offline se carga
   cuando hay sesión; `/login` pasó de 6.47 s y 207 módulos a 1.74 s y 99 módulos en frío. `dev:api`
   usa `apps/server/data/evidence` en local en lugar de la ruta `/data/evidence` del contenedor.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 248 web, 36 Playwright y 137 de integración contra
-  PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
+- **Pruebas:** 41 unitarias/HTTP del servidor, 249 web, 36 Playwright y 143 de integración contra
+  PostgreSQL real. `pnpm check:fast`, `check:static`, build y la suite de Playwright en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 

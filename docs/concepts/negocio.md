@@ -22,10 +22,12 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
    otra persona ejecuta sus acciones y registra sus tiempos. El historial distingue siempre
    **actor** (quién lo hizo) de **sujeto** (a nombre de quién). El **administrador** puede actuar
    en nombre de cualquiera; el **supervisor**, sobre sus técnicos (asignados o auxiliares).
-4. **Tiempos por acción.** Quien lleva el seguimiento (supervisor o administrador) puede fijar la
-   **hora real de la acción** al crear un tiquet o ejecutar cualquier acción, y ajustarla después
-   si queda entre los eventos vecinos. Los tramos se derivan de los eventos; el ajuste queda
-   auditado y reconstruye los tramos. No se crean tramos manuales independientes.
+4. **Tiempos por acción.** Las acciones directas registran la hora en que se ejecutan. Quien lleva
+   el seguimiento (supervisor o administrador) puede fijar la **hora real de la acción** solo
+   cuando actúa **a nombre de un técnico**, o la hora de registro cuando crea el tiquet **a nombre
+   de otra persona**. Después puede ajustarla si queda entre los eventos vecinos. Los tramos se
+   derivan de los eventos; el ajuste queda auditado y reconstruye los tramos. No se crean tramos
+   manuales independientes.
 5. **Permisos nuevos.** Se añaden al conjunto fijo: crear a nombre de, actuar en nombre de
    técnico, ajustar la hora de las acciones, y validar / cancelar / reclamar / calificar a nombre
    del solicitante sin cuenta.

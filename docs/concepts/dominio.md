@@ -162,10 +162,11 @@ sin ruteo; y los indicadores propios de duplicados. Definición de cada uno en
 - **Proxy ("actuar en nombre de")**: el administrador puede actuar en nombre de cualquiera; el
   supervisor, sobre sus técnicos (asignados o auxiliares). El historial distingue siempre
   **actor** (quién lo hizo) de **sujeto** (a nombre de quién).
-- **Tiempos por acción**: cada evento del tiquet lleva la hora real de la acción. Administrador y
-  supervisor pueden fijarla al ejecutar y ajustarla después si queda entre los eventos vecinos.
-  Los tramos se derivan del historial y se reconstruyen después de un ajuste; no se crean tramos
-  manuales independientes.
+- **Tiempos por acción**: cada evento del tiquet lleva la hora real de la acción. Las acciones
+  directas usan la hora de ejecución; administrador y supervisor pueden fijarla al actuar a nombre
+  de un técnico o al crear el tiquet a nombre de otra persona, y ajustarla después si queda entre
+  los eventos vecinos. Los tramos se derivan del historial y se reconstruyen después de un ajuste;
+  no se crean tramos manuales independientes.
 
 ## 14. Glosario (negocio ↔ código)
 

@@ -1,5 +1,8 @@
 # 0081 — Hora por acción y ajuste auditado
 
+- Fecha: 2026-10-23
+- Estado: parcial (la hora manual de acciones se limita al proxy en el ADR 0084)
+
 ## Contexto
 
 El registro de tiempos manuales como tramos de inicio y fin era confuso para el trabajo de

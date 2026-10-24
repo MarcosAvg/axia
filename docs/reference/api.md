@@ -47,9 +47,12 @@ Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add
 `reactivate` y `rate`.
 
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
-hora real. El ajuste de un evento valida que la nueva hora quede entre el evento anterior y el
-siguiente, deja auditoría y reconstruye los tramos del tiquet. En la sincronización offline,
-`manualTime: true` exige permiso para ajustar horas y aplica las mismas validaciones.
+hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de
+técnico ejecutadas por proxy (`start`, `pause`, `advance_pause`, `resume`, `attend`, `recapture`).
+En el alta solo se acepta cuando el tiquet se registra a nombre de otra persona. El ajuste de un
+evento valida que la nueva hora quede entre el evento anterior y el siguiente, deja auditoría y
+reconstruye los tramos del tiquet. En la sincronización offline, `manualTime: true` exige permiso
+para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
 
 ## Catálogos y evidencias
 

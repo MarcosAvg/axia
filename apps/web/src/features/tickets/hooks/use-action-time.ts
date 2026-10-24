@@ -8,12 +8,16 @@ function localNow(): string {
     .slice(0, 16)
 }
 
-/** Hora real de una acción, disponible solo para quien puede ajustarla. */
-export function useActionTime() {
+/**
+ * Hora real de una acción por proxy, disponible solo para quien puede ajustarla.
+ * `enabled` indica que el contexto permite hora manual (sujeto seleccionado y
+ * acción de técnico).
+ */
+export function useActionTime(enabled = true) {
   const { identity } = useAuth()
   const [value, setValue] = useState(localNow)
   const [touched, setTouched] = useState(false)
-  const show = can(identity, 'time.record_manual')
+  const show = enabled && can(identity, 'time.record_manual')
   return {
     value,
     setValue: (next: string) => {

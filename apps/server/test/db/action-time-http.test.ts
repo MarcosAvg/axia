@@ -15,6 +15,7 @@ type TimelineItem = {
   id: number
   type: string
   occurredAt: string
+  subjectTechnicianName: string | null
   payload: Record<string, unknown>
 }
 
@@ -88,43 +89,55 @@ it('records a ticket creation time and keeps the event aligned', async () => {
   expect((await timeline(ticketId))[0]?.occurredAt).toBe(occurredAt)
 })
 
-it('records an action time, corrects it and audits the change', async () => {
+async function technicianId(): Promise<string> {
+  const technician = await context.db.execute(sql`
+    select id from public.technicians
+    where full_name = 'Técnico A' and active
+    limit 1
+  `)
+  return (technician.rows[0] as { id: string }).id
+}
+
+it('records a proxy action time, corrects it and audits the change', async () => {
   const ticketId = await createTicketAt(minutesAgo(60))
   const occurredAt = minutesAgo(30)
+  const subjectTechnicianId = await technicianId()
   const action = await call(
     'POST',
     `/api/tickets/${ticketId}/actions`,
     context.cookies.admin,
     {
-      action: 'comment',
-      text: 'Comentario con hora real',
+      action: 'recapture',
+      changes: { description: 'Recaptura con hora real' },
+      subjectTechnicianId,
       occurredAt,
       clientRequestId: crypto.randomUUID(),
     },
   )
   expect(action.statusCode).toBe(200)
 
-  const comment = (await timeline(ticketId)).findLast(
-    (item) => item.type === 'comment',
+  const recapture = (await timeline(ticketId)).findLast(
+    (item) => item.type === 'capture_recaptured',
   )
-  expect(comment?.occurredAt).toBe(occurredAt)
+  expect(recapture?.occurredAt).toBe(occurredAt)
+  expect(recapture?.subjectTechnicianName).toBe('Técnico A')
 
   const correctedAt = minutesAgo(20)
   const corrected = await call(
     'PATCH',
-    `/api/tickets/${ticketId}/events/${comment?.id}/time`,
+    `/api/tickets/${ticketId}/events/${recapture?.id}/time`,
     context.cookies.admin,
     { occurredAt: correctedAt },
   )
   expect(corrected.statusCode).toBe(204)
 
   const history = await timeline(ticketId)
-  expect(history.find((item) => item.id === comment?.id)?.occurredAt).toBe(
+  expect(history.find((item) => item.id === recapture?.id)?.occurredAt).toBe(
     correctedAt,
   )
   const audit = history.find((item) => item.type === 'event_time_corrected')
   expect(audit?.payload).toMatchObject({
-    eventId: String(comment?.id),
+    eventId: String(recapture?.id),
     previousOccurredAt: occurredAt,
     occurredAt: correctedAt,
   })
@@ -143,7 +156,6 @@ it('rebuilds the derived spans after correcting an assignment time', async () =>
     {
       action: 'assign_technician',
       technicianId,
-      occurredAt: minutesAgo(50),
       clientRequestId: crypto.randomUUID(),
     },
   )
@@ -203,7 +215,6 @@ it('rejects a correction outside the ticket or its neighbours', async () => {
     {
       action: 'comment',
       text: 'Comentario para límites',
-      occurredAt: minutesAgo(30),
       clientRequestId: crypto.randomUUID(),
     },
   )
@@ -232,6 +243,7 @@ it('rejects a correction outside the ticket or its neighbours', async () => {
 it('applies a manual time from the offline sync contract', async () => {
   const ticketId = await createTicketAt(minutesAgo(60))
   const occurredAt = minutesAgo(20)
+  const subjectTechnicianId = await technicianId()
   const response = await call(
     'POST',
     '/api/sync/actions',
@@ -241,8 +253,11 @@ it('applies a manual time from the offline sync contract', async () => {
         {
           clientRequestId: crypto.randomUUID(),
           ticketId,
-          type: 'comment',
-          args: { text: 'Acción con hora desde sync' },
+          type: 'recapture',
+          args: {
+            changes: { description: 'Acción con hora desde sync' },
+            subjectTechnicianId,
+          },
           occurredAt,
           manualTime: true,
         },
@@ -255,8 +270,9 @@ it('applies a manual time from the offline sync contract', async () => {
       ?.status,
   ).toBe('applied')
   expect(
-    (await timeline(ticketId)).findLast((item) => item.type === 'comment')
-      ?.occurredAt,
+    (await timeline(ticketId)).findLast(
+      (item) => item.type === 'capture_recaptured',
+    )?.occurredAt,
   ).toBe(occurredAt)
 })
 

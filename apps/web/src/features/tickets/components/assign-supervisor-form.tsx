@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { toTicketError } from '../domain/errors'
 import { useAssignSupervisorForm } from '../hooks/use-assign-supervisor-form'
 import { ticketMessages } from '../i18n'
-import { ActionTimeField } from './action-time-field'
 import { AssignSupervisorFields } from './assign-supervisor-fields'
 
 /** Reasignar supervisor: a otro equipo (re-rutea) o a un supervisor concreto. */
@@ -20,12 +19,6 @@ export function AssignSupervisorForm({
 
   return (
     <form onSubmit={form.submit} className="flex flex-col gap-4">
-      {form.time.show ? (
-        <ActionTimeField
-          value={form.time.value}
-          onChange={form.time.setValue}
-        />
-      ) : null}
       <AssignSupervisorFields
         mode={form.mode}
         onMode={form.setMode}

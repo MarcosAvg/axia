@@ -83,7 +83,7 @@ export function TicketForm() {
     form,
     catalogs,
     canChooseRequester,
-    canAdjustTime,
+    showOccurredAt,
     ownRequester,
     candidates,
     onSubmit,
@@ -111,7 +111,7 @@ export function TicketForm() {
           errors={formState.errors}
           catalogs={catalogs}
           canChooseRequester={canChooseRequester}
-          showOccurredAt={canAdjustTime}
+          showOccurredAt={showOccurredAt}
           ownRequesterName={ownRequester?.fullName ?? null}
           photo={photo}
           onPhotoChange={setPhoto}

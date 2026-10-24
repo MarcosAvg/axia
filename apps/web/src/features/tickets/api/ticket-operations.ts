@@ -93,7 +93,7 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
       },
       id,
     ),
-  start: (t, _a, id) => startTicket(t, id),
+  start: (t, a, id) => startTicket(t, id, opt(a.subjectTechnicianId)),
   pause: (t, a, id) =>
     pauseTicket(
       t,
@@ -114,7 +114,8 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
       },
       id,
     ),
-  resume: (t, a, id) => resumeTicket(t, str(a.reasonId), id),
+  resume: (t, a, id) =>
+    resumeTicket(t, str(a.reasonId), id, opt(a.subjectTechnicianId)),
   attend: (t, a, id) =>
     attendTicket(t, id, {
       workDescription: str(a.workDescription),

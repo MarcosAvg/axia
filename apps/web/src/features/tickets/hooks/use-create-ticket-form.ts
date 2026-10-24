@@ -31,6 +31,7 @@ export function useCreateTicketForm() {
     control: form.control,
     name: 'subcategoryId',
   })
+  const requesterId = useWatch({ control: form.control, name: 'requesterId' })
 
   const catalogs = useCreateTicketCatalogs(
     buildingId || undefined,
@@ -42,12 +43,23 @@ export function useCreateTicketForm() {
   const ownRequester = catalogs.requesters.find(
     (requester) => requester.userId === identity?.userId,
   )
+  const showOccurredAt =
+    canAdjustTime &&
+    canChooseRequester &&
+    Boolean(requesterId) &&
+    requesterId !== ownRequester?.id
 
   useEffect(() => {
     if (ownRequester && !form.getValues('requesterId')) {
       form.setValue('requesterId', ownRequester.id)
     }
   }, [ownRequester, form])
+
+  useEffect(() => {
+    if (!showOccurredAt && form.getValues('occurredAt')) {
+      form.setValue('occurredAt', '')
+    }
+  }, [showOccurredAt, form])
 
   const [photo, setPhoto] = useState<File | null>(null)
   const submission = useCreateTicketSubmission(form, photo)
@@ -56,7 +68,7 @@ export function useCreateTicketForm() {
     form,
     catalogs,
     canChooseRequester,
-    canAdjustTime,
+    showOccurredAt,
     ownRequester,
     photo,
     setPhoto,

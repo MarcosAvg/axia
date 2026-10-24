@@ -9,11 +9,9 @@ import { actionEmphasis } from '../domain/action-emphasis'
 import type { ActionEmphasis } from '../domain/action-emphasis'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useMyOffers } from '../hooks/use-tickets'
-import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
-import { ActionTimeField } from './action-time-field'
 import { TakeOfferBanner } from './take-offer-banner'
 import { DEDICATED } from './ticket-action-handlers'
 const ONE_CLICK: ActionKey[] = ['validate']
@@ -198,8 +196,7 @@ function useActionPanel(
   const [formAction, setFormAction] = useState<ActionKey | null>(null)
   const subject =
     canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
-  const time = useActionTime()
-  const mutations = useTicketActions(ticket.id, subject, time.iso)
+  const mutations = useTicketActions(ticket.id, subject)
   const offers = useMyOffers(
     identity?.userId,
     can(identity, 'ticket.take_offer'),
@@ -227,7 +224,6 @@ function useActionPanel(
     setSubject,
     subject,
     mutations,
-    time,
     hasOffer,
     oneClick,
     pending,
@@ -259,14 +255,6 @@ export function TicketActionsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {panel.time.show ? (
-        <ActionTimeField
-          id="quick-action-occurred-at"
-          label="Hora real para acciones directas"
-          value={panel.time.value}
-          onChange={panel.time.setValue}
-        />
-      ) : null}
       {ticket.status === 'registered' && panel.hasOffer ? (
         <TakeOfferBanner
           pending={panel.mutations.take.isPending}

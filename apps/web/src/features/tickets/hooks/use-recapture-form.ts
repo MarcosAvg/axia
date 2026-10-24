@@ -34,7 +34,7 @@ export function useRecaptureForm(
   subjectTechnicianId: string | undefined,
   onClose: () => void,
 ) {
-  const time = useActionTime()
+  const time = useActionTime(Boolean(subjectTechnicianId))
   const actions = useTicketActions(ticket.id, subjectTechnicianId, time.iso)
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)

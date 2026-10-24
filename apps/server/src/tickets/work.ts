@@ -13,14 +13,21 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTechnicianAction } from './proxy.js'
+import { findVisibleTicket } from './repository.js'
+
+type StartInput = {
+  ticketId: string
+  clientRequestId: string
+  subjectTechnicianId?: string | null
+}
 
 async function startInTransaction(
   tx: DbExecutor,
   actor: Actor,
-  ticketId: string,
-  clientRequestId: string,
+  input: StartInput,
 ): Promise<ActionResult> {
+  const { ticketId, clientRequestId, subjectTechnicianId = null } = input
   const before = validateHandled(
     await findHandledEvent(tx, clientRequestId),
     ticketId,
@@ -50,6 +57,7 @@ async function startInTransaction(
     type: 'started',
     actorId: actor.id,
     clientRequestId,
+    subjectTechnicianId,
   })
   return { ticketId, action: 'start', replayed: false }
 }
@@ -57,15 +65,18 @@ async function startInTransaction(
 export async function startTicket(
   db: Database,
   actor: Actor,
-  ticketId: string,
-  clientRequestId: string,
+  input: StartInput,
 ): Promise<ActionResult> {
-  const access = await findVisibleTicket(db, actor, ticketId)
+  const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.start', access)
-  return db.transaction((tx) =>
-    startInTransaction(tx, actor, ticketId, clientRequestId),
-  )
+  await assertTechnicianAction({
+    db,
+    actor,
+    access,
+    permission: 'ticket.start',
+    subjectTechnicianId: input.subjectTechnicianId,
+  })
+  return db.transaction((tx) => startInTransaction(tx, actor, input))
 }
 
 type AttendInput = {
@@ -73,6 +84,7 @@ type AttendInput = {
   workDescription: string
   serviceTypeId?: string
   clientRequestId: string
+  subjectTechnicianId?: string | null
 }
 
 async function validateServiceType(tx: DbExecutor, serviceTypeId: string) {
@@ -125,6 +137,7 @@ async function attendInTransaction(
     type: 'attended',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
+    subjectTechnicianId: input.subjectTechnicianId ?? null,
     payload: { workDescription: input.workDescription },
   })
   return {
@@ -141,6 +154,12 @@ export async function attendTicket(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.attend', access)
+  await assertTechnicianAction({
+    db,
+    actor,
+    access,
+    permission: 'ticket.attend',
+    subjectTechnicianId: input.subjectTechnicianId,
+  })
   return db.transaction((tx) => attendInTransaction(tx, actor, input))
 }

@@ -35,6 +35,7 @@ type ActionTimeInput = {
   actor: Actor
   ticketId: string
   occurredAt: string
+  subjectTechnicianId?: string | null
 }
 
 type AdjustInput = {
@@ -97,16 +98,24 @@ async function lastActionTime(
   return value ? new Date(value) : null
 }
 
-/** Valida que el actor pueda fijar la hora de una acción. */
+/** Valida que el actor pueda fijar la hora de una acción por proxy. */
 export async function validateManualActionTime({
   db,
   actor,
   ticketId,
   occurredAt,
+  subjectTechnicianId,
 }: ActionTimeInput): Promise<Date> {
   const access = await findVisibleTicket(db, actor, ticketId)
   if (!access) throw new AppError(404, 'not_found', 'Tiquet no encontrado')
   assertTicketAction(actor, 'time.record_manual', access)
+  if (!subjectTechnicianId) {
+    throw new AppError(
+      400,
+      'validation',
+      'Solo puedes fijar la hora al actuar a nombre de un técnico',
+    )
+  }
   const proposed = parseActionTime(occurredAt)
   const ticket = await ticketClock(db, ticketId)
   const previous = await lastActionTime(db, ticketId, ticket.cycle)

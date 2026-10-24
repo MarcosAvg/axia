@@ -17,8 +17,14 @@ export async function assignTechnician(
   })
 }
 
-export async function startTicket(ticketId: string, clientRequestId: string) {
-  await ticketAction(ticketId, 'start', clientRequestId)
+export async function startTicket(
+  ticketId: string,
+  clientRequestId: string,
+  subjectTechnicianId?: string | null,
+) {
+  await ticketAction(ticketId, 'start', clientRequestId, {
+    subjectTechnicianId: subjectTechnicianId || undefined,
+  })
 }
 
 export async function attendTicket(
@@ -33,6 +39,7 @@ export async function attendTicket(
   await ticketAction(ticketId, 'attend', clientRequestId, {
     workDescription: input.workDescription,
     serviceTypeId: input.serviceTypeId || undefined,
+    subjectTechnicianId: input.subjectTechnicianId || undefined,
   })
 }
 
@@ -102,6 +109,7 @@ export async function recaptureTicket(
   await ticketAction(ticketId, 'recapture', clientRequestId, {
     changes: input.changes,
     reasonId: input.reasonId || undefined,
+    subjectTechnicianId: input.subjectTechnicianId || undefined,
   })
 }
 

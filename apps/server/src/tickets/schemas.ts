@@ -74,6 +74,10 @@ const actionBase = {
   occurredAt: z.string().datetime().optional(),
 }
 
+const proxyBase = {
+  subjectTechnicianId: z.string().uuid().optional(),
+}
+
 export const ticketActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('take'),
@@ -87,12 +91,14 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
   }),
   z.object({
     action: z.literal('start'),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({
     action: z.literal('attend'),
     workDescription: z.string().trim().min(5).max(4000),
     serviceTypeId: z.string().uuid().optional(),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({
@@ -140,17 +146,20 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/)
       .optional(),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({
     action: z.literal('advance_pause'),
     reasonId: z.string().uuid(),
     note: z.string().trim().max(2000).optional(),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({
     action: z.literal('resume'),
     reasonId: z.string().uuid(),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({
@@ -171,6 +180,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
         message: 'Indica al menos un cambio',
       }),
     reasonId: z.string().uuid().optional(),
+    ...proxyBase,
     ...actionBase,
   }),
   z.object({

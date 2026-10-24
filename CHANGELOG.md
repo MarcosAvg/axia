@@ -47,9 +47,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Navegación por rol: Mi trabajo solo con perfil de técnico, Bandeja solo con permiso de tomar
   ofertas, “Nuevo tiquet” solo con permiso de creación y administración alineada con sus permisos
   específicos. El panel deja de consultar métricas y ofertas que el rol no puede ver.
-- Tiempos por acción: administradores y supervisores registran la hora real al crear un tiquet o
-  ejecutar una acción, y pueden ajustarla desde la línea de tiempo con validación de vecinos y
-  reconstrucción de tramos.
+- Tiempos por acción: la hora manual solo se ofrece al actuar a nombre de un técnico o al registrar
+  un tiquet a nombre de otra persona. Las acciones directas y el alta propia usan la hora del
+  servidor. La hora de un evento puede ajustarse desde la línea de tiempo con validación de vecinos
+  y reconstrucción de tramos.
+- Proxy del técnico: la API vuelve a recibir y guardar el `subjectTechnicianId`, valida
+  `act_on_behalf` por alcance y la participación en el tiquet, y exige sujeto para aceptar
+  `occurredAt` en una acción.
 - Pruebas por cambio: `check:fast`, `test:affected`, smoke E2E y compuerta completa reservada al
   cierre; la integración reutiliza una base plantilla ya migrada.
 - Arranque en desarrollo: React Compiler solo se aplica al compilar (ADR 0083) y la cola offline se

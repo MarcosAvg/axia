@@ -66,6 +66,11 @@ const PROXY_ACTIONS: ActionKey[] = [
   'resume',
   'recapture',
 ]
+
+/** Indica si la acción admite un técnico sujeto (proxy). */
+export function isProxyAction(action: ActionKey): boolean {
+  return PROXY_ACTIONS.includes(action)
+}
 const DIRECT_PERMISSION: Partial<Record<ActionKey, string>> = {
   start: 'ticket.start',
   attend: 'ticket.attend',

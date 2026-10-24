@@ -138,6 +138,10 @@ async function executeItem(
         actor,
         ticketId: item.ticketId,
         occurredAt: item.occurredAt,
+        subjectTechnicianId:
+          'subjectTechnicianId' in parsed.data
+            ? parsed.data.subjectTechnicianId
+            : undefined,
       })
     }
     const result = await withOccurredAt(item.occurredAt, () =>

@@ -184,9 +184,13 @@ los indicadores de desempeño.
 
 ### Registrar y ajustar la hora de las acciones
 
-Cada acción del tiquet puede registrar su hora real. Al crear un tiquet o ejecutar una acción,
-administradores y supervisores ven un campo **Hora real de la acción**; el valor predeterminado es
-la hora actual.
+Las acciones directas registran la hora en que se ejecutan y no muestran un selector de hora.
+Cuando un administrador o supervisor actúa **a nombre de un técnico**, las acciones de técnico
+—iniciar, pausar, avanzar subestado, reanudar, atender y recapturar— permiten fijar la hora real
+del trabajo. Esa hora alimenta los tramos y el evento queda atribuido al técnico sujeto.
+
+El alta de tiquet usa la hora del servidor. Solo al registrar a nombre de otra persona se puede
+fijar **Hora real de registro**.
 
 La hora del evento es la que alimenta los tramos de tiempo. Si después se detecta un error, la
 línea de tiempo permite **Ajustar hora** en cualquier evento. La nueva hora debe quedar entre la
@@ -195,8 +199,8 @@ historial.
 
 Los eventos de una acción no se editan como tramos independientes: no hay formulario de “inicio y
 fin” separado. La evidencia sigue siendo la prueba de la acción; si una foto pierde sus metadatos
-—por ejemplo, al pasar por WhatsApp— la hora se escribe a mano en la acción. La evidencia de un
-avance también conserva la hora real elegida.
+—por ejemplo, al pasar por WhatsApp— la hora se escribe a mano en la acción a nombre del técnico.
+La evidencia de un avance también conserva la hora real elegida.
 
 ## 8. Duplicados
 

@@ -2,6 +2,7 @@ import type { Identity } from '@/features/auth'
 import {
   actionsRequiringSubject,
   allowedActions,
+  isProxyAction,
   pickPrimaryAction,
 } from './actions'
 import type { ActionContext } from './actions'
@@ -155,6 +156,15 @@ describe('actionsRequiringSubject', () => {
     expect(
       actionsRequiringSubject(identityWith(['ticket.start']), ['start'], false),
     ).toEqual([])
+  })
+})
+
+describe('isProxyAction', () => {
+  it('solo las acciones del técnico admiten sujeto', () => {
+    expect(isProxyAction('start')).toBe(true)
+    expect(isProxyAction('recapture')).toBe(true)
+    expect(isProxyAction('comment')).toBe(false)
+    expect(isProxyAction('validate')).toBe(false)
   })
 })
 

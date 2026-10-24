@@ -15,10 +15,11 @@ import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
+import { isProxyAction } from '../domain/actions'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
-import { can, useAuth } from '@/features/auth'
+import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
 import { TicketActionFields } from './ticket-action-fields'
@@ -185,17 +186,6 @@ function usePauseMotiveReasonId(
   return state.data?.motiveId ?? null
 }
 
-function localNow(): string {
-  const date = new Date()
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16)
-}
-
-function localToIso(value: string): string | undefined {
-  return value ? new Date(value).toISOString() : undefined
-}
-
 interface TicketActionFormProps {
   ticketId: string
   cycle: number
@@ -213,13 +203,10 @@ function useTicketActionForm({
   excludeIds,
   onClose,
 }: TicketActionFormProps) {
-  const { identity } = useAuth()
-  const showOccurredAt = can(identity, 'time.record_manual')
-  const [occurredAt, setOccurredAt] = useState(localNow)
-  const [timeTouched, setTimeTouched] = useState(false)
-  const occurredAtIso =
-    showOccurredAt && timeTouched ? localToIso(occurredAt) : undefined
-  const actions = useTicketActions(ticketId, subjectTechnicianId, occurredAtIso)
+  const time = useActionTime(
+    isProxyAction(action) && Boolean(subjectTechnicianId),
+  )
+  const actions = useTicketActions(ticketId, subjectTechnicianId, time.iso)
   const technicians = useTechnicians()
   const priorities = usePriorities()
   const reasons = useReasons(reasonUseFor(action))
@@ -232,7 +219,7 @@ function useTicketActionForm({
     action,
     ticketId,
     cycle,
-    occurredAt: occurredAtIso,
+    occurredAt: time.iso,
     onClose,
   })
   const state = actionFormState(
@@ -244,18 +231,14 @@ function useTicketActionForm({
     submission.clearValidation()
     setValues((current) => ({ ...current, ...patch }))
   }
-  const onOccurredAtChange = (value: string) => (
-    setTimeTouched(true),
-    setOccurredAt(value)
-  )
   return {
     state,
     submission,
     values,
     onChange,
-    occurredAt,
-    showOccurredAt,
-    onOccurredAtChange,
+    occurredAt: time.value,
+    showOccurredAt: time.show,
+    onOccurredAtChange: time.setValue,
     technicians: listTechnicians(technicians.data, action, excludeIds),
     reasons: reasons.data ?? [],
     priorities: priorities.data ?? [],

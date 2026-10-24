@@ -21,6 +21,12 @@ import { takeTicket } from './take.js'
 import { validateTicket } from './validation.js'
 import { attendTicket, startTicket } from './work.js'
 
+function subjectOf(input: TicketActionInput): string | null {
+  return 'subjectTechnicianId' in input
+    ? (input.subjectTechnicianId ?? null)
+    : null
+}
+
 async function runDispositionAction(
   db: Database,
   actor: Actor,
@@ -90,6 +96,7 @@ async function runPauseAction(
   ticketId: string,
   input: TicketActionInput,
 ): Promise<ActionResult> {
+  const subjectTechnicianId = subjectOf(input)
   switch (input.action) {
     case 'pause':
       return pauseTicket(db, actor, {
@@ -98,6 +105,7 @@ async function runPauseAction(
         note: input.note ?? null,
         estimatedDate: input.estimatedDate ?? null,
         clientRequestId: input.clientRequestId,
+        subjectTechnicianId,
       })
     case 'advance_pause':
       return advancePause(db, actor, {
@@ -105,12 +113,14 @@ async function runPauseAction(
         reasonId: input.reasonId,
         note: input.note ?? null,
         clientRequestId: input.clientRequestId,
+        subjectTechnicianId,
       })
     case 'resume':
       return resumeTicket(db, actor, {
         ticketId,
         reasonId: input.reasonId,
         clientRequestId: input.clientRequestId,
+        subjectTechnicianId,
       })
     default:
       throw new Error(`Unsupported pause action: ${input.action}`)
@@ -130,6 +140,7 @@ async function runClaimAction(
         changes: input.changes,
         reasonId: input.reasonId ?? null,
         clientRequestId: input.clientRequestId,
+        subjectTechnicianId: subjectOf(input),
       })
     case 'open_claim':
       return openClaim(db, actor, {
@@ -229,7 +240,11 @@ async function runTicketActionNow(
     })
   }
   if (input.action === 'start') {
-    return startTicket(db, actor, ticketId, input.clientRequestId)
+    return startTicket(db, actor, {
+      ticketId,
+      clientRequestId: input.clientRequestId,
+      subjectTechnicianId: subjectOf(input),
+    })
   }
   if (input.action === 'attend') {
     return attendTicket(db, actor, {
@@ -237,6 +252,7 @@ async function runTicketActionNow(
       workDescription: input.workDescription,
       serviceTypeId: input.serviceTypeId,
       clientRequestId: input.clientRequestId,
+      subjectTechnicianId: subjectOf(input),
     })
   }
   if (input.action === 'validate') {
@@ -252,7 +268,13 @@ export async function runTicketAction(
   input: TicketActionInput,
 ): Promise<ActionResult> {
   return withActionTime(
-    { db, actor, ticketId, occurredAt: input.occurredAt ?? '' },
+    {
+      db,
+      actor,
+      ticketId,
+      occurredAt: input.occurredAt ?? '',
+      subjectTechnicianId: subjectOf(input),
+    },
     () => runTicketActionNow(db, actor, ticketId, input),
   )
 }

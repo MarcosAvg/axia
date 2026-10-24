@@ -16,6 +16,7 @@ export async function pauseTicket(
   await ticketAction(ticketId, 'pause', clientRequestId, {
     reasonId: input.reasonId,
     note: input.note ?? undefined,
+    subjectTechnicianId: input.subjectTechnicianId || undefined,
   })
 }
 
@@ -27,6 +28,7 @@ export async function advancePause(
   await ticketAction(ticketId, 'advance_pause', clientRequestId, {
     reasonId: input.reasonId,
     note: input.note ?? undefined,
+    subjectTechnicianId: input.subjectTechnicianId || undefined,
   })
 }
 
@@ -34,6 +36,10 @@ export async function resumeTicket(
   ticketId: string,
   reasonId: string,
   clientRequestId: string,
+  subjectTechnicianId?: string | null,
 ) {
-  await ticketAction(ticketId, 'resume', clientRequestId, { reasonId })
+  await ticketAction(ticketId, 'resume', clientRequestId, {
+    reasonId,
+    subjectTechnicianId: subjectTechnicianId || undefined,
+  })
 }

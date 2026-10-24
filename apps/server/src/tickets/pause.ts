@@ -11,8 +11,9 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { assertTechnicianAction } from './proxy.js'
 import { requirePauseDescendant, requirePauseRoot } from './reasons.js'
-import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { findVisibleTicket } from './repository.js'
 
 type PauseInput = {
   ticketId: string
@@ -20,6 +21,7 @@ type PauseInput = {
   note: string | null
   estimatedDate: string | null
   clientRequestId: string
+  subjectTechnicianId?: string | null
 }
 
 type PauseRow = {
@@ -91,6 +93,7 @@ async function pauseInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
+    subjectTechnicianId: input.subjectTechnicianId ?? null,
     payload: { note: input.note, estimatedDate: input.estimatedDate },
   })
   return { ticketId: input.ticketId, action: 'pause', replayed: false }
@@ -103,7 +106,13 @@ export async function pauseTicket(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.pause', access)
+  await assertTechnicianAction({
+    db,
+    actor,
+    access,
+    permission: 'ticket.pause',
+    subjectTechnicianId: input.subjectTechnicianId,
+  })
   return db.transaction((tx) => pauseInTransaction(tx, actor, input))
 }
 
@@ -112,6 +121,7 @@ type AdvancePauseInput = {
   reasonId: string
   note: string | null
   clientRequestId: string
+  subjectTechnicianId?: string | null
 }
 
 async function advanceInTransaction(
@@ -159,6 +169,7 @@ async function advanceInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
+    subjectTechnicianId: input.subjectTechnicianId ?? null,
     payload: { note: input.note },
   })
   return { ticketId: input.ticketId, action: 'advance_pause', replayed: false }
@@ -171,7 +182,13 @@ export async function advancePause(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.pause', access)
+  await assertTechnicianAction({
+    db,
+    actor,
+    access,
+    permission: 'ticket.pause',
+    subjectTechnicianId: input.subjectTechnicianId,
+  })
   return db.transaction((tx) => advanceInTransaction(tx, actor, input))
 }
 
@@ -179,6 +196,7 @@ type ResumeInput = {
   ticketId: string
   reasonId: string
   clientRequestId: string
+  subjectTechnicianId?: string | null
 }
 
 async function resumeInTransaction(
@@ -223,6 +241,7 @@ async function resumeInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
+    subjectTechnicianId: input.subjectTechnicianId ?? null,
   })
   return { ticketId: input.ticketId, action: 'resume', replayed: false }
 }
@@ -234,6 +253,12 @@ export async function resumeTicket(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.resume', access)
+  await assertTechnicianAction({
+    db,
+    actor,
+    access,
+    permission: 'ticket.resume',
+    subjectTechnicianId: input.subjectTechnicianId,
+  })
   return db.transaction((tx) => resumeInTransaction(tx, actor, input))
 }
