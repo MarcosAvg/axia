@@ -49,7 +49,7 @@ Variables de entorno del servidor y del compose. Los valores reales viven en `.e
 
 | Variable | Valor por defecto |
 |---|---|
-| `STORAGE_DIR` | `./data/evidence`; `/data/evidence` en la imagen |
+| `STORAGE_DIR` | `./data/evidence`; `/data/evidence` en Compose; `apps/server/data/evidence` con `pnpm dev:api` (o `AXIA_DEV_STORAGE_DIR`) |
 | `EVIDENCE_MAX_BYTES` | `20971520` (20 MiB) |
 | `EVIDENCE_MAX_DIMENSION` | `4096` |
 | `EVIDENCE_THUMBNAIL_SIZE` | `320` |

@@ -39,7 +39,9 @@ El instalador:
 La API queda en `http://127.0.0.1:3100` y la web en `http://localhost:5173`. Vite reenvía `/api`.
 
 Para desarrollo sin el contenedor `app`, ejecutar `pnpm dev:api` en otra terminal. El comando carga
-`.env` y usa el puerto `3100`; la web se inicia con `pnpm dev`.
+`.env`, usa el puerto `3100` y guarda las evidencias en `apps/server/data/evidence` (o en la ruta de
+`AXIA_DEV_STORAGE_DIR`), porque `/data/evidence` solo existe dentro del contenedor. La web se inicia
+con `pnpm dev`.
 
 La opción `--dry-run` muestra los pasos sin escribir archivos ni tocar contenedores. Las variables
 `APP_PORT` y `DB_PORT` permiten cambiar los puertos locales.

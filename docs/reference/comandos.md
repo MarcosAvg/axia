@@ -7,7 +7,7 @@ Comandos disponibles desde la raíz del repositorio.
 | Comando | Efecto |
 |---|---|
 | `pnpm dev` | SPA en `http://localhost:5173`; Vite reenvía `/api` |
-| `pnpm dev:api` | API local en `http://127.0.0.1:3100` |
+| `pnpm dev:api` | API local en `http://127.0.0.1:3100`; guarda evidencias en `apps/server/data/evidence` |
 | `pnpm build` | Compila servidor y SPA |
 | `pnpm lint` | ESLint en todo el monorepo |
 | `pnpm typecheck` | TypeScript en todo el monorepo |
@@ -40,7 +40,7 @@ Comandos disponibles desde la raíz del repositorio.
 | `pnpm check:agnostic` | Verifica que el núcleo no nombre plataformas externas |
 | `pnpm check:boundaries` | Verifica las reglas de dependencia |
 | `pnpm knip` | Detecta código y dependencias sin uso |
-| `pnpm test:scripts` | Prueba el instalador en modo dry-run |
+| `pnpm test:scripts` | Prueba el instalador en dry-run y el arranque local del API |
 
 `pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`. Playwright
 prepara su propia base con la semilla demo. Durante el desarrollo usa `pnpm check:fast`; la
