@@ -50,7 +50,9 @@ test('el acceso no desborda en móvil ni tiene un h1 oculto', async ({
   }
 })
 
-for (const width of [320, 360, 390, 768, 1440]) {
+// Matriz reducida: móvil pequeño, móvil estándar y escritorio. Los anchos
+// intermedios no añadían cobertura funcional y duplicaban el coste.
+for (const width of [320, 390, 1440]) {
   test(`las rutas autenticadas no desbordan a ${width} px`, async ({
     page,
   }) => {

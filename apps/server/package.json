@@ -17,7 +17,8 @@
     "db:migrate:prod": "node dist/db/migrate.js",
     "db:reset": "tsx scripts/reset-db.ts",
     "db:indexes": "tsx scripts/index-audit.ts",
-    "db:demo": "tsx scripts/seed-demo.ts"
+    "db:demo": "tsx scripts/seed-demo.ts",
+    "test:unit": "vitest run test/unit test/http"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.3",

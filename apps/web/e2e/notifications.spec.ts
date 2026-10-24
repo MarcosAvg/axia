@@ -24,7 +24,9 @@ test('un administrador ve el estado vacío de avisos', async ({ page }) => {
   await expect(page.getByText('No hay avisos.')).toBeVisible()
 })
 
-test('un solicitante recibe un aviso en vivo por SSE', async ({ browser }) => {
+test('@smoke un solicitante recibe un aviso en vivo por SSE', async ({
+  browser,
+}) => {
   const requesterContext = await browser.newContext()
   const adminContext = await browser.newContext()
   const requester = await requesterContext.newPage()

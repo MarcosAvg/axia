@@ -279,11 +279,15 @@ rules: {
 - **Prettier** para formato; **knip** para código y dependencias sin uso.
 - **Husky + lint-staged** (formato y lint al confirmar) y **commitlint** (Conventional Commits).
 - **`drizzle-kit check`** para revisar el esquema y las migraciones.
-- **CI** (GitHub Actions o Forgejo) ejecutando la compuerta completa en cada cambio.
+- **CI** (GitHub Actions o Forgejo) ejecutando la compuerta completa en pull requests y en
+  `main`. El ciclo local usa `pnpm check:fast` y `pnpm test:affected`; la compuerta completa no
+  se repite tras cada edición.
 
 ## 15. Definición de terminado (toda tarea)
 
-- [ ] `pnpm check` en verde (lint, tipos, independencia, Vitest, Playwright, PostgreSQL y build), con la salida mostrada.
+- [ ] `pnpm check` completo en verde antes de integrar (lint, tipos, independencia, Vitest,
+      Playwright, PostgreSQL y build), con la salida mostrada. Durante el desarrollo basta
+      `pnpm check:fast` + `pnpm test:affected`.
 - [ ] Pruebas nuevas o actualizadas para el comportamiento cambiado.
 - [ ] Si hubo migración: `pnpm db:reset` limpio y `drizzle-kit check` en verde.
 - [ ] Documentación actualizada en el mismo commit (incluido `docs/concepts/dominio.md` si cambió el negocio).
@@ -336,7 +340,7 @@ Qué se gana, qué se paga y cómo revertirlo.
 ## 17. Git
 
 - Ramas cortas: `feat/...`, `fix/...`, `refactor/...`, `docs/...`, `chore/...`. Se integra a
-  `main` solo con `pnpm check` en verde.
+  `main` solo con `pnpm check` completo en verde.
 - **Conventional Commits** en español: `feat(tickets): agrega asignación a técnico`.
   Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `build`, `ci`.
 - Un commit, una idea; cada commit deja el proyecto compilando y con pruebas en verde.

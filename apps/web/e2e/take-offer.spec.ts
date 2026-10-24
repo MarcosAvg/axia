@@ -16,7 +16,7 @@ async function signOut(page: Page) {
   await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
 }
 
-test('el supervisor toma la oferta al pulsar Tomar tiquet', async ({
+test('@smoke el supervisor toma la oferta al pulsar Tomar tiquet', async ({
   page,
 }) => {
   const description = `Toma E2E ${crypto.randomUUID()}`

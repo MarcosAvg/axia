@@ -24,8 +24,10 @@ de revisión.
    | `chore/…` | Mantenimiento y configuración |
 
 2. Realizar commits pequeños y atómicos.
-3. Ejecutar `pnpm check` hasta que quede en verde.
-4. Integrar a `main` solo con la compuerta en verde.
+3. Durante el trabajo, ejecutar `pnpm check:fast` y `pnpm test:affected`. No hace falta repetir
+   la compuerta completa tras cada edición.
+4. Antes de integrar, ejecutar `pnpm check` completo una vez y corregir solo lo que falle.
+5. Integrar a `main` solo con la compuerta en verde.
 
 ## Mensajes de commit
 
@@ -40,8 +42,9 @@ docs(deploy): documenta el contrato de reverse proxy
 
 ## Compuerta de calidad
 
-`pnpm check` es la fuente única de verdad: lint, tipos, docs, independencia del núcleo, fronteras,
-knip, pruebas (Vitest y Playwright), integración contra PostgreSQL real y build. Necesita las
+`pnpm check` es la compuerta de cierre: lint, tipos, docs, independencia del núcleo, fronteras,
+knip, pruebas (Vitest y Playwright), integración contra PostgreSQL real y build. Para el ciclo
+local usa `pnpm check:fast` y `pnpm test:affected`. Necesita las
 variables `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; Playwright prepara su
 propia base con la semilla demo.
 
@@ -53,8 +56,13 @@ propia base con la semilla demo.
 | `pnpm check:agnostic` | El núcleo no menciona plataformas externas |
 | `pnpm check:boundaries` | Dependencias entre capas |
 | `pnpm knip` | Código y dependencias sin uso |
-| `pnpm test` | Pruebas de frontend y de flujo |
+| `pnpm test:unit` | Unitarias de servidor y web, sin Playwright ni PostgreSQL |
+| `pnpm test:affected` | Solo pruebas relacionadas con archivos cambiados |
+| `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
+| `pnpm test:e2e` | Todos los flujos de Playwright |
 | `pnpm db:test` | Integración contra PostgreSQL real |
+| `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
+| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
 
 ## Pull requests
 

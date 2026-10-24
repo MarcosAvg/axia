@@ -80,7 +80,13 @@ contraseña fija en el repositorio.**
 | `pnpm dev:api` | API en desarrollo (http://127.0.0.1:3100) |
 | `pnpm build` | Compila servidor y SPA |
 | `pnpm lint` / `pnpm typecheck` | ESLint y TypeScript en todo el monorepo |
+| `pnpm test:unit` | Vitest de servidor y web |
+| `pnpm test:affected` | Pruebas relacionadas con los archivos cambiados |
+| `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
+| `pnpm test:e2e` | Todos los flujos de Playwright |
 | `pnpm test` | Vitest y Playwright |
+| `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
+| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
 | `pnpm db:start` / `pnpm db:stop` | Levanta o detiene PostgreSQL local |
 | `pnpm db:reset` | Reconstruye la base local con migraciones |
 | `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
@@ -93,7 +99,8 @@ contraseña fija en el repositorio.**
 | **`pnpm check`** | **Compuerta completa**: lint, tipos, scripts, docs, fronteras, knip, Vitest, Playwright, PostgreSQL real y build |
 
 `pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; en CI se
-configuran contra el servicio PostgreSQL. Playwright prepara su propia base con la semilla demo.
+configuran contra el servicio PostgreSQL. Durante el desarrollo usa `pnpm check:fast`; la
+compuerta completa se ejecuta antes de integrar. Playwright prepara su propia base con la semilla demo.
 
 Ejemplo local:
 

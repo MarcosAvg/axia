@@ -76,6 +76,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Reutiliza un jsdom por worker en lugar de crear uno por archivo.
+    pool: 'vmThreads',
     globals: true,
     setupFiles: './src/test/setup.ts',
     // Lo de `e2e/` y `visual/` lo corre Playwright, no Vitest.

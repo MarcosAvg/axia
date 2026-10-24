@@ -31,7 +31,7 @@ async function clickAndWait(page: Page, name: string, action: string) {
   await done
 }
 
-test('el técnico recibe, atiende con evidencias y cierra su parte', async ({
+test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', async ({
   page,
 }) => {
   const description = `Flujo técnico E2E ${crypto.randomUUID()}`

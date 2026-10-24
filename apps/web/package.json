@@ -10,7 +10,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run && playwright test",
     "test:visual": "playwright test --config playwright.visual.config.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

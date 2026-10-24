@@ -70,7 +70,7 @@ async function createAssignedTicket(page: Page, description: string) {
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 }
 
-test('el técnico sube evidencia sin conexión y luego se sincroniza', async ({
+test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   page,
 }) => {
   const description = `Offline E2E ${crypto.randomUUID()}`

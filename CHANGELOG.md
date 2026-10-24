@@ -50,6 +50,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Tiempos por acción: administradores y supervisores registran la hora real al crear un tiquet o
   ejecutar una acción, y pueden ajustarla desde la línea de tiempo con validación de vecinos y
   reconstrucción de tramos.
+- Pruebas por cambio: `check:fast`, `test:affected`, smoke E2E y compuerta completa reservada al
+  cierre; la integración reutiliza una base plantilla ya migrada.
 
 ### Retirado
 

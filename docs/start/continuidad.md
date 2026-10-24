@@ -22,7 +22,8 @@ docker compose run --rm migrate   # instalación con Compose
 1. Revisar `git status` y `git branch`.
 2. Leer la sección «En curso» de [`../internal/estado.md`](../internal/estado.md).
 3. Revisar bloqueos y decisiones abiertas.
-4. Ejecutar `pnpm check` para confirmar el estado de partida.
+4. Ejecutar `pnpm check:fast` para confirmar el estado de partida; reserva `pnpm check` completo
+   para el cierre de la tarea.
 
 ## Volver a clonar
 

@@ -17,7 +17,9 @@ test('sin sesión, la raíz redirige al acceso', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
 })
 
-test('un administrador inicia sesión y ve el panel', async ({ page }) => {
+test('@smoke un administrador inicia sesión y ve el panel', async ({
+  page,
+}) => {
   await signIn(page, 'demo.admin')
 
   await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()

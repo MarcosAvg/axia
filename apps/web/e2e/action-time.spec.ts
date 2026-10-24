@@ -14,7 +14,7 @@ async function signIn(page: Page) {
   ).toBeVisible()
 }
 
-test('el administrador registra y corrige la hora de una acción', async ({
+test('@smoke el administrador registra y corrige la hora de una acción', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })

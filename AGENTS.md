@@ -66,12 +66,16 @@ Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/interna
 | Comando | Qué hace |
 |---|---|
 | `pnpm dev` | Servidor de desarrollo |
-| `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm build` | Chequeos individuales |
+| `pnpm lint` / `pnpm typecheck` / `pnpm test:unit` / `pnpm build` | Chequeos individuales |
+| `pnpm test:affected` | Pruebas Vitest relacionadas con los archivos cambiados |
+| `pnpm test:e2e:smoke` | Flujos críticos de Playwright (`@smoke`) |
 | `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas de terceros |
 | `pnpm db:start` / `pnpm db:reset` | PostgreSQL local / reconstruir base local |
 | `pnpm db:test` | Integración del servidor contra PostgreSQL real |
 | `pnpm db:next:demo -- --demo` | Semilla demo explícita, solo local |
-| **`pnpm check`** | **Compuerta completa**: lint + typecheck + scripts + agnóstico + fronteras + knip + Vitest + Playwright + PostgreSQL + build |
+| **`pnpm check:fast`** | **Ciclo local**: lint + typecheck + unitarias |
+| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
+| **`pnpm check`** | **Compuerta completa**: estáticos + unitarias + Playwright + PostgreSQL + build |
 
 ## 6. Reglas de oro (no negociables)
 
@@ -111,7 +115,12 @@ Nunca, sin que la persona lo pida claramente en esta sesión:
 
 ## 8. Cómo verificas tu trabajo
 
-- Corre `pnpm check` antes de cada merge a `main`. Si falla, corrige la causa.
+- Durante el desarrollo corre `pnpm check:fast` y `pnpm test:affected`; no repitas la compuerta
+  completa tras cada edición.
+- Antes de cada merge a `main` corre `pnpm check` completo una vez. Si falla, corrige con la
+  suite afectada y vuelve a ejecutar la compuerta al final, no en cada intento.
+- Para cambios de interfaz, `pnpm test:e2e:smoke` es el mínimo local; el E2E completo queda para
+  el cierre. Para migraciones, ejecuta toda la integración de PostgreSQL.
 - Para librerías que cambian rápido (TanStack Router, shadcn/ui, Drizzle, Fastify,
   vite-plugin-pwa, Recharts): no confíes en tu memoria. Revisa los tipos instalados en
   `node_modules` o la documentación oficial de la versión instalada.
@@ -124,8 +133,10 @@ Nunca, sin que la persona lo pida claramente en esta sesión:
 1. Lee `docs/internal/estado.md` y los documentos relevantes.
 2. Escribe un plan de 3 a 7 líneas en `docs/internal/estado.md` (sección "En curso") y avanza.
 3. Crea una rama (`feat/...`, `fix/...`), haz commits pequeños con Conventional Commits.
-4. Escribe o actualiza pruebas, implementa, corre `pnpm check`.
-5. Integra a `main` solo con la compuerta en verde. Actualiza `docs/internal/estado.md`.
+4. Escribe o actualiza pruebas, implementa y corre las pruebas afectadas. Usa `pnpm check:fast`
+   para el ciclo y `pnpm test:affected` para el subconjunto relacionado.
+5. Antes de integrar, corre `pnpm check` completo una vez. Integra a `main` solo con la compuerta
+   en verde. Actualiza `docs/internal/estado.md`.
 6. Entrega el informe final (sección 10).
 
 ## 10. Informe final de cada tarea

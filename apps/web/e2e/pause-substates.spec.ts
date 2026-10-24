@@ -31,9 +31,8 @@ async function clickAndWait(page: Page, name: string, action: string) {
   await done
 }
 
-test('el técnico pausa, avanza el subestado y reanuda', async ({ page }) => {
+test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   const description = `Pausa E2E ${crypto.randomUUID()}`
-
   await signIn(page, 'demo.admin')
   await page.goto('/tickets/nuevo')
   await page
@@ -51,14 +50,12 @@ test('el técnico pausa, avanza el subestado y reanuda', async ({ page }) => {
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()
   await expect(page.getByText(description)).toBeVisible()
-
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
   await signOut(page)
-
   await signIn(page, 'demo.technician')
   await page.goto('/mi-trabajo')
   await page.getByText(description).click()

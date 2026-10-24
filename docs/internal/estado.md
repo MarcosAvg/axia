@@ -56,13 +56,14 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Tanda C1:** vistas por rol y permisos coherentes: `technicianId` en la identidad, “Mi trabajo”
   solo para técnicos, “Bandeja” solo con ofertas, panel sin consultas 403, “Nuevo tiquet” por
   permiso y administración alineada con sus permisos específicos. Ver ADR 0079.
-- **Pruebas:** 39 unitarias/HTTP del servidor, 245 web, 38 Playwright y 137 de integración contra
+- **Pruebas:** 39 unitarias/HTTP del servidor, 245 web, 36 Playwright y 137 de integración contra
   PostgreSQL real. `pnpm check` en verde; `pnpm test:visual` con 3 capturas en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0082:** pruebas por cambio, ciclo local rápido y compuerta completa al cierre.
 - **ADR 0078:** corte único del frontend y retirada del stack anterior.
 - **ADR 0077:** Vitest contra PostgreSQL real como suite principal; pgTAP se retiró con el esquema
   anterior porque probaba RLS/RPC que ya no existen.
@@ -77,12 +78,14 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 ## Verificación
 
 ```bash
-pnpm check
+pnpm check:fast   # ciclo local
+pnpm check        # antes de integrar
 ```
 
-La compuerta incluye lint, tipos, independencia del núcleo, fronteras, knip, Vitest, Playwright,
-integración contra PostgreSQL real y build. Requiere `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD`
-y `DATABASE_URL`; Playwright prepara su propia base con la semilla demo.
+Para el ciclo local usa `pnpm check:fast` y `pnpm test:affected`. La compuerta completa incluye
+lint, tipos, independencia del núcleo, fronteras, knip, Vitest, Playwright, integración contra
+PostgreSQL real y build. Requiere `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`;
+Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes de integrar.
 
 ## Pendientes operativos
 

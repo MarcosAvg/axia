@@ -2,7 +2,12 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -38,5 +43,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @axia/web exec playwright install chromium --with-deps
-      # Compuerta única: PostgreSQL 17 real, migraciones, Vitest, Playwright y build.
+      # La compuerta completa se ejecuta una vez por PR o push a main. El ciclo local usa
+      # `pnpm check:fast` y `pnpm test:affected`.
       - run: pnpm check

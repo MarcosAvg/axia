@@ -31,6 +31,11 @@ Comandos disponibles desde la raíz del repositorio.
 
 | Comando | Efecto |
 |---|---|
+| `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
+| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
+| `pnpm test:affected` | Pruebas relacionadas con los archivos cambiados |
+| `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
+| `pnpm test:unit` | Unitarias de servidor y web |
 | `pnpm check` | Compuerta completa: lint, tipos, scripts, agnóstico, fronteras, knip, tests, base y build |
 | `pnpm check:agnostic` | Verifica que el núcleo no nombre plataformas externas |
 | `pnpm check:boundaries` | Verifica las reglas de dependencia |
@@ -38,7 +43,8 @@ Comandos disponibles desde la raíz del repositorio.
 | `pnpm test:scripts` | Prueba el instalador en modo dry-run |
 
 `pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`. Playwright
-prepara su propia base con la semilla demo.
+prepara su propia base con la semilla demo. Durante el desarrollo usa `pnpm check:fast`; la
+compuerta completa se reserva para el cierre y para CI.
 
 ## Instalación y operación
 

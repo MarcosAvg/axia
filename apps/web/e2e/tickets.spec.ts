@@ -13,7 +13,7 @@ async function signIn(page: Page, email: string) {
   ).toBeVisible()
 }
 
-test('un solicitante registra un tiquet y lo ve en la lista y el detalle', async ({
+test('@smoke un solicitante registra un tiquet y lo ve en la lista y el detalle', async ({
   page,
 }) => {
   const description = `Prueba E2E ${crypto.randomUUID()}`
