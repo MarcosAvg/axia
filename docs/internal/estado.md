@@ -128,6 +128,7 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
 - Construir y arrancar la imagen Docker completa en un host limpio.
 - Configurar dominio, TLS, reverse proxy y `TRUST_PROXY` si corresponde.
 - Programar respaldos de base y evidencias, con prueba de restauración trimestral.
+- Programar `db:cleanup-evidence` (o el comando del contenedor) junto con los respaldos.
 - Revisar logs, retención, monitorización y espacio en disco.
 - Decidir si se implementan Web Push, escalamiento y adaptadores de importación.
 
