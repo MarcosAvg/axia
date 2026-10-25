@@ -8,7 +8,7 @@
 
 ## En curso
 
-**Sin trabajo en curso.** Las correcciones de la auditoría están integradas a `main`, con la
+**Sin trabajo en curso.** El lote de evidencias y recaptura está integrado a `main`, con la
 compuerta completa en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
@@ -82,7 +82,11 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   cuenta si está `ready`. La cola offline y las fotos quedan separadas por usuario del dispositivo,
   se borran del dispositivo al subirse y ya no reintentan errores definitivos. Se retiró el cliente
   de sincronización por lote que no se usaba.
-- **Pruebas:** 48 unitarias/HTTP del servidor, 248 web, 38 Playwright y 164 de integración contra
+- **Evidencias y recaptura (2026-10-25):** la cuota se comprueba al iniciar la subida, no después de
+  escribir el archivo. `pnpm db:cleanup-evidence` elimina subidas abandonadas y marca la fila como
+  `failed` sin borrarla (RN-22). La recaptura valida que la ubicación pertenezca al edificio, la
+  subcategoría a la categoría y el problema a la subcategoría; solo valida lo que cambió.
+- **Pruebas:** 48 unitarias/HTTP del servidor, 248 web, 38 Playwright y 168 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
