@@ -8,8 +8,8 @@
 
 ## En curso
 
-**Sin trabajo en curso.** Las correcciones de la auditoría quedaron en la rama
-`fix/audit-must-fixes`, con la compuerta completa en verde.
+**Sin trabajo en curso.** Las correcciones de la auditoría están integradas a `main`, con la
+compuerta completa en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
