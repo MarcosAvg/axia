@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isNetworkError } from '@/lib/offline/errors'
+import { processOutbox } from '@/lib/offline/outbox'
 import { enqueueTicketAction } from '../api/offline-actions'
 import { sendSyncBatch } from '../api/sync-api'
 import { TICKET_OPERATIONS } from '../api/ticket-operations'
@@ -63,6 +64,7 @@ function useTicketMutation<TVariables extends Record<string, unknown>>(
             clientRequestId,
             occurredAt,
           })
+          void processOutbox()
           return
         }
         throw error

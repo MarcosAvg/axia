@@ -11,6 +11,7 @@ import {
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { uploadResumable } from '@/lib/offline/tus'
+import { currentOfflineUserId } from '@/lib/offline/user'
 import { EVIDENCE_TYPES } from '../domain/types'
 import type { EvidenceType } from '../domain/types'
 
@@ -31,6 +32,7 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
   const blob = await compressImage(params.file)
   await db.evidences.add({
     id,
+    userId: currentOfflineUserId() ?? undefined,
     ticketId: params.ticketId,
     cycle: params.cycle,
     type: params.type,
@@ -50,7 +52,14 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
 async function uploadEvidenceItem(payload: unknown): Promise<void> {
   const { evidenceId } = payload as { evidenceId: string }
   const evidence = await db.evidences.get(evidenceId)
-  if (!evidence || evidence.state === 'uploaded') return
+  if (!evidence) return
+  if (evidence.state === 'uploaded') {
+    await db.evidences.delete(evidenceId)
+    return
+  }
+  if (evidence.userId && evidence.userId !== currentOfflineUserId()) {
+    throw new Error('La evidencia pertenece a otro usuario')
+  }
   const type = EVIDENCE_TYPES.find((candidate) => candidate === evidence.type)
   if (!type) throw new Error('Tipo de evidencia inválido')
 
@@ -84,7 +93,8 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
       }
     },
   })
-  await db.evidences.update(evidenceId, { state: 'uploaded', progress: 100 })
+  // La foto ya está en el servidor: no hace falta conservar otra copia local.
+  await db.evidences.delete(evidenceId)
 }
 
 /**

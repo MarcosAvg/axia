@@ -1,10 +1,10 @@
 import { MenuIcon, SearchIcon } from 'lucide-react'
-import { OfflineIndicator } from '@/components/shared/offline-indicator'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { NotificationBell } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppBreadcrumbs } from './breadcrumbs'
+import { OfflineIndicator } from './offline-indicator'
 import { UserMenu } from './user-menu'
 
 interface AppTopbarProps {

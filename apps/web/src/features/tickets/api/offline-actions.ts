@@ -7,7 +7,7 @@ import type { TicketOperation } from './ticket-operations'
 
 const TICKET_ACTION = 'ticket_action'
 
-export interface TicketActionPayload {
+interface TicketActionPayload {
   operation: TicketOperation
   ticketId: string
   args: Record<string, unknown>

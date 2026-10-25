@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { CloudOffIcon, RefreshCwIcon } from 'lucide-react'
-import { db } from '@/lib/offline/db'
+import { useAuth } from '@/features/auth'
+import { pendingForCurrentUser } from '@/lib/offline/outbox'
 import { messages } from '@/lib/i18n'
 
 /** Aviso de "sin conexión" y de elementos pendientes de sincronizar. */
@@ -9,7 +10,9 @@ export function OfflineIndicator() {
   const [online, setOnline] = useState(
     typeof navigator === 'undefined' ? true : navigator.onLine,
   )
-  const pending = useLiveQuery(() => db.outbox.count(), [], 0)
+  const { session } = useAuth()
+  const userId = session?.user.id
+  const pending = useLiveQuery(() => pendingForCurrentUser(), [userId], 0)
 
   useEffect(() => {
     const goOnline = () => setOnline(true)

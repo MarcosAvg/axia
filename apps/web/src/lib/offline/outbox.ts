@@ -1,6 +1,7 @@
 import { db } from './db'
 import type { OutboxItem } from './db'
 import { isNetworkError } from './errors'
+import { currentOfflineUserId } from './user'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
 
@@ -38,6 +39,7 @@ export async function enqueue(type: string, payload: unknown): Promise<void> {
       id: crypto.randomUUID(),
       seq: nextSeq(),
       type,
+      userId: currentOfflineUserId() ?? undefined,
       payload,
       state: 'pending',
       attempts: 0,
@@ -48,6 +50,7 @@ export async function enqueue(type: string, payload: unknown): Promise<void> {
 }
 
 const MAX_ATTEMPTS = 5
+const STALE_SENDING_MS = 60_000
 let isProcessing = false
 let afterProcess: (() => void) | null = null
 
@@ -61,12 +64,25 @@ export async function processOutbox(): Promise<void> {
   // Sin conexión no hay nada que enviar; se reintenta al recuperar la red.
   if (typeof navigator !== 'undefined' && !navigator.onLine) return
   if (isProcessing) return
+  const userId = currentOfflineUserId()
+  if (!userId) return
   isProcessing = true
   try {
     await exclusive(async () => {
-      const items = await db.outbox.toArray()
-      items.sort((a, b) => a.seq - b.seq)
-      for (const item of items) {
+      if (currentOfflineUserId() !== userId) return
+      const items = await db.outbox
+        .where('state')
+        .anyOf('pending', 'sending')
+        .toArray()
+      const mine = items.filter(
+        (item) =>
+          item.userId === userId &&
+          (item.state === 'pending' ||
+            !item.sendingAt ||
+            item.sendingAt < Date.now() - STALE_SENDING_MS),
+      )
+      mine.sort((a, b) => a.seq - b.seq)
+      for (const item of mine) {
         await processItem(item)
       }
     })
@@ -74,6 +90,14 @@ export async function processOutbox(): Promise<void> {
     isProcessing = false
     afterProcess?.()
   }
+}
+
+/** Elementos pendientes del usuario actual; el aviso no cuenta los de otra sesión. */
+export async function pendingForCurrentUser(): Promise<number> {
+  const userId = currentOfflineUserId()
+  if (!userId) return 0
+  const items = await db.outbox.where('state').equals('pending').toArray()
+  return items.filter((item) => item.userId === userId).length
 }
 
 async function processItem(item: OutboxItem): Promise<void> {
@@ -85,7 +109,10 @@ async function processItem(item: OutboxItem): Promise<void> {
     })
     return
   }
-  await db.outbox.update(item.id, { state: 'sending' })
+  await db.outbox.update(item.id, {
+    state: 'sending',
+    sendingAt: Date.now(),
+  })
   try {
     await handler(item.payload)
     await db.outbox.delete(item.id)
@@ -95,6 +122,7 @@ async function processItem(item: OutboxItem): Promise<void> {
     await db.outbox.update(item.id, {
       state: permanent || attempts >= MAX_ATTEMPTS ? 'error' : 'pending',
       attempts,
+      sendingAt: null,
       lastError: error instanceof Error ? error.message : String(error),
     })
   }

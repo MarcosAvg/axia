@@ -10,17 +10,22 @@ export interface OutboxItem {
   // la evidencia "antes" se suba antes que la acción de iniciar.
   seq: number
   type: string
+  /** Dueño del elemento; nunca se reenvía con la sesión de otra persona. */
+  userId?: string
   payload: unknown
-  state: 'pending' | 'sending' | 'error' | 'blocked'
+  state: 'pending' | 'sending' | 'error'
   attempts: number
   lastError: string | null
-  result?: unknown
+  /** Marca de tiempo del último intento, para recuperar envíos interrumpidos. */
+  sendingAt?: number | null
   createdAt: number
 }
 
 // Foto ya comprimida, guardada en el dispositivo hasta que termine de subirse.
 export interface Evidence {
   id: string
+  /** Dueño de la foto; otra persona en el mismo dispositivo no la ve. */
+  userId?: string
   ticketId: string
   cycle: number
   type: string

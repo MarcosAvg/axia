@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useAuth } from '@/features/auth'
 import { db } from '@/lib/offline/db'
 import type { Evidence } from '@/lib/offline/db'
 import { getEvidenceUrl } from '../api/evidence-api'
@@ -36,12 +37,18 @@ export function useUploadEvidence() {
 
 /** Evidencias guardadas en el dispositivo para un tiquet (observadas en vivo). */
 export function useLocalEvidence(ticketId: string | undefined) {
+  const { session } = useAuth()
+  const userId = session?.user.id
   return useLiveQuery(
     () =>
-      ticketId
-        ? db.evidences.where('ticketId').equals(ticketId).toArray()
+      ticketId && userId
+        ? db.evidences
+            .where('ticketId')
+            .equals(ticketId)
+            .filter((item) => item.userId === userId)
+            .toArray()
         : Promise.resolve<Evidence[]>([]),
-    [ticketId],
+    [ticketId, userId],
     [],
   )
 }
