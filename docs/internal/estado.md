@@ -8,7 +8,8 @@
 
 ## En curso
 
-**Sin trabajo en curso.**
+**Sin trabajo en curso.** Las correcciones de la auditoría quedaron en la rama
+`fix/audit-must-fixes`, con la compuerta completa en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -74,8 +75,15 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   autoría del tiquet; `before`/`during`/`after` con `ticket.record_progress` o `evidence.attach`.
   El solicitante ya puede abrir reclamaciones y adjuntar la foto de su solicitud; los errores de
   dominio limpian la fila local y la foto fallida muestra un aviso (ADR 0086).
-- **Pruebas:** 48 unitarias/HTTP del servidor, 251 web, 38 Playwright y 155 de integración contra
-  PostgreSQL real. `pnpm check:fast`, `check:static`, build, base de datos y Playwright en verde.
+- **Corrección de la auditoría (2026-10-25):** los cambios de rol exigen `role.manage`; se protegió
+  al último administrador en las rutas de acceso y el rol Administrador ya no se desactiva desde la
+  API (ADR 0087). La validación llena el lado del solicitante sin cuenta o cuando se actúa con
+  `ticket.validate_on_behalf`, la recaptura acepta limpiar campos opcionales y la evidencia solo
+  cuenta si está `ready`. La cola offline y las fotos quedan separadas por usuario del dispositivo,
+  se borran del dispositivo al subirse y ya no reintentan errores definitivos. Se retiró el cliente
+  de sincronización por lote que no se usaba.
+- **Pruebas:** 48 unitarias/HTTP del servidor, 248 web, 38 Playwright y 164 de integración contra
+  PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
