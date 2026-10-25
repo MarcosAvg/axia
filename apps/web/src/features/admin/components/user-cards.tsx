@@ -8,7 +8,7 @@ import { StatusSwitch } from './status-switch'
 
 interface UserCardActions {
   onToggleActive: (profile: Profile) => void
-  onEditRoles: (profile: Profile) => void
+  onEditRoles?: (profile: Profile) => void
   onResetPassword: (profile: Profile) => void
   onRevokeSessions: (profile: Profile) => void
 }
@@ -61,6 +61,12 @@ function UserCardRoles({
   )
 }
 
+function lastAccessText(profile: Profile): string {
+  return profile.lastLoginAt
+    ? formatDateTime(profile.lastLoginAt)
+    : adminMessages.users.never
+}
+
 function UserCard({
   profile,
   roles,
@@ -78,9 +84,6 @@ function UserCard({
   requesters: LinkablePerson[]
   technicians: LinkablePerson[]
 }) {
-  const lastAccess = profile.lastLoginAt
-    ? formatDateTime(profile.lastLoginAt)
-    : adminMessages.users.never
   return (
     <li className="flex flex-col gap-3 rounded-xl border bg-card p-3">
       <div className="flex items-start justify-between gap-3">
@@ -90,7 +93,7 @@ function UserCard({
             @{profile.username ?? '—'}
           </p>
           <p className="text-xs text-muted-foreground">
-            {adminMessages.users.lastAccess}: {lastAccess}
+            {adminMessages.users.lastAccess}: {lastAccessText(profile)}
           </p>
         </div>
         <StatusSwitch
@@ -112,7 +115,7 @@ function UserCard({
           active={profile.active}
           name={profile.fullName}
           editLabel={adminMessages.users.editRoles}
-          onEdit={() => onEditRoles(profile)}
+          onEdit={onEditRoles ? () => onEditRoles(profile) : undefined}
           onToggle={() => onToggleActive(profile)}
           onResetPassword={() => onResetPassword(profile)}
           onRevokeSessions={() => onRevokeSessions(profile)}

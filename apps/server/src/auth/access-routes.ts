@@ -2,7 +2,12 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import type { Database } from '../db/client.js'
-import { authGuards, requirePermission, type Guard } from './guards.js'
+import {
+  authGuards,
+  currentActor,
+  requirePermission,
+  type Guard,
+} from './guards.js'
 import type { AuthService } from './service.js'
 import type { AppConfig } from '../config.js'
 import { listAccess } from './access-admin.js'
@@ -19,7 +24,6 @@ import {
   removeScopeBuilding,
   removeTechnicianCategory,
   removeUserRole,
-  setProfileActive,
   setRolePermission,
   updateRole,
 } from './access-admin-write.js'
@@ -113,54 +117,65 @@ function registerRolePermissions(
   )
 }
 
-function registerPeopleRoutes(
+function registerProfileRoutes(
   app: FastifyInstance,
-  db: Database,
-  userGuard: Guard[],
-  assignmentGuard: Guard[],
+  auth: AuthService,
+  guard: Guard[],
 ) {
   app.patch(
     '/api/admin/access/profiles/:id',
-    { preHandler: userGuard },
+    { preHandler: guard },
     async (request, reply) => {
       const { id } = idParams.parse(request.params)
       const { active } = z.object({ active: z.boolean() }).parse(request.body)
-      await setProfileActive(db, id, active)
+      await auth.updateUser(currentActor(request), id, { active })
       return reply.status(204).send()
     },
   )
+}
 
+function registerUserRoleRoutes(
+  app: FastifyInstance,
+  db: Database,
+  guard: Guard[],
+) {
   app.post(
     '/api/admin/access/user-roles',
-    { preHandler: userGuard },
+    { preHandler: guard },
     async (request, reply) => {
       const body = z
         .object({ userId: z.string().uuid(), roleId: z.string().uuid() })
         .parse(request.body)
-      await assignUserRole(db, body.userId, body.roleId)
+      await assignUserRole(db, currentActor(request), body.userId, body.roleId)
       return reply.status(204).send()
     },
   )
 
   app.post(
     '/api/admin/access/user-roles/remove',
-    { preHandler: userGuard },
+    { preHandler: guard },
     async (request, reply) => {
       const body = z
         .object({ userId: z.string().uuid(), roleId: z.string().uuid() })
         .parse(request.body)
-      await removeUserRole(db, body.userId, body.roleId)
+      await removeUserRole(db, currentActor(request), body.userId, body.roleId)
       return reply.status(204).send()
     },
   )
+}
 
+function registerLinkRoutes(
+  app: FastifyInstance,
+  db: Database,
+  guard: Guard[],
+) {
   for (const [path, link] of [
     ['requesters', linkRequesterUser],
     ['technicians', linkTechnicianUser],
   ] as const) {
     app.patch(
       `/api/admin/access/${path}/:id`,
-      { preHandler: assignmentGuard },
+      { preHandler: guard },
       async (request, reply) => {
         const { id } = idParams.parse(request.params)
         const { userId } = z
@@ -263,6 +278,10 @@ export function registerAdminAccessRoutes(
   const active = authGuards(auth, config, false)
   const userGuard: Guard[] = [active, requirePermission('user.manage')]
   const roleGuard: Guard[] = [active, requirePermission('role.manage')]
+  const roleChangeGuard: Guard[] = [
+    ...userGuard,
+    requirePermission('role.manage'),
+  ]
   const assignmentGuard: Guard[] = [
     active,
     requirePermission('assignment.manage'),
@@ -273,7 +292,9 @@ export function registerAdminAccessRoutes(
   )
   registerRoleRoutes(app, db, roleGuard)
   registerRolePermissions(app, db, roleGuard)
-  registerPeopleRoutes(app, db, userGuard, assignmentGuard)
+  registerProfileRoutes(app, auth, userGuard)
+  registerUserRoleRoutes(app, db, roleChangeGuard)
+  registerLinkRoutes(app, db, assignmentGuard)
   registerScopeRoutes(app, db, assignmentGuard)
   registerTechnicianCategories(app, db, assignmentGuard)
 }

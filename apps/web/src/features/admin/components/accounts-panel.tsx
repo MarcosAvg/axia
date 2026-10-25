@@ -1,7 +1,7 @@
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { sortRows } from '@/lib/sort'
-import { useAuth } from '@/features/auth'
+import { can, useAuth } from '@/features/auth'
 import type { Profile, Role } from '../domain/access'
 import { filterProfiles } from '../domain/user-list'
 import {
@@ -11,11 +11,11 @@ import {
 } from '../hooks/use-accounts'
 import type { AccountAction } from '../hooks/use-accounts'
 import { adminMessages } from '../i18n'
+import { AccountsTable } from './accounts-table'
 import { AdminToolbar } from './admin-toolbar'
 import { TemporaryPasswordDialog } from './temporary-password-dialog'
 import { UserCreateDialog } from './user-create-dialog'
 import { UserRolesDialog } from './user-roles-dialog'
-import { UsersTable } from './users-table'
 
 function UsersConfirmDialog({
   profile,
@@ -120,7 +120,7 @@ function AccountsToolbar({
   query: string
   count: number
   onQuery: (value: string) => void
-  onAdd: () => void
+  onAdd?: () => void
 }) {
   const { users, list } = adminMessages
   return (
@@ -131,42 +131,6 @@ function AccountsToolbar({
       countText={`${count} ${list.results}`}
       addLabel={users.newUser}
       onAdd={onAdd}
-    />
-  )
-}
-
-function AccountsTable({
-  visible,
-  data,
-  sort,
-  onSort,
-  onToggle,
-  onEdit,
-  onReset,
-  onRevoke,
-}: {
-  visible: Profile[]
-  data: ReturnType<typeof useAccountsData>
-  sort: Parameters<typeof UsersTable>[0]['sort']
-  onSort: Parameters<typeof UsersTable>[0]['onSortChange']
-  onToggle: Parameters<typeof UsersTable>[0]['onToggleActive']
-  onEdit: Parameters<typeof UsersTable>[0]['onEditRoles']
-  onReset: Parameters<typeof UsersTable>[0]['onResetPassword']
-  onRevoke: Parameters<typeof UsersTable>[0]['onRevokeSessions']
-}) {
-  return (
-    <UsersTable
-      profiles={visible}
-      roles={data.roleList}
-      assignments={data.assignmentList}
-      requesters={data.peopleData.requesters}
-      technicians={data.peopleData.technicians}
-      sort={sort}
-      onSortChange={onSort}
-      onToggleActive={onToggle}
-      onEditRoles={onEdit}
-      onResetPassword={onReset}
-      onRevokeSessions={onRevoke}
     />
   )
 }
@@ -227,11 +191,13 @@ function AccountsContent({
   actions,
   mutations,
   visible,
+  onEdit,
 }: {
   data: ReturnType<typeof useAccountsData>
   actions: ReturnType<typeof useAccountsActions>
   mutations: ReturnType<typeof useAccountMutations>
   visible: Profile[]
+  onEdit?: (profile: Profile) => void
 }) {
   if (data.profiles.isLoading || data.accounts.isLoading)
     return <LoadingList rows={4} />
@@ -244,7 +210,7 @@ function AccountsContent({
       sort={actions.sort}
       onSort={actions.toggleSort}
       onToggle={actions.requestToggle}
-      onEdit={actions.setEditing}
+      onEdit={onEdit}
       onReset={(profile) => mutations.setAction({ kind: 'reset', profile })}
       onRevoke={(profile) => mutations.setAction({ kind: 'revoke', profile })}
     />
@@ -253,6 +219,7 @@ function AccountsContent({
 
 export function AccountsPanel() {
   const { identity } = useAuth()
+  const canEditRoles = can(identity, 'role.manage')
   const data = useAccountsData()
   const actions = useAccountsActions({
     currentUserId: identity?.userId,
@@ -276,13 +243,14 @@ export function AccountsPanel() {
         query={actions.query}
         count={visible.length}
         onQuery={actions.setQuery}
-        onAdd={() => mutations.setCreating(true)}
+        onAdd={canEditRoles ? () => mutations.setCreating(true) : undefined}
       />
       <AccountsContent
         data={data}
         actions={actions}
         mutations={mutations}
         visible={visible}
+        onEdit={canEditRoles ? actions.setEditing : undefined}
       />
       <AccountsRoleDialog
         profile={actions.editing}

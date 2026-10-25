@@ -12,8 +12,10 @@ export function createAdminService(db: Database) {
   return {
     listUsers: (query: Parameters<typeof listUsers>[1]) => listUsers(db, query),
     listRoles: () => listRoles(db),
-    createUser: (input: Parameters<typeof createUser>[1]) =>
-      createUser(db, input),
+    createUser: (
+      actor: Parameters<typeof createUser>[1],
+      input: Parameters<typeof createUser>[2],
+    ) => createUser(db, actor, input),
     updateUser: (
       actor: Parameters<typeof updateUser>[1],
       targetId: string,

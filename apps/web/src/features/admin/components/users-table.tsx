@@ -20,7 +20,7 @@ interface UsersTableProps {
   sort: SortState | null
   onSortChange: (key: string) => void
   onToggleActive: (profile: Profile) => void
-  onEditRoles: (profile: Profile) => void
+  onEditRoles?: (profile: Profile) => void
   onResetPassword: (profile: Profile) => void
   onRevokeSessions: (profile: Profile) => void
 }
@@ -119,12 +119,19 @@ function activeColumn(
   }
 }
 
-function actionsColumn(
-  onEditRoles: (profile: Profile) => void,
-  onToggleActive: (profile: Profile) => void,
-  onResetPassword: (profile: Profile) => void,
-  onRevokeSessions: (profile: Profile) => void,
-): DataTableColumn<Profile> {
+interface ActionsColumnOptions {
+  onEditRoles?: (profile: Profile) => void
+  onToggleActive: (profile: Profile) => void
+  onResetPassword: (profile: Profile) => void
+  onRevokeSessions: (profile: Profile) => void
+}
+
+function actionsColumn({
+  onEditRoles,
+  onToggleActive,
+  onResetPassword,
+  onRevokeSessions,
+}: ActionsColumnOptions): DataTableColumn<Profile> {
   return {
     id: 'actions',
     header: '',
@@ -136,7 +143,7 @@ function actionsColumn(
           active={profile.active}
           name={profile.fullName}
           editLabel={adminMessages.users.editRoles}
-          onEdit={() => onEditRoles(profile)}
+          onEdit={onEditRoles ? () => onEditRoles(profile) : undefined}
           onToggle={() => onToggleActive(profile)}
           onResetPassword={() => onResetPassword(profile)}
           onRevokeSessions={() => onRevokeSessions(profile)}
@@ -174,12 +181,12 @@ export function UsersTable({
     rolesColumn(roles, assignments),
     linkColumn(requesters, technicians),
     activeColumn(onToggleActive),
-    actionsColumn(
+    actionsColumn({
       onEditRoles,
       onToggleActive,
       onResetPassword,
       onRevokeSessions,
-    ),
+    }),
   ]
 
   return (

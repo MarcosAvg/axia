@@ -157,7 +157,7 @@ async function registerAdminUserRoutes(
     { preHandler: admin },
     async (request, reply) => {
       const body = createUserSchema.parse(request.body)
-      const result = await auth.createUser(body)
+      const result = await auth.createUser(currentActor(request), body)
       return reply.status(201).send(result)
     },
   )

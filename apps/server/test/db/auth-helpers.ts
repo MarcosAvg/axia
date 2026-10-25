@@ -1,8 +1,10 @@
+import { sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { Pool } from 'pg'
 import { expect } from 'vitest'
 
 import { buildApp } from '../../src/app.js'
+import { hashPassword } from '../../src/auth/password.js'
 import { createAuthService } from '../../src/auth/service.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
@@ -40,6 +42,7 @@ export async function buildAuthTestApp(): Promise<AuthTestContext> {
   const app = await buildApp({
     config: testConfig,
     auth,
+    db: created.db,
     readiness: () => checkDatabase(created.pool),
     logger: false,
   })
@@ -121,4 +124,47 @@ export async function adminId(app: FastifyInstance, cookie: string) {
     headers: headers(cookie),
   })
   return (response.json() as { user: { id: string } }).user.id
+}
+
+/** Administrador y un usuario con solo `user.manage` para probar los límites. */
+export async function setupOps(context: AuthTestContext) {
+  const adminCookie = await setupAdmin(context.app)
+  const adminUserId = await adminId(context.app, adminCookie)
+
+  await context.db.execute(sql`
+    insert into public.roles (name, label) values ('ops', 'Operaciones')
+  `)
+  await context.db.execute(sql`
+    insert into public.role_permissions (role_id, permission_id, scope)
+    select r.id, 'user.manage', 'all'
+    from public.roles r where r.name = 'ops'
+  `)
+  const opsRole = await roleIdByName(context.app, adminCookie, 'ops')
+  const opsPassword = 'OpsPassword123!'
+  const opsHash = await hashPassword(opsPassword)
+  const opsUser = await context.db.execute(sql`
+    insert into public.users (username, full_name, password_hash, must_change_password)
+    values ('ops', 'Operaciones', ${opsHash}, false)
+    returning id
+  `)
+  const opsId = (opsUser.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    insert into public.user_roles (user_id, role_id) values (${opsId}, ${opsRole})
+  `)
+
+  const opsLogin = await login(context.app, 'ops', opsPassword)
+  expect(opsLogin.statusCode).toBe(200)
+  const adminRole = await roleIdByName(
+    context.app,
+    adminCookie,
+    'administrator',
+  )
+
+  return {
+    adminCookie,
+    adminUserId,
+    adminRole,
+    opsId,
+    opsCookie: cookieFrom(opsLogin),
+  }
 }

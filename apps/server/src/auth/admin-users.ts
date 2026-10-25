@@ -2,7 +2,7 @@ import { sql, type SQL } from 'drizzle-orm'
 
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
-import type { Actor } from './authorization.js'
+import { can, type Actor } from './authorization.js'
 import {
   ADMIN_LOCK_KEY,
   assertAnotherAdmin,
@@ -72,7 +72,22 @@ export async function listRoles(db: Database): Promise<RoleView[]> {
   return result.rows as RoleView[]
 }
 
-export async function createUser(db: Database, input: CreateUserInput) {
+function assertCanAssignRoles(
+  actor: Actor,
+  roleIds: string[] | undefined,
+): void {
+  if (!roleIds) return
+  if (can(actor, 'role.manage')) return
+  throw new AppError(403, 'forbidden', 'No tienes permiso para asignar roles')
+}
+
+export async function createUser(
+  db: Database,
+  actor: Actor,
+  input: CreateUserInput,
+) {
+  assertCanAssignRoles(actor, input.roleIds)
+
   const temporaryPassword = generateTemporaryPassword()
   const passwordHash = await hashPassword(temporaryPassword)
 
@@ -161,6 +176,8 @@ export async function updateUser(
     await tx.execute(sql`select pg_advisory_xact_lock(${ADMIN_LOCK_KEY})`)
     const target = await loadTarget(tx, targetId)
 
+    assertCanAssignRoles(actor, input.roleIds)
+
     if (target.id === actor.id && input.active === false) {
       throw new AppError(
         409,
@@ -209,6 +226,21 @@ export async function resetPassword(
       409,
       'self_protected',
       'Usa el cambio de contraseña para tu propia cuenta',
+    )
+  }
+
+  const targetIsAdmin = await db.execute(sql`
+    select 1
+    from public.user_roles ur
+    join public.roles r on r.id = ur.role_id
+    where ur.user_id = ${targetId} and r.name = 'administrator'
+    limit 1
+  `)
+  if (targetIsAdmin.rows[0] && !can(actor, 'role.manage')) {
+    throw new AppError(
+      403,
+      'forbidden',
+      'No tienes permiso para restablecer la contraseña de un administrador',
     )
   }
 

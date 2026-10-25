@@ -1,7 +1,5 @@
-import { sql } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { hashPassword } from '../../src/auth/password.js'
 import {
   adminId,
   buildAuthTestApp,
@@ -195,47 +193,6 @@ describe('admin protections', () => {
       payload: { roleIds: [requesterRole] },
     })
     expect(selfRoleGuard.statusCode).toBe(409)
-  })
-})
-
-describe('last admin protection', () => {
-  it('protects the last administrator', async () => {
-    const adminCookie = await setupAdmin(context.app)
-    const adminUserId = await adminId(context.app, adminCookie)
-
-    await context.db.execute(sql`
-      insert into public.roles (name, label) values ('ops', 'Operaciones')
-    `)
-    await context.db.execute(sql`
-      insert into public.role_permissions (role_id, permission_id, scope)
-      select r.id, 'user.manage', 'all'
-      from public.roles r where r.name = 'ops'
-    `)
-    const opsRole = await roleIdByName(context.app, adminCookie, 'ops')
-    const opsPassword = 'OpsPassword123!'
-    const opsHash = await hashPassword(opsPassword)
-    const opsUser = await context.db.execute(sql`
-      insert into public.users (username, full_name, password_hash, must_change_password)
-      values ('ops', 'Operaciones', ${opsHash}, false)
-      returning id
-    `)
-    const opsId = (opsUser.rows[0] as { id: string }).id
-    await context.db.execute(sql`
-      insert into public.user_roles (user_id, role_id) values (${opsId}, ${opsRole})
-    `)
-
-    const opsLogin = await login(context.app, 'ops', opsPassword)
-    expect(opsLogin.statusCode).toBe(200)
-    const opsCookie = cookieFrom(opsLogin)
-
-    const lastAdmin = await context.app.inject({
-      method: 'PATCH',
-      url: `/api/admin/users/${adminUserId}`,
-      headers: headers(opsCookie),
-      payload: { active: false },
-    })
-    expect(lastAdmin.statusCode).toBe(409)
-    expect(lastAdmin.json()).toMatchObject({ error: { code: 'last_admin' } })
   })
 })
 

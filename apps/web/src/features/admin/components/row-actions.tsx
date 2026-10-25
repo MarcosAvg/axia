@@ -19,7 +19,7 @@ interface RowActionsProps {
   active: boolean
   name: string
   editLabel?: string
-  onEdit: () => void
+  onEdit?: () => void
   onToggle: () => void
   onResetPassword?: () => void
   onRevokeSessions?: () => void
@@ -50,10 +50,12 @@ export function RowActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={onEdit}>
-          <PencilIcon />
-          {editLabel ?? actions.edit}
-        </DropdownMenuItem>
+        {onEdit ? (
+          <DropdownMenuItem onSelect={onEdit}>
+            <PencilIcon />
+            {editLabel ?? actions.edit}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem onSelect={onToggle}>
           <PowerIcon />
           {toggleLabel}

@@ -87,6 +87,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0084](0084-hora-manual-solo-por-proxy.md) | Hora manual solo al actuar por proxy |
 | [0085](0085-correcciones-ciclo-tiquet.md) | Correcciones del ciclo de vida y de la barra de acciones |
 | [0086](0086-evidencia-por-tipo.md) | Autorización de evidencia por tipo |
+| [0087](0087-cambios-de-rol-exigen-role-manage.md) | Los cambios de rol exigen `role.manage` |
 
 ## Archivo
 
