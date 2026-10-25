@@ -101,10 +101,27 @@ La prueba de restauración se realiza al montar el servidor y después cada trim
 éxito es que la aplicación abra con los datos restaurados y que los conteos de tiquets, eventos y
 evidencias coincidan con el origen.
 
+## Limpieza de evidencias abandonadas
+
+Una subida que nunca termina deja un archivo parcial en el volumen. La cuota se comprueba al iniciar
+la subida, y este trabajo elimina los archivos parciales de más de 24 horas y marca la fila como
+`failed`; las filas de evidencia nunca se borran (RN-22).
+
+```bash
+# En el contenedor, con las variables y el volumen del servicio app:
+docker compose run --rm app node dist/evidence/cleanup-cli.js
+
+# En local:
+pnpm db:cleanup-evidence
+```
+
+`EVIDENCE_CLEANUP_HOURS` cambia el umbral (por defecto 24). Programarlo con cron o systemd junto con
+los respaldos.
+
 ## Operación y mantenimiento
 
 - Revisar logs, espacio en disco y salud del contenedor.
-- Programar los respaldos con cron o systemd.
+- Programar los respaldos y la limpieza de evidencias con cron o systemd.
 - Mantener `.env` fuera del repositorio y con permisos `0600`.
 - Rotar contraseñas de base y aplicación cuando corresponda; reiniciar `app` después.
 - No añadir PgBouncer ni particiones sin medición previa. El pool de la aplicación está limitado a

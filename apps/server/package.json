@@ -13,6 +13,7 @@
     "test:db": "vitest run test/db",
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
+    "db:cleanup-evidence": "tsx src/evidence/cleanup-cli.ts",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:migrate:prod": "node dist/db/migrate.js",
     "db:reset": "tsx scripts/reset-db.ts",

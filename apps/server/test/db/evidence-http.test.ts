@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm'
 import sharp from 'sharp'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import { testConfig } from '../http/helpers.js'
 import {
   authHeaders,
   buildTicketHttpApp,
@@ -210,5 +211,48 @@ describe('evidence authorization by type', () => {
   it('rejects claim evidence for a technician', async () => {
     const response = await createEvidence(context.cookies.technician, 'claim')
     expect(response.statusCode).toBe(403)
+  })
+})
+
+describe('evidence quota', () => {
+  it('rejects the upload before writing it when the quota is full', async () => {
+    const created = await createEvidence(context.cookies.technician)
+    expect(created.statusCode).toBe(201)
+    const evidenceId = (created.json() as { evidence: { id: string } }).evidence
+      .id
+
+    const user = await context.db.execute(sql`
+      select id from public.users where username = 'technician-access'
+    `)
+    const userId = (user.rows[0] as { id: string }).id
+    await context.db.execute(sql`
+      insert into public.evidence (
+        ticket_id, cycle, type, uploaded_by, processing_state, size_bytes
+      ) values (
+        ${context.ids.ticketA1}, 1, 'other', ${userId}, 'ready', 1000
+      )
+    `)
+
+    const original = testConfig.EVIDENCE_QUOTA_BYTES
+    testConfig.EVIDENCE_QUOTA_BYTES = 1000
+    try {
+      const image = Buffer.alloc(20, 1)
+      const response = await fetch(`${baseUrl}/api/uploads/${evidenceId}`, {
+        method: 'POST',
+        headers: {
+          'Tus-Resumable': '1.0.0',
+          'Upload-Length': String(image.length),
+          'Upload-Metadata': metadata({
+            evidenceId,
+            ticketId: context.ids.ticketA1,
+          }),
+          Cookie: context.cookies.technician,
+          Origin: baseUrl,
+        },
+      })
+      expect(response.status).toBe(413)
+    } finally {
+      testConfig.EVIDENCE_QUOTA_BYTES = original
+    }
   })
 })

@@ -90,6 +90,10 @@ async function onUploadCreate(
   if ((upload.size ?? 0) > context.config.EVIDENCE_MAX_BYTES) {
     tusError(413, 'El archivo supera el tamaño máximo')
   }
+  const used = await context.evidence.quotaForUploader(actor.id, evidenceId)
+  if (used + (upload.size ?? 0) > context.config.EVIDENCE_QUOTA_BYTES) {
+    tusError(413, 'Has alcanzado tu cuota de evidencias')
+  }
   return {}
 }
 
