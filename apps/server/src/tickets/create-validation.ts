@@ -216,3 +216,118 @@ export async function resolveCreateDefaults(
   }
   return { ...input, serviceTypeId, priorityId, channelId }
 }
+
+type RecaptureCurrent = {
+  buildingId: string
+  locationId: string
+  dependencyId: string
+  categoryId: string
+  subcategoryId: string | null
+  problemId: string | null
+  serviceTypeId: string | null
+  priorityId: string
+}
+
+export type RecaptureValidationInput = {
+  current: RecaptureCurrent
+  changes: Partial<RecaptureCurrent>
+}
+
+/** La web envía todos los campos; solo se valida lo que de verdad cambió. */
+function changed<T>(next: T | undefined, current: T): boolean {
+  return next !== undefined && next !== current
+}
+
+function resolved<T>(next: T | undefined, current: T): T {
+  return next !== undefined ? next : current
+}
+
+async function validateRecapturePlace(
+  tx: DbExecutor,
+  { current, changes }: RecaptureValidationInput,
+): Promise<void> {
+  if (
+    !changed(changes.buildingId, current.buildingId) &&
+    !changed(changes.locationId, current.locationId)
+  ) {
+    return
+  }
+  const buildingId = changes.buildingId ?? current.buildingId
+  const locationId = changes.locationId ?? current.locationId
+  await requireActive(tx, 'buildings', buildingId, 'Edificio')
+  await validateLocation(tx, locationId, buildingId)
+}
+
+async function validateRecaptureClassification(
+  tx: DbExecutor,
+  { current, changes }: RecaptureValidationInput,
+): Promise<void> {
+  const categoryChanged = changed(changes.categoryId, current.categoryId)
+  const subcategoryChanged = changed(
+    changes.subcategoryId,
+    current.subcategoryId,
+  )
+  const problemChanged = changed(changes.problemId, current.problemId)
+  if (!categoryChanged && !subcategoryChanged && !problemChanged) return
+
+  const categoryId = resolved(changes.categoryId, current.categoryId)
+  if (categoryChanged) await loadCategory(tx, categoryId)
+
+  const subcategoryId = resolved(changes.subcategoryId, current.subcategoryId)
+  const problemId = resolved(changes.problemId, current.problemId)
+  if (subcategoryId) {
+    await validateSubcategory(tx, categoryId, subcategoryId)
+  }
+  if (problemId) {
+    if (!subcategoryId) {
+      throw invalid('No se puede indicar un problema sin subcategoría')
+    }
+    await validateProblem(tx, subcategoryId, problemId)
+  }
+}
+
+async function validateRecaptureReferences(
+  tx: DbExecutor,
+  { current, changes }: RecaptureValidationInput,
+): Promise<void> {
+  if (changed(changes.dependencyId, current.dependencyId)) {
+    await requireActive(
+      tx,
+      'dependencies',
+      changes.dependencyId as string,
+      'Dependencia',
+    )
+  }
+  if (changed(changes.serviceTypeId, current.serviceTypeId)) {
+    if (changes.serviceTypeId) {
+      await requireActive(
+        tx,
+        'service_types',
+        changes.serviceTypeId,
+        'Tipo de servicio',
+      )
+    }
+  }
+  if (changed(changes.priorityId, current.priorityId)) {
+    await requireActive(
+      tx,
+      'priorities',
+      changes.priorityId as string,
+      'Prioridad',
+    )
+  }
+}
+
+/**
+ * La recaptura puede cambiar partes de la clasificación. Valida solo lo que
+ * cambia (o lo que depende de ello) para no bloquear correcciones de textos en
+ * tiquets antiguos con catálogos ya desactivados.
+ */
+export async function validateRecaptureInputs(
+  tx: DbExecutor,
+  input: RecaptureValidationInput,
+): Promise<void> {
+  await validateRecapturePlace(tx, input)
+  await validateRecaptureClassification(tx, input)
+  await validateRecaptureReferences(tx, input)
+}

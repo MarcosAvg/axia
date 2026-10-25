@@ -105,3 +105,49 @@ describe('recapture nullable fields', () => {
     })
   })
 })
+
+describe('recapture catalog integrity', () => {
+  it('rejects a location from another building', async () => {
+    const ticketId = await createTicket()
+    const other = await context.db.execute(sql`
+      select id from public.buildings where name = 'Edificio B1'
+    `)
+    const buildingB1 = (other.rows[0] as { id: string }).id
+
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'recapture',
+      changes: {
+        buildingId: buildingB1,
+        locationId: refs.locationId,
+        description: 'Ubicación cruzada',
+      },
+      reasonId: recaptureReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('rejects a subcategory from another category', async () => {
+    const ticketId = await createTicket()
+    const other = await context.db.execute(sql`
+      select id from public.categories where name = 'Categoría B'
+    `)
+    const categoryB = (other.rows[0] as { id: string }).id
+    const subcategory = await context.db.execute(sql`
+      insert into public.subcategories (category_id, name)
+      values (${categoryB}, 'Subcategoría B') returning id
+    `)
+    const subcategoryId = (subcategory.rows[0] as { id: string }).id
+
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'recapture',
+      changes: {
+        subcategoryId,
+        description: 'Subcategoría cruzada',
+      },
+      reasonId: recaptureReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(400)
+  })
+})

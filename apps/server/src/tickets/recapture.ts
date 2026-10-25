@@ -11,6 +11,7 @@ import {
   type ActionResult,
 } from './action-shared.js'
 import { routeTicket } from './create.js'
+import { validateRecaptureInputs } from './create-validation.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import {
@@ -50,6 +51,12 @@ type RecaptureTicket = {
   category_id: string
   team_id: string
   building_id: string
+  location_id: string
+  dependency_id: string
+  subcategory_id: string | null
+  problem_id: string | null
+  service_type_id: string | null
+  priority_id: string
 }
 
 // La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
@@ -60,8 +67,7 @@ async function lockRecaptureTicket(
   ticketId: string,
 ): Promise<RecaptureTicket> {
   const result = await tx.execute(sql`
-    select id, status, cycle, category_id, team_id, building_id
-    from public.tickets
+    select * from public.tickets
     where id = ${ticketId}
     for update
   `)
@@ -205,6 +211,19 @@ async function applyChanges(
     teamId: ticket.team_id,
     buildingId: ticket.building_id,
   }
+  await validateRecaptureInputs(tx, {
+    current: {
+      buildingId: ticket.building_id,
+      locationId: ticket.location_id,
+      dependencyId: ticket.dependency_id,
+      categoryId: ticket.category_id,
+      subcategoryId: ticket.subcategory_id,
+      problemId: ticket.problem_id,
+      serviceTypeId: ticket.service_type_id,
+      priorityId: ticket.priority_id,
+    },
+    changes,
+  })
   await updateFields(tx, ticket, changes)
 
   const categoryChanged =
