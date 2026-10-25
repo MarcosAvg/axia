@@ -98,6 +98,7 @@ export async function commentTicket(
 export interface RecaptureTicketInput {
   changes: Record<string, string | null>
   reasonId: string | null
+  note?: string | null
   subjectTechnicianId?: string | null
 }
 
@@ -109,6 +110,7 @@ export async function recaptureTicket(
   await ticketAction(ticketId, 'recapture', clientRequestId, {
     changes: input.changes,
     reasonId: input.reasonId || undefined,
+    note: input.note || undefined,
     subjectTechnicianId: input.subjectTechnicianId || undefined,
   })
 }

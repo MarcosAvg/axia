@@ -3,7 +3,7 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-24
+**Última actualización:** 2026-10-25
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
@@ -63,13 +63,22 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
 - **Arranque en desarrollo:** React Compiler solo al compilar (ADR 0083) y la cola offline se carga
   cuando hay sesión; `/login` pasó de 6.47 s y 207 módulos a 1.74 s y 99 módulos en frío. `dev:api`
   usa `apps/server/data/evidence` en local en lugar de la ruta `/data/evidence` del contenedor.
-- **Pruebas:** 41 unitarias/HTTP del servidor, 249 web, 36 Playwright y 143 de integración contra
-  PostgreSQL real. `pnpm check:fast`, `check:static`, build y la suite de Playwright en verde.
+- **Corrección del ciclo (auditoría 2026-10-25):** recaptura con contrato `camelCase`, nota y
+  reruteo por cambio de equipo/edificio, limitada a antes de iniciar; la reasignación de supervisor
+  cierra pausa y trabajo activo; se terminan las participaciones al reasignar técnico; los descartes
+  fijan `closed_at` y cierran reclamaciones abiertas; la reactivación limpia el vínculo de
+  duplicado; la reclamación procedente limpia `closed_at`; apoyo auxiliar restringido a trabajo en
+  curso; asignación desde `registered` con oferta registra la toma y la reasignación emite
+  `reassigned_technician` (ADR 0085).
+- **Pruebas:** 41 unitarias/HTTP del servidor, 251 web, 36 Playwright y 150 de integración contra
+  PostgreSQL real. `pnpm check:fast`, `check:static`, build, base de datos y Playwright en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0085:** correcciones del ciclo de vida: recaptura antes de iniciar y con reruteo, cierre de
+  pausa/participación al reasignar, `closed_at` en descartes y limpieza del vínculo al reactivar.
 - **ADR 0083:** React Compiler solo al compilar; en desarrollo se puede forzar con
   `AXIA_REACT_COMPILER=1`.
 - **ADR 0082:** pruebas por cambio, ciclo local rápido y compuerta completa al cierre.
@@ -103,3 +112,13 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
 - Programar respaldos de base y evidencias, con prueba de restauración trimestral.
 - Revisar logs, retención, monitorización y espacio en disco.
 - Decidir si se implementan Web Push, escalamiento y adaptadores de importación.
+
+## Pendientes de producto
+
+- La barra de acciones se calcula en el cliente con permiso + estado; no conoce ámbito,
+  participación ni ventana de reclamación. Conviene migrarla a acciones calculadas por el servidor.
+- `open_claim` sobre `closed` se ofrece sin comprobar la ventana de reclamación; el servidor lo
+  rechaza con 409 cuando ya venció.
+- El permiso `ticket.reopen` no lo usa ninguna acción: decidir si se retira o se implementa una
+  reapertura explícita.
+- `docs/concepts/negocio.md` §4 sigue listando `pending_recapture`, que la decisión 7 no implementa.

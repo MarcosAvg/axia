@@ -87,26 +87,37 @@ afterAll(async () => {
   await closeTicketHttpApp(context)
 })
 
+async function cancelTicket(ticketId: string) {
+  const response = await action(context.cookies.requester, ticketId, {
+    action: 'cancel',
+    reasonId: cancellationReason,
+    note: 'Ya no se requiere',
+    clientRequestId: randomUUID(),
+  })
+  expect(response.statusCode).toBe(200)
+}
+
 describe('reject and cancel', () => {
-  it('cancels and reactivates a ticket', async () => {
+  it('cancels a ticket and records its close date', async () => {
     const ticketId = await createTicket()
-    const cancel = await action(context.cookies.requester, ticketId, {
-      action: 'cancel',
-      reasonId: cancellationReason,
-      note: 'Ya no se requiere',
-      clientRequestId: randomUUID(),
-    })
-    expect(cancel.statusCode).toBe(200)
+    await cancelTicket(ticketId)
 
     const cancelled = await context.db.execute(sql`
-      select status, status_before_discard
+      select status, status_before_discard, closed_at
       from public.tickets where id = ${ticketId}
     `)
     expect(cancelled.rows[0]).toMatchObject({
       status: 'cancelled',
       status_before_discard: 'registered',
     })
+    expect(
+      (cancelled.rows[0] as { closed_at: Date | null }).closed_at,
+    ).not.toBeNull()
+  })
 
+  it('reactivates a cancelled ticket and clears its close date', async () => {
+    const ticketId = await createTicket()
+    await cancelTicket(ticketId)
     const reactivate = await action(context.cookies.admin, ticketId, {
       action: 'reactivate',
       reasonId: reactivationReason,
@@ -114,13 +125,14 @@ describe('reject and cancel', () => {
     })
     expect(reactivate.statusCode).toBe(200)
     const active = await context.db.execute(sql`
-      select status, status_before_discard
+      select status, status_before_discard, closed_at
       from public.tickets where id = ${ticketId}
     `)
     expect(active.rows[0]).toMatchObject({
       status: 'registered',
       status_before_discard: null,
     })
+    expect((active.rows[0] as { closed_at: Date | null }).closed_at).toBeNull()
   })
 })
 
@@ -145,13 +157,16 @@ describe('reject and cancel validation', () => {
     })
     expect(response.statusCode).toBe(200)
     const ticket = await context.db.execute(sql`
-      select status, status_before_discard
+      select status, status_before_discard, closed_at
       from public.tickets where id = ${ticketId}
     `)
     expect(ticket.rows[0]).toMatchObject({
       status: 'rejected',
       status_before_discard: 'assigned',
     })
+    expect(
+      (ticket.rows[0] as { closed_at: Date | null }).closed_at,
+    ).not.toBeNull()
   })
 
   it('rejects a reason with the wrong use', async () => {
@@ -165,30 +180,63 @@ describe('reject and cancel validation', () => {
   })
 })
 
-describe('duplicates, comments and priority', () => {
+async function markDuplicate(duplicateId: string, originalId: string) {
+  const response = await action(context.cookies.requester, duplicateId, {
+    action: 'mark_duplicate',
+    originalId,
+    clientRequestId: randomUUID(),
+  })
+  expect(response.statusCode).toBe(200)
+}
+
+describe('duplicates', () => {
   it('marks a duplicate and links the original', async () => {
     const originalId = await createTicket()
     const duplicateId = await createTicket()
-    const response = await action(context.cookies.requester, duplicateId, {
-      action: 'mark_duplicate',
-      originalId,
-      clientRequestId: randomUUID(),
-    })
-    expect(response.statusCode).toBe(200)
+    await markDuplicate(duplicateId, originalId)
 
     const ticket = await context.db.execute(sql`
-      select status, duplicate_of_id from public.tickets where id = ${duplicateId}
+      select
+        status,
+        duplicate_of_id,
+        closed_at,
+        (select link_type from public.ticket_links
+          where ticket_id = ${duplicateId} limit 1) as link_type
+      from public.tickets where id = ${duplicateId}
     `)
     expect(ticket.rows[0]).toMatchObject({
       status: 'duplicate',
       duplicate_of_id: originalId,
+      link_type: 'duplicate_of',
     })
-    const link = await context.db.execute(sql`
-      select link_type from public.ticket_links where ticket_id = ${duplicateId}
-    `)
-    expect(link.rows[0]).toMatchObject({ link_type: 'duplicate_of' })
+    expect(
+      (ticket.rows[0] as { closed_at: Date | null }).closed_at,
+    ).not.toBeNull()
   })
 
+  it('reactivates a duplicate and clears the link', async () => {
+    const originalId = await createTicket()
+    const duplicateId = await createTicket()
+    await markDuplicate(duplicateId, originalId)
+    const reactivate = await action(context.cookies.admin, duplicateId, {
+      action: 'reactivate',
+      reasonId: reactivationReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(reactivate.statusCode).toBe(200)
+    const active = await context.db.execute(sql`
+      select status, duplicate_of_id, closed_at
+      from public.tickets where id = ${duplicateId}
+    `)
+    expect(active.rows[0]).toMatchObject({
+      status: 'registered',
+      duplicate_of_id: null,
+    })
+    expect((active.rows[0] as { closed_at: Date | null }).closed_at).toBeNull()
+  })
+})
+
+describe('comments and priority', () => {
   it('adds comments and changes priority', async () => {
     const ticketId = await createTicket()
     const comment = await action(context.cookies.requester, ticketId, {

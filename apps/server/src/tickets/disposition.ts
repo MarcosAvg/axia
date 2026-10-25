@@ -15,6 +15,12 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import {
+  actionTimestamp,
+  endOpenParticipants,
+  reopenLeaderParticipation,
+  resolveOpenClaimOnDiscard,
+} from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type DiscardInput = {
@@ -55,9 +61,19 @@ async function discardInTransaction(
   await requireReason(tx, input.reasonId, input.reasonUse, 'Motivo')
   await tx.execute(sql`
     update public.tickets
-    set status = ${input.status}, status_before_discard = ${ticket.status}
+    set
+      status = ${input.status},
+      status_before_discard = ${ticket.status},
+      closed_at = ${actionTimestamp()}
     where id = ${input.ticketId}
   `)
+  await endOpenParticipants(tx, input.ticketId)
+  await resolveOpenClaimOnDiscard(
+    tx,
+    input.ticketId,
+    actor.id,
+    'Tiquet descartado',
+  )
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: input.eventType,
@@ -156,9 +172,17 @@ async function applyDuplicate(
     set
       status = 'duplicate',
       status_before_discard = ${ticket.status},
-      duplicate_of_id = ${input.originalId}
+      duplicate_of_id = ${input.originalId},
+      closed_at = ${actionTimestamp()}
     where id = ${input.ticketId}
   `)
+  await endOpenParticipants(tx, input.ticketId)
+  await resolveOpenClaimOnDiscard(
+    tx,
+    input.ticketId,
+    actor.id,
+    'Tiquet marcado como duplicado',
+  )
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'duplicate_marked',
@@ -238,9 +262,20 @@ async function reactivateInTransaction(
   }
   await tx.execute(sql`
     update public.tickets
-    set status = ${input.ticket.status_before_discard}, status_before_discard = null
+    set
+      status = ${input.ticket.status_before_discard},
+      status_before_discard = null,
+      closed_at = null,
+      duplicate_of_id = null
     where id = ${input.ticket.id}
   `)
+  if (
+    ['assigned', 'in_progress', 'paused'].includes(
+      input.ticket.status_before_discard,
+    )
+  ) {
+    await reopenLeaderParticipation(tx, input.ticket.id, actor.id)
+  }
   await writeEvent(tx, {
     ticketId: input.ticket.id,
     type: 'reactivated',
@@ -272,7 +307,7 @@ export async function reactivateTicket(
     const ticket = locked.rows[0] as
       (LockedTicket & { status_before_discard: string | null }) | undefined
     if (!ticket) throw notFound()
-    if (!isFinalStatus(ticket.status)) {
+    if (!['rejected', 'cancelled', 'duplicate'].includes(ticket.status)) {
       throw conflict('El tiquet no está descartado')
     }
     return reactivateInTransaction(tx, actor, { ...input, ticket })

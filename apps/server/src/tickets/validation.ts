@@ -12,6 +12,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { endOpenParticipants } from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type LockedValidationTicket = {
@@ -136,6 +137,7 @@ async function validateInTransaction(
       set status = 'closed', closed_at = now()
       where id = ${ticketId}
     `)
+    await endOpenParticipants(tx, ticketId)
     await writeEvent(tx, {
       ticketId,
       type: 'validated',

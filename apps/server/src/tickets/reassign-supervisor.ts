@@ -14,6 +14,7 @@ import {
 import type { DbExecutor } from './db.js'
 import { routeTicket } from './create.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { closeOpenWorkPhase, endTechnicianAssignments } from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { getPermissionScope } from './access.js'
 
@@ -179,6 +180,11 @@ async function reassignInTransaction(
     set status = 'withdrawn', resolved_at = now()
     where ticket_id = ${input.ticketId} and status = 'offered'
   `)
+
+  // El tiquet deja de estar en manos del técnico actual: se cierra la pausa
+  // o el tramo activo y se termina su asignación antes de volver al supervisor.
+  await closeOpenWorkPhase(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
 
   if (input.supervisorUserId) {
     return assignToSupervisor(tx, actor, input, ticket.cycle)

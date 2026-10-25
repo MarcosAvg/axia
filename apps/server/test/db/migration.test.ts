@@ -283,7 +283,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(10)
+    ).toBe(11)
   })
 
   it('enforces username normalization and uniqueness', async () => {

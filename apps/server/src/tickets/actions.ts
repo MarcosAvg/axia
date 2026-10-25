@@ -139,6 +139,7 @@ async function runClaimAction(
         ticketId,
         changes: input.changes,
         reasonId: input.reasonId ?? null,
+        note: input.note ?? null,
         clientRequestId: input.clientRequestId,
         subjectTechnicianId: subjectOf(input),
       })

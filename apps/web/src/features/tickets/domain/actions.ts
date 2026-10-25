@@ -29,13 +29,13 @@ export interface ActionContext {
 }
 
 const ASSIGNABLE: TicketStatus[] = ['registered', 'with_supervisor', 'assigned']
+// La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
 const RECAPTURABLE: TicketStatus[] = [
   'registered',
   'with_supervisor',
   'assigned',
-  'in_progress',
-  'paused',
 ]
+const AUXILIARY_STATUSES: TicketStatus[] = ['assigned', 'in_progress', 'paused']
 const ADVANCEABLE: TicketStatus[] = [
   'registered',
   'with_supervisor',
@@ -108,7 +108,7 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   assign_supervisor: (c) =>
     REASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_supervisor'),
   add_auxiliary: (c) =>
-    ADVANCEABLE.includes(c.status) && has(c, 'ticket.add_auxiliary'),
+    AUXILIARY_STATUSES.includes(c.status) && has(c, 'ticket.add_auxiliary'),
   start: (c) => c.status === 'assigned' && technicianAction(c, 'ticket.start'),
   record_progress: (c) =>
     (c.status === 'in_progress' || c.status === 'paused') &&

@@ -5,7 +5,6 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
   conflict,
-  isFinalStatus,
   lockTicket,
   notFound,
   requireReason,
@@ -71,7 +70,7 @@ async function auxiliaryInTransaction(
     'add_auxiliary',
   )
   if (after) return after
-  if (isFinalStatus(ticket.status)) {
+  if (!['assigned', 'in_progress', 'paused'].includes(ticket.status)) {
     throw conflict('El tiquet no admite apoyo auxiliar')
   }
   const cycle = await validateAuxiliary(tx, input, ticket)

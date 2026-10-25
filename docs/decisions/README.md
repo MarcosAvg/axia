@@ -85,6 +85,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0082](0082-pruebas-por-cambio.md) | Pruebas por cambio y compuerta por niveles |
 | [0083](0083-react-compiler-solo-al-compilar.md) | React Compiler solo al compilar |
 | [0084](0084-hora-manual-solo-por-proxy.md) | Hora manual solo al actuar por proxy |
+| [0085](0085-correcciones-ciclo-tiquet.md) | Correcciones del ciclo de vida y de la barra de acciones |
 
 ## Archivo
 

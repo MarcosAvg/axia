@@ -157,6 +157,31 @@ describe('recapture and auxiliary support', () => {
   })
 })
 
+describe('implicit take', () => {
+  it('records the take when a supervisor assigns from registered', async () => {
+    const ticketId = await createTicket()
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'assign_technician',
+      technicianId: refs.technicianId,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(200)
+    const events = await context.db.execute(sql`
+      select type from public.ticket_events
+      where ticket_id = ${ticketId}
+      order by id
+    `)
+    expect(events.rows.map((row) => (row as { type: string }).type)).toEqual(
+      expect.arrayContaining(['taken', 'assigned_technician']),
+    )
+    const assignment = await context.db.execute(sql`
+      select count(*)::int as count from public.ticket_assignments
+      where ticket_id = ${ticketId} and stage = 'supervisor' and ended_at is null
+    `)
+    expect((assignment.rows[0] as { count: number }).count).toBe(1)
+  })
+})
+
 describe('claims and supervisor reassignment', () => {
   it('opens and dismisses a claim', async () => {
     const ticketId = await createTicket()

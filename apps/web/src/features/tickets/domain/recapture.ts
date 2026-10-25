@@ -46,19 +46,36 @@ export function applyRecaptureChange(
   return next
 }
 
-/** Campos que envía la recaptura (vacío → null). */
+/** Campos que envía la recaptura. Los opcionales vacíos viajan como `null`. */
 export function recaptureChanges(
   values: RecaptureValues,
 ): Record<string, string | null> {
   return {
-    building_id: values.buildingId,
-    location_id: values.locationId,
-    dependency_id: values.dependencyId,
-    category_id: values.categoryId,
-    subcategory_id: values.subcategoryId || null,
-    problem_id: values.problemId || null,
-    service_type_id: values.serviceTypeId || null,
-    priority_id: values.priorityId,
+    buildingId: values.buildingId,
+    locationId: values.locationId,
+    dependencyId: values.dependencyId,
+    categoryId: values.categoryId,
+    subcategoryId: values.subcategoryId || null,
+    problemId: values.problemId || null,
+    serviceTypeId: values.serviceTypeId || null,
+    priorityId: values.priorityId,
     description: values.description,
   }
+}
+
+/** Campos obligatorios de la captura que la recaptura no puede dejar vacíos. */
+export function missingRecaptureFields(
+  values: RecaptureValues,
+): (keyof RecaptureValues)[] {
+  const required: (keyof RecaptureValues)[] = [
+    'buildingId',
+    'locationId',
+    'dependencyId',
+    'categoryId',
+    'priorityId',
+    'reasonId',
+  ]
+  const missing = required.filter((field) => !values[field])
+  if (values.description.trim().length < 5) missing.push('description')
+  return missing
 }

@@ -133,6 +133,7 @@ export const TICKET_OPERATIONS: Record<TicketOperation, Operation> = {
       {
         changes: asChanges(a.changes),
         reasonId: opt(a.reasonId),
+        note: opt(a.note),
         subjectTechnicianId: opt(a.subjectTechnicianId),
       },
       id,

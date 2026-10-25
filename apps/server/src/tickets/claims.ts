@@ -13,6 +13,7 @@ import {
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { copyDerivedTicket } from './claim-derived.js'
+import { endOpenParticipants, reopenLeaderParticipation } from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type OpenClaimInput = {
@@ -173,9 +174,10 @@ async function resolveUpheld(
 ): Promise<ActionResult> {
   await tx.execute(sql`
     update public.tickets
-    set status = 'assigned', cycle = ${claim.cycle + 1}
+    set status = 'assigned', cycle = ${claim.cycle + 1}, closed_at = null
     where id = ${input.ticketId}
   `)
+  await reopenLeaderParticipation(tx, input.ticketId, actor.id)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'reopened',
@@ -198,6 +200,7 @@ async function resolveDismissed(
     update public.tickets set status = 'closed', closed_at = now()
     where id = ${input.ticketId}
   `)
+  await endOpenParticipants(tx, input.ticketId)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'claim_resolved',

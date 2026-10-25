@@ -14,6 +14,7 @@ import {
 import {
   applyRecaptureChange,
   initialRecaptureValues,
+  missingRecaptureFields,
   recaptureChanges,
 } from '../domain/recapture'
 import type { TicketDetail } from '../domain/types'
@@ -55,12 +56,16 @@ export function useRecaptureForm(
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (!values.reasonId) {
+    if (missingRecaptureFields(values).length > 0) {
       setHasError(true)
       return
     }
     actions.recapture.mutate(
-      { changes: recaptureChanges(values), reasonId: values.reasonId },
+      {
+        changes: recaptureChanges(values),
+        reasonId: values.reasonId,
+        note: values.note || null,
+      },
       { onSuccess: onClose },
     )
   }

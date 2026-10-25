@@ -7,11 +7,11 @@ import {
   conflict,
   lockTicket,
   notFound,
-  validateHandled,
   type ActionResult,
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
-import { findHandledEvent, writeEvent } from './events.js'
+import { findHandledEvent, writeEvent, type HandledEvent } from './events.js'
+import { endTechnicianAssignments } from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 export type AssignTechnicianInput = {
@@ -42,25 +42,37 @@ async function loadTechnician(
   return row
 }
 
-async function closePreviousAssignment(
+function validateAssignmentHandled(
+  handled: HandledEvent | null,
+  ticketId: string,
+): ActionResult | null {
+  if (!handled) return null
+  if (
+    handled.ticketId !== ticketId ||
+    !['assigned_technician', 'reassigned_technician'].includes(handled.type)
+  ) {
+    throw conflict('La clave de idempotencia ya se usó para otra acción')
+  }
+  return { ticketId, action: 'assign_technician', replayed: true }
+}
+
+async function hasOpenTechnicianAssignment(
   tx: DbExecutor,
   ticketId: string,
-  technicianId: string,
-) {
-  await tx.execute(sql`
-    update public.ticket_assignments
-    set ended_at = now()
+): Promise<boolean> {
+  const result = await tx.execute(sql`
+    select 1
+    from public.ticket_assignments
     where ticket_id = ${ticketId}
       and stage = 'technician'
       and ended_at is null
+    limit 1
   `)
-  await tx.execute(sql`
-    update public.ticket_participants
-    set ended_at = now()
-    where ticket_id = ${ticketId}
-      and technician_id = ${technicianId}
-      and ended_at is null
-  `)
+  return Boolean(result.rows[0])
+}
+
+async function closePreviousAssignment(tx: DbExecutor, ticketId: string) {
+  await endTechnicianAssignments(tx, ticketId)
   await tx.execute(sql`
     update public.ticket_offers
     set status = 'withdrawn', resolved_at = now()
@@ -68,12 +80,68 @@ async function closePreviousAssignment(
   `)
 }
 
+/**
+ * Asignar técnico desde `registered` implica tomar el tiquet (RN-05) cuando
+ * quien asigna es un supervisor con oferta activa. Se registra la toma para
+ * que el historial y el tiempo de respuesta existan.
+ */
+async function takeImplicitly(tx: DbExecutor, actor: Actor, ticketId: string) {
+  const offer = await tx.execute(sql`
+    select 1
+    from public.ticket_offers
+    where ticket_id = ${ticketId}
+      and supervisor_user_id = ${actor.id}
+      and status = 'offered'
+    limit 1
+  `)
+  if (!offer.rows[0]) return
+
+  const openSupervisor = await tx.execute(sql`
+    select 1
+    from public.ticket_assignments
+    where ticket_id = ${ticketId}
+      and stage = 'supervisor'
+      and ended_at is null
+    limit 1
+  `)
+  if (!openSupervisor.rows[0]) {
+    await tx.execute(sql`
+      insert into public.ticket_assignments (
+        ticket_id, cycle, stage, assignee_user_id, assigned_by
+      )
+      select id, cycle, 'supervisor', ${actor.id}, ${actor.id}
+      from public.tickets where id = ${ticketId}
+    `)
+  }
+  await tx.execute(sql`
+    update public.ticket_offers
+    set
+      status = case
+        when supervisor_user_id = ${actor.id} then 'taken'::public.offer_status
+        else 'withdrawn'::public.offer_status
+      end,
+      resolved_at = now()
+    where ticket_id = ${ticketId} and status = 'offered'
+  `)
+  await writeEvent(tx, {
+    ticketId,
+    type: 'taken',
+    actorId: actor.id,
+  })
+}
+
+type ParticipationInput = {
+  actor: Actor
+  input: AssignTechnicianInput
+  ticket: { cycle: number; category_id: string }
+  isReassignment: boolean
+}
+
 async function recordParticipation(
   tx: DbExecutor,
-  actor: Actor,
-  input: AssignTechnicianInput,
-  ticket: { cycle: number; category_id: string },
+  context: ParticipationInput,
 ) {
+  const { actor, input, ticket, isReassignment } = context
   const result = await tx.execute(sql`
     select exists (
       select 1 from public.technician_categories
@@ -95,7 +163,7 @@ async function recordParticipation(
   `)
   await writeEvent(tx, {
     ticketId: input.ticketId,
-    type: 'assigned_technician',
+    type: isReassignment ? 'reassigned_technician' : 'assigned_technician',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
@@ -109,28 +177,28 @@ async function assignInTransaction(
   actor: Actor,
   input: AssignTechnicianInput,
 ): Promise<ActionResult> {
-  const before = validateHandled(
+  const before = validateAssignmentHandled(
     await findHandledEvent(tx, input.clientRequestId),
     input.ticketId,
-    'assigned_technician',
-    'assign_technician',
   )
   if (before) return before
 
   const ticket = await lockTicket(tx, input.ticketId)
-  const after = validateHandled(
+  const after = validateAssignmentHandled(
     await findHandledEvent(tx, input.clientRequestId),
     input.ticketId,
-    'assigned_technician',
-    'assign_technician',
   )
   if (after) return after
 
   if (!['registered', 'with_supervisor', 'assigned'].includes(ticket.status)) {
     throw conflict('El tiquet no admite asignación de técnico')
   }
+  const isReassignment = await hasOpenTechnicianAssignment(tx, input.ticketId)
   await loadTechnician(tx, input.technicianId)
-  await closePreviousAssignment(tx, input.ticketId, input.technicianId)
+  if (ticket.status === 'registered') {
+    await takeImplicitly(tx, actor, input.ticketId)
+  }
+  await closePreviousAssignment(tx, input.ticketId)
   await tx.execute(sql`
     update public.tickets set status = 'assigned' where id = ${input.ticketId}
   `)
@@ -142,7 +210,12 @@ async function assignInTransaction(
       ${actor.id}, ${input.reasonId}
     )
   `)
-  await recordParticipation(tx, actor, input, ticket)
+  await recordParticipation(tx, {
+    actor,
+    input,
+    ticket,
+    isReassignment,
+  })
   return {
     ticketId: input.ticketId,
     action: 'assign_technician',

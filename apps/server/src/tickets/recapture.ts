@@ -5,16 +5,20 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
   conflict,
-  isFinalStatus,
-  lockTicket,
   notFound,
   requireReason,
   validateHandled,
   type ActionResult,
-  type LockedTicket,
 } from './action-shared.js'
+import { routeTicket } from './create.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import {
+  actionTimestamp,
+  endTechnicianAssignments,
+  isDesignatedForCategory,
+  openParticipationType,
+} from './flow-state.js'
 import { assertTechnicianAction } from './proxy.js'
 import { findVisibleTicket } from './repository.js'
 
@@ -34,19 +38,45 @@ export type RecaptureInput = {
   ticketId: string
   changes: RecaptureChanges
   reasonId: string | null
+  note: string | null
   clientRequestId: string
   subjectTechnicianId?: string | null
 }
 
-type TicketRow = LockedTicket
+type RecaptureTicket = {
+  id: string
+  status: string
+  cycle: number
+  category_id: string
+  team_id: string
+  building_id: string
+}
+
+// La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
+const RECAPTURABLE = ['registered', 'with_supervisor', 'assigned']
 
 function field(value: string | undefined): string | null {
   return value ?? null
 }
 
+async function lockRecaptureTicket(
+  tx: DbExecutor,
+  ticketId: string,
+): Promise<RecaptureTicket> {
+  const result = await tx.execute(sql`
+    select id, status, cycle, category_id, team_id, building_id
+    from public.tickets
+    where id = ${ticketId}
+    for update
+  `)
+  const row = result.rows[0] as RecaptureTicket | undefined
+  if (!row) throw notFound()
+  return row
+}
+
 async function updateFields(
   tx: DbExecutor,
-  ticket: TicketRow,
+  ticket: RecaptureTicket,
   changes: RecaptureChanges,
 ) {
   await tx.execute(sql`
@@ -64,60 +94,143 @@ async function updateFields(
   `)
 }
 
-async function applyCategoryChange(
-  tx: DbExecutor,
-  ticket: TicketRow,
-  categoryId: string,
-) {
+async function categoryTeam(tx: DbExecutor, categoryId: string) {
   const category = await tx.execute(sql`
     select team_id from public.categories where id = ${categoryId} limit 1
   `)
-  const newTeam = (category.rows[0] as { team_id: string } | undefined)?.team_id
-  if (!newTeam) {
+  const teamId = (category.rows[0] as { team_id: string } | undefined)?.team_id
+  if (!teamId) {
     throw new AppError(400, 'validation_error', 'Categoría no válida')
   }
-  await tx.execute(sql`
-    update public.tickets set team_id = ${newTeam} where id = ${ticket.id}
-  `)
-  const assignment = await tx.execute(sql`
+  return teamId
+}
+
+async function openAssignmentTechnician(
+  tx: DbExecutor,
+  ticketId: string,
+): Promise<string | null> {
+  const result = await tx.execute(sql`
     select assignee_technician_id
     from public.ticket_assignments
-    where ticket_id = ${ticket.id}
+    where ticket_id = ${ticketId}
       and stage = 'technician'
       and ended_at is null
     order by assigned_at desc
     limit 1
   `)
-  const technicianId = (
-    assignment.rows[0] as { assignee_technician_id: string | null } | undefined
-  )?.assignee_technician_id
-  if (!technicianId) return
-  const designated = await tx.execute(sql`
-    select exists (
-      select 1 from public.technician_categories
-      where technician_id = ${technicianId}
-        and category_id = ${categoryId}
-    ) as designated
-  `)
-  const isDesignated = Boolean(
-    (designated.rows[0] as { designated: boolean } | undefined)?.designated,
+  return (
+    (result.rows[0] as { assignee_technician_id: string | null } | undefined)
+      ?.assignee_technician_id ?? null
   )
-  if (!isDesignated && newTeam !== ticket.team_id) {
-    await tx.execute(sql`
-      update public.tickets set status = 'with_supervisor' where id = ${ticket.id}
-    `)
-  }
 }
 
+type RoutingInput = {
+  actor: Actor
+  ticket: RecaptureTicket
+  teamId: string
+  buildingId: string
+}
+
+/** Devuelve el tiquet a ruteo con el equipo y edificio corregidos. */
+async function resetRouting(tx: DbExecutor, input: RoutingInput) {
+  const { actor, ticket, teamId, buildingId } = input
+  const at = actionTimestamp()
+  await endTechnicianAssignments(tx, ticket.id)
+  await tx.execute(sql`
+    update public.ticket_offers
+    set status = 'withdrawn', resolved_at = ${at}
+    where ticket_id = ${ticket.id} and status = 'offered'
+  `)
+  await tx.execute(sql`
+    update public.ticket_assignments set ended_at = ${at}
+    where ticket_id = ${ticket.id}
+      and stage = 'supervisor'
+      and ended_at is null
+  `)
+  await tx.execute(sql`
+    update public.tickets
+    set status = 'registered', team_id = ${teamId}
+    where id = ${ticket.id}
+  `)
+  await routeTicket({
+    tx,
+    ticketId: ticket.id,
+    cycle: ticket.cycle,
+    teamId,
+    buildingId,
+    actorId: actor.id,
+  })
+}
+
+/** Conserva al técnico asignado o lo libera si la nueva categoría no le toca. */
+async function reconcileAssignedTechnician(
+  tx: DbExecutor,
+  ticket: RecaptureTicket,
+  categoryId: string,
+  categoryChanged: boolean,
+) {
+  if (ticket.status !== 'assigned' || !categoryChanged) return
+  const technicianId = await openAssignmentTechnician(tx, ticket.id)
+  if (!technicianId) return
+  const stays =
+    (await isDesignatedForCategory(tx, technicianId, categoryId)) ||
+    (await openParticipationType(tx, ticket.id, technicianId)) === 'auxiliary'
+  if (stays) return
+
+  await endTechnicianAssignments(tx, ticket.id)
+  await tx.execute(sql`
+    update public.tickets set status = 'with_supervisor' where id = ${ticket.id}
+  `)
+}
+
+/**
+ * Aplica la captura y ajusta el ruteo cuando cambia el equipo, el edificio o
+ * la categoría del técnico asignado (RN-11).
+ */
 async function applyChanges(
   tx: DbExecutor,
-  ticket: TicketRow,
+  actor: Actor,
+  ticket: RecaptureTicket,
   changes: RecaptureChanges,
 ) {
-  await updateFields(tx, ticket, changes)
-  if (changes.categoryId) {
-    await applyCategoryChange(tx, ticket, changes.categoryId)
+  const before = {
+    categoryId: ticket.category_id,
+    teamId: ticket.team_id,
+    buildingId: ticket.building_id,
   }
+  await updateFields(tx, ticket, changes)
+
+  const categoryChanged =
+    changes.categoryId !== undefined && changes.categoryId !== before.categoryId
+  const newTeamId = categoryChanged
+    ? await categoryTeam(tx, changes.categoryId as string)
+    : before.teamId
+  const newBuildingId = changes.buildingId ?? before.buildingId
+  const moved =
+    newTeamId !== before.teamId || newBuildingId !== before.buildingId
+
+  if (categoryChanged) {
+    await tx.execute(sql`
+      update public.tickets set team_id = ${newTeamId} where id = ${ticket.id}
+    `)
+  }
+
+  if (moved) {
+    await resetRouting(tx, {
+      actor,
+      ticket,
+      teamId: newTeamId,
+      buildingId: newBuildingId,
+    })
+    return
+  }
+
+  await reconcileAssignedTechnician(
+    tx,
+    ticket,
+    changes.categoryId ?? before.categoryId,
+    categoryChanged,
+  )
 }
 
 async function recaptureInTransaction(
@@ -132,7 +245,7 @@ async function recaptureInTransaction(
     'recapture',
   )
   if (before) return before
-  const ticket = await lockTicket(tx, input.ticketId)
+  const ticket = await lockRecaptureTicket(tx, input.ticketId)
   const after = validateHandled(
     await findHandledEvent(tx, input.clientRequestId),
     input.ticketId,
@@ -140,7 +253,7 @@ async function recaptureInTransaction(
     'recapture',
   )
   if (after) return after
-  if (isFinalStatus(ticket.status)) {
+  if (!RECAPTURABLE.includes(ticket.status)) {
     throw conflict('El tiquet no admite recaptura en su estado')
   }
   if (Object.keys(input.changes).length === 0) {
@@ -149,16 +262,15 @@ async function recaptureInTransaction(
   if (input.reasonId) {
     await requireReason(tx, input.reasonId, 'recapture', 'Motivo')
   }
-  const row = ticket
   await tx.execute(sql`
     insert into public.ticket_captures (
       ticket_id, cycle, changed_by, reason_id, changes
     ) values (
-      ${input.ticketId}, ${row.cycle}, ${actor.id}, ${input.reasonId},
+      ${input.ticketId}, ${ticket.cycle}, ${actor.id}, ${input.reasonId},
       ${JSON.stringify(input.changes)}::jsonb
     )
   `)
-  await applyChanges(tx, row, input.changes)
+  await applyChanges(tx, actor, ticket, input.changes)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'capture_recaptured',
@@ -166,7 +278,7 @@ async function recaptureInTransaction(
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
     subjectTechnicianId: input.subjectTechnicianId ?? null,
-    payload: input.changes,
+    payload: { ...input.changes, note: input.note ?? null },
   })
   return { ticketId: input.ticketId, action: 'recapture', replayed: false }
 }

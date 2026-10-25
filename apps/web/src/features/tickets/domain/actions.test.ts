@@ -91,10 +91,16 @@ describe('allowedActions', () => {
 })
 
 describe('allowedActions (reclamaciones y descartes)', () => {
-  it('permite recapturar con permiso en estados no finales', () => {
+  it('permite recapturar solo antes de iniciar el trabajo', () => {
+    expect(allowedActions(context(['ticket.recapture'], 'assigned'))).toContain(
+      'recapture',
+    )
     expect(
       allowedActions(context(['ticket.recapture'], 'in_progress')),
-    ).toContain('recapture')
+    ).not.toContain('recapture')
+    expect(
+      allowedActions(context(['ticket.recapture'], 'paused')),
+    ).not.toContain('recapture')
   })
 
   it('abre reclamación solo si está atendido o cerrado', () => {
@@ -130,10 +136,16 @@ describe('allowedActions (reclamaciones y descartes)', () => {
     ).not.toContain('assign_supervisor')
   })
 
-  it('agrega auxiliar en estados no finales', () => {
+  it('agrega auxiliar solo cuando ya hay trabajo en curso', () => {
     expect(
       allowedActions(context(['ticket.add_auxiliary'], 'in_progress')),
     ).toContain('add_auxiliary')
+    expect(
+      allowedActions(context(['ticket.add_auxiliary'], 'registered')),
+    ).not.toContain('add_auxiliary')
+    expect(
+      allowedActions(context(['ticket.add_auxiliary'], 'attended')),
+    ).not.toContain('add_auxiliary')
   })
 })
 

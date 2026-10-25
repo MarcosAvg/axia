@@ -1,6 +1,7 @@
 import {
   applyRecaptureChange,
   initialRecaptureValues,
+  missingRecaptureFields,
   recaptureChanges,
 } from './recapture'
 import type { RecaptureValues } from './recapture'
@@ -80,15 +81,44 @@ describe('applyRecaptureChange', () => {
 })
 
 describe('recaptureChanges', () => {
-  it('arma el objeto con snake_case y vacíos a null', () => {
+  it('arma el objeto con camelCase y opcionales vacíos a null', () => {
     const values: RecaptureValues = {
       ...initialRecaptureValues(ticket),
       subcategoryId: '',
       problemId: '',
     }
     const changes = recaptureChanges(values)
-    expect(changes.subcategory_id).toBeNull()
-    expect(changes.problem_id).toBeNull()
-    expect(changes.category_id).toBe('c1')
+    expect(changes.subcategoryId).toBeNull()
+    expect(changes.problemId).toBeNull()
+    expect(changes.categoryId).toBe('c1')
+    expect(changes.buildingId).toBe('b1')
+    expect(changes.locationId).toBe('l1')
+    expect(changes.description).toBe('No enciende')
+    expect(changes).not.toHaveProperty('category_id')
+  })
+})
+
+describe('missingRecaptureFields', () => {
+  it('exige motivo, ubicación y descripción útil', () => {
+    const values: RecaptureValues = {
+      ...initialRecaptureValues(ticket),
+      reasonId: '',
+      locationId: '',
+      description: 'abc',
+    }
+    expect(missingRecaptureFields(values)).toEqual([
+      'locationId',
+      'reasonId',
+      'description',
+    ])
+  })
+
+  it('acepta una captura completa', () => {
+    expect(
+      missingRecaptureFields({
+        ...initialRecaptureValues(ticket),
+        reasonId: 'r1',
+      }),
+    ).toEqual([])
   })
 })

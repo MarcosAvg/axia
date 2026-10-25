@@ -180,6 +180,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
         message: 'Indica al menos un cambio',
       }),
     reasonId: z.string().uuid().optional(),
+    note: z.string().trim().max(2000).optional(),
     ...proxyBase,
     ...actionBase,
   }),
