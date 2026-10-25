@@ -80,6 +80,16 @@ function registerChanges(app: FastifyInstance, db: Database, canView: Guard[]) {
   app.get('/api/events/changes', { preHandler: canView }, async (request) => {
     const actor = currentActor(request)
     const query = changesQuerySchema.parse(request.query)
+    const requesterFilter =
+      actor.requesterUserId === null
+        ? sql`true`
+        : sql`(
+            r.user_id is distinct from ${actor.requesterUserId}
+            or e.type in (
+              select unnest(requester_visible_event_types)
+              from public.instance_settings
+            )
+          )`
     const result = await db.execute(sql`
         select e.id, e.ticket_id, e.type, e.occurred_at
         from public.ticket_events e
@@ -87,13 +97,7 @@ function registerChanges(app: FastifyInstance, db: Database, canView: Guard[]) {
         join public.requesters r on r.id = t.requester_id
         where e.id > ${query.since}
           and ${scopePredicate(actor, 'ticket.view')}
-          and (
-            r.user_id is distinct from ${actor.requesterUserId}
-            or e.type in (
-              select unnest(requester_visible_event_types)
-              from public.instance_settings
-            )
-          )
+          and ${requesterFilter}
         order by e.id
         limit ${query.limit}
       `)

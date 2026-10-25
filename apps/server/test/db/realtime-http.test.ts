@@ -125,6 +125,32 @@ describe('SSE', () => {
       'comment',
     ])
   })
+
+  it('keeps internal events for requesters without an account', async () => {
+    await context.db.execute(sql`
+      insert into public.ticket_events (
+        ticket_id, cycle, type, actor_id, payload, client_request_id
+      ) values (
+        ${context.ids.ticketAux}, 1, 'comment', null,
+        '{"text":"nota interna"}'::jsonb, ${randomUUID()}
+      )
+    `)
+
+    const response = await get(
+      '/api/events/changes?since=0',
+      context.cookies.admin,
+    )
+    expect(response.status).toBe(200)
+    const body = (await response.json()) as {
+      items: Array<{ ticketId: string; type: string }>
+    }
+    expect(
+      body.items.some(
+        (item) =>
+          item.ticketId === context.ids.ticketAux && item.type === 'comment',
+      ),
+    ).toBe(true)
+  })
 })
 
 describe('notifications', () => {

@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
+import { canAct } from './access.js'
 import {
   conflict,
   lockTicket,
@@ -77,6 +78,11 @@ export async function rateTicket(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.rate', access)
+  if (
+    !canAct(actor, 'ticket.rate', access) &&
+    !canAct(actor, 'ticket.rate_on_behalf', access)
+  ) {
+    assertTicketAction(actor, 'ticket.rate', access)
+  }
   return db.transaction((tx) => rateInTransaction(tx, actor, input))
 }

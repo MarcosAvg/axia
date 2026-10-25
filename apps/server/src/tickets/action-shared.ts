@@ -97,6 +97,7 @@ export async function hasEvidence(
     select 1
     from public.evidence
     where ticket_id = ${ticketId} and cycle = ${cycle} and type = ${type}
+      and processing_state = 'ready'
     limit 1
   `)
   return Boolean(result.rows[0])

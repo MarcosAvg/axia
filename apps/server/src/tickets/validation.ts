@@ -49,14 +49,52 @@ async function requesterUserId(
   )
 }
 
+async function validationPolicy(tx: DbExecutor): Promise<string> {
+  const settings = await tx.execute(sql`
+    select validation_policy from public.instance_settings limit 1
+  `)
+  return (
+    (settings.rows[0] as { validation_policy: string } | undefined)
+      ?.validation_policy ?? 'both'
+  )
+}
+
+async function hasRoleValidation(
+  tx: DbExecutor,
+  ticketId: string,
+  cycle: number,
+  role: 'requester' | 'supervisor',
+): Promise<boolean> {
+  const result = await tx.execute(sql`
+    select exists (
+      select 1 from public.ticket_validations
+      where ticket_id = ${ticketId} and cycle = ${cycle}
+        and validator_role = ${role}
+    ) as found
+  `)
+  return Boolean((result.rows[0] as { found: boolean } | undefined)?.found)
+}
+
+/**
+ * El solicitante sin cuenta no puede validar: quien tiene `validate_on_behalf`
+ * llena primero el lado del solicitante y después el del supervisor.
+ */
 async function validationRole(
   tx: DbExecutor,
   actor: Actor,
   ticket: LockedValidationTicket,
+  policy: string,
 ): Promise<'requester' | 'supervisor'> {
   const userId = await requesterUserId(tx, ticket.requester_id)
   if (userId !== null && userId === actor.id) return 'requester'
-  if (userId !== null && !hasPermission(actor, 'ticket.validate_on_behalf')) {
+  if (hasPermission(actor, 'ticket.validate_on_behalf')) {
+    if (policy === 'supervisor') return 'supervisor'
+    if (!(await hasRoleValidation(tx, ticket.id, ticket.cycle, 'requester'))) {
+      return 'requester'
+    }
+    return 'supervisor'
+  }
+  if (userId !== null) {
     throw new AppError(
       403,
       'forbidden',
@@ -70,13 +108,8 @@ async function shouldClose(
   tx: DbExecutor,
   ticketId: string,
   cycle: number,
+  policy: string,
 ): Promise<boolean> {
-  const settings = await tx.execute(sql`
-    select validation_policy from public.instance_settings limit 1
-  `)
-  const policy =
-    (settings.rows[0] as { validation_policy: string } | undefined)
-      ?.validation_policy ?? 'both'
   const validations = await tx.execute(sql`
     select
       exists (
@@ -122,7 +155,8 @@ async function validateInTransaction(
     throw conflict('El tiquet no está pendiente de validación')
   }
 
-  const role = await validationRole(tx, actor, ticket)
+  const policy = await validationPolicy(tx)
+  const role = await validationRole(tx, actor, ticket, policy)
   await tx.execute(sql`
     insert into public.ticket_validations (
       ticket_id, cycle, validator_user_id, validator_role
@@ -130,7 +164,7 @@ async function validateInTransaction(
     on conflict (ticket_id, cycle, validator_role) do nothing
   `)
 
-  const close = await shouldClose(tx, ticketId, ticket.cycle)
+  const close = await shouldClose(tx, ticketId, ticket.cycle, policy)
   if (close) {
     await tx.execute(sql`
       update public.tickets

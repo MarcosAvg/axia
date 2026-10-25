@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
@@ -27,9 +27,9 @@ type RecaptureChanges = {
   locationId?: string
   dependencyId?: string
   categoryId?: string
-  subcategoryId?: string
-  problemId?: string
-  serviceTypeId?: string
+  subcategoryId?: string | null
+  problemId?: string | null
+  serviceTypeId?: string | null
   priorityId?: string
   description?: string
 }
@@ -55,10 +55,6 @@ type RecaptureTicket = {
 // La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
 const RECAPTURABLE = ['registered', 'with_supervisor', 'assigned']
 
-function field(value: string | undefined): string | null {
-  return value ?? null
-}
-
 async function lockRecaptureTicket(
   tx: DbExecutor,
   ticketId: string,
@@ -74,22 +70,33 @@ async function lockRecaptureTicket(
   return row
 }
 
+const RECAPTURE_COLUMNS: Array<[keyof RecaptureChanges, string]> = [
+  ['buildingId', 'building_id'],
+  ['locationId', 'location_id'],
+  ['dependencyId', 'dependency_id'],
+  ['categoryId', 'category_id'],
+  ['subcategoryId', 'subcategory_id'],
+  ['problemId', 'problem_id'],
+  ['serviceTypeId', 'service_type_id'],
+  ['priorityId', 'priority_id'],
+  ['description', 'description'],
+]
+
 async function updateFields(
   tx: DbExecutor,
   ticket: RecaptureTicket,
   changes: RecaptureChanges,
 ) {
+  const updates: SQL[] = RECAPTURE_COLUMNS.filter(
+    ([key]) => changes[key] !== undefined,
+  ).map(
+    ([key, column]) =>
+      sql`${sql.identifier(column)} = ${changes[key] as string | null}`,
+  )
+  if (updates.length === 0) return
   await tx.execute(sql`
-    update public.tickets set
-      building_id = coalesce(${field(changes.buildingId)}, building_id),
-      location_id = coalesce(${field(changes.locationId)}, location_id),
-      dependency_id = coalesce(${field(changes.dependencyId)}, dependency_id),
-      category_id = coalesce(${field(changes.categoryId)}, category_id),
-      subcategory_id = coalesce(${field(changes.subcategoryId)}, subcategory_id),
-      problem_id = coalesce(${field(changes.problemId)}, problem_id),
-      service_type_id = coalesce(${field(changes.serviceTypeId)}, service_type_id),
-      priority_id = coalesce(${field(changes.priorityId)}, priority_id),
-      description = coalesce(${field(changes.description)}, description)
+    update public.tickets
+    set ${sql.join(updates, sql`, `)}
     where id = ${ticket.id}
   `)
 }

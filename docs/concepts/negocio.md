@@ -204,7 +204,9 @@ puede, precondiciones y efectos.
 - **RN-15 Validación.** Política de la instancia (no por tiquet): solo solicitante, solo supervisor, o
   ambos en cualquier orden. Opcionalmente, validación automática tras N días sin respuesta (**apagada
   por defecto**). Cumplida la política, pasa a `closed`. El solicitante puede dejar calificación de
-  satisfacción (1 a 5) y comentario.
+  satisfacción (1 a 5) y comentario. Cuando un solicitante no tiene cuenta, o quien valida actúa con
+  `ticket.validate_on_behalf`, la validación llena primero el lado del solicitante y después el del
+  supervisor. La satisfacción a nombre del solicitante exige `ticket.rate_on_behalf`.
 - **RN-16 Reclamación.** La pueden abrir el solicitante, un supervisor o un administrador, **nunca el
   técnico**, mientras el tiquet esté `attended` o dentro de la ventana configurable posterior a
   `closed` (**en la semilla, 1 día**). Requiere motivo (catálogo), descripción y evidencia `claim`. Pasa

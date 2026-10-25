@@ -170,9 +170,9 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
         locationId: z.string().uuid().optional(),
         dependencyId: z.string().uuid().optional(),
         categoryId: z.string().uuid().optional(),
-        subcategoryId: z.string().uuid().optional(),
-        problemId: z.string().uuid().optional(),
-        serviceTypeId: z.string().uuid().optional(),
+        subcategoryId: z.string().uuid().nullable().optional(),
+        problemId: z.string().uuid().nullable().optional(),
+        serviceTypeId: z.string().uuid().nullable().optional(),
         priorityId: z.string().uuid().optional(),
         description: z.string().trim().min(5).max(4000).optional(),
       })
