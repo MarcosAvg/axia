@@ -35,6 +35,7 @@ function ticket(overrides: Partial<TicketAccess> = {}): TicketAccess {
     teamId: 'team-a',
     buildingId: 'building-a',
     requesterUserId: 'requester-user',
+    registeredBy: 'requester-user',
     isTechnician: false,
     isParticipant: false,
     isSupervisor: false,

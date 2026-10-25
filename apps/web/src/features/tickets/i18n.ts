@@ -138,6 +138,7 @@ export const ticketMessages = {
     requesterFromCatalog:
       'El nombre y el contacto se toman del catálogo de solicitantes.',
     photo: 'Foto de la solicitud (opcional)',
+    photoError: 'El tiquet se registró, pero no se pudo subir la foto.',
     duplicateTitle: 'Posibles duplicados',
     duplicateHelp:
       'Encontramos tiquets parecidos. Revisa si ya está registrado antes de continuar.',

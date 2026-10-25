@@ -36,6 +36,21 @@ Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito 
 La comprobación se realiza en el servidor con `can` y `canAct`. Un tiquet fuera de alcance devuelve
 404; un permiso ausente devuelve 403.
 
+## Evidencia por tipo
+
+La creación de evidencia se autoriza por el tipo y la acción que la justifica. `evidence.attach`
+habilita cualquier tipo para quien lo tenga en el ámbito del tiquet.
+
+| Tipo | Quién puede crearla |
+|---|---|
+| `request` | El solicitante o quien registró el tiquet, con `ticket.create` o `ticket.create_on_behalf`; o `evidence.attach` |
+| `before`, `during`, `after` | `ticket.record_progress` sobre el tiquet; o `evidence.attach` |
+| `claim` | `ticket.open_claim` sobre el tiquet; o `evidence.attach` |
+| `other` | `evidence.attach` |
+
+El solicitante puede adjuntar la foto de su solicitud y la evidencia de una reclamación sin recibir
+`evidence.attach`; no puede adjuntar evidencias de trabajo ni “otras”.
+
 ## Vistas por rol
 
 La navegación combina permisos con capacidades de la cuenta. Una vista oculta tampoco es accesible

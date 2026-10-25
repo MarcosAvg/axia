@@ -138,7 +138,7 @@ describe('evidence access', () => {
     expect(body.items.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('rejects evidence creation without attachment permission', async () => {
+  it('rejects work evidence for the requester', async () => {
     const response = await createEvidence(context.cookies.requester)
     expect(response.statusCode).toBe(403)
   })
@@ -183,5 +183,32 @@ describe('evidence access', () => {
       headers: { Cookie: context.cookies.outsider },
     })
     expect(response.status).toBe(404)
+  })
+})
+
+describe('evidence authorization by type', () => {
+  it('allows the requester to attach claim evidence', async () => {
+    const response = await createEvidence(context.cookies.requester, 'claim')
+    expect(response.statusCode).toBe(201)
+  })
+
+  it('allows the requester to attach the request photo', async () => {
+    const response = await createEvidence(context.cookies.requester, 'request')
+    expect(response.statusCode).toBe(201)
+  })
+
+  it('rejects other evidence for the requester', async () => {
+    const response = await createEvidence(context.cookies.requester, 'other')
+    expect(response.statusCode).toBe(403)
+  })
+
+  it('allows the supervisor to attach work evidence', async () => {
+    const response = await createEvidence(context.cookies.supervisor, 'before')
+    expect(response.statusCode).toBe(201)
+  })
+
+  it('rejects claim evidence for a technician', async () => {
+    const response = await createEvidence(context.cookies.technician, 'claim')
+    expect(response.statusCode).toBe(403)
   })
 })

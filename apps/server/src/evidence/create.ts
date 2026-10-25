@@ -7,6 +7,7 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import { parseActionTime } from '../tickets/action-time.js'
 import { findVisibleTicket } from '../tickets/repository.js'
+import { canAttachEvidence } from './access.js'
 import type { CreateEvidenceInput } from './schemas.js'
 
 export type CreateContext = {
@@ -121,13 +122,11 @@ export async function createEvidence(
 ): Promise<CreateEvidenceResult> {
   const { db, config } = context
   await context.ready
-  if (!(await findVisibleTicket(db, actor, ticketId))) {
+  const access = await findVisibleTicket(db, actor, ticketId)
+  if (!access) {
     throw new AppError(404, 'not_found', 'Tiquet no encontrado')
   }
-  if (
-    !hasPermission(actor, 'evidence.attach') &&
-    !hasPermission(actor, 'ticket.record_progress')
-  ) {
+  if (!canAttachEvidence(actor, access, input.type)) {
     throw forbidden()
   }
   if (input.occurredAt) {

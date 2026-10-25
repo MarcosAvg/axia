@@ -1,8 +1,10 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
+import { toast } from 'sonner'
 import { saveAndUploadEvidence } from '../api/offline-evidence'
 import { toTicketError } from '../domain/errors'
+import { ticketMessages } from '../i18n'
 import type { DuplicateCandidate } from '../domain/types'
 import type { CreateTicketInput } from '../schemas'
 import { useCheckDuplicates, useCreateTicket } from './use-tickets'
@@ -44,6 +46,7 @@ async function uploadRequestPhoto(
     })
   } catch (error) {
     console.warn('No se pudo subir la foto de la solicitud', error)
+    toast.error(ticketMessages.create.photoError)
   }
 }
 

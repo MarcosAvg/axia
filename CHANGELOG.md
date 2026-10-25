@@ -23,6 +23,16 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Instalación con secretos generados, Compose `db`/`migrate`/`app`, respaldos de base y evidencias.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
+### Corregido
+
+- Ciclo del tiquet: la recaptura usa las claves correctas, guarda su nota y se limita a antes de
+  iniciar; reasignar cierra la pausa, el trabajo activo y la participación anterior; los descartes
+  fijan el cierre, las reclamaciones abiertas se resuelven, la reactivación limpia el duplicado y
+  una reclamación procedente limpia la fecha de cierre.
+- Evidencia: se autoriza por tipo y por la acción (`claim` con la reclamación, `request` con la
+  autoría del tiquet, trabajo con el avance). El solicitante puede reclamar y adjuntar la foto de su
+  solicitud; los errores de subida ya no dejan una evidencia pendiente local.
+
 ### Cambiado
 
 - La PWA usa la API propia y el servidor sirve el SPA compilado.

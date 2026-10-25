@@ -7,6 +7,7 @@ export type TicketAccess = {
   teamId: string
   buildingId: string
   requesterUserId: string | null
+  registeredBy: string | null
   isTechnician: boolean
   isParticipant: boolean
   isSupervisor: boolean

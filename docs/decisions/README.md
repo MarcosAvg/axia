@@ -86,6 +86,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0083](0083-react-compiler-solo-al-compilar.md) | React Compiler solo al compilar |
 | [0084](0084-hora-manual-solo-por-proxy.md) | Hora manual solo al actuar por proxy |
 | [0085](0085-correcciones-ciclo-tiquet.md) | Correcciones del ciclo de vida y de la barra de acciones |
+| [0086](0086-evidencia-por-tipo.md) | Autorización de evidencia por tipo |
 
 ## Archivo
 

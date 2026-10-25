@@ -102,7 +102,12 @@ export async function saveAndUploadEvidence(
       await uploadEvidenceItem({ evidenceId: id })
       return id
     } catch (error) {
-      if (!isNetworkError(error)) throw error
+      if (!isNetworkError(error)) {
+        // Un error de dominio no se resuelve reintentando: se descarta la fila
+        // local para no dejar una evidencia pendiente que nunca se subirá.
+        await db.evidences.delete(id)
+        throw error
+      }
     }
   }
   await enqueue(EVIDENCE_UPLOAD, { evidenceId: id })

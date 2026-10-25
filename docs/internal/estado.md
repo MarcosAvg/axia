@@ -70,13 +70,19 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   duplicado; la reclamación procedente limpia `closed_at`; apoyo auxiliar restringido a trabajo en
   curso; asignación desde `registered` con oferta registra la toma y la reasignación emite
   `reassigned_technician` (ADR 0085).
-- **Pruebas:** 41 unitarias/HTTP del servidor, 251 web, 36 Playwright y 150 de integración contra
+- **Evidencia por tipo (2026-10-25):** `claim` se autoriza con `ticket.open_claim`; `request` con la
+  autoría del tiquet; `before`/`during`/`after` con `ticket.record_progress` o `evidence.attach`.
+  El solicitante ya puede abrir reclamaciones y adjuntar la foto de su solicitud; los errores de
+  dominio limpian la fila local y la foto fallida muestra un aviso (ADR 0086).
+- **Pruebas:** 48 unitarias/HTTP del servidor, 251 web, 38 Playwright y 155 de integración contra
   PostgreSQL real. `pnpm check:fast`, `check:static`, build, base de datos y Playwright en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0086:** la evidencia se autoriza por tipo y por la acción que la justifica (`claim` con
+  `ticket.open_claim`, `request` con la autoría del tiquet, trabajo con `ticket.record_progress`).
 - **ADR 0085:** correcciones del ciclo de vida: recaptura antes de iniciar y con reruteo, cierre de
   pausa/participación al reasignar, `closed_at` en descartes y limpieza del vínculo al reactivar.
 - **ADR 0083:** React Compiler solo al compilar; en desarrollo se puede forzar con
