@@ -10,6 +10,7 @@ en `compose.yaml`.
   del repositorio.
 - Respaldos: `deploy/scripts/backup.sh` (base), `deploy/scripts/backup-evidence.sh` (evidencias) y
   sus `restore*.sh`.
+- Limpieza y retención: `deploy/scripts/cleanup.sh` (cron sugerido en `docs/guides/operacion.md`).
 - La imagen `app` sirve el SPA compilado desde `STATIC_DIR=/app/web`; no se despliega la web por
   separado.
 

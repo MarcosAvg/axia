@@ -101,27 +101,40 @@ La prueba de restauración se realiza al montar el servidor y después cada trim
 éxito es que la aplicación abra con los datos restaurados y que los conteos de tiquets, eventos y
 evidencias coincidan con el origen.
 
-## Limpieza de evidencias abandonadas
+## Limpieza y retención
 
 Una subida que nunca termina deja un archivo parcial en el volumen. La cuota se comprueba al iniciar
 la subida, y este trabajo elimina los archivos parciales de más de 24 horas y marca la fila como
 `failed`; las filas de evidencia nunca se borran (RN-22).
 
+La retención borra sesiones caducadas o revocadas, intentos de acceso y avisos ya leídos. Los avisos
+sin leer y la bitácora de tiquets se conservan.
+
 ```bash
-# En el contenedor, con las variables y el volumen del servicio app:
+# Ambas tareas, con la pila levantada:
+./deploy/scripts/cleanup.sh
+
+# Por separado, en el contenedor:
 docker compose run --rm app node dist/evidence/cleanup-cli.js
+docker compose run --rm app node dist/maintenance/cleanup-cli.js
 
 # En local:
 pnpm db:cleanup-evidence
+pnpm db:cleanup
 ```
 
-`EVIDENCE_CLEANUP_HOURS` cambia el umbral (por defecto 24). Programarlo con cron o systemd junto con
-los respaldos.
+Umbrales (días): `EVIDENCE_CLEANUP_HOURS` (24 horas), `RETENTION_SESSION_DAYS` (30),
+`RETENTION_LOGIN_ATTEMPT_DAYS` (90) y `RETENTION_NOTIFICATION_DAYS` (90). Programar con cron junto
+con los respaldos:
+
+```cron
+0 3 * * * cd /opt/axia && ./deploy/scripts/cleanup.sh >> /var/log/axia-cleanup.log 2>&1
+```
 
 ## Operación y mantenimiento
 
 - Revisar logs, espacio en disco y salud del contenedor.
-- Programar los respaldos y la limpieza de evidencias con cron o systemd.
+- Programar los respaldos, la limpieza y la retención con cron o systemd.
 - Mantener `.env` fuera del repositorio y con permisos `0600`.
 - Rotar contraseñas de base y aplicación cuando corresponda; reiniciar `app` después.
 - No añadir PgBouncer ni particiones sin medición previa. El pool de la aplicación está limitado a
