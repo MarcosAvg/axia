@@ -8,8 +8,8 @@
 
 ## En curso
 
-**Sin trabajo en curso.** El lote de rendimiento (indicadores, actor/sesión y SSE) está integrado a
-`main`, con la compuerta completa en verde.
+**Sin trabajo en curso.** El cierre de la auditoría está integrado a `main` con la compuerta
+completa en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -92,13 +92,22 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   navegador. La carga del actor es una sola consulta y la sesión solo se actualiza al vencer el
   intervalo de toque. El SSE agrupa suscriptores por actor, comprueba la visibilidad una vez por
   actor y serializa los eventos (ADR 0088).
-- **Pruebas:** 48 unitarias/HTTP del servidor, 240 web, 38 Playwright y 171 de integración contra
+- **Cierre de auditoría (2026-10-26):** el SSE se cierra al cerrar sesión, cambiar contraseña, rol o
+  estado, resetear o revocar sesiones; al reconectar se recargan los permisos. La evidencia nueva
+  escribe `evidence_added` y llena `evidence.event_id` en la misma transacción. `pnpm db:cleanup`
+  aplica retención a sesiones, intentos de acceso y avisos leídos, y `deploy/scripts/cleanup.sh`
+  agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
+  una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
+  descartar (ADR 0089).
+- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 176 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0089:** cierre de SSE al revocar sesiones y cambiar permisos, evento `evidence_added`,
+  retención operativa y retirada de permisos muertos.
 - **ADR 0088:** indicadores agregados en SQL, actor en una consulta, sesión sin toque innecesario y
   SSE agrupado por actor.
 - **ADR 0086:** la evidencia se autoriza por tipo y por la acción que la justifica (`claim` con
@@ -136,8 +145,9 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
 - Construir y arrancar la imagen Docker completa en un host limpio.
 - Configurar dominio, TLS, reverse proxy y `TRUST_PROXY` si corresponde.
 - Programar respaldos de base y evidencias, con prueba de restauración trimestral.
-- Programar `db:cleanup-evidence` (o el comando del contenedor) junto con los respaldos.
-- Revisar logs, retención, monitorización y espacio en disco.
+- Programar `deploy/scripts/cleanup.sh` junto con los respaldos (cron de ejemplo en
+  `docs/guides/operacion.md`).
+- Revisar logs, monitorización y espacio en disco.
 - Decidir si se implementan Web Push, escalamiento y adaptadores de importación.
 
 ## Pendientes de producto
@@ -146,6 +156,4 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
   participación ni ventana de reclamación. Conviene migrarla a acciones calculadas por el servidor.
 - `open_claim` sobre `closed` se ofrece sin comprobar la ventana de reclamación; el servidor lo
   rechaza con 409 cuando ya venció.
-- El permiso `ticket.reopen` no lo usa ninguna acción: decidir si se retira o se implementa una
-  reapertura explícita.
 - `docs/concepts/negocio.md` §4 sigue listando `pending_recapture`, que la decisión 7 no implementa.
