@@ -74,9 +74,9 @@ type OptionalServices = {
 async function registerCoreRoutes(
   app: FastifyInstance,
   config: AppConfig,
-  { auth, db, tickets, catalogs }: OptionalServices,
+  { auth, db, tickets, catalogs, realtime }: OptionalServices,
 ) {
-  if (auth) await registerAuthRoutes(app, auth, config)
+  if (auth) await registerAuthRoutes(app, auth, config, realtime?.events)
   if (auth && db) {
     registerAdminAccessRoutes(app, auth, config, db)
     registerAdminCatalogRoutes(app, auth, config, db)

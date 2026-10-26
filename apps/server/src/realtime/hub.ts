@@ -14,6 +14,7 @@ export type TicketEvent = {
 
 type Subscriber = {
   id: string
+  sessionId: string
   actor: Actor
   write: (chunk: string) => void
   close: () => void
@@ -61,6 +62,17 @@ async function canReceive(
   return true
 }
 
+function drop(
+  subscribers: Map<string, Subscriber>,
+  match: (subscriber: Subscriber) => boolean,
+) {
+  for (const subscriber of subscribers.values()) {
+    if (!match(subscriber)) continue
+    subscribers.delete(subscriber.id)
+    subscriber.close()
+  }
+}
+
 export function createEventHub(db: Database) {
   const subscribers = new Map<string, Subscriber>()
   const cache: VisibleCache = { types: null }
@@ -68,14 +80,23 @@ export function createEventHub(db: Database) {
   return {
     subscribe(
       actor: Actor,
+      sessionId: string,
       write: (chunk: string) => void,
       close: () => void,
     ): () => void {
       const id = crypto.randomUUID()
-      subscribers.set(id, { id, actor, write, close })
+      subscribers.set(id, { id, sessionId, actor, write, close })
       return () => {
         subscribers.delete(id)
       }
+    },
+
+    disconnectSession(sessionId: string) {
+      drop(subscribers, (subscriber) => subscriber.sessionId === sessionId)
+    },
+
+    disconnectUser(userId: string) {
+      drop(subscribers, (subscriber) => subscriber.actor.id === userId)
     },
 
     async publish(event: TicketEvent) {

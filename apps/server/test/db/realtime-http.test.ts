@@ -207,6 +207,79 @@ describe('notifications', () => {
   })
 })
 
+describe('SSE session lifecycle', () => {
+  it('closes the stream when a role changes', async () => {
+    const controller = new AbortController()
+    const response = await fetch(`${baseUrl}/api/events`, {
+      headers: { Cookie: context.cookies.technician },
+      signal: controller.signal,
+    })
+    const reader = response.body?.getReader()
+    expect(reader).toBeDefined()
+    if (!reader) return
+    await readWithTimeout(reader)
+
+    const target = await context.db.execute(sql`
+      select u.id, r.id as role_id
+      from public.users u
+      cross join public.roles r
+      where u.username = 'technician-access' and r.name = 'technician'
+    `)
+    const { id, role_id: roleId } = target.rows[0] as {
+      id: string
+      role_id: string
+    }
+    const updated = await fetch(`${baseUrl}/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: {
+        Cookie: context.cookies.admin,
+        Origin: baseUrl,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ roleIds: [roleId] }),
+    })
+    expect(updated.status).toBe(200)
+
+    let closed = false
+    for (let index = 0; index < 5 && !closed; index += 1) {
+      const chunk = await readWithTimeout(reader)
+      closed = chunk.done === true
+    }
+    expect(closed).toBe(true)
+    controller.abort()
+  })
+})
+
+describe('SSE session revocation', () => {
+  it('closes the stream when the session is revoked', async () => {
+    const controller = new AbortController()
+    const response = await fetch(`${baseUrl}/api/events`, {
+      headers: { Cookie: context.cookies.technician },
+      signal: controller.signal,
+    })
+    expect(response.status).toBe(200)
+    const reader = response.body?.getReader()
+    expect(reader).toBeDefined()
+    if (!reader) return
+
+    await readWithTimeout(reader)
+
+    const logout = await fetch(`${baseUrl}/api/auth/logout`, {
+      method: 'POST',
+      headers: { Cookie: context.cookies.technician, Origin: baseUrl },
+    })
+    expect(logout.status).toBe(204)
+
+    let closed = false
+    for (let index = 0; index < 5 && !closed; index += 1) {
+      const chunk = await readWithTimeout(reader)
+      closed = chunk.done === true
+    }
+    expect(closed).toBe(true)
+    controller.abort()
+  })
+})
+
 describe('LISTEN bridge', () => {
   it('receives ticket events through a dedicated connection', async () => {
     const technician = await context.db.execute(sql`
@@ -223,6 +296,7 @@ describe('LISTEN bridge', () => {
     const received: string[] = []
     hub.subscribe(
       actor,
+      'test-session',
       (chunk) => received.push(chunk),
       () => {},
     )

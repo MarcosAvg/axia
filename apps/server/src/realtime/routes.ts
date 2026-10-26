@@ -56,6 +56,7 @@ function registerStream(
     }, config.SSE_HEARTBEAT_MS)
     const unsubscribe = events.subscribe(
       currentActor(request),
+      request.sessionId ?? '',
       (chunk) => {
         if (!closed) reply.raw.write(chunk)
       },

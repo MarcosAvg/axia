@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import type { AppConfig } from '../config.js'
 import { registerOriginGuard } from '../http/origin.js'
+import type { EventHub } from '../realtime/hub.js'
 import type { Actor } from './authorization.js'
 import { clearSessionCookie, setSessionCookie } from './cookies.js'
 import {
@@ -82,7 +83,7 @@ async function registerSessionRoutes(
   app: FastifyInstance,
   auth: AuthService,
   config: AppConfig,
-  allowPending: Guard,
+  { allowPending, events }: { allowPending: Guard; events?: EventHub },
 ) {
   app.post('/api/auth/login', async (request, reply) => {
     const body = loginSchema.parse(request.body)
@@ -94,7 +95,10 @@ async function registerSessionRoutes(
     '/api/auth/logout',
     { preHandler: allowPending },
     async (request, reply) => {
-      if (request.sessionId) await auth.logout(request.sessionId)
+      if (request.sessionId) {
+        await auth.logout(request.sessionId)
+        events?.disconnectSession(request.sessionId)
+      }
       clearSessionCookie(reply, config)
       return reply.status(204).send()
     },
@@ -121,11 +125,13 @@ async function registerSessionRoutes(
       const body = changePasswordSchema(config.PASSWORD_MIN_LENGTH).parse(
         request.body,
       )
+      const actor = currentActor(request)
       const result = await auth.changePassword(
-        currentActor(request),
+        actor,
         body,
         sessionContext(request),
       )
+      events?.disconnectUser(actor.id)
       return setLoginResponse(reply, result, config)
     },
   )
@@ -135,6 +141,7 @@ async function registerAdminUserRoutes(
   app: FastifyInstance,
   auth: AuthService,
   admin: Guard[],
+  events?: EventHub,
 ) {
   app.get('/api/admin/users', { preHandler: admin }, async (request) => {
     const query = listUsersQuerySchema.parse(request.query)
@@ -165,9 +172,9 @@ async function registerAdminUserRoutes(
   app.patch('/api/admin/users/:id', { preHandler: admin }, async (request) => {
     const { id } = idParamsSchema.parse(request.params)
     const body = updateUserSchema.parse(request.body)
-    return {
-      user: await auth.updateUser(currentActor(request), id, body),
-    }
+    const user = await auth.updateUser(currentActor(request), id, body)
+    if (body.active === false || body.roleIds) events?.disconnectUser(id)
+    return { user }
   })
 }
 
@@ -175,6 +182,7 @@ async function registerAdminAccountRoutes(
   app: FastifyInstance,
   auth: AuthService,
   admin: Guard[],
+  events?: EventHub,
 ) {
   app.get('/api/admin/roles', { preHandler: admin }, async () => ({
     items: await auth.listRoles(),
@@ -185,7 +193,9 @@ async function registerAdminAccountRoutes(
     { preHandler: admin },
     async (request) => {
       const { id } = idParamsSchema.parse(request.params)
-      return auth.resetPassword(currentActor(request), id)
+      const result = await auth.resetPassword(currentActor(request), id)
+      events?.disconnectUser(id)
+      return result
     },
   )
 
@@ -195,6 +205,7 @@ async function registerAdminAccountRoutes(
     async (request) => {
       const { id } = idParamsSchema.parse(request.params)
       await auth.revokeSessionsForUser(id)
+      events?.disconnectUser(id)
       return { ok: true }
     },
   )
@@ -204,6 +215,7 @@ export async function registerAuthRoutes(
   app: FastifyInstance,
   auth: AuthService,
   config: AppConfig,
+  events?: EventHub,
 ) {
   await app.register(cookie)
   registerOriginGuard(app, config)
@@ -216,7 +228,7 @@ export async function registerAuthRoutes(
   ]
 
   await registerSetupRoutes(app, auth, config)
-  await registerSessionRoutes(app, auth, config, allowPending)
-  await registerAdminUserRoutes(app, auth, admin)
-  await registerAdminAccountRoutes(app, auth, admin)
+  await registerSessionRoutes(app, auth, config, { allowPending, events })
+  await registerAdminUserRoutes(app, auth, admin, events)
+  await registerAdminAccountRoutes(app, auth, admin, events)
 }
