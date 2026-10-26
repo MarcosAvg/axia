@@ -89,10 +89,7 @@ export async function commentTicket(
   text: string,
   clientRequestId: string,
 ) {
-  await ticketAction(ticketId, 'comment', clientRequestId, {
-    text,
-    isInternal: true,
-  })
+  await ticketAction(ticketId, 'comment', clientRequestId, { text })
 }
 
 export interface RecaptureTicketInput {

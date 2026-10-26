@@ -63,10 +63,25 @@ describe('reference seed catalogs', () => {
     await expectReferenceCounts()
     expect(
       await scalar('select count(*)::text as value from public.permissions'),
-    ).toBe(36)
+    ).toBe(32)
     expect(
       await scalar('select count(*)::text as value from public.roles'),
     ).toBe(4)
+  })
+
+  it('does not seed permissions without an action', async () => {
+    expect(
+      await scalar(`
+        select count(*)::text as value
+        from public.permissions
+        where id in (
+          'ticket.open_claim_on_behalf',
+          'ticket.cancel_on_behalf',
+          'ticket.reopen',
+          'data.import'
+        )
+      `),
+    ).toBe(0)
   })
 
   it('keeps reasons hierarchical and consistent', async () => {

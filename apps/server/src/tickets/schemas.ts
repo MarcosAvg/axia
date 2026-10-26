@@ -125,7 +125,6 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('comment'),
     text: z.string().trim().min(1).max(4000),
-    isInternal: z.boolean().default(true),
     ...actionBase,
   }),
   z.object({

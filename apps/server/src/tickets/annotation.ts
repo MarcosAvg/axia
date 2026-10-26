@@ -17,7 +17,6 @@ import { assertTicketAction, findVisibleTicket } from './repository.js'
 type CommentInput = {
   ticketId: string
   text: string
-  isInternal: boolean
   clientRequestId: string
 }
 
@@ -46,7 +45,7 @@ async function commentInTransaction(
     type: 'comment',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
-    payload: { text: input.text, isInternal: input.isInternal },
+    payload: { text: input.text },
   })
   return { ticketId: input.ticketId, action: 'comment', replayed: false }
 }

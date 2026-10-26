@@ -115,6 +115,13 @@ describe('ticket list scope', () => {
     const page = await pageBody('/api/tickets?page=2&pageSize=1', cookies.admin)
     expect(page).toMatchObject({ total: 4, page: 2, pageSize: 1 })
     expect(page.items).toHaveLength(1)
+
+    const past = await pageBody(
+      '/api/tickets?page=99&pageSize=1',
+      cookies.admin,
+    )
+    expect(past).toMatchObject({ total: 4, page: 99, pageSize: 1 })
+    expect(past.items).toEqual([])
   })
 
   it('rejects invalid filters', async () => {

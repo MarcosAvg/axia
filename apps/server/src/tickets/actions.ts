@@ -82,7 +82,6 @@ async function runAnnotationAction(
       return commentTicket(db, actor, {
         ticketId,
         text: input.text,
-        isInternal: input.isInternal,
         clientRequestId: input.clientRequestId,
       })
     default:

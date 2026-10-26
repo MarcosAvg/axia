@@ -183,6 +183,24 @@ export type ListTicketsOptions = {
   pageSize: number
 }
 
+function toListItem(row: ListRow): TicketListItem {
+  return {
+    id: row.id,
+    folio: row.folio,
+    status: row.status,
+    reportedAt: iso(row.reported_at),
+    closedAt: optionalIso(row.closed_at),
+    description: row.description,
+    requesterName: row.requester_name,
+    possibleDuplicate: row.possible_duplicate,
+    buildingName: row.building_name,
+    categoryName: row.category_name,
+    priorityName: row.priority_name,
+    priorityPosition: row.priority_position,
+    teamName: row.team_name,
+  }
+}
+
 export async function listTickets(
   db: Database,
   actor: Actor,
@@ -216,23 +234,20 @@ export async function listTickets(
   `)
 
   const rows = result.rows as ListRow[]
+  let total = rows[0]?.total ?? 0
+  if (rows.length === 0 && page > 1) {
+    const count = await db.execute(sql`
+      select count(*)::int as total
+      from public.tickets t
+      join public.requesters r on r.id = t.requester_id
+      where ${where}
+    `)
+    total = (count.rows[0] as { total: number } | undefined)?.total ?? 0
+  }
+
   return {
-    items: rows.map((row) => ({
-      id: row.id,
-      folio: row.folio,
-      status: row.status,
-      reportedAt: iso(row.reported_at),
-      closedAt: optionalIso(row.closed_at),
-      description: row.description,
-      requesterName: row.requester_name,
-      possibleDuplicate: row.possible_duplicate,
-      buildingName: row.building_name,
-      categoryName: row.category_name,
-      priorityName: row.priority_name,
-      priorityPosition: row.priority_position,
-      teamName: row.team_name,
-    })),
-    total: rows[0]?.total ?? 0,
+    items: rows.map(toListItem),
+    total,
     page,
     pageSize,
   }
