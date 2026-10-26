@@ -93,13 +93,13 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   intervalo de toque. El SSE agrupa suscriptores por actor, comprueba la visibilidad una vez por
   actor y serializa los eventos (ADR 0088).
 - **Cierre de auditoría (2026-10-26):** el SSE se cierra al cerrar sesión, cambiar contraseña, rol o
-  estado, resetear o revocar sesiones; al reconectar se recargan los permisos. La evidencia nueva
+  estado, resetear o revocar sesiones, o al vencer la sesión; al reconectar se recargan los permisos. La evidencia nueva
   escribe `evidence_added` y llena `evidence.event_id` en la misma transacción. `pnpm db:cleanup`
   aplica retención a sesiones, intentos de acceso y avisos leídos, y `deploy/scripts/cleanup.sh`
   agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
   una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
   descartar (ADR 0089).
-- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 176 de integración contra
+- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.

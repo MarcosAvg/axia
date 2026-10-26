@@ -12,9 +12,10 @@ límite. También quedaban permisos sembrados sin ninguna acción que los usara.
 
 ## Decisión
 
-- Cada suscripción SSE recuerda su `sessionId`. Logout, cambio de contraseña, reseteo, revocación y
-  cambio de rol o desactivación de una cuenta cierran las conexiones afectadas. El cliente reconecta
-  con la cookie vigente y recibe el actor actualizado; una sesión revocada ya no recibe eventos.
+- Cada suscripción SSE recuerda su `sessionId` y su hora de cierre. Logout, cambio de contraseña,
+  reseteo, revocación, cambio de rol o desactivación de una cuenta cierran las conexiones afectadas;
+  también se cierran al vencer la sesión o su inactividad. El cliente reconecta con la cookie
+  vigente y recibe el actor actualizado; una sesión revocada o vencida ya no recibe eventos.
 - `evidence_added` se escribe en la misma transacción que la fila de evidencia y
   `evidence.event_id` queda ligado a ese evento. El payload guarda `evidenceId` y `type`; la hora
   del evento es la de captura, no la de subida, para no alterar el orden de las acciones.
@@ -27,9 +28,9 @@ límite. También quedaban permisos sembrados sin ninguna acción que los usara.
 
 ## Consecuencias
 
-- Los permisos de una pestaña abierta se refrescan al reconectar, no en caliente. La sesión que
-  expira por tiempo mientras el SSE sigue abierto no se cierra en este lote; el límite absoluto se
-  aplica en la siguiente reconexión.
+- Los permisos de una pestaña abierta se refrescan al reconectar, no en caliente. La conexión se
+  cierra en la hora de vencimiento calculada al conectar; si otra petición extiende la inactividad,
+  el cliente reconecta y recibe un plazo nuevo.
 - La evidencia histórica anterior a esta migración no tiene evento; las filas nuevas sí.
 - La retención es irreversible. Los umbrales se ajustan con `RETENTION_*` y el comando debe
   programarse junto con los respaldos.
