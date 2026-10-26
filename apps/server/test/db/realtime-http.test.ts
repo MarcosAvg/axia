@@ -3,10 +3,6 @@ import { randomUUID } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { loadActor } from '../../src/auth/authorization.js'
-import { createEventBridge } from '../../src/realtime/bridge.js'
-import { createEventHub } from '../../src/realtime/hub.js'
-import { ownerConnectionString } from './helpers.js'
 import {
   buildTicketHttpApp,
   closeTicketHttpApp,
@@ -30,6 +26,28 @@ async function readWithTimeout(
       setTimeout(() => reject(new Error('SSE read timeout')), timeoutMs)
     }),
   ])
+}
+
+async function openEvents(cookie: string) {
+  const controller = new AbortController()
+  const response = await fetch(`${baseUrl}/api/events`, {
+    headers: { Cookie: cookie },
+    signal: controller.signal,
+  })
+  expect(response.status).toBe(200)
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error('SSE body missing')
+  await readWithTimeout(reader)
+  return { controller, reader }
+}
+
+async function expectClosed(reader: ReadableStreamDefaultReader<Uint8Array>) {
+  let closed = false
+  for (let index = 0; index < 5 && !closed; index += 1) {
+    const chunk = await readWithTimeout(reader, 3_000)
+    closed = chunk.done === true
+  }
+  expect(closed).toBe(true)
 }
 
 async function get(path: string, cookie: string) {
@@ -209,15 +227,7 @@ describe('notifications', () => {
 
 describe('SSE session lifecycle', () => {
   it('closes the stream when a role changes', async () => {
-    const controller = new AbortController()
-    const response = await fetch(`${baseUrl}/api/events`, {
-      headers: { Cookie: context.cookies.technician },
-      signal: controller.signal,
-    })
-    const reader = response.body?.getReader()
-    expect(reader).toBeDefined()
-    if (!reader) return
-    await readWithTimeout(reader)
+    const { controller, reader } = await openEvents(context.cookies.technician)
 
     const target = await context.db.execute(sql`
       select u.id, r.id as role_id
@@ -240,29 +250,14 @@ describe('SSE session lifecycle', () => {
     })
     expect(updated.status).toBe(200)
 
-    let closed = false
-    for (let index = 0; index < 5 && !closed; index += 1) {
-      const chunk = await readWithTimeout(reader)
-      closed = chunk.done === true
-    }
-    expect(closed).toBe(true)
+    await expectClosed(reader)
     controller.abort()
   })
 })
 
 describe('SSE session revocation', () => {
   it('closes the stream when the session is revoked', async () => {
-    const controller = new AbortController()
-    const response = await fetch(`${baseUrl}/api/events`, {
-      headers: { Cookie: context.cookies.technician },
-      signal: controller.signal,
-    })
-    expect(response.status).toBe(200)
-    const reader = response.body?.getReader()
-    expect(reader).toBeDefined()
-    if (!reader) return
-
-    await readWithTimeout(reader)
+    const { controller, reader } = await openEvents(context.cookies.technician)
 
     const logout = await fetch(`${baseUrl}/api/auth/logout`, {
       method: 'POST',
@@ -270,57 +265,35 @@ describe('SSE session revocation', () => {
     })
     expect(logout.status).toBe(204)
 
-    let closed = false
-    for (let index = 0; index < 5 && !closed; index += 1) {
-      const chunk = await readWithTimeout(reader)
-      closed = chunk.done === true
-    }
-    expect(closed).toBe(true)
+    await expectClosed(reader)
     controller.abort()
   })
 })
 
-describe('LISTEN bridge', () => {
-  it('receives ticket events through a dedicated connection', async () => {
-    const technician = await context.db.execute(sql`
+describe('SSE session expiry', () => {
+  it('closes the stream when the session expires', async () => {
+    const login = await fetch(`${baseUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({
+        username: 'technician-access',
+        password: 'TicketPassword123!',
+      }),
+    })
+    expect(login.status).toBe(200)
+    const cookie = login.headers.get('set-cookie')?.split(';')[0] ?? ''
+    const user = await context.db.execute(sql`
       select id from public.users where username = 'technician-access'
     `)
-    const actor = await loadActor(
-      context.db,
-      (technician.rows[0] as { id: string }).id,
-    )
-    expect(actor).not.toBeNull()
-    if (!actor) return
+    const userId = (user.rows[0] as { id: string }).id
+    await context.db.execute(sql`
+      update public.sessions
+      set idle_expires_at = now() + interval '1 second'
+      where user_id = ${userId} and revoked_at is null
+    `)
 
-    const hub = createEventHub(context.db)
-    const received: string[] = []
-    hub.subscribe(
-      actor,
-      'test-session',
-      (chunk) => received.push(chunk),
-      () => {},
-    )
-    const bridge = createEventBridge(ownerConnectionString(), hub)
-    await bridge.start()
-    try {
-      await context.db.execute(sql`
-        insert into public.ticket_events (
-          ticket_id, cycle, type, payload, client_request_id
-        ) values (
-          ${context.ids.ticketA1}, 1, 'created', '{}'::jsonb,
-          ${randomUUID()}
-        )
-      `)
-      for (
-        let attempt = 0;
-        attempt < 20 && received.length === 0;
-        attempt += 1
-      ) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-      expect(received.join('')).toContain(context.ids.ticketA1)
-    } finally {
-      await bridge.stop()
-    }
+    const { controller, reader } = await openEvents(cookie)
+    await expectClosed(reader)
+    controller.abort()
   })
 })

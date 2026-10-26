@@ -51,6 +51,7 @@ function registerStream(
     reply.raw.write('retry: 3000\n\n')
 
     let closed = false
+    let expiry: ReturnType<typeof setTimeout> | undefined
     const heartbeat = setInterval(() => {
       if (!closed) reply.raw.write(': heartbeat\n\n')
     }, config.SSE_HEARTBEAT_MS)
@@ -68,11 +69,19 @@ function registerStream(
       if (closed) return
       closed = true
       clearInterval(heartbeat)
+      if (expiry) clearTimeout(expiry)
       unsubscribe()
       if (!reply.raw.writableEnded) reply.raw.end()
     }
     request.raw.once('close', cleanup)
     request.raw.once('error', cleanup)
+    if (request.sessionClosesAt) {
+      const remaining = new Date(request.sessionClosesAt).getTime() - Date.now()
+      expiry = setTimeout(
+        cleanup,
+        Math.min(Math.max(0, remaining), 2_147_483_647),
+      )
+    }
     return reply
   })
 }

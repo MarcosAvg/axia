@@ -230,12 +230,20 @@ async function authenticate(
   db: Database,
   config: AppConfig,
   token: string,
-): Promise<{ actor: Actor; sessionId: string } | null> {
+): Promise<{
+  actor: Actor
+  sessionId: string
+  sessionClosesAt: string
+} | null> {
   const session = await loadSession(db, token, config)
   if (!session) return null
   const actor = await loadActor(db, session.userId)
   if (!actor) return null
-  return { actor, sessionId: session.id }
+  return {
+    actor,
+    sessionId: session.id,
+    sessionClosesAt: session.closesAt,
+  }
 }
 
 export function createAuthService(db: Database, config: AppConfig) {

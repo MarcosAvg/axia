@@ -12,12 +12,14 @@ export type SessionContext = {
 export type AuthenticatedSession = {
   id: string
   userId: string
+  closesAt: string
 }
 
 type SessionRow = {
   id: string
   user_id: string
   needs_touch: boolean
+  closes_at: Date
 }
 
 export async function createSession(
@@ -57,6 +59,7 @@ export async function loadSession(
     select
       s.id,
       s.user_id,
+      least(s.expires_at, s.idle_expires_at) as closes_at,
       s.last_used_at < now() - ${config.SESSION_TOUCH_INTERVAL_SECONDS}
         * interval '1 second' as needs_touch
     from public.sessions s
@@ -80,7 +83,11 @@ export async function loadSession(
     `)
   }
 
-  return { id: row.id, userId: row.user_id }
+  return {
+    id: row.id,
+    userId: row.user_id,
+    closesAt: new Date(row.closes_at).toISOString(),
+  }
 }
 
 export async function revokeSession(

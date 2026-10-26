@@ -161,5 +161,6 @@ declare module 'fastify' {
   interface FastifyRequest {
     actor?: Actor
     sessionId?: string
+    sessionClosesAt?: string
   }
 }

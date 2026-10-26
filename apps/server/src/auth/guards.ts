@@ -32,6 +32,7 @@ async function authenticate(
 
   request.actor = result.actor
   request.sessionId = result.sessionId
+  request.sessionClosesAt = result.sessionClosesAt
 }
 
 export function authGuards(
