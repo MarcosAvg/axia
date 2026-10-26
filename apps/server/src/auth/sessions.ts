@@ -17,6 +17,7 @@ export type AuthenticatedSession = {
 type SessionRow = {
   id: string
   user_id: string
+  needs_touch: boolean
 }
 
 export async function createSession(
@@ -53,7 +54,11 @@ export async function loadSession(
 ): Promise<AuthenticatedSession | null> {
   const tokenHash = hashSessionToken(token)
   const result = await db.execute(sql`
-    select s.id, s.user_id
+    select
+      s.id,
+      s.user_id,
+      s.last_used_at < now() - ${config.SESSION_TOUCH_INTERVAL_SECONDS}
+        * interval '1 second' as needs_touch
     from public.sessions s
     join public.users u on u.id = s.user_id
     where s.token_hash = ${tokenHash}
@@ -66,13 +71,14 @@ export async function loadSession(
   const row = result.rows[0] as SessionRow | undefined
   if (!row) return null
 
-  await db.execute(sql`
-    update public.sessions
-    set last_used_at = now(),
-        idle_expires_at = now() + ${config.SESSION_IDLE_TTL_HOURS} * interval '1 hour'
-    where id = ${row.id}
-      and last_used_at < now() - ${config.SESSION_TOUCH_INTERVAL_SECONDS} * interval '1 second'
-  `)
+  if (row.needs_touch) {
+    await db.execute(sql`
+      update public.sessions
+      set last_used_at = now(),
+          idle_expires_at = now() + ${config.SESSION_IDLE_TTL_HOURS} * interval '1 hour'
+      where id = ${row.id}
+    `)
+  }
 
   return { id: row.id, userId: row.user_id }
 }
