@@ -24,10 +24,10 @@ export function MetricsDashboard() {
       />
       {board.loading ? <LoadingList rows={4} /> : null}
       {board.error ? <ErrorAlert message={metricsMessages.error} /> : null}
-      {!board.loading && !board.error && board.filtered.length === 0 ? (
+      {!board.loading && !board.error && board.summary.tickets === 0 ? (
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       ) : null}
-      {board.filtered.length > 0 ? (
+      {board.summary.tickets > 0 ? (
         <>
           <MetricsHero
             summary={board.summary}
@@ -36,7 +36,8 @@ export function MetricsDashboard() {
             sla={board.sla}
           />
           <MetricsTabs
-            filtered={board.filtered}
+            volume={board.volume}
+            aging={board.aging}
             summary={board.summary}
             comparison={board.comparison}
             groups={board.groups}

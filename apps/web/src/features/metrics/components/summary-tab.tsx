@@ -1,8 +1,7 @@
 import { statusLabels } from '@/features/tickets'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import type { RoutingSummary } from '../domain/indicators'
-import { openAging, volumeByMonth } from '../domain/metrics'
-import type { MetricsTicket } from '../domain/metrics'
+import type { AgingRow, VolumePoint } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
@@ -15,12 +14,14 @@ const statusLabel = (status: string): string =>
 
 /** Resumen: volumen + ruteo, una sección por dimensión y antigüedad. */
 export function SummaryTab({
-  filtered,
+  volume,
+  aging,
   groups,
   nameOf,
   routing,
 }: {
-  filtered: MetricsTicket[]
+  volume: VolumePoint[]
+  aging: AgingRow[]
   groups: DimensionGroup[]
   nameOf: (dimension: Dimension, id: string) => string
   routing: RoutingSummary
@@ -33,7 +34,7 @@ export function SummaryTab({
             title={metricsMessages.charts.volume}
             hint={metricsMessages.chartHints.volume}
           >
-            <VolumeChart data={volumeByMonth(filtered)} />
+            <VolumeChart data={volume} />
           </ChartCard>
         </div>
         <ChartCard
@@ -54,10 +55,7 @@ export function SummaryTab({
         hint={metricsMessages.chartHints.aging}
       >
         <div className="max-h-80 overflow-auto">
-          <AgingList
-            rows={openAging(filtered, new Date()).slice(0, 8)}
-            statusLabel={statusLabel}
-          />
+          <AgingList rows={aging} statusLabel={statusLabel} />
         </div>
       </ChartCard>
     </div>

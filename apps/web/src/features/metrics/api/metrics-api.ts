@@ -1,6 +1,7 @@
 // Lectura de indicadores contra la API de Axia.
 
 import { apiFetch } from '@/lib/api-client'
+import type { DimensionGroup } from '../domain/dimensions'
 import type {
   RejectCancelRow,
   RoutingSummary,
@@ -8,65 +9,24 @@ import type {
 } from '../domain/indicators'
 import { intervalToMinutes } from '../domain/metrics'
 import type {
+  AgingRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
   MetricsFilters,
-  MetricsTicket,
+  MetricsSummary,
   PauseReasonRow,
   SatisfactionSummary,
   SlaPriorityRow,
   SlaSummary,
+  VolumePoint,
 } from '../domain/metrics'
 
-interface TicketRow {
-  id: string
-  folio: string
-  status: string
-  reported_at: string
-  building_id: string
-  category_id: string
-  team_id: string
-  dependency_id: string
-  requester_id: string
-  total_time: string | null
-  net_time: string | null
-  active_work_time: string | null
-  active_work_time_labor: string | null
-  active_work_time_extra: string | null
-  response_time: string | null
-  assignment_time: string | null
-  validation_time: string | null
-  reassigned_supervisor: boolean
-  reassigned_technician: boolean
-  recaptured: boolean
-  reopened: boolean
-}
-
-function parseTicket(row: TicketRow): MetricsTicket {
-  return {
-    id: row.id,
-    folio: row.folio,
-    status: row.status,
-    reportedAt: row.reported_at,
-    buildingId: row.building_id,
-    categoryId: row.category_id,
-    teamId: row.team_id,
-    dependencyId: row.dependency_id,
-    requesterId: row.requester_id,
-    totalMinutes: intervalToMinutes(row.total_time),
-    netMinutes: intervalToMinutes(row.net_time),
-    activeMinutes: intervalToMinutes(row.active_work_time),
-    activeLaborMinutes: intervalToMinutes(row.active_work_time_labor),
-    activeExtraMinutes: intervalToMinutes(row.active_work_time_extra),
-    responseMinutes: intervalToMinutes(row.response_time),
-    assignmentMinutes: intervalToMinutes(row.assignment_time),
-    validationMinutes: intervalToMinutes(row.validation_time),
-    reassigned: row.reassigned_supervisor,
-    reassignedTechnician: row.reassigned_technician,
-    recaptured: row.recaptured,
-    reopened: row.reopened,
-  }
+interface MetricsAggregate {
+  summary: MetricsSummary
+  groups: DimensionGroup[]
+  volume: VolumePoint[]
+  aging: AgingRow[]
 }
 
 function filtersQuery(filters: MetricsFilters) {
@@ -89,9 +49,16 @@ async function fetchItems<T>(
   return body.items
 }
 
-export async function fetchMetricsTickets(): Promise<MetricsTicket[]> {
-  const items = await fetchItems<TicketRow>('/api/metrics/tickets')
-  return items.map(parseTicket)
+export async function fetchMetricsSummary(
+  filters: MetricsFilters,
+  compact = false,
+): Promise<MetricsAggregate> {
+  const params = new URLSearchParams(filtersQuery(filters))
+  if (compact) params.set('compact', '1')
+  const query = params.toString()
+  return apiFetch<MetricsAggregate>(
+    query ? `/api/metrics/summary?${query}` : '/api/metrics/summary',
+  )
 }
 
 export async function fetchPausesByReason(

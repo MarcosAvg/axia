@@ -6,15 +6,16 @@ import type {
   TechnicianRow,
 } from '../domain/indicators'
 import type {
+  AgingRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
   MetricsSummary,
-  MetricsTicket,
   PauseReasonRow,
   SatisfactionSummary,
   SlaPriorityRow,
   SlaSummary,
+  VolumePoint,
 } from '../domain/metrics'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
@@ -25,7 +26,8 @@ import { TeamTab } from './team-tab'
 import { TimesTab } from './times-tab'
 
 interface MetricsTabsProps {
-  filtered: MetricsTicket[]
+  volume: VolumePoint[]
+  aging: AgingRow[]
   summary: MetricsSummary
   comparison: Comparison | null
   groups: DimensionGroup[]
@@ -60,7 +62,8 @@ function MetricsTabList() {
 
 /** Pestañas del tablero por tema. */
 export function MetricsTabs({
-  filtered,
+  volume,
+  aging,
   summary,
   comparison,
   groups,
@@ -79,7 +82,8 @@ export function MetricsTabs({
       <MetricsTabList />
       <TabsContent value="summary">
         <SummaryTab
-          filtered={filtered}
+          volume={volume}
+          aging={aging}
           groups={groups}
           nameOf={nameOf}
           routing={routing}

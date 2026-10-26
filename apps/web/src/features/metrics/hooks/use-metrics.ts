@@ -5,7 +5,7 @@ import {
   fetchDuplicateAlerts,
   fetchDuplicateTickets,
   fetchDuplicatesByDimension,
-  fetchMetricsTickets,
+  fetchMetricsSummary,
   fetchPausesByReason,
   fetchRejectCancel,
   fetchRouting,
@@ -15,7 +15,7 @@ import {
 } from '../api/metrics-api'
 
 const metricsKeys = {
-  tickets: ['metrics', 'tickets'] as const,
+  summary: ['metrics', 'summary'] as const,
   pauses: ['metrics', 'pauses'] as const,
   duplicateTickets: ['metrics', 'duplicate-tickets'] as const,
   duplicateAlerts: ['metrics', 'duplicate-alerts'] as const,
@@ -42,10 +42,16 @@ function useFilteredQuery<T>(
   })
 }
 
-export function useMetricsTickets() {
+export function useMetricsSummary(
+  filters: MetricsFilters,
+  options: { compact?: boolean; enabled?: boolean } = {},
+) {
+  const compact = options.compact ?? false
   return useQuery({
-    queryKey: metricsKeys.tickets,
-    queryFn: fetchMetricsTickets,
+    queryKey: [...metricsKeys.summary, filters, compact],
+    queryFn: () => fetchMetricsSummary(filters, compact),
+    placeholderData: keepPreviousData,
+    enabled: options.enabled ?? true,
   })
 }
 

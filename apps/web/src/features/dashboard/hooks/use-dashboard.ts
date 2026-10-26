@@ -3,16 +3,16 @@ import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import {
   EMPTY_FILTERS,
-  summarize,
-  useMetricsTickets,
+  EMPTY_SUMMARY,
+  useMetricsSummary,
   useSla,
   useSatisfaction,
 } from '@/features/metrics'
 import type {
   MetricsSummary,
-  MetricsTicket,
   SatisfactionSummary,
   SlaSummary,
+  VolumePoint,
 } from '@/features/metrics'
 import {
   ACTIVE_STATUSES,
@@ -76,7 +76,7 @@ export interface DashboardData {
     unassigned: number
     closed: number
   }
-  tickets: MetricsTicket[]
+  volume: VolumePoint[]
   summary: MetricsSummary
   sla: SlaSummary
   satisfaction: SatisfactionSummary
@@ -98,12 +98,11 @@ export function useDashboardData(identity: Identity | null): DashboardData {
     1,
   )
   const closed = useTicketsList({ statuses: ['closed'] }, 1)
-  const metrics = useMetricsTickets()
+  const metrics = useMetricsSummary(EMPTY_FILTERS, { compact: true })
   const sla = useSla(EMPTY_FILTERS, canViewMetrics)
   const satisfaction = useSatisfaction(EMPTY_FILTERS, canViewMetrics)
   const activity = useRecentActivity()
 
-  const tickets = or(metrics.data, [])
   const queries = [
     myWork,
     offers,
@@ -130,8 +129,8 @@ export function useDashboardData(identity: Identity | null): DashboardData {
       unassigned: pageTotal(unassigned.data),
       closed: pageTotal(closed.data),
     },
-    tickets,
-    summary: summarize(tickets),
+    volume: or(metrics.data?.volume, []),
+    summary: or(metrics.data?.summary, EMPTY_SUMMARY),
     sla: or(sla.summary.data, EMPTY_SLA),
     satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
     activity: or(activity.data, []),

@@ -16,7 +16,7 @@ import {
   duplicateAlerts,
   duplicateTickets,
   duplicatesByDimension,
-  metricsTickets,
+  metricsSummary,
   pausesByReason,
   recentActivity,
   rejectCancel,
@@ -93,11 +93,19 @@ export function registerMetricsRoutes(
   ]
 
   app.get(
-    '/api/metrics/tickets',
+    '/api/metrics/summary',
     { preHandler: ticketView },
-    async (request) => ({
-      items: await metricsTickets(db, currentActor(request)),
-    }),
+    async (request) => {
+      const { compact } = z
+        .object({ compact: z.coerce.number().int().min(0).max(1).default(0) })
+        .parse(request.query)
+      return metricsSummary(
+        db,
+        currentActor(request),
+        filtersOf(request.query),
+        compact === 1,
+      )
+    },
   )
   app.get(
     '/api/dashboard/activity',

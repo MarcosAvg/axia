@@ -1,29 +1,5 @@
 // Tipos y funciones puras de los indicadores. Sin React, el cliente HTTP ni TanStack.
 
-export interface MetricsTicket {
-  id: string
-  folio: string
-  status: string
-  reportedAt: string
-  buildingId: string
-  categoryId: string
-  teamId: string
-  dependencyId: string
-  requesterId: string
-  totalMinutes: number
-  netMinutes: number
-  activeMinutes: number
-  activeLaborMinutes: number
-  activeExtraMinutes: number
-  responseMinutes: number
-  assignmentMinutes: number
-  validationMinutes: number
-  reassigned: boolean
-  reassignedTechnician: boolean
-  recaptured: boolean
-  reopened: boolean
-}
-
 export interface MetricsFilters {
   from: string
   to: string
@@ -69,41 +45,10 @@ export function formatMinutes(minutes: number): string {
   return `${hours} h ${rest} min`
 }
 
-function ratio(part: number, total: number): number {
-  return total > 0 ? part / total : 0
-}
-
 /** Porcentaje legible a partir de una razón 0..1. */
 export function formatPercent(rate: number): string {
   if (!Number.isFinite(rate)) return '0%'
   return `${Math.round(rate * 100)}%`
-}
-
-function withinRange(iso: string, from: string, to: string): boolean {
-  const day = iso.slice(0, 10)
-  if (from && day < from) return false
-  if (to && day > to) return false
-  return true
-}
-
-/** Filtra los tiquets por rango de fechas (día) y dimensiones. */
-export function filterTickets(
-  tickets: MetricsTicket[],
-  filters: MetricsFilters,
-): MetricsTicket[] {
-  return tickets.filter((ticket) => {
-    if (!withinRange(ticket.reportedAt, filters.from, filters.to)) return false
-    if (filters.buildingId && ticket.buildingId !== filters.buildingId)
-      return false
-    if (filters.teamId && ticket.teamId !== filters.teamId) return false
-    if (filters.categoryId && ticket.categoryId !== filters.categoryId) {
-      return false
-    }
-    if (filters.dependencyId && ticket.dependencyId !== filters.dependencyId) {
-      return false
-    }
-    return true
-  })
 }
 
 export interface MetricsSummary {
@@ -134,77 +79,37 @@ export interface MetricsSummary {
   sumValidation: number
 }
 
-function average(
-  tickets: MetricsTicket[],
-  pick: (ticket: MetricsTicket) => number,
-): number {
-  if (tickets.length === 0) return 0
-  const total = tickets.reduce((sum, ticket) => sum + pick(ticket), 0)
-  return total / tickets.length
-}
-
-function sum(
-  tickets: MetricsTicket[],
-  pick: (ticket: MetricsTicket) => number,
-): number {
-  return tickets.reduce((acc, ticket) => acc + pick(ticket), 0)
-}
-
-/** Resume los KPI del conjunto de tiquets. */
-export function summarize(tickets: MetricsTicket[]): MetricsSummary {
-  const count = tickets.length
-  const reassigned = tickets.filter((t) => t.reassigned).length
-  const reassignedTechnician = tickets.filter(
-    (t) => t.reassignedTechnician,
-  ).length
-  const recaptured = tickets.filter((t) => t.recaptured).length
-  const reopened = tickets.filter((t) => t.reopened).length
-  const closed = tickets.filter((t) => t.status === 'closed')
-  const firstFix = closed.filter((t) => !t.reopened).length
-  return {
-    tickets: count,
-    reassigned,
-    reassignedTechnician,
-    recaptured,
-    reopened,
-    reassignmentRate: ratio(reassigned, count),
-    technicianReassignmentRate: ratio(reassignedTechnician, count),
-    recaptureRate: ratio(recaptured, count),
-    reopenRate: ratio(reopened, count),
-    firstTimeFixRate: ratio(firstFix, closed.length),
-    avgTotal: average(tickets, (t) => t.totalMinutes),
-    avgNet: average(tickets, (t) => t.netMinutes),
-    avgActive: average(tickets, (t) => t.activeMinutes),
-    avgActiveLabor: average(tickets, (t) => t.activeLaborMinutes),
-    avgActiveExtra: average(tickets, (t) => t.activeExtraMinutes),
-    avgResponse: average(tickets, (t) => t.responseMinutes),
-    avgAssignment: average(tickets, (t) => t.assignmentMinutes),
-    avgValidation: average(tickets, (t) => t.validationMinutes),
-    sumTotal: sum(tickets, (t) => t.totalMinutes),
-    sumNet: sum(tickets, (t) => t.netMinutes),
-    sumActive: sum(tickets, (t) => t.activeMinutes),
-    sumActiveExtra: sum(tickets, (t) => t.activeExtraMinutes),
-    sumResponse: sum(tickets, (t) => t.responseMinutes),
-    sumAssignment: sum(tickets, (t) => t.assignmentMinutes),
-    sumValidation: sum(tickets, (t) => t.validationMinutes),
-  }
+export const EMPTY_SUMMARY: MetricsSummary = {
+  tickets: 0,
+  reassigned: 0,
+  reassignedTechnician: 0,
+  recaptured: 0,
+  reopened: 0,
+  reassignmentRate: 0,
+  technicianReassignmentRate: 0,
+  recaptureRate: 0,
+  reopenRate: 0,
+  firstTimeFixRate: 0,
+  avgTotal: 0,
+  avgNet: 0,
+  avgActive: 0,
+  avgActiveLabor: 0,
+  avgActiveExtra: 0,
+  avgResponse: 0,
+  avgAssignment: 0,
+  avgValidation: 0,
+  sumTotal: 0,
+  sumNet: 0,
+  sumActive: 0,
+  sumActiveExtra: 0,
+  sumResponse: 0,
+  sumAssignment: 0,
+  sumValidation: 0,
 }
 
 export interface VolumePoint {
   month: string
   tickets: number
-}
-
-/** Cuenta tiquets por mes de registro. */
-export function volumeByMonth(tickets: MetricsTicket[]): VolumePoint[] {
-  const counts = new Map<string, number>()
-  for (const ticket of tickets) {
-    const month = ticket.reportedAt.slice(0, 7)
-    counts.set(month, (counts.get(month) ?? 0) + 1)
-  }
-  return [...counts.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([month, count]) => ({ month, tickets: count }))
 }
 
 /** Arma un CSV simple a partir de encabezados y filas (valores ya formateados). */
@@ -281,35 +186,9 @@ export function formatRate(rate: number | null): string {
   return formatPercent(rate)
 }
 
-const OPEN_STATUSES = new Set([
-  'registered',
-  'with_supervisor',
-  'assigned',
-  'in_progress',
-  'paused',
-  'attended',
-  'under_claim',
-])
-
 export interface AgingRow {
   id: string
   folio: string
   status: string
   ageMinutes: number
-}
-
-/** Antigüedad de los tiquets pendientes, de mayor a menor. */
-export function openAging(tickets: MetricsTicket[], now: Date): AgingRow[] {
-  return tickets
-    .filter((ticket) => OPEN_STATUSES.has(ticket.status))
-    .map((ticket) => ({
-      id: ticket.id,
-      folio: ticket.folio,
-      status: ticket.status,
-      ageMinutes: Math.max(
-        0,
-        (now.getTime() - new Date(ticket.reportedAt).getTime()) / 60000,
-      ),
-    }))
-    .sort((a, b) => b.ageMinutes - a.ageMinutes)
 }

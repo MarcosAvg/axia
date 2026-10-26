@@ -4,6 +4,7 @@ import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { getPermissionScope } from '../tickets/access.js'
 import { scopePredicate } from '../tickets/scope.js'
+import { filterParams, type MetricsFilters } from './filters.js'
 import {
   intervalMinutes,
   mergeBy,
@@ -11,27 +12,10 @@ import {
   number,
 } from './merge-impl.js'
 
-export type MetricsFilters = {
-  from?: string
-  to?: string
-  buildingId?: string
-  teamId?: string
-  categoryId?: string
-  dependencyId?: string
-}
+export type { MetricsFilters } from './filters.js'
+export { metricsSummary } from './summary.js'
 
 type MetricsRow = Record<string, unknown>
-
-function filterParams(filters: MetricsFilters) {
-  return {
-    p_from: filters.from || null,
-    p_to: filters.to || null,
-    p_building: filters.buildingId || null,
-    p_team: filters.teamId || null,
-    p_category: filters.categoryId || null,
-    p_dependency: filters.dependencyId || null,
-  }
-}
 
 async function callMetrics(
   db: Database,
@@ -84,26 +68,6 @@ async function scopedRows(
     calls.map((call) => callMetrics(db, name, call)),
   )
   return groups.flat()
-}
-
-export async function metricsTickets(db: Database, actor: Actor) {
-  const result = await db.execute(sql`
-    select
-      v.id, v.folio, v.status, v.reported_at, v.building_id, v.category_id,
-      v.team_id, v.dependency_id, v.requester_id,
-      v.total_time, v.net_time, v.active_work_time, v.active_work_time_labor,
-      v.active_work_time_extra, v.response_time, v.assignment_time,
-      v.validation_time, v.reassigned_supervisor, v.reassigned_technician,
-      v.recaptured, v.reopened
-    from public.v_ticket_metrics_base v
-    where exists (
-      select 1 from public.tickets t
-      join public.requesters r on r.id = t.requester_id
-      where t.id = v.id and ${scopePredicate(actor, 'ticket.view')}
-    )
-    order by v.reported_at
-  `)
-  return result.rows
 }
 
 export async function recentActivity(

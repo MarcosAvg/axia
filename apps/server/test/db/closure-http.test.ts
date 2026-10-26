@@ -198,14 +198,17 @@ describe('duplicate check', () => {
 })
 
 describe('metrics', () => {
-  it('returns scoped tickets and aggregates', async () => {
-    const tickets = await call(
+  it('returns scoped aggregates', async () => {
+    const summary = await call(
       'GET',
-      '/api/metrics/tickets',
+      '/api/metrics/summary',
       context.cookies.admin,
     )
-    expect(tickets.statusCode).toBe(200)
-    expect(tickets.json()).toMatchObject({ items: expect.any(Array) })
+    expect(summary.statusCode).toBe(200)
+    expect(summary.json()).toMatchObject({
+      summary: { tickets: expect.any(Number) },
+      groups: expect.any(Array),
+    })
 
     const sla = await call('GET', '/api/metrics/sla', context.cookies.admin)
     expect(sla.statusCode).toBe(200)

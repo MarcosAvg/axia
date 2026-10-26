@@ -1,18 +1,12 @@
 import {
   EMPTY_FILTERS,
   averageOf,
-  filterTickets,
   formatMinutes,
   formatPercent,
   formatScore,
   intervalToMinutes,
-  openAging,
-  summarize,
   toCsv,
-  volumeByMonth,
 } from './metrics'
-import type { MetricsTicket } from './metrics'
-import { allDimensions, byDimension } from './dimensions'
 import {
   deltaOf,
   formatDelta,
@@ -21,33 +15,6 @@ import {
   previousRange,
   rangeForDays,
 } from './period'
-
-function ticket(partial: Partial<MetricsTicket>): MetricsTicket {
-  return {
-    id: 't1',
-    folio: 'AX-1',
-    status: 'closed',
-    reportedAt: '2026-10-05T08:00:00Z',
-    buildingId: 'b1',
-    categoryId: 'c1',
-    teamId: 'tm1',
-    dependencyId: 'd1',
-    requesterId: 'r1',
-    totalMinutes: 240,
-    netMinutes: 180,
-    activeMinutes: 60,
-    activeLaborMinutes: 60,
-    activeExtraMinutes: 0,
-    responseMinutes: 15,
-    assignmentMinutes: 30,
-    validationMinutes: 20,
-    reassigned: false,
-    reassignedTechnician: false,
-    recaptured: false,
-    reopened: false,
-    ...partial,
-  }
-}
 
 describe('intervalToMinutes', () => {
   it('lee tiempos y días', () => {
@@ -65,120 +32,6 @@ describe('formatMinutes y formatPercent', () => {
     expect(formatMinutes(120)).toBe('2 h')
     expect(formatMinutes(135)).toBe('2 h 15 min')
     expect(formatPercent(0.25)).toBe('25%')
-  })
-})
-
-describe('filterTickets', () => {
-  const tickets = [
-    ticket({ id: 'a', reportedAt: '2026-10-01T08:00:00Z', teamId: 'tm1' }),
-    ticket({ id: 'b', reportedAt: '2026-10-10T08:00:00Z', teamId: 'tm2' }),
-  ]
-
-  it('filtra por rango de fechas y dimensión', () => {
-    const result = filterTickets(tickets, {
-      ...EMPTY_FILTERS,
-      from: '2026-10-05',
-      to: '2026-10-31',
-      teamId: 'tm2',
-    })
-    expect(result.map((item) => item.id)).toEqual(['b'])
-  })
-
-  it('sin filtros devuelve todo', () => {
-    expect(filterTickets(tickets, EMPTY_FILTERS)).toHaveLength(2)
-  })
-})
-
-describe('summarize', () => {
-  it('calcula tasas y promedios', () => {
-    const summary = summarize([
-      ticket({ id: 'a', reopened: false, activeMinutes: 60 }),
-      ticket({
-        id: 'b',
-        reopened: true,
-        reassigned: true,
-        reassignedTechnician: true,
-        activeMinutes: 120,
-      }),
-    ])
-    expect(summary.tickets).toBe(2)
-    expect(summary.reassignmentRate).toBe(0.5)
-    expect(summary.technicianReassignmentRate).toBe(0.5)
-    expect(summary.reopenRate).toBe(0.5)
-    expect(summary.firstTimeFixRate).toBe(0.5)
-    expect(summary.avgActive).toBe(90)
-    expect(summary.sumActive).toBe(180)
-  })
-})
-
-describe('volumeByMonth', () => {
-  it('agrupa por mes en orden', () => {
-    const points = volumeByMonth([
-      ticket({ id: 'a', reportedAt: '2026-10-02T08:00:00Z' }),
-      ticket({ id: 'b', reportedAt: '2026-09-01T09:00:00Z' }),
-      ticket({ id: 'c', reportedAt: '2026-10-18T18:00:00Z' }),
-    ])
-    expect(points).toEqual([
-      { month: '2026-09', tickets: 1 },
-      { month: '2026-10', tickets: 2 },
-    ])
-  })
-})
-
-describe('byDimension', () => {
-  it('agrupa y ordena por volumen', () => {
-    const rows = byDimension(
-      [
-        ticket({ id: 'a', teamId: 'tm1' }),
-        ticket({ id: 'b', teamId: 'tm1' }),
-        ticket({ id: 'c', teamId: 'tm2' }),
-      ],
-      'team',
-    )
-    expect(rows[0]).toMatchObject({ id: 'tm1', tickets: 2 })
-    expect(rows[1]).toMatchObject({ id: 'tm2', tickets: 1 })
-    expect(rows[0]).toMatchObject({ sumActive: 120 })
-  })
-
-  it('agrupa por solicitante', () => {
-    const rows = byDimension(
-      [
-        ticket({ id: 'a', requesterId: 'r1' }),
-        ticket({ id: 'b', requesterId: 'r2' }),
-        ticket({ id: 'c', requesterId: 'r2' }),
-      ],
-      'requester',
-    )
-    expect(rows[0]).toMatchObject({ id: 'r2', tickets: 2 })
-    expect(rows[1]).toMatchObject({ id: 'r1', tickets: 1 })
-  })
-})
-
-describe('openAging', () => {
-  it('incluye pendientes y ordena por antigüedad', () => {
-    const now = new Date('2026-10-10T08:00:00Z')
-    const rows = openAging(
-      [
-        ticket({
-          id: 'a',
-          status: 'in_progress',
-          reportedAt: '2026-10-09T08:00:00Z',
-        }),
-        ticket({
-          id: 'b',
-          status: 'registered',
-          reportedAt: '2026-10-08T08:00:00Z',
-        }),
-        ticket({
-          id: 'c',
-          status: 'closed',
-          reportedAt: '2026-10-01T08:00:00Z',
-        }),
-      ],
-      now,
-    )
-    expect(rows.map((row) => row.id)).toEqual(['b', 'a'])
-    expect(rows[0]?.ageMinutes).toBe(2880)
   })
 })
 
@@ -258,28 +111,5 @@ describe('formatMonthLabel', () => {
   it('formatea un mes con año', () => {
     expect(formatMonthLabel('2026-10')).toBe('oct 2026')
     expect(formatMonthLabel('2026-01')).toBe('ene 2026')
-  })
-})
-
-describe('allDimensions', () => {
-  it('devuelve una agrupación por dimensión', () => {
-    const groups = allDimensions([
-      ticket({
-        id: 'a',
-        teamId: 'tm1',
-        buildingId: 'b1',
-        categoryId: 'c1',
-        dependencyId: 'd1',
-        requesterId: 'r1',
-      }),
-    ])
-    expect([...new Set(groups.map((group) => group.dimension))]).toEqual([
-      'team',
-      'building',
-      'category',
-      'dependency',
-      'requester',
-    ])
-    expect(groups.every((group) => group.row.tickets === 1)).toBe(true)
   })
 })

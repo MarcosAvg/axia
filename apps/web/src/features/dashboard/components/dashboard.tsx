@@ -129,7 +129,7 @@ export function Dashboard() {
             sla={data.sla}
             satisfaction={data.satisfaction}
           />
-          <DashboardCharts tickets={data.tickets} />
+          <DashboardCharts volume={data.volume} />
           <ActivitySection items={data.activity} />
           <DashboardSections data={data} role={dashboardRole(identity)} />
         </>

@@ -7,9 +7,8 @@ import {
   useTeams,
 } from '@/features/catalogs'
 import type { Option, RequesterOption } from '@/features/catalogs'
-import { allDimensions } from '../domain/dimensions'
 import type { FilterCatalogs, RoutingSummary } from '../domain/indicators'
-import { EMPTY_FILTERS, filterTickets, summarize } from '../domain/metrics'
+import { EMPTY_FILTERS, EMPTY_SUMMARY } from '../domain/metrics'
 import type {
   Dimension,
   MetricsFilters,
@@ -21,7 +20,7 @@ import type { Comparison } from '../domain/period'
 import {
   useByTechnician,
   useDuplicates,
-  useMetricsTickets,
+  useMetricsSummary,
   usePausesByReason,
   useRejectCancel,
   useRouting,
@@ -85,7 +84,12 @@ function nameResolver(catalogs: FilterCatalogs) {
 /** Estado y datos del tablero de métricas. */
 export function useMetricsBoard() {
   const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
-  const tickets = useMetricsTickets()
+  const current = useMetricsSummary(filters)
+  const prevFilters = previousRange(filters)
+  const previous = useMetricsSummary(prevFilters ?? EMPTY_FILTERS, {
+    compact: true,
+    enabled: Boolean(prevFilters),
+  })
   const pauses = usePausesByReason(filters)
   const duplicates = useDuplicates(filters)
   const satisfaction = useSatisfaction(filters)
@@ -106,27 +110,26 @@ export function useMetricsBoard() {
     dependencies: dependencies.data,
     requesters: requesters.data,
   })
-  const allTickets = or(tickets.data, [])
-  const filtered = filterTickets(allTickets, filters)
-  const prevFilters = previousRange(filters)
-  const comparison: Comparison | null = prevFilters
-    ? {
-        summary: summarize(filterTickets(allTickets, prevFilters)),
-        label: formatRangeLabel(prevFilters.from, prevFilters.to),
-      }
-    : null
+  const comparison: Comparison | null =
+    prevFilters && previous.data
+      ? {
+          summary: previous.data.summary,
+          label: formatRangeLabel(prevFilters.from, prevFilters.to),
+        }
+      : null
 
   return {
     filters,
     setFilters,
     catalogs,
-    filtered,
-    summary: summarize(filtered),
+    summary: or(current.data?.summary, EMPTY_SUMMARY),
+    volume: or(current.data?.volume, []),
+    aging: or(current.data?.aging, []),
     comparison,
-    groups: allDimensions(filtered),
+    groups: or(current.data?.groups, []),
     nameOf: nameResolver(catalogs),
-    loading: tickets.isLoading,
-    error: tickets.isError,
+    loading: current.isLoading,
+    error: current.isError,
     pauses: or(pauses.data, []),
     duplicates: {
       tickets: or(duplicates.tickets.data, []),

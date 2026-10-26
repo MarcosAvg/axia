@@ -7,8 +7,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { formatMonthLabel, volumeByMonth } from '@/features/metrics'
-import type { MetricsTicket } from '@/features/metrics'
+import { formatMonthLabel } from '@/features/metrics'
+import type { VolumePoint } from '@/features/metrics'
 import { dashboardMessages as t } from '../i18n'
 
 const volumeConfig = {
@@ -16,8 +16,7 @@ const volumeConfig = {
 }
 
 /** Tiquets por mes del usuario. */
-export function DashboardCharts({ tickets }: { tickets: MetricsTicket[] }) {
-  const volume = volumeByMonth(tickets)
+export function DashboardCharts({ volume }: { volume: VolumePoint[] }) {
   return (
     <Card>
       <CardHeader>
