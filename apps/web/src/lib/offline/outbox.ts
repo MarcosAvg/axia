@@ -4,12 +4,19 @@ import { isNetworkError } from './errors'
 import { currentOfflineUserId } from './user'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
+export type OutboxDiscardHandler = (payload: unknown) => Promise<void>
 
 const handlers = new Map<string, OutboxHandler>()
+const discarders = new Map<string, OutboxDiscardHandler>()
 
-/** Registra el manejador de un tipo de ítem de la cola. */
-export function registerOutboxHandler(type: string, handler: OutboxHandler) {
+/** Registra el manejador de un tipo de ítem de la cola y su limpieza al descartar. */
+export function registerOutboxHandler(
+  type: string,
+  handler: OutboxHandler,
+  discard?: OutboxDiscardHandler,
+) {
   handlers.set(type, handler)
+  if (discard) discarders.set(type, discard)
 }
 
 let seqCounter = 0
@@ -98,6 +105,40 @@ export async function pendingForCurrentUser(): Promise<number> {
   if (!userId) return 0
   const items = await db.outbox.where('state').equals('pending').toArray()
   return items.filter((item) => item.userId === userId).length
+}
+
+/** Elementos que agotaron los reintentos o fallaron de forma definitiva. */
+export async function errorsForCurrentUser(): Promise<OutboxItem[]> {
+  const userId = currentOfflineUserId()
+  if (!userId) return []
+  const items = await db.outbox.where('state').equals('error').toArray()
+  return items
+    .filter((item) => item.userId === userId)
+    .sort((a, b) => a.createdAt - b.createdAt)
+}
+
+/** Devuelve un elemento con error a la cola, sin tocar los de otra sesión. */
+export async function retryOutboxItem(id: string): Promise<void> {
+  await exclusive(async () => {
+    const item = await db.outbox.get(id)
+    if (!item || item.userId !== currentOfflineUserId()) return
+    await db.outbox.update(id, {
+      state: 'pending',
+      attempts: 0,
+      lastError: null,
+      sendingAt: null,
+    })
+  })
+}
+
+/** Descarta un elemento con error y limpia sus datos locales asociados. */
+export async function discardOutboxItem(id: string): Promise<void> {
+  await exclusive(async () => {
+    const item = await db.outbox.get(id)
+    if (!item || item.userId !== currentOfflineUserId()) return
+    await discarders.get(item.type)?.(item.payload)
+    await db.outbox.delete(id)
+  })
 }
 
 async function processItem(item: OutboxItem): Promise<void> {

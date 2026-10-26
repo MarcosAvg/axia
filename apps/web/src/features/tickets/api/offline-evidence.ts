@@ -127,5 +127,13 @@ export async function saveAndUploadEvidence(
 
 /** Registra el manejador de subida de evidencia en la cola de salida. */
 export function registerEvidenceUploadHandler() {
-  registerOutboxHandler(EVIDENCE_UPLOAD, uploadEvidenceItem)
+  registerOutboxHandler(
+    EVIDENCE_UPLOAD,
+    uploadEvidenceItem,
+    async (payload) => {
+      const { evidenceId } = payload as { evidenceId: string }
+      const evidence = await db.evidences.get(evidenceId)
+      if (evidence?.state !== 'uploaded') await db.evidences.delete(evidenceId)
+    },
+  )
 }
