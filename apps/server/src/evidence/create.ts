@@ -6,6 +6,8 @@ import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import { parseActionTime } from '../tickets/action-time.js'
+import type { DbExecutor } from '../tickets/db.js'
+import { writeEvent } from '../tickets/events.js'
 import { findVisibleTicket } from '../tickets/repository.js'
 import { canAttachEvidence } from './access.js'
 import type { CreateEvidenceInput } from './schemas.js'
@@ -32,7 +34,7 @@ function forbidden(): AppError {
   )
 }
 
-async function ticketCycle(db: Database, ticketId: string): Promise<number> {
+async function ticketCycle(db: DbExecutor, ticketId: string): Promise<number> {
   const result = await db.execute(sql`
     select cycle from public.tickets where id = ${ticketId} limit 1
   `)
@@ -99,19 +101,33 @@ async function insertEvidence(
   ticketId: string,
   input: CreateEvidenceInput,
 ): Promise<string> {
-  const cycle = await ticketCycle(db, ticketId)
-  const inserted = await db.execute(sql`
-    insert into public.evidence (
-      ticket_id, cycle, type, captured_by_technician_id,
-      captured_by_user_id, uploaded_by, client_request_id, mime_type, occurred_at
-    ) values (
-      ${ticketId}, ${cycle}, ${input.type}, ${actor.technicianId},
-      ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
-      ${input.occurredAt ?? new Date().toISOString()}
-    )
-    returning id
-  `)
-  return (inserted.rows[0] as { id: string }).id
+  return db.transaction(async (tx) => {
+    const cycle = await ticketCycle(tx, ticketId)
+    const inserted = await tx.execute(sql`
+      insert into public.evidence (
+        ticket_id, cycle, type, captured_by_technician_id,
+        captured_by_user_id, uploaded_by, client_request_id, mime_type, occurred_at
+      ) values (
+        ${ticketId}, ${cycle}, ${input.type}, ${actor.technicianId},
+        ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
+        ${input.occurredAt ?? new Date().toISOString()}
+      )
+      returning id
+    `)
+    const evidenceId = (inserted.rows[0] as { id: string }).id
+    const event = await writeEvent(tx, {
+      ticketId,
+      type: 'evidence_added',
+      actorId: actor.id,
+      clientRequestId: input.clientRequestId,
+      payload: { evidenceId, type: input.type },
+      occurredAt: input.occurredAt,
+    })
+    await tx.execute(sql`
+      update public.evidence set event_id = ${event.id} where id = ${evidenceId}
+    `)
+    return evidenceId
+  })
 }
 
 export async function createEvidence(

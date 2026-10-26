@@ -17,6 +17,7 @@ export type EventInput = {
   reasonId?: string | null
   subjectUserId?: string | null
   subjectTechnicianId?: string | null
+  occurredAt?: string
 }
 
 export async function findHandledEvent(
@@ -44,9 +45,10 @@ export async function writeEvent(
     reasonId = null,
     subjectUserId = null,
     subjectTechnicianId = null,
+    occurredAt,
   }: EventInput,
-) {
-  await executor.execute(sql`
+): Promise<{ id: string }> {
+  const result = await executor.execute(sql`
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
       reason_id, payload, client_request_id, occurred_at
@@ -55,10 +57,14 @@ export async function writeEvent(
       t.id, t.cycle, ${type}, ${actorId ?? null}, ${subjectUserId},
       ${subjectTechnicianId}, ${reasonId}, ${JSON.stringify(payload)}::jsonb,
       ${clientRequestId ?? null},
-      ${currentOccurredAt() ?? new Date().toISOString()}::timestamptz
+      ${occurredAt ?? currentOccurredAt() ?? new Date().toISOString()}::timestamptz
     from public.tickets t
     where t.id = ${ticketId}
+    returning id
   `)
+  const row = result.rows[0] as { id: string } | undefined
+  if (!row) throw new Error('Event could not be written')
+  return { id: row.id }
 }
 
 function postgresError(error: unknown): Record<string, unknown> | null {

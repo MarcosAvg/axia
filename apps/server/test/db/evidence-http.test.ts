@@ -72,22 +72,61 @@ afterAll(async () => {
   await rm('./data/evidence-test', { recursive: true, force: true })
 })
 
+function redPng() {
+  return sharp({
+    create: { width: 40, height: 20, channels: 3, background: '#cc0000' },
+  })
+    .png()
+    .toBuffer()
+}
+
+async function expectServed(evidenceId: string, cookie: string) {
+  const file = await fetch(`${baseUrl}/api/evidence/${evidenceId}/file`, {
+    headers: { Cookie: cookie },
+  })
+  expect(file.status).toBe(200)
+  expect(file.headers.get('content-type')).toContain('image/webp')
+
+  const thumbnail = await fetch(
+    `${baseUrl}/api/evidence/${evidenceId}/thumbnail`,
+    { headers: { Cookie: cookie } },
+  )
+  expect(thumbnail.status).toBe(200)
+  expect(thumbnail.headers.get('content-type')).toContain('image/webp')
+}
+
 describe('evidence upload and delivery', () => {
+  it('records the evidence event at the captured time', async () => {
+    const occurredAt = new Date(Date.now() - 60 * 60_000).toISOString()
+    const created = await context.app.inject({
+      method: 'POST',
+      url: `/api/tickets/${context.ids.ticketA1}/evidence`,
+      headers: authHeaders(context.cookies.admin),
+      payload: { type: 'before', clientRequestId: randomUUID(), occurredAt },
+    })
+    expect(created.statusCode).toBe(201)
+    const evidenceId = (created.json() as { evidence: { id: string } }).evidence
+      .id
+    const event = await context.db.execute(sql`
+      select ev.type, ev.occurred_at
+      from public.evidence e
+      join public.ticket_events ev on ev.id = e.event_id
+      where e.id = ${evidenceId}
+    `)
+    expect(event.rows[0]).toMatchObject({ type: 'evidence_added' })
+    expect(
+      new Date(
+        (event.rows[0] as { occurred_at: string }).occurred_at,
+      ).toISOString(),
+    ).toBe(occurredAt)
+  })
+
   it('uploads an image with TUS, processes it and serves file and thumbnail', async () => {
     const created = await createEvidence(context.cookies.technician)
     expect(created.statusCode).toBe(201)
     const evidenceId = (created.json() as { evidence: { id: string } }).evidence
       .id
-    const image = await sharp({
-      create: {
-        width: 40,
-        height: 20,
-        channels: 3,
-        background: '#cc0000',
-      },
-    })
-      .png()
-      .toBuffer()
+    const image = await redPng()
 
     const { post, patch } = await uploadImage(
       evidenceId,
@@ -110,18 +149,7 @@ describe('evidence upload and delivery', () => {
       '.webp',
     )
 
-    const file = await fetch(`${baseUrl}/api/evidence/${evidenceId}/file`, {
-      headers: { Cookie: context.cookies.technician },
-    })
-    expect(file.status).toBe(200)
-    expect(file.headers.get('content-type')).toContain('image/webp')
-
-    const thumbnail = await fetch(
-      `${baseUrl}/api/evidence/${evidenceId}/thumbnail`,
-      { headers: { Cookie: context.cookies.technician } },
-    )
-    expect(thumbnail.status).toBe(200)
-    expect(thumbnail.headers.get('content-type')).toContain('image/webp')
+    await expectServed(evidenceId, context.cookies.technician)
   })
 })
 
