@@ -3,13 +3,13 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-25
+**Última actualización:** 2026-10-26
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-**Sin trabajo en curso.** El lote de evidencias y recaptura está integrado a `main`, con la
-compuerta completa en verde.
+**Sin trabajo en curso.** El lote de rendimiento (indicadores, actor/sesión y SSE) está integrado a
+`main`, con la compuerta completa en verde.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -86,13 +86,21 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   escribir el archivo. `pnpm db:cleanup-evidence` elimina subidas abandonadas y marca la fila como
   `failed` sin borrarla (RN-22). La recaptura valida que la ubicación pertenezca al edificio, la
   subcategoría a la categoría y el problema a la subcategoría; solo valida lo que cambió.
-- **Pruebas:** 48 unitarias/HTTP del servidor, 248 web, 38 Playwright y 168 de integración contra
+- **Rendimiento (2026-10-26):** `GET /api/metrics/summary` calcula resumen, grupos, volumen y
+  antigüedad en una consulta con `GROUPING SETS` sobre una CTE materializada; el panel pide
+  `compact=1` y ya no descarga el histórico. Se retiró `/api/metrics/tickets` y la agregación en el
+  navegador. La carga del actor es una sola consulta y la sesión solo se actualiza al vencer el
+  intervalo de toque. El SSE agrupa suscriptores por actor, comprueba la visibilidad una vez por
+  actor y serializa los eventos (ADR 0088).
+- **Pruebas:** 48 unitarias/HTTP del servidor, 240 web, 38 Playwright y 171 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0088:** indicadores agregados en SQL, actor en una consulta, sesión sin toque innecesario y
+  SSE agrupado por actor.
 - **ADR 0086:** la evidencia se autoriza por tipo y por la acción que la justifica (`claim` con
   `ticket.open_claim`, `request` con la autoría del tiquet, trabajo con `ticket.record_progress`).
 - **ADR 0085:** correcciones del ciclo de vida: recaptura antes de iniciar y con reruteo, cierre de

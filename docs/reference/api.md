@@ -97,7 +97,7 @@ y `createdAt`.
 
 | Método | Ruta |
 |---|---|
-| `GET` | `/api/metrics/tickets` |
+| `GET` | `/api/metrics/summary` |
 | `GET` | `/api/dashboard/activity` |
 | `GET` | `/api/metrics/pauses` |
 | `GET` | `/api/metrics/duplicate-tickets` |
