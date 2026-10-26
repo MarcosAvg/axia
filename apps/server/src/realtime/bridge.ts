@@ -6,6 +6,7 @@ export function createEventBridge(connectionString: string, hub: EventHub) {
   let client: Client | null = null
   let stopped = false
   let reconnectTimer: NodeJS.Timeout | null = null
+  let queue: Promise<void> = Promise.resolve()
 
   function scheduleReconnect() {
     if (stopped || reconnectTimer) return
@@ -26,7 +27,8 @@ export function createEventBridge(connectionString: string, hub: EventHub) {
       if (message.channel !== 'axia_events' || !message.payload) return
       try {
         const event = JSON.parse(message.payload) as TicketEvent
-        void hub.publish(event)
+        // Serialize fan-outs so events keep their order.
+        queue = queue.then(() => hub.publish(event)).catch(() => {})
       } catch {
         // Ignore malformed notifications; the stream will catch up by query.
       }
