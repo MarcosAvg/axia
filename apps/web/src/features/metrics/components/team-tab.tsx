@@ -1,30 +1,21 @@
 import type { TechnicianRow } from '../domain/indicators'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { TechnicianChart } from './technician-chart'
 import { TechnicianTable } from './technician-table'
 
-/** Equipo: tiquets por técnico (gráfica) y carga detallada (tabla). */
+/** Equipo: carga y participación por técnico, en una sola tabla. */
 export function TeamTab({ technicians }: { technicians: TechnicianRow[] }) {
   const sorted = [...technicians].sort(
     (left, right) => right.tickets - left.tickets,
   )
   return (
-    <div className="flex flex-col gap-4">
-      <ChartCard
-        title={metricsMessages.technicians.byTechnician}
-        hint={metricsMessages.chartHints.techniciansChart}
-      >
-        <TechnicianChart rows={sorted} />
-      </ChartCard>
-      <ChartCard
-        title={metricsMessages.technicians.title}
-        hint={metricsMessages.chartHints.techniciansTable}
-      >
-        <div className="max-h-96 overflow-auto">
-          <TechnicianTable rows={sorted} />
-        </div>
-      </ChartCard>
-    </div>
+    <ChartCard
+      title={metricsMessages.technicians.title}
+      hint={metricsMessages.chartHints.techniciansTable}
+    >
+      <div className="max-h-[32rem] overflow-auto">
+        <TechnicianTable rows={sorted} />
+      </div>
+    </ChartCard>
   )
 }

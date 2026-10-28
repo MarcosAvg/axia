@@ -91,15 +91,14 @@ export function MetricsTabs({
           groups={groups}
           nameOf={nameOf}
           routing={routing}
+          summary={summary}
+          comparison={comparison}
+          satisfaction={satisfaction}
+          sla={sla}
         />
       </TabsContent>
       <TabsContent value="times">
-        <TimesTab
-          summary={summary}
-          comparison={comparison}
-          groups={groups}
-          nameOf={nameOf}
-        />
+        <TimesTab summary={summary} groups={groups} nameOf={nameOf} />
       </TabsContent>
       <TabsContent value="quality">
         <QualityTab

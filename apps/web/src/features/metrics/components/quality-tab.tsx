@@ -1,5 +1,7 @@
-import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
+import { HintIcon } from '@/components/shared/hint'
+import { Progress } from '@/components/ui/progress'
 import type { RejectCancelRow } from '../domain/indicators'
+import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import type {
   DuplicateAlert,
   DuplicateDimensionRow,
@@ -11,78 +13,70 @@ import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { DuplicateRateChart } from './duplicate-rate-chart'
+import { DeltaBadge } from './delta-badge'
 import { DuplicateTable } from './duplicate-table'
-import { KpiGrid } from './metrics-kpis'
-import type { Kpi } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
-import { RejectCancelChart } from './reject-cancel-chart'
+import { RejectCancelTable } from './reject-cancel-chart'
 
-function qualityCards(
-  summary: MetricsSummary,
-  comparison: Comparison | null,
-): Kpi[] {
-  const k = metricsMessages.kpi
-  const hints = metricsMessages.kpiHints
-  const change = (pick: (s: MetricsSummary) => number) =>
-    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
-  return [
-    {
-      label: k.reassignment,
-      value: formatPercent(summary.reassignmentRate),
-      hint: hints.reassignment,
-      delta: change((s) => s.reassignmentRate),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.reassignedTechnician,
-      value: formatPercent(summary.technicianReassignmentRate),
-      hint: hints.reassignedTechnician,
-      delta: change((s) => s.technicianReassignmentRate),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.recapture,
-      value: formatPercent(summary.recaptureRate),
-      hint: hints.recapture,
-      delta: change((s) => s.recaptureRate),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.reopen,
-      value: formatPercent(summary.reopenRate),
-      hint: hints.reopen,
-      delta: change((s) => s.reopenRate),
-      lowerIsBetter: true,
-    },
-    {
-      label: k.firstFix,
-      value: formatPercent(summary.firstTimeFixRate),
-      hint: hints.firstFix,
-      delta: change((s) => s.firstTimeFixRate),
-      lowerIsBetter: false,
-    },
-  ]
+interface RateStat {
+  label: string
+  hint: string
+  value: string
+  percent: number
+  delta?: number
+  lowerIsBetter: boolean
 }
 
-function duplicateCards(duplicates: {
-  tickets: DuplicateTicket[]
-  alerts: DuplicateAlert[]
-}): Kpi[] {
-  const t = metricsMessages.duplicates
-  const hints = metricsMessages.duplicateHints
-  const decisions = t.decisions as Record<string, string>
-  const avg = averageOf(
-    duplicates.tickets.map((item) => item.timeToMarkMinutes),
-  )
-  return [
-    { label: t.timeToMark, value: formatMinutes(avg), hint: hints.timeToMark },
-    ...duplicates.alerts.map((alert) => ({
-      label: decisions[alert.decision] ?? alert.decision,
-      value: String(alert.candidates),
-      hint: hints.alerts,
-    })),
-  ]
+const RATE_DEFINITIONS = [
+  {
+    label: metricsMessages.kpi.reassignment,
+    hint: metricsMessages.kpiHints.reassignment,
+    lowerIsBetter: true,
+    pick: (value: MetricsSummary) => value.reassignmentRate,
+  },
+  {
+    label: metricsMessages.kpi.reassignedTechnician,
+    hint: metricsMessages.kpiHints.reassignedTechnician,
+    lowerIsBetter: true,
+    pick: (value: MetricsSummary) => value.technicianReassignmentRate,
+  },
+  {
+    label: metricsMessages.kpi.recapture,
+    hint: metricsMessages.kpiHints.recapture,
+    lowerIsBetter: true,
+    pick: (value: MetricsSummary) => value.recaptureRate,
+  },
+  {
+    label: metricsMessages.kpi.reopen,
+    hint: metricsMessages.kpiHints.reopen,
+    lowerIsBetter: true,
+    pick: (value: MetricsSummary) => value.reopenRate,
+  },
+  {
+    label: metricsMessages.kpi.firstFix,
+    hint: metricsMessages.kpiHints.firstFix,
+    lowerIsBetter: false,
+    pick: (value: MetricsSummary) => value.firstTimeFixRate,
+  },
+]
+
+function rateStats(
+  summary: MetricsSummary,
+  comparison: Comparison | null,
+): RateStat[] {
+  return RATE_DEFINITIONS.map((definition) => {
+    const ratio = definition.pick(summary)
+    return {
+      label: definition.label,
+      hint: definition.hint,
+      value: formatPercent(ratio),
+      percent: Math.min(100, Math.max(0, Math.round(ratio * 100))),
+      delta: comparison
+        ? (deltaOf(ratio, definition.pick(comparison.summary)) ?? undefined)
+        : undefined,
+      lowerIsBetter: definition.lowerIsBetter,
+    }
+  })
 }
 
 function QualityRates({
@@ -93,20 +87,68 @@ function QualityRates({
   comparison: Comparison | null
 }) {
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        {metricsMessages.kpiGroups.calidad}
-      </h2>
-      <KpiGrid
-        cards={qualityCards(summary, comparison)}
-        columns={5}
-        period={comparison?.label}
-      />
+    <section
+      aria-label={metricsMessages.kpiGroups.calidad}
+      className="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-5"
+    >
+      {rateStats(summary, comparison).map((stat) => (
+        <div key={stat.label} className="flex flex-col gap-1">
+          <span className="flex min-h-7 items-start gap-1 text-[11px] leading-tight font-medium tracking-wide text-muted-foreground uppercase">
+            <span>{stat.label}</span>
+            <HintIcon hint={stat.hint} label={stat.label} />
+          </span>
+          <span className="text-xl font-semibold tabular-nums">
+            {stat.value}
+          </span>
+          <Progress
+            value={stat.percent}
+            className="h-1.5"
+            aria-label={`${stat.label}: ${stat.value}`}
+          />
+          <span className="min-h-4 text-xs">
+            {stat.delta !== undefined ? (
+              <DeltaBadge
+                change={stat.delta}
+                lowerIsBetter={stat.lowerIsBetter}
+                period={comparison?.label}
+              />
+            ) : null}
+          </span>
+        </div>
+      ))}
     </section>
   )
 }
 
-/** Calidad: tasas, motivos y duplicados (con sus gráficas). */
+function DuplicateStats({
+  duplicates,
+}: {
+  duplicates: { tickets: DuplicateTicket[]; alerts: DuplicateAlert[] }
+}) {
+  const t = metricsMessages.duplicates
+  const decisions = t.decisions as Record<string, string>
+  const average = averageOf(
+    duplicates.tickets.map((item) => item.timeToMarkMinutes),
+  )
+  return (
+    <dl className="flex flex-wrap items-baseline gap-x-8 gap-y-2 text-sm">
+      <div className="flex items-baseline gap-2">
+        <dt className="text-muted-foreground">{t.timeToMark}</dt>
+        <dd className="font-semibold tabular-nums">{formatMinutes(average)}</dd>
+      </div>
+      {duplicates.alerts.map((alert) => (
+        <div key={alert.decision} className="flex items-baseline gap-2">
+          <dt className="text-muted-foreground">
+            {decisions[alert.decision] ?? alert.decision}
+          </dt>
+          <dd className="font-semibold tabular-nums">{alert.candidates}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+/** Calidad: tasas, duplicados, pausas y rechazos. */
 export function QualityTab({
   summary,
   comparison,
@@ -131,16 +173,8 @@ export function QualityTab({
         <h2 className="text-sm font-medium text-muted-foreground">
           {metricsMessages.duplicates.title}
         </h2>
-        <KpiGrid cards={duplicateCards(duplicates)} columns={3} />
-        <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
-          <ChartCard
-            title={metricsMessages.duplicates.byDimension}
-            hint={metricsMessages.chartHints.duplicatesByDimension}
-          >
-            <DuplicateRateChart rows={duplicates.rows} />
-          </ChartCard>
-          <DuplicateTable rows={duplicates.rows} />
-        </div>
+        <DuplicateStats duplicates={duplicates} />
+        <DuplicateTable rows={duplicates.rows} />
       </section>
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ChartCard
@@ -153,7 +187,7 @@ export function QualityTab({
           title={metricsMessages.rejectCancel.title}
           hint={metricsMessages.chartHints.rejectCancel}
         >
-          <RejectCancelChart rows={rejectCancel} />
+          <RejectCancelTable rows={rejectCancel} />
         </ChartCard>
       </div>
     </div>

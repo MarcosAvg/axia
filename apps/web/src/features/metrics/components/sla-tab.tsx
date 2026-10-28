@@ -1,3 +1,5 @@
+import { GaugeIcon } from 'lucide-react'
+import { EmptyState } from '@/components/shared/empty-state'
 import type {
   SatisfactionSummary,
   SlaPriorityRow,
@@ -6,9 +8,6 @@ import type {
 import { formatMinutes, formatRate, formatScore } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { KpiGrid } from './metrics-kpis'
-import type { Kpi } from './metrics-kpis'
-import { SlaPriorityChart } from './sla-priority-chart'
 
 const t = metricsMessages.sla
 const k = metricsMessages.kpi
@@ -18,7 +17,75 @@ function minutes(value: number | null): string {
   return value === null ? '—' : formatMinutes(value)
 }
 
-/** SLA y satisfacción: cumplimiento, tiempos y detalle por prioridad. */
+function BulletRows({ rows }: { rows: SlaPriorityRow[] }) {
+  if (rows.length === 0) {
+    return <EmptyState icon={GaugeIcon} title={t.empty} />
+  }
+  return (
+    <ul className="flex flex-col divide-y">
+      {rows.map((row) => {
+        const percent = Math.min(
+          100,
+          Math.max(0, Math.round((row.complianceRate ?? 0) * 100)),
+        )
+        return (
+          <li
+            key={row.priorityId}
+            className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0 sm:grid sm:grid-cols-[minmax(7rem,1fr)_2fr_auto] sm:items-center sm:gap-4"
+          >
+            <span className="text-sm">{row.priorityName}</span>
+            <span
+              className="relative h-2 overflow-hidden rounded-full bg-muted"
+              aria-hidden
+            >
+              <span
+                className="absolute inset-y-0 left-0 rounded-full bg-chart-2"
+                style={{ width: `${percent}%` }}
+              />
+            </span>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {formatRate(row.complianceRate)} · {row.met}/{row.withTarget}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+function SatisfactionGauge({
+  satisfaction,
+}: {
+  satisfaction: SatisfactionSummary
+}) {
+  const average = satisfaction.average
+  const percent =
+    average === null ? 0 : Math.min(100, Math.max(0, (average / 5) * 100))
+  return (
+    <div className="flex items-center gap-4">
+      <div
+        role="img"
+        aria-label={`${k.satisfaction}: ${formatScore(average)}`}
+        className="relative size-24 shrink-0 rounded-full"
+        style={{
+          background: `conic-gradient(var(--chart-1) ${percent}%, var(--muted) 0)`,
+        }}
+      >
+        <div className="absolute inset-2 flex items-center justify-center rounded-full bg-card text-xl font-semibold tabular-nums">
+          {average === null ? '—' : average.toFixed(1)}
+        </div>
+      </div>
+      <div className="flex flex-col gap-0.5 text-sm">
+        <span className="text-muted-foreground">de 5</span>
+        <span className="text-xs text-muted-foreground">
+          {satisfaction.ratings} {t.ratings}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/** SLA y satisfacción: cumplimiento por prioridad y calificación media. */
 export function SlaTab({
   sla,
   slaRows,
@@ -28,37 +95,43 @@ export function SlaTab({
   slaRows: SlaPriorityRow[]
   satisfaction: SatisfactionSummary
 }) {
-  const cards: Kpi[] = [
-    { label: k.sla, value: formatRate(sla.complianceRate), hint: hints.sla },
-    {
-      label: t.met,
-      value: `${sla.met} / ${sla.withTarget}`,
-      hint: t.metHint,
-    },
-    {
-      label: t.target,
-      value: minutes(sla.avgTargetMinutes),
-      hint: t.targetHint,
-    },
-    {
-      label: k.satisfaction,
-      value: formatScore(satisfaction.average),
-      hint: hints.satisfaction,
-    },
-  ]
   return (
-    <div className="flex flex-col gap-4">
-      <KpiGrid cards={cards} columns={4} />
-      <p className="text-sm text-muted-foreground">
-        {t.summary(sla.met, sla.withTarget, satisfaction.ratings)}
-      </p>
-      <ChartCard title={t.title} hint={metricsMessages.chartHints.sla}>
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
-            {t.resolution}: {minutes(sla.avgResolutionMinutes)}
-          </p>
-          <SlaPriorityChart rows={slaRows} />
-        </div>
+    <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
+      <div className="lg:col-span-2">
+        <ChartCard title={t.title} hint={metricsMessages.chartHints.sla}>
+          <div className="flex flex-col gap-3">
+            <BulletRows rows={slaRows} />
+            <dl className="flex flex-wrap gap-x-6 gap-y-1 border-t pt-2 text-xs">
+              <div className="flex items-baseline gap-1.5">
+                <dt className="text-muted-foreground">{t.rate}:</dt>
+                <dd className="font-medium tabular-nums">
+                  {formatRate(sla.complianceRate)}
+                </dd>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <dt className="text-muted-foreground">{t.met}:</dt>
+                <dd className="font-medium tabular-nums">
+                  {sla.met} / {sla.withTarget}
+                </dd>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <dt className="text-muted-foreground">{t.resolution}:</dt>
+                <dd className="font-medium tabular-nums">
+                  {minutes(sla.avgResolutionMinutes)}
+                </dd>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <dt className="text-muted-foreground">{t.target}:</dt>
+                <dd className="font-medium tabular-nums">
+                  {minutes(sla.avgTargetMinutes)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </ChartCard>
+      </div>
+      <ChartCard title={k.satisfaction} hint={hints.satisfaction}>
+        <SatisfactionGauge satisfaction={satisfaction} />
       </ChartCard>
     </div>
   )

@@ -31,7 +31,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
 
-  await page.getByRole('tab', { name: 'Solicitante' }).click()
+  await page.getByRole('button', { name: 'Solicitante' }).click()
   await expect(
     page.getByRole('columnheader', { name: 'Agrupación' }),
   ).toBeVisible()
@@ -41,6 +41,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await page
     .getByRole('combobox', { name: 'Edificio' })
     .selectOption({ label: 'Edificio Central' })
+  await page.keyboard.press('Escape')
   await expect(
     page.getByRole('button', { name: 'Quitar Edificio Central' }),
   ).toBeVisible()
@@ -77,5 +78,19 @@ test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
   await page.goto('/metricas')
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
-  await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
+  await expect(page.getByText('Detalle por agrupación')).toBeVisible()
+})
+
+test('cambia el periodo desde el popover', async ({ page }) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+
+  await page.getByRole('button', { name: 'Periodo' }).click()
+  await page.getByRole('button', { name: '7 días' }).click()
+  await expect(page.getByRole('button', { name: 'Periodo' })).toContainText(
+    '7 días',
+  )
 })

@@ -10,12 +10,15 @@
 
 **Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`), listo para integrar.
 
-1. Contexto compacto: rango, filtros plegables, chips y vista de tiempos en una fila desde 1440 px.
-2. Franja de salud con cuatro KPIs; la primera resolución pasó a Calidad.
-3. Explorador único de dimensiones con pestañas, gráfica y tabla.
-4. Calidad, SLA y Equipo con el mismo patrón y densidad; cinco KPIs de calidad en una fila.
-5. Controles de 36 px desde `lg` (44 px en móvil), pestañas a su ancho y capturas a 390, 1280 y
-   1440 px. Ver ADR 0090.
+1. Jerarquía: la salud vive en Resumen, no como franja fija; periodo, filtros y exportación en
+   popovers/menú; una barra de contexto de ~44 px.
+2. Un dato, un lugar: se eliminan las tarjetas repetidas; dimensiones con selector compacto y
+   tabla con barras.
+3. Una forma por dato: área (volumen), barra apilada (ciclo y rechazos), Pareto (pausas), bullet
+   (SLA), radial (satisfacción) y barras dentro de tablas (rankings).
+4. Se retiran ocho componentes de tarjetas/gráficas duplicadas; no hay dependencias nuevas.
+5. Conteos de pg normalizados en la API web y en `mergeBy`, con prueba; capturas a 390, 1280 y
+   1440 px más Tiempos. Ver ADR 0090.
 
 **Siguiente:** integrar la rama a `main` con `pnpm check` en verde; después, puesta en marcha real
 (servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el host definitivo.

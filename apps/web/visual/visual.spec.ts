@@ -53,7 +53,7 @@ test('panel y métricas', async ({ page }) => {
   await expect(
     page.getByText('No se pudieron cargar las métricas.'),
   ).toHaveCount(0)
-  await expect(page.locator('svg.recharts-surface').first()).toBeVisible()
+  await expect(page.getByText('Tiquets por mes')).toBeVisible()
 
   await expect(page).toHaveScreenshot('metricas.png', {
     fullPage: true,
@@ -62,8 +62,12 @@ test('panel y métricas', async ({ page }) => {
       page.getByText('Antigüedad de pendientes'),
     ],
   })
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
+  await expect(page.getByText('Ciclo medio')).toBeVisible()
+  await expect(page).toHaveScreenshot('tiempos.png', { fullPage: true })
+
   await page.getByRole('tab', { name: 'Calidad' }).click()
-  await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Duplicados' })).toBeVisible()
   await expect(page).toHaveScreenshot('calidad.png', {
     fullPage: true,
     mask: [page.locator('svg.recharts-surface')],
@@ -77,7 +81,7 @@ test('panel y métricas', async ({ page }) => {
   })
 
   await page.getByRole('tab', { name: 'Equipo' }).click()
-  await expect(page.getByText('Tiquets por técnico')).toBeVisible()
+  await expect(page.getByText('Carga por técnico')).toBeVisible()
   await expect(page).toHaveScreenshot('equipo.png', {
     fullPage: true,
     mask: [page.locator('svg.recharts-surface')],
@@ -92,7 +96,7 @@ test('métricas en escritorio ancho', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
   await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
-  await expect(page.locator('svg.recharts-surface').first()).toBeVisible()
+  await expect(page.getByText('Tiquets por mes')).toBeVisible()
 
   await expect(page).toHaveScreenshot('metricas-escritorio.png', {
     fullPage: true,

@@ -1,5 +1,11 @@
+import { ChevronDownIcon, DownloadIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ButtonGrid } from '@/components/shared/button-grid'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { downloadTextFile } from '@/lib/download'
 import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
@@ -86,25 +92,29 @@ export function MetricsExport({
   }
 
   return (
-    <ButtonGrid>
-      <Button
-        type="button"
-        variant="outline"
-        className="min-h-11 lg:min-h-9"
-        disabled={groups.length === 0}
-        onClick={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
-      >
-        {metricsMessages.export}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="min-h-11 lg:min-h-9"
-        disabled={groups.length === 0}
-        onClick={() => void handleXlsx()}
-      >
-        {metricsMessages.exportXlsx}
-      </Button>
-    </ButtonGrid>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 lg:min-h-9"
+          disabled={groups.length === 0}
+        >
+          <DownloadIcon className="size-4" />
+          {metricsMessages.export}
+          <ChevronDownIcon className="size-4 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem
+          onSelect={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
+        >
+          {metricsMessages.exportCsv}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => void handleXlsx()}>
+          {metricsMessages.exportXlsx}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

@@ -1,19 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { ButtonGrid } from '@/components/shared/button-grid'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import type { FilterCatalogs, NamedOption } from '../domain/indicators'
-import { isQuickRangeActive } from '../domain/period'
 import type { MetricsFilters } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
 const t = metricsMessages.filters
-const quick = metricsMessages.quickRanges
-
-const QUICK_RANGES = [
-  { key: 'd7' as const, days: 7 },
-  { key: 'd30' as const, days: 30 },
-  { key: 'd90' as const, days: 90 },
-]
 
 export type FilterField = {
   key: 'buildingId' | 'teamId' | 'categoryId' | 'dependencyId'
@@ -76,70 +66,28 @@ export function DateRangeFields({
   onFiltersChange: (filters: MetricsFilters) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex">
-      <div className="w-full sm:w-36">
-        <TextField
-          id="metrics-from"
-          type="date"
-          label={t.from}
-          value={filters.from}
-          className="min-h-11 lg:min-h-9"
-          onChange={(event) =>
-            onFiltersChange({ ...filters, from: event.target.value })
-          }
-        />
-      </div>
-      <div className="w-full sm:w-36">
-        <TextField
-          id="metrics-to"
-          type="date"
-          label={t.to}
-          value={filters.to}
-          className="min-h-11 lg:min-h-9"
-          onChange={(event) =>
-            onFiltersChange({ ...filters, to: event.target.value })
-          }
-        />
-      </div>
-    </div>
-  )
-}
-
-export function QuickRanges({
-  filters,
-  onRange,
-}: {
-  filters: MetricsFilters
-  onRange: (days: number | null) => void
-}) {
-  const allActive = isQuickRangeActive(filters, null)
-  return (
-    <ButtonGrid className="w-full sm:w-auto">
-      <Button
-        type="button"
-        variant={allActive ? 'secondary' : 'outline'}
-        aria-pressed={allActive}
+    <div className="grid grid-cols-2 gap-2">
+      <TextField
+        id="metrics-from"
+        type="date"
+        label={t.from}
+        value={filters.from}
         className="min-h-11 lg:min-h-9"
-        onClick={() => onRange(null)}
-      >
-        {quick.all}
-      </Button>
-      {QUICK_RANGES.map((item) => {
-        const active = isQuickRangeActive(filters, item.days)
-        return (
-          <Button
-            key={item.key}
-            type="button"
-            variant={active ? 'secondary' : 'outline'}
-            aria-pressed={active}
-            className="min-h-11 lg:min-h-9"
-            onClick={() => onRange(item.days)}
-          >
-            {quick[item.key]}
-          </Button>
-        )
-      })}
-    </ButtonGrid>
+        onChange={(event) =>
+          onFiltersChange({ ...filters, from: event.target.value })
+        }
+      />
+      <TextField
+        id="metrics-to"
+        type="date"
+        label={t.to}
+        value={filters.to}
+        className="min-h-11 lg:min-h-9"
+        onChange={(event) =>
+          onFiltersChange({ ...filters, to: event.target.value })
+        }
+      />
+    </div>
   )
 }
 

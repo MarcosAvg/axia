@@ -19,6 +19,7 @@ export const metricsMessages = {
   empty: 'No hay datos con estos filtros.',
   filters: {
     title: 'Filtros',
+    period: 'Periodo',
     from: 'Desde',
     to: 'Hasta',
     building: 'Edificio',
@@ -28,7 +29,7 @@ export const metricsMessages = {
     all: 'Todos',
     clear: 'Limpiar',
     remove: 'Quitar',
-    range: 'Rango',
+    done: 'Listo',
   },
   quickRanges: {
     d7: '7 días',
@@ -45,6 +46,7 @@ export const metricsMessages = {
   },
   dimensions: {
     title: 'Dimensiones',
+    viewBy: 'Ver por',
     count: (count: number) =>
       `${count} ${count === 1 ? 'agrupación' : 'agrupaciones'}`,
   },
@@ -66,10 +68,11 @@ export const metricsMessages = {
     reassignedTechnician: 'Reasignación de técnico',
   },
   kpiGroups: {
-    carga: 'Carga',
-    tiempos: 'Tiempos',
     calidad: 'Calidad',
-    sla: 'SLA y satisfacción',
+  },
+  times: {
+    cycle: 'Ciclo medio',
+    unclassified: 'Pausas y esperas',
   },
   kpiHints: {
     tickets: 'Número de tiquets con los filtros y el periodo activos.',
@@ -94,6 +97,8 @@ export const metricsMessages = {
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     reassignedTechnician:
       'Porcentaje de tiquets en los que el técnico cambió después de la asignación.',
+    unclassified:
+      'Parte del ciclo que no cae en una fase medida: pausas, esperas y tramos sin clasificar.',
   },
   chartHints: {
     volume:
@@ -110,7 +115,6 @@ export const metricsMessages = {
     duplicatesByDimension:
       'Tasa de duplicados por agrupación: duplicados entre los tiquets.',
     rejectCancel: 'Tiquets rechazados o cancelados, desglosados por motivo.',
-    techniciansChart: 'Tiquets por técnico en el periodo.',
     techniciansTable:
       'Carga y participación por técnico: tiquets como líder y auxiliar, y minutos de participación.',
   },
@@ -148,17 +152,16 @@ export const metricsMessages = {
     target: 'Objetivo medio',
     resolution: 'Resolución media',
     empty: 'Sin tiquets con objetivo.',
+    ratings: 'calificaciones',
     metHint:
       'Tiquets que cumplieron su tiempo objetivo, sobre el total con objetivo.',
     targetHint:
       'Tiempo objetivo medio de los tiquets con objetivo en el periodo.',
-    summary: (met: number, withTarget: number, ratings: number) =>
-      `${met} de ${withTarget} tiquets con objetivo cumplido · ${ratings} calificaciones.`,
   },
   charts: {
     volume: 'Tiquets por mes',
-    ticketsBy: 'Tiquets',
-    timesByDimension: 'Tiempos por dimensión',
+    volumeSingle:
+      'La tendencia aparece cuando el periodo abarca más de un mes.',
     pauses: 'Pausas por motivo',
   },
   table: {
@@ -196,7 +199,6 @@ export const metricsMessages = {
   },
   technicians: {
     title: 'Carga por técnico',
-    byTechnician: 'Tiquets por técnico',
     technician: 'Técnico',
     tickets: 'Tiquets',
     leader: 'Como líder',
@@ -207,9 +209,9 @@ export const metricsMessages = {
   },
   rejectCancel: {
     title: 'Rechazos y cancelaciones',
-    event: 'Tipo',
     reason: 'Motivo',
     tickets: 'Tiquets',
+    total: 'Total',
     rejected: 'Rechazado',
     cancelled: 'Cancelado',
   },
@@ -220,6 +222,7 @@ export const metricsMessages = {
     taken: 'Tomadas',
     timeToTake: 'Tiempo hasta la toma',
   },
-  export: 'Exportar CSV',
+  export: 'Exportar',
+  exportCsv: 'Exportar CSV',
   exportXlsx: 'Exportar XLSX',
 } as const

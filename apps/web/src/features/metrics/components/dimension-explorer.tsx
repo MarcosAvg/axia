@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { BarChart3Icon } from 'lucide-react'
+import { BarCell } from './bar-cell'
+import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
 import { HintLabel } from '@/components/shared/hint'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   aggregationHint,
   aggregationLabel,
@@ -20,15 +22,19 @@ import type {
 } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
-import { DimensionChart } from './dimension-chart'
 
 const t = metricsMessages.table
 const hints = metricsMessages.tableHints
 
 type DimensionVariant = 'counts' | 'times'
 
+function maxOf(rows: DimensionRow[], pick: (row: DimensionRow) => number) {
+  return Math.max(1, ...rows.map(pick))
+}
+
 function countColumns(
   nameOf: (id: string) => string,
+  maxTickets: number,
 ): DataTableColumn<DimensionRow>[] {
   return [
     { id: 'name', header: t.name, cell: (row) => nameOf(row.id) },
@@ -36,7 +42,14 @@ function countColumns(
       id: 'tickets',
       header: t.tickets,
       hint: hints.dimensionTickets,
-      cell: (row) => row.tickets,
+      cell: (row) => (
+        <BarCell
+          value={row.tickets}
+          max={maxTickets}
+          label={row.tickets}
+          className="min-w-40"
+        />
+      ),
     },
     {
       id: 'reassignment',
@@ -58,6 +71,7 @@ function countColumns(
 function timeColumns(
   nameOf: (id: string) => string,
   aggregation: TimeAggregation,
+  maxActive: number,
 ): DataTableColumn<DimensionRow>[] {
   return [
     { id: 'name', header: t.name, cell: (row) => nameOf(row.id) },
@@ -65,14 +79,24 @@ function timeColumns(
       id: 'tickets',
       header: t.tickets,
       hint: hints.dimensionTickets,
+      hideBelow: 'md',
       cell: (row) => row.tickets,
     },
     {
       id: 'avgActive',
       header: aggregationLabel(t.avgActive, aggregation),
       hint: hints.avgActive,
-      cell: (row) =>
-        formatMinutes(timeValue(aggregation, row.avgActive, row.sumActive)),
+      cell: (row) => {
+        const value = timeValue(aggregation, row.avgActive, row.sumActive)
+        return (
+          <BarCell
+            value={value}
+            max={maxActive}
+            label={formatMinutes(value)}
+            className="min-w-44"
+          />
+        )
+      },
     },
     {
       id: 'avgTotal',
@@ -92,77 +116,80 @@ function rowsFor(groups: DimensionGroup[], dimension: Dimension) {
     .sort((left, right) => right.tickets - left.tickets)
 }
 
-function DimensionPanel({
+function DimensionSelector({
   dimension,
-  groups,
-  nameOf,
-  variant,
-  aggregation,
-  showChart,
+  onChange,
 }: {
   dimension: Dimension
-  groups: DimensionGroup[]
-  nameOf: (dimension: Dimension, id: string) => string
-  variant: DimensionVariant
-  aggregation: TimeAggregation
-  showChart: boolean
+  onChange: (dimension: Dimension) => void
 }) {
-  const rows = rowsFor(groups, dimension)
-  const label = (id: string) => nameOf(dimension, id)
-  const columns =
-    variant === 'counts' ? countColumns(label) : timeColumns(label, aggregation)
   return (
-    <TabsContent
-      key={dimension}
-      value={dimension}
-      className="flex flex-col gap-3"
+    <div
+      role="group"
+      aria-label={metricsMessages.dimensions.viewBy}
+      className="flex flex-wrap items-center gap-1"
     >
+      <span className="mr-1 text-xs text-muted-foreground">
+        {metricsMessages.dimensions.viewBy}
+      </span>
+      {DIMENSIONS.map((value) => (
+        <Button
+          key={value}
+          type="button"
+          variant={value === dimension ? 'secondary' : 'ghost'}
+          aria-pressed={value === dimension}
+          className="min-h-11 px-2.5 lg:min-h-8"
+          onClick={() => onChange(value)}
+        >
+          {dimensionLabels[value]}
+        </Button>
+      ))}
+    </div>
+  )
+}
+
+function DimensionBody({
+  rows,
+  columns,
+}: {
+  rows: DimensionRow[]
+  columns: DataTableColumn<DimensionRow>[]
+}) {
+  return (
+    <CardContent className="flex flex-col gap-2">
       <p className="text-xs text-muted-foreground">
         {metricsMessages.dimensions.count(rows.length)}
       </p>
       {rows.length === 0 ? (
         <EmptyState icon={BarChart3Icon} title={metricsMessages.empty} />
       ) : (
-        <div
-          className={
-            showChart
-              ? 'grid gap-4 lg:grid-cols-2 lg:items-start'
-              : 'flex flex-col'
-          }
-        >
-          {showChart ? (
-            <DimensionChart
-              id={`metrics-dim-${dimension}`}
-              rows={rows}
-              nameOf={label}
-            />
-          ) : null}
-          <div className="max-h-80 overflow-auto">
-            <DataTable
-              columns={columns}
-              rows={rows}
-              getRowId={(row) => row.id}
-            />
-          </div>
+        <div className="max-h-80 overflow-auto">
+          <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />
         </div>
       )}
-    </TabsContent>
+    </CardContent>
   )
 }
 
-/** Dimensiones en una sola tarjeta: pestañas, gráfica y tabla. */
+/** Dimensiones en una sola tarjeta: selector y tabla con barras. */
 export function DimensionExplorer({
   groups,
   nameOf,
   variant,
-  showChart = false,
 }: {
   groups: DimensionGroup[]
   nameOf: (dimension: Dimension, id: string) => string
   variant: DimensionVariant
-  showChart?: boolean
 }) {
+  const [dimension, setDimension] = useState<Dimension>('team')
   const { aggregation } = useTimeAggregation()
+  const rows = rowsFor(groups, dimension).sort((left, right) =>
+    variant === 'times'
+      ? timeValue(aggregation, right.avgActive, right.sumActive) -
+        timeValue(aggregation, left.avgActive, left.sumActive)
+      : right.tickets - left.tickets,
+  )
+  const label = (id: string) => nameOf(dimension, id)
   const hint =
     variant === 'times'
       ? aggregationHint(
@@ -170,40 +197,29 @@ export function DimensionExplorer({
           aggregation,
         )
       : metricsMessages.chartHints.countsByDimension
+  const columns =
+    variant === 'counts'
+      ? countColumns(
+          label,
+          maxOf(rows, (row) => row.tickets),
+        )
+      : timeColumns(
+          label,
+          aggregation,
+          maxOf(rows, (row) =>
+            timeValue(aggregation, row.avgActive, row.sumActive),
+          ),
+        )
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-wrap items-center justify-between gap-2">
         <CardTitle as="h2" className="text-base">
           <HintLabel label={metricsMessages.dimensions.title} hint={hint} />
         </CardTitle>
+        <DimensionSelector dimension={dimension} onChange={setDimension} />
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="team" className="flex flex-col gap-3">
-          <TabsList className="h-auto flex-wrap justify-start">
-            {DIMENSIONS.map((dimension) => (
-              <TabsTrigger
-                key={dimension}
-                value={dimension}
-                className="min-h-11 lg:min-h-9 lg:px-4"
-              >
-                {dimensionLabels[dimension]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {DIMENSIONS.map((dimension) => (
-            <DimensionPanel
-              key={dimension}
-              dimension={dimension}
-              groups={groups}
-              nameOf={nameOf}
-              variant={variant}
-              aggregation={aggregation}
-              showChart={showChart}
-            />
-          ))}
-        </Tabs>
-      </CardContent>
+      <DimensionBody rows={rows} columns={columns} />
     </Card>
   )
 }

@@ -49,6 +49,18 @@ async function fetchItems<T>(
   return body.items
 }
 
+// pg devuelve los COUNT como texto: se normalizan en la frontera.
+function toNumber(value: unknown): number {
+  const numeric = Number(value ?? 0)
+  return Number.isFinite(numeric) ? numeric : 0
+}
+
+function toNullableNumber(value: unknown): number | null {
+  if (value === null || value === undefined) return null
+  const numeric = Number(value)
+  return Number.isFinite(numeric) ? numeric : null
+}
+
 export async function fetchMetricsSummary(
   filters: MetricsFilters,
   compact = false,
@@ -72,7 +84,7 @@ export async function fetchPausesByReason(
   }>('/api/metrics/pauses', filters)
   return items.map((row) => ({
     reasonName: row.reason_name,
-    pauses: row.pauses,
+    pauses: toNumber(row.pauses),
     pauseMinutes: intervalToMinutes(row.pause_time),
     pauseLaborMinutes: intervalToMinutes(row.pause_time_labor),
   }))
@@ -100,8 +112,8 @@ export async function fetchDuplicateAlerts(
   }>('/api/metrics/duplicate-alerts', filters)
   return items.map((row) => ({
     decision: row.decision,
-    candidates: row.candidates,
-    tickets: row.tickets,
+    candidates: toNumber(row.candidates),
+    tickets: toNumber(row.tickets),
   }))
 }
 
@@ -120,9 +132,9 @@ export async function fetchDuplicatesByDimension(
     dimension: row.dimension,
     dimensionId: row.dimension_id,
     dimensionName: row.dimension_name,
-    tickets: row.tickets,
-    duplicates: row.duplicates,
-    duplicateRate: row.duplicate_rate,
+    tickets: toNumber(row.tickets),
+    duplicates: toNumber(row.duplicates),
+    duplicateRate: toNumber(row.duplicate_rate),
   }))
 }
 
@@ -135,7 +147,10 @@ export async function fetchSatisfaction(
       filters,
     )
   )[0]
-  return { average: item?.average_score ?? null, ratings: item?.ratings ?? 0 }
+  return {
+    average: toNullableNumber(item?.average_score),
+    ratings: toNumber(item?.ratings),
+  }
 }
 
 interface SlaRow {
@@ -157,11 +172,11 @@ const EMPTY_SLA_ROW: SlaRow = {
 function toSla(row: SlaRow | undefined): SlaSummary {
   const data = row ?? EMPTY_SLA_ROW
   return {
-    withTarget: data.with_target ?? 0,
-    met: data.met ?? 0,
-    complianceRate: data.compliance_rate,
-    avgTargetMinutes: data.avg_target_minutes,
-    avgResolutionMinutes: data.avg_resolution_minutes,
+    withTarget: toNumber(data.with_target),
+    met: toNumber(data.met),
+    complianceRate: toNullableNumber(data.compliance_rate),
+    avgTargetMinutes: toNullableNumber(data.avg_target_minutes),
+    avgResolutionMinutes: toNullableNumber(data.avg_resolution_minutes),
   }
 }
 
@@ -182,9 +197,9 @@ export async function fetchSlaByPriority(
   return items.map((row) => ({
     priorityId: row.priority_id,
     priorityName: row.priority_name,
-    withTarget: row.with_target,
-    met: row.met,
-    complianceRate: row.compliance_rate,
+    withTarget: toNumber(row.with_target),
+    met: toNumber(row.met),
+    complianceRate: toNullableNumber(row.compliance_rate),
   }))
 }
 
@@ -205,13 +220,13 @@ export async function fetchByTechnician(
   return items.map((row) => ({
     technicianId: row.technician_id,
     name: row.technician_name,
-    tickets: row.tickets,
-    leaderCount: row.leader_count,
-    auxiliaryCount: row.auxiliary_count,
+    tickets: toNumber(row.tickets),
+    leaderCount: toNumber(row.leader_count),
+    auxiliaryCount: toNumber(row.auxiliary_count),
     participationMinutes: intervalToMinutes(row.participation_time),
     participationLaborMinutes: intervalToMinutes(row.participation_time_labor),
     participationExtraMinutes: intervalToMinutes(row.participation_time_extra),
-    assignedCount: row.assigned_count,
+    assignedCount: toNumber(row.assigned_count),
   }))
 }
 
@@ -226,7 +241,7 @@ export async function fetchRejectCancel(
   return items.map((row) => ({
     eventType: row.event_type,
     reasonName: row.reason_name,
-    tickets: row.tickets,
+    tickets: toNumber(row.tickets),
   }))
 }
 
@@ -242,9 +257,9 @@ export async function fetchRouting(
     }>('/api/metrics/routing', filters)
   )[0]
   return {
-    offers: row?.offers ?? 0,
-    pendingOffers: row?.pending_offers ?? 0,
-    taken: row?.taken ?? 0,
+    offers: toNumber(row?.offers),
+    pendingOffers: toNumber(row?.pending_offers),
+    taken: toNumber(row?.taken),
     avgTimeToTakeMinutes: intervalToMinutes(row?.avg_time_to_take),
   }
 }

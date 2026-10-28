@@ -5,10 +5,11 @@ import { EmptyState } from '@/components/shared/empty-state'
 import { formatMinutes } from '../domain/metrics'
 import type { AgingRow } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
+import { BarCell } from './bar-cell'
 
 const t = metricsMessages.aging
 
-/** Lista de tiquets pendientes por antigüedad. */
+/** Lista de tiquets pendientes por antigüedad, con barra comparativa. */
 export function AgingList({
   rows,
   statusLabel,
@@ -19,6 +20,7 @@ export function AgingList({
   if (rows.length === 0) {
     return <EmptyState icon={ClockIcon} title={metricsMessages.empty} />
   }
+  const maxAge = Math.max(1, ...rows.map((row) => row.ageMinutes))
   const columns: DataTableColumn<AgingRow>[] = [
     { id: 'folio', header: t.ticket, cell: (row) => row.folio },
     {
@@ -31,7 +33,14 @@ export function AgingList({
       id: 'age',
       header: t.age,
       hint: metricsMessages.tableHints.age,
-      cell: (row) => formatMinutes(row.ageMinutes),
+      cell: (row) => (
+        <BarCell
+          value={row.ageMinutes}
+          max={maxAge}
+          label={formatMinutes(row.ageMinutes)}
+          className="min-w-40"
+        />
+      ),
     },
   ]
   return <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />

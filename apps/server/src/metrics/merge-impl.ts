@@ -32,7 +32,13 @@ export function mergeBy(
     const key = keyOf(row)
     const current = map.get(key)
     if (!current) {
-      map.set(key, { ...row })
+      // La primera fila también se normaliza: pg devuelve los COUNT como texto.
+      const normalized = { ...row }
+      for (const field of sumFields) normalized[field] = number(row[field])
+      for (const field of intervalFields) {
+        normalized[field] = minutesToInterval(intervalMinutes(row[field]))
+      }
+      map.set(key, normalized)
       continue
     }
     for (const field of sumFields) {

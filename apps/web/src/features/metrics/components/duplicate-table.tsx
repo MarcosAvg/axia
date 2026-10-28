@@ -6,6 +6,7 @@ import type { Dimension } from '../domain/dimensions'
 import { formatPercent } from '../domain/metrics'
 import type { DuplicateDimensionRow } from '../domain/metrics'
 import { dimensionLabels, metricsMessages } from '../i18n'
+import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
 
 const t = metricsMessages.duplicates
@@ -38,7 +39,14 @@ const columns: DataTableColumn<DuplicateDimensionRow>[] = [
     id: 'rate',
     header: t.rate,
     hint: hints.duplicateRate,
-    cell: (row) => formatPercent(row.duplicateRate),
+    cell: (row) => (
+      <BarCell
+        value={row.duplicateRate}
+        max={1}
+        label={formatPercent(row.duplicateRate)}
+        className="min-w-32"
+      />
+    ),
   },
 ]
 

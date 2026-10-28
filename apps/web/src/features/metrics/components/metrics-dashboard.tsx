@@ -3,7 +3,6 @@ import { PageHeader } from '@/components/shared/page-header'
 import { useMetricsBoard } from '../hooks/use-metrics-board'
 import { metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
-import { MetricsHero } from './metrics-hero'
 import { MetricsTabs } from './metrics-tabs'
 import { MetricsToolbar } from './metrics-toolbar'
 
@@ -28,30 +27,22 @@ export function MetricsDashboard() {
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       ) : null}
       {board.summary.tickets > 0 ? (
-        <>
-          <MetricsHero
-            summary={board.summary}
-            comparison={board.comparison}
-            satisfaction={board.satisfaction}
-            sla={board.sla}
-          />
-          <MetricsTabs
-            volume={board.volume}
-            aging={board.aging}
-            summary={board.summary}
-            comparison={board.comparison}
-            groups={board.groups}
-            nameOf={board.nameOf}
-            pauses={board.pauses}
-            duplicates={board.duplicates}
-            sla={board.sla}
-            slaRows={board.slaRows}
-            satisfaction={board.satisfaction}
-            technicians={board.technicians}
-            rejectCancel={board.rejectCancel}
-            routing={board.routing}
-          />
-        </>
+        <MetricsTabs
+          volume={board.volume}
+          aging={board.aging}
+          summary={board.summary}
+          comparison={board.comparison}
+          groups={board.groups}
+          nameOf={board.nameOf}
+          pauses={board.pauses}
+          duplicates={board.duplicates}
+          sla={board.sla}
+          slaRows={board.slaRows}
+          satisfaction={board.satisfaction}
+          technicians={board.technicians}
+          rejectCancel={board.rejectCancel}
+          routing={board.routing}
+        />
       ) : null}
     </div>
   )
