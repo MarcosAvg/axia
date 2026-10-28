@@ -85,6 +85,27 @@ function duplicateCards(duplicates: {
   ]
 }
 
+function QualityRates({
+  summary,
+  comparison,
+}: {
+  summary: MetricsSummary
+  comparison: Comparison | null
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-muted-foreground">
+        {metricsMessages.kpiGroups.calidad}
+      </h2>
+      <KpiGrid
+        cards={qualityCards(summary, comparison)}
+        columns={5}
+        period={comparison?.label}
+      />
+    </section>
+  )
+}
+
 /** Calidad: tasas, motivos y duplicados (con sus gráficas). */
 export function QualityTab({
   summary,
@@ -105,17 +126,13 @@ export function QualityTab({
 }) {
   return (
     <div className="flex flex-col gap-5">
-      <KpiGrid
-        cards={qualityCards(summary, comparison)}
-        columns={5}
-        period={comparison?.label}
-      />
+      <QualityRates summary={summary} comparison={comparison} />
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">
           {metricsMessages.duplicates.title}
         </h2>
         <KpiGrid cards={duplicateCards(duplicates)} columns={3} />
-        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
           <ChartCard
             title={metricsMessages.duplicates.byDimension}
             hint={metricsMessages.chartHints.duplicatesByDimension}

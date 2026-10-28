@@ -32,7 +32,7 @@ export function DuplicateRateChart({
     <ChartContainer
       id="metrics-duplicate-rate"
       config={config}
-      className="aspect-auto h-40 lg:h-48"
+      className="aspect-auto h-40"
     >
       <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />

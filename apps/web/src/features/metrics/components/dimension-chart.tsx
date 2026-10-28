@@ -26,11 +26,7 @@ export function DimensionChart({
     tickets: row.tickets,
   }))
   return (
-    <ChartContainer
-      id={id}
-      config={config}
-      className="aspect-auto h-48 lg:h-56"
-    >
+    <ChartContainer id={id} config={config} className="aspect-auto h-48">
       <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis

@@ -1,39 +1,37 @@
-# 0090 — Tablero de métricas operativo, con escritorio primero
+# 0090 — Tablero de métricas operativo y compacto
 
 - Fecha: 2026-10-28
 - Estado: aceptada
 
 ## Contexto
 
-El tablero de métricas se usa sobre todo desde escritorio, pero su diseño había quedado
-centrado en móvil: cinco pestañas que mostraban una sección a la vez, un segundo nivel de
-pestañas para las dimensiones, controles de 44 px y tarjetas de una sola columna. A 1280 px
-eso dejaba gráficas de 936 px de ancho por 224 px de alto, secciones enteras ocultas y una
-página que se leía como un teléfono estirado.
+El tablero de métricas mezclaba el contexto (rango, filtros y vista de tiempos), una franja de
+salud y cinco secciones con tarjetas de dimensión repetidas. En escritorio el resultado se leía
+como un layout móvil estirado: controles de 44 px, pestañas a todo lo ancho, KPIs de 3 columnas con
+filas huérfanas y secciones que solo cabían una por pantalla. El equipo lo usa sobre todo en
+escritorio, aunque la vista debe seguir funcionando en móvil.
 
-La verificación visual mostró además que entre 1024 y 1279 px todo colapsaba a una columna,
-porque los cortes de Tiempos y Duplicados estaban en `xl`.
+Se evaluó apilar las cinco secciones en una sola página con un índice de anclas y pestañas solo en
+móvil. Se descartó: la navegación por pestañas ya es clara, evita duplicar paneles con
+`useMediaQuery` y conserva las pruebas y el patrón de las demás pantallas.
 
 ## Decisión
 
-- **Escritorio primero a partir de 1024 px.** Las secciones del tablero se apilan en una sola
-  página con una barra de anclas pegajosa bajo la barra superior. Por debajo de 1024 px se
-  conservan las pestañas, que siguen siendo la navegación correcta en móvil.
-- **Una sola rama montada.** `useMediaQuery` elige entre la página con anclas y las pestañas;
-  no se duplican paneles ni gráficas.
-- **Dimensiones con selector.** Las cinco pestañas anidadas de dimensiones se sustituyen por un
-  selector «Ver por»; es un filtro, no una segunda navegación.
-- **Densidad de escritorio.** Rejillas de 4–5 columnas para los KPI, controles de 36 px en
-  escritorio (44 px en móvil), menos relleno y gráficas emparejadas en dos columnas, con alto
-  mayor solo en escritorio.
-- **Sin scroll-spy.** La barra de anclas no resalta la sección activa: el estado no cambia el
-  resultado y añade JavaScript y pruebas.
+- **Cinco pestañas** (`Resumen`, `Tiempos`, `Calidad`, `SLA y satisfacción`, `Equipo`) como
+  navegación principal, con la franja de salud del periodo siempre visible encima.
+- **Explorador de dimensiones** único: pestañas, gráfica y tabla, en lugar de una tarjeta por
+  dimensión. Se elige `Equipo` por defecto.
+- **Densidad de escritorio**: controles de 36 px a partir de `lg` y de 44 px por debajo (objetivo
+  táctil en móvil); pestañas a su ancho de contenido; cinco KPIs en una fila desde `xl`; etiquetas
+  de KPI con altura reservada para que los valores queden alineados.
+- **Filtros** en una fila a partir de 1440 px: rangos rápidos, fechas, filtros de catálogo
+  plegables y vista promedio/acumulado. Los chips solo aparecen con filtros activos.
+- La vista de tiempos (`Promedio`/`Acumulado`) es global y se muestra junto a los filtros.
 
 ## Consecuencias
 
-- A 1280 px se ven las cinco secciones con sus gráficas emparejadas y sin desbordes
-  horizontales entre 1024 y 1920 px.
-- El equipo de pruebas cambia: el E2E de escritorio usa el enlace «Tiempos» y el selector
-  «Ver por»; se añade una prueba de pestañas en móvil. Las capturas de regresión pasan a una
-  página completa en escritorio y una captura móvil.
-- El móvil sigue siendo usable, pero no guía las decisiones de composición.
+- El tablero usa el ancho disponible y reduce el desplazamiento vertical en escritorio; en móvil
+  conserva objetivos táctiles y el apilado de una columna.
+- Las capturas de regresión cubren ahora 1280 px, 1440 px y 390 px (`metricas.png`,
+  `metricas-escritorio.png`, `metricas-movil.png`).
+- No se añaden dependencias ni se cambia el contrato de la API: la compactación es de presentación.

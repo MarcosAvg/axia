@@ -47,23 +47,19 @@ export function SlaTab({
     },
   ]
   return (
-    <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
-      <div className="flex flex-col gap-3 lg:col-span-1">
-        <KpiGrid cards={cards} columns={2} />
-        <p className="text-sm text-muted-foreground">
-          {t.summary(sla.met, sla.withTarget, satisfaction.ratings)}
-        </p>
-      </div>
-      <div className="lg:col-span-2">
-        <ChartCard title={t.title} hint={metricsMessages.chartHints.sla}>
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-muted-foreground">
-              {t.resolution}: {minutes(sla.avgResolutionMinutes)}
-            </p>
-            <SlaPriorityChart rows={slaRows} />
-          </div>
-        </ChartCard>
-      </div>
+    <div className="flex flex-col gap-4">
+      <KpiGrid cards={cards} columns={4} />
+      <p className="text-sm text-muted-foreground">
+        {t.summary(sla.met, sla.withTarget, satisfaction.ratings)}
+      </p>
+      <ChartCard title={t.title} hint={metricsMessages.chartHints.sla}>
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            {t.resolution}: {minutes(sla.avgResolutionMinutes)}
+          </p>
+          <SlaPriorityChart rows={slaRows} />
+        </div>
+      </ChartCard>
     </div>
   )
 }

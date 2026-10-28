@@ -65,7 +65,7 @@ function CatalogFilterPanel({
   return (
     <div
       id="metrics-catalog-filters"
-      className="grid gap-2 border-t pt-2 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid gap-3 border-t pt-3 sm:grid-cols-2 lg:grid-cols-4"
     >
       {fields.map((field) => (
         <CatalogFilterSelect
@@ -131,10 +131,10 @@ function ToolbarForm({
   return (
     <form
       onSubmit={(event) => event.preventDefault()}
-      className="flex flex-col gap-2 rounded-xl border bg-card p-2.5 sm:p-3"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-3"
     >
-      <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end xl:flex-nowrap">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <QuickRanges filters={filters} onRange={onRange} />
           <DateRangeFields
             filters={filters}
@@ -146,11 +146,11 @@ function ToolbarForm({
             onToggle={() => setFiltersOpen((open) => !open)}
           />
         </div>
-        <div className="flex items-center justify-between gap-2 sm:justify-end">
-          <span className="hidden text-xs whitespace-nowrap text-muted-foreground xl:inline">
+        <div className="flex shrink-0 items-center justify-between gap-2 sm:justify-end">
+          <span className="text-xs whitespace-nowrap text-muted-foreground">
             {messages.aggregation.label}
           </span>
-          <AggregationToggle className="[&_button]:lg:min-h-9" />
+          <AggregationToggle />
         </div>
       </div>
       {filtersOpen ? (

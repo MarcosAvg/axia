@@ -27,7 +27,7 @@ export function PausesChart({ data }: { data: PauseReasonRow[] }) {
     <ChartContainer
       id="metrics-pauses"
       config={config}
-      className="aspect-auto h-48 lg:h-56"
+      className="aspect-auto h-48"
     >
       <BarChart data={chartData} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />

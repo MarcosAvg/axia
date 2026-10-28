@@ -41,8 +41,8 @@ function FilterSelect({
       placeholder={t.all}
       options={items.map((item) => ({ value: item.id, label: item.name }))}
       value={value}
-      onChange={(event) => onChange(event.target.value)}
       className="min-h-11 lg:min-h-9"
+      onChange={(event) => onChange(event.target.value)}
     />
   )
 }
@@ -77,28 +77,28 @@ export function DateRangeFields({
 }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:flex">
-      <div className="w-full sm:w-40 lg:w-36">
+      <div className="w-full sm:w-36">
         <TextField
           id="metrics-from"
           type="date"
           label={t.from}
           value={filters.from}
+          className="min-h-11 lg:min-h-9"
           onChange={(event) =>
             onFiltersChange({ ...filters, from: event.target.value })
           }
-          className="min-h-11 lg:min-h-9"
         />
       </div>
-      <div className="w-full sm:w-40 lg:w-36">
+      <div className="w-full sm:w-36">
         <TextField
           id="metrics-to"
           type="date"
           label={t.to}
           value={filters.to}
+          className="min-h-11 lg:min-h-9"
           onChange={(event) =>
             onFiltersChange({ ...filters, to: event.target.value })
           }
-          className="min-h-11 lg:min-h-9"
         />
       </div>
     </div>

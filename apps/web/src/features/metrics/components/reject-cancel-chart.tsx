@@ -68,7 +68,7 @@ export function RejectCancelChart({ rows }: { rows: RejectCancelRow[] }) {
       <ChartContainer
         id="metrics-reject-cancel"
         config={config}
-        className="aspect-auto h-48 lg:h-56"
+        className="aspect-auto h-48"
       >
         <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
           <CartesianGrid vertical={false} />

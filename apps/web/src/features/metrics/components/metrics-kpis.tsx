@@ -1,4 +1,3 @@
-import { cn } from 'cn'
 import { MetricCard } from './metric-card'
 
 export interface Kpi {
@@ -11,10 +10,10 @@ export interface Kpi {
 
 const COLUMNS: Record<number, string> = {
   2: 'sm:grid-cols-2',
-  3: 'sm:grid-cols-3',
-  4: 'sm:grid-cols-2 lg:grid-cols-4',
-  5: 'sm:grid-cols-3 lg:grid-cols-5',
-  6: 'sm:grid-cols-3 lg:grid-cols-6',
+  3: 'sm:grid-cols-2 lg:grid-cols-3',
+  4: 'sm:grid-cols-2 xl:grid-cols-4',
+  5: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
+  6: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6',
 }
 
 /** Rejilla de tarjetas de indicadores. */
@@ -28,7 +27,7 @@ export function KpiGrid({
   period?: string
 }) {
   return (
-    <div className={cn('grid grid-cols-2 gap-2 sm:gap-3', COLUMNS[columns])}>
+    <div className={`grid grid-cols-2 gap-3 ${COLUMNS[columns]}`}>
       {cards.map((card) => (
         <MetricCard
           key={card.label}

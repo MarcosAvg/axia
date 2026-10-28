@@ -26,7 +26,7 @@ export function SlaPriorityChart({ rows }: { rows: SlaPriorityRow[] }) {
     <ChartContainer
       id="metrics-sla-priority"
       config={config}
-      className="aspect-auto h-48 lg:h-56"
+      className="aspect-auto h-48"
     >
       <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />

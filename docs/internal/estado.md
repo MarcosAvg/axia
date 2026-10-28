@@ -8,18 +8,18 @@
 
 ## En curso
 
-**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`), implementado y pendiente
-de compuerta completa e integración.
+**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`), listo para integrar.
 
-1. Contexto compacto: rango, filtros plegables, chips y vista de tiempos.
-2. Franja de salud con cuatro KPIs; la primera resolución vive en Calidad.
-3. Dimensiones con un selector «Ver por», gráfica y tabla.
-4. Escritorio primero: secciones apiladas con anclas desde 1024 px y pestañas solo en móvil
-   (ADR 0090).
-5. Pruebas y capturas visuales actualizadas; falta correr `pnpm check` con una base `_test`.
+1. Contexto compacto: rango, filtros plegables, chips y vista de tiempos en una fila desde 1440 px.
+2. Franja de salud con cuatro KPIs; la primera resolución pasó a Calidad.
+3. Explorador único de dimensiones con pestañas, gráfica y tabla.
+4. Calidad, SLA y Equipo con el mismo patrón y densidad; cinco KPIs de calidad en una fila.
+5. Controles de 36 px desde `lg` (44 px en móvil), pestañas a su ancho y capturas a 390, 1280 y
+   1440 px. Ver ADR 0090.
 
-**Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
-de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
+**Siguiente:** integrar la rama a `main` con `pnpm check` en verde; después, puesta en marcha real
+(servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el host definitivo.
+Si se decide, Web Push y escalamiento programado.
 
 ## Hecho
 
@@ -106,21 +106,13 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
   una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
   descartar (ADR 0089).
-- **Tablero de métricas (2026-10-28):** escritorio primero. Desde 1024 px las cinco secciones se
-  apilan con una barra de anclas pegajosa; por debajo quedan las pestañas. Las dimensiones pasan a
-  un selector, los KPI a rejillas de 4–5 columnas, los controles a 36 px en escritorio y las
-  gráficas se emparejan (ADR 0090). `check:fast`, `check:static`, el E2E de métricas, la regresión
-  visual y el build en verde; la compuerta completa queda pendiente de una base terminada en `_test`.
-- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 39 Playwright y 177 de integración contra
-  PostgreSQL real. La compuerta completa anterior está en verde; tras el rediseño falta repetirla
-  con la base `_test`.
+- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
+  PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
-- **ADR 0090:** tablero de métricas operativo con escritorio primero: anclas desde 1024 px,
-  pestañas en móvil, dimensiones por selector y densidad de escritorio.
 - **ADR 0089:** cierre de SSE al revocar sesiones y cambiar permisos, evento `evidence_added`,
   retención operativa y retirada de permisos muertos.
 - **ADR 0088:** indicadores agregados en SQL, actor en una consulta, sesión sin toque innecesario y

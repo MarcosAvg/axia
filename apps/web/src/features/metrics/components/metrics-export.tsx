@@ -90,7 +90,7 @@ export function MetricsExport({
       <Button
         type="button"
         variant="outline"
-        className="min-h-11"
+        className="min-h-11 lg:min-h-9"
         disabled={groups.length === 0}
         onClick={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
       >
@@ -99,7 +99,7 @@ export function MetricsExport({
       <Button
         type="button"
         variant="outline"
-        className="min-h-11"
+        className="min-h-11 lg:min-h-9"
         disabled={groups.length === 0}
         onClick={() => void handleXlsx()}
       >

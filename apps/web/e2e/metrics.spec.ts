@@ -31,12 +31,9 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
 
-  await page
-    .getByRole('combobox', { name: 'Ver por' })
-    .first()
-    .selectOption({ label: 'Solicitante' })
+  await page.getByRole('tab', { name: 'Solicitante' }).click()
   await expect(
-    page.getByRole('columnheader', { name: 'Agrupación' }).first(),
+    page.getByRole('columnheader', { name: 'Agrupación' }),
   ).toBeVisible()
 
   await expect(page.locator('#metrics-catalog-filters')).toHaveCount(0)
@@ -62,18 +59,14 @@ test('alterna la vista de tiempos entre promedio y acumulado', async ({
     .getByRole('navigation', { name: 'Navegación principal' })
     .getByRole('link', { name: 'Métricas' })
     .click()
-  await page
-    .getByRole('navigation', { name: 'Secciones de métricas' })
-    .getByRole('link', { name: 'Tiempos' })
-    .click()
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
 
-  const times = page.locator('#metrics-times')
   await expect(
-    times.getByText('Trabajo activo', { exact: true }).first(),
+    page.getByText('Trabajo activo', { exact: true }).first(),
   ).toBeVisible()
   await page.getByRole('button', { name: 'Acumulado' }).click()
   await expect(
-    times.getByText('Trabajo activo (acumulado)', { exact: true }).first(),
+    page.getByText('Trabajo activo (acumulado)').first(),
   ).toBeVisible()
 })
 

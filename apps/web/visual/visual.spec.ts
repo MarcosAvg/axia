@@ -59,24 +59,62 @@ test('panel y métricas', async ({ page }) => {
     fullPage: true,
     mask: [
       page.locator('svg.recharts-surface'),
-      page.locator('table').filter({ hasText: 'Antigüedad' }),
+      page.getByText('Antigüedad de pendientes'),
+    ],
+  })
+  await page.getByRole('tab', { name: 'Calidad' }).click()
+  await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
+  await expect(page).toHaveScreenshot('calidad.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
+
+  await page.getByRole('tab', { name: 'SLA y satisfacción' }).click()
+  await expect(page.getByText('Tiempos objetivo (SLA)')).toBeVisible()
+  await expect(page).toHaveScreenshot('sla.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
+
+  await page.getByRole('tab', { name: 'Equipo' }).click()
+  await expect(page.getByText('Tiquets por técnico')).toBeVisible()
+  await expect(page).toHaveScreenshot('equipo.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
+})
+
+test('métricas en escritorio ancho', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
+  await expect(page.locator('svg.recharts-surface').first()).toBeVisible()
+
+  await expect(page).toHaveScreenshot('metricas-escritorio.png', {
+    fullPage: true,
+    mask: [
+      page.locator('svg.recharts-surface'),
+      page.getByText('Antigüedad de pendientes'),
     ],
   })
 })
 
-test('métricas móvil', async ({ page }) => {
+test('métricas en móvil', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await signIn(page, 'demo.admin')
-  await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
-  await page.goto('/metricas')
-  await expect(page.getByRole('tab', { name: 'Resumen' })).toBeVisible()
-  await page.getByRole('tab', { name: 'Calidad' }).click()
-  await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
+  await page.getByRole('button', { name: 'Abrir menú' }).click()
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
+
   await expect(page).toHaveScreenshot('metricas-movil.png', {
     fullPage: true,
-    mask: [
-      page.locator('svg.recharts-surface'),
-      page.locator('table').filter({ hasText: 'Antigüedad' }),
-    ],
+    mask: [page.locator('svg.recharts-surface')],
   })
 })

@@ -33,7 +33,7 @@ export function AggregationToggle({ className }: { className?: string }) {
             size="sm"
             variant={active ? 'secondary' : 'ghost'}
             aria-pressed={active}
-            className="min-h-11"
+            className="min-h-11 lg:min-h-9"
             onClick={() => setAggregation(value)}
           >
             {LABELS[value]}

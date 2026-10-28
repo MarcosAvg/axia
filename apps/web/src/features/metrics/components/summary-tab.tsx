@@ -28,8 +28,8 @@ export function SummaryTab({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
-        <div className="lg:col-span-2">
+      <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
+        <div className="lg:col-span-3">
           <ChartCard
             title={metricsMessages.charts.volume}
             hint={metricsMessages.chartHints.volume}
@@ -37,12 +37,14 @@ export function SummaryTab({
             <VolumeChart data={volume} />
           </ChartCard>
         </div>
-        <ChartCard
-          title={metricsMessages.routing.title}
-          hint={metricsMessages.chartHints.routing}
-        >
-          <RoutingCards routing={routing} columns={2} />
-        </ChartCard>
+        <div className="lg:col-span-2">
+          <ChartCard
+            title={metricsMessages.routing.title}
+            hint={metricsMessages.chartHints.routing}
+          >
+            <RoutingCards routing={routing} columns={2} />
+          </ChartCard>
+        </div>
       </div>
       <DimensionExplorer
         groups={groups}

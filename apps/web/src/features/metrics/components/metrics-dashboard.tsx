@@ -4,7 +4,7 @@ import { useMetricsBoard } from '../hooks/use-metrics-board'
 import { metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
 import { MetricsHero } from './metrics-hero'
-import { MetricsSections } from './metrics-sections'
+import { MetricsTabs } from './metrics-tabs'
 import { MetricsToolbar } from './metrics-toolbar'
 
 /** Tablero de indicadores agrupado por tema. */
@@ -35,7 +35,7 @@ export function MetricsDashboard() {
             satisfaction={board.satisfaction}
             sla={board.sla}
           />
-          <MetricsSections
+          <MetricsTabs
             volume={board.volume}
             aging={board.aging}
             summary={board.summary}
