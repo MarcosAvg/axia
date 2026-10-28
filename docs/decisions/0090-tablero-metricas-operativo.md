@@ -51,8 +51,8 @@ datos, más detalle y variedad de gráficas, no solo tablas.
   satisfacción.
 - Se retiran las tarjetas de KPI (`metric-card`, `metrics-kpis`, `metrics-hero`), las gráficas
   duplicadas y la pestaña SLA.
-- La regresión visual cubre Resumen, Distribución, Tiempos, Calidad, Equipo y Supervisores a
-  1280 px, Resumen y Distribución a 1440 px y Resumen a 390 px.
+- La regresión visual cubre Resumen, Distribución (incluida la jerarquía), Tiempos, Calidad,
+  Equipo y Supervisores a 1280 px; Resumen a 1440 px y Resumen a 390 px.
 - Los medidores de calidad son neutros: no se inventan umbrales de bueno/malo; los deltas
   conservan `lowerIsBetter`.
 - El coste inicial crece con las doce dimensiones. El resumen se carga una vez y las consultas
