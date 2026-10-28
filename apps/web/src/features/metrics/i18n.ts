@@ -14,6 +14,7 @@ export const metricsMessages = {
   title: 'Métricas',
   subtitle: 'Indicadores de los tiquets que puedes ver.',
   health: 'Salud del periodo',
+  sectionsNav: 'Secciones de métricas',
   loading: 'Cargando…',
   error: 'No se pudieron cargar las métricas.',
   empty: 'No hay datos con estos filtros.',
@@ -45,6 +46,7 @@ export const metricsMessages = {
   },
   dimensions: {
     title: 'Dimensiones',
+    viewBy: 'Ver por',
     count: (count: number) =>
       `${count} ${count === 1 ? 'agrupación' : 'agrupaciones'}`,
   },
@@ -67,8 +69,7 @@ export const metricsMessages = {
   },
   kpiGroups: {
     carga: 'Carga',
-    tiempos: 'Tiempos',
-    calidad: 'Calidad',
+    tiempos: 'Duración',
     sla: 'SLA y satisfacción',
   },
   kpiHints: {

@@ -132,8 +132,8 @@ export function TimesTab({
   const { aggregation } = useTimeAggregation()
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-5 xl:grid-cols-5 xl:items-start">
-        <div className="xl:col-span-2">
+      <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
+        <div className="lg:col-span-2">
           <TimeSection
             title={groups.carga}
             metrics={LOAD_METRICS}
@@ -143,7 +143,7 @@ export function TimesTab({
             columns={2}
           />
         </div>
-        <div className="xl:col-span-3">
+        <div className="lg:col-span-3">
           <TimeSection
             title={groups.tiempos}
             metrics={DURATION_METRICS}

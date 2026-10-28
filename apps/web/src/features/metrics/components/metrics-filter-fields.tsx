@@ -42,6 +42,7 @@ function FilterSelect({
       options={items.map((item) => ({ value: item.id, label: item.name }))}
       value={value}
       onChange={(event) => onChange(event.target.value)}
+      className="min-h-11 lg:min-h-9"
     />
   )
 }
@@ -76,7 +77,7 @@ export function DateRangeFields({
 }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:flex">
-      <div className="w-full sm:w-40">
+      <div className="w-full sm:w-40 lg:w-36">
         <TextField
           id="metrics-from"
           type="date"
@@ -85,9 +86,10 @@ export function DateRangeFields({
           onChange={(event) =>
             onFiltersChange({ ...filters, from: event.target.value })
           }
+          className="min-h-11 lg:min-h-9"
         />
       </div>
-      <div className="w-full sm:w-40">
+      <div className="w-full sm:w-40 lg:w-36">
         <TextField
           id="metrics-to"
           type="date"
@@ -96,6 +98,7 @@ export function DateRangeFields({
           onChange={(event) =>
             onFiltersChange({ ...filters, to: event.target.value })
           }
+          className="min-h-11 lg:min-h-9"
         />
       </div>
     </div>
@@ -116,7 +119,7 @@ export function QuickRanges({
         type="button"
         variant={allActive ? 'secondary' : 'outline'}
         aria-pressed={allActive}
-        className="min-h-11"
+        className="min-h-11 lg:min-h-9"
         onClick={() => onRange(null)}
       >
         {quick.all}
@@ -129,7 +132,7 @@ export function QuickRanges({
             type="button"
             variant={active ? 'secondary' : 'outline'}
             aria-pressed={active}
-            className="min-h-11"
+            className="min-h-11 lg:min-h-9"
             onClick={() => onRange(item.days)}
           >
             {quick[item.key]}

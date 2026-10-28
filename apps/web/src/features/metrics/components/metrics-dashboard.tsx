@@ -4,14 +4,14 @@ import { useMetricsBoard } from '../hooks/use-metrics-board'
 import { metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
 import { MetricsHero } from './metrics-hero'
-import { MetricsTabs } from './metrics-tabs'
+import { MetricsSections } from './metrics-sections'
 import { MetricsToolbar } from './metrics-toolbar'
 
 /** Tablero de indicadores agrupado por tema. */
 export function MetricsDashboard() {
   const board = useMetricsBoard()
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <PageHeader
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
@@ -35,7 +35,7 @@ export function MetricsDashboard() {
             satisfaction={board.satisfaction}
             sla={board.sla}
           />
-          <MetricsTabs
+          <MetricsSections
             volume={board.volume}
             aging={board.aging}
             summary={board.summary}

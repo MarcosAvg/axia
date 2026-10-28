@@ -18,7 +18,7 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
     <ChartContainer
       id="metrics-volume"
       config={config}
-      className="aspect-auto h-56"
+      className="aspect-auto h-56 lg:h-64"
     >
       <LineChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />

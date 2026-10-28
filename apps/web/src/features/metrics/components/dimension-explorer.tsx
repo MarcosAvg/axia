@@ -1,11 +1,12 @@
+import { useState } from 'react'
 import { BarChart3Icon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
+import { SelectField } from '@/components/shared/form-fields'
 import { HintLabel } from '@/components/shared/hint'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   aggregationHint,
   aggregationLabel,
@@ -111,46 +112,63 @@ function DimensionPanel({
   const label = (id: string) => nameOf(dimension, id)
   const columns =
     variant === 'counts' ? countColumns(label) : timeColumns(label, aggregation)
+  if (rows.length === 0) {
+    return <EmptyState icon={BarChart3Icon} title={metricsMessages.empty} />
+  }
   return (
-    <TabsContent
-      key={dimension}
-      value={dimension}
-      className="flex flex-col gap-3"
+    <div
+      className={
+        showChart ? 'grid gap-4 lg:grid-cols-2 lg:items-start' : 'flex flex-col'
+      }
     >
-      <p className="text-xs text-muted-foreground">
-        {metricsMessages.dimensions.count(rows.length)}
-      </p>
-      {rows.length === 0 ? (
-        <EmptyState icon={BarChart3Icon} title={metricsMessages.empty} />
-      ) : (
-        <div
-          className={
-            showChart
-              ? 'grid gap-4 lg:grid-cols-2 lg:items-start'
-              : 'flex flex-col'
-          }
-        >
-          {showChart ? (
-            <DimensionChart
-              id={`metrics-dim-${dimension}`}
-              rows={rows}
-              nameOf={label}
-            />
-          ) : null}
-          <div className="max-h-80 overflow-auto">
-            <DataTable
-              columns={columns}
-              rows={rows}
-              getRowId={(row) => row.id}
-            />
-          </div>
-        </div>
-      )}
-    </TabsContent>
+      {showChart ? (
+        <DimensionChart
+          id={`metrics-dim-${variant}-${dimension}`}
+          rows={rows}
+          nameOf={label}
+        />
+      ) : null}
+      <div className="max-h-80 overflow-auto">
+        <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />
+      </div>
+    </div>
   )
 }
 
-/** Dimensiones en una sola tarjeta: pestañas, gráfica y tabla. */
+function DimensionPicker({
+  id,
+  dimension,
+  count,
+  onChange,
+}: {
+  id: string
+  dimension: Dimension
+  count: number
+  onChange: (dimension: Dimension) => void
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="w-48">
+        <SelectField
+          id={id}
+          label={metricsMessages.dimensions.viewBy}
+          options={DIMENSIONS.map((value) => ({
+            value,
+            label: dimensionLabels[value],
+          }))}
+          value={dimension}
+          onChange={(event) => onChange(event.target.value as Dimension)}
+          className="min-h-11 lg:min-h-9"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {metricsMessages.dimensions.count(count)}
+      </p>
+    </div>
+  )
+}
+
+/** Dimensiones en una sola tarjeta: selector, gráfica y tabla. */
 export function DimensionExplorer({
   groups,
   nameOf,
@@ -162,6 +180,7 @@ export function DimensionExplorer({
   variant: DimensionVariant
   showChart?: boolean
 }) {
+  const [dimension, setDimension] = useState<Dimension>('team')
   const { aggregation } = useTimeAggregation()
   const hint =
     variant === 'times'
@@ -170,6 +189,7 @@ export function DimensionExplorer({
           aggregation,
         )
       : metricsMessages.chartHints.countsByDimension
+  const rows = rowsFor(groups, dimension)
 
   return (
     <Card>
@@ -178,31 +198,21 @@ export function DimensionExplorer({
           <HintLabel label={metricsMessages.dimensions.title} hint={hint} />
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="team" className="flex flex-col gap-3">
-          <TabsList className="h-auto w-full flex-wrap justify-start">
-            {DIMENSIONS.map((dimension) => (
-              <TabsTrigger
-                key={dimension}
-                value={dimension}
-                className="min-h-11"
-              >
-                {dimensionLabels[dimension]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {DIMENSIONS.map((dimension) => (
-            <DimensionPanel
-              key={dimension}
-              dimension={dimension}
-              groups={groups}
-              nameOf={nameOf}
-              variant={variant}
-              aggregation={aggregation}
-              showChart={showChart}
-            />
-          ))}
-        </Tabs>
+      <CardContent className="flex flex-col gap-3">
+        <DimensionPicker
+          id={`metrics-dimension-${variant}`}
+          dimension={dimension}
+          count={rows.length}
+          onChange={setDimension}
+        />
+        <DimensionPanel
+          dimension={dimension}
+          groups={groups}
+          nameOf={nameOf}
+          variant={variant}
+          aggregation={aggregation}
+          showChart={showChart}
+        />
       </CardContent>
     </Card>
   )

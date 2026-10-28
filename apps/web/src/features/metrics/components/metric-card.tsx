@@ -25,8 +25,10 @@ export function MetricCard({
           <HintLabel label={label} hint={hint} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
+      <CardContent className="flex flex-col gap-0.5">
+        <p className="text-2xl font-semibold tabular-nums lg:text-[1.75rem]">
+          {value}
+        </p>
         {delta !== undefined ? (
           <DeltaBadge
             change={delta}

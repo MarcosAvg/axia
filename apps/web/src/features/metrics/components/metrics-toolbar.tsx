@@ -34,7 +34,7 @@ function CatalogFilterButton({
     <Button
       type="button"
       variant="outline"
-      className="min-h-11"
+      className="min-h-11 lg:min-h-9"
       aria-expanded={open}
       aria-controls={open ? 'metrics-catalog-filters' : undefined}
       onClick={onToggle}
@@ -65,7 +65,7 @@ function CatalogFilterPanel({
   return (
     <div
       id="metrics-catalog-filters"
-      className="grid gap-3 border-t pt-3 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid gap-2 border-t pt-2 sm:grid-cols-2 lg:grid-cols-4"
     >
       {fields.map((field) => (
         <CatalogFilterSelect
@@ -131,10 +131,10 @@ function ToolbarForm({
   return (
     <form
       onSubmit={(event) => event.preventDefault()}
-      className="flex flex-col gap-3 rounded-xl border bg-card p-3 sm:p-4"
+      className="flex flex-col gap-2 rounded-xl border bg-card p-2.5 sm:p-3"
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end xl:flex-nowrap">
           <QuickRanges filters={filters} onRange={onRange} />
           <DateRangeFields
             filters={filters}
@@ -147,10 +147,10 @@ function ToolbarForm({
           />
         </div>
         <div className="flex items-center justify-between gap-2 sm:justify-end">
-          <span className="text-xs text-muted-foreground">
+          <span className="hidden text-xs whitespace-nowrap text-muted-foreground xl:inline">
             {messages.aggregation.label}
           </span>
-          <AggregationToggle />
+          <AggregationToggle className="[&_button]:lg:min-h-9" />
         </div>
       </div>
       {filtersOpen ? (

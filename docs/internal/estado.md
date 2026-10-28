@@ -3,18 +3,20 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-26
+**Última actualización:** 2026-10-28
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`).
+**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`), implementado y pendiente
+de compuerta completa e integración.
 
-1. Compactar el contexto: rango, filtros plegables, chips y vista de tiempos.
-2. Dejar una franja de salud con cuatro KPIs y mover la primera resolución a Calidad.
-3. Sustituir las cinco tarjetas de dimensión por un explorador con pestañas, gráfica y tabla.
-4. Reorganizar Calidad, SLA y Equipo con el mismo patrón y densidad.
-5. Ajustar móvil, foco y estados; actualizar pruebas y capturas visuales.
+1. Contexto compacto: rango, filtros plegables, chips y vista de tiempos.
+2. Franja de salud con cuatro KPIs; la primera resolución vive en Calidad.
+3. Dimensiones con un selector «Ver por», gráfica y tabla.
+4. Escritorio primero: secciones apiladas con anclas desde 1024 px y pestañas solo en móvil
+   (ADR 0090).
+5. Pruebas y capturas visuales actualizadas; falta correr `pnpm check` con una base `_test`.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
@@ -104,13 +106,21 @@ de restauración en el host definitivo. Si se decide, Web Push y escalamiento pr
   agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
   una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
   descartar (ADR 0089).
-- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
-  PostgreSQL real. `pnpm check` completo en verde.
+- **Tablero de métricas (2026-10-28):** escritorio primero. Desde 1024 px las cinco secciones se
+  apilan con una barra de anclas pegajosa; por debajo quedan las pestañas. Las dimensiones pasan a
+  un selector, los KPI a rejillas de 4–5 columnas, los controles a 36 px en escritorio y las
+  gráficas se emparejan (ADR 0090). `check:fast`, `check:static`, el E2E de métricas, la regresión
+  visual y el build en verde; la compuerta completa queda pendiente de una base terminada en `_test`.
+- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 39 Playwright y 177 de integración contra
+  PostgreSQL real. La compuerta completa anterior está en verde; tras el rediseño falta repetirla
+  con la base `_test`.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
 ## Decisiones vigentes
 
+- **ADR 0090:** tablero de métricas operativo con escritorio primero: anclas desde 1024 px,
+  pestañas en móvil, dimensiones por selector y densidad de escritorio.
 - **ADR 0089:** cierre de SSE al revocar sesiones y cambiar permisos, evento `evidence_added`,
   retención operativa y retirada de permisos muertos.
 - **ADR 0088:** indicadores agregados en SQL, actor en una consulta, sesión sin toque innecesario y

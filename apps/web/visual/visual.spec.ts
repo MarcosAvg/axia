@@ -59,28 +59,24 @@ test('panel y métricas', async ({ page }) => {
     fullPage: true,
     mask: [
       page.locator('svg.recharts-surface'),
-      page.getByText('Antigüedad de pendientes'),
+      page.locator('table').filter({ hasText: 'Antigüedad' }),
     ],
   })
+})
 
+test('métricas móvil', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await signIn(page, 'demo.admin')
+  await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
+  await page.goto('/metricas')
+  await expect(page.getByRole('tab', { name: 'Resumen' })).toBeVisible()
   await page.getByRole('tab', { name: 'Calidad' }).click()
   await expect(page.getByText('Duplicados por dimensión')).toBeVisible()
-  await expect(page).toHaveScreenshot('calidad.png', {
+  await expect(page).toHaveScreenshot('metricas-movil.png', {
     fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
-  })
-
-  await page.getByRole('tab', { name: 'SLA y satisfacción' }).click()
-  await expect(page.getByText('Tiempos objetivo (SLA)')).toBeVisible()
-  await expect(page).toHaveScreenshot('sla.png', {
-    fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
-  })
-
-  await page.getByRole('tab', { name: 'Equipo' }).click()
-  await expect(page.getByText('Tiquets por técnico')).toBeVisible()
-  await expect(page).toHaveScreenshot('equipo.png', {
-    fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
+    mask: [
+      page.locator('svg.recharts-surface'),
+      page.locator('table').filter({ hasText: 'Antigüedad' }),
+    ],
   })
 })
