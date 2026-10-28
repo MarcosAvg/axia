@@ -1,22 +1,33 @@
-import type { Dimension, DimensionGroup } from '../domain/dimensions'
+import type { DimensionGroup } from '../domain/dimensions'
+import type { TechnicianRow, TechnicianTimeRow } from '../domain/indicators'
 import type { MetricsSummary } from '../domain/metrics'
 import { CycleBar } from './cycle-bar'
-import { DimensionExplorer } from './dimension-explorer'
+import { PhaseHeatmap } from './phase-heatmap'
+import { PhaseTable } from './phase-table'
+import { TechnicianTimes } from './technician-times'
+import { TimesDimensionTable } from './times-dimension-table'
 
-/** Tiempos: composición del ciclo y desglose por dimensión. */
+/** Tiempos: ciclo, fases, mapa de calor, dimensiones y técnicos. */
 export function TimesTab({
   summary,
   groups,
-  nameOf,
+  technicians,
+  technicianTimes,
 }: {
   summary: MetricsSummary
   groups: DimensionGroup[]
-  nameOf: (dimension: Dimension, id: string) => string
+  technicians: TechnicianRow[]
+  technicianTimes: TechnicianTimeRow[]
 }) {
   return (
     <div className="flex flex-col gap-5">
       <CycleBar summary={summary} />
-      <DimensionExplorer groups={groups} nameOf={nameOf} variant="times" />
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <PhaseTable summary={summary} />
+        <PhaseHeatmap groups={groups} />
+      </div>
+      <TimesDimensionTable groups={groups} />
+      <TechnicianTimes technicians={technicians} times={technicianTimes} />
     </div>
   )
 }

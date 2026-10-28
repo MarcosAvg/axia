@@ -6,7 +6,12 @@ import {
   aggregationLabel,
   timeValue,
 } from '@/lib/time-aggregation'
-import { formatMinutes, formatRate, formatScore } from '../domain/metrics'
+import {
+  formatMinutes,
+  formatPercent,
+  formatRate,
+  formatScore,
+} from '../domain/metrics'
 import type {
   MetricsSummary,
   SatisfactionSummary,
@@ -59,6 +64,62 @@ function StatItem({
   )
 }
 
+function buildStats({
+  summary,
+  comparison,
+  aggregation,
+  satisfaction,
+  sla,
+}: {
+  summary: MetricsSummary
+  comparison: Comparison | null
+  aggregation: ReturnType<typeof useTimeAggregation>['aggregation']
+  satisfaction: SatisfactionSummary
+  sla: SlaSummary
+}): Stat[] {
+  const k = metricsMessages.kpi
+  const hints = metricsMessages.kpiHints
+  const change = (pick: (value: MetricsSummary) => number) =>
+    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
+  const active = (value: MetricsSummary) =>
+    timeValue(aggregation, value.avgActive, value.sumActive)
+  return [
+    {
+      label: k.tickets,
+      value: String(summary.tickets),
+      hint: hints.tickets,
+      delta: change((value) => value.tickets) ?? undefined,
+    },
+    {
+      label: k.open,
+      value: String(summary.open),
+      hint: hints.open,
+    },
+    {
+      label: aggregationLabel(k.activeShort, aggregation),
+      value: formatMinutes(active(summary)),
+      hint: aggregationHint(hints.active, aggregation),
+      delta: change(active) ?? undefined,
+      lowerIsBetter: true,
+    },
+    {
+      label: k.slaShort,
+      value: formatRate(sla.complianceRate),
+      hint: hints.sla,
+    },
+    {
+      label: k.satisfaction,
+      value: formatScore(satisfaction.average),
+      hint: hints.satisfaction,
+    },
+    {
+      label: k.firstFixShort,
+      value: formatPercent(summary.firstTimeFixRate),
+      hint: hints.firstFix,
+    },
+  ]
+}
+
 /** Franja compacta de salud, dentro de la pestaña Resumen. */
 export function HealthStrip({
   summary,
@@ -72,41 +133,17 @@ export function HealthStrip({
   sla: SlaSummary
 }) {
   const { aggregation } = useTimeAggregation()
-  const k = metricsMessages.kpi
-  const hints = metricsMessages.kpiHints
-  const change = (pick: (value: MetricsSummary) => number) =>
-    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
-  const active = (value: MetricsSummary) =>
-    timeValue(aggregation, value.avgActive, value.sumActive)
-  const stats: Stat[] = [
-    {
-      label: k.tickets,
-      value: String(summary.tickets),
-      hint: hints.tickets,
-      delta: change((value) => value.tickets) ?? undefined,
-    },
-    {
-      label: aggregationLabel(k.active, aggregation),
-      value: formatMinutes(active(summary)),
-      hint: aggregationHint(hints.active, aggregation),
-      delta: change(active) ?? undefined,
-      lowerIsBetter: true,
-    },
-    {
-      label: k.sla,
-      value: formatRate(sla.complianceRate),
-      hint: hints.sla,
-    },
-    {
-      label: k.satisfaction,
-      value: formatScore(satisfaction.average),
-      hint: hints.satisfaction,
-    },
-  ]
+  const stats = buildStats({
+    summary,
+    comparison,
+    aggregation,
+    satisfaction,
+    sla,
+  })
   return (
     <section
       aria-label={metricsMessages.health}
-      className="grid grid-cols-2 gap-x-6 gap-y-4 border-y py-3 sm:grid-cols-4"
+      className="grid grid-cols-2 gap-x-6 gap-y-4 border-y py-3 sm:grid-cols-3 xl:grid-cols-6"
     >
       {stats.map((stat, index) => (
         <StatItem

@@ -1,6 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { MetricsFilters } from '../domain/metrics'
 import {
+  fetchPauseSubstates,
+  fetchSupervisors,
+  fetchTechnicianTimes,
+} from '../api/indicators-api'
+import {
   fetchByTechnician,
   fetchDuplicateAlerts,
   fetchDuplicateTickets,
@@ -24,6 +29,9 @@ const metricsKeys = {
   sla: ['metrics', 'sla'] as const,
   slaByPriority: ['metrics', 'sla-by-priority'] as const,
   byTechnician: ['metrics', 'by-technician'] as const,
+  technicianTimes: ['metrics', 'technician-times'] as const,
+  supervisors: ['metrics', 'supervisors'] as const,
+  pauseSubstates: ['metrics', 'pause-substates'] as const,
   rejectCancel: ['metrics', 'reject-cancel'] as const,
   routing: ['metrics', 'routing'] as const,
 }
@@ -110,4 +118,24 @@ export function useRejectCancel(filters: MetricsFilters) {
 
 export function useRouting(filters: MetricsFilters) {
   return useFilteredQuery(metricsKeys.routing, filters, fetchRouting)
+}
+
+export function useTechnicianTimes(filters: MetricsFilters) {
+  return useFilteredQuery(
+    metricsKeys.technicianTimes,
+    filters,
+    fetchTechnicianTimes,
+  )
+}
+
+export function useSupervisors(filters: MetricsFilters) {
+  return useFilteredQuery(metricsKeys.supervisors, filters, fetchSupervisors)
+}
+
+export function usePauseSubstates(filters: MetricsFilters) {
+  return useFilteredQuery(
+    metricsKeys.pauseSubstates,
+    filters,
+    fetchPauseSubstates,
+  )
 }

@@ -10,7 +10,6 @@ import type { Option, RequesterOption } from '@/features/catalogs'
 import type { FilterCatalogs, RoutingSummary } from '../domain/indicators'
 import { EMPTY_FILTERS, EMPTY_SUMMARY } from '../domain/metrics'
 import type {
-  Dimension,
   MetricsFilters,
   SatisfactionSummary,
   SlaSummary,
@@ -22,10 +21,13 @@ import {
   useDuplicates,
   useMetricsSummary,
   usePausesByReason,
+  usePauseSubstates,
   useRejectCancel,
   useRouting,
   useSatisfaction,
   useSla,
+  useSupervisors,
+  useTechnicianTimes,
 } from './use-metrics'
 
 const EMPTY_SLA: SlaSummary = {
@@ -68,35 +70,35 @@ function buildCatalogs(options: {
   }
 }
 
-function nameResolver(catalogs: FilterCatalogs) {
-  const maps: Record<Dimension, Map<string, string>> = {
-    team: new Map(catalogs.teams.map((item) => [item.id, item.name])),
-    building: new Map(catalogs.buildings.map((item) => [item.id, item.name])),
-    category: new Map(catalogs.categories.map((item) => [item.id, item.name])),
-    dependency: new Map(
-      catalogs.dependencies.map((item) => [item.id, item.name]),
-    ),
-    requester: new Map(catalogs.requesters.map((item) => [item.id, item.name])),
-  }
-  return (dimension: Dimension, id: string) => maps[dimension].get(id) ?? id
-}
-
-/** Estado y datos del tablero de métricas. */
-export function useMetricsBoard() {
-  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
+/** Consultas del tablero, separadas del estado y los catálogos. */
+function useMetricsData(filters: MetricsFilters) {
   const current = useMetricsSummary(filters)
   const prevFilters = previousRange(filters)
   const previous = useMetricsSummary(prevFilters ?? EMPTY_FILTERS, {
     compact: true,
     enabled: Boolean(prevFilters),
   })
-  const pauses = usePausesByReason(filters)
-  const duplicates = useDuplicates(filters)
-  const satisfaction = useSatisfaction(filters)
-  const sla = useSla(filters)
-  const technicians = useByTechnician(filters)
-  const rejectCancel = useRejectCancel(filters)
-  const routing = useRouting(filters)
+  return {
+    current,
+    prevFilters,
+    previous,
+    pauses: usePausesByReason(filters),
+    duplicates: useDuplicates(filters),
+    satisfaction: useSatisfaction(filters),
+    sla: useSla(filters),
+    technicians: useByTechnician(filters),
+    technicianTimes: useTechnicianTimes(filters),
+    supervisors: useSupervisors(filters),
+    pauseSubstates: usePauseSubstates(filters),
+    rejectCancel: useRejectCancel(filters),
+    routing: useRouting(filters),
+  }
+}
+
+/** Estado y datos del tablero de métricas. */
+export function useMetricsBoard() {
+  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
+  const data = useMetricsData(filters)
   const buildings = useBuildings()
   const teams = useTeams()
   const categories = useCategories()
@@ -111,10 +113,10 @@ export function useMetricsBoard() {
     requesters: requesters.data,
   })
   const comparison: Comparison | null =
-    prevFilters && previous.data
+    data.prevFilters && data.previous.data
       ? {
-          summary: previous.data.summary,
-          label: formatRangeLabel(prevFilters.from, prevFilters.to),
+          summary: data.previous.data.summary,
+          label: formatRangeLabel(data.prevFilters.from, data.prevFilters.to),
         }
       : null
 
@@ -122,25 +124,31 @@ export function useMetricsBoard() {
     filters,
     setFilters,
     catalogs,
-    summary: or(current.data?.summary, EMPTY_SUMMARY),
-    volume: or(current.data?.volume, []),
-    aging: or(current.data?.aging, []),
+    summary: or(data.current.data?.summary, EMPTY_SUMMARY),
+    volume: or(data.current.data?.volume, []),
+    aging: or(data.current.data?.aging, []),
     comparison,
-    groups: or(current.data?.groups, []),
-    nameOf: nameResolver(catalogs),
-    loading: current.isLoading,
-    error: current.isError,
-    pauses: or(pauses.data, []),
+    groups: or(data.current.data?.groups, []),
+    satisfactionDistribution: or(
+      data.current.data?.satisfactionDistribution,
+      [0, 0, 0, 0, 0],
+    ),
+    loading: data.current.isLoading,
+    error: data.current.isError,
+    pauses: or(data.pauses.data, []),
+    pauseSubstates: or(data.pauseSubstates.data, []),
     duplicates: {
-      tickets: or(duplicates.tickets.data, []),
-      alerts: or(duplicates.alerts.data, []),
-      rows: or(duplicates.byDimension.data, []),
+      tickets: or(data.duplicates.tickets.data, []),
+      alerts: or(data.duplicates.alerts.data, []),
+      rows: or(data.duplicates.byDimension.data, []),
     },
-    satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
-    sla: or(sla.summary.data, EMPTY_SLA),
-    slaRows: or(sla.byPriority.data, []),
-    technicians: or(technicians.data, []),
-    rejectCancel: or(rejectCancel.data, []),
-    routing: or(routing.data, EMPTY_ROUTING),
+    satisfaction: or(data.satisfaction.data, EMPTY_SATISFACTION),
+    sla: or(data.sla.summary.data, EMPTY_SLA),
+    slaRows: or(data.sla.byPriority.data, []),
+    technicians: or(data.technicians.data, []),
+    technicianTimes: or(data.technicianTimes.data, []),
+    supervisors: or(data.supervisors.data, []),
+    rejectCancel: or(data.rejectCancel.data, []),
+    routing: or(data.routing.data, EMPTY_ROUTING),
   }
 }

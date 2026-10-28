@@ -31,9 +31,21 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
 
-  await page.getByRole('button', { name: 'Solicitante' }).click()
+  await page.getByRole('tab', { name: 'Distribución' }).click()
+  await page
+    .getByRole('combobox', { name: 'Ver por' })
+    .selectOption({ label: 'Solicitante' })
   await expect(
     page.getByRole('columnheader', { name: 'Agrupación' }),
+  ).toBeVisible()
+
+  await page
+    .getByRole('combobox', { name: 'Ver por' })
+    .selectOption({ label: 'Problema' })
+  await expect(
+    page.getByRole('img', {
+      name: 'Categoría → Subcategoría → Problema',
+    }),
   ).toBeVisible()
 
   await expect(page.locator('#metrics-catalog-filters')).toHaveCount(0)
@@ -79,6 +91,22 @@ test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
   await expect(page.getByText('Detalle por agrupación')).toBeVisible()
+})
+
+test('el equipo cambia entre equipos, supervisores y técnicos', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Equipo' }).click()
+  await expect(page.getByText('Resumen por equipo')).toBeVisible()
+  await page.getByRole('button', { name: 'Supervisores' }).click()
+  await expect(page.getByText('Ruteo y toma')).toBeVisible()
+  await page.getByRole('button', { name: 'Técnicos' }).click()
+  await expect(page.getByText('Carga por técnico')).toBeVisible()
 })
 
 test('cambia el periodo desde el popover', async ({ page }) => {

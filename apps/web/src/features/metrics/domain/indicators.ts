@@ -39,3 +39,32 @@ export interface RoutingSummary {
   taken: number
   avgTimeToTakeMinutes: number
 }
+
+export interface TechnicianTimeRow {
+  technicianId: string
+  name: string
+  tickets: number
+  avgActive: number
+  avgTotal: number
+  avgResponse: number
+  avgAssignment: number
+  avgValidation: number
+}
+
+export interface SupervisorRow {
+  supervisorId: string
+  name: string
+  offers: number
+  taken: number
+  pending: number
+  withdrawn: number
+  avgTimeToTakeMinutes: number
+  reassigned: number
+  validated: number
+}
+
+export interface PauseSubstateRow {
+  name: string
+  pauses: number
+  pauseMinutes: number
+}

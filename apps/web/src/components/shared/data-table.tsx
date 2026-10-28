@@ -23,7 +23,7 @@ export interface DataTableColumn<T> {
   /** Clase aplicada a la celda y a su encabezado. */
   className?: string
   /** Oculta la columna por debajo del punto de quiebre indicado. */
-  hideBelow?: 'sm' | 'md' | 'lg'
+  hideBelow?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   /** Alineación del encabezado y de las celdas. */
   align?: ColumnAlign
   /** Habilita el orden por esta columna (requiere `onSortChange`). */
@@ -47,6 +47,8 @@ const hideClasses = {
   sm: 'hidden sm:table-cell',
   md: 'hidden md:table-cell',
   lg: 'hidden lg:table-cell',
+  xl: 'hidden xl:table-cell',
+  '2xl': 'hidden 2xl:table-cell',
 } as const
 
 const alignClasses: Record<ColumnAlign, string> = {

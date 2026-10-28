@@ -12,9 +12,13 @@ import { metricsMessages } from '../i18n'
 const COLORS: Record<CyclePhase, string> = {
   response: 'var(--chart-1)',
   assignment: 'var(--chart-2)',
-  active: 'var(--chart-3)',
+  reassignment: 'var(--chart-3)',
+  wait: 'var(--warning)',
+  active: 'var(--success)',
+  pause: 'var(--destructive)',
   validation: 'var(--chart-4)',
-  unclassified: 'var(--chart-5)',
+  claim: 'var(--chart-5)',
+  unclassified: 'var(--border)',
 }
 
 const k = metricsMessages.kpi
@@ -26,8 +30,7 @@ interface PhaseView extends CycleSlice {
 
 function phaseLabel(phase: CyclePhase, aggregation: TimeAggregation): string {
   if (phase === 'active') return aggregationLabel(k.active, aggregation)
-  if (phase === 'unclassified') return t.unclassified
-  return k[phase]
+  return t.phases[phase]
 }
 
 function CycleLegend({ slices }: { slices: PhaseView[] }) {
@@ -86,8 +89,12 @@ export function CycleBar({ summary }: { summary: MetricsSummary }) {
   const slices: PhaseView[] = cyclePhases({
     response: minutes(summary.avgResponse, summary.sumResponse),
     assignment: minutes(summary.avgAssignment, summary.sumAssignment),
+    reassignment: minutes(summary.avgReassignment, summary.sumReassignment),
+    wait: minutes(summary.avgWait, summary.sumWait),
     active: minutes(summary.avgActive, summary.sumActive),
+    pause: minutes(summary.avgPause, summary.sumPause),
     validation: minutes(summary.avgValidation, summary.sumValidation),
+    claim: minutes(summary.avgClaim, summary.sumClaim),
     total,
   }).map((slice) => ({
     ...slice,

@@ -14,7 +14,7 @@ export function MetricsDashboard() {
       <PageHeader
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
-        actions={<MetricsExport groups={board.groups} nameOf={board.nameOf} />}
+        actions={<MetricsExport groups={board.groups} />}
       />
       <MetricsToolbar
         filters={board.filters}
@@ -33,13 +33,16 @@ export function MetricsDashboard() {
           summary={board.summary}
           comparison={board.comparison}
           groups={board.groups}
-          nameOf={board.nameOf}
           pauses={board.pauses}
+          pauseSubstates={board.pauseSubstates}
           duplicates={board.duplicates}
           sla={board.sla}
           slaRows={board.slaRows}
           satisfaction={board.satisfaction}
+          satisfactionDistribution={board.satisfactionDistribution}
           technicians={board.technicians}
+          technicianTimes={board.technicianTimes}
+          supervisors={board.supervisors}
           rejectCancel={board.rejectCancel}
           routing={board.routing}
         />

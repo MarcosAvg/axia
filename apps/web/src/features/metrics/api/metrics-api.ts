@@ -8,6 +8,7 @@ import type {
   TechnicianRow,
 } from '../domain/indicators'
 import { intervalToMinutes } from '../domain/metrics'
+import { toNullableNumber, toNumber } from './numbers'
 import type {
   AgingRow,
   DuplicateAlert,
@@ -27,6 +28,7 @@ interface MetricsAggregate {
   groups: DimensionGroup[]
   volume: VolumePoint[]
   aging: AgingRow[]
+  satisfactionDistribution: number[]
 }
 
 function filtersQuery(filters: MetricsFilters) {
@@ -40,25 +42,13 @@ function filtersQuery(filters: MetricsFilters) {
   return params.toString()
 }
 
-async function fetchItems<T>(
+export async function fetchItems<T>(
   path: string,
   filters?: MetricsFilters,
 ): Promise<T[]> {
   const query = filters ? filtersQuery(filters) : ''
   const body = await apiFetch<{ items: T[] }>(query ? `${path}?${query}` : path)
   return body.items
-}
-
-// pg devuelve los COUNT como texto: se normalizan en la frontera.
-function toNumber(value: unknown): number {
-  const numeric = Number(value ?? 0)
-  return Number.isFinite(numeric) ? numeric : 0
-}
-
-function toNullableNumber(value: unknown): number | null {
-  if (value === null || value === undefined) return null
-  const numeric = Number(value)
-  return Number.isFinite(numeric) ? numeric : null
 }
 
 export async function fetchMetricsSummary(

@@ -3,13 +3,25 @@
 import type { RejectCancelRow } from './indicators'
 
 export type CyclePhase =
-  'response' | 'assignment' | 'active' | 'validation' | 'unclassified'
+  | 'response'
+  | 'assignment'
+  | 'reassignment'
+  | 'wait'
+  | 'active'
+  | 'pause'
+  | 'validation'
+  | 'claim'
+  | 'unclassified'
 
 export interface CycleInput {
   response: number
   assignment: number
+  reassignment: number
+  wait: number
   active: number
+  pause: number
   validation: number
+  claim: number
   total: number
 }
 
@@ -19,18 +31,29 @@ export interface CycleSlice {
 }
 
 /**
- * Reparte el ciclo medio en fases. Lo que el total no explica son pausas y
- * esperas; se acota a cero para no inventar tiempo negativo.
+ * Reparte el ciclo medio en fases. Lo que el total no explica queda como
+ * "sin clasificar"; se acota a cero para no inventar tiempo negativo.
  */
 export function cyclePhases(input: CycleInput): CycleSlice[] {
   const known =
-    input.response + input.assignment + input.active + input.validation
+    input.response +
+    input.assignment +
+    input.reassignment +
+    input.wait +
+    input.active +
+    input.pause +
+    input.validation +
+    input.claim
   const unclassified = Math.max(0, input.total - known)
   return [
     { phase: 'response', minutes: Math.max(0, input.response) },
     { phase: 'assignment', minutes: Math.max(0, input.assignment) },
+    { phase: 'reassignment', minutes: Math.max(0, input.reassignment) },
+    { phase: 'wait', minutes: Math.max(0, input.wait) },
     { phase: 'active', minutes: Math.max(0, input.active) },
+    { phase: 'pause', minutes: Math.max(0, input.pause) },
     { phase: 'validation', minutes: Math.max(0, input.validation) },
+    { phase: 'claim', minutes: Math.max(0, input.claim) },
     { phase: 'unclassified', minutes: unclassified },
   ]
 }

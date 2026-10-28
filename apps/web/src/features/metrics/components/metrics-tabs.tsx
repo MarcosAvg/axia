@@ -1,9 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Dimension, DimensionGroup } from '../domain/dimensions'
+import type { DimensionGroup } from '../domain/dimensions'
 import type {
+  PauseSubstateRow,
   RejectCancelRow,
   RoutingSummary,
+  SupervisorRow,
   TechnicianRow,
+  TechnicianTimeRow,
 } from '../domain/indicators'
 import type {
   AgingRow,
@@ -19,8 +22,8 @@ import type {
 } from '../domain/metrics'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
+import { DistributionTab } from './distribution-tab'
 import { QualityTab } from './quality-tab'
-import { SlaTab } from './sla-tab'
 import { SummaryTab } from './summary-tab'
 import { TeamTab } from './team-tab'
 import { TimesTab } from './times-tab'
@@ -31,8 +34,8 @@ interface MetricsTabsProps {
   summary: MetricsSummary
   comparison: Comparison | null
   groups: DimensionGroup[]
-  nameOf: (dimension: Dimension, id: string) => string
   pauses: PauseReasonRow[]
+  pauseSubstates: PauseSubstateRow[]
   duplicates: {
     tickets: DuplicateTicket[]
     alerts: DuplicateAlert[]
@@ -41,12 +44,21 @@ interface MetricsTabsProps {
   sla: SlaSummary
   slaRows: SlaPriorityRow[]
   satisfaction: SatisfactionSummary
+  satisfactionDistribution: number[]
   technicians: TechnicianRow[]
+  technicianTimes: TechnicianTimeRow[]
+  supervisors: SupervisorRow[]
   rejectCancel: RejectCancelRow[]
   routing: RoutingSummary
 }
 
-const TAB_VALUES = ['summary', 'times', 'quality', 'sla', 'team'] as const
+const TAB_VALUES = [
+  'summary',
+  'distribution',
+  'times',
+  'quality',
+  'team',
+] as const
 
 function MetricsTabList() {
   return (
@@ -65,55 +77,52 @@ function MetricsTabList() {
 }
 
 /** Pestañas del tablero por tema. */
-export function MetricsTabs({
-  volume,
-  aging,
-  summary,
-  comparison,
-  groups,
-  nameOf,
-  pauses,
-  duplicates,
-  sla,
-  slaRows,
-  satisfaction,
-  technicians,
-  rejectCancel,
-  routing,
-}: MetricsTabsProps) {
+export function MetricsTabs(props: MetricsTabsProps) {
   return (
     <Tabs defaultValue="summary" className="flex flex-col gap-4">
       <MetricsTabList />
       <TabsContent value="summary">
         <SummaryTab
-          volume={volume}
-          aging={aging}
-          groups={groups}
-          nameOf={nameOf}
-          routing={routing}
-          summary={summary}
-          comparison={comparison}
-          satisfaction={satisfaction}
-          sla={sla}
+          volume={props.volume}
+          aging={props.aging}
+          groups={props.groups}
+          summary={props.summary}
+          comparison={props.comparison}
+          satisfaction={props.satisfaction}
+          satisfactionDistribution={props.satisfactionDistribution}
+          sla={props.sla}
+          slaRows={props.slaRows}
         />
       </TabsContent>
+      <TabsContent value="distribution">
+        <DistributionTab groups={props.groups} />
+      </TabsContent>
       <TabsContent value="times">
-        <TimesTab summary={summary} groups={groups} nameOf={nameOf} />
+        <TimesTab
+          summary={props.summary}
+          groups={props.groups}
+          technicians={props.technicians}
+          technicianTimes={props.technicianTimes}
+        />
       </TabsContent>
       <TabsContent value="quality">
         <QualityTab
-          summary={summary}
-          comparison={comparison}
-          pauses={pauses}
-          duplicates={duplicates}
-          rejectCancel={rejectCancel}
+          summary={props.summary}
+          comparison={props.comparison}
+          groups={props.groups}
+          pauses={props.pauses}
+          pauseSubstates={props.pauseSubstates}
+          duplicates={props.duplicates}
+          rejectCancel={props.rejectCancel}
         />
       </TabsContent>
-      <TabsContent value="sla">
-        <SlaTab sla={sla} slaRows={slaRows} satisfaction={satisfaction} />
-      </TabsContent>
       <TabsContent value="team">
-        <TeamTab technicians={technicians} />
+        <TeamTab
+          groups={props.groups}
+          routing={props.routing}
+          supervisors={props.supervisors}
+          technicians={props.technicians}
+        />
       </TabsContent>
     </Tabs>
   )

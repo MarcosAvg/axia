@@ -8,17 +8,17 @@
 
 ## En curso
 
-**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`), listo para integrar.
+**Tablero de métricas extenso** (rama `feat/rediseno-metricas`), listo para integrar.
 
-1. Jerarquía: la salud vive en Resumen, no como franja fija; periodo, filtros y exportación en
-   popovers/menú; una barra de contexto de ~44 px.
-2. Un dato, un lugar: se eliminan las tarjetas repetidas; dimensiones con selector compacto y
-   tabla con barras.
-3. Una forma por dato: área (volumen), barra apilada (ciclo y rechazos), Pareto (pausas), bullet
-   (SLA), radial (satisfacción) y barras dentro de tablas (rankings).
-4. Se retiran ocho componentes de tarjetas/gráficas duplicadas; no hay dependencias nuevas.
-5. Conteos de pg normalizados en la API web y en `mergeBy`, con prueba; capturas a 390, 1280 y
-   1440 px más Tiempos. Ver ADR 0090.
+1. Cinco pestañas por pregunta: Resumen, Distribución, Tiempos, Calidad y Equipo; SLA y
+   satisfacción viven en Resumen.
+2. Distribución con las 12 dimensiones, jerarquía con Sunburst, porcentajes global/acumulado/del
+   padre y detalle con tiempos y calidad; estado actual y subestados de pausa.
+3. Tiempos con todas las fases, tabla, mapa de calor por categoría y dimensión, y tiempos por
+   técnico. Calidad con mapa por dimensión, dispersión de riesgo, Pareto y subestados.
+4. Equipo con equipos, supervisores y técnicos; nuevos endpoints `technician-times`,
+   `supervisors` y `pause-substates`. Sin migración de esquema.
+5. Conteos normalizados en la API web y en `mergeBy`; capturas a 390, 1280 y 1440 px. Ver ADR 0090.
 
 **Siguiente:** integrar la rama a `main` con `pnpm check` en verde; después, puesta en marcha real
 (servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el host definitivo.

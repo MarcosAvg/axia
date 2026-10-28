@@ -1,6 +1,6 @@
 import { HintIcon } from '@/components/shared/hint'
 import { Progress } from '@/components/ui/progress'
-import type { RejectCancelRow } from '../domain/indicators'
+import type { RejectCancelRow, PauseSubstateRow } from '../domain/indicators'
 import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import type {
   DuplicateAlert,
@@ -11,12 +11,16 @@ import type {
 } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
+import type { DimensionGroup } from '../domain/dimensions'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DeltaBadge } from './delta-badge'
 import { DuplicateTable } from './duplicate-table'
 import { PausesChart } from './pauses-chart'
+import { PauseSubstates } from './pause-substates'
+import { QualityHeatmap } from './quality-heatmap'
 import { RejectCancelTable } from './reject-cancel-chart'
+import { RiskScatter } from './risk-scatter'
 
 interface RateStat {
   label: string
@@ -148,17 +152,21 @@ function DuplicateStats({
   )
 }
 
-/** Calidad: tasas, duplicados, pausas y rechazos. */
+/** Calidad: tasas, mapa por dimensión, riesgo, pausas y descartes. */
 export function QualityTab({
   summary,
   comparison,
+  groups,
   pauses,
+  pauseSubstates,
   duplicates,
   rejectCancel,
 }: {
   summary: MetricsSummary
   comparison: Comparison | null
+  groups: DimensionGroup[]
   pauses: PauseReasonRow[]
+  pauseSubstates: PauseSubstateRow[]
   duplicates: {
     tickets: DuplicateTicket[]
     alerts: DuplicateAlert[]
@@ -169,6 +177,24 @@ export function QualityTab({
   return (
     <div className="flex flex-col gap-5">
       <QualityRates summary={summary} comparison={comparison} />
+      <QualityHeatmap groups={groups} />
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <RiskScatter groups={groups} />
+        <ChartCard
+          title={metricsMessages.charts.pauses}
+          hint={metricsMessages.chartHints.pauses}
+        >
+          <div className="flex flex-col gap-4">
+            <PausesChart data={pauses} />
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Subestados
+              </h3>
+              <PauseSubstates rows={pauseSubstates} />
+            </div>
+          </div>
+        </ChartCard>
+      </div>
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">
           {metricsMessages.duplicates.title}
@@ -176,20 +202,12 @@ export function QualityTab({
         <DuplicateStats duplicates={duplicates} />
         <DuplicateTable rows={duplicates.rows} />
       </section>
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <ChartCard
-          title={metricsMessages.charts.pauses}
-          hint={metricsMessages.chartHints.pauses}
-        >
-          <PausesChart data={pauses} />
-        </ChartCard>
-        <ChartCard
-          title={metricsMessages.rejectCancel.title}
-          hint={metricsMessages.chartHints.rejectCancel}
-        >
-          <RejectCancelTable rows={rejectCancel} />
-        </ChartCard>
-      </div>
+      <ChartCard
+        title={metricsMessages.rejectCancel.title}
+        hint={metricsMessages.chartHints.rejectCancel}
+      >
+        <RejectCancelTable rows={rejectCancel} />
+      </ChartCard>
     </div>
   )
 }

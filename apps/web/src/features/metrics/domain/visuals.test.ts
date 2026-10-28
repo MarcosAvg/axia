@@ -5,30 +5,42 @@ describe('cyclePhases', () => {
   it('separa las fases conocidas y el resto', () => {
     expect(
       cyclePhases({
-        response: 10,
+        response: 5,
         assignment: 5,
-        active: 60,
+        reassignment: 2,
+        wait: 3,
+        active: 40,
+        pause: 10,
         validation: 5,
+        claim: 2,
         total: 100,
       }),
     ).toEqual([
-      { phase: 'response', minutes: 10 },
+      { phase: 'response', minutes: 5 },
       { phase: 'assignment', minutes: 5 },
-      { phase: 'active', minutes: 60 },
+      { phase: 'reassignment', minutes: 2 },
+      { phase: 'wait', minutes: 3 },
+      { phase: 'active', minutes: 40 },
+      { phase: 'pause', minutes: 10 },
       { phase: 'validation', minutes: 5 },
-      { phase: 'unclassified', minutes: 20 },
+      { phase: 'claim', minutes: 2 },
+      { phase: 'unclassified', minutes: 28 },
     ])
   })
 
   it('no inventa tiempo negativo si las fases superan el total', () => {
     expect(
       cyclePhases({
-        response: 10,
-        assignment: 10,
-        active: 10,
-        validation: 10,
+        response: 5,
+        assignment: 5,
+        reassignment: 5,
+        wait: 5,
+        active: 5,
+        pause: 5,
+        validation: 5,
+        claim: 5,
         total: 5,
-      })[4],
+      })[8],
     ).toEqual({ phase: 'unclassified', minutes: 0 })
   })
 })

@@ -1,14 +1,6 @@
 // Textos de métricas (es-MX).
 
-import type { Dimension } from './domain/metrics'
-
-export const dimensionLabels: Record<Dimension, string> = {
-  team: 'Equipo',
-  building: 'Edificio',
-  category: 'Categoría',
-  dependency: 'Dependencia',
-  requester: 'Solicitante',
-}
+export { dimensionLabels } from './dimension-labels'
 
 export const metricsMessages = {
   title: 'Métricas',
@@ -39,9 +31,9 @@ export const metricsMessages = {
   },
   tabs: {
     summary: 'Resumen',
+    distribution: 'Distribución',
     times: 'Tiempos',
     quality: 'Calidad',
-    sla: 'SLA y satisfacción',
     team: 'Equipo',
   },
   dimensions: {
@@ -52,7 +44,11 @@ export const metricsMessages = {
   },
   kpi: {
     tickets: 'Tiquets',
+    open: 'Abiertos',
     active: 'Trabajo activo',
+    activeShort: 'Activo',
+    firstFixShort: '1ª resolución',
+    slaShort: 'SLA',
     activeExtra: 'Fuera de horario',
     total: 'Tiempo total',
     net: 'Tiempo neto',
@@ -72,10 +68,85 @@ export const metricsMessages = {
   },
   times: {
     cycle: 'Ciclo medio',
-    unclassified: 'Pausas y esperas',
+    unclassified: 'Sin clasificar',
+    phases: {
+      response: 'Respuesta',
+      assignment: 'Asignación',
+      reassignment: 'Reasignación',
+      wait: 'Espera',
+      active: 'Trabajo activo',
+      pause: 'Pausa',
+      validation: 'Validación',
+      claim: 'Reclamación',
+      unclassified: 'Sin clasificar',
+    },
+    phaseTable: 'Fases del ciclo',
+    phase: 'Fase',
+    average: 'Promedio',
+    accumulated: 'Acumulado',
+    share: '% del total',
+    byDimension: 'Tiempo por dimensión',
+    measure: 'Medida',
+    technicians: 'Técnicos',
+    heatmap: 'Tiempo por categoría y fase',
+    load: 'Carga',
+    participation: 'Participación',
+    noTimes: 'Sin tiempos de tiquets liderados.',
+  },
+  status: {
+    title: 'Estado actual',
+    detail: 'Detalle por estado',
+    family: 'Grupo',
+    tickets: 'Tiquets',
+    share: '%',
+    scroll: 'Desplázate para ver los 11 estados.',
+    families: {
+      initial: 'Por atender',
+      progress: 'En trabajo',
+      paused: 'Pausado',
+      validation: 'Validación',
+      closed: 'Cerrado',
+      discarded: 'Descartado',
+    },
+  },
+  distribution: {
+    title: 'Distribución',
+    subtitle: 'Volumen, porcentaje y detalle por dimensión.',
+    share: '% del total',
+    cumulative: '% acum.',
+    parentShare: '% del padre',
+    others: 'Otros',
+    top: 'Top por tiquets',
+  },
+  quality: {
+    byDimension: 'Calidad por dimensión',
+    risk: 'Riesgo de retrabajo',
+    riskHint:
+      'Tiquets frente a la tasa de reapertura. Más a la derecha, más volumen; más arriba, más retrabajo.',
+    heatmap: 'Tasas por dimensión',
+    firstFix: 'Primera resolución',
+  },
+  team: {
+    summary: 'Resumen por equipo',
+    supervisors: 'Supervisores',
+    technicians: 'Técnicos',
+    teams: 'Equipos',
+    open: 'Abiertos',
+    closed: 'Cerrados',
+    offers: 'Ofertas',
+    taken: 'Tomadas',
+    pending: 'Pendientes',
+    withdrawn: 'Retiradas',
+    timeToTake: 'Tiempo hasta la toma',
+    reassigned: 'Reasignados',
+    validated: 'Validados',
+    tickets: 'Tiquets',
+    load: 'Carga',
+    supervisor: 'Supervisor',
   },
   kpiHints: {
     tickets: 'Número de tiquets con los filtros y el periodo activos.',
+    open: 'Tiquets del periodo que siguen abiertos: registrados, asignados, en proceso, pausados, atendidos o en reclamación.',
     active:
       'Trabajo activo por tiquet: del inicio a la atención, sin contar pausas.',
     activeExtra:
@@ -107,6 +178,8 @@ export const metricsMessages = {
       'Tiempo por agrupación (equipo, edificio, categoría, dependencia o solicitante).',
     countsByDimension:
       'Tiquets por agrupación, con su tasa de reasignación y de recaptura.',
+    status:
+      'Estado actual de los tiquets del periodo, agrupado por etapa del flujo.',
     pauses: 'Número de pausas por motivo en el periodo.',
     routing:
       'Ofertas a supervisores: pendientes, tomadas y tiempo medio hasta la toma.',
@@ -162,11 +235,13 @@ export const metricsMessages = {
     volume: 'Tiquets por mes',
     volumeSingle:
       'La tendencia aparece cuando el periodo abarca más de un mes.',
+    topCategories: 'Top categorías',
     pauses: 'Pausas por motivo',
   },
   table: {
     dimension: 'Dimensión',
     name: 'Agrupación',
+    parent: 'Padre',
     tickets: 'Tiquets',
     avgActive: 'Trabajo activo',
     avgTotal: 'Tiempo total',

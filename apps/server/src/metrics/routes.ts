@@ -26,6 +26,7 @@ import {
   slaByPriority,
   type MetricsFilters,
 } from './service.js'
+import { pauseSubstates, supervisors, technicianTimes } from './people.js'
 
 const filterSchema = z.object({
   from: z
@@ -129,6 +130,9 @@ export function registerMetricsRoutes(
     ['/api/metrics/sla', sla],
     ['/api/metrics/sla-by-priority', slaByPriority],
     ['/api/metrics/by-technician', byTechnician],
+    ['/api/metrics/technician-times', technicianTimes],
+    ['/api/metrics/supervisors', supervisors],
+    ['/api/metrics/pause-substates', pauseSubstates],
     ['/api/metrics/reject-cancel', rejectCancel],
     ['/api/metrics/routing', routing],
   ] as const) {

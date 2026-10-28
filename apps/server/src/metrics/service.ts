@@ -11,7 +11,6 @@ import {
   minutesToInterval,
   number,
 } from './merge-impl.js'
-
 export type { MetricsFilters } from './filters.js'
 export { metricsSummary } from './summary.js'
 

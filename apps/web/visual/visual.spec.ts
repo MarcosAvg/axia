@@ -59,12 +59,43 @@ test('panel y métricas', async ({ page }) => {
     fullPage: true,
     mask: [
       page.locator('svg.recharts-surface'),
-      page.getByText('Antigüedad de pendientes'),
+      page.locator('table').filter({ hasText: 'Folio' }),
     ],
   })
+  await page.getByRole('tab', { name: 'Distribución' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Distribución' }),
+  ).toBeVisible()
+  await expect(page).toHaveScreenshot('distribucion.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
+  await page
+    .getByRole('combobox', { name: 'Ver por' })
+    .selectOption({ label: 'Problema' })
+  await expect(
+    page.getByRole('img', {
+      name: 'Categoría → Subcategoría → Problema',
+    }),
+  ).toBeVisible()
+  await expect(page).toHaveScreenshot('distribucion-jerarquia.png', {
+    fullPage: true,
+  })
+})
+
+test('métricas: tiempos, calidad y equipo', async ({ page }) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+
   await page.getByRole('tab', { name: 'Tiempos' }).click()
   await expect(page.getByText('Ciclo medio')).toBeVisible()
-  await expect(page).toHaveScreenshot('tiempos.png', { fullPage: true })
+  await expect(page).toHaveScreenshot('tiempos.png', {
+    fullPage: true,
+    mask: [page.locator('svg.recharts-surface')],
+  })
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
   await expect(page.getByRole('heading', { name: 'Duplicados' })).toBeVisible()
@@ -73,19 +104,13 @@ test('panel y métricas', async ({ page }) => {
     mask: [page.locator('svg.recharts-surface')],
   })
 
-  await page.getByRole('tab', { name: 'SLA y satisfacción' }).click()
-  await expect(page.getByText('Tiempos objetivo (SLA)')).toBeVisible()
-  await expect(page).toHaveScreenshot('sla.png', {
-    fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
-  })
-
   await page.getByRole('tab', { name: 'Equipo' }).click()
-  await expect(page.getByText('Carga por técnico')).toBeVisible()
-  await expect(page).toHaveScreenshot('equipo.png', {
-    fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
-  })
+  await expect(page.getByText('Resumen por equipo')).toBeVisible()
+  await expect(page).toHaveScreenshot('equipo.png', { fullPage: true })
+
+  await page.getByRole('button', { name: 'Supervisores' }).click()
+  await expect(page.getByText('Ruteo y toma')).toBeVisible()
+  await expect(page).toHaveScreenshot('supervisores.png', { fullPage: true })
 })
 
 test('métricas en escritorio ancho', async ({ page }) => {
@@ -102,7 +127,7 @@ test('métricas en escritorio ancho', async ({ page }) => {
     fullPage: true,
     mask: [
       page.locator('svg.recharts-surface'),
-      page.getByText('Antigüedad de pendientes'),
+      page.locator('table').filter({ hasText: 'Folio' }),
     ],
   })
 })
@@ -119,6 +144,9 @@ test('métricas en móvil', async ({ page }) => {
 
   await expect(page).toHaveScreenshot('metricas-movil.png', {
     fullPage: true,
-    mask: [page.locator('svg.recharts-surface')],
+    mask: [
+      page.locator('svg.recharts-surface'),
+      page.locator('table').filter({ hasText: 'Folio' }),
+    ],
   })
 })
