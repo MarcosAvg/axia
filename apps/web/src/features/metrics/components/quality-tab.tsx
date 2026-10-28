@@ -12,7 +12,7 @@ import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DuplicateRateChart } from './duplicate-rate-chart'
-import { DuplicateSections } from './duplicate-sections'
+import { DuplicateTable } from './duplicate-table'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 import { PausesChart } from './pauses-chart'
@@ -85,6 +85,27 @@ function duplicateCards(duplicates: {
   ]
 }
 
+function QualityRates({
+  summary,
+  comparison,
+}: {
+  summary: MetricsSummary
+  comparison: Comparison | null
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-muted-foreground">
+        {metricsMessages.kpiGroups.calidad}
+      </h2>
+      <KpiGrid
+        cards={qualityCards(summary, comparison)}
+        columns={3}
+        period={comparison?.label}
+      />
+    </section>
+  )
+}
+
 /** Calidad: tasas, motivos y duplicados (con sus gráficas). */
 export function QualityTab({
   summary,
@@ -104,15 +125,23 @@ export function QualityTab({
   rejectCancel: RejectCancelRow[]
 }) {
   return (
-    <div className="flex flex-col gap-4">
-      <KpiGrid
-        cards={[
-          ...qualityCards(summary, comparison),
-          ...duplicateCards(duplicates),
-        ]}
-        columns={6}
-        period={comparison?.label}
-      />
+    <div className="flex flex-col gap-5">
+      <QualityRates summary={summary} comparison={comparison} />
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          {metricsMessages.duplicates.title}
+        </h2>
+        <KpiGrid cards={duplicateCards(duplicates)} columns={3} />
+        <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+          <ChartCard
+            title={metricsMessages.duplicates.byDimension}
+            hint={metricsMessages.chartHints.duplicatesByDimension}
+          >
+            <DuplicateRateChart rows={duplicates.rows} />
+          </ChartCard>
+          <DuplicateTable rows={duplicates.rows} />
+        </div>
+      </section>
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <ChartCard
           title={metricsMessages.charts.pauses}
@@ -126,15 +155,6 @@ export function QualityTab({
         >
           <RejectCancelChart rows={rejectCancel} />
         </ChartCard>
-      </div>
-      <div className="flex flex-col gap-3">
-        <ChartCard
-          title={metricsMessages.duplicates.byDimension}
-          hint={metricsMessages.chartHints.duplicatesByDimension}
-        >
-          <DuplicateRateChart rows={duplicates.rows} />
-        </ChartCard>
-        <DuplicateSections rows={duplicates.rows} />
       </div>
     </div>
   )

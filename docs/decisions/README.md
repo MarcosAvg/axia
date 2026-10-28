@@ -88,6 +88,9 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0085](0085-correcciones-ciclo-tiquet.md) | Correcciones del ciclo de vida y de la barra de acciones |
 | [0086](0086-evidencia-por-tipo.md) | Autorización de evidencia por tipo |
 | [0087](0087-cambios-de-rol-exigen-role-manage.md) | Los cambios de rol exigen `role.manage` |
+| [0088](0088-indicadores-agregados-y-abanico-sse.md) | Indicadores agregados y abanico SSE acotado |
+| [0089](0089-sesiones-evidencia-y-retencion.md) | Sesiones, evidencia y retención |
+| [0090](0090-tablero-metricas-operativo.md) | Tablero de métricas operativo |
 
 ## Archivo
 

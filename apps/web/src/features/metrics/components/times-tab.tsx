@@ -1,4 +1,3 @@
-import { HintLabel } from '@/components/shared/hint'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import {
   aggregationHint,
@@ -12,12 +11,13 @@ import type { MetricsSummary } from '../domain/metrics'
 import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
-import { DimensionSections } from './dimension-sections'
+import { DimensionExplorer } from './dimension-explorer'
 import { KpiGrid } from './metrics-kpis'
 import type { Kpi } from './metrics-kpis'
 
 const k = metricsMessages.kpi
 const hints = metricsMessages.kpiHints
+const groups = metricsMessages.kpiGroups
 
 interface TimeMetric {
   label: string
@@ -26,7 +26,7 @@ interface TimeMetric {
   sum: (s: MetricsSummary) => number
 }
 
-const TIME_METRICS: TimeMetric[] = [
+const LOAD_METRICS: TimeMetric[] = [
   {
     label: k.active,
     hint: hints.active,
@@ -39,6 +39,9 @@ const TIME_METRICS: TimeMetric[] = [
     avg: (s) => s.avgActiveExtra,
     sum: (s) => s.sumActiveExtra,
   },
+]
+
+const DURATION_METRICS: TimeMetric[] = [
   {
     label: k.total,
     hint: hints.total,
@@ -67,13 +70,14 @@ const TIME_METRICS: TimeMetric[] = [
 ]
 
 function timeCards(
+  metrics: TimeMetric[],
   summary: MetricsSummary,
   comparison: Comparison | null,
   aggregation: TimeAggregation,
 ): Kpi[] {
   const change = (pick: (s: MetricsSummary) => number) =>
     comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
-  return TIME_METRICS.map((metric) => {
+  return metrics.map((metric) => {
     const value = (s: MetricsSummary) =>
       timeValue(aggregation, metric.avg(s), metric.sum(s))
     return {
@@ -86,11 +90,38 @@ function timeCards(
   })
 }
 
+function TimeSection({
+  title,
+  metrics,
+  summary,
+  comparison,
+  aggregation,
+  columns,
+}: {
+  title: string
+  metrics: TimeMetric[]
+  summary: MetricsSummary
+  comparison: Comparison | null
+  aggregation: TimeAggregation
+  columns: 2 | 3
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
+      <KpiGrid
+        cards={timeCards(metrics, summary, comparison, aggregation)}
+        columns={columns}
+        period={comparison?.label}
+      />
+    </section>
+  )
+}
+
 /** Tiempos: KPI de duración y desglose por dimensión. */
 export function TimesTab({
   summary,
   comparison,
-  groups,
+  groups: dimensionGroups,
   nameOf,
 }: {
   summary: MetricsSummary
@@ -101,23 +132,33 @@ export function TimesTab({
   const { aggregation } = useTimeAggregation()
   return (
     <div className="flex flex-col gap-4">
-      <KpiGrid
-        cards={timeCards(summary, comparison, aggregation)}
-        columns={4}
-        period={comparison?.label}
-      />
-      <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          <HintLabel
-            label={metricsMessages.charts.timesByDimension}
-            hint={aggregationHint(
-              metricsMessages.chartHints.timesByDimension,
-              aggregation,
-            )}
+      <div className="grid gap-5 xl:grid-cols-5 xl:items-start">
+        <div className="xl:col-span-2">
+          <TimeSection
+            title={groups.carga}
+            metrics={LOAD_METRICS}
+            summary={summary}
+            comparison={comparison}
+            aggregation={aggregation}
+            columns={2}
           />
-        </h2>
-        <DimensionSections groups={groups} nameOf={nameOf} variant="times" />
+        </div>
+        <div className="xl:col-span-3">
+          <TimeSection
+            title={groups.tiempos}
+            metrics={DURATION_METRICS}
+            summary={summary}
+            comparison={comparison}
+            aggregation={aggregation}
+            columns={3}
+          />
+        </div>
       </div>
+      <DimensionExplorer
+        groups={dimensionGroups}
+        nameOf={nameOf}
+        variant="times"
+      />
     </div>
   )
 }

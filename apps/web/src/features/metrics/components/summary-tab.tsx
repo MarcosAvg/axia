@@ -5,7 +5,7 @@ import type { AgingRow, VolumePoint } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
-import { DimensionSections } from './dimension-sections'
+import { DimensionExplorer } from './dimension-explorer'
 import { RoutingCards } from './routing-cards'
 import { VolumeChart } from './volume-chart'
 
@@ -44,11 +44,11 @@ export function SummaryTab({
           <RoutingCards routing={routing} columns={2} />
         </ChartCard>
       </div>
-      <DimensionSections
+      <DimensionExplorer
         groups={groups}
         nameOf={nameOf}
         variant="counts"
-        withChart
+        showChart
       />
       <ChartCard
         title={metricsMessages.aging.title}

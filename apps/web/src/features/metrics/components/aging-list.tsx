@@ -24,6 +24,7 @@ export function AgingList({
     {
       id: 'status',
       header: t.status,
+      hideBelow: 'sm',
       cell: (row) => statusLabel(row.status),
     },
     {

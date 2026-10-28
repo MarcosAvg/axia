@@ -6,19 +6,24 @@ import { TechnicianTable } from './technician-table'
 
 /** Equipo: tiquets por técnico (gráfica) y carga detallada (tabla). */
 export function TeamTab({ technicians }: { technicians: TechnicianRow[] }) {
+  const sorted = [...technicians].sort(
+    (left, right) => right.tickets - left.tickets,
+  )
   return (
     <div className="flex flex-col gap-4">
       <ChartCard
         title={metricsMessages.technicians.byTechnician}
         hint={metricsMessages.chartHints.techniciansChart}
       >
-        <TechnicianChart rows={technicians} />
+        <TechnicianChart rows={sorted} />
       </ChartCard>
       <ChartCard
         title={metricsMessages.technicians.title}
         hint={metricsMessages.chartHints.techniciansTable}
       >
-        <TechnicianTable rows={technicians} />
+        <div className="max-h-96 overflow-auto">
+          <TechnicianTable rows={sorted} />
+        </div>
       </ChartCard>
     </div>
   )

@@ -1,110 +1,83 @@
+import { useState } from 'react'
+import { ChevronDownIcon, SlidersHorizontalIcon } from 'lucide-react'
+import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
 import { AggregationToggle } from '@/components/shared/aggregation-toggle'
-import { ButtonGrid } from '@/components/shared/button-grid'
 import { FilterChips } from '@/components/shared/filter-chips'
 import type { FilterChip } from '@/components/shared/filter-chips'
-import { SelectField, TextField } from '@/components/shared/form-fields'
 import { messages } from '@/lib/i18n'
-import type { FilterCatalogs, NamedOption } from '../domain/indicators'
+import type { FilterCatalogs } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
-import {
-  formatRangeLabel,
-  isQuickRangeActive,
-  rangeForDays,
-} from '../domain/period'
+import { formatRangeLabel, rangeForDays } from '../domain/period'
 import type { MetricsFilters } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
+import {
+  CatalogFilterSelect,
+  DateRangeFields,
+  QuickRanges,
+  filterSelects,
+} from './metrics-filter-fields'
+import type { FilterField } from './metrics-filter-fields'
 
 const t = metricsMessages.filters
-const quick = metricsMessages.quickRanges
 
-const QUICK_RANGES = [
-  { key: 'd7' as const, days: 7 },
-  { key: 'd30' as const, days: 30 },
-  { key: 'd90' as const, days: 90 },
-]
-
-function FilterSelect({
-  id,
-  label,
-  value,
-  items,
-  onChange,
+function CatalogFilterButton({
+  activeCount,
+  open,
+  onToggle,
 }: {
-  id: string
-  label: string
-  value: string
-  items: NamedOption[]
-  onChange: (value: string) => void
+  activeCount: number
+  open: boolean
+  onToggle: () => void
 }) {
   return (
-    <SelectField
-      id={id}
-      label={label}
-      placeholder={t.all}
-      options={items.map((item) => ({ value: item.id, label: item.name }))}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <Button
+      type="button"
+      variant="outline"
+      className="min-h-11"
+      aria-expanded={open}
+      aria-controls={open ? 'metrics-catalog-filters' : undefined}
+      onClick={onToggle}
+    >
+      <SlidersHorizontalIcon className="size-4" />
+      {t.title}
+      {activeCount > 0 ? (
+        <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-xs text-secondary-foreground">
+          {activeCount}
+        </span>
+      ) : null}
+      <ChevronDownIcon
+        className={cn('size-4 transition-transform', open && 'rotate-180')}
+      />
+    </Button>
   )
 }
 
-function filterSelects(catalogs: FilterCatalogs) {
-  return [
-    {
-      key: 'buildingId' as const,
-      label: t.building,
-      items: catalogs.buildings,
-    },
-    { key: 'teamId' as const, label: t.team, items: catalogs.teams },
-    {
-      key: 'categoryId' as const,
-      label: t.category,
-      items: catalogs.categories,
-    },
-    {
-      key: 'dependencyId' as const,
-      label: t.dependency,
-      items: catalogs.dependencies,
-    },
-  ]
-}
-
-function QuickRanges({
+function CatalogFilterPanel({
+  fields,
   filters,
-  onRange,
+  onFiltersChange,
 }: {
+  fields: FilterField[]
   filters: MetricsFilters
-  onRange: (days: number | null) => void
+  onFiltersChange: (filters: MetricsFilters) => void
 }) {
-  const allActive = isQuickRangeActive(filters, null)
   return (
-    <ButtonGrid className="w-full sm:w-auto">
-      <Button
-        type="button"
-        variant={allActive ? 'secondary' : 'outline'}
-        aria-pressed={allActive}
-        className="min-h-11"
-        onClick={() => onRange(null)}
-      >
-        {quick.all}
-      </Button>
-      {QUICK_RANGES.map((item) => {
-        const active = isQuickRangeActive(filters, item.days)
-        return (
-          <Button
-            key={item.key}
-            type="button"
-            variant={active ? 'secondary' : 'outline'}
-            aria-pressed={active}
-            className="min-h-11"
-            onClick={() => onRange(item.days)}
-          >
-            {quick[item.key]}
-          </Button>
-        )
-      })}
-    </ButtonGrid>
+    <div
+      id="metrics-catalog-filters"
+      className="grid gap-3 border-t pt-3 sm:grid-cols-2 lg:grid-cols-4"
+    >
+      {fields.map((field) => (
+        <CatalogFilterSelect
+          key={field.key}
+          field={field}
+          value={filters[field.key]}
+          onChange={(value) =>
+            onFiltersChange({ ...filters, [field.key]: value })
+          }
+        />
+      ))}
+    </div>
   )
 }
 
@@ -140,34 +113,6 @@ function buildChips(
   return chips
 }
 
-function CatalogFields({
-  filters,
-  catalogs,
-  onFiltersChange,
-}: {
-  filters: MetricsFilters
-  catalogs: FilterCatalogs
-  onFiltersChange: (filters: MetricsFilters) => void
-}) {
-  return (
-    <>
-      {filterSelects(catalogs).map((field) => (
-        <div key={field.key} className="w-full sm:w-44">
-          <FilterSelect
-            id={`metrics-${field.key}`}
-            label={field.label}
-            items={field.items}
-            value={filters[field.key]}
-            onChange={(value) =>
-              onFiltersChange({ ...filters, [field.key]: value })
-            }
-          />
-        </div>
-      ))}
-    </>
-  )
-}
-
 function ToolbarForm({
   filters,
   catalogs,
@@ -179,47 +124,48 @@ function ToolbarForm({
   onRange: (days: number | null) => void
   onFiltersChange: (filters: MetricsFilters) => void
 }) {
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const fields = filterSelects(catalogs)
+  const activeCatalogs = fields.filter((field) => filters[field.key]).length
+
   return (
     <form
       onSubmit={(event) => event.preventDefault()}
-      className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
+      className="flex flex-col gap-3 rounded-xl border bg-card p-3 sm:p-4"
     >
-      <QuickRanges filters={filters} onRange={onRange} />
-      <div className="w-full sm:w-40">
-        <TextField
-          id="metrics-from"
-          type="date"
-          label={t.from}
-          value={filters.from}
-          onChange={(event) =>
-            onFiltersChange({ ...filters, from: event.target.value })
-          }
-        />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <QuickRanges filters={filters} onRange={onRange} />
+          <DateRangeFields
+            filters={filters}
+            onFiltersChange={onFiltersChange}
+          />
+          <CatalogFilterButton
+            activeCount={activeCatalogs}
+            open={filtersOpen}
+            onToggle={() => setFiltersOpen((open) => !open)}
+          />
+        </div>
+        <div className="flex items-center justify-between gap-2 sm:justify-end">
+          <span className="text-xs text-muted-foreground">
+            {messages.aggregation.label}
+          </span>
+          <AggregationToggle />
+        </div>
       </div>
-      <div className="w-full sm:w-40">
-        <TextField
-          id="metrics-to"
-          type="date"
-          label={t.to}
-          value={filters.to}
-          onChange={(event) =>
-            onFiltersChange({ ...filters, to: event.target.value })
-          }
+      {filtersOpen ? (
+        <CatalogFilterPanel
+          fields={fields}
+          filters={filters}
+          onFiltersChange={onFiltersChange}
         />
-      </div>
-      <CatalogFields
-        filters={filters}
-        catalogs={catalogs}
-        onFiltersChange={onFiltersChange}
+      ) : null}
+      <FilterChips
+        items={buildChips(filters, catalogs, onFiltersChange)}
+        removeLabel={t.remove}
+        clearLabel={t.clear}
+        onClear={() => onFiltersChange(EMPTY_FILTERS)}
       />
-      <Button
-        type="button"
-        variant="ghost"
-        className="min-h-11"
-        onClick={() => onFiltersChange(EMPTY_FILTERS)}
-      >
-        {t.clear}
-      </Button>
     </form>
   )
 }
@@ -230,7 +176,7 @@ interface MetricsToolbarProps {
   onFiltersChange: (filters: MetricsFilters) => void
 }
 
-/** Barra de filtros del tablero (mismo patrón que la lista de Operación). */
+/** Barra de filtros del tablero (contexto compacto). */
 export function MetricsToolbar({
   filters,
   catalogs,
@@ -243,28 +189,13 @@ export function MetricsToolbar({
       onFiltersChange({ ...filters, ...rangeForDays(days, new Date()) })
     }
   }
-  const chips = buildChips(filters, catalogs, onFiltersChange)
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2 sm:justify-end">
-        <span className="text-sm text-muted-foreground">
-          {messages.aggregation.label}
-        </span>
-        <AggregationToggle />
-      </div>
-      <ToolbarForm
-        filters={filters}
-        catalogs={catalogs}
-        onRange={onRange}
-        onFiltersChange={onFiltersChange}
-      />
-      <FilterChips
-        items={chips}
-        removeLabel={t.remove}
-        clearLabel={t.clear}
-        onClear={() => onFiltersChange(EMPTY_FILTERS)}
-      />
-    </div>
+    <ToolbarForm
+      filters={filters}
+      catalogs={catalogs}
+      onRange={onRange}
+      onFiltersChange={onFiltersChange}
+    />
   )
 }

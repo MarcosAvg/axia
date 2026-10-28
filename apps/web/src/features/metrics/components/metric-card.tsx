@@ -19,9 +19,9 @@ export function MetricCard({
   period?: string
 }) {
   return (
-    <Card>
-      <CardHeader className="min-h-16">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card size="sm" className="justify-between">
+      <CardHeader>
+        <CardTitle className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           <HintLabel label={label} hint={hint} />
         </CardTitle>
       </CardHeader>

@@ -4,12 +4,7 @@ import {
   aggregationLabel,
   timeValue,
 } from '@/lib/time-aggregation'
-import {
-  formatMinutes,
-  formatPercent,
-  formatRate,
-  formatScore,
-} from '../domain/metrics'
+import { formatMinutes, formatRate, formatScore } from '../domain/metrics'
 import type {
   MetricsSummary,
   SatisfactionSummary,
@@ -60,13 +55,13 @@ export function MetricsHero({
       value: formatScore(satisfaction.average),
       hint: hints.satisfaction,
     },
-    {
-      label: k.firstFix,
-      value: formatPercent(summary.firstTimeFixRate),
-      hint: hints.firstFix,
-      delta: change((s) => s.firstTimeFixRate),
-      lowerIsBetter: false,
-    },
   ]
-  return <KpiGrid cards={cards} columns={5} period={comparison?.label} />
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-muted-foreground">
+        {metricsMessages.health}
+      </h2>
+      <KpiGrid cards={cards} columns={4} period={comparison?.label} />
+    </section>
+  )
 }

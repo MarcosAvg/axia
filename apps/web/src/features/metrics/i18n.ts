@@ -13,6 +13,7 @@ export const dimensionLabels: Record<Dimension, string> = {
 export const metricsMessages = {
   title: 'Métricas',
   subtitle: 'Indicadores de los tiquets que puedes ver.',
+  health: 'Salud del periodo',
   loading: 'Cargando…',
   error: 'No se pudieron cargar las métricas.',
   empty: 'No hay datos con estos filtros.',
@@ -41,6 +42,11 @@ export const metricsMessages = {
     quality: 'Calidad',
     sla: 'SLA y satisfacción',
     team: 'Equipo',
+  },
+  dimensions: {
+    title: 'Dimensiones',
+    count: (count: number) =>
+      `${count} ${count === 1 ? 'agrupación' : 'agrupaciones'}`,
   },
   kpi: {
     tickets: 'Tiquets',
@@ -139,7 +145,13 @@ export const metricsMessages = {
     withTarget: 'Con objetivo',
     met: 'Cumplidos',
     rate: 'Cumplimiento',
+    target: 'Objetivo medio',
+    resolution: 'Resolución media',
     empty: 'Sin tiquets con objetivo.',
+    metHint:
+      'Tiquets que cumplieron su tiempo objetivo, sobre el total con objetivo.',
+    targetHint:
+      'Tiempo objetivo medio de los tiquets con objetivo en el periodo.',
     summary: (met: number, withTarget: number, ratings: number) =>
       `${met} de ${withTarget} tiquets con objetivo cumplido · ${ratings} calificaciones.`,
   },
@@ -162,6 +174,7 @@ export const metricsMessages = {
   duplicates: {
     title: 'Duplicados',
     byDimension: 'Duplicados por dimensión',
+    detail: 'Detalle por agrupación',
     timeToMark: 'Tiempo medio hasta marcarse',
     alerts: 'Alertas de posible duplicado',
     dimension: 'Dimensión',

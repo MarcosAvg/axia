@@ -8,8 +8,13 @@
 
 ## En curso
 
-**Sin trabajo en curso.** El cierre de la auditoría está integrado a `main` con la compuerta
-completa en verde.
+**Rediseño del tablero de métricas** (rama `feat/rediseno-metricas`).
+
+1. Compactar el contexto: rango, filtros plegables, chips y vista de tiempos.
+2. Dejar una franja de salud con cuatro KPIs y mover la primera resolución a Calidad.
+3. Sustituir las cinco tarjetas de dimensión por un explorador con pestañas, gráfica y tabla.
+4. Reorganizar Calidad, SLA y Equipo con el mismo patrón y densidad.
+5. Ajustar móvil, foco y estados; actualizar pruebas y capturas visuales.
 
 **Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
 de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.

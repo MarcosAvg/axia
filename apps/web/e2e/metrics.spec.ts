@@ -24,6 +24,33 @@ test('el administrador abre las métricas', async ({ page }) => {
   ).toHaveCount(0)
 })
 
+test('explora dimensiones y filtra por edificio', async ({ page }) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+
+  await page.getByRole('tab', { name: 'Solicitante' }).click()
+  await expect(
+    page.getByRole('columnheader', { name: 'Agrupación' }),
+  ).toBeVisible()
+
+  await expect(page.locator('#metrics-catalog-filters')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page
+    .getByRole('combobox', { name: 'Edificio' })
+    .selectOption({ label: 'Edificio Central' })
+  await expect(
+    page.getByRole('button', { name: 'Quitar Edificio Central' }),
+  ).toBeVisible()
+
+  await page.getByRole('button', { name: 'Quitar Edificio Central' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Quitar Edificio Central' }),
+  ).toHaveCount(0)
+})
+
 test('alterna la vista de tiempos entre promedio y acumulado', async ({
   page,
 }) => {
