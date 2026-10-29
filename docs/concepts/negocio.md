@@ -107,11 +107,12 @@ validar, reclamar y reabrir.
 5. El supervisor **asigna técnico**. Cada categoría tiene técnicos designados, pero puede asignar a
    cualquier otro técnico o supervisor; si la persona no está designada para esa categoría, cuenta
    como **apoyo auxiliar** en esa categoría.
-6. El técnico **revisa** la captura y la descripción. Si están mal, **propone una recaptura** sobre el
-   **mismo tiquet**: se conservan los datos originales y cada versión. Supervisor y solicitante
-   reciben alerta y **deben estar de acuerdo**. Si tras el cambio el técnico ya no corresponde al área
-   (y no es auxiliar), el tiquet vuelve al supervisor, que reasigna. Si en la revisión detecta que es
-   un **duplicado**, lo marca (paso 12).
+6. El técnico **revisa** la captura y la descripción. Si están mal, **aplica una recaptura** sobre el
+   **mismo tiquet**: se conservan los datos originales y cada versión, y se avisa al supervisor y al
+   solicitante. La recaptura no requiere aprobación; quien no esté de acuerdo abre una reclamación
+   (RN-16). Si tras el cambio el técnico ya no corresponde al área (y no es auxiliar), el tiquet
+   vuelve al supervisor, que reasigna. Si en la revisión detecta que es un **duplicado**, lo marca
+   (paso 12).
 7. El técnico toma la **evidencia "antes"** al llegar e inicia el trabajo.
 8. Durante el trabajo el tiquet puede **pausarse** con un motivo jerárquico (por ejemplo: material →
    solicitado → en cotización → compra externa → recibido).
@@ -135,7 +136,6 @@ Los estados son **lógica de negocio fija** (no son catálogo). Los motivos y su
 | `registered` | Registrado | Creado y ofrecido a supervisores candidatos; nadie lo ha tomado |
 | `with_supervisor` | Con supervisor | Un supervisor lo tomó y decide o asigna técnico |
 | `assigned` | Asignado (sin atender) | Técnico asignado; aún no inicia |
-| `pending_recapture` | Recaptura por aprobar | El técnico propuso cambios y esperan aprobación |
 | `in_progress` | En proceso | Trabajo iniciado |
 | `paused` | Pausado | No puede avanzar; lleva motivo y subestados |
 | `attended` | Atendido | El técnico terminó; pendiente de validación |
@@ -182,15 +182,13 @@ puede, precondiciones y efectos.
 - **RN-10 Revisión del técnico.** Antes de iniciar, el técnico confirma la captura, propone una
   recaptura o marca un duplicado.
 - **RN-11 Recaptura.** Modifica el **mismo** tiquet; no se crea otro. Se conservan los valores
-  originales y cada versión (campos antes y después, quién, cuándo, motivo del catálogo). Si la
-  propone el técnico: estado `pending_recapture` y la deben aceptar el supervisor y el solicitante
-  (política configurable), con alertas a ambos. Aceptada: se aplican los cambios; si el técnico ya no
+  originales y cada versión (campos antes y después, quién, cuándo, motivo del catálogo). La
+  recaptura se **aplica sin aprobación**, tanto si la hace el técnico como el supervisor (incluida la
+  que hace al revisar una reclamación); se alerta al solicitante y al supervisor. Si el técnico ya no
   corresponde (la nueva categoría no es de su área y no es auxiliar) vuelve al supervisor
   (`with_supervisor`, o `registered` hacia otro equipo si cambió el equipo o el edificio); si
-  corresponde, vuelve a `assigned`. Rechazada: se conserva lo original, vuelve a `assigned` y el
-  supervisor decide cómo seguir. Si la hace un supervisor (incluida la que hace al revisar una
-  reclamación): se registra y se notifica al solicitante, sin aprobación. Es la forma de medir la
-  calidad de la captura (quién se equivoca y en qué).
+  corresponde, vuelve a `assigned`. Quien no esté de acuerdo abre una reclamación (RN-16). Es la forma
+  de medir la calidad de la captura (quién se equivoca y en qué).
 - **RN-12 Inicio.** Solo con evidencia `before` del ciclo de atención actual (tomada cuando el técnico
   llega). Pasa a `in_progress`.
 - **RN-13 Pausa.** La inician técnico, supervisor o administrador. Se elige un **motivo** (nodo raíz del
@@ -334,7 +332,7 @@ Tramos que deben poder distinguirse:
 | Respuesta del supervisor | Registro → tomado |
 | Reasignación | Tiempo con un supervisor equivocado hasta que reasigna (**aparte**) |
 | Asignación de técnico | Tomado → técnico asignado |
-| Recaptura | Propuesta → resuelta |
+| Recaptura | Cambio propuesto → aplicado |
 | Espera de inicio | Técnico asignado → en proceso |
 | Trabajo activo | En proceso, sin contar pausas |
 | Pausa | Por motivo y subestado |
