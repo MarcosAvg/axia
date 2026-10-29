@@ -12,29 +12,23 @@ Guía para desplegar, actualizar y respaldar una instalación de Axia. La instal
 | `app` | API Fastify y SPA; volumen de evidencias |
 
 Axia no incluye reverse proxy: el TLS y el enrutamiento de borde son infraestructura de destino. La
-base no se publica nunca. El servicio `app` escucha en `3100` y ya sirve el SPA, su fallback y las
-cabeceras de caché; el proxy solo tiene que reenviar todo a `app`, sin servir estáticos por su
-cuenta. Si publicas en loopback, apunta a `127.0.0.1:3100`, no a `localhost`, que puede resolverse
-a IPv6.
+base no se publica nunca. El servicio `app` publica `127.0.0.1:${APP_PORT:-3100}` para que un proxy
+del host lo alcance; no se publica en todas las interfaces. Si el proxy es otro contenedor, puede
+usar `app:3100` en la red de Compose. `app` ya sirve el SPA, su fallback y las cabeceras de caché; el
+proxy solo tiene que reenviar todo a `app`, sin servir estáticos por su cuenta.
 
 ## Puesta en marcha en producción
 
 ```bash
 cp .env.example .env
-# Generar secretos y ajustar valores. No usar los valores de ejemplo.
+# Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD. No usar valores de ejemplo.
 chmod 600 .env
-
-# Solo si el proxy corre en el mismo host: publica app en 127.0.0.1.
-export COMPOSE_FILE=compose.yaml:compose.publish.yaml
-
-docker compose build
-docker compose up -d db
-docker compose run --rm migrate
-docker compose up -d app
+docker compose up -d
 ```
 
-Si el proxy es otro contenedor, no exportes `compose.publish.yaml`: únelo a la red de Compose y
-apunta a `app:3100`.
+Compose descarga las imágenes de GHCR, arranca `db`, ejecuta `migrate` y arranca `app` cuando la
+migración termina. No hay que construir imágenes en el servidor. `AXIA_VERSION` permite fijar una
+imagen; por defecto usa `latest`. Las imágenes de GHCR son públicas y no requieren autenticación.
 
 Comprobaciones:
 
@@ -42,7 +36,6 @@ Comprobaciones:
 docker compose ps
 docker compose logs --tail=100 app
 docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1))"
-# Solo con compose.publish.yaml:
 curl -fsS http://127.0.0.1:3100/api/health/ready
 ```
 
@@ -74,15 +67,18 @@ El proxy debe cumplir este contrato:
 ## Actualización
 
 ```bash
-git pull
-# Repite el export si el proxy está en el host:
-export COMPOSE_FILE=compose.yaml:compose.publish.yaml
-docker compose build
-docker compose run --rm migrate
-docker compose up -d app
+docker compose pull
+docker compose up -d
 ```
 
-La compuerta de calidad se ejecuta antes de desplegar:
+Compose recrea `migrate` si cambió la imagen y aplica las migraciones antes de arrancar `app`. Para
+ver el resultado:
+
+```bash
+docker compose logs migrate
+```
+
+Antes de publicar una nueva imagen, la compuerta de calidad se ejecuta en el repositorio:
 
 ```bash
 pnpm check
@@ -106,8 +102,9 @@ El script detecta el contenedor `db` del Compose del repositorio. También acept
 BACKUP_DIR=/var/backups/axia ./deploy/scripts/backup-evidence.sh
 ```
 
-Respalda el volumen de fotos y miniaturas. Debe ejecutarse junto con el respaldo de la base:
-restaurar solo uno deja registros sin archivos o archivos sin registros.
+Respalda el volumen de fotos y miniaturas. Usa la imagen del contenedor `app`; también acepta
+`AXIA_APP_IMAGE`. Debe ejecutarse junto con el respaldo de la base: restaurar solo uno deja registros
+sin archivos o archivos sin registros.
 
 ### Restauración
 

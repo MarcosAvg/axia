@@ -68,7 +68,7 @@ docker info >/dev/null 2>&1 || fail "Docker no responde; revisa el servicio o el
 
 info "Generando secretos en $ENV_FILE…"
 umask 077
-cp "$ROOT_DIR/.env.example" "$ENV_FILE"
+cp "$ROOT_DIR/.env.dev.example" "$ENV_FILE"
 owner_password="$(openssl rand -hex 32)"
 app_password="$(openssl rand -hex 32)"
 sed -i \

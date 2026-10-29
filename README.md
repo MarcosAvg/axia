@@ -129,8 +129,9 @@ axia/
 La instalación está en
 [`docs/start/instalacion.md`](docs/start/instalacion.md) y la operación en
 [`docs/guides/operacion.md`](docs/guides/operacion.md). El despliegue en un servidor real lo ejecuta
-la persona. El stack no incluye reverse proxy: `compose.publish.yaml` publica `app` solo en loopback
-para el proxy del host.
+la persona. En producción, `docker compose up -d` descarga las imágenes de GHCR, aplica migraciones
+y arranca la app; no se construye nada en el servidor. El stack no incluye reverse proxy: `app` se
+publica solo en `127.0.0.1:3100` para el proxy del host.
 
 ## Contribución
 

@@ -23,9 +23,10 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
   designaciones y métricas.
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
-- **Despliegue con Compose:** sin reverse proxy por defecto; `compose.publish.yaml` publica `app`
-  solo en loopback para el proxy del host. El contrato de proxy, la rotación de logs y el hardening
-  de `app` están documentados, y CI valida Compose y construye la imagen.
+- **Despliegue con Compose:** `compose.yaml` descarga las imágenes de GHCR, publica `app` solo en
+  loopback y ejecuta `migrate` antes de arrancar. El `.env` de producción es mínimo; el desarrollo
+  usa `compose.dev.yaml` y `.env.dev.example`. El contrato de proxy, la rotación de logs y el
+  hardening de `app` están documentados, y CI valida Compose y construye la imagen.
 - **UI:** escritorio y móvil por rol, navegación inferior, temas y regresión visual.
 - **Calidad:** Vitest contra PostgreSQL real, Playwright, fronteras de dependencias, knip y
   verificación de enlaces.
@@ -49,9 +50,9 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
 
 ## Pendientes operativos
 
-- Construir y arrancar la imagen Docker completa en un host limpio.
-- Configurar dominio, TLS y el reverse proxy elegido; si corre en el host, exportar
-  `COMPOSE_FILE=compose.yaml:compose.publish.yaml` y activar `TRUST_PROXY=true`.
+- Descargar y arrancar las imágenes de GHCR en un host limpio.
+- Configurar dominio, TLS y el reverse proxy elegido; apuntarlo a `127.0.0.1:3100` y activar
+  `TRUST_PROXY=true`.
 - Programar respaldos de base y evidencias, con prueba de restauración trimestral.
 - Programar `deploy/scripts/cleanup.sh` junto con los respaldos (cron de ejemplo en
   `docs/guides/operacion.md`).

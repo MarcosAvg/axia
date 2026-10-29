@@ -5,15 +5,23 @@
 set -euo pipefail
 
 BACKUP_FILE="${1:?Uso: restore-evidence.sh <archivo.tgz>}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VOLUME="${EVIDENCE_VOLUME:-axia_axia_evidence}"
-IMAGE="${AXIA_APP_IMAGE:-axia-app:local}"
+IMAGE="${AXIA_APP_IMAGE:-}"
+if [[ -z "$IMAGE" ]]; then
+  app_container="$(cd "$ROOT_DIR" && docker compose ps -aq app 2>/dev/null | head -n1 || true)"
+  if [[ -n "$app_container" ]]; then
+    IMAGE="$(docker inspect --format '{{.Config.Image}}' "$app_container")"
+  fi
+fi
+IMAGE="${IMAGE:-ghcr.io/marcosavg/axia/axia-app:latest}"
 
 if [[ ! -f "$BACKUP_FILE" ]]; then
   echo "No existe el archivo: $BACKUP_FILE" >&2
   exit 1
 fi
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
-  echo "No existe la imagen $IMAGE; constrúyela con: docker compose build app" >&2
+  echo "No existe la imagen $IMAGE; ejecuta docker compose pull o define AXIA_APP_IMAGE." >&2
   exit 1
 fi
 

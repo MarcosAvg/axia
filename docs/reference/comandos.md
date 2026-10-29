@@ -56,8 +56,9 @@ compuerta completa se reserva para el cierre y para CI.
 | `./scripts/install.sh` | Instala y levanta el stack local |
 | `./scripts/install.sh --demo` | Instala y carga la semilla demo |
 | `./scripts/install.sh --dry-run` | Muestra los pasos sin escribir archivos |
-| `deploy/scripts/up.sh` | Levanta `db`, migra y arranca `app`; respeta `COMPOSE_FILE` |
-| `docker compose run --rm migrate` | Aplica migraciones |
+| `docker compose up -d` | Descarga imágenes, migra y arranca la app |
+| `deploy/scripts/up.sh` | Descarga imágenes, levanta `db`, migra y arranca `app` |
+| `docker compose run --rm migrate` | Aplica migraciones manualmente |
 | `deploy/scripts/backup.sh` | Respalda la base |
 | `deploy/scripts/backup-evidence.sh` | Respalda el volumen de evidencias |
 | `deploy/scripts/restore.sh` | Restaura la base |

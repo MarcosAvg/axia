@@ -21,8 +21,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Indicadores de tiempos, SLA, duplicados, satisfacción, carga por técnico y ruteo.
 - Semilla de referencia en migraciones y semilla demo explícita, idempotente y sin contraseña fija.
 - Instalación con secretos generados, Compose `db`/`migrate`/`app`, respaldos de base y evidencias.
-- Overlay opcional `compose.publish.yaml` para publicar `app` en loopback y conectar un reverse proxy
-  del host, sin incluirlo en el repositorio.
+- Compose de producción con imágenes de GHCR, `.env` mínimo y publicación de `app` solo en loopback
+  para conectar un reverse proxy del host, sin incluirlo en el repositorio.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido
@@ -72,8 +72,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   carga cuando hay sesión. La pantalla de acceso ya no descarga el feature completo de tiquets.
 - `pnpm dev:api` y el servidor E2E guardan evidencias en el repositorio, no en `/data/evidence`, que
   solo existe dentro del contenedor. Esto corrige el error de instalación en el login local.
-- Compose: rotación de logs, cierre ordenado de PostgreSQL y hardening de `app`
-  (`no-new-privileges`, sin capacidades). CI valida las capas de Compose y construye la imagen.
+- Compose: producción descarga las imágenes de GHCR, publica `app` solo en loopback y ejecuta
+  `migrate` antes de arrancar. El `.env` de producción es mínimo, el desarrollo usa
+  `.env.dev.example` y `compose.dev.yaml`, y CI valida Compose y construye la imagen. Se mantienen
+  rotación de logs, cierre ordenado de PostgreSQL y hardening de `app`.
 
 ### Retirado
 

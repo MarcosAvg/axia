@@ -228,7 +228,7 @@ estas reglas requiere un comentario con la razón y se evita.
 - Entradas siempre validadas; salidas de texto libre siempre escapadas (React lo hace; no se
   usa `dangerouslySetInnerHTML`).
 - Variables de entorno: solo `VITE_*` públicas en el cliente; lo secreto nunca llega al
-  cliente. `.env.example` se mantiene al día.
+  cliente. `.env.example` y `.env.dev.example` se mantienen al día.
 - Archivos de evidencia en almacenamiento privado con URL firmadas y límites de tipo y tamaño.
 
 ## 13. Pruebas
@@ -292,7 +292,7 @@ rules: {
 - [ ] Si hubo migración: `pnpm db:reset` limpio y `pnpm db:test` en verde.
 - [ ] Documentación actualizada en el mismo commit (incluido `docs/concepts/dominio.md` si cambió el negocio).
 - [ ] Sin `console.log`, sin código comentado, sin `TODO` sin registrar en `docs/internal/estado.md`.
-- [ ] Sin secretos, `.env.example` al día.
+- [ ] Sin secretos, `.env.example` y `.env.dev.example` al día.
 - [ ] El núcleo no depende de ninguna plataforma externa.
 - [ ] `docs/internal/estado.md` actualizado y, si aplica, un ADR creado.
 

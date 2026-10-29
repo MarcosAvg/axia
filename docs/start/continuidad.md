@@ -13,8 +13,8 @@ pnpm install
 Si cambió el esquema, reconstruir la base local o ejecutar las migraciones:
 
 ```bash
-pnpm db:reset          # base local
-docker compose run --rm migrate   # instalación con Compose
+pnpm db:reset                     # base local
+docker compose pull && docker compose up -d   # instalación con Compose
 ```
 
 ## Retomar una tarea

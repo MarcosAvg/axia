@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Levanta db/migrate/app con el Compose del repositorio.
-# Respeta COMPOSE_FILE; para un proxy del host:
-#   COMPOSE_FILE=compose.yaml:compose.publish.yaml ./deploy/scripts/up.sh
+# Descarga las imágenes, levanta db, aplica migraciones y arranca app.
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
-[[ -f .env ]] || { echo 'Falta .env; ejecuta scripts/install.sh o créalo desde .env.example.' >&2; exit 1; }
+[[ -f .env ]] || { echo 'Falta .env; créalo desde .env.example.' >&2; exit 1; }
+docker compose pull
 docker compose up -d db
 docker compose run --rm migrate
 docker compose up -d app

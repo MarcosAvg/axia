@@ -3,9 +3,19 @@ services:
     ports:
       - '127.0.0.1:${DB_PORT:-5433}:5432'
 
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+      target: migrate
+    image: axia-migrate:local
+
   app:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+      target: app
+    image: axia-app:local
     environment:
       NODE_ENV: development
       LOG_LEVEL: ${LOG_LEVEL:-debug}
-    ports:
-      - '127.0.0.1:${APP_PORT:-3100}:3100'

@@ -14,14 +14,14 @@ con el proxy que la institución ya tenga (Traefik, nginx, Apache, un balanceado
 ## Decisión
 
 - **No** se incluye ningún reverse proxy y no se versionan configuraciones de proxy.
-- `compose.yaml` define `db`, `migrate` y `app`; `app` no publica puertos por defecto.
-- `compose.publish.yaml` es un overlay **opcional** que publica `app` solo en `127.0.0.1` para un
-  proxy del host. No añade servicios ni TLS.
+- `compose.yaml` es el compose de producción: usa las imágenes de GHCR y publica `app` solo en
+  `127.0.0.1:${APP_PORT:-3100}` para un proxy del host. No añade servicios ni TLS.
+- `compose.dev.yaml` construye las imágenes localmente para desarrollo.
 - Si el proxy es otro contenedor, se conecta a la red de Compose y usa `app:3100`.
 - El **contrato de despliegue** (cabeceras, `TRUST_PROXY`, TUS, SSE, caché y TLS) vive en
   `deploy/README.md` y `docs/guides/operacion.md`.
-- El stack se levanta con `deploy/scripts/up.sh`; el script respeta `COMPOSE_FILE` para incluir el
-  overlay cuando corresponda.
+- El stack se levanta con `docker compose up -d` o `deploy/scripts/up.sh`; no hay overlay de
+  publicación.
 
 ## Alternativas consideradas
 
@@ -36,4 +36,5 @@ con el proxy que la institución ya tenga (Traefik, nginx, Apache, un balanceado
 - El despliegue se adapta a la infraestructura existente; Axia no opina sobre el proxy.
 - Quien despliega configura TLS, cabeceras y límites según su host.
 - Revisión de la 0032: su mención a Caddy queda superada por esta decisión.
-- Revisión de la 0075: el stack actual sirve el SPA desde `app` y ofrece el overlay de publicación.
+- Revisión de la 0075: el stack actual sirve el SPA desde `app` y publica imágenes en GHCR para
+  desplegar sin construir en el servidor.

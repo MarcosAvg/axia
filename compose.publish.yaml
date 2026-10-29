@@ -1,7 +1,0 @@
-# Opcional: publica `app` solo en loopback para un reverse proxy del host.
-# No incluye proxy ni TLS; esa configuración es de quien despliega.
-# Uso: export COMPOSE_FILE=compose.yaml:compose.publish.yaml
-services:
-  app:
-    ports:
-      - '127.0.0.1:${APP_PORT:-3100}:3100'

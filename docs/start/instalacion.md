@@ -44,7 +44,8 @@ Para desarrollo sin el contenedor `app`, ejecutar `pnpm dev:api` en otra termina
 con `pnpm dev`.
 
 La opción `--dry-run` muestra los pasos sin escribir archivos ni tocar contenedores. Las variables
-`APP_PORT` y `DB_PORT` permiten cambiar los puertos locales.
+`APP_PORT` y `DB_PORT` permiten cambiar los puertos locales. El instalador usa la plantilla de
+desarrollo `.env.dev.example`; la de producción es `.env.example`.
 
 ## Primer administrador
 
@@ -62,35 +63,30 @@ curl -sS -X POST http://127.0.0.1:3100/api/setup \
 La contraseña debe tener al menos 12 caracteres. El primer arranque es de una sola vez; después se
 usan `/api/auth/login` y la administración de usuarios.
 
-## Instalación manual
+## Instalación en producción
 
 ```bash
 cp .env.example .env
-# Editar .env: reemplazar CHANGE_ME y las URLs de MIGRATION_DATABASE_URL/DATABASE_URL.
-# Generar secretos: openssl rand -hex 32
+# Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD.
+# Generar cada uno: openssl rand -hex 32
 chmod 600 .env
-
-# Solo si el proxy corre en el mismo host:
-export COMPOSE_FILE=compose.yaml:compose.publish.yaml
-
-docker compose build
-docker compose up -d db
-docker compose run --rm migrate
-docker compose up -d app
+docker compose up -d
 ```
 
-En producción no se usa `compose.dev.yaml`: ese archivo solo publica puertos en `127.0.0.1` para
-desarrollo. Axia no incluye reverse proxy. Si el proxy corre en el host, `compose.publish.yaml`
-publica `app` solo en `127.0.0.1:3100`; si es otro contenedor, únelo a la red de Compose y apunta a
-`app:3100` sin publicar puertos. El contrato completo está en
+`compose.yaml` descarga las imágenes de GHCR, arranca `db`, ejecuta `migrate` y arranca `app` cuando
+la migración termina. No hay que construir imágenes en el servidor ni usar `compose.dev.yaml`.
+
+`app` publica solo `127.0.0.1:${APP_PORT:-3100}`. El reverse proxy apunta ahí; si es otro contenedor,
+usa `app:3100` en la red de Compose. El contrato completo está en
 [`../guides/operacion.md`](../guides/operacion.md#reverse-proxy).
 
 `TRUST_PROXY=true` es obligatorio cuando el proxy termina TLS y reenvía `X-Forwarded-*`: sin él, el
 guard de origen rechaza las peticiones `POST`/`PATCH`. Actívalo solo si la única vía a `app` es el
 proxy de confianza.
 
-La API tarda en arrancar hasta que `migrate` termina; `depends_on` lo garantiza. Si cambia una
-migración o una variable, se reconstruye la imagen y se vuelve a ejecutar `migrate`.
+Las imágenes de GHCR son públicas y no requieren autenticación. En actualizaciones,
+`docker compose pull` descarga la nueva imagen y `docker compose up -d` vuelve a ejecutar `migrate`
+antes de arrancar `app`.
 
 ## Semilla de demostración
 
@@ -115,14 +111,15 @@ reiniciar la API o el contenedor no la cambia. Los usuarios son `demo.admin`, `d
 
 | Variable | Uso |
 |---|---|
-| `POSTGRES_OWNER_PASSWORD` | Rol dueño de la base; solo migraciones |
-| `AXIA_APP_PASSWORD` | Rol de aplicación, sin DDL |
-| `MIGRATION_DATABASE_URL` | Conexión del runner de migraciones |
-| `DATABASE_URL` | Conexión del servidor |
-| `PORT` / `APP_PORT` | Puerto de la API |
-| `DB_PORT` | Puerto local de PostgreSQL |
-| `TRUST_PROXY` | Solo detrás de un proxy de confianza |
-| `STORAGE_DIR` | Volumen de evidencias |
+| `POSTGRES_OWNER_PASSWORD` | Rol dueño de la base; solo migraciones. Obligatoria |
+| `AXIA_APP_PASSWORD` | Rol de aplicación, sin DDL. Obligatoria |
+| `TRUST_PROXY` | `true` detrás de un proxy TLS |
+| `APP_PORT` | Puerto de loopback que publica `app` |
+| `AXIA_VERSION` | Imagen de GHCR; `latest` o un SHA |
+| `LOG_LEVEL` | Nivel de registro; opcional |
+| `MIGRATION_DATABASE_URL` | Solo scripts del host |
+| `DATABASE_URL` | Solo scripts del host |
+| `DB_PORT` | Solo desarrollo local |
 | `AXIA_DEMO_PASSWORD` | Opcional, solo semilla demo local |
 
 Los secretos reales no se versionan. `.env` debe quedar con permisos `0600`.
