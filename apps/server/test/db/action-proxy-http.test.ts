@@ -50,6 +50,17 @@ async function createTicketAt(occurredAt: string): Promise<string> {
   return (response.json() as { ticket: { id: string } }).ticket.id
 }
 
+type TimelineItem = { id: number; type: string; occurredAt: string }
+
+async function timeline(ticketId: string): Promise<TimelineItem[]> {
+  const response = await call(
+    'GET',
+    `/api/tickets/${ticketId}/timeline`,
+    context.cookies.admin,
+  )
+  return (response.json() as { items: TimelineItem[] }).items
+}
+
 async function technicianByName(fullName: string): Promise<string> {
   const technician = await context.db.execute(sql`
     select id from public.technicians
@@ -168,6 +179,69 @@ it('allows a supervisor to act for a technician of their team', async () => {
     }
   ).items.findLast((item) => item.type === 'capture_recaptured')
   expect(event?.subjectTechnicianName).toBe('Técnico A')
+})
+
+it('keeps a correction between its neighbours and lets the creation move earlier', async () => {
+  const ticketId = await createTicketAt(minutesAgo(60))
+  const subjectTechnicianId = await technicianByName('Técnico A')
+  for (const [description, occurredAt] of [
+    ['Primera recaptura', minutesAgo(40)],
+    ['Segunda recaptura', minutesAgo(20)],
+  ] as const) {
+    const response = await call(
+      'POST',
+      `/api/tickets/${ticketId}/actions`,
+      context.cookies.admin,
+      {
+        action: 'recapture',
+        changes: { description },
+        subjectTechnicianId,
+        occurredAt,
+        clientRequestId: crypto.randomUUID(),
+      },
+    )
+    expect(response.statusCode).toBe(200)
+  }
+
+  const history = await timeline(ticketId)
+  const created = history[0]
+  const firstRecapture = history.find(
+    (item) => item.type === 'capture_recaptured',
+  )
+
+  const crossed = await call(
+    'PATCH',
+    `/api/tickets/${ticketId}/events/${firstRecapture?.id}/time`,
+    context.cookies.admin,
+    { occurredAt: minutesAgo(10) },
+  )
+  expect(crossed.statusCode).toBe(409)
+
+  const afterNext = await call(
+    'PATCH',
+    `/api/tickets/${ticketId}/events/${created?.id}/time`,
+    context.cookies.admin,
+    { occurredAt: minutesAgo(30) },
+  )
+  expect(afterNext.statusCode).toBe(409)
+
+  const earlier = minutesAgo(90)
+  const moved = await call(
+    'PATCH',
+    `/api/tickets/${ticketId}/events/${created?.id}/time`,
+    context.cookies.admin,
+    { occurredAt: earlier },
+  )
+  expect(moved.statusCode).toBe(204)
+  const detail = await call(
+    'GET',
+    `/api/tickets/${ticketId}`,
+    context.cookies.admin,
+  )
+  expect(
+    (detail.json() as { ticket: { reportedAt: string } }).ticket.reportedAt,
+  ).toBe(earlier)
+  expect((await timeline(ticketId))[0]?.occurredAt).toBe(earlier)
 })
 
 it('rejects a sync manual time without a proxy subject', async () => {

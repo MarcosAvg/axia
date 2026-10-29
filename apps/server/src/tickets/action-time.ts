@@ -181,10 +181,11 @@ async function assertNeighbourTime(
   event: EventRow,
   proposed: Date,
 ): Promise<void> {
+  const current = new Date(event.occurred_at)
   const result = await tx.execute(sql`
     select
-      max(occurred_at) filter (where occurred_at < ${proposed.toISOString()}::timestamptz) as previous,
-      min(occurred_at) filter (where occurred_at > ${proposed.toISOString()}::timestamptz) as next
+      max(occurred_at) filter (where occurred_at < ${current}::timestamptz) as previous,
+      min(occurred_at) filter (where occurred_at > ${current}::timestamptz) as next
     from public.ticket_events
     where ticket_id = ${ticketId}
       and cycle = ${event.cycle}
@@ -257,7 +258,8 @@ async function adjustInTransaction(
   const ticket = await ticketClock(tx, input.ticketId, true)
   const event = await eventRow(tx, input.ticketId, input.eventId)
   const proposed = parseActionTime(input.occurredAt)
-  if (proposed < new Date(ticket.reported_at)) {
+  // El alta define el límite inferior; corregirla mueve ese límite.
+  if (event.type !== 'created' && proposed < new Date(ticket.reported_at)) {
     throw new AppError(
       400,
       'validation',
