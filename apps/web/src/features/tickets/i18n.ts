@@ -57,6 +57,7 @@ export const ticketMessages = {
       building: 'Edificio',
       category: 'Categoría',
       all: 'Todos',
+      more: 'Filtros',
       clear: 'Limpiar filtros',
       remove: 'Quitar',
     },

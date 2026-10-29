@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { SlidersHorizontalIcon } from 'lucide-react'
 import { FilterChips } from '@/components/shared/filter-chips'
 import type { FilterChip } from '@/components/shared/filter-chips'
 import { SelectField, TextField } from '@/components/shared/form-fields'
@@ -97,42 +99,18 @@ interface FilterFieldsProps {
   onApply: (patch: Partial<TicketListSearch>) => void
 }
 
-function FilterFields({
-  value,
-  buildings,
-  categories,
-  onApply,
-}: FilterFieldsProps) {
-  const selects = buildFilterSelects(value, buildings, categories)
+function AdvancedFilterFields({
+  selects,
+  open,
+}: {
+  selects: FilterSelect[]
+  open: boolean
+}) {
   return (
-    <form
-      className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
-      onSubmit={(event) => {
-        event.preventDefault()
-        const data = new FormData(event.currentTarget)
-        const raw = String(data.get('search') ?? '').trim()
-        const status = ticketStatusSchema.safeParse(data.get('filter-status'))
-        const buildingId = String(data.get('filter-building') ?? '')
-        const categoryId = String(data.get('filter-category') ?? '')
-        onApply({
-          search: raw || undefined,
-          status: status.success ? status.data : undefined,
-          buildingId: buildingId || undefined,
-          categoryId: categoryId || undefined,
-        })
-      }}
+    <div
+      id="ticket-advanced-filters"
+      className={open ? 'contents' : 'hidden lg:contents'}
     >
-      <div className="w-full sm:min-w-56 sm:flex-1">
-        <TextField
-          key={value.search ?? ''}
-          id="filter-search"
-          name="search"
-          type="search"
-          label={list.filters.search}
-          placeholder={list.filters.searchPlaceholder}
-          defaultValue={value.search ?? ''}
-        />
-      </div>
       {selects.map((select) => (
         <div key={`${select.id}:${select.value}`} className="w-full sm:w-44">
           <SelectField
@@ -145,6 +123,65 @@ function FilterFields({
           />
         </div>
       ))}
+    </div>
+  )
+}
+
+function readFilterValues(form: FormData): Partial<TicketListSearch> {
+  const raw = String(form.get('search') ?? '').trim()
+  const status = ticketStatusSchema.safeParse(form.get('filter-status'))
+  const buildingId = String(form.get('filter-building') ?? '')
+  const categoryId = String(form.get('filter-category') ?? '')
+  return {
+    search: raw || undefined,
+    status: status.success ? status.data : undefined,
+    buildingId: buildingId || undefined,
+    categoryId: categoryId || undefined,
+  }
+}
+
+function FilterFields({
+  value,
+  buildings,
+  categories,
+  onApply,
+}: FilterFieldsProps) {
+  const [showFilters, setShowFilters] = useState(false)
+  const selects = buildFilterSelects(value, buildings, categories)
+  return (
+    <form
+      className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
+      onSubmit={(event) => {
+        event.preventDefault()
+        onApply(readFilterValues(new FormData(event.currentTarget)))
+        setShowFilters(false)
+      }}
+    >
+      <div className="flex w-full items-end gap-2 lg:w-auto lg:flex-1">
+        <div className="min-w-0 flex-1 lg:min-w-56">
+          <TextField
+            key={value.search ?? ''}
+            id="filter-search"
+            name="search"
+            type="search"
+            label={list.filters.search}
+            placeholder={list.filters.searchPlaceholder}
+            defaultValue={value.search ?? ''}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 lg:hidden"
+          aria-expanded={showFilters}
+          aria-controls="ticket-advanced-filters"
+          onClick={() => setShowFilters((open) => !open)}
+        >
+          <SlidersHorizontalIcon />
+          {list.filters.more}
+        </Button>
+      </div>
+      <AdvancedFilterFields selects={selects} open={showFilters} />
       <Button
         type="submit"
         variant="secondary"

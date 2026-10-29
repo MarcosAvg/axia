@@ -1,27 +1,9 @@
-import { AggregationToggle } from '@/components/shared/aggregation-toggle'
 import { HintLabel } from '@/components/shared/hint'
-import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { messages } from '@/lib/i18n'
-import {
-  aggregationHint,
-  aggregationLabel,
-  timeValue,
-} from '@/lib/time-aggregation'
-import type { TimeAggregation } from '@/lib/time-aggregation'
 import { can, canAny } from '@/features/auth'
 import type { Identity } from '@/features/auth'
-import {
-  formatMinutes,
-  formatPercent,
-  formatRate,
-  formatScore,
-} from '@/features/metrics'
-import type {
-  MetricsSummary,
-  SatisfactionSummary,
-  SlaSummary,
-} from '@/features/metrics'
+import { formatRate, formatScore } from '@/features/metrics'
+import type { SatisfactionSummary, SlaSummary } from '@/features/metrics'
 import type { WorkSummary } from '../domain/summary'
 import { dashboardMessages as t } from '../i18n'
 
@@ -37,15 +19,12 @@ interface Kpi {
   label: string
   value: string
   hint?: string
-  /** Indicador de tiempo: cambia entre promedio y acumulado. */
-  temporal?: boolean
 }
 
 interface KpiInput {
   work: WorkSummary
   offers: number
   totals: DashboardTotals
-  summary: MetricsSummary
   sla: SlaSummary
   satisfaction: SatisfactionSummary
 }
@@ -76,11 +55,7 @@ function adminKpis(
   ]
 }
 
-function technicianKpis(
-  work: WorkSummary,
-  summary: MetricsSummary,
-  aggregation: TimeAggregation,
-): Kpi[] {
+function technicianKpis(work: WorkSummary): Kpi[] {
   return [
     { label: k.myWork, value: String(work.total), hint: hints.myWork },
     {
@@ -93,19 +68,6 @@ function technicianKpis(
       label: k.toValidate,
       value: String(work.attended),
       hint: hints.toValidate,
-    },
-    {
-      label: aggregationLabel(k.activeTime, aggregation),
-      value: formatMinutes(
-        timeValue(aggregation, summary.avgActive, summary.sumActive),
-      ),
-      hint: aggregationHint(hints.activeTime, aggregation),
-      temporal: true,
-    },
-    {
-      label: k.firstFix,
-      value: formatPercent(summary.firstTimeFixRate),
-      hint: hints.firstFix,
     },
   ]
 }
@@ -145,12 +107,8 @@ function requesterKpis(totals: DashboardTotals): Kpi[] {
   ]
 }
 
-function buildKpis(
-  identity: Identity | null,
-  input: KpiInput,
-  aggregation: TimeAggregation,
-): Kpi[] {
-  const { work, offers, totals, summary, sla, satisfaction } = input
+function buildKpis(identity: Identity | null, input: KpiInput): Kpi[] {
+  const { work, offers, totals, sla, satisfaction } = input
   const isAdmin = canAny(identity, [
     'catalog.manage',
     'user.manage',
@@ -164,7 +122,7 @@ function buildKpis(
     can(identity, 'ticket.start') || can(identity, 'ticket.attend')
 
   if (isAdmin) return adminKpis(totals, sla, satisfaction)
-  if (isTechnician) return technicianKpis(work, summary, aggregation)
+  if (isTechnician) return technicianKpis(work)
   if (isSupervisor) return supervisorKpis(offers, totals, sla)
   return requesterKpis(totals)
 }
@@ -174,34 +132,22 @@ export function DashboardKpis({
   identity,
   ...input
 }: KpiInput & { identity: Identity | null }) {
-  const { aggregation } = useTimeAggregation()
-  const kpis = buildKpis(identity, input, aggregation)
-  const showToggle = kpis.some((kpi) => kpi.temporal)
+  const kpis = buildKpis(identity, input)
 
   return (
-    <div className="flex flex-col gap-3">
-      {showToggle ? (
-        <div className="flex items-center justify-end gap-2">
-          <span className="text-sm text-muted-foreground">
-            {messages.aggregation.label}
-          </span>
-          <AggregationToggle />
-        </div>
-      ) : null}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-        {kpis.map((kpi) => (
-          <Card key={kpi.label}>
-            <CardHeader className="min-h-16">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                <HintLabel label={kpi.label} hint={kpi.hint} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold tabular-nums">{kpi.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+      {kpis.map((kpi) => (
+        <Card key={kpi.label}>
+          <CardHeader className="min-h-16">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              <HintLabel label={kpi.label} hint={kpi.hint} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold tabular-nums">{kpi.value}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }

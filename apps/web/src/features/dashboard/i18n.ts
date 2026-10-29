@@ -7,6 +7,7 @@ export const dashboardMessages = {
   retry: 'Reintentar',
   actions: {
     newTicket: 'Nuevo tiquet',
+    myWork: 'Mi trabajo',
     tickets: 'Ver tiquets',
     metrics: 'Métricas',
     admin: 'Administración',
@@ -20,8 +21,6 @@ export const dashboardMessages = {
     toValidate: 'Por validar',
     unassigned: 'Sin asignar',
     closed: 'Cerrados',
-    activeTime: 'Trabajo activo',
-    firstFix: 'Primera resolución',
     sla: 'Cumplimiento de SLA',
     satisfaction: 'Satisfacción',
   },
@@ -38,9 +37,6 @@ export const dashboardMessages = {
     toValidate: 'Tiquets atendidos que esperan validación para cerrarse.',
     unassigned: 'Tiquets registrados que aún no tienen técnico asignado.',
     closed: 'Tiquets cerrados en el periodo consultado.',
-    activeTime:
-      'Trabajo activo por tiquet: del inicio a la atención, sin pausas.',
-    firstFix: 'Porcentaje de tiquets cerrados sin reapertura posterior.',
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     satisfaction:
       'Promedio de las calificaciones del solicitante (escala 1 a 5).',

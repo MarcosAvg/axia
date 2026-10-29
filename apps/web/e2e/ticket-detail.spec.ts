@@ -4,9 +4,9 @@ import type { Page } from '@playwright/test'
 const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const TICKET_ID = 'de000000-0000-4000-8000-000000000004'
 
-async function signIn(page: Page) {
+async function signIn(page: Page, username = 'demo.admin') {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill('demo.admin')
+  await page.getByLabel('Usuario').fill(username)
   await page.getByLabel('Contraseña').fill(PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
@@ -63,4 +63,23 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   await expect(dialog.getByRole('img')).toHaveClass(/object-contain/)
   await page.keyboard.press('Escape')
   await expect(dialog).toHaveCount(0)
+})
+
+test('el técnico ve sus acciones antes que la gráfica de tiempos en móvil', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 900 })
+  await signIn(page, 'demo.technician')
+  await openTicket(page)
+
+  await expect(
+    page.getByRole('heading', { name: 'Tiempo por fase' }),
+  ).toBeHidden()
+  const headings = await page.locator('main h2:visible').allInnerTexts()
+  expect(headings[0]).toBe('Acciones')
+
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await expect(
+    page.getByRole('heading', { name: 'Tiempo por fase' }),
+  ).toBeVisible()
 })

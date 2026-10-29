@@ -62,4 +62,17 @@ describe('isNavItemVisible', () => {
     expect(isNavItemVisible(users, onlyRoles)).toBe(false)
     expect(isNavItemVisible(scopes, onlyRoles)).toBe(false)
   })
+
+  it('agrupa administración en móvil y conserva los destinos en escritorio', () => {
+    const admin = identity([
+      'catalog.manage',
+      'user.manage',
+      'role.manage',
+      'assignment.manage',
+    ])
+    expect(isNavItemVisible(item('admin'), admin)).toBe(false)
+    expect(isNavItemVisible(item('admin'), admin, true)).toBe(true)
+    expect(isNavItemVisible(item('roles'), admin, true)).toBe(false)
+    expect(isNavItemVisible(item('roles'), admin)).toBe(true)
+  })
 })

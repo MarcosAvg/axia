@@ -17,6 +17,7 @@ export const shellMessages = {
     inbox: 'Bandeja',
     notifications: 'Avisos',
     metrics: 'Métricas',
+    adminHome: 'Panel de administración',
     catalogs: 'Catálogos',
     roles: 'Roles',
     users: 'Usuarios',

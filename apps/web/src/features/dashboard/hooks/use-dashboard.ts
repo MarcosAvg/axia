@@ -3,13 +3,11 @@ import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import {
   EMPTY_FILTERS,
-  EMPTY_SUMMARY,
   useMetricsSummary,
   useSla,
   useSatisfaction,
 } from '@/features/metrics'
 import type {
-  MetricsSummary,
   SatisfactionSummary,
   SlaSummary,
   VolumePoint,
@@ -77,7 +75,6 @@ export interface DashboardData {
     closed: number
   }
   volume: VolumePoint[]
-  summary: MetricsSummary
   sla: SlaSummary
   satisfaction: SatisfactionSummary
   activity: ActivityItem[]
@@ -98,7 +95,10 @@ export function useDashboardData(identity: Identity | null): DashboardData {
     1,
   )
   const closed = useTicketsList({ statuses: ['closed'] }, 1)
-  const metrics = useMetricsSummary(EMPTY_FILTERS, { compact: true })
+  const metrics = useMetricsSummary(EMPTY_FILTERS, {
+    compact: true,
+    enabled: canViewMetrics,
+  })
   const sla = useSla(EMPTY_FILTERS, canViewMetrics)
   const satisfaction = useSatisfaction(EMPTY_FILTERS, canViewMetrics)
   const activity = useRecentActivity()
@@ -130,7 +130,6 @@ export function useDashboardData(identity: Identity | null): DashboardData {
       closed: pageTotal(closed.data),
     },
     volume: or(metrics.data?.volume, []),
-    summary: or(metrics.data?.summary, EMPTY_SUMMARY),
     sla: or(sla.summary.data, EMPTY_SLA),
     satisfaction: or(satisfaction.data, EMPTY_SATISFACTION),
     activity: or(activity.data, []),

@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/tooltip'
 import { cn } from 'cn'
 import { ToneDot } from '@/components/shared/tone'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { messages } from '@/lib/i18n'
 import { toneForId } from '@/lib/tones'
 import { useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
@@ -84,14 +86,18 @@ function SectionLinks({
   section,
   collapsed,
   identity,
+  mobile,
   onNavigate,
 }: {
   section: NavSection
   collapsed: boolean
   identity: Identity | null
+  mobile: boolean
   onNavigate?: () => void
 }) {
-  const items = section.items.filter((item) => isNavItemVisible(item, identity))
+  const items = section.items.filter((item) =>
+    isNavItemVisible(item, identity, mobile),
+  )
   if (items.length === 0) return null
 
   return (
@@ -121,6 +127,8 @@ interface AppSidebarProps {
   collapsed?: boolean
   onToggle?: () => void
   onNavigate?: () => void
+  /** Menú dentro del cajón móvil: agrupa administración y añade el tema. */
+  mobile?: boolean
 }
 
 /** Navegación lateral por áreas. Colapsable en escritorio, embebible en un cajón. */
@@ -128,6 +136,7 @@ export function AppSidebar({
   collapsed = false,
   onToggle,
   onNavigate,
+  mobile = false,
 }: AppSidebarProps) {
   const { identity } = useAuth()
 
@@ -170,10 +179,17 @@ export function AppSidebar({
             section={section}
             collapsed={collapsed}
             identity={identity}
+            mobile={mobile}
             onNavigate={onNavigate}
           />
         ))}
       </nav>
+      {mobile ? (
+        <div className="flex items-center gap-1 border-t border-sidebar-border px-2 py-2 text-sm text-sidebar-foreground/70">
+          <ThemeToggle />
+          <span>{messages.theme.aria}</span>
+        </div>
+      ) : null}
     </div>
   )
 }

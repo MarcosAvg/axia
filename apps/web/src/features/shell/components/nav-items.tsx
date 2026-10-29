@@ -13,7 +13,7 @@ import {
   UserIcon,
   UsersIcon,
 } from 'lucide-react'
-import { can } from '@/features/auth'
+import { can, canAny } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { shellMessages } from '../i18n'
 
@@ -24,6 +24,7 @@ type PlainPath =
   | '/inbox'
   | '/metricas'
   | '/perfil'
+  | '/admin'
   | '/admin/roles'
   | '/admin/usuarios'
   | '/admin/ambitos'
@@ -36,6 +37,10 @@ interface NavItemBase {
   icon: LucideIcon
   permission?: string
   visible?: (identity: Identity | null) => boolean
+  /** Solo aparece en el menú móvil. */
+  mobileOnly?: boolean
+  /** Se oculta del menú móvil; sigue disponible en escritorio y en la búsqueda. */
+  mobileHidden?: boolean
 }
 
 /**
@@ -56,11 +61,21 @@ export interface NavSection {
 
 const { nav } = shellMessages
 
-/** Aplica el permiso y la condición de perfil de cada destino. */
+const ADMIN_PERMISSIONS = [
+  'catalog.manage',
+  'user.manage',
+  'role.manage',
+  'assignment.manage',
+]
+
+/** Aplica el permiso, la condición de perfil y el corte de cada menú. */
 export function isNavItemVisible(
   item: NavItem,
   identity: Identity | null,
+  mobile = false,
 ): boolean {
+  if (mobile && item.mobileHidden) return false
+  if (!mobile && item.mobileOnly) return false
   if (item.permission && !can(identity, item.permission)) return false
   return item.visible ? item.visible(identity) : true
 }
@@ -123,11 +138,21 @@ export const NAV_SECTIONS: NavSection[] = [
     label: shellMessages.groups.administration,
     items: [
       {
+        id: 'admin',
+        kind: 'plain',
+        to: '/admin',
+        label: nav.adminHome,
+        icon: ShieldCheckIcon,
+        visible: (identity) => canAny(identity, ADMIN_PERMISSIONS),
+        mobileOnly: true,
+      },
+      {
         id: 'catalogs',
         kind: 'catalog',
         label: nav.catalogs,
         icon: LibraryIcon,
         permission: 'catalog.manage',
+        mobileHidden: true,
       },
       {
         id: 'roles',
@@ -136,6 +161,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.roles,
         icon: ShieldCheckIcon,
         permission: 'role.manage',
+        mobileHidden: true,
       },
       {
         id: 'users',
@@ -144,6 +170,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.users,
         icon: UsersIcon,
         permission: 'user.manage',
+        mobileHidden: true,
       },
       {
         id: 'scopes',
@@ -152,6 +179,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.scopes,
         icon: Building2Icon,
         permission: 'assignment.manage',
+        mobileHidden: true,
       },
       {
         id: 'calendars',
@@ -160,6 +188,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.calendars,
         icon: CalendarDaysIcon,
         permission: 'catalog.manage',
+        mobileHidden: true,
       },
       {
         id: 'settings',
@@ -168,6 +197,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: nav.settings,
         icon: SettingsIcon,
         permission: 'catalog.manage',
+        mobileHidden: true,
       },
     ],
   },

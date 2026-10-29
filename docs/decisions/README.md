@@ -91,6 +91,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0088](0088-indicadores-agregados-y-abanico-sse.md) | Indicadores agregados y abanico SSE acotado |
 | [0089](0089-sesiones-evidencia-y-retencion.md) | Sesiones, evidencia y retención |
 | [0090](0090-tablero-metricas-operativo.md) | Tablero de métricas operativo |
+| [0091](0091-movil-por-rol.md) | Experiencia móvil recortada por rol |
 
 ## Archivo
 

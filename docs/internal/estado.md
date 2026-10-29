@@ -112,6 +112,11 @@ Si se decide, Web Push y escalamiento programado.
 - **Detalle del tiquet (2026-10-28):** gráfica “Tiempo por fase” a todo el ancho, encima de las dos
   columnas, con los tiempos reales del tiquet y las mismas fases y colores de Métricas. La API de
   detalle devuelve `cycleTimes` en minutos; sin migración de esquema.
+- **Móvil por rol (2026-10-28):** técnico y solicitante tienen panel de flujo sin análisis, acción
+  principal “Mi trabajo”, tiquets antes que actividad y detalle con acciones primero; la gráfica de
+  tiempos se oculta en móvil para ellos. Supervisor y administrador conservan toda la información.
+  El tema pasa al menú móvil, los filtros de tiquets se abren bajo demanda y la administración se
+  agrupa en una entrada móvil. Ver ADR 0091.
 - **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR

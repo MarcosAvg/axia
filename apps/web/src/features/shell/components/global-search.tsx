@@ -8,11 +8,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { can, useAuth } from '@/features/auth'
+import { useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { useTicketSearchByFolio } from '@/features/tickets'
 import { shellMessages } from '../i18n'
-import { NAV_SECTIONS } from './nav-items'
+import { isNavItemVisible, NAV_SECTIONS } from './nav-items'
 import type { NavItem } from './nav-items'
 
 interface GlobalSearchProps {
@@ -39,7 +39,7 @@ function useDestination() {
 function navigationItems(term: string, identity: Identity | null): NavItem[] {
   const needle = term.toLocaleLowerCase('es-MX')
   return NAV_SECTIONS.flatMap((section) => section.items).filter((item) => {
-    if (item.permission && !can(identity, item.permission)) return false
+    if (!isNavItemVisible(item, identity)) return false
     return item.label.toLocaleLowerCase('es-MX').includes(needle)
   })
 }

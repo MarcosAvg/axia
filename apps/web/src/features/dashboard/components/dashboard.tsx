@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { PlusIcon } from 'lucide-react'
+import { HardHatIcon, PlusIcon } from 'lucide-react'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { ButtonGrid } from '@/components/shared/button-grid'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { can, canAny, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { useDashboardData } from '../hooks/use-dashboard'
+import type { DashboardData } from '../hooks/use-dashboard'
 import { dashboardMessages as t } from '../i18n'
 import { ActivitySection } from './activity-section'
 import { DashboardCharts } from './dashboard-charts'
@@ -41,6 +42,7 @@ function dashboardRole(identity: Identity | null): DashboardRole {
 
 function QuickActions({ canCreate }: { canCreate: boolean }) {
   const { identity } = useAuth()
+  const isTechnician = Boolean(identity?.technicianId)
   return (
     <ButtonGrid>
       {canCreate ? (
@@ -48,6 +50,14 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
           <Link to="/tickets/nuevo">
             <PlusIcon />
             {t.actions.newTicket}
+          </Link>
+        </Button>
+      ) : null}
+      {isTechnician ? (
+        <Button asChild className="col-span-2 min-h-11">
+          <Link to="/mi-trabajo">
+            <HardHatIcon />
+            {t.actions.myWork}
           </Link>
         </Button>
       ) : null}
@@ -85,11 +95,53 @@ function DashboardLoading() {
   )
 }
 
+function DashboardBody({
+  identity,
+  data,
+  role,
+  showAnalytics,
+  focus,
+}: {
+  identity: Identity | null
+  data: DashboardData
+  role: DashboardRole
+  showAnalytics: boolean
+  focus: boolean
+}) {
+  return (
+    <>
+      <DashboardKpis
+        identity={identity}
+        work={data.work}
+        offers={data.offerItems.length}
+        totals={data.totals}
+        sla={data.sla}
+        satisfaction={data.satisfaction}
+      />
+      {showAnalytics ? <DashboardCharts volume={data.volume} /> : null}
+      {focus ? (
+        <>
+          <DashboardSections data={data} role={role} />
+          <ActivitySection items={data.activity} />
+        </>
+      ) : (
+        <>
+          <ActivitySection items={data.activity} />
+          <DashboardSections data={data} role={role} />
+        </>
+      )}
+    </>
+  )
+}
+
 /** Panel de inicio: indicadores, tiquets activos y actividad del usuario. */
 export function Dashboard() {
   const { identity } = useAuth()
   const data = useDashboardData(identity)
   const queryClient = useQueryClient()
+  const role = dashboardRole(identity)
+  const showAnalytics = can(identity, 'metrics.view')
+  const focus = role === 'technician' || role === 'other'
 
   return (
     <div className="flex flex-col gap-6">
@@ -119,20 +171,13 @@ export function Dashboard() {
       {data.loading ? (
         <DashboardLoading />
       ) : (
-        <>
-          <DashboardKpis
-            identity={identity}
-            work={data.work}
-            offers={data.offerItems.length}
-            totals={data.totals}
-            summary={data.summary}
-            sla={data.sla}
-            satisfaction={data.satisfaction}
-          />
-          <DashboardCharts volume={data.volume} />
-          <ActivitySection items={data.activity} />
-          <DashboardSections data={data} role={dashboardRole(identity)} />
-        </>
+        <DashboardBody
+          identity={identity}
+          data={data}
+          role={role}
+          showAnalytics={showAnalytics}
+          focus={focus}
+        />
       )}
     </div>
   )

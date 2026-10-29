@@ -56,7 +56,7 @@ export function AppShell() {
           <SheetHeader className="sr-only">
             <SheetTitle>{shellMessages.brand}</SheetTitle>
           </SheetHeader>
-          <AppSidebar onNavigate={() => setMobileOpen(false)} />
+          <AppSidebar mobile onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 

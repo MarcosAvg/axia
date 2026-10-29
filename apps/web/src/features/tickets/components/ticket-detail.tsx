@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { TicketIcon } from 'lucide-react'
+import { cn } from 'cn'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { HintLabel } from '@/components/shared/hint'
@@ -39,14 +40,16 @@ import { ParticipantList, TicketSummary } from './ticket-summary'
 function Section({
   title,
   hint,
+  className,
   children,
 }: {
   title: string
   hint?: string
+  className?: string
   children: React.ReactNode
 }) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle as="h2">
           <HintLabel label={title} hint={hint} />
@@ -150,6 +153,7 @@ function TicketLayout({
       <Section
         title={ticketMessages.detail.cycleTimes}
         hint={detailSectionHints.cycleTimes}
+        className={cn(!can(identity, 'metrics.view') && 'hidden lg:block')}
       >
         <TicketCycleChart times={ticket.cycleTimes} />
       </Section>

@@ -49,7 +49,9 @@ export function AppTopbar({ onOpenSidebar, onOpenSearch }: AppTopbarProps) {
         </Button>
         <NotificationBell />
         <OfflineIndicator />
-        <ThemeToggle />
+        <div className="hidden lg:block">
+          <ThemeToggle />
+        </div>
         <UserMenu />
       </div>
     </header>
