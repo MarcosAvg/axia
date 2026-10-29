@@ -1,37 +1,16 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ButtonGrid } from '@/components/shared/button-grid'
-import { SelectField } from '@/components/shared/form-fields'
-import { can, type Identity } from '@/features/auth'
-import type { ActionKey } from '../domain/actions'
-import { actionsRequiringSubject, pickPrimaryAction } from '../domain/actions'
+import type { Identity } from '@/features/auth'
 import { actionEmphasis } from '../domain/action-emphasis'
 import type { ActionEmphasis } from '../domain/action-emphasis'
+import type { ActionKey } from '../domain/actions'
+import { pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
-import { useMyOffers } from '../hooks/use-tickets'
-import { useTicketActions } from '../hooks/use-ticket-actions'
+import { useActionPanel } from '../hooks/use-action-panel'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
+import { ProxyRequiredHint, ProxySelector } from './proxy-fields'
 import { TakeOfferBanner } from './take-offer-banner'
-import { DEDICATED } from './ticket-action-handlers'
-const ONE_CLICK: ActionKey[] = ['validate']
-const FORM_ACTIONS: ActionKey[] = [
-  'start',
-  'record_progress',
-  'assign_technician',
-  'add_auxiliary',
-  'pause',
-  'advance_pause',
-  'resume',
-  'reject',
-  'cancel',
-  'change_priority',
-  'attend',
-  'comment',
-  'open_claim',
-  'resolve_claim',
-  'reactivate',
-]
 
 /** Variante del botón para cada énfasis (tinte suave; ver `domain/action-emphasis`). */
 const EMPHASIS_VARIANT = {
@@ -140,103 +119,7 @@ function ActionControls({
   )
 }
 
-function ProxySelector({
-  participants,
-  value,
-  onChange,
-}: {
-  participants: TicketParticipant[]
-  value: string
-  onChange: (value: string) => void
-}) {
-  const seen = new Set<string>()
-  const options = participants
-    .filter((item) => {
-      if (seen.has(item.technicianId)) return false
-      seen.add(item.technicianId)
-      return true
-    })
-    .map((item) => ({ value: item.technicianId, label: item.technicianName }))
-  if (options.length === 0) return null
-
-  return (
-    <div className="flex flex-col gap-1">
-      <SelectField
-        id="proxy-technician"
-        label={ticketMessages.proxy.label}
-        placeholder={ticketMessages.proxy.none}
-        options={options}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <p className="text-xs text-muted-foreground">
-        {ticketMessages.proxy.help}
-      </p>
-    </div>
-  )
-}
-
-function ProxyRequiredHint({ show }: { show: boolean }) {
-  if (!show) return null
-  return (
-    <p role="status" className="text-sm text-muted-foreground">
-      {ticketMessages.proxy.required}
-    </p>
-  )
-}
-
-function useActionPanel(
-  ticket: TicketDetail,
-  actions: ActionKey[],
-  identity: Identity | null,
-  participants: TicketParticipant[],
-) {
-  const canProxy = can(identity, 'act_on_behalf')
-  const [subjectTechnicianId, setSubject] = useState('')
-  const [formAction, setFormAction] = useState<ActionKey | null>(null)
-  const subject =
-    canProxy && subjectTechnicianId ? subjectTechnicianId : undefined
-  const mutations = useTicketActions(ticket.id, subject)
-  const offers = useMyOffers(
-    identity?.userId,
-    can(identity, 'ticket.take_offer'),
-  )
-  const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
-  const oneClick: Partial<Record<ActionKey, () => void>> = {
-    validate: () => mutations.validate.mutate({}),
-  }
-  const pending: Partial<Record<ActionKey, boolean>> = {
-    validate: mutations.validate.isPending,
-  }
-  const visible = actions.filter(
-    (action) =>
-      ONE_CLICK.includes(action) ||
-      FORM_ACTIONS.includes(action) ||
-      DEDICATED.includes(action),
-  )
-  const blocked = actionsRequiringSubject(identity, visible, Boolean(subject))
-  const activeIds = participants
-    .filter((item) => item.endedAt === null)
-    .map((item) => item.technicianId)
-  return {
-    canProxy,
-    subjectTechnicianId,
-    setSubject,
-    subject,
-    mutations,
-    hasOffer,
-    oneClick,
-    pending,
-    visible,
-    blocked,
-    activeIds,
-    formAction,
-    setFormAction,
-    close: () => setFormAction(null),
-  }
-}
-
-interface TicketActionsPanelProps {
+export interface TicketActionsPanelProps {
   ticket: TicketDetail
   actions: ActionKey[]
   identity: Identity | null

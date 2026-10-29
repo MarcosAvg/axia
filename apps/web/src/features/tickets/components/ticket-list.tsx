@@ -29,26 +29,34 @@ export function TicketList({
             <p className="line-clamp-2 text-sm text-muted-foreground">
               {ticket.description}
             </p>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              {ticket.buildingName ? <span>{ticket.buildingName}</span> : null}
-              {ticket.categoryName ? <span>{ticket.categoryName}</span> : null}
-              <span>{ticket.requesterName}</span>
-              <span>{formatDateTime(ticket.reportedAt)}</span>
-              {showElapsed ? (
-                <span
-                  data-elapsed
-                  className="inline-flex items-center gap-1"
-                  title={ticketMessages.list.elapsed}
-                >
-                  <ClockIcon className="size-3" aria-hidden />
-                  {formatElapsed(ticket.reportedAt)}
-                </span>
-              ) : null}
-              {ticket.possibleDuplicate ? (
-                <span className="font-medium text-amber-700 dark:text-amber-400">
-                  {ticketMessages.list.duplicateMark}
-                </span>
-              ) : null}
+            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <p className="truncate">
+                {[
+                  ticket.buildingName,
+                  ticket.categoryName,
+                  ticket.requesterName,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              <span className="flex shrink-0 items-center gap-2">
+                <span>{formatDateTime(ticket.reportedAt)}</span>
+                {showElapsed ? (
+                  <span
+                    data-elapsed
+                    className="inline-flex items-center gap-1"
+                    title={ticketMessages.list.elapsed}
+                  >
+                    <ClockIcon className="size-3" aria-hidden />
+                    {formatElapsed(ticket.reportedAt)}
+                  </span>
+                ) : null}
+                {ticket.possibleDuplicate ? (
+                  <span className="font-medium text-amber-700 dark:text-amber-400">
+                    {ticketMessages.list.duplicateMark}
+                  </span>
+                ) : null}
+              </span>
             </div>
           </Link>
         </li>
