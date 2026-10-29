@@ -21,9 +21,13 @@ export function PageHeader({
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex min-w-0 flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight lg:text-2xl">
+          {title}
+        </h1>
         {description ? (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="line-clamp-2 text-sm text-muted-foreground lg:line-clamp-none">
+            {description}
+          </p>
         ) : null}
       </div>
       {actions ? (

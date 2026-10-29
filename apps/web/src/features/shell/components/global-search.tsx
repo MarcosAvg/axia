@@ -123,7 +123,7 @@ function SearchResults({
   onTicket: (id: string) => void
 }) {
   return (
-    <div className="max-h-80 overflow-y-auto p-2">
+    <div className="max-h-80 overflow-y-auto p-2 max-sm:max-h-none max-sm:flex-1 max-sm:p-3">
       <NavigationResults items={navItems} onSelect={onNav} />
       {hasTerm ? (
         <TicketResults items={ticketItems} onSelect={onTicket} />
@@ -168,11 +168,11 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent className="gap-0 overflow-hidden p-0 max-sm:top-0 max-sm:left-0 max-sm:flex max-sm:h-svh max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:flex-col max-sm:rounded-none sm:max-w-lg">
         <DialogHeader className="sr-only">
           <DialogTitle>{shellMessages.search.open}</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center gap-2 border-b px-3">
+        <div className="flex items-center gap-2 border-b px-3 pr-12 max-sm:h-14 max-sm:px-4">
           <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
           <Input
             value={term}

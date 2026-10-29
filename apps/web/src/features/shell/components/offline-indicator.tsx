@@ -65,7 +65,7 @@ function OutboxErrors({ items }: { items: OutboxItem[] }) {
           type="button"
           variant="warning"
           size="sm"
-          className="h-8 gap-1 px-2"
+          className="h-11 gap-1 px-2 lg:h-8"
           aria-label={label}
         >
           <AlertTriangleIcon />

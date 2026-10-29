@@ -1,5 +1,5 @@
 import type { Identity } from '@/features/auth'
-import { isNavItemVisible, NAV_SECTIONS } from './nav-items'
+import { isNavItemVisible, mobileTabs, NAV_SECTIONS } from './nav-items'
 import type { NavItem } from './nav-items'
 
 function item(id: string): NavItem {
@@ -74,5 +74,41 @@ describe('isNavItemVisible', () => {
     expect(isNavItemVisible(item('admin'), admin, true)).toBe(true)
     expect(isNavItemVisible(item('roles'), admin, true)).toBe(false)
     expect(isNavItemVisible(item('roles'), admin)).toBe(true)
+  })
+})
+
+describe('mobileTabs', () => {
+  it('deja al técnico con su trabajo como tercer destino', () => {
+    expect(
+      mobileTabs(
+        identity(
+          ['ticket.view', 'ticket.start', 'ticket.attend'],
+          'technician-1',
+        ),
+      ).map((tab) => tab.id),
+    ).toEqual(['panel', 'tickets', 'my-work'])
+  })
+
+  it('deja al administrador con métricas en lugar de mi trabajo', () => {
+    expect(
+      mobileTabs(
+        identity([
+          'ticket.view',
+          'metrics.view',
+          'catalog.manage',
+          'user.manage',
+          'role.manage',
+          'assignment.manage',
+        ]),
+      ).map((tab) => tab.id),
+    ).toEqual(['panel', 'tickets', 'metrics'])
+  })
+
+  it('no inventa destinos para un perfil sin permisos', () => {
+    expect(mobileTabs(identity([])).map((tab) => tab.id)).toEqual(['panel'])
+    expect(mobileTabs(identity(['ticket.view'])).map((tab) => tab.id)).toEqual([
+      'panel',
+      'tickets',
+    ])
   })
 })

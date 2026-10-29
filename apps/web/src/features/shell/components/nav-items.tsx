@@ -80,6 +80,18 @@ export function isNavItemVisible(
   return item.visible ? item.visible(identity) : true
 }
 
+/** Destinos de la barra inferior, en orden de preferencia; se toman los tres visibles. */
+const MOBILE_TAB_IDS = ['panel', 'tickets', 'my-work', 'metrics', 'inbox']
+
+export function mobileTabs(identity: Identity | null): NavItem[] {
+  return MOBILE_TAB_IDS.flatMap((id) => {
+    const item = NAV_SECTIONS.flatMap((section) => section.items).find(
+      (candidate) => candidate.id === id,
+    )
+    return item && isNavItemVisible(item, identity, true) ? [item] : []
+  }).slice(0, 3)
+}
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     id: 'operation',

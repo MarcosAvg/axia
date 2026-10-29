@@ -1,4 +1,4 @@
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { cn } from 'cn'
 import {
@@ -10,8 +10,29 @@ import {
 import { useServerEvents } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppSidebar } from './app-sidebar'
+import { AppTabbar } from './app-tabbar'
 import { AppTopbar } from './app-topbar'
 import { GlobalSearch } from './global-search'
+
+/** El detalle del tiquet ocupa el pulgar con su propia barra de acciones. */
+function isTicketDetail(pathname: string): boolean {
+  return /^\/tickets\/[^/]+$/.test(pathname)
+}
+
+function useSearchShortcut(
+  setOpen: (update: (open: boolean) => boolean) => void,
+) {
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [setOpen])
+}
 
 /** Armazón de la aplicación autenticada: barra lateral, barra superior y contenido. */
 export function AppShell() {
@@ -19,17 +40,11 @@ export function AppShell() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault()
-        setSearchOpen((open) => !open)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const tabbar = !isTicketDetail(pathname)
+  useSearchShortcut(setSearchOpen)
 
   return (
     <div className="flex min-h-svh w-full bg-background text-foreground">
@@ -61,18 +76,19 @@ export function AppShell() {
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar
-          onOpenSidebar={() => setMobileOpen(true)}
-          onOpenSearch={() => setSearchOpen(true)}
-        />
+        <AppTopbar onOpenSearch={() => setSearchOpen(true)} />
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1800px] flex-1 p-4 lg:p-6"
+          className={cn(
+            'mx-auto w-full max-w-[1800px] flex-1 p-4 lg:p-6',
+            tabbar && 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6',
+          )}
         >
           <Outlet />
         </main>
       </div>
 
+      {tabbar ? <AppTabbar onOpenMore={() => setMobileOpen(true)} /> : null}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   )

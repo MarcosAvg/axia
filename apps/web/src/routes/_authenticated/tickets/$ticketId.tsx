@@ -13,7 +13,11 @@ function TicketDetailPage() {
   return (
     <RequirePermission permission="ticket.view">
       <div className="flex flex-col gap-4">
-        <Button asChild variant="ghost" className="min-h-11 self-start">
+        <Button
+          asChild
+          variant="ghost"
+          className="min-h-11 self-start max-md:hidden"
+        >
           <Link to="/tickets" search={{ page: 1 }}>
             {ticketMessages.detail.back}
           </Link>

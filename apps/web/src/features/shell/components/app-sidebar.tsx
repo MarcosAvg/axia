@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { PanelLeftIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,6 +14,7 @@ import { toneForId } from '@/lib/tones'
 import { useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { shellMessages } from '../i18n'
+import { NavDestination } from './nav-destination'
 import { isNavItemVisible, NAV_SECTIONS } from './nav-items'
 import type { NavItem, NavSection } from './nav-items'
 
@@ -25,10 +25,10 @@ interface NavLinkProps {
 }
 
 const expandedClass =
-  'flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:min-h-10 [&.active]:bg-sidebar-accent [&.active]:font-medium [&.active]:text-sidebar-accent-foreground'
+  'flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:min-h-10 aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground'
 
 const collapsedClass =
-  'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&.active]:bg-sidebar-accent [&.active]:text-sidebar-accent-foreground'
+  'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[current=page]:bg-sidebar-accent aria-[current=page]:text-sidebar-accent-foreground'
 
 function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
   const Icon: LucideIcon = item.icon
@@ -40,37 +40,11 @@ function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
     </>
   )
 
-  const link =
-    item.kind === 'tickets' ? (
-      <Link
-        to="/tickets"
-        search={{ page: 1 }}
-        className={className}
-        activeProps={{ 'aria-current': 'page' }}
-        onClick={onNavigate}
-      >
-        {content}
-      </Link>
-    ) : item.kind === 'catalog' ? (
-      <Link
-        to="/admin/catalogos"
-        search={{ catalog: 'teams' }}
-        className={className}
-        activeProps={{ 'aria-current': 'page' }}
-        onClick={onNavigate}
-      >
-        {content}
-      </Link>
-    ) : (
-      <Link
-        to={item.to}
-        className={className}
-        activeProps={{ 'aria-current': 'page' }}
-        onClick={onNavigate}
-      >
-        {content}
-      </Link>
-    )
+  const link = (
+    <NavDestination item={item} className={className} onNavigate={onNavigate}>
+      {content}
+    </NavDestination>
+  )
 
   if (!collapsed) return link
 

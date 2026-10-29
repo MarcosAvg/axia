@@ -33,6 +33,11 @@ export const shellMessages = {
     open: 'Abrir menú',
     close: 'Cerrar menú',
   },
+  tabbar: {
+    label: 'Navegación inferior',
+    more: 'Más',
+    back: 'Volver',
+  },
   userMenu: {
     label: 'Menú de usuario',
   },

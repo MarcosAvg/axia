@@ -28,7 +28,7 @@ const adminLabels: Record<string, string> = {
 }
 
 /** Migas de pan a partir de la ruta actual. */
-function buildCrumbs(pathname: string): Crumb[] {
+export function buildCrumbs(pathname: string): Crumb[] {
   if (pathname === '/') return [{ label: shellMessages.nav.panel }]
 
   const segments = pathname.split('/').filter(Boolean)
@@ -51,7 +51,7 @@ function buildCrumbs(pathname: string): Crumb[] {
     crumbs.push({ label: shellMessages.nav.tickets, to: '/tickets' })
     const [, child] = segments
     if (child === 'nuevo') crumbs.push({ label: 'Nuevo tiquet' })
-    else if (child) crumbs.push({ label: 'Detalle' })
+    else if (child) crumbs.push({ label: 'Tiquet' })
     return crumbs
   }
 

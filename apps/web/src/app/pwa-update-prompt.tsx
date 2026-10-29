@@ -18,7 +18,10 @@ export function PwaUpdatePrompt() {
   }
 
   return (
-    <div role="status" className="fixed inset-x-0 bottom-0 z-50 p-4">
+    <div
+      role="status"
+      className="fixed inset-x-0 bottom-0 z-50 p-4 pb-[calc(1rem+3.5rem+env(safe-area-inset-bottom))] lg:pb-4"
+    >
       <div className="mx-auto flex max-w-md items-center gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-lg">
         <p className="flex-1 text-sm">
           {needRefresh
