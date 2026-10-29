@@ -34,6 +34,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Evidencia: se autoriza por tipo y por la acción (`claim` con la reclamación, `request` con la
   autoría del tiquet, trabajo con el avance). El solicitante puede reclamar y adjuntar la foto de su
   solicitud; los errores de subida ya no dejan una evidencia pendiente local.
+- Compose: el healthcheck de PostgreSQL usa TCP y no se adelanta durante la inicialización. El primer
+  `up` ya no arranca `migrate` antes de que la base esté lista.
 
 ### Cambiado
 
@@ -72,10 +74,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   carga cuando hay sesión. La pantalla de acceso ya no descarga el feature completo de tiquets.
 - `pnpm dev:api` y el servidor E2E guardan evidencias en el repositorio, no en `/data/evidence`, que
   solo existe dentro del contenedor. Esto corrige el error de instalación en el login local.
-- Compose: producción descarga las imágenes de GHCR, publica `app` solo en loopback y ejecuta
-  `migrate` antes de arrancar. El `.env` de producción es mínimo, el desarrollo usa
-  `.env.dev.example` y `compose.dev.yaml`, y CI valida Compose y construye la imagen. Se mantienen
-  rotación de logs, cierre ordenado de PostgreSQL y hardening de `app`.
+- Compose: producción descarga las imágenes de GHCR, conecta `app` a la red `proxy`, publica
+  `127.0.0.1:3100` y ejecuta `migrate` antes de arrancar. El `.env` de producción es mínimo, el
+  desarrollo usa `.env.dev.example` y `compose.dev.yaml`, y CI valida Compose y construye la imagen.
+  Se mantienen rotación de logs, cierre ordenado de PostgreSQL y hardening de `app`.
 
 ### Retirado
 

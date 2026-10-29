@@ -33,7 +33,11 @@ services:
     volumes:
       - axia_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}',
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -56,6 +60,9 @@ services:
     restart: unless-stopped
     ports:
       - '127.0.0.1:${APP_PORT:-3100}:3100'
+    networks:
+      - default
+      - proxy
     logging: *default-logging
     security_opt:
       - no-new-privileges:true
@@ -98,6 +105,10 @@ services:
       retries: 3
       start_period: 10s
     stop_grace_period: 15s
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK:-proxy}
 
 volumes:
   axia_db_data:

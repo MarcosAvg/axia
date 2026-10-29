@@ -14,6 +14,7 @@ pruebas es `.env.dev.example`.
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
 | `TRUST_PROXY` | `true` si hay un proxy TLS delante |
 | `APP_PORT` | Opcional; puerto de loopback, `3100` por defecto |
+| `PROXY_NETWORK` | Opcional; red compartida con el proxy, `proxy` por defecto |
 | `AXIA_VERSION` | Opcional; `latest` o un SHA de GHCR |
 
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
@@ -39,6 +40,7 @@ El resto de variables tiene valores por defecto en `compose.yaml` o en el servid
 | `HOST` | `0.0.0.0` | Interfaz de escucha |
 | `PORT` | `3100` | Puerto HTTP fuera de Compose; dentro es fijo `3100` |
 | `APP_PORT` | `3100` | Puerto de loopback que publica `compose.yaml` |
+| `PROXY_NETWORK` | `proxy` | Red compartida con el reverse proxy |
 | `AXIA_VERSION` | `latest` | Imagen de GHCR: `latest` o un SHA |
 | `NODE_ENV` | `development` | Compose fija `production`; el overlay de desarrollo usa `development` |
 | `LOG_LEVEL` | `info` | Nivel de registro |

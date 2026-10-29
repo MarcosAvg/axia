@@ -76,8 +76,9 @@ docker compose up -d
 `compose.yaml` descarga las imágenes de GHCR, arranca `db`, ejecuta `migrate` y arranca `app` cuando
 la migración termina. No hay que construir imágenes en el servidor ni usar `compose.dev.yaml`.
 
-`app` publica solo `127.0.0.1:${APP_PORT:-3100}`. El reverse proxy apunta ahí; si es otro contenedor,
-usa `app:3100` en la red de Compose. El contrato completo está en
+`app` se conecta a la red `${PROXY_NETWORK:-proxy}` y publica `127.0.0.1:${APP_PORT:-3100}`. Un proxy
+contenedor usa `app:3100` en la red `proxy`; un proxy del host apunta al puerto de loopback. Si el
+proxy ya creó una red con otro nombre, define `PROXY_NETWORK` en `.env`. El contrato completo está en
 [`../guides/operacion.md`](../guides/operacion.md#reverse-proxy).
 
 `TRUST_PROXY=true` es obligatorio cuando el proxy termina TLS y reenvía `X-Forwarded-*`: sin él, el

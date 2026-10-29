@@ -23,10 +23,10 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
   designaciones y métricas.
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
-- **Despliegue con Compose:** `compose.yaml` descarga las imágenes de GHCR, publica `app` solo en
-  loopback y ejecuta `migrate` antes de arrancar. El `.env` de producción es mínimo; el desarrollo
-  usa `compose.dev.yaml` y `.env.dev.example`. El contrato de proxy, la rotación de logs y el
-  hardening de `app` están documentados, y CI valida Compose y construye la imagen.
+- **Despliegue con Compose:** `compose.yaml` descarga las imágenes de GHCR, conecta `app` a la red
+  `proxy`, publica `127.0.0.1:3100` y ejecuta `migrate` antes de arrancar. El `.env` de producción es
+  mínimo; el desarrollo usa `compose.dev.yaml` y `.env.dev.example`. El contrato de proxy, la rotación
+  de logs y el hardening de `app` están documentados, y CI valida Compose y construye la imagen.
 - **UI:** escritorio y móvil por rol, navegación inferior, temas y regresión visual.
 - **Calidad:** Vitest contra PostgreSQL real, Playwright, fronteras de dependencias, knip y
   verificación de enlaces.

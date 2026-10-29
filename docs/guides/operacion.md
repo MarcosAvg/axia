@@ -12,10 +12,11 @@ Guía para desplegar, actualizar y respaldar una instalación de Axia. La instal
 | `app` | API Fastify y SPA; volumen de evidencias |
 
 Axia no incluye reverse proxy: el TLS y el enrutamiento de borde son infraestructura de destino. La
-base no se publica nunca. El servicio `app` publica `127.0.0.1:${APP_PORT:-3100}` para que un proxy
-del host lo alcance; no se publica en todas las interfaces. Si el proxy es otro contenedor, puede
-usar `app:3100` en la red de Compose. `app` ya sirve el SPA, su fallback y las cabeceras de caché; el
-proxy solo tiene que reenviar todo a `app`, sin servir estáticos por su cuenta.
+base no se publica nunca. El servicio `app` se conecta a la red `${PROXY_NETWORK:-proxy}` (Compose la
+crea si no existe) y además publica `127.0.0.1:${APP_PORT:-3100}`. Un proxy contenedor usa
+`app:3100` en la red `proxy`; un proxy del host usa el puerto de loopback. `app` ya sirve el SPA, su
+fallback y las cabeceras de caché; el proxy solo tiene que reenviar todo a `app`, sin servir
+estáticos por su cuenta.
 
 ## Puesta en marcha en producción
 
@@ -46,6 +47,8 @@ La primera cuenta se crea desde `/login` o con `POST /api/setup`. La contraseña
 
 El proxy debe cumplir este contrato:
 
+- **Red.** Si el proxy es un contenedor, únelo a `${PROXY_NETWORK:-proxy}` y apunta a `app:3100`.
+  Si corre en el host, apunta a `127.0.0.1:${APP_PORT:-3100}`.
 - **TLS en el borde.** Las cookies de sesión son `Secure` en producción; sin HTTPS el navegador no
   las envía.
 - **Cabeceras.** Conservar `Host` y `Origin`, y reenviar `X-Forwarded-Proto`, `X-Forwarded-Host` y

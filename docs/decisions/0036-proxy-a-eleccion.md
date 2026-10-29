@@ -14,10 +14,11 @@ con el proxy que la institución ya tenga (Traefik, nginx, Apache, un balanceado
 ## Decisión
 
 - **No** se incluye ningún reverse proxy y no se versionan configuraciones de proxy.
-- `compose.yaml` es el compose de producción: usa las imágenes de GHCR y publica `app` solo en
-  `127.0.0.1:${APP_PORT:-3100}` para un proxy del host. No añade servicios ni TLS.
+- `compose.yaml` es el compose de producción: usa las imágenes de GHCR, conecta `app` a la red
+  `${PROXY_NETWORK:-proxy}` y publica `127.0.0.1:${APP_PORT:-3100}` para un proxy del host. No añade
+  servicios ni TLS.
 - `compose.dev.yaml` construye las imágenes localmente para desarrollo.
-- Si el proxy es otro contenedor, se conecta a la red de Compose y usa `app:3100`.
+- Si el proxy es otro contenedor, se conecta a la red `proxy` y usa `app:3100`.
 - El **contrato de despliegue** (cabeceras, `TRUST_PROXY`, TUS, SSE, caché y TLS) vive en
   `deploy/README.md` y `docs/guides/operacion.md`.
 - El stack se levanta con `docker compose up -d` o `deploy/scripts/up.sh`; no hay overlay de

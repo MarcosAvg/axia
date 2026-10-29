@@ -19,13 +19,15 @@ públicas: `docker compose up -d` las descarga sin credenciales.
 
 ## Reverse proxy
 
-El repositorio **no incluye** proxy ni TLS. `compose.yaml` publica `app` solo en
-`127.0.0.1:${APP_PORT:-3100}`:
+El repositorio **no incluye** proxy ni TLS. `app` se conecta a la red `${PROXY_NETWORK:-proxy}`
+(Compose la crea si no existe) y además publica `127.0.0.1:${APP_PORT:-3100}`:
 
+- **Proxy contenedor:** únelo a la red `proxy` y apunta a `app:3100`. Es la opción recomendada.
 - **Proxy en el host:** apunta a `127.0.0.1:3100` (no a `localhost`, que puede resolverse a IPv6).
-- **Proxy contenedor:** únelo a la red de Compose y apunta a `app:3100`.
 
-El contrato (cabeceras, `TRUST_PROXY`, TUS, SSE y caché) está en
+Si el proxy ya creó una red con otro nombre, define `PROXY_NETWORK` en `.env`. Si la declara como
+`external`, créala antes con `docker network create proxy`. El contrato (cabeceras, `TRUST_PROXY`,
+TUS, SSE y caché) está en
 [`../docs/guides/operacion.md`](../docs/guides/operacion.md#reverse-proxy).
 
 La ejecución real en un servidor la hace la persona; el agente no toca producción ni la nube.
