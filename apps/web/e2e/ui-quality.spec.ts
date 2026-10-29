@@ -86,7 +86,7 @@ test('la barra superior tiene controles táctiles y no desborda', async ({
 
     const topbar = page.locator('header.sticky')
     const controls = topbar.locator('button:visible, a[href]:visible')
-    await expect(controls).toHaveCount(4)
+    await expect(controls).toHaveCount(3)
     await expect(topbar.getByRole('link', { name: /^Avisos/ })).toBeVisible()
 
     for (const control of await controls.all()) {
@@ -96,7 +96,7 @@ test('la barra superior tiene controles táctiles y no desborda', async ({
 
     await expectNoHorizontalOverflow(page)
 
-    await page.getByRole('button', { name: 'Abrir menú' }).click()
+    await page.getByRole('button', { name: 'Más', exact: true }).click()
     await expect(
       page.getByRole('button', { name: 'Cambiar tema y modo' }),
     ).toBeVisible()

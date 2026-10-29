@@ -30,17 +30,18 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   const headings = await page.locator('main h2').allInnerTexts()
   expect(headings.slice(0, 5)).toEqual([
     'Tiempo por fase',
-    'Acciones',
     'Captura',
     'Línea de tiempo',
     'Evidencias',
+    'Participantes',
   ])
   const width = (await page.evaluate(
     '({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth })',
   )) as { scroll: number; client: number }
   expect(width.scroll).toBe(width.client)
 
-  await page.getByRole('button', { name: 'Comentar' }).click()
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Comentar' }).click()
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Completa este campo.')).toBeVisible()
   await page.keyboard.press('Escape')
@@ -65,7 +66,7 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   await expect(dialog).toHaveCount(0)
 })
 
-test('el técnico ve sus acciones antes que la gráfica de tiempos en móvil', async ({
+test('el técnico tiene sus acciones fijas y no ve la gráfica en móvil', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })
@@ -76,10 +77,14 @@ test('el técnico ve sus acciones antes que la gráfica de tiempos en móvil', a
     page.getByRole('heading', { name: 'Tiempo por fase' }),
   ).toBeHidden()
   const headings = await page.locator('main h2:visible').allInnerTexts()
-  expect(headings[0]).toBe('Acciones')
+  expect(headings).not.toContain('Acciones')
+  expect(page.getByRole('button', { name: 'Más', exact: true })).toBeVisible()
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await expect(
     page.getByRole('heading', { name: 'Tiempo por fase' }),
   ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Más', exact: true }),
+  ).toBeHidden()
 })

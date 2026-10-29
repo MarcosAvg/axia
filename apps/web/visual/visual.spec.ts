@@ -11,6 +11,9 @@ async function signIn(page: Page, username: string) {
   await page.getByLabel('Usuario').fill(username)
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Menú de usuario' }),
+  ).toBeVisible()
 }
 
 test('acceso', async ({ page }) => {
@@ -135,7 +138,7 @@ test('métricas en escritorio ancho', async ({ page }) => {
 test('métricas en móvil', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await signIn(page, 'demo.admin')
-  await page.getByRole('button', { name: 'Abrir menú' }).click()
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
     .getByRole('link', { name: 'Métricas' })
@@ -148,5 +151,15 @@ test('métricas en móvil', async ({ page }) => {
       page.locator('svg.recharts-surface'),
       page.locator('table').filter({ hasText: 'Folio' }),
     ],
+  })
+})
+
+test('detalle de tiquet en móvil', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await signIn(page, 'demo.technician')
+  await page.goto('/tickets/de000000-0000-4000-8000-000000000004')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('AX-')
+  await expect(page).toHaveScreenshot('detalle-movil.png', {
+    mask: [page.locator('time'), page.locator('[data-elapsed]')],
   })
 })

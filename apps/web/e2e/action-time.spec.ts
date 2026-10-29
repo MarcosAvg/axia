@@ -20,6 +20,17 @@ async function signIn(page: Page) {
   ).toBeVisible()
 }
 
+/** En móvil la acción puede estar en la barra fija o en su menú "Más". */
+async function clickAction(page: Page, name: string) {
+  const direct = page.getByRole('button', { name, exact: true })
+  if ((await direct.count()) > 0) {
+    await direct.click()
+    return
+  }
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
+  await page.getByRole('menuitem', { name, exact: true }).click()
+}
+
 async function createTicketAt(page: Page, occurredAt: Date) {
   const description = `Hora por proxy ${crypto.randomUUID()}`
   await page.goto('/tickets/nuevo')
@@ -53,19 +64,19 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
   await createTicketAt(page, createdAt)
 
   // Las acciones directas no ofrecen hora manual.
-  await page.getByRole('button', { name: 'Comentar' }).click()
+  await clickAction(page, 'Comentar')
   await expect(page.locator('#action-occurred-at')).toHaveCount(0)
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Asignar técnico' }).click()
+  await clickAction(page, 'Asignar técnico')
   await page
     .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez' })
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await clickAction(page, 'Iniciar')
   await expect(page.locator('#action-occurred-at')).toHaveCount(0)
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -79,7 +90,7 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
 
   // Con técnico sujeto la acción sí permite fijar la hora.
   await page.locator('#proxy-technician').selectOption({ label: 'Luis Gómez' })
-  await page.getByRole('button', { name: 'Iniciar' }).click()
+  await clickAction(page, 'Iniciar')
   const startedAt = new Date(assignedAt.getTime() + 60 * 60_000)
   await expect(page.locator('#action-occurred-at')).toBeVisible()
   await page.locator('#action-occurred-at').fill(localInput(startedAt))
