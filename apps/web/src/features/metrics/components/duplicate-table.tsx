@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { CopyIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
@@ -5,19 +6,24 @@ import { EmptyState } from '@/components/shared/empty-state'
 import type { Dimension } from '../domain/dimensions'
 import { formatPercent } from '../domain/metrics'
 import type { DuplicateDimensionRow } from '../domain/metrics'
-import { dimensionLabels, metricsMessages } from '../i18n'
+import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
+import { DimensionPicker } from './dimension-picker'
 
 const t = metricsMessages.duplicates
 const hints = metricsMessages.tableHints
 
+/** Dimensiones que devuelve el endpoint de duplicados. */
+const DUPLICATE_DIMENSIONS: Dimension[] = [
+  'team',
+  'building',
+  'category',
+  'dependency',
+  'requester',
+]
+
 const columns: DataTableColumn<DuplicateDimensionRow>[] = [
-  {
-    id: 'dimension',
-    header: t.dimension,
-    cell: (row) => dimensionLabels[row.dimension as Dimension] ?? row.dimension,
-  },
   {
     id: 'name',
     header: metricsMessages.table.name,
@@ -50,29 +56,39 @@ const columns: DataTableColumn<DuplicateDimensionRow>[] = [
   },
 ]
 
-/** Detalle de duplicados por agrupación, en una sola tabla. */
+/** Detalle de duplicados por una dimensión seleccionable. */
 export function DuplicateTable({ rows }: { rows: DuplicateDimensionRow[] }) {
-  const sorted = [...rows].sort(
-    (left, right) =>
-      right.duplicateRate - left.duplicateRate ||
-      right.duplicates - left.duplicates,
-  )
+  const [dimension, setDimension] = useState<Dimension>('category')
+  const filtered = rows
+    .filter((row) => row.dimension === dimension)
+    .sort(
+      (left, right) =>
+        right.duplicateRate - left.duplicateRate ||
+        right.duplicates - left.duplicates,
+    )
   return (
     <ChartCard
       title={t.detail}
       hint={metricsMessages.chartHints.duplicatesByDimension}
     >
-      {sorted.length === 0 ? (
-        <EmptyState icon={CopyIcon} title={metricsMessages.empty} />
-      ) : (
-        <div className="max-h-80 overflow-auto">
-          <DataTable
-            columns={columns}
-            rows={sorted}
-            getRowId={(row) => `${row.dimension}:${row.dimensionId}`}
-          />
-        </div>
-      )}
+      <div className="flex flex-col gap-3">
+        <DimensionPicker
+          value={dimension}
+          onChange={setDimension}
+          dimensions={DUPLICATE_DIMENSIONS}
+        />
+        {filtered.length === 0 ? (
+          <EmptyState icon={CopyIcon} title={metricsMessages.empty} />
+        ) : (
+          <div className="max-h-80 overflow-auto">
+            <DataTable
+              columns={columns}
+              rows={filtered}
+              getRowId={(row) => row.dimensionId}
+            />
+          </div>
+        )}
+      </div>
     </ChartCard>
   )
 }
