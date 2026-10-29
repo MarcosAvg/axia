@@ -113,7 +113,7 @@ async function loadActorRow(
       ), '[]'::json) as scopes,
       (select s.timezone from public.instance_settings s limit 1) as timezone
     from public.users u
-    where u.id = ${userId}
+    where u.id = ${userId} and u.deleted_at is null
     limit 1
   `)
   return (result.rows[0] as ActorRow | undefined) ?? null

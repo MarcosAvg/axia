@@ -23,6 +23,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Instalación con secretos generados, Compose `db`/`migrate`/`app`, respaldos de base y evidencias.
 - Compose de producción con imágenes de GHCR, `.env` mínimo y `app` solo en la red `proxy` como
   `axia:3100`, sin incluir proxy ni túnel en el repositorio.
+- Eliminación de usuarios: las cuentas sin historial se borran y las que participaron en tiquets se
+  archivan para conservar la bitácora.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido

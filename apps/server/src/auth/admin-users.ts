@@ -21,7 +21,7 @@ import { generateTemporaryPassword, hashPassword } from './password.js'
 import { revokeUserSessions } from './sessions.js'
 
 export async function listUsers(db: Database, query: ListUsersQuery) {
-  const conditions: SQL[] = [sql`true`]
+  const conditions: SQL[] = [sql`u.deleted_at is null`]
   if (query.search) {
     const term = `%${query.search}%`
     conditions.push(
@@ -117,16 +117,30 @@ export async function createUser(
   return { user, temporaryPassword }
 }
 
-async function loadTarget(tx: AdminTx, targetId: string) {
+type TargetUser = {
+  id: string
+  active: boolean
+  deleted_at: Date | string | null
+}
+
+export async function loadTarget(
+  tx: AdminTx,
+  targetId: string,
+): Promise<TargetUser> {
   const result = await tx.execute(sql`
-    select id, active from public.users where id = ${targetId} for update
+    select id, active, deleted_at
+    from public.users
+    where id = ${targetId}
+    for update
   `)
-  const target = result.rows[0] as { id: string; active: boolean } | undefined
-  if (!target) throw new AppError(404, 'not_found', 'Usuario no encontrado')
+  const target = result.rows[0] as TargetUser | undefined
+  if (!target || target.deleted_at) {
+    throw new AppError(404, 'not_found', 'Usuario no encontrado')
+  }
   return target
 }
 
-async function isAdmin(tx: AdminTx, userId: string): Promise<boolean> {
+export async function isAdmin(tx: AdminTx, userId: string): Promise<boolean> {
   const result = await tx.execute(sql`
     select count(*)::int as count
     from public.user_roles ur
@@ -231,9 +245,12 @@ export async function resetPassword(
 
   const targetIsAdmin = await db.execute(sql`
     select 1
-    from public.user_roles ur
+    from public.users u
+    join public.user_roles ur on ur.user_id = u.id
     join public.roles r on r.id = ur.role_id
-    where ur.user_id = ${targetId} and r.name = 'administrator'
+    where u.id = ${targetId}
+      and u.deleted_at is null
+      and r.name = 'administrator'
     limit 1
   `)
   if (targetIsAdmin.rows[0] && !can(actor, 'role.manage')) {
@@ -251,7 +268,7 @@ export async function resetPassword(
     set password_hash = ${passwordHash},
         must_change_password = true,
         password_changed_at = now()
-    where id = ${targetId}
+    where id = ${targetId} and deleted_at is null
     returning id
   `)
   if (result.rowCount !== 1) {
@@ -263,7 +280,7 @@ export async function resetPassword(
 
 export async function revokeSessionsForUser(db: Database, targetId: string) {
   const result = await db.execute(sql`
-    select 1 from public.users where id = ${targetId}
+    select 1 from public.users where id = ${targetId} and deleted_at is null
   `)
   if (result.rowCount !== 1) {
     throw new AppError(404, 'not_found', 'Usuario no encontrado')

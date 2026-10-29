@@ -176,6 +176,17 @@ async function registerAdminUserRoutes(
     if (body.active === false || body.roleIds) events?.disconnectUser(id)
     return { user }
   })
+
+  app.delete(
+    '/api/admin/users/:id',
+    { preHandler: admin },
+    async (request, reply) => {
+      const { id } = idParamsSchema.parse(request.params)
+      await auth.deleteUser(currentActor(request), id)
+      events?.disconnectUser(id)
+      return reply.status(204).send()
+    },
+  )
 }
 
 async function registerAdminAccountRoutes(

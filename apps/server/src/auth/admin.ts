@@ -7,6 +7,7 @@ import {
   revokeSessionsForUser,
   updateUser,
 } from './admin-users.js'
+import { deleteUser } from './admin-users-delete.js'
 
 export function createAdminService(db: Database) {
   return {
@@ -21,6 +22,8 @@ export function createAdminService(db: Database) {
       targetId: string,
       input: Parameters<typeof updateUser>[3],
     ) => updateUser(db, actor, targetId, input),
+    deleteUser: (actor: Parameters<typeof deleteUser>[1], targetId: string) =>
+      deleteUser(db, actor, targetId),
     resetPassword: (
       actor: Parameters<typeof resetPassword>[1],
       targetId: string,

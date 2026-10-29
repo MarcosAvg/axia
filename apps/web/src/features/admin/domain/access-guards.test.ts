@@ -3,6 +3,7 @@ import type { Profile, Role, UserRole } from './access'
 import {
   activeAdminIds,
   canDeactivateProfile,
+  canDeleteProfile,
   canDeactivateRole,
   canEditRolePermissions,
   canRemoveUserRole,
@@ -100,6 +101,26 @@ describe('canDeactivateProfile', () => {
   })
 })
 
+describe('canDeleteProfile', () => {
+  it('bloquea eliminar la propia cuenta', () => {
+    expect(
+      canDeleteProfile(rosa, { ...base, assignments: [rosaAdmin] }),
+    ).toEqual({ allowed: false, reason: 'self-delete' })
+  })
+
+  it('bloquea eliminar al último administrador', () => {
+    expect(
+      canDeleteProfile(sergio, { ...base, assignments: [sergioAdmin] }),
+    ).toEqual({ allowed: false, reason: 'last-admin' })
+  })
+
+  it('permite eliminar a alguien sin rol administrativo', () => {
+    expect(
+      canDeleteProfile(ana, { ...base, assignments: [rosaAdmin] }),
+    ).toEqual({ allowed: true })
+  })
+})
+
 describe('canRemoveUserRole', () => {
   it('bloquea quitar el último rol administrativo activo', () => {
     expect(
@@ -148,6 +169,7 @@ describe('rol administrativo', () => {
 describe('guardMessage', () => {
   it('traduce cada motivo', () => {
     expect(guardMessage('self-deactivate')).toContain('propia cuenta')
+    expect(guardMessage('self-delete')).toContain('propia cuenta')
     expect(guardMessage('last-admin')).toContain('administradores')
     expect(guardMessage('admin-role')).toContain('protegido')
   })

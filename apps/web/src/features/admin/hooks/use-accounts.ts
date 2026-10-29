@@ -6,8 +6,11 @@ import type { CreateUserInput } from '../api/users-api'
 import type { LinkablePerson, Profile, Role, UserRole } from '../domain/access'
 import {
   canDeactivateProfile,
+  canDeleteProfile,
   canRemoveUserRole,
   guardMessage,
+  type AccessContext,
+  type GuardResult,
 } from '../domain/access-guards'
 import {
   useAssignUserRole,
@@ -20,6 +23,7 @@ import {
 } from './use-access'
 import {
   useCreateUser,
+  useDeleteUser,
   useResetUserPassword,
   useRevokeUserSessions,
   useUserAccounts,
@@ -71,6 +75,21 @@ interface AccountsActionsInput {
   assignmentList: UserRole[]
 }
 
+function accessContext(input: AccountsActionsInput): AccessContext {
+  return {
+    profiles: input.profileList,
+    roles: input.roleList,
+    assignments: input.assignmentList,
+    currentUserId: input.currentUserId,
+  }
+}
+
+function allowOrToast(guard: GuardResult): boolean {
+  if (guard.allowed) return true
+  toast.error(guardMessage(guard.reason))
+  return false
+}
+
 /** Estado de edición y guardarraíles de las cuentas. */
 export function useAccountsActions(input: AccountsActionsInput) {
   const assign = useAssignUserRole()
@@ -82,17 +101,9 @@ export function useAccountsActions(input: AccountsActionsInput) {
   const [sort, setSort] = useState<SortState | null>(null)
 
   function requestToggle(profile: Profile) {
-    const guard = canDeactivateProfile(profile, {
-      profiles: input.profileList,
-      roles: input.roleList,
-      assignments: input.assignmentList,
-      currentUserId: input.currentUserId,
-    })
-    if (!guard.allowed) {
-      toast.error(guardMessage(guard.reason))
-      return
+    if (allowOrToast(canDeactivateProfile(profile, accessContext(input)))) {
+      setConfirming(profile)
     }
-    setConfirming(profile)
   }
 
   function confirmToggle() {
@@ -101,6 +112,10 @@ export function useAccountsActions(input: AccountsActionsInput) {
       { id: confirming.id, active: !confirming.active },
       { onSuccess: () => setConfirming(null) },
     )
+  }
+
+  function requestDelete(profile: Profile): boolean {
+    return allowOrToast(canDeleteProfile(profile, accessContext(input)))
   }
 
   function removeRole(roleId: string) {
@@ -133,11 +148,15 @@ export function useAccountsActions(input: AccountsActionsInput) {
     toggleSort: (key: string) => setSort((current) => nextSort(current, key)),
     requestToggle,
     confirmToggle,
+    requestDelete,
     removeRole,
   }
 }
 
-export type AccountAction = { kind: 'reset' | 'revoke'; profile: Profile }
+export type AccountAction = {
+  kind: 'reset' | 'revoke' | 'delete'
+  profile: Profile
+}
 
 interface PasswordState {
   mode: 'created' | 'reset'
@@ -150,6 +169,7 @@ export function useAccountMutations() {
   const create = useCreateUser()
   const reset = useResetUserPassword()
   const revoke = useRevokeUserSessions()
+  const remove = useDeleteUser()
   const [creating, setCreating] = useState(false)
   const [action, setAction] = useState<AccountAction | null>(null)
   const [password, setPassword] = useState<PasswordState | null>(null)
@@ -186,10 +206,16 @@ export function useAccountMutations() {
     revoke.mutate(action.profile.id, { onSuccess: () => setAction(null) })
   }
 
+  function handleDelete() {
+    if (!action || action.kind !== 'delete') return
+    remove.mutate(action.profile.id, { onSuccess: () => setAction(null) })
+  }
+
   return {
     create,
     reset,
     revoke,
+    remove,
     creating,
     setCreating,
     action,
@@ -199,6 +225,7 @@ export function useAccountMutations() {
     handleCreate,
     handleReset,
     handleRevoke,
-    isActionPending: reset.isPending || revoke.isPending,
+    handleDelete,
+    isActionPending: reset.isPending || revoke.isPending || remove.isPending,
   }
 }

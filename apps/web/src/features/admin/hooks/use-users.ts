@@ -52,3 +52,10 @@ export function useRevokeUserSessions() {
     adminMessages.users.sessionsRevoked,
   )
 }
+
+export function useDeleteUser() {
+  return useUserMutation(
+    (id: string) => api.deleteUser(id),
+    adminMessages.users.deleted,
+  )
+}

@@ -20,7 +20,8 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
 - **Núcleo:** autenticación local, autorización por permisos y ámbitos, ciclo completo del tiquet,
   evidencias TUS/Sharp, tiempo real con SSE, cola offline y tiempos por acción.
 - **Administración:** usuarios, roles, catálogos, calendarios, configuración de instancia, ámbitos,
-  designaciones y métricas.
+  designaciones y métricas. Las cuentas se pueden desactivar o eliminar: sin historial se borran y
+  con historial se archivan para conservar la bitácora.
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
 - **Despliegue con Compose:** `compose.yaml` descarga las imágenes `:latest` de GHCR, deja `app` solo

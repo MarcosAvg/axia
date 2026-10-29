@@ -3,7 +3,8 @@ import type { Profile, Role, UserRole } from './access'
 /** Nombre del rol semilla que concentra la administración de la instancia. */
 const ADMIN_ROLE_NAME = 'administrator'
 
-export type GuardReason = 'self-deactivate' | 'last-admin' | 'admin-role'
+export type GuardReason =
+  'self-deactivate' | 'self-delete' | 'last-admin' | 'admin-role'
 
 export interface GuardResult {
   allowed: boolean
@@ -72,6 +73,26 @@ export function canDeactivateProfile(
   return ALLOWED
 }
 
+/** Una cuenta no puede eliminarse a sí misma ni dejar la instancia sin administradores. */
+export function canDeleteProfile(
+  profile: Profile,
+  context: AccessContext,
+): GuardResult {
+  if (profile.id === context.currentUserId) {
+    return { allowed: false, reason: 'self-delete' }
+  }
+  if (!profile.active) return ALLOWED
+  const admins = activeAdminIds(
+    context.profiles,
+    context.roles,
+    context.assignments,
+  )
+  if (admins.size <= 1 && admins.has(profile.id)) {
+    return { allowed: false, reason: 'last-admin' }
+  }
+  return ALLOWED
+}
+
 /** Quitar el rol administrativo no puede dejar la instancia sin administradores. */
 export function canRemoveUserRole(
   userId: string,
@@ -107,6 +128,8 @@ export function guardMessage(reason: GuardReason | undefined): string {
   switch (reason) {
     case 'self-deactivate':
       return 'No puedes desactivar tu propia cuenta.'
+    case 'self-delete':
+      return 'No puedes eliminar tu propia cuenta.'
     case 'last-admin':
       return 'La instancia quedaría sin administradores activos.'
     case 'admin-role':

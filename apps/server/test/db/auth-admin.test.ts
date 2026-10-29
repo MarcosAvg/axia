@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
@@ -126,6 +127,106 @@ describe('user deactivation', () => {
       'PersonPassword123!',
     )
     expect(inactiveLogin.statusCode).toBe(401)
+  })
+})
+
+describe('user deletion without history', () => {
+  it('deletes an unused user and frees the username', async () => {
+    const adminCookie = await setupAdmin(context.app)
+    const requesterRole = await roleIdByName(
+      context.app,
+      adminCookie,
+      'requester',
+    )
+    const created = await createUser(context.app, adminCookie, 'persona', [
+      requesterRole,
+    ])
+
+    const deleted = await context.app.inject({
+      method: 'DELETE',
+      url: `/api/admin/users/${created.user.id}`,
+      headers: headers(adminCookie),
+    })
+    expect(deleted.statusCode).toBe(204)
+
+    const missing = await login(
+      context.app,
+      'persona',
+      created.temporaryPassword,
+    )
+    expect(missing.statusCode).toBe(401)
+
+    const list = await context.app.inject({
+      method: 'GET',
+      url: '/api/admin/users',
+      headers: headers(adminCookie),
+    })
+    expect(
+      (list.json() as { items: Array<{ id: string }> }).items.some(
+        (item) => item.id === created.user.id,
+      ),
+    ).toBe(false)
+
+    const recreated = await createUser(context.app, adminCookie, 'persona', [
+      requesterRole,
+    ])
+    expect(recreated.user.username).toBe('persona')
+  })
+})
+
+describe('user deletion with history', () => {
+  it('archives a user with history and keeps their name', async () => {
+    const adminCookie = await setupAdmin(context.app)
+    const requesterRole = await roleIdByName(
+      context.app,
+      adminCookie,
+      'requester',
+    )
+    const created = await createUser(context.app, adminCookie, 'persona', [
+      requesterRole,
+    ])
+
+    await context.db.execute(sql`
+      insert into public.idempotency_keys (client_request_id, actor_id, operation)
+      values (${crypto.randomUUID()}, ${created.user.id}, 'test')
+    `)
+
+    const deleted = await context.app.inject({
+      method: 'DELETE',
+      url: `/api/admin/users/${created.user.id}`,
+      headers: headers(adminCookie),
+    })
+    expect(deleted.statusCode).toBe(204)
+
+    const archived = await context.db.execute(sql`
+      select username, full_name, active, deleted_at
+      from public.users
+      where id = ${created.user.id}
+    `)
+    const row = archived.rows[0] as {
+      username: string
+      full_name: string
+      active: boolean
+      deleted_at: Date | null
+    }
+    expect(row.full_name).toBe('Persona persona')
+    expect(row.active).toBe(false)
+    expect(row.username).toMatch(/^deleted-/)
+    expect(row.deleted_at).not.toBeNull()
+  })
+})
+
+describe('user deletion protections', () => {
+  it('protects the own account from deletion', async () => {
+    const adminCookie = await setupAdmin(context.app)
+    const adminUserId = await adminId(context.app, adminCookie)
+
+    const deleted = await context.app.inject({
+      method: 'DELETE',
+      url: `/api/admin/users/${adminUserId}`,
+      headers: headers(adminCookie),
+    })
+    expect(deleted.statusCode).toBe(409)
   })
 })
 

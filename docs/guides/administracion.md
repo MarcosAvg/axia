@@ -5,12 +5,16 @@ el detalle de permisos está en [`../reference/permisos.md`](../reference/permis
 
 ## Usuarios
 
-En `/admin/usuarios` se crean cuentas, se asignan roles, se activan o desactivan y se restablecen
-contraseñas.
+En `/admin/usuarios` se crean cuentas, se asignan roles, se activan o desactivan, se eliminan y se
+restablecen contraseñas.
 
 - Una cuenta nueva recibe una contraseña temporal y debe cambiarla al entrar.
-- La última cuenta administradora activa no se puede desactivar ni degradar.
-- Una cuenta no puede quitarse a sí misma el rol de administrador.
+- **Desactivar** bloquea el acceso y revoca las sesiones, pero conserva la cuenta visible.
+- **Eliminar** quita la cuenta de la lista y libera el nombre de usuario. Si la cuenta no tiene
+  historial, se borra; si participó en tiquets, se conserva de forma lógica para que la bitácora
+  mantenga su nombre.
+- La última cuenta administradora activa no se puede desactivar, eliminar ni degradar.
+- Una cuenta no puede quitarse a sí misma el rol de administrador ni eliminarse.
 - El restablecimiento de contraseña revoca las sesiones de esa cuenta.
 - Los vínculos con solicitantes y técnicos se gestionan en `/admin/ambitos`.
 

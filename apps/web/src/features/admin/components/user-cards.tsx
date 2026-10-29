@@ -11,6 +11,7 @@ interface UserCardActions {
   onEditRoles?: (profile: Profile) => void
   onResetPassword: (profile: Profile) => void
   onRevokeSessions: (profile: Profile) => void
+  onDelete: (profile: Profile) => void
 }
 
 export function RoleChips({ labels }: { labels: string[] }) {
@@ -77,6 +78,7 @@ function UserCard({
   onEditRoles,
   onResetPassword,
   onRevokeSessions,
+  onDelete,
 }: UserCardActions & {
   profile: Profile
   roles: Role[]
@@ -119,6 +121,7 @@ function UserCard({
           onToggle={() => onToggleActive(profile)}
           onResetPassword={() => onResetPassword(profile)}
           onRevokeSessions={() => onRevokeSessions(profile)}
+          onDelete={() => onDelete(profile)}
         />
       </div>
     </li>

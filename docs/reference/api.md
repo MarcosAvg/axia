@@ -84,7 +84,7 @@ y `createdAt`.
 
 | Método | Ruta | Uso |
 |---|---|---|
-| `GET/POST/PATCH` | `/api/admin/users` / `/api/admin/users/:id` | Usuarios |
+| `GET/POST/PATCH/DELETE` | `/api/admin/users` / `/api/admin/users/:id` | Usuarios; `DELETE` borra o archiva |
 | `POST` | `/api/admin/users/:id/reset-password` | Restablecer contraseña |
 | `POST` | `/api/admin/users/:id/revoke-sessions` | Revocar sesiones |
 | `GET` | `/api/admin/roles` | Roles |

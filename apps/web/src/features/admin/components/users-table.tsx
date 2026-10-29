@@ -23,6 +23,7 @@ interface UsersTableProps {
   onEditRoles?: (profile: Profile) => void
   onResetPassword: (profile: Profile) => void
   onRevokeSessions: (profile: Profile) => void
+  onDelete: (profile: Profile) => void
 }
 
 function nameColumn(): DataTableColumn<Profile> {
@@ -124,6 +125,7 @@ interface ActionsColumnOptions {
   onToggleActive: (profile: Profile) => void
   onResetPassword: (profile: Profile) => void
   onRevokeSessions: (profile: Profile) => void
+  onDelete: (profile: Profile) => void
 }
 
 function actionsColumn({
@@ -131,6 +133,7 @@ function actionsColumn({
   onToggleActive,
   onResetPassword,
   onRevokeSessions,
+  onDelete,
 }: ActionsColumnOptions): DataTableColumn<Profile> {
   return {
     id: 'actions',
@@ -147,10 +150,59 @@ function actionsColumn({
           onToggle={() => onToggleActive(profile)}
           onResetPassword={() => onResetPassword(profile)}
           onRevokeSessions={() => onRevokeSessions(profile)}
+          onDelete={() => onDelete(profile)}
         />
       </div>
     ),
   }
+}
+
+function EmptyUsers() {
+  return (
+    <div className="rounded-xl border bg-card">
+      <EmptyState icon={UsersIcon} title={adminMessages.list.empty} />
+    </div>
+  )
+}
+
+type ColumnsInput = Pick<
+  UsersTableProps,
+  | 'roles'
+  | 'assignments'
+  | 'requesters'
+  | 'technicians'
+  | 'onToggleActive'
+  | 'onEditRoles'
+  | 'onResetPassword'
+  | 'onRevokeSessions'
+  | 'onDelete'
+>
+
+function columnsFor({
+  roles,
+  assignments,
+  requesters,
+  technicians,
+  onToggleActive,
+  onEditRoles,
+  onResetPassword,
+  onRevokeSessions,
+  onDelete,
+}: ColumnsInput): DataTableColumn<Profile>[] {
+  return [
+    nameColumn(),
+    lastAccessColumn(),
+    rolesColumn(roles, assignments),
+    linkColumn(requesters, technicians),
+    activeColumn(onToggleActive),
+    actionsColumn({
+      onEditRoles,
+      onToggleActive,
+      onResetPassword,
+      onRevokeSessions,
+      onDelete,
+    }),
+  ]
 }
 
 /** Tabla de usuarios: nombre, contacto, roles, vínculo, estado y acciones. */
@@ -166,28 +218,21 @@ export function UsersTable({
   onEditRoles,
   onResetPassword,
   onRevokeSessions,
+  onDelete,
 }: UsersTableProps) {
-  if (profiles.length === 0) {
-    return (
-      <div className="rounded-xl border bg-card">
-        <EmptyState icon={UsersIcon} title={adminMessages.list.empty} />
-      </div>
-    )
-  }
+  if (profiles.length === 0) return <EmptyUsers />
 
-  const columns: DataTableColumn<Profile>[] = [
-    nameColumn(),
-    lastAccessColumn(),
-    rolesColumn(roles, assignments),
-    linkColumn(requesters, technicians),
-    activeColumn(onToggleActive),
-    actionsColumn({
-      onEditRoles,
-      onToggleActive,
-      onResetPassword,
-      onRevokeSessions,
-    }),
-  ]
+  const columns = columnsFor({
+    roles,
+    assignments,
+    requesters,
+    technicians,
+    onToggleActive,
+    onEditRoles,
+    onResetPassword,
+    onRevokeSessions,
+    onDelete,
+  })
 
   return (
     <>
@@ -201,6 +246,7 @@ export function UsersTable({
         onEditRoles={onEditRoles}
         onResetPassword={onResetPassword}
         onRevokeSessions={onRevokeSessions}
+        onDelete={onDelete}
       />
       <div className="hidden lg:block">
         <DataTable

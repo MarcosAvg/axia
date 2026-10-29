@@ -91,20 +91,35 @@ function AccountActionDialog({
   if (!action) return null
   const { users } = adminMessages
   const isReset = action.kind === 'reset'
+  const isDelete = action.kind === 'delete'
   return (
     <ConfirmDialog
       open
       onOpenChange={(open) => {
         if (!open) onClose()
       }}
-      title={isReset ? users.resetTitle : users.revokeTitle}
-      description={
-        isReset
-          ? users.resetDescription(action.profile.fullName)
-          : users.revokeDescription(action.profile.fullName)
+      title={
+        isDelete
+          ? users.deleteTitle
+          : isReset
+            ? users.resetTitle
+            : users.revokeTitle
       }
-      confirmLabel={isReset ? users.resetPassword : users.revokeSessions}
-      destructive={isReset}
+      description={
+        isDelete
+          ? users.deleteDescription(action.profile.fullName)
+          : isReset
+            ? users.resetDescription(action.profile.fullName)
+            : users.revokeDescription(action.profile.fullName)
+      }
+      confirmLabel={
+        isDelete
+          ? users.delete
+          : isReset
+            ? users.resetPassword
+            : users.revokeSessions
+      }
+      destructive={isReset || isDelete}
       isPending={isPending}
       onConfirm={onConfirm}
     />
@@ -162,7 +177,9 @@ function AccountDialogs({
         onConfirm={
           mutations.action?.kind === 'reset'
             ? mutations.handleReset
-            : mutations.handleRevoke
+            : mutations.action?.kind === 'delete'
+              ? mutations.handleDelete
+              : mutations.handleRevoke
         }
         onClose={() => mutations.setAction(null)}
       />
@@ -192,12 +209,14 @@ function AccountsContent({
   mutations,
   visible,
   onEdit,
+  onDelete,
 }: {
   data: ReturnType<typeof useAccountsData>
   actions: ReturnType<typeof useAccountsActions>
   mutations: ReturnType<typeof useAccountMutations>
   visible: Profile[]
   onEdit?: (profile: Profile) => void
+  onDelete: (profile: Profile) => void
 }) {
   if (data.profiles.isLoading || data.accounts.isLoading)
     return <LoadingList rows={4} />
@@ -213,8 +232,19 @@ function AccountsContent({
       onEdit={onEdit}
       onReset={(profile) => mutations.setAction({ kind: 'reset', profile })}
       onRevoke={(profile) => mutations.setAction({ kind: 'revoke', profile })}
+      onDelete={onDelete}
     />
   )
+}
+
+function requestDeleteAction(
+  actions: ReturnType<typeof useAccountsActions>,
+  mutations: ReturnType<typeof useAccountMutations>,
+  profile: Profile,
+) {
+  if (actions.requestDelete(profile)) {
+    mutations.setAction({ kind: 'delete', profile })
+  }
 }
 
 export function AccountsPanel() {
@@ -251,6 +281,7 @@ export function AccountsPanel() {
         mutations={mutations}
         visible={visible}
         onEdit={canEditRoles ? actions.setEditing : undefined}
+        onDelete={(profile) => requestDeleteAction(actions, mutations, profile)}
       />
       <AccountsRoleDialog
         profile={actions.editing}

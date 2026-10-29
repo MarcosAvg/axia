@@ -561,6 +561,10 @@ export const users = pgTable(
     passwordHash: text('password_hash').notNull(),
     mustChangePassword: boolean('must_change_password').default(true).notNull(),
     active: boolean().default(true).notNull(),
+    deletedAt: timestamp('deleted_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
     passwordChangedAt: timestamp('password_changed_at', {
       withTimezone: true,
       mode: 'string',

@@ -4,6 +4,7 @@ import {
   LogOutIcon,
   PencilIcon,
   PowerIcon,
+  Trash2Icon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,6 +24,19 @@ interface RowActionsProps {
   onToggle: () => void
   onResetPassword?: () => void
   onRevokeSessions?: () => void
+  onDelete?: () => void
+}
+
+function DeleteMenuItem({ onDelete }: { onDelete: () => void }) {
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+        <Trash2Icon />
+        {adminMessages.users.deleteUser}
+      </DropdownMenuItem>
+    </>
+  )
 }
 
 /** Acciones de una fila en un menú compacto. */
@@ -34,6 +48,7 @@ export function RowActions({
   onToggle,
   onResetPassword,
   onRevokeSessions,
+  onDelete,
 }: RowActionsProps) {
   const { actions, users } = adminMessages
   const toggleLabel = active ? actions.deactivate : actions.activate
@@ -75,6 +90,7 @@ export function RowActions({
             {users.revokeSessions}
           </DropdownMenuItem>
         ) : null}
+        {onDelete ? <DeleteMenuItem onDelete={onDelete} /> : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

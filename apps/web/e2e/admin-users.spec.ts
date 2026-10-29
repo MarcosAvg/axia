@@ -59,6 +59,26 @@ async function resetAccount(page: Page, fullName: string): Promise<string> {
   return temporaryPasswordFromDialog(page)
 }
 
+test('elimina una cuenta nueva', async ({ page }) => {
+  const suffix = crypto.randomUUID().slice(0, 8)
+  const username = `e2e.delete.${suffix}`
+  const fullName = `Usuario eliminado ${suffix}`
+
+  await signIn(page, 'demo.admin')
+  await page.goto('/admin/usuarios')
+  await createAccount(page, username, fullName)
+  await expect(page.getByRole('table').getByText(fullName)).toBeVisible()
+
+  await page.getByRole('button', { name: `Editar roles: ${fullName}` }).click()
+  await page.getByRole('menuitem', { name: 'Eliminar cuenta' }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Eliminar' })
+    .click()
+
+  await expect(page.getByRole('table').getByText(fullName)).toHaveCount(0)
+})
+
 test('crea una cuenta, restablece su contraseña y la cambia desde el perfil', async ({
   page,
 }) => {

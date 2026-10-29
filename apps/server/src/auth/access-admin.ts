@@ -23,7 +23,7 @@ async function listAccessRows(db: Database) {
       sql`select role_id, permission_id, scope from public.role_permissions`,
     ),
     db.execute(
-      sql`select id, full_name, phone, active from public.users order by full_name`,
+      sql`select id, full_name, phone, active from public.users where deleted_at is null order by full_name`,
     ),
     db.execute(sql`select user_id, role_id from public.user_roles`),
     db.execute(

@@ -54,7 +54,7 @@ export type AuthResult = {
 
 async function setupStatus(db: Database) {
   const result = await db.execute(sql`
-    select count(*)::int as count from public.users
+    select count(*)::int as count from public.users where deleted_at is null
   `)
   const row = result.rows[0] as { count: number } | undefined
   return { required: !row || row.count === 0 }
@@ -71,7 +71,7 @@ async function setup(
   const userId = await db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(${SETUP_LOCK_KEY})`)
     const count = await tx.execute(sql`
-      select count(*)::int as count from public.users
+      select count(*)::int as count from public.users where deleted_at is null
     `)
     const countRow = count.rows[0] as { count: number } | undefined
     if (!countRow || countRow.count > 0) {
@@ -124,7 +124,7 @@ async function login(
   const result = await db.execute(sql`
     select id, username, full_name, password_hash, must_change_password, active
     from public.users
-    where username = ${input.username}
+    where username = ${input.username} and deleted_at is null
     limit 1
   `)
   const user = result.rows[0] as LoginUserRow | undefined

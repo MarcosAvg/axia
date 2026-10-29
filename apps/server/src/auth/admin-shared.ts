@@ -103,7 +103,10 @@ export async function assertAnotherAdmin(tx: AdminTx, targetId: string) {
     from public.users u
     join public.user_roles ur on ur.user_id = u.id
     join public.roles r on r.id = ur.role_id
-    where r.name = 'administrator' and u.active and u.id <> ${targetId}
+    where r.name = 'administrator'
+      and u.active
+      and u.deleted_at is null
+      and u.id <> ${targetId}
   `)
   const row = result.rows[0] as { count: number } | undefined
   if (!row || row.count === 0) {

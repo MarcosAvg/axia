@@ -48,3 +48,7 @@ export async function resetUserPassword(
 export async function revokeUserSessions(id: string): Promise<void> {
   await apiFetch(`/api/admin/users/${id}/revoke-sessions`, { method: 'POST' })
 }
+
+export async function deleteUser(id: string): Promise<void> {
+  await apiFetch(`/api/admin/users/${id}`, { method: 'DELETE' })
+}

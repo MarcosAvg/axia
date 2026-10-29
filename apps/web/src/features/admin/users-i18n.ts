@@ -49,6 +49,12 @@ export const usersMessages = {
   sessionsRevoked: 'Sesiones revocadas.',
   resetPassword: 'Restablecer contraseña',
   revokeSessions: 'Revocar sesiones',
+  deleteUser: 'Eliminar cuenta',
+  deleteTitle: 'Eliminar cuenta',
+  deleteDescription: (name: string) =>
+    `La cuenta ${name} dejará de aparecer y no podrá iniciar sesión. Se revocarán sus sesiones y se quitarán sus roles; el historial de tiquets conserva su nombre.`,
+  delete: 'Eliminar',
+  deleted: 'Cuenta eliminada.',
   resetTitle: 'Restablecer contraseña',
   resetDescription: (name: string) =>
     `Se generará una contraseña temporal para ${name} y se cerrarán sus sesiones.`,

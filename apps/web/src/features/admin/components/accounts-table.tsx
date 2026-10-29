@@ -12,6 +12,7 @@ export function AccountsTable({
   onEdit,
   onReset,
   onRevoke,
+  onDelete,
 }: {
   visible: Profile[]
   data: ReturnType<typeof useAccountsData>
@@ -21,6 +22,7 @@ export function AccountsTable({
   onEdit?: Parameters<typeof UsersTable>[0]['onEditRoles']
   onReset: Parameters<typeof UsersTable>[0]['onResetPassword']
   onRevoke: Parameters<typeof UsersTable>[0]['onRevokeSessions']
+  onDelete: Parameters<typeof UsersTable>[0]['onDelete']
 }) {
   return (
     <UsersTable
@@ -35,6 +37,7 @@ export function AccountsTable({
       onEditRoles={onEdit}
       onResetPassword={onReset}
       onRevokeSessions={onRevoke}
+      onDelete={onDelete}
     />
   )
 }
