@@ -33,8 +33,8 @@ final del SPA será posterior.
 - Los respaldos de base y evidencias se hacen y se prueban por separado.
 - La rotación de contraseñas requiere actualizar `.env`, el rol correspondiente y reiniciar el
   servicio afectado.
-- `install.sh` es solo para entornos locales o de prueba; producción requiere revisar el `.env`, el
-  reverse proxy y `TRUST_PROXY`.
+- `install.sh` es solo para entornos locales o de prueba; producción requiere revisar el `.env` y
+  conectar Nginx Proxy Manager o Cloudflare Tunnel a la red `proxy`.
 
 ## Alternativas descartadas
 

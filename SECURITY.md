@@ -41,8 +41,8 @@ Entran en alcance, entre otros:
   del repositorio.
 - El rol de aplicación no tiene permisos de DDL. Las migraciones usan el rol dueño.
 - `.env`, dumps y el volumen de evidencias no se versionan.
-- El reverse proxy termina TLS y reenvía `X-Forwarded-*`; `TRUST_PROXY=true` solo se activa en una
-  red de confianza.
+- El reverse proxy o túnel termina TLS. `app` no publica puertos y `TRUST_PROXY=true` está fijo
+  porque la única entrada es la red Docker `proxy`.
 - Las sesiones usan cookies `HttpOnly`, `SameSite=Lax` y expiración absoluta e inactiva.
 - Los respaldos se cifran o se almacenan en un medio con acceso restringido.
 - Se revisan los registros y se rota cualquier secreto que haya podido exponerse.

@@ -76,18 +76,13 @@ docker compose up -d
 `compose.yaml` descarga las imágenes de GHCR, arranca `db`, ejecuta `migrate` y arranca `app` cuando
 la migración termina. No hay que construir imágenes en el servidor ni usar `compose.dev.yaml`.
 
-`app` se conecta a la red `${PROXY_NETWORK:-proxy}` y publica `127.0.0.1:${APP_PORT:-3100}`. Un proxy
-contenedor usa `app:3100` en la red `proxy`; un proxy del host apunta al puerto de loopback. Si el
-proxy ya creó una red con otro nombre, define `PROXY_NETWORK` en `.env`. El contrato completo está en
-[`../guides/operacion.md`](../guides/operacion.md#reverse-proxy).
+`app` no publica puertos: queda solo en la red Docker `proxy` como `axia:3100`. Conecta ahí tu
+Nginx Proxy Manager o tu contenedor de `cloudflared`. La guía concreta está en
+[`../../deploy/README.md`](../../deploy/README.md).
 
-`TRUST_PROXY=true` es obligatorio cuando el proxy termina TLS y reenvía `X-Forwarded-*`: sin él, el
-guard de origen rechaza las peticiones `POST`/`PATCH`. Actívalo solo si la única vía a `app` es el
-proxy de confianza.
-
-Las imágenes de GHCR son públicas y no requieren autenticación. En actualizaciones,
-`docker compose pull` descarga la nueva imagen y `docker compose up -d` vuelve a ejecutar `migrate`
-antes de arrancar `app`.
+El compose fija `TRUST_PROXY=true` porque la única entrada es ese proxy. Las imágenes de GHCR son
+públicas y no requieren autenticación. En actualizaciones, `docker compose pull` descarga la nueva
+imagen y `docker compose up -d` vuelve a ejecutar `migrate` antes de arrancar `app`.
 
 ## Semilla de demostración
 
@@ -114,9 +109,6 @@ reiniciar la API o el contenedor no la cambia. Los usuarios son `demo.admin`, `d
 |---|---|
 | `POSTGRES_OWNER_PASSWORD` | Rol dueño de la base; solo migraciones. Obligatoria |
 | `AXIA_APP_PASSWORD` | Rol de aplicación, sin DDL. Obligatoria |
-| `TRUST_PROXY` | `true` detrás de un proxy TLS |
-| `APP_PORT` | Puerto de loopback que publica `app` |
-| `AXIA_VERSION` | Imagen de GHCR; `latest` o un SHA |
 | `LOG_LEVEL` | Nivel de registro; opcional |
 | `MIGRATION_DATABASE_URL` | Solo scripts del host |
 | `DATABASE_URL` | Solo scripts del host |

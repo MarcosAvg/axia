@@ -11,14 +11,12 @@ Guía para desplegar, actualizar y respaldar una instalación de Axia. La instal
 | `migrate` | Aplica migraciones y termina |
 | `app` | API Fastify y SPA; volumen de evidencias |
 
-Axia no incluye reverse proxy: el TLS y el enrutamiento de borde son infraestructura de destino. La
-base no se publica nunca. El servicio `app` se conecta a la red `${PROXY_NETWORK:-proxy}` (Compose la
-crea si no existe) y además publica `127.0.0.1:${APP_PORT:-3100}`. Un proxy contenedor usa
-`app:3100` en la red `proxy`; un proxy del host usa el puerto de loopback. `app` ya sirve el SPA, su
-fallback y las cabeceras de caché; el proxy solo tiene que reenviar todo a `app`, sin servir
-estáticos por su cuenta.
+Axia no incluye reverse proxy ni túnel. La base no se publica y `app` no abre puertos en el host:
+queda solo en la red Docker `proxy` como `axia:3100`. Nginx Proxy Manager o Cloudflare Tunnel se
+configuran fuera de este compose y se encargan de TLS. El compose fija `TRUST_PROXY=true` porque la
+única vía de entrada es ese proxy.
 
-## Puesta en marcha en producción
+## Puesta en marcha
 
 ```bash
 cp .env.example .env
@@ -28,8 +26,7 @@ docker compose up -d
 ```
 
 Compose descarga las imágenes de GHCR, arranca `db`, ejecuta `migrate` y arranca `app` cuando la
-migración termina. No hay que construir imágenes en el servidor. `AXIA_VERSION` permite fijar una
-imagen; por defecto usa `latest`. Las imágenes de GHCR son públicas y no requieren autenticación.
+migración termina. No hay que construir imágenes en el servidor.
 
 Comprobaciones:
 
@@ -37,35 +34,36 @@ Comprobaciones:
 docker compose ps
 docker compose logs --tail=100 app
 docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1))"
-curl -fsS http://127.0.0.1:3100/api/health/ready
 ```
 
-La primera cuenta se crea desde `/login` o con `POST /api/setup`. La contraseña debe tener al menos
-12 caracteres.
+La primera cuenta se crea desde `/login` a través del dominio ya publicado, o con `POST /api/setup`.
+La contraseña debe tener al menos 12 caracteres.
 
-## Reverse proxy
+## Nginx Proxy Manager
 
-El proxy debe cumplir este contrato:
+Axia crea la red `proxy`. Conecta el contenedor de NPM a esa red y crea un **Proxy Host**:
 
-- **Red.** Si el proxy es un contenedor, únelo a `${PROXY_NETWORK:-proxy}` y apunta a `app:3100`.
-  Si corre en el host, apunta a `127.0.0.1:${APP_PORT:-3100}`.
-- **TLS en el borde.** Las cookies de sesión son `Secure` en producción; sin HTTPS el navegador no
-  las envía.
-- **Cabeceras.** Conservar `Host` y `Origin`, y reenviar `X-Forwarded-Proto`, `X-Forwarded-Host` y
-  `X-Forwarded-For`. Si el proxy reescribe `Host`, `X-Forwarded-Host` debe llevar el dominio
-  público.
-- **`TRUST_PROXY=true`.** Es obligatorio cuando el proxy termina TLS: el guard de origen compara
-  `Origin` con el protocolo y el host de la petición. Actívalo solo si la única vía a `app` es el
-  proxy (loopback o red privada); nunca si `app` está expuesta directamente.
-- **Tamaño de subida.** El límite del proxy debe superar `EVIDENCE_MAX_BYTES` (20 MiB por defecto)
-  con margen. Las subidas usan TUS en `/api/uploads` y necesitan `PATCH`, `HEAD` y `OPTIONS`.
-- **SSE.** `/api/events` es `text/event-stream`: desactiva el buffering y usa un timeout mayor que
-  `SSE_HEARTBEAT_MS` (15 s por defecto). No hace falta WebSocket.
-- **Caché.** No pises las cabeceras de la app: `index.html` y el service worker van con `no-cache`;
-  `/assets/*` con caché inmutable.
-- **Cookies.** Deja pasar `Cookie` y `Set-Cookie` sin reescribir dominio ni ruta.
-- **Salud.** `/api/health/ready` responde 503 hasta que la base está lista; úsalo si el proxy hace
-  comprobaciones propias.
+- Scheme: `http`.
+- Forward Hostname: `axia`.
+- Forward Port: `3100`.
+- SSL: Let's Encrypt y **Force SSL**.
+
+No hace falta configuración avanzada. NPM ya permite cuerpos de hasta 2000 MB, usa un timeout de
+90 s y reenvía `X-Forwarded-For`/`X-Forwarded-Proto`. Axia envía `X-Accel-Buffering: no` para SSE.
+Si el SSE se queda cargando, agrega `proxy_buffering off;` en Advanced. No necesitas WebSockets.
+
+Los detalles para conectar NPM a la red están en [`../../deploy/README.md`](../../deploy/README.md).
+
+## Cloudflare Tunnel
+
+Axia no incluye `cloudflared`. El túnel lo ejecuta quien despliega, conectado a la red `proxy`. En
+Cloudflare, el **Service URL** debe ser `http://axia:3100`.
+
+- No hace falta abrir puertos ni configurar un certificado de origen.
+- Cloudflare termina TLS y reenvía `X-Forwarded-Proto` y `X-Forwarded-For`.
+- El límite gratuito de subida es 100 MB; Axia usa 20 MiB por evidencia.
+- SSE funciona sin configuración adicional.
+- El `TUNNEL_TOKEN` pertenece a `cloudflared`, no al `.env` de Axia.
 
 ## Actualización
 
@@ -181,8 +179,8 @@ con los respaldos:
 
 | Variable | Rotación |
 |---|---|
-| `POSTGRES_OWNER_PASSWORD` | Cambiar el rol dueño y actualizar `MIGRATION_DATABASE_URL` |
-| `AXIA_APP_PASSWORD` | Cambiar el rol de aplicación, actualizar `DATABASE_URL` y reiniciar `app` |
+| `POSTGRES_OWNER_PASSWORD` | Cambiar el rol dueño y actualizar `.env` |
+| `AXIA_APP_PASSWORD` | Cambiar el rol de aplicación, actualizar `.env` y reiniciar `app` |
 | `AXIA_DEMO_PASSWORD` | Solo demo local; nunca en producción |
 
 Nunca se versionan `.env`, dumps ni el volumen de evidencias.

@@ -23,10 +23,10 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
   designaciones y métricas.
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
-- **Despliegue con Compose:** `compose.yaml` descarga las imágenes de GHCR, conecta `app` a la red
-  `proxy`, publica `127.0.0.1:3100` y ejecuta `migrate` antes de arrancar. El `.env` de producción es
-  mínimo; el desarrollo usa `compose.dev.yaml` y `.env.dev.example`. El contrato de proxy, la rotación
-  de logs y el hardening de `app` están documentados, y CI valida Compose y construye la imagen.
+- **Despliegue con Compose:** `compose.yaml` descarga las imágenes `:latest` de GHCR, deja `app` solo
+  en la red `proxy` con el alias `axia` y ejecuta `migrate` antes de arrancar. El `.env` de
+  producción solo pide los dos secretos; el desarrollo usa `compose.dev.yaml` y `.env.dev.example`.
+  La guía cubre Nginx Proxy Manager y Cloudflare Tunnel, y CI valida Compose y construye la imagen.
 - **UI:** escritorio y móvil por rol, navegación inferior, temas y regresión visual.
 - **Calidad:** Vitest contra PostgreSQL real, Playwright, fronteras de dependencias, knip y
   verificación de enlaces.
@@ -51,8 +51,8 @@ Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes 
 ## Pendientes operativos
 
 - Descargar y arrancar las imágenes de GHCR en un host limpio.
-- Configurar dominio, TLS y el reverse proxy elegido; apuntarlo a `127.0.0.1:3100` y activar
-  `TRUST_PROXY=true`.
+- Configurar dominio y TLS en Nginx Proxy Manager o Cloudflare Tunnel; apuntarlo a `axia:3100` en la
+  red `proxy`.
 - Programar respaldos de base y evidencias, con prueba de restauración trimestral.
 - Programar `deploy/scripts/cleanup.sh` junto con los respaldos (cron de ejemplo en
   `docs/guides/operacion.md`).

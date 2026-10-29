@@ -6,19 +6,16 @@ pruebas es `.env.dev.example`.
 
 ## Producción mínima
 
-`compose.yaml` solo exige dos secretos y el modo de proxy:
+`compose.yaml` solo exige dos secretos:
 
 | Variable | Uso |
 |---|---|
 | `POSTGRES_OWNER_PASSWORD` | Contraseña del rol dueño; obligatoria |
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
-| `TRUST_PROXY` | `true` si hay un proxy TLS delante |
-| `APP_PORT` | Opcional; puerto de loopback, `3100` por defecto |
-| `PROXY_NETWORK` | Opcional; red compartida con el proxy, `proxy` por defecto |
-| `AXIA_VERSION` | Opcional; `latest` o un SHA de GHCR |
 
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
-`.env` solo cuando se necesita cambiar el comportamiento.
+`.env` solo cuando se necesita cambiar el comportamiento. La app usa las imágenes `:latest`; para
+fijar una versión se edita `compose.yaml`.
 
 ## Base de datos
 
@@ -38,13 +35,11 @@ El resto de variables tiene valores por defecto en `compose.yaml` o en el servid
 | Variable | Valor por defecto | Uso |
 |---|---|---|
 | `HOST` | `0.0.0.0` | Interfaz de escucha |
-| `PORT` | `3100` | Puerto HTTP fuera de Compose; dentro es fijo `3100` |
-| `APP_PORT` | `3100` | Puerto de loopback que publica `compose.yaml` |
-| `PROXY_NETWORK` | `proxy` | Red compartida con el reverse proxy |
-| `AXIA_VERSION` | `latest` | Imagen de GHCR: `latest` o un SHA |
+| `PORT` | `3100` | Puerto HTTP; dentro de Compose es fijo `3100` |
+| `APP_PORT` | `3100` | Solo desarrollo local; puerto de `app` en `compose.dev.yaml` |
 | `NODE_ENV` | `development` | Compose fija `production`; el overlay de desarrollo usa `development` |
 | `LOG_LEVEL` | `info` | Nivel de registro |
-| `TRUST_PROXY` | `false` | Obligatorio con proxy TLS; solo si `app` no está expuesta directamente |
+| `TRUST_PROXY` | `true` | Fijo en producción; `false` en el overlay de desarrollo |
 | `BODY_LIMIT_BYTES` | `1048576` | Límite del cuerpo JSON |
 | `HEALTH_TIMEOUT_MS` | `2000` | Timeout de salud |
 | `SHUTDOWN_TIMEOUT_MS` | `10000` | Cierre ordenado |

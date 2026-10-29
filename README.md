@@ -127,11 +127,11 @@ axia/
 ## Despliegue
 
 La instalación está en
-[`docs/start/instalacion.md`](docs/start/instalacion.md) y la operación en
-[`docs/guides/operacion.md`](docs/guides/operacion.md). El despliegue en un servidor real lo ejecuta
-la persona. En producción, `docker compose up -d` descarga las imágenes de GHCR, aplica migraciones
-y arranca la app; no se construye nada en el servidor. El stack no incluye reverse proxy: `app` se
-publica solo en `127.0.0.1:3100` para el proxy del host.
+[`docs/start/instalacion.md`](docs/start/instalacion.md) y la guía de despliegue en
+[`deploy/README.md`](deploy/README.md). El despliegue en un servidor real lo ejecuta la persona. En
+producción, `docker compose up -d` descarga las imágenes de GHCR, aplica migraciones y arranca la
+app; no se construye nada en el servidor. El stack no incluye NPM ni `cloudflared`: `app` queda solo
+en la red Docker `proxy` como `axia:3100` para que el proxy o túnel del usuario lo alcance.
 
 ## Contribución
 

@@ -21,8 +21,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Indicadores de tiempos, SLA, duplicados, satisfacción, carga por técnico y ruteo.
 - Semilla de referencia en migraciones y semilla demo explícita, idempotente y sin contraseña fija.
 - Instalación con secretos generados, Compose `db`/`migrate`/`app`, respaldos de base y evidencias.
-- Compose de producción con imágenes de GHCR, `.env` mínimo y publicación de `app` solo en loopback
-  para conectar un reverse proxy del host, sin incluirlo en el repositorio.
+- Compose de producción con imágenes de GHCR, `.env` mínimo y `app` solo en la red `proxy` como
+  `axia:3100`, sin incluir proxy ni túnel en el repositorio.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido
@@ -74,13 +74,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   carga cuando hay sesión. La pantalla de acceso ya no descarga el feature completo de tiquets.
 - `pnpm dev:api` y el servidor E2E guardan evidencias en el repositorio, no en `/data/evidence`, que
   solo existe dentro del contenedor. Esto corrige el error de instalación en el login local.
-- Compose: producción descarga las imágenes de GHCR, conecta `app` a la red `proxy`, publica
-  `127.0.0.1:3100` y ejecuta `migrate` antes de arrancar. El `.env` de producción es mínimo, el
-  desarrollo usa `.env.dev.example` y `compose.dev.yaml`, y CI valida Compose y construye la imagen.
-  Se mantienen rotación de logs, cierre ordenado de PostgreSQL y hardening de `app`.
+- Compose: producción descarga las imágenes `:latest` de GHCR, deja `app` solo en la red `proxy` con
+  el alias `axia` y ejecuta `migrate` antes de arrancar. El `.env` de producción solo pide los dos
+  secretos; el desarrollo usa `.env.dev.example` y `compose.dev.yaml`. La guía cubre Nginx Proxy
+  Manager y Cloudflare Tunnel. Se mantienen rotación de logs, cierre ordenado de PostgreSQL y
+  hardening de `app`.
 
 ### Retirado
 
+- Los envoltorios `deploy/scripts/up.sh`, `down.sh` y `migrate.sh`; `docker compose` cubre esos pasos.
 - El runtime y las herramientas del stack anterior.
 - La suite de pruebas ligada al esquema anterior; las invariantes se prueban contra PostgreSQL real.
 - Las importaciones e integraciones externas quedan deshabilitadas en esta versión.

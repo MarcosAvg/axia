@@ -16,6 +16,9 @@ services:
       dockerfile: apps/server/Dockerfile
       target: app
     image: axia-app:local
+    ports:
+      - '127.0.0.1:${APP_PORT:-3100}:3100'
     environment:
       NODE_ENV: development
       LOG_LEVEL: ${LOG_LEVEL:-debug}
+      TRUST_PROXY: 'false'
