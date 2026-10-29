@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getTicketDetail } from '../../src/tickets/detail.js'
@@ -34,6 +35,27 @@ describe('ticket detail', () => {
       priorityPosition: 3,
       teamName: 'Equipo A',
     })
+  })
+
+  it('returns the time of each cycle phase in minutes', async () => {
+    const { db, actors, ids } = fixtures
+    await db.execute(sql`
+      update public.tickets set reported_at = now() - interval '3 hours'
+      where id = ${ids.ticketA1}
+    `)
+    await db.execute(sql`
+      insert into public.time_spans (ticket_id, cycle, kind, started_at, ended_at)
+      values (
+        ${ids.ticketA1}, 1, 'active_work',
+        now() - interval '90 minutes', now() - interval '30 minutes'
+      )
+    `)
+
+    const ticket = await getTicketDetail(db, actors.admin, ids.ticketA1)
+
+    expect(ticket?.cycleTimes.active).toBeCloseTo(60, 0)
+    expect(ticket?.cycleTimes.response).toBe(0)
+    expect(ticket?.cycleTimes.total).toBeCloseTo(180, 0)
   })
 
   it('returns null when the ticket is outside the actor scope', async () => {

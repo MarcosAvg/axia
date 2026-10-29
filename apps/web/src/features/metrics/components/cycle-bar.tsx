@@ -6,7 +6,7 @@ import { messages } from '@/lib/i18n'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
 import { cyclePhases, shareOf } from '../domain/visuals'
-import type { CyclePhase, CycleSlice } from '../domain/visuals'
+import type { CycleInput, CyclePhase, CycleSlice } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 
 const COLORS: Record<CyclePhase, string> = {
@@ -80,6 +80,39 @@ function CycleFooter({
   )
 }
 
+/** Barra apilada y leyenda de fases, sin controles de agregación. */
+function CycleChart({ slices, total }: { slices: PhaseView[]; total: number }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div
+        className="flex h-10 w-full overflow-hidden rounded-lg bg-muted"
+        aria-hidden
+      >
+        {slices.map((slice) => (
+          <span
+            key={slice.phase}
+            className="h-full"
+            style={{
+              width: `${shareOf(slice.minutes, total) * 100}%`,
+              background: COLORS[slice.phase],
+            }}
+          />
+        ))}
+      </div>
+      <CycleLegend slices={slices} />
+    </div>
+  )
+}
+
+/** Tiempos reales de las fases de un solo tiquet. */
+export function TicketCycleChart({ times }: { times: CycleInput }) {
+  const slices = cyclePhases(times).map((slice) => ({
+    ...slice,
+    label: t.phases[slice.phase],
+  }))
+  return <CycleChart slices={slices} total={times.total} />
+}
+
 /** Composición del ciclo medio en una sola barra apilada. */
 export function CycleBar({ summary }: { summary: MetricsSummary }) {
   const { aggregation } = useTimeAggregation()
@@ -112,22 +145,7 @@ export function CycleBar({ summary }: { summary: MetricsSummary }) {
           <AggregationToggle />
         </div>
       </div>
-      <div
-        className="flex h-10 w-full overflow-hidden rounded-lg bg-muted"
-        aria-hidden
-      >
-        {slices.map((slice) => (
-          <span
-            key={slice.phase}
-            className="h-full"
-            style={{
-              width: `${shareOf(slice.minutes, total) * 100}%`,
-              background: COLORS[slice.phase],
-            }}
-          />
-        ))}
-      </div>
-      <CycleLegend slices={slices} />
+      <CycleChart slices={slices} total={total} />
       <CycleFooter summary={summary} aggregation={aggregation} />
     </section>
   )

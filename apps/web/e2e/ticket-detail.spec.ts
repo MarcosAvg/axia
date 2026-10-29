@@ -29,11 +29,11 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
   const headings = await page.locator('main h2').allInnerTexts()
   expect(headings.slice(0, 5)).toEqual([
+    'Tiempo por fase',
     'Acciones',
     'Captura',
     'Línea de tiempo',
     'Evidencias',
-    'Participantes',
   ])
   const width = (await page.evaluate(
     '({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth })',

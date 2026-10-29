@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
+import { TicketCycleChart } from '@/features/metrics'
 import { useDocumentTitle } from '@/lib/use-document-title'
 import type { Identity } from '@/features/auth'
 import { allowedActions } from '../domain/actions'
 import type { ActionKey } from '../domain/actions'
 import { detailSectionHints } from '../detail-hints'
 import type {
-  TicketDetail,
+  TicketDetailWithTimes,
   TicketParticipant,
   TicketStatus,
   TicketTimelineItem,
@@ -125,7 +126,7 @@ function TicketExtras({
 
 interface TicketLayoutProps {
   ticketId: string
-  ticket: TicketDetail
+  ticket: TicketDetailWithTimes
   participants: TicketParticipant[]
   identity: Identity | null
   actions: ActionKey[]
@@ -145,42 +146,50 @@ function TicketLayout({
   canAttachEvidence,
 }: TicketLayoutProps) {
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
-      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
-        {actions.length > 0 || can(identity, 'ticket.take_offer') ? (
+    <div className="flex flex-col gap-6">
+      <Section
+        title={ticketMessages.detail.cycleTimes}
+        hint={detailSectionHints.cycleTimes}
+      >
+        <TicketCycleChart times={ticket.cycleTimes} />
+      </Section>
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
+        <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+          {actions.length > 0 || can(identity, 'ticket.take_offer') ? (
+            <Section
+              title={ticketMessages.detail.actions}
+              hint={detailSectionHints.actions}
+            >
+              <TicketActionsPanel
+                ticket={ticket}
+                actions={actions}
+                identity={identity}
+                participants={participants}
+              />
+            </Section>
+          ) : null}
           <Section
-            title={ticketMessages.detail.actions}
-            hint={detailSectionHints.actions}
+            title={ticketMessages.detail.capture}
+            hint={detailSectionHints.capture}
           >
-            <TicketActionsPanel
-              ticket={ticket}
-              actions={actions}
-              identity={identity}
-              participants={participants}
-            />
+            <TicketSummary ticket={ticket} />
           </Section>
-        ) : null}
-        <Section
-          title={ticketMessages.detail.capture}
-          hint={detailSectionHints.capture}
-        >
-          <TicketSummary ticket={ticket} />
-        </Section>
-        <PausePanel ticketId={ticketId} />
-      </div>
-      <TicketActivity ticketId={ticketId} timeline={timeline} />
-      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
-        <EvidenceSection
-          ticketId={ticketId}
-          cycle={ticket.cycle}
-          status={ticket.status}
-          canAttach={canAttachEvidence}
-        />
-        <TicketExtras
-          ticketId={ticketId}
-          participants={participants}
-          canRate={canRate}
-        />
+          <PausePanel ticketId={ticketId} />
+        </div>
+        <TicketActivity ticketId={ticketId} timeline={timeline} />
+        <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+          <EvidenceSection
+            ticketId={ticketId}
+            cycle={ticket.cycle}
+            status={ticket.status}
+            canAttach={canAttachEvidence}
+          />
+          <TicketExtras
+            ticketId={ticketId}
+            participants={participants}
+            canRate={canRate}
+          />
+        </div>
       </div>
     </div>
   )

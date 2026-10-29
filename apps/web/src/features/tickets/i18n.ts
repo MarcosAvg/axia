@@ -89,6 +89,7 @@ export const ticketMessages = {
     back: 'Volver a la lista',
     actions: 'Acciones',
     capture: 'Captura',
+    cycleTimes: 'Tiempo por fase',
     timeline: 'Línea de tiempo',
     participants: 'Participantes',
     evidence: 'Evidencias',

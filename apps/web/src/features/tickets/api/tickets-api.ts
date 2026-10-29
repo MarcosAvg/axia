@@ -5,7 +5,7 @@ import { isFinalStatus } from '../domain/status'
 import type {
   DuplicateCandidate,
   SupervisorOption,
-  TicketDetail,
+  TicketDetailWithTimes,
   TicketEvidenceItem,
   TicketListItem,
   TicketParticipant,
@@ -58,9 +58,13 @@ export async function fetchTickets(
   return apiFetch<TicketPage>(`/api/tickets?${query}`)
 }
 
-export async function fetchTicket(id: string): Promise<TicketDetail | null> {
+export async function fetchTicket(
+  id: string,
+): Promise<TicketDetailWithTimes | null> {
   try {
-    const body = await apiFetch<{ ticket: TicketDetail }>(`/api/tickets/${id}`)
+    const body = await apiFetch<{ ticket: TicketDetailWithTimes }>(
+      `/api/tickets/${id}`,
+    )
     return body.ticket
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null

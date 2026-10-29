@@ -107,6 +107,23 @@ export interface TicketDetail extends TicketListItem {
   duplicateOfId: string | null
 }
 
+/** Tiempos del ciclo de un tiquet, en minutos. */
+interface TicketCycleTimes {
+  total: number
+  response: number
+  assignment: number
+  reassignment: number
+  wait: number
+  active: number
+  pause: number
+  validation: number
+  claim: number
+}
+
+export type TicketDetailWithTimes = TicketDetail & {
+  cycleTimes: TicketCycleTimes
+}
+
 export interface TicketTimelineItem {
   id: number
   cycle: number

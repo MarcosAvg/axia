@@ -109,6 +109,9 @@ Si se decide, Web Push y escalamiento programado.
   agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
   una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
   descartar (ADR 0089).
+- **Detalle del tiquet (2026-10-28):** gráfica “Tiempo por fase” a todo el ancho, encima de las dos
+  columnas, con los tiempos reales del tiquet y las mismas fases y colores de Métricas. La API de
+  detalle devuelve `cycleTimes` en minutos; sin migración de esquema.
 - **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
   PostgreSQL real. `pnpm check` completo en verde.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
