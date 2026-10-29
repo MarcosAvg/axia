@@ -11,9 +11,11 @@ Guía para desplegar, actualizar y respaldar una instalación de Axia. La instal
 | `migrate` | Aplica migraciones y termina |
 | `app` | API Fastify y SPA; volumen de evidencias |
 
-El reverse proxy TLS es infraestructura de destino. Debe enrutar al servicio `app` en el puerto
-`3100`, conservar las cabeceras de proxy y permitir el tamaño de las evidencias. La base no se
-publica.
+Axia no incluye reverse proxy: el TLS y el enrutamiento de borde son infraestructura de destino. La
+base no se publica nunca. El servicio `app` escucha en `3100` y ya sirve el SPA, su fallback y las
+cabeceras de caché; el proxy solo tiene que reenviar todo a `app`, sin servir estáticos por su
+cuenta. Si publicas en loopback, apunta a `127.0.0.1:3100`, no a `localhost`, que puede resolverse
+a IPv6.
 
 ## Puesta en marcha en producción
 
@@ -21,27 +23,60 @@ publica.
 cp .env.example .env
 # Generar secretos y ajustar valores. No usar los valores de ejemplo.
 chmod 600 .env
+
+# Solo si el proxy corre en el mismo host: publica app en 127.0.0.1.
+export COMPOSE_FILE=compose.yaml:compose.publish.yaml
+
 docker compose build
 docker compose up -d db
 docker compose run --rm migrate
 docker compose up -d app
 ```
 
+Si el proxy es otro contenedor, no exportes `compose.publish.yaml`: únelo a la red de Compose y
+apunta a `app:3100`.
+
 Comprobaciones:
 
 ```bash
 docker compose ps
 docker compose logs --tail=100 app
+docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1))"
+# Solo con compose.publish.yaml:
 curl -fsS http://127.0.0.1:3100/api/health/ready
 ```
 
 La primera cuenta se crea desde `/login` o con `POST /api/setup`. La contraseña debe tener al menos
 12 caracteres.
 
+## Reverse proxy
+
+El proxy debe cumplir este contrato:
+
+- **TLS en el borde.** Las cookies de sesión son `Secure` en producción; sin HTTPS el navegador no
+  las envía.
+- **Cabeceras.** Conservar `Host` y `Origin`, y reenviar `X-Forwarded-Proto`, `X-Forwarded-Host` y
+  `X-Forwarded-For`. Si el proxy reescribe `Host`, `X-Forwarded-Host` debe llevar el dominio
+  público.
+- **`TRUST_PROXY=true`.** Es obligatorio cuando el proxy termina TLS: el guard de origen compara
+  `Origin` con el protocolo y el host de la petición. Actívalo solo si la única vía a `app` es el
+  proxy (loopback o red privada); nunca si `app` está expuesta directamente.
+- **Tamaño de subida.** El límite del proxy debe superar `EVIDENCE_MAX_BYTES` (20 MiB por defecto)
+  con margen. Las subidas usan TUS en `/api/uploads` y necesitan `PATCH`, `HEAD` y `OPTIONS`.
+- **SSE.** `/api/events` es `text/event-stream`: desactiva el buffering y usa un timeout mayor que
+  `SSE_HEARTBEAT_MS` (15 s por defecto). No hace falta WebSocket.
+- **Caché.** No pises las cabeceras de la app: `index.html` y el service worker van con `no-cache`;
+  `/assets/*` con caché inmutable.
+- **Cookies.** Deja pasar `Cookie` y `Set-Cookie` sin reescribir dominio ni ruta.
+- **Salud.** `/api/health/ready` responde 503 hasta que la base está lista; úsalo si el proxy hace
+  comprobaciones propias.
+
 ## Actualización
 
 ```bash
 git pull
+# Repite el export si el proxy está en el host:
+export COMPOSE_FILE=compose.yaml:compose.publish.yaml
 docker compose build
 docker compose run --rm migrate
 docker compose up -d app

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Levanta db/migrate/app con el Compose del repositorio.
+# Respeta COMPOSE_FILE; para un proxy del host:
+#   COMPOSE_FILE=compose.yaml:compose.publish.yaml ./deploy/scripts/up.sh
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"

@@ -144,7 +144,8 @@ axia/
 La instalación está en
 [`docs/start/instalacion.md`](docs/start/instalacion.md) y la operación en
 [`docs/guides/operacion.md`](docs/guides/operacion.md). El despliegue en un servidor real lo ejecuta
-la persona.
+la persona. El stack no incluye reverse proxy: `compose.publish.yaml` publica `app` solo en loopback
+para el proxy del host.
 
 ## Contribución
 

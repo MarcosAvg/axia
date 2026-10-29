@@ -69,6 +69,10 @@ cp .env.example .env
 # Editar .env: reemplazar CHANGE_ME y las URLs de MIGRATION_DATABASE_URL/DATABASE_URL.
 # Generar secretos: openssl rand -hex 32
 chmod 600 .env
+
+# Solo si el proxy corre en el mismo host:
+export COMPOSE_FILE=compose.yaml:compose.publish.yaml
+
 docker compose build
 docker compose up -d db
 docker compose run --rm migrate
@@ -76,11 +80,14 @@ docker compose up -d app
 ```
 
 En producción no se usa `compose.dev.yaml`: ese archivo solo publica puertos en `127.0.0.1` para
-desarrollo. El reverse proxy debe alcanzar el servicio `app` por la red interna de Compose, en el
-puerto `3100`, o mediante un overlay de infraestructura.
+desarrollo. Axia no incluye reverse proxy. Si el proxy corre en el host, `compose.publish.yaml`
+publica `app` solo en `127.0.0.1:3100`; si es otro contenedor, únelo a la red de Compose y apunta a
+`app:3100` sin publicar puertos. El contrato completo está en
+[`../guides/operacion.md`](../guides/operacion.md#reverse-proxy).
 
-`TRUST_PROXY=true` solo se activa si el proxy reenvía `X-Forwarded-*` y está en una red de
-confianza.
+`TRUST_PROXY=true` es obligatorio cuando el proxy termina TLS y reenvía `X-Forwarded-*`: sin él, el
+guard de origen rechaza las peticiones `POST`/`PATCH`. Actívalo solo si la única vía a `app` es el
+proxy de confianza.
 
 La API tarda en arrancar hasta que `migrate` termina; `depends_on` lo garantiza. Si cambia una
 migración o una variable, se reconstruye la imagen y se vuelve a ejecutar `migrate`.

@@ -1,26 +1,27 @@
 # 0036 — El reverse proxy es elección de quien despliega
 
 - Fecha: 2026-10-08
-- Estado: aceptada (ajusta la 0032)
+- Actualizado: 2026-10-29
+- Estado: aceptada (ajusta la 0032; convive con 0075)
 
 ## Contexto
 
-En la Fase 7A/7B se incluyó un `deploy/Caddyfile` como proxy por defecto (TLS automático,
-frontend estático y proxy de la API). Al revisarlo: Axia es una **SPA estática** más un endpoint de
-el stack anterior (Kong, que ya es un proxy), así que el proxy de borde es **infraestructura del despliegue**,
-no del producto. Imponer Caddy es una opinión y puede ser redundante con el proxy que la institución
-ya tenga (Traefik, nginx, Apache, un balanceador de nube…).
+En una fase anterior se incluyó un `deploy/Caddyfile` como proxy por defecto. Axia es un único
+servidor Fastify que sirve la API y el SPA compilado; el TLS y el enrutamiento de borde son
+infraestructura del despliegue, no del producto. Imponer Caddy es una opinión y puede ser redundante
+con el proxy que la institución ya tenga (Traefik, nginx, Apache, un balanceador de nube…).
 
 ## Decisión
 
-- **No** se incluye ningún reverse proxy. Se elimina `deploy/Caddyfile`.
-- Se documenta un **contrato de despliegue** (`deploy/README.md`): qué debe cumplir cualquier proxy
-  (estáticos con *fallback* SPA, proxy a Kong con WebSocket, límite de subida, `no-cache` del
-  service worker y TLS).
-- Se ofrecen **ejemplos opcionales** en `deploy/examples/` (nginx y Traefik) como referencia, no como
-  requisito.
-- El **stack** se levanta con un comando (`deploy/scripts/up.sh`) que trae el compose oficial de
-  el stack anterior (que **sigue sin versionarse**) y aplica migraciones; no incluye servidor web.
+- **No** se incluye ningún reverse proxy y no se versionan configuraciones de proxy.
+- `compose.yaml` define `db`, `migrate` y `app`; `app` no publica puertos por defecto.
+- `compose.publish.yaml` es un overlay **opcional** que publica `app` solo en `127.0.0.1` para un
+  proxy del host. No añade servicios ni TLS.
+- Si el proxy es otro contenedor, se conecta a la red de Compose y usa `app:3100`.
+- El **contrato de despliegue** (cabeceras, `TRUST_PROXY`, TUS, SSE, caché y TLS) vive en
+  `deploy/README.md` y `docs/guides/operacion.md`.
+- El stack se levanta con `deploy/scripts/up.sh`; el script respeta `COMPOSE_FILE` para incluir el
+  overlay cuando corresponda.
 
 ## Alternativas consideradas
 
@@ -28,10 +29,11 @@ ya tenga (Traefik, nginx, Apache, un balanceador de nube…).
   quien ya tiene proxy.
 - **Vendorear un compose con Caddy dentro**: además de lo anterior, obliga a mantener una pila de
   terceros en el repositorio.
+- **Publicar `app` en todas las interfaces**: expone la API sin TLS ni control de borde.
 
 ## Consecuencias
 
 - El despliegue se adapta a la infraestructura existente; Axia no opina sobre el proxy.
-- El repositorio gana un **contrato** y **ejemplos**, en lugar de una configuración obligatoria.
+- Quien despliega configura TLS, cabeceras y límites según su host.
 - Revisión de la 0032: su mención a Caddy queda superada por esta decisión.
-- El envoltorio `up.sh` es un guion, no una capa nueva: el stack sigue siendo el compose oficial.
+- Revisión de la 0075: el stack actual sirve el SPA desde `app` y ofrece el overlay de publicación.

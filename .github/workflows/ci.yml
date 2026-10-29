@@ -46,3 +46,26 @@ jobs:
       # La compuerta completa se ejecuta una vez por PR o push a main. El ciclo local usa
       # `pnpm check:fast` y `pnpm test:affected`.
       - run: pnpm check
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      POSTGRES_OWNER_PASSWORD: compose-test
+      AXIA_APP_PASSWORD: compose-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar Compose
+        run: |
+          docker compose -f compose.yaml -f compose.dev.yaml config -q
+          docker compose -f compose.yaml -f compose.publish.yaml config -q
+      - uses: docker/setup-buildx-action@v3
+      - name: Construir imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          target: app
+          push: false
+          cache-from: type=gha
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}

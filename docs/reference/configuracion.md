@@ -22,10 +22,10 @@ Variables de entorno del servidor y del compose. Los valores reales viven en `.e
 |---|---|---|
 | `HOST` | `0.0.0.0` | Interfaz de escucha |
 | `PORT` | `3100` | Puerto HTTP |
-| `APP_PORT` | `3100` | Puerto publicado en desarrollo |
+| `APP_PORT` | `3100` | Puerto de loopback en desarrollo y con `compose.publish.yaml` |
 | `NODE_ENV` | `development` | `production` en producción |
 | `LOG_LEVEL` | `info` | Nivel de registro |
-| `TRUST_PROXY` | `false` | Activar solo detrás de un proxy de confianza |
+| `TRUST_PROXY` | `false` | Obligatorio con proxy TLS; solo si `app` no está expuesta directamente |
 | `BODY_LIMIT_BYTES` | `1048576` | Límite del cuerpo JSON |
 | `HEALTH_TIMEOUT_MS` | `2000` | Timeout de salud |
 | `SHUTDOWN_TIMEOUT_MS` | `10000` | Cierre ordenado |
