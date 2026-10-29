@@ -8,21 +8,20 @@
 
 ## En curso
 
-**Tablero de métricas extenso** (rama `feat/rediseno-metricas`), listo para integrar.
+**Navegación móvil con barra inferior** (rama `feat/movil-navegacion-inferior`), lista para
+integrar.
 
-1. Cinco pestañas por pregunta: Resumen, Distribución, Tiempos, Calidad y Equipo; SLA y
-   satisfacción viven en Resumen.
-2. Distribución con las 12 dimensiones, jerarquía con Sunburst, porcentajes global/acumulado/del
-   padre y detalle con tiempos y calidad; estado actual y subestados de pausa.
-3. Tiempos con todas las fases, tabla, mapa de calor por categoría y dimensión, y tiempos por
-   técnico. Calidad con mapa por dimensión, dispersión de riesgo, Pareto y subestados.
-4. Equipo con equipos, supervisores y técnicos; nuevos endpoints `technician-times`,
-   `supervisors` y `pause-substates`. Sin migración de esquema.
-5. Conteos normalizados en la API web y en `mergeBy`; capturas a 390, 1280 y 1440 px. Ver ADR 0090.
+1. Barra inferior de tres pestañas por rol + “Más”; el cajón conserva el resto de destinos.
+2. Barra superior contextual: solo el detalle muestra “volver” y título; búsqueda a pantalla
+   completa en móvil y controles de 44 px.
+3. Detalle con barra de acción fija (primaria + menú “Más” y selector de actuar a nombre de),
+   secciones planas y pestañas ocultas en esa pantalla.
+4. Filtros en hoja inferior con contador y lista de metadatos en una línea.
+5. `viewport-fit=cover` y `safe-area-inset-bottom`. Ver ADR 0092, que amplía el 0091.
 
-**Siguiente:** integrar la rama a `main` con `pnpm check` en verde; después, puesta en marcha real
-(servidor, TLS, reverse proxy), respaldos programados y prueba de restauración en el host definitivo.
-Si se decide, Web Push y escalamiento programado.
+**Siguiente:** integrar `feat/rediseno-metricas` y esta rama a `main` con `pnpm check` en verde;
+después, puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba de
+restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
 
 ## Hecho
 
@@ -117,8 +116,11 @@ Si se decide, Web Push y escalamiento programado.
   tiempos se oculta en móvil para ellos. Supervisor y administrador conservan toda la información.
   El tema pasa al menú móvil, los filtros de tiquets se abren bajo demanda y la administración se
   agrupa en una entrada móvil. Ver ADR 0091.
-- **Pruebas:** 48 unitarias/HTTP del servidor, 242 web, 38 Playwright y 177 de integración contra
-  PostgreSQL real. `pnpm check` completo en verde.
+- **Navegación móvil (2026-10-29):** barra inferior de tres destinos por rol + “Más”, barra
+  superior contextual con búsqueda a pantalla completa, detalle con barra de acción fija y filtros
+  en hoja inferior; lista compacta, secciones planas y safe-area de PWA. Ver ADR 0092.
+- **Pruebas:** 48 unitarias/HTTP del servidor, 255 web, 41 Playwright y 177 de integración contra
+  PostgreSQL real.
 - **Documentación:** estructura por audiencia (`start`, `guides`, `reference`, `concepts`), ADR
   vigentes y archivo histórico, verificación de enlaces con `pnpm check:docs`.
 
