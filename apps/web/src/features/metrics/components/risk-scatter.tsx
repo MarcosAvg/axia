@@ -8,38 +8,12 @@ import type { DimensionGroup } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { RankingBars } from './ranking-bars'
 
 const t = metricsMessages.quality
-
-function RiskBars({ rows }: { rows: DimensionGroup['row'][] }) {
-  const volumeRows = rows.map((row) => ({
-    id: row.id,
-    name: row.name || 'Sin dato',
-    value: row.tickets,
-    label: String(row.tickets),
-  }))
-  return (
-    <ChartCard title={t.risk} hint={t.riskHint}>
-      <div className="flex flex-col gap-2">
-        <RankingBars
-          rows={volumeRows}
-          label={metricsMessages.table.tickets}
-          height={280}
-        />
-        <p className="text-xs text-muted-foreground">
-          Sin reaperturas en el periodo; se muestra el volumen por categoría.
-        </p>
-      </div>
-    </ChartCard>
-  )
-}
 
 /** Tiquets contra tasa de reapertura, con el tiempo activo como burbuja. */
 export function RiskScatter({ groups }: { groups: DimensionGroup[] }) {
   const rows = rowsByDimension(groups, 'category').slice(0, 10)
-  const hasRisk = rows.some((row) => row.reopenRate > 0)
-  if (!hasRisk) return <RiskBars rows={rows} />
   const points = rows.map((row) => ({
     name: row.name || 'Sin dato',
     tickets: row.tickets,
