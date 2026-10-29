@@ -3,25 +3,15 @@
 > El agente lee este archivo al iniciar cada sesión y lo actualiza al terminar cada tarea.
 > Es la memoria del proyecto entre sesiones. Mantenlo corto y verídico.
 
-**Última actualización:** 2026-10-28
+**Última actualización:** 2026-10-29
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-**Navegación móvil con barra inferior** (rama `feat/movil-navegacion-inferior`), lista para
-integrar.
+Nada en curso. La compuerta completa está en verde sobre `main`.
 
-1. Barra inferior de tres pestañas por rol + “Más”; el cajón conserva el resto de destinos.
-2. Barra superior contextual: solo el detalle muestra “volver” y título; búsqueda a pantalla
-   completa en móvil y controles de 44 px.
-3. Detalle con barra de acción fija (primaria + menú “Más” y selector de actuar a nombre de),
-   secciones planas y pestañas ocultas en esa pantalla.
-4. Filtros en hoja inferior con contador y lista de metadatos en una línea.
-5. `viewport-fit=cover` y `safe-area-inset-bottom`. Ver ADR 0092, que amplía el 0091.
-
-**Siguiente:** integrar `feat/rediseno-metricas` y esta rama a `main` con `pnpm check` en verde;
-después, puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba de
-restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
+**Siguiente:** puesta en marcha real (servidor, TLS, reverse proxy), respaldos programados y prueba
+de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
 
 ## Hecho
 
@@ -108,6 +98,10 @@ restauración en el host definitivo. Si se decide, Web Push y escalamiento progr
   agrupa la limpieza para cron. Se retiraron cuatro permisos sin acción y se corrigió el total de
   una página fuera de rango. La cola offline muestra sus errores definitivos con reintentar y
   descartar (ADR 0089).
+- **Tablero de métricas (2026-10-28):** cinco pestañas (Resumen, Distribución, Tiempos, Calidad y
+  Equipo), doce dimensiones con jerarquía y porcentajes, mapa de calor por categoría, tiempos por
+  técnico, supervisores y subestados de pausa; endpoints `technician-times`, `supervisors` y
+  `pause-substates`. Ver ADR 0090.
 - **Detalle del tiquet (2026-10-28):** gráfica “Tiempo por fase” a todo el ancho, encima de las dos
   columnas, con los tiempos reales del tiquet y las mismas fases y colores de Métricas. La API de
   detalle devuelve `cycleTimes` en minutos; sin migración de esquema.
