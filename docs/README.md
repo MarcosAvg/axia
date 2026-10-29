@@ -50,5 +50,4 @@ cuando no avanza, evidencias y tiempos medibles. Esta página reúne la document
 | [Diseño de UI](history/diseno-ui.md) | Referencia histórica de interfaz |
 | [Auditoría UI/UX](history/auditoria-ui-ux.md) | Auditoría histórica |
 | [Modelo de datos inicial](history/modelo-datos-fase-1.md) | Diseño histórico |
-| [Prompt inicial](history/prompt-fase-1-modelo-de-datos.md) | Encargo histórico |
 | [Integraciones](history/integraciones-y-migracion.md) | Referencia histórica de importación |

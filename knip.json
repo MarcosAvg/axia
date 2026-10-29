@@ -4,9 +4,7 @@
     "apps/web": {
       "entry": [],
       "ignore": [
-        // Kit de shadcn/ui generado por el CLI: se mantiene completo (input,
-        // label y variantes) aunque hoy no todo se use; se repone con
-        // `shadcn add` cuando haga falta.
+        // Componentes de shadcn/ui: el CLI los regenera con `shadcn add`.
         "src/components/ui/**"
       ]
     }

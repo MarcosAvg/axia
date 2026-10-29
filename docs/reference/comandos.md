@@ -23,9 +23,10 @@ Comandos disponibles desde la raíz del repositorio.
 | `pnpm db:stop` | Detiene PostgreSQL local |
 | `pnpm db:reset` | Reconstruye la base con las migraciones |
 | `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
-| `pnpm db:next:demo -- --demo` | Carga la semilla demo local |
-| `pnpm db:next:check` | Ejecuta `drizzle-kit check` |
-| `pnpm db:next:indexes` | Audita índices y claves foráneas |
+| `pnpm db:demo -- --demo` | Carga la semilla demo local |
+| `pnpm db:indexes` | Audita índices y claves foráneas |
+| `pnpm db:cleanup` | Aplica la retención de sesiones, intentos y avisos |
+| `pnpm db:cleanup-evidence` | Limpia subidas de evidencia abandonadas |
 
 ## Calidad
 
@@ -34,8 +35,10 @@ Comandos disponibles desde la raíz del repositorio.
 | `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
 | `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
 | `pnpm test:affected` | Pruebas relacionadas con los archivos cambiados |
+| `pnpm test:e2e` | Todos los flujos de Playwright |
 | `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
 | `pnpm test:unit` | Unitarias de servidor y web |
+| `pnpm check:docs` | Verifica los enlaces relativos de la documentación |
 | `pnpm check` | Compuerta completa: lint, tipos, scripts, agnóstico, fronteras, knip, tests, base y build |
 | `pnpm check:agnostic` | Verifica que el núcleo no nombre plataformas externas |
 | `pnpm check:boundaries` | Verifica las reglas de dependencia |

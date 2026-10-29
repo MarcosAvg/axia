@@ -278,7 +278,7 @@ rules: {
   en un archivo de configuración dentro de `scripts/`, que es la única excepción.
 - **Prettier** para formato; **knip** para código y dependencias sin uso.
 - **Husky + lint-staged** (formato y lint al confirmar) y **commitlint** (Conventional Commits).
-- **`drizzle-kit check`** para revisar el esquema y las migraciones.
+- **`pnpm db:test`** aplica las migraciones contra PostgreSQL real y verifica el esquema.
 - **CI** (GitHub Actions o Forgejo) ejecutando la compuerta completa en pull requests y en
   `main`. El ciclo local usa `pnpm check:fast` y `pnpm test:affected`; la compuerta completa no
   se repite tras cada edición.
@@ -289,7 +289,7 @@ rules: {
       Playwright, PostgreSQL y build), con la salida mostrada. Durante el desarrollo basta
       `pnpm check:fast` + `pnpm test:affected`.
 - [ ] Pruebas nuevas o actualizadas para el comportamiento cambiado.
-- [ ] Si hubo migración: `pnpm db:reset` limpio y `drizzle-kit check` en verde.
+- [ ] Si hubo migración: `pnpm db:reset` limpio y `pnpm db:test` en verde.
 - [ ] Documentación actualizada en el mismo commit (incluido `docs/concepts/dominio.md` si cambió el negocio).
 - [ ] Sin `console.log`, sin código comentado, sin `TODO` sin registrar en `docs/internal/estado.md`.
 - [ ] Sin secretos, `.env.example` al día.

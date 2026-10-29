@@ -45,7 +45,7 @@ permisos `0600`.
 | `install.sh` detecta un `.env` existente | No se sobrescriben secretos; recuperar el original |
 | `pnpm check` falla en `db:test` | Revisar `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y el puerto de PostgreSQL |
 | Playwright no encuentra Chromium | `pnpm --filter @axia/web exec playwright install chromium` |
-| No se puede iniciar sesión | Definir `AXIA_DEMO_PASSWORD` y ejecutar `pnpm db:next:demo -- --demo` (reaplica la contraseña a los usuarios existentes); revisar el bloqueo por intentos |
+| No se puede iniciar sesión | Definir `AXIA_DEMO_PASSWORD` y ejecutar `pnpm db:demo -- --demo` (reaplica la contraseña a los usuarios existentes); revisar el bloqueo por intentos |
 | El puerto 3100 está ocupado | Cambiar `PORT` y `AXIA_API_URL`; Vite reenvía `/api` |
 | La API no responde | Revisar `docker compose ps` y `docker compose logs app` |
 

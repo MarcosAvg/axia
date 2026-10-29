@@ -61,7 +61,7 @@ Tú escribes todo el código y nadie lo revisa línea por línea. Por eso:
 
 ## 5. Comandos
 
-Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/internal/estado.md`).
+Si algún script no existe, créalo durante el arranque.
 
 | Comando | Qué hace |
 |---|---|
@@ -72,7 +72,7 @@ Si algún script no existe, créalo durante el arranque (Fase 0 de `docs/interna
 | `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas de terceros |
 | `pnpm db:start` / `pnpm db:reset` | PostgreSQL local / reconstruir base local |
 | `pnpm db:test` | Integración del servidor contra PostgreSQL real |
-| `pnpm db:next:demo -- --demo` | Semilla demo explícita, solo local |
+| `pnpm db:demo -- --demo` | Semilla demo explícita, solo local |
 | **`pnpm check:fast`** | **Ciclo local**: lint + typecheck + unitarias |
 | `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
 | **`pnpm check`** | **Compuerta completa**: estáticos + unitarias + Playwright + PostgreSQL + build |

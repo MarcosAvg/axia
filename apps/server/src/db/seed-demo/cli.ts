@@ -37,7 +37,7 @@ export function parseDemoCli(
   }
   if (!argv.includes('--demo')) {
     throw new Error(
-      'La semilla demo es explícita: ejecuta `pnpm db:demo -- --demo` (o `pnpm db:next:demo -- --demo`)',
+      'La semilla demo es explícita: ejecuta `pnpm db:demo -- --demo`',
     )
   }
   if (!env.MIGRATION_DATABASE_URL) {

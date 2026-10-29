@@ -97,7 +97,7 @@ migración o una variable, se reconstruye la imagen y se vuelve a ejecutar `migr
 Solo en local o en una instalación de prueba:
 
 ```bash
-pnpm db:next:demo -- --demo
+pnpm db:demo -- --demo
 ```
 
 La demo crea usuarios, catálogos y seis tiquets ficticios. No se ejecuta al migrar, no se aplica en
@@ -133,7 +133,7 @@ Los secretos reales no se versionan. `.env` debe quedar con permisos `0600`.
 pnpm db:start
 pnpm db:reset
 pnpm db:test
-pnpm db:next:demo -- --demo
+pnpm db:demo -- --demo
 ```
 
 Las migraciones viven en `apps/server/db/migrations/`. El runner usa un advisory lock y permite

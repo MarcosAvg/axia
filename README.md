@@ -71,34 +71,19 @@ La primera cuenta de administración se crea desde la pantalla de primer arranqu
 La semilla demo genera `demo.admin`, `demo.supervisor`, `demo.technician` y `demo.requester`. La
 contraseña se toma de `AXIA_DEMO_PASSWORD` en `.env` o se genera una sola vez al ejecutar la semilla.
 **No hay contraseña fija en el repositorio.** Si defines o cambias `AXIA_DEMO_PASSWORD`, vuelve a
-ejecutar `pnpm db:next:demo -- --demo`: se reaplica a los usuarios demo existentes. Reiniciar solo la
+ejecutar `pnpm db:demo -- --demo`: se reaplica a los usuarios demo existentes. Reiniciar solo la
 API no cambia la contraseña, porque el hash vive en la base.
 
 ## Comandos
 
 | Comando | Descripción |
 |---|---|
-| `pnpm dev` | SPA en desarrollo (http://localhost:5173) |
-| `pnpm dev:api` | API en desarrollo (http://127.0.0.1:3100) |
-| `pnpm build` | Compila servidor y SPA |
-| `pnpm lint` / `pnpm typecheck` | ESLint y TypeScript en todo el monorepo |
-| `pnpm test:unit` | Vitest de servidor y web |
-| `pnpm test:affected` | Pruebas relacionadas con los archivos cambiados |
-| `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
-| `pnpm test:e2e` | Todos los flujos de Playwright |
-| `pnpm test` | Vitest y Playwright |
+| `pnpm dev` / `pnpm dev:api` | SPA y API en desarrollo |
 | `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
-| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
-| `pnpm db:start` / `pnpm db:stop` | Levanta o detiene PostgreSQL local |
-| `pnpm db:reset` | Reconstruye la base local con migraciones |
-| `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
-| `pnpm db:next:demo -- --demo` | Carga la semilla demo en una base local |
-| `pnpm test:scripts` | Prueba el instalador en modo dry-run |
-| `pnpm check:docs` | Verifica enlaces relativos de la documentación |
-| `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas externas |
-| `pnpm check:boundaries` | Reglas de dependencia entre capas |
-| `pnpm knip` | Código y dependencias sin uso |
-| **`pnpm check`** | **Compuerta completa**: lint, tipos, scripts, docs, fronteras, knip, Vitest, Playwright, PostgreSQL real y build |
+| **`pnpm check`** | **Compuerta completa antes de integrar** |
+| `pnpm db:demo -- --demo` | Carga la semilla demo local |
+
+La lista completa está en [`docs/reference/comandos.md`](docs/reference/comandos.md).
 
 `pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; en CI se
 configuran contra el servicio PostgreSQL. Durante el desarrollo usa `pnpm check:fast`; la

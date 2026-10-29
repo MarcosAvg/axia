@@ -47,7 +47,7 @@ cada índice cuesta escrituras, espacio y vacuum. El orden es:
 5. Reejecutar `EXPLAIN` para verificar que se usa.
 6. Crear el índice con `CONCURRENTLY` en una migración no transaccional.
 
-El script `pnpm db:next:indexes` lista FKs sin un índice que cubra todas sus columnas, índices no
+El script `pnpm db:indexes` lista FKs sin un índice que cubra todas sus columnas, índices no
 usados e indicadores por tabla. Es una **herramienta de revisión**, no una orden de crear índices.
 En una base vacía o recién reiniciada sus estadísticas no son concluyentes.
 
@@ -187,7 +187,7 @@ inactivo. Un `EXPLAIN` correcto no compensa una fuga de datos.
 
 ```bash
 # Base de desarrollo con datos representativos
-pnpm db:next:indexes
+pnpm db:indexes
 psql "$DATABASE_URL" -c "EXPLAIN (ANALYZE, BUFFERS) <consulta>"
 ```
 
