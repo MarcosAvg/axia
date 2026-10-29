@@ -1,6 +1,14 @@
-import { statusLabels } from '@/features/tickets'
+import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from 'recharts'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
+import { BarChart3Icon } from 'lucide-react'
+import { statusLabels } from '@/features/tickets'
 import type { DimensionGroup } from '../domain/dimensions'
 import { formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
@@ -15,26 +23,14 @@ const FAMILIES = [
     statuses: ['registered', 'with_supervisor', 'assigned'],
     color: 'var(--chart-1)',
   },
-  {
-    key: 'progress',
-    statuses: ['in_progress'],
-    color: 'var(--chart-2)',
-  },
-  {
-    key: 'paused',
-    statuses: ['paused'],
-    color: 'var(--warning)',
-  },
+  { key: 'progress', statuses: ['in_progress'], color: 'var(--chart-2)' },
+  { key: 'paused', statuses: ['paused'], color: 'var(--warning)' },
   {
     key: 'validation',
     statuses: ['attended', 'under_claim'],
     color: 'var(--chart-4)',
   },
-  {
-    key: 'closed',
-    statuses: ['closed'],
-    color: 'var(--success)',
-  },
+  { key: 'closed', statuses: ['closed'], color: 'var(--success)' },
   {
     key: 'discarded',
     statuses: ['rejected', 'cancelled', 'duplicate'],
@@ -62,59 +58,96 @@ interface StatusRow {
   tickets: number
 }
 
-interface StatusFamily {
-  key: string
-  label: string
-  color: string
-  tickets: number
+function statusData(groups: DimensionGroup[]) {
+  const rows = groups
+    .filter((group) => group.dimension === 'status')
+    .map((group) => group.row)
+  const byStatus = new Map(rows.map((row) => [row.id, row]))
+  const statusRows: StatusRow[] = STATUS_ORDER.map((status) => ({
+    status,
+    label: (statusLabels as Record<string, string>)[status] ?? status,
+    tickets: byStatus.get(status)?.tickets ?? 0,
+  }))
+  const total = statusRows.reduce((sum, row) => sum + row.tickets, 0)
+  const families = FAMILIES.map((family) => {
+    const tickets = family.statuses.reduce(
+      (sum, status) => sum + (byStatus.get(status)?.tickets ?? 0),
+      0,
+    )
+    return {
+      key: family.key,
+      label: t.families[family.key],
+      color: family.color,
+      tickets,
+      valueLabel: `${tickets} · ${formatPercent(shareOf(tickets, total))}`,
+    }
+  }).filter((family) => family.tickets > 0)
+  return { statusRows, families, total }
 }
 
-function StatusBar({
-  families,
-  total,
-}: {
-  families: StatusFamily[]
-  total: number
-}) {
+/** Barras de las seis familias del estado actual. */
+export function StatusChart({ groups }: { groups: DimensionGroup[] }) {
+  const { families, total } = statusData(groups)
+  if (families.length === 0) {
+    return (
+      <ChartCard title={t.title} hint={metricsMessages.chartHints.status}>
+        <EmptyState icon={BarChart3Icon} title={metricsMessages.empty} />
+      </ChartCard>
+    )
+  }
+  const config = {
+    tickets: {
+      label: metricsMessages.table.tickets,
+      color: 'var(--chart-1)',
+    },
+  }
   return (
-    <div className="flex flex-col gap-3">
-      <div
-        className="flex h-8 w-full overflow-hidden rounded-lg bg-muted"
-        aria-hidden
-      >
-        {families.map((family) => (
-          <span
-            key={family.key}
-            className="h-full"
-            style={{
-              width: `${shareOf(family.tickets, total) * 100}%`,
-              background: family.color,
-            }}
+    <ChartCard title={t.title} hint={metricsMessages.chartHints.status}>
+      <ChartContainer config={config} className="aspect-auto h-60">
+        <BarChart
+          data={families}
+          layout="vertical"
+          margin={{ left: 4, right: 64, top: 4, bottom: 4 }}
+        >
+          <XAxis type="number" hide />
+          <YAxis
+            type="category"
+            dataKey="label"
+            width={96}
+            tickLine={false}
+            axisLine={false}
+            fontSize={11}
           />
-        ))}
-      </div>
-      <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs">
-        {families.map((family) => (
-          <li key={family.key} className="flex items-center gap-1.5">
-            <span
-              className="size-2 rounded-full"
-              style={{ background: family.color }}
-              aria-hidden
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Bar
+            dataKey="tickets"
+            radius={[0, 4, 4, 0]}
+            isAnimationActive={false}
+          >
+            {families.map((family) => (
+              <Cell key={family.key} fill={family.color} />
+            ))}
+            <LabelList
+              dataKey="valueLabel"
+              position="right"
+              fontSize={11}
+              className="fill-muted-foreground"
             />
-            <span className="text-muted-foreground">{family.label}</span>
-            <span className="font-medium tabular-nums">
-              {formatPercent(shareOf(family.tickets, total))}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
+          </Bar>
+        </BarChart>
+      </ChartContainer>
+      <p className="text-xs text-muted-foreground">
+        Total del periodo: {total} tiquets.
+      </p>
+    </ChartCard>
   )
 }
 
-function StatusTable({ rows, total }: { rows: StatusRow[]; total: number }) {
+/** Detalle completo de los once estados. */
+export function StatusTableCard({ groups }: { groups: DimensionGroup[] }) {
+  const { statusRows, total } = statusData(groups)
   const columns: DataTableColumn<StatusRow>[] = [
-    { id: 'label', header: t.detail, cell: (row) => row.label },
+    { id: 'label', header: t.state, cell: (row) => row.label },
     { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
     {
       id: 'share',
@@ -123,40 +156,12 @@ function StatusTable({ rows, total }: { rows: StatusRow[]; total: number }) {
     },
   ]
   return (
-    <DataTable columns={columns} rows={rows} getRowId={(row) => row.status} />
-  )
-}
-
-/** Distribución del estado actual, por familias y detalle. */
-export function StatusDistribution({ groups }: { groups: DimensionGroup[] }) {
-  const statusRows = groups
-    .filter((group) => group.dimension === 'status')
-    .map((group) => group.row)
-  const byStatus = new Map(statusRows.map((row) => [row.id, row]))
-  const rows: StatusRow[] = STATUS_ORDER.map((status) => ({
-    status,
-    label: (statusLabels as Record<string, string>)[status] ?? status,
-    tickets: byStatus.get(status)?.tickets ?? 0,
-  }))
-  const total = rows.reduce((sum, row) => sum + row.tickets, 0)
-  const families = FAMILIES.map((family) => ({
-    ...family,
-    label: t.families[family.key],
-    tickets: family.statuses.reduce(
-      (sum, status) => sum + (byStatus.get(status)?.tickets ?? 0),
-      0,
-    ),
-  })).filter((family) => family.tickets > 0)
-
-  return (
-    <ChartCard title={t.title} hint={metricsMessages.chartHints.status}>
-      <div className="flex flex-col gap-4">
-        <StatusBar families={families} total={total} />
-        <div className="max-h-72 overflow-auto">
-          <StatusTable rows={rows} total={total} />
-        </div>
-        <p className="text-xs text-muted-foreground">{t.scroll}</p>
-      </div>
+    <ChartCard title={t.detail} hint={metricsMessages.chartHints.status}>
+      <DataTable
+        columns={columns}
+        rows={statusRows}
+        getRowId={(row) => row.status}
+      />
     </ChartCard>
   )
 }

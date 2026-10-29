@@ -20,11 +20,13 @@ function shortName(name: string) {
 export function RankingBars({
   rows,
   label,
+  height: heightProp,
 }: {
   rows: RankRow[]
   label: string
+  height?: number
 }) {
-  const height = Math.max(180, rows.length * 32)
+  const height = heightProp ?? Math.max(180, rows.length * 32)
   const config = {
     value: { label, color: 'var(--chart-1)' },
   }

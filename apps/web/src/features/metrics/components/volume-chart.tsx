@@ -17,7 +17,7 @@ export function VolumeChart({ data }: { data: VolumePoint[] }) {
   if (data.length < 2) {
     const point = data[0]
     return (
-      <div className="flex min-h-32 flex-col justify-center gap-1">
+      <div className="flex min-h-60 flex-col justify-center gap-1">
         <span className="text-3xl font-semibold tabular-nums">
           {point?.tickets ?? 0}
         </span>

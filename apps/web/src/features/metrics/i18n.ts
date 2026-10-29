@@ -68,7 +68,6 @@ export const metricsMessages = {
   },
   times: {
     cycle: 'Ciclo medio',
-    unclassified: 'Sin clasificar',
     phases: {
       response: 'Respuesta',
       assignment: 'Asignación',
@@ -89,7 +88,6 @@ export const metricsMessages = {
     measure: 'Medida',
     technicians: 'Técnicos',
     heatmap: 'Tiempo por categoría y fase',
-    load: 'Carga',
     participation: 'Participación',
     noTimes: 'Sin tiempos de tiquets liderados.',
   },
@@ -97,9 +95,9 @@ export const metricsMessages = {
     title: 'Estado actual',
     detail: 'Detalle por estado',
     family: 'Grupo',
+    state: 'Estado',
     tickets: 'Tiquets',
     share: '%',
-    scroll: 'Desplázate para ver los 11 estados.',
     families: {
       initial: 'Por atender',
       progress: 'En trabajo',
@@ -115,15 +113,17 @@ export const metricsMessages = {
     share: '% del total',
     cumulative: '% acum.',
     parentShare: '% del padre',
-    others: 'Otros',
     top: 'Top por tiquets',
+    total: 'Total',
+    withData: 'Con dato',
+    withoutData: 'Sin dato',
+    concentration: 'Top 3',
   },
   quality: {
     byDimension: 'Calidad por dimensión',
     risk: 'Riesgo de retrabajo',
     riskHint:
       'Tiquets frente a la tasa de reapertura. Más a la derecha, más volumen; más arriba, más retrabajo.',
-    heatmap: 'Tasas por dimensión',
     firstFix: 'Primera resolución',
   },
   team: {
@@ -140,8 +140,6 @@ export const metricsMessages = {
     timeToTake: 'Tiempo hasta la toma',
     reassigned: 'Reasignados',
     validated: 'Validados',
-    tickets: 'Tiquets',
-    load: 'Carga',
     supervisor: 'Supervisor',
   },
   kpiHints: {

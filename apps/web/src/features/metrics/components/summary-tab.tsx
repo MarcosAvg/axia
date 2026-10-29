@@ -18,7 +18,7 @@ import { ChartCard } from './chart-card'
 import { HealthStrip } from './health-strip'
 import { RankingBars } from './ranking-bars'
 import { SatisfactionPanel, SlaPanel } from './sla-panels'
-import { StatusDistribution } from './status-distribution'
+import { StatusChart, StatusTableCard } from './status-distribution'
 import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
@@ -41,7 +41,11 @@ function TopCategories({ groups }: { groups: DimensionGroup[] }) {
       {chartRows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       ) : (
-        <RankingBars rows={chartRows} label={metricsMessages.table.tickets} />
+        <RankingBars
+          rows={chartRows}
+          label={metricsMessages.table.tickets}
+          height={200}
+        />
       )}
     </ChartCard>
   )
@@ -100,7 +104,7 @@ export function SummaryTab({
           </ChartCard>
         </div>
         <div className="lg:col-span-2">
-          <StatusDistribution groups={groups} />
+          <StatusChart groups={groups} />
         </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
@@ -111,6 +115,7 @@ export function SummaryTab({
         />
       </div>
       <SlaPanel sla={sla} rows={slaRows} />
+      <StatusTableCard groups={groups} />
       <AgingCard aging={aging} />
     </div>
   )

@@ -22,10 +22,8 @@ export function TimesTab({
   return (
     <div className="flex flex-col gap-5">
       <CycleBar summary={summary} />
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <PhaseTable summary={summary} />
-        <PhaseHeatmap groups={groups} />
-      </div>
+      <PhaseTable summary={summary} />
+      <PhaseHeatmap groups={groups} />
       <TimesDimensionTable groups={groups} />
       <TechnicianTimes technicians={technicians} times={technicianTimes} />
     </div>

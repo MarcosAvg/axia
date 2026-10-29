@@ -11,6 +11,7 @@ import { formatMinutes } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
+import { RankingBars } from './ranking-bars'
 
 const t = metricsMessages.times
 
@@ -168,10 +169,28 @@ export function TechnicianTimes({
       active: row.avgActive ?? 0,
       participation: row.participationMinutes,
     }))
+  const participationRows = rows.map((row) => ({
+    id: row.technicianId,
+    name: row.name,
+    value: row.participationMinutes,
+    label: formatMinutes(row.participationMinutes),
+  }))
   return (
     <ChartCard title={t.technicians}>
       <div className="flex flex-col gap-3">
-        <ScatterBox points={points} />
+        {points.length >= 3 ? (
+          <ScatterBox points={points} />
+        ) : participationRows.length > 0 ? (
+          <RankingBars
+            rows={participationRows}
+            label={t.participation}
+            height={220}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {metricsMessages.empty}
+          </p>
+        )}
         <div className="max-h-80 overflow-auto">
           <DataTable
             columns={[...identityColumns(maxParticipation), ...timeColumns()]}

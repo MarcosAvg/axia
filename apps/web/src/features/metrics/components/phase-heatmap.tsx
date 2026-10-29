@@ -10,7 +10,9 @@ const t = metricsMessages.times
 const PHASES = [
   { key: 'response', field: 'avgResponse' },
   { key: 'assignment', field: 'avgAssignment' },
+  { key: 'wait', field: 'avgWait' },
   { key: 'active', field: 'avgActive' },
+  { key: 'pause', field: 'avgPause' },
   { key: 'validation', field: 'avgValidation' },
 ] as const
 

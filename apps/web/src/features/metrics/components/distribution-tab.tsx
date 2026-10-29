@@ -20,11 +20,9 @@ import { formatMinutes, formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { dimensionLabels, metricsMessages } from '../i18n'
 import { DimensionPicker } from './dimension-picker'
-import { HierarchyChart } from './hierarchy-chart'
-import { RankingBars } from './ranking-bars'
+import { DistributionChart, HIERARCHY } from './distribution-chart'
 
 const t = metricsMessages.distribution
-const HIERARCHY = new Set<Dimension>(['subcategory', 'problem', 'location'])
 
 function rowName(row: DimensionRow, dimension: Dimension) {
   if (dimension === 'status') {
@@ -197,38 +195,6 @@ function DistributionTable({
   )
 }
 
-function DistributionChart({
-  dimension,
-  tree,
-  chartRows,
-  unclassified,
-  pathLabels,
-}: {
-  dimension: Dimension
-  tree: ReturnType<typeof buildHierarchy>
-  chartRows: { id: string; name: string; value: number; label: string }[]
-  unclassified: number
-  pathLabels: string
-}) {
-  if (!HIERARCHY.has(dimension)) {
-    return (
-      <RankingBars rows={chartRows} label={metricsMessages.table.tickets} />
-    )
-  }
-  return (
-    <>
-      <p className="text-xs text-muted-foreground">{pathLabels}</p>
-      {unclassified > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          {unclassified} sin {dimensionLabels[dimension].toLowerCase()} (solo en
-          la tabla).
-        </p>
-      ) : null}
-      <HierarchyChart nodes={tree} ariaLabel={pathLabels} />
-    </>
-  )
-}
-
 /** Distribución por dimensión con jerarquía, ranking y detalle. */
 export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
   const [dimension, setDimension] = useState<Dimension>('category')
@@ -277,6 +243,7 @@ export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
           chartRows={chartRows}
           unclassified={unclassified}
           pathLabels={pathLabels}
+          total={total}
         />
         <DistributionTable
           rows={rows}
