@@ -55,6 +55,30 @@ async function listOptions(
   return result.rows as SimpleOption[]
 }
 
+async function listDependencies(
+  db: Database,
+  locationId?: string,
+): Promise<SimpleOption[]> {
+  if (!locationId) return listOptions(db, 'dependencies')
+  const result = await db.execute(sql`
+    select d.id, d.name
+    from public.dependencies d
+    where d.active
+      and (
+        not exists (
+          select 1 from public.dependency_locations dl
+          where dl.dependency_id = d.id
+        )
+        or exists (
+          select 1 from public.dependency_locations dl
+          where dl.dependency_id = d.id and dl.location_id = ${locationId}
+        )
+      )
+    order by d.name
+  `)
+  return result.rows as SimpleOption[]
+}
+
 async function listPriorities(db: Database): Promise<PriorityOption[]> {
   const result = await db.execute(sql`
     select id, name, position
@@ -152,7 +176,6 @@ async function listReasons(db: Database, use: string): Promise<ReasonOption[]> {
 const SIMPLE_TABLES: Partial<Record<CatalogName, OptionTable>> = {
   teams: 'teams',
   buildings: 'buildings',
-  dependencies: 'dependencies',
   'service-types': 'service_types',
   channels: 'channels',
 }
@@ -193,6 +216,7 @@ export async function listCatalog(
   name: CatalogName,
   query: CatalogQuery,
 ): Promise<CatalogItem[]> {
+  if (name === 'dependencies') return listDependencies(db, query.locationId)
   const table = SIMPLE_TABLES[name]
   if (table) return listOptions(db, table)
   const named = await listNamedCatalog(db, name)

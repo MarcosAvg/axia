@@ -117,6 +117,84 @@ export async function insertAdminRow(
   return (result.rows[0] as { id: string } | undefined)?.id
 }
 
+export type DependencyLocationLink = {
+  dependencyId: string
+  dependencyName: string
+  buildingId: string
+  buildingName: string
+  locationId: string
+  locationName: string
+}
+
+export async function listDependencyLocations(
+  db: Database,
+): Promise<DependencyLocationLink[]> {
+  const result = await db.execute(sql`
+    select
+      d.id as "dependencyId",
+      d.name as "dependencyName",
+      b.id as "buildingId",
+      b.name as "buildingName",
+      l.id as "locationId",
+      l.name as "locationName"
+    from public.dependencies d
+    join public.dependency_locations dl on dl.dependency_id = d.id
+    join public.locations l on l.id = dl.location_id
+    join public.buildings b on b.id = l.building_id
+    order by d.name, b.name, l.name
+  `)
+  return result.rows as DependencyLocationLink[]
+}
+
+export async function listDependencyLocationIds(
+  db: Database,
+  dependencyId: string,
+): Promise<string[]> {
+  const result = await db.execute(sql`
+    select location_id
+    from public.dependency_locations
+    where dependency_id = ${dependencyId}
+    order by location_id
+  `)
+  return result.rows.map((row) =>
+    String((row as { location_id: string }).location_id),
+  )
+}
+
+export async function replaceDependencyLocations(
+  db: Database,
+  dependencyId: string,
+  locationIds: string[],
+) {
+  const unique = [...new Set(locationIds)]
+  await db.transaction(async (tx) => {
+    const dependency = await tx.execute(sql`
+      select id from public.dependencies where id = ${dependencyId}
+    `)
+    if (!dependency.rows[0]) {
+      throw new AppError(404, 'not_found', 'Dependencia no encontrada')
+    }
+    for (const locationId of unique) {
+      const location = await tx.execute(sql`
+        select id from public.locations where id = ${locationId}
+      `)
+      if (!location.rows[0]) {
+        throw new AppError(400, 'validation_error', 'Ubicación no encontrada')
+      }
+    }
+    await tx.execute(sql`
+      delete from public.dependency_locations
+      where dependency_id = ${dependencyId}
+    `)
+    for (const locationId of unique) {
+      await tx.execute(sql`
+        insert into public.dependency_locations (dependency_id, location_id)
+        values (${dependencyId}, ${locationId})
+      `)
+    }
+  })
+}
+
 export async function updateAdminRow(
   db: Database,
   table: AdminCatalogTable,

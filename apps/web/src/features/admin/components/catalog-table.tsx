@@ -20,6 +20,7 @@ interface CatalogTableProps {
   onSortChange: (key: string) => void
   onEdit: (row: Record<string, unknown>) => void
   onToggle: (row: Record<string, unknown>) => void
+  onLocations?: (row: Record<string, unknown>) => void
 }
 
 function relationLabel(options: AdminOption[], value: unknown): string | null {
@@ -80,6 +81,7 @@ interface BuildColumnsOptions {
   optionsFor: (table: AdminTable) => AdminOption[]
   onEdit: (row: Record<string, unknown>) => void
   onToggle: (row: Record<string, unknown>) => void
+  onLocations?: (row: Record<string, unknown>) => void
 }
 
 function depthFunction(
@@ -123,6 +125,7 @@ function actionsColumn(
   nameOf: (row: Record<string, unknown>) => string,
   onEdit: (row: Record<string, unknown>) => void,
   onToggle: (row: Record<string, unknown>) => void,
+  onLocations?: (row: Record<string, unknown>) => void,
 ): DataTableColumn<Record<string, unknown>> {
   return {
     id: 'actions',
@@ -136,6 +139,7 @@ function actionsColumn(
           name={nameOf(row)}
           onEdit={() => onEdit(row)}
           onToggle={() => onToggle(row)}
+          onLocations={onLocations ? () => onLocations(row) : undefined}
         />
       </div>
     ),
@@ -145,7 +149,8 @@ function actionsColumn(
 function buildTableColumns(
   options: BuildColumnsOptions,
 ): DataTableColumn<Record<string, unknown>>[] {
-  const { rows, dataColumns, optionsFor, onEdit, onToggle } = options
+  const { rows, dataColumns, optionsFor, onEdit, onToggle, onLocations } =
+    options
   const nameColumn = dataColumns[0]
   const nameOf = (row: Record<string, unknown>) =>
     nameColumn ? displayName(row, nameColumn) : ''
@@ -173,7 +178,7 @@ function buildTableColumns(
       },
     })),
     activeColumn(nameOf, onToggle),
-    actionsColumn(nameOf, onEdit, onToggle),
+    actionsColumn(nameOf, onEdit, onToggle, onLocations),
   ]
 }
 
@@ -183,6 +188,7 @@ interface CatalogCardProps {
   optionsFor: (table: AdminTable) => AdminOption[]
   onEdit: (row: Record<string, unknown>) => void
   onToggle: (row: Record<string, unknown>) => void
+  onLocations?: (row: Record<string, unknown>) => void
 }
 
 function CatalogCard({
@@ -191,6 +197,7 @@ function CatalogCard({
   optionsFor,
   onEdit,
   onToggle,
+  onLocations,
 }: CatalogCardProps) {
   const dataColumns = columns.filter((column) => column.key !== 'active')
   const nameColumn = dataColumns[0]
@@ -222,6 +229,7 @@ function CatalogCard({
             name={name}
             onEdit={() => onEdit(row)}
             onToggle={() => onToggle(row)}
+            onLocations={onLocations ? () => onLocations(row) : undefined}
           />
         </div>
       </div>
@@ -254,6 +262,7 @@ export function CatalogTable({
   onSortChange,
   onEdit,
   onToggle,
+  onLocations,
 }: CatalogTableProps) {
   if (rows.length === 0) {
     return (
@@ -276,6 +285,7 @@ export function CatalogTable({
             optionsFor={optionsFor}
             onEdit={onEdit}
             onToggle={onToggle}
+            onLocations={onLocations}
           />
         ))}
       </ul>
@@ -287,6 +297,7 @@ export function CatalogTable({
             optionsFor,
             onEdit,
             onToggle,
+            onLocations,
           })}
           rows={rows}
           sort={sort}

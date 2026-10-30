@@ -4,7 +4,13 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { adminInsert, adminList, adminUpdate } from '../api/admin-api'
+import {
+  adminDependencyLocationIds,
+  adminInsert,
+  adminList,
+  adminReplaceDependencyLocations,
+  adminUpdate,
+} from '../api/admin-api'
 import type { AdminTable, AdminValues } from '../api/admin-api'
 
 const adminKeys = {
@@ -49,6 +55,24 @@ export function useAdminOptions(sources: OptionSource[]) {
     )
   })
   return options
+}
+
+export function useDependencyLocationIds(id: string) {
+  return useQuery({
+    queryKey: ['admin', 'dependency-locations', id] as const,
+    queryFn: () => adminDependencyLocationIds(id),
+  })
+}
+
+export function useDependencyLocationsSave() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { id: string; locationIds: string[] }) =>
+      adminReplaceDependencyLocations(variables.id, variables.locationIds),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin'] })
+    },
+  })
 }
 
 export function useAdminSave() {

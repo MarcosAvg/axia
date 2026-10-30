@@ -21,6 +21,8 @@ Referencia conceptual del modelo de datos actual. El esquema ejecutable está en
 ## Relaciones clave
 
 - Un tiquet pertenece a un equipo, edificio, ubicación, dependencia, categoría y prioridad.
+- Una dependencia se vincula a una o varias ubicaciones (`dependency_locations`); una ubicación
+  puede tener varias dependencias. Sin vínculos, la dependencia se ofrece en todas.
 - Un tiquet puede tener subcategoría, problema y tipo de servicio.
 - El solicitante puede tener cuenta o existir solo en el catálogo.
 - El técnico puede tener cuenta o existir solo en el catálogo.

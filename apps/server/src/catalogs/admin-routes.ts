@@ -9,12 +9,19 @@ import {
   adminTable,
   insertAdminRow,
   listAdminRows,
+  listDependencyLocationIds,
+  listDependencyLocations,
+  replaceDependencyLocations,
   updateAdminRow,
   type AdminValues,
 } from './admin.js'
 
 const tableParams = z.object({ table: z.string().min(1).max(40) })
 const rowParams = tableParams.extend({ id: z.string().uuid() })
+const dependencyParams = z.object({ id: z.string().uuid() })
+const locationIdsBody = z.object({
+  locationIds: z.array(z.string().uuid()).max(500),
+})
 const bodySchema = z.record(
   z.string().min(1).max(64),
   z.union([z.string(), z.number(), z.boolean(), z.null()]),
@@ -22,6 +29,38 @@ const bodySchema = z.record(
 
 function valuesOf(body: Record<string, unknown>): AdminValues {
   return body as AdminValues
+}
+
+function registerDependencyLocationRoutes(
+  app: FastifyInstance,
+  guard: Guard[],
+  db: Database,
+) {
+  app.get(
+    '/api/admin/catalogs/dependencies/locations',
+    { preHandler: guard },
+    async () => ({ items: await listDependencyLocations(db) }),
+  )
+
+  app.get(
+    '/api/admin/catalogs/dependencies/:id/locations',
+    { preHandler: guard },
+    async (request) => {
+      const { id } = dependencyParams.parse(request.params)
+      return { locationIds: await listDependencyLocationIds(db, id) }
+    },
+  )
+
+  app.put(
+    '/api/admin/catalogs/dependencies/:id/locations',
+    { preHandler: guard },
+    async (request, reply) => {
+      const { id } = dependencyParams.parse(request.params)
+      const { locationIds } = locationIdsBody.parse(request.body)
+      await replaceDependencyLocations(db, id, locationIds)
+      return reply.status(204).send()
+    },
+  )
 }
 
 export function registerAdminCatalogRoutes(
@@ -48,6 +87,8 @@ export function registerAdminCatalogRoutes(
       }
     },
   )
+
+  registerDependencyLocationRoutes(app, guard, db)
 
   app.post(
     '/api/admin/catalogs/:table',

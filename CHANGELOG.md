@@ -27,6 +27,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   archivan para conservar la bitácora.
 - Exportación e importación de todos los catálogos en un único XLSX idempotente, con referencias por
   nombre y reporte por fila.
+- Dependencias solicitantes vinculadas a una o varias ubicaciones (N:M), con filtro en el alta de
+  tiquets y edición desde Administración.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido

@@ -22,7 +22,8 @@ const catalogKeys = {
   teams: ['catalogs', 'teams'] as const,
   technicians: ['catalogs', 'technicians'] as const,
   buildings: ['catalogs', 'buildings'] as const,
-  dependencies: ['catalogs', 'dependencies'] as const,
+  dependencies: (locationId: string) =>
+    ['catalogs', 'dependencies', locationId] as const,
   serviceTypes: ['catalogs', 'serviceTypes'] as const,
   channels: ['catalogs', 'channels'] as const,
   priorities: ['catalogs', 'priorities'] as const,
@@ -69,10 +70,10 @@ export function useBuildings() {
   })
 }
 
-export function useDependencies() {
+export function useDependencies(locationId?: string) {
   return useQuery({
-    queryKey: catalogKeys.dependencies,
-    queryFn: fetchDependencies,
+    queryKey: catalogKeys.dependencies(locationId ?? ''),
+    queryFn: () => fetchDependencies(locationId),
     staleTime,
   })
 }

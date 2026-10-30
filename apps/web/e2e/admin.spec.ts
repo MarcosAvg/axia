@@ -46,6 +46,28 @@ test('el administrador crea un equipo desde la administración', async ({
   await expect(page.getByRole('table').getByText(name)).toBeVisible()
 })
 
+test('@smoke vincula una dependencia a una ubicación', async ({ page }) => {
+  const name = `Dependencia E2E ${crypto.randomUUID().slice(0, 8)}`
+  await signIn(page, 'demo.admin')
+  await page.goto('/admin/catalogos?catalog=dependencies')
+  await expect(
+    page.getByRole('heading', { name: 'Dependencias' }),
+  ).toBeVisible()
+
+  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByLabel('Nombre').fill(name)
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('table').getByText(name)).toBeVisible()
+
+  await page.getByRole('button', { name: `Editar: ${name}` }).click()
+  await page.getByRole('menuitem', { name: 'Ubicaciones' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('Ubicaciones de la dependencia')).toBeVisible()
+  await dialog.getByRole('checkbox').first().check()
+  await dialog.getByRole('button', { name: 'Guardar ubicaciones' }).click()
+  await expect(page.getByText('Ubicaciones guardadas.')).toBeVisible()
+})
+
 test('@smoke exporta y reimporta los catálogos sin inválidas', async ({
   page,
 }) => {

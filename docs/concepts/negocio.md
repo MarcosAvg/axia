@@ -72,7 +72,7 @@ políticas y hasta los nombres con que se muestran los conceptos.
 | Concepto | Significado |
 |---|---|
 | **Equipo** (`team`) | Grupo que atiende: mantenimiento, seguridad, etc. Cada instancia lo puede llamar departamento, jefatura, área o como quiera (etiqueta configurable). La **categoría pertenece a un equipo** |
-| **Dependencia** (`dependency`) | Unidad que solicita. **No es lo mismo que el equipo** |
+| **Dependencia** (`dependency`) | Unidad que solicita. **No es lo mismo que el equipo**. Se vincula a una o varias ubicaciones; sin vínculos, se ofrece en todas |
 | Edificio / Ubicación | Dónde ocurre el problema; la ubicación pertenece a un edificio |
 | Categoría → Subcategoría → Problema | Clasificación jerárquica de tres niveles |
 | **Captura** | Lo que registra quien crea el tiquet. **Mala captura**: captura incorrecta. **Recaptura**: corrección de la captura sobre el mismo tiquet, conservando lo original |

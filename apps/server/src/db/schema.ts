@@ -1907,6 +1907,31 @@ export const dependencies = pgTable(
   (table) => [unique('dependencies_name_key').on(table.name)],
 )
 
+export const dependencyLocations = pgTable(
+  'dependency_locations',
+  {
+    dependencyId: uuid('dependency_id').notNull(),
+    locationId: uuid('location_id').notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.dependencyId],
+      foreignColumns: [dependencies.id],
+      name: 'dependency_locations_dependency_id_fkey',
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [locations.id],
+      name: 'dependency_locations_location_id_fkey',
+    }),
+    primaryKey({
+      columns: [table.dependencyId, table.locationId],
+      name: 'dependency_locations_pkey',
+    }),
+    index('dependency_locations_location_idx').on(table.locationId),
+  ],
+)
+
 export const categories = pgTable(
   'categories',
   {

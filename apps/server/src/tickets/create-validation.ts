@@ -3,17 +3,21 @@ import { sql } from 'drizzle-orm'
 import { AppError } from '../http/errors.js'
 import type { CreateTicketInput } from './create-types.js'
 import type { DbExecutor } from './db.js'
+import { assertPair, assertRecapturePair } from './dependency-location.js'
+import {
+  changed,
+  resolved,
+  type RecaptureValidationInput,
+} from './recapture-input.js'
 
 type ActiveTable =
   'buildings' | 'dependencies' | 'service_types' | 'priorities' | 'channels'
-
 export type RequesterRow = {
   id: string
   full_name: string
   contact: string | null
   user_id: string | null
 }
-
 export type CategoryRow = {
   id: string
   team_id: string
@@ -141,6 +145,7 @@ export async function validateCreateInputs(
 ): Promise<CategoryRow> {
   await requireActive(tx, 'buildings', input.buildingId, 'Edificio')
   await requireActive(tx, 'dependencies', input.dependencyId, 'Dependencia')
+  await assertPair(tx, input.dependencyId, input.locationId)
   await requireActive(
     tx,
     'service_types',
@@ -215,31 +220,6 @@ export async function resolveCreateDefaults(
     throw invalid('Faltan catálogos obligatorios para registrar el tiquet')
   }
   return { ...input, serviceTypeId, priorityId, channelId }
-}
-
-type RecaptureCurrent = {
-  buildingId: string
-  locationId: string
-  dependencyId: string
-  categoryId: string
-  subcategoryId: string | null
-  problemId: string | null
-  serviceTypeId: string | null
-  priorityId: string
-}
-
-export type RecaptureValidationInput = {
-  current: RecaptureCurrent
-  changes: Partial<RecaptureCurrent>
-}
-
-/** La web envía todos los campos; solo se valida lo que de verdad cambió. */
-function changed<T>(next: T | undefined, current: T): boolean {
-  return next !== undefined && next !== current
-}
-
-function resolved<T>(next: T | undefined, current: T): T {
-  return next !== undefined ? next : current
 }
 
 async function validateRecapturePlace(
@@ -319,9 +299,8 @@ async function validateRecaptureReferences(
 }
 
 /**
- * La recaptura puede cambiar partes de la clasificación. Valida solo lo que
- * cambia (o lo que depende de ello) para no bloquear correcciones de textos en
- * tiquets antiguos con catálogos ya desactivados.
+ * La recaptura valida solo lo que cambia (o de lo que depende) para no bloquear
+ * correcciones de textos en tiquets antiguos con catálogos desactivados.
  */
 export async function validateRecaptureInputs(
   tx: DbExecutor,
@@ -330,4 +309,5 @@ export async function validateRecaptureInputs(
   await validateRecapturePlace(tx, input)
   await validateRecaptureClassification(tx, input)
   await validateRecaptureReferences(tx, input)
+  await assertRecapturePair(tx, input)
 }

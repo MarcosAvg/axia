@@ -26,6 +26,7 @@ export function useCreateTicketForm() {
     defaultValues,
   })
   const buildingId = useWatch({ control: form.control, name: 'buildingId' })
+  const locationId = useWatch({ control: form.control, name: 'locationId' })
   const categoryId = useWatch({ control: form.control, name: 'categoryId' })
   const subcategoryId = useWatch({
     control: form.control,
@@ -35,6 +36,7 @@ export function useCreateTicketForm() {
 
   const catalogs = useCreateTicketCatalogs(
     buildingId || undefined,
+    locationId || undefined,
     categoryId || undefined,
     subcategoryId || undefined,
   )
@@ -54,6 +56,15 @@ export function useCreateTicketForm() {
       form.setValue('requesterId', ownRequester.id)
     }
   }, [ownRequester, form])
+
+  useEffect(() => {
+    form.setValue('locationId', '')
+    form.setValue('dependencyId', '')
+  }, [buildingId, form])
+
+  useEffect(() => {
+    form.setValue('dependencyId', '')
+  }, [locationId, form])
 
   useEffect(() => {
     if (!showOccurredAt && form.getValues('occurredAt')) {

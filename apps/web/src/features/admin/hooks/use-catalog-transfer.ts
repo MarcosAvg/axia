@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { adminDependencyLocationLinks } from '../api/admin-api'
+import type { AdminRow, DependencyLocationLink } from '../api/admin-api'
 import {
   importCatalogSheets,
   loadCatalogRows,
@@ -10,79 +12,120 @@ import {
   readCatalogWorkbook,
   writeCatalogWorkbook,
 } from '../api/catalog-workbook'
-import type { CatalogSheets } from '../api/catalog-workbook'
+import type {
+  CatalogSheets,
+  CatalogWorkbook,
+  DependencyLocationRow,
+} from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
-import type { CatalogSheetRows } from '../domain/catalog-import'
+import type { CatalogKey } from '../domain/catalog-import'
 import { toExportRows, toReferences } from '../domain/catalog-export'
 import { adminMessages } from '../i18n'
 
 const t = adminMessages.transfer
 
+async function runTask(
+  task: () => Promise<void>,
+  setBusy: (value: boolean) => void,
+  onError: () => void,
+) {
+  setBusy(true)
+  try {
+    await task()
+  } catch {
+    onError()
+  } finally {
+    setBusy(false)
+  }
+}
+
+function linkRows(
+  rows: Record<CatalogKey, AdminRow[]>,
+  links: DependencyLocationLink[],
+): DependencyLocationRow[] {
+  const byDependency = new Map<string, DependencyLocationRow[]>()
+  for (const link of links) {
+    const list = byDependency.get(link.dependencyId) ?? []
+    list.push({
+      dependency: link.dependencyName,
+      building: link.buildingName,
+      location: link.locationName,
+    })
+    byDependency.set(link.dependencyId, list)
+  }
+  return rows.dependencies.flatMap(
+    (row) =>
+      byDependency.get(String(row.id)) ?? [
+        { dependency: String(row.name ?? ''), building: '', location: '' },
+      ],
+  )
+}
+
 async function exportWorkbook() {
-  const rows = await loadCatalogRows()
+  const [rows, links] = await Promise.all([
+    loadCatalogRows(),
+    adminDependencyLocationLinks(),
+  ])
   const references = toReferences(rows)
   const data: CatalogSheets = {}
   for (const spec of CATALOG_IMPORT_SPECS) {
     data[spec.key] = toExportRows(spec, rows[spec.key], references)
   }
-  await writeCatalogWorkbook(data)
+  await writeCatalogWorkbook(data, linkRows(rows, links))
 }
 
-/** Lee el archivo; `null` si no trae hojas de catálogo. */
-async function loadSheets(file: File): Promise<CatalogSheetRows | null> {
+/** Lee el archivo; `null` si no trae hojas de catálogo ni vínculos. */
+async function loadSheets(file: File): Promise<CatalogWorkbook | null> {
   const workbook = await readCatalogWorkbook(file)
-  const hasRows = Object.values(workbook).some((rows) => rows?.length)
+  const hasRows =
+    workbook.dependencyLocations.length > 0 ||
+    Object.values(workbook.sheets).some((rows) => rows?.length)
   return hasRows ? workbook : null
 }
 
 /** Estado de la exportación e importación del libro de catálogos. */
 export function useCatalogTransfer() {
   const queryClient = useQueryClient()
-  const [sheets, setSheets] = useState<CatalogSheetRows | null>(null)
+  const [workbook, setWorkbook] = useState<CatalogWorkbook | null>(null)
   const [fileName, setFileName] = useState('')
   const [report, setReport] = useState<ImportReport[] | null>(null)
   const [issues, setIssues] = useState<ImportIssue[]>([])
   const [busy, setBusy] = useState(false)
 
-  async function run(task: () => Promise<void>) {
-    setBusy(true)
-    try {
-      await task()
-    } catch {
-      toast.error(t.error)
-    } finally {
-      setBusy(false)
-    }
-  }
+  const run = (task: () => Promise<void>) =>
+    runTask(task, setBusy, () => toast.error(t.error))
 
   const exportAll = () => run(exportWorkbook)
   function choose(file: File | null) {
     setReport(null)
-    setSheets(null)
+    setWorkbook(null)
     if (!file) return Promise.resolve()
     return run(async () => {
-      const workbook = await loadSheets(file)
-      if (!workbook) {
+      const parsed = await loadSheets(file)
+      if (!parsed) {
         toast.error(t.noSheets)
         return
       }
-      setSheets(workbook)
+      setWorkbook(parsed)
       setFileName(file.name)
     })
   }
   function apply() {
-    if (!sheets) return Promise.resolve()
+    if (!workbook) return Promise.resolve()
     return run(async () => {
-      const result = await importCatalogSheets(sheets)
+      const result = await importCatalogSheets(
+        workbook.sheets,
+        workbook.dependencyLocations,
+      )
       setReport(result.report)
       setIssues(result.issues)
-      setSheets(null)
+      setWorkbook(null)
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
     })
   }
 
   return {
-    sheets,
+    workbook,
     fileName,
     report,
     issues,
@@ -90,10 +133,10 @@ export function useCatalogTransfer() {
     exportAll,
     choose,
     apply,
-    cancel: () => setSheets(null),
+    cancel: () => setWorkbook(null),
     close: () => setReport(null),
     dismiss: () => {
-      setSheets(null)
+      setWorkbook(null)
       setReport(null)
     },
   }

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import type { ImportReport } from '../api/catalog-transfer-api'
+import { DEPENDENCY_LOCATION_SHEET } from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
 import { useCatalogTransfer } from '../hooks/use-catalog-transfer'
 import { adminMessages } from '../i18n'
@@ -22,11 +23,17 @@ function totalsOf(report: ImportReport[]) {
 }
 
 function Preview({ transfer }: { transfer: Transfer }) {
-  if (!transfer.sheets) return null
-  const rows = CATALOG_IMPORT_SPECS.map((spec) => ({
-    title: spec.title,
-    count: transfer.sheets?.[spec.key]?.length ?? 0,
-  })).filter((item) => item.count > 0)
+  if (!transfer.workbook) return null
+  const links = transfer.workbook.dependencyLocations
+  const rows = [
+    ...CATALOG_IMPORT_SPECS.map((spec) => ({
+      title: spec.title,
+      count: transfer.workbook?.sheets[spec.key]?.length ?? 0,
+    })),
+    ...(links.length > 0
+      ? [{ title: DEPENDENCY_LOCATION_SHEET, count: links.length }]
+      : []),
+  ].filter((item) => item.count > 0)
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
@@ -131,14 +138,14 @@ export function CatalogTransfer() {
         </label>
       </Button>
       <EntityDialog
-        open={Boolean(transfer.sheets || transfer.report)}
+        open={Boolean(transfer.workbook || transfer.report)}
         onOpenChange={(open) => {
           if (!open) transfer.dismiss()
         }}
-        title={transfer.sheets ? t.confirmTitle : t.reportTitle}
-        description={transfer.sheets ? t.confirmHelp : undefined}
+        title={transfer.workbook ? t.confirmTitle : t.reportTitle}
+        description={transfer.workbook ? t.confirmHelp : undefined}
       >
-        {transfer.sheets ? (
+        {transfer.workbook ? (
           <Preview transfer={transfer} />
         ) : (
           <Result transfer={transfer} />

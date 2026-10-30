@@ -2,6 +2,7 @@ import {
   EllipsisIcon,
   KeyRoundIcon,
   LogOutIcon,
+  MapPinIcon,
   PencilIcon,
   PowerIcon,
   Trash2Icon,
@@ -25,6 +26,16 @@ interface RowActionsProps {
   onResetPassword?: () => void
   onRevokeSessions?: () => void
   onDelete?: () => void
+  onLocations?: () => void
+}
+
+function LocationsMenuItem({ onSelect }: { onSelect: () => void }) {
+  return (
+    <DropdownMenuItem onSelect={onSelect}>
+      <MapPinIcon />
+      {adminMessages.actions.locations}
+    </DropdownMenuItem>
+  )
 }
 
 function DeleteMenuItem({ onDelete }: { onDelete: () => void }) {
@@ -49,6 +60,7 @@ export function RowActions({
   onResetPassword,
   onRevokeSessions,
   onDelete,
+  onLocations,
 }: RowActionsProps) {
   const { actions, users } = adminMessages
   const toggleLabel = active ? actions.deactivate : actions.activate
@@ -71,6 +83,7 @@ export function RowActions({
             {editLabel ?? actions.edit}
           </DropdownMenuItem>
         ) : null}
+        {onLocations ? <LocationsMenuItem onSelect={onLocations} /> : null}
         <DropdownMenuItem onSelect={onToggle}>
           <PowerIcon />
           {toggleLabel}

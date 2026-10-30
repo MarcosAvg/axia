@@ -50,3 +50,40 @@ export async function adminUpdate(
     body: JSON.stringify(values),
   })
 }
+
+export interface DependencyLocationLink {
+  dependencyId: string
+  dependencyName: string
+  buildingId: string
+  buildingName: string
+  locationId: string
+  locationName: string
+}
+
+export async function adminDependencyLocationLinks(): Promise<
+  DependencyLocationLink[]
+> {
+  const body = await apiFetch<{ items: DependencyLocationLink[] }>(
+    '/api/admin/catalogs/dependencies/locations',
+  )
+  return body.items
+}
+
+export async function adminDependencyLocationIds(
+  id: string,
+): Promise<string[]> {
+  const body = await apiFetch<{ locationIds: string[] }>(
+    `/api/admin/catalogs/dependencies/${id}/locations`,
+  )
+  return body.locationIds
+}
+
+export async function adminReplaceDependencyLocations(
+  id: string,
+  locationIds: string[],
+): Promise<void> {
+  await apiFetch(`/api/admin/catalogs/dependencies/${id}/locations`, {
+    method: 'PUT',
+    body: JSON.stringify({ locationIds }),
+  })
+}

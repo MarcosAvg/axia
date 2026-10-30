@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => {
         if (row) Object.assign(row, values)
       },
     ),
+    adminReplaceDependencyLocations: vi.fn(async () => undefined),
   }
 })
 
@@ -31,6 +32,7 @@ vi.mock('./admin-api', () => ({
   adminList: mocks.adminList,
   adminInsert: mocks.adminInsert,
   adminUpdate: mocks.adminUpdate,
+  adminReplaceDependencyLocations: mocks.adminReplaceDependencyLocations,
 }))
 
 import { importCatalogSheets } from './catalog-transfer-api'
@@ -65,5 +67,36 @@ describe('importCatalogSheets', () => {
     )
     const child = mocks.store.reasons?.find((row) => row.name === 'Sin stock')
     expect(child?.parent_id).toBe(parent?.id)
+  })
+
+  it('reemplaza los vínculos dependencia–ubicación', async () => {
+    mocks.store.dependencies = [{ id: 'dep-1', name: 'Sistemas' }]
+    mocks.store.buildings = [{ id: 'bld-1', name: 'Edificio Central' }]
+    mocks.store.locations = [
+      { id: 'loc-1', name: 'Piso 1', building_id: 'bld-1' },
+      { id: 'loc-2', name: 'Piso 2', building_id: 'bld-1' },
+    ]
+    const result = await importCatalogSheets({}, [
+      {
+        dependency: 'Sistemas',
+        building: 'Edificio Central',
+        location: 'Piso 1',
+      },
+      {
+        dependency: 'Sistemas',
+        building: 'Edificio Central',
+        location: 'Piso 2',
+      },
+    ])
+
+    expect(mocks.adminReplaceDependencyLocations).toHaveBeenCalledWith(
+      'dep-1',
+      ['loc-1', 'loc-2'],
+    )
+    expect(result.report.at(-1)).toMatchObject({
+      updated: 1,
+      invalid: 0,
+      errors: 0,
+    })
   })
 })

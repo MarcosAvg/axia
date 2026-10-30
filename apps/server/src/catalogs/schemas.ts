@@ -10,5 +10,6 @@ export const catalogQuerySchema = z.object({
   buildingId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
   subcategoryId: z.string().uuid().optional(),
+  locationId: z.string().uuid().optional(),
   use: z.enum(REASON_USES).optional(),
 })

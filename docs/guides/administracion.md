@@ -43,6 +43,9 @@ En `/admin/catalogos` se administran equipos, edificios, ubicaciones, dependenci
 subcategorías, problemas, tipos de servicio, prioridades, canales, solicitantes, técnicos y motivos.
 
 - Los catálogos se desactivan; no se borran.
+- En **Dependencias**, la acción **Ubicaciones** permite marcar dónde se ofrece cada dependencia.
+  Sin ubicaciones marcadas se ofrece en todas (compatibilidad); al marcar una o varias, solo
+  aparece en esas ubicaciones del alta de tiquets.
 - **Exportar** descarga `catalogos.xlsx` con una hoja por catálogo, referencias por nombre y las
   filas activas e inactivas. Ese mismo archivo se puede **Importar** en otra instancia o en la
   misma: inserta lo nuevo y actualiza lo existente sin duplicar, sin borrar y sin tocar las celdas
