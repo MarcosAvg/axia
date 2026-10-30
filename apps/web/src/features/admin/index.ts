@@ -3,6 +3,7 @@
 export { ADMIN_CATALOGS, catalogByKey } from './domain/catalogs'
 export { AdminPage } from './components/admin-page'
 export { CatalogManager } from './components/catalog-manager'
+export { CatalogTransfer } from './components/catalog-transfer'
 export { RolesManager } from './components/roles-manager'
 export { UsersManager } from './components/users-manager'
 export { ScopesManager } from './components/scopes-manager'

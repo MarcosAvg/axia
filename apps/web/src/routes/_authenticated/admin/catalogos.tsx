@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import {
   ADMIN_CATALOGS,
   CatalogManager,
+  CatalogTransfer,
   adminMessages,
   catalogByKey,
 } from '@/features/admin'
@@ -50,6 +51,7 @@ function CatalogsPage() {
       <PageHeader
         title={adminMessages.nav.catalogs}
         description={adminMessages.descriptions.catalogs}
+        actions={<CatalogTransfer />}
       />
       <div className="grid min-w-0 gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <CatalogPicker current={config.key} />

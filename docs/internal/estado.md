@@ -3,7 +3,7 @@
 > Memoria de trabajo entre sesiones. Mantenerla corta: el detalle cronológico vive en
 > [`CHANGELOG.md`](../../CHANGELOG.md) y las decisiones en [`../decisions/`](../decisions/).
 
-**Última actualización:** 2026-10-29
+**Última actualización:** 2026-10-30
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
@@ -21,7 +21,8 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
   evidencias TUS/Sharp, tiempo real con SSE, cola offline y tiempos por acción.
 - **Administración:** usuarios, roles, catálogos, calendarios, configuración de instancia, ámbitos,
   designaciones y métricas. Las cuentas se pueden desactivar o eliminar: sin historial se borran y
-  con historial se archivan para conservar la bitácora.
+  con historial se archivan para conservar la bitácora. Los catálogos se exportan e importan en un
+  único XLSX idempotente (ADR 0094).
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
 - **Despliegue con Compose:** `compose.yaml` descarga las imágenes `:latest` de GHCR, deja `app` solo

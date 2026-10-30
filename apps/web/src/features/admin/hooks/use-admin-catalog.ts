@@ -54,14 +54,17 @@ export function useAdminOptions(sources: OptionSource[]) {
 export function useAdminSave() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: {
+    mutationFn: async (variables: {
       table: AdminTable
       id?: string
       values: AdminValues
-    }) =>
-      variables.id
-        ? adminUpdate(variables.table, variables.id, variables.values)
-        : adminInsert(variables.table, variables.values),
+    }) => {
+      if (variables.id) {
+        await adminUpdate(variables.table, variables.id, variables.values)
+      } else {
+        await adminInsert(variables.table, variables.values)
+      }
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
     },

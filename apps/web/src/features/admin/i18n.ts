@@ -171,6 +171,33 @@ export const adminMessages = {
     settings: 'Parámetros generales de la instancia.',
   },
   catalogPicker: 'Catálogo',
+  transfer: {
+    export: 'Exportar',
+    import: 'Importar',
+    importing: 'Importando…',
+    error: 'No se pudo completar la operación.',
+    noSheets: 'El archivo no contiene hojas de catálogo reconocidas.',
+    confirmTitle: 'Importar catálogos',
+    confirmHelp:
+      'Se insertan los registros nuevos y se actualizan los existentes por su clave natural. No se borra nada y las celdas vacías no modifican el dato.',
+    fileLabel: (name: string) => `Archivo: ${name}`,
+    rows: 'filas',
+    row: 'Fila',
+    cancel: 'Cancelar',
+    close: 'Cerrar',
+    reportTitle: 'Resultado de la importación',
+    inserted: 'nuevas',
+    updated: 'actualizadas',
+    invalid: 'inválidas',
+    noIssues: 'Sin incidencias.',
+    summary: (
+      inserted: number,
+      updated: number,
+      invalid: number,
+      errors: number,
+    ) =>
+      `${inserted} nuevas, ${updated} actualizadas, ${invalid} inválidas, ${errors} errores.`,
+  },
   form: {
     newTitle: 'Nuevo registro',
     editTitle: 'Editar registro',

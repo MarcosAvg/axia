@@ -43,6 +43,10 @@ En `/admin/catalogos` se administran equipos, edificios, ubicaciones, dependenci
 subcategorías, problemas, tipos de servicio, prioridades, canales, solicitantes, técnicos y motivos.
 
 - Los catálogos se desactivan; no se borran.
+- **Exportar** descarga `catalogos.xlsx` con una hoja por catálogo, referencias por nombre y las
+  filas activas e inactivas. Ese mismo archivo se puede **Importar** en otra instancia o en la
+  misma: inserta lo nuevo y actualiza lo existente sin duplicar, sin borrar y sin tocar las celdas
+  vacías. Un nombre repetido bajo padres distintos se exporta como ruta (`Equipo / Categoría`).
 - Cada tiquet conserva una instantánea de los valores usados.
 - Los motivos son jerárquicos y se agrupan por uso: pausa, rechazo, cancelación, reasignación,
   recaptura, reclamación, reactivación y apoyo auxiliar.

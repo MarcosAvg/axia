@@ -37,9 +37,18 @@ export function parseNumber(value: unknown): number | null | undefined {
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
-function findReference(rows: ReferenceRow[] | undefined, label: string) {
+function findReference(
+  rows: ReferenceRow[] | undefined,
+  label: string,
+): { row?: ReferenceRow; ambiguous?: true } {
   const target = label.trim().toLocaleLowerCase('es-MX')
-  return rows?.find((row) => row.label.toLocaleLowerCase('es-MX') === target)
+  const matches = (rows ?? []).filter(
+    (row) =>
+      row.label.toLocaleLowerCase('es-MX') === target ||
+      row.path?.toLocaleLowerCase('es-MX') === target,
+  )
+  if (matches.length > 1) return { ambiguous: true }
+  return { row: matches[0] }
 }
 
 function findFixed(column: ImportColumn, value: string): string | null {
@@ -100,8 +109,11 @@ function parseReferenceColumn(
     rows = rows?.filter((row) => !row.use || row.use === resolvedUse)
   }
   const found = findReference(rows, label)
-  return found
-    ? { value: found.id }
+  if (found.ambiguous) {
+    return { issue: `Referencia ambigua: ${column.header} «${label}»` }
+  }
+  return found.row
+    ? { value: found.row.id }
     : { issue: `Sin coincidencia: ${column.header} «${label}»` }
 }
 

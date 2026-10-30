@@ -94,6 +94,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0091](0091-movil-por-rol.md) | Experiencia móvil recortada por rol |
 | [0092](0092-navegacion-movil-inferior.md) | Navegación móvil inferior |
 | [0093](0093-borrado-de-usuarios.md) | Borrado de usuarios sin romper la bitácora |
+| [0094](0094-exportar-e-importar-catalogos.md) | Exportar e importar catálogos en un solo XLSX |
 
 ## Archivo
 

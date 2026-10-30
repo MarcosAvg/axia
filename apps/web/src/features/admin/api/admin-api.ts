@@ -32,11 +32,12 @@ export async function adminList(
 export async function adminInsert(
   table: AdminTable,
   values: AdminValues,
-): Promise<void> {
-  await apiFetch(`/api/admin/catalogs/${table}`, {
+): Promise<string> {
+  const body = await apiFetch<{ id: string }>(`/api/admin/catalogs/${table}`, {
     method: 'POST',
     body: JSON.stringify(values),
   })
+  return body.id
 }
 
 export async function adminUpdate(

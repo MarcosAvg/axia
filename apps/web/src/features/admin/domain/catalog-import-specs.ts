@@ -41,11 +41,18 @@ export interface ImportSpec {
 export interface ReferenceRow {
   id: string
   label: string
+  /** Nombre con la ruta de padres; desambigua etiquetas repetidas. */
+  path?: string
   /** Solo motivos: el uso, para desambiguar el padre. */
   use?: string
 }
 
 export type References = Record<CatalogKey, ReferenceRow[]>
+
+/** Filas crudas por catálogo, tal como se leen de un XLSX. */
+export type CatalogSheetRows = Partial<
+  Record<CatalogKey, Record<string, unknown>[]>
+>
 
 const reasonUseOptions = Object.entries(adminMessages.reasonUse).map(
   ([value, label]) => ({ value, label }),
@@ -130,6 +137,17 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
     ['category_id', 'name'],
   ),
   spec(
+    'priorities',
+    'Prioridades',
+    [
+      text('name', 'Nombre', true),
+      number('position', 'Orden'),
+      number('target_minutes', 'Tiempo objetivo (min)'),
+      active,
+    ],
+    ['name'],
+  ),
+  spec(
     'problems',
     'Problemas',
     [
@@ -145,17 +163,6 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
     'Tipos de servicio',
     [
       text('name', 'Nombre', true),
-      number('target_minutes', 'Tiempo objetivo (min)'),
-      active,
-    ],
-    ['name'],
-  ),
-  spec(
-    'priorities',
-    'Prioridades',
-    [
-      text('name', 'Nombre', true),
-      number('position', 'Orden'),
       number('target_minutes', 'Tiempo objetivo (min)'),
       active,
     ],

@@ -122,6 +122,23 @@ describe('prepareRow', () => {
   })
 })
 
+describe('referencias ambiguas', () => {
+  it('rechaza una referencia con dos coincidencias en vez de elegir una', () => {
+    const refs = references()
+    refs.buildings = [
+      { id: 'bld-1', label: 'Edificio Central' },
+      { id: 'bld-2', label: 'Edificio Central' },
+    ]
+    const row = prepareRow(
+      specByKey('locations'),
+      { Edificio: 'Edificio Central', Nombre: 'Planta baja' },
+      2,
+      refs,
+    )
+    expect(row.issues.some((issue) => issue.includes('ambigua'))).toBe(true)
+  })
+})
+
 describe('analyzeCatalog', () => {
   it('clasifica nuevas, existentes y duplicadas', () => {
     const spec = specByKey('teams')

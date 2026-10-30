@@ -28,3 +28,26 @@ test('el administrador crea un equipo desde la administración', async ({
 
   await expect(page.getByRole('table').getByText(name)).toBeVisible()
 })
+
+test('@smoke exporta y reimporta los catálogos sin inválidas', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page.goto('/admin/catalogos')
+
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Exportar' }).click()
+  const path = await (await downloadPromise).path()
+  if (!path) throw new Error('La exportación no generó un archivo')
+
+  await page.locator('input[type="file"]').setInputFiles(path)
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('Importar catálogos')).toBeVisible()
+  await dialog.getByRole('button', { name: 'Importar', exact: true }).click()
+
+  await expect(dialog.getByRole('status')).toContainText(
+    /0 nuevas, \d+ actualizadas, 0 inválidas, 0 errores/,
+    { timeout: 60_000 },
+  )
+  await expect(dialog.getByText('Sin incidencias.')).toBeVisible()
+})

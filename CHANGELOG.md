@@ -25,6 +25,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   `axia:3100`, sin incluir proxy ni túnel en el repositorio.
 - Eliminación de usuarios: las cuentas sin historial se borran y las que participaron en tiquets se
   archivan para conservar la bitácora.
+- Exportación e importación de todos los catálogos en un único XLSX idempotente, con referencias por
+  nombre y reporte por fila.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido
