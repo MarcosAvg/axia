@@ -1,7 +1,24 @@
+import { createRequire } from 'node:module'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
 const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
+const nodeRequire = createRequire(import.meta.url)
+
+/** Deja solo dos hojas para no reescribir todos los catálogos junto al resto de E2E. */
+async function trimWorkbook(path: string): Promise<string> {
+  const ExcelJS = nodeRequire('exceljs') as typeof import('exceljs')
+  const workbook = new ExcelJS.Workbook()
+  await workbook.xlsx.readFile(path)
+  for (const sheet of [...workbook.worksheets]) {
+    if (!['Equipos', 'Categorías'].includes(sheet.name)) {
+      workbook.removeWorksheet(sheet.id)
+    }
+  }
+  const target = `${path}.trimmed.xlsx`
+  await workbook.xlsx.writeFile(target)
+  return target
+}
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
@@ -40,7 +57,9 @@ test('@smoke exporta y reimporta los catálogos sin inválidas', async ({
   const path = await (await downloadPromise).path()
   if (!path) throw new Error('La exportación no generó un archivo')
 
-  await page.locator('input[type="file"]').setInputFiles(path)
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles(await trimWorkbook(path))
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText('Importar catálogos')).toBeVisible()
   await dialog.getByRole('button', { name: 'Importar', exact: true }).click()
