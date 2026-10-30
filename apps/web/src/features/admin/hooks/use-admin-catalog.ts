@@ -8,10 +8,14 @@ import {
   adminDependencyLocationIds,
   adminInsert,
   adminList,
-  adminReplaceDependencyLocations,
+  adminSaveDependency,
   adminUpdate,
 } from '../api/admin-api'
-import type { AdminTable, AdminValues } from '../api/admin-api'
+import type {
+  AdminTable,
+  AdminValues,
+  DependencyValues,
+} from '../api/admin-api'
 
 const adminKeys = {
   rows: (table: AdminTable, orderBy: string) =>
@@ -61,14 +65,15 @@ export function useDependencyLocationIds(id: string) {
   return useQuery({
     queryKey: ['admin', 'dependency-locations', id] as const,
     queryFn: () => adminDependencyLocationIds(id),
+    enabled: Boolean(id),
   })
 }
 
-export function useDependencyLocationsSave() {
+export function useDependencySave() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: { id: string; locationIds: string[] }) =>
-      adminReplaceDependencyLocations(variables.id, variables.locationIds),
+    mutationFn: (variables: { id?: string; values: DependencyValues }) =>
+      adminSaveDependency(variables.values, variables.id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
     },

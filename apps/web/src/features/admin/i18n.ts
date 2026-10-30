@@ -136,7 +136,6 @@ export const adminMessages = {
     error: 'No se pudo guardar.',
     activate: 'Activar',
     deactivate: 'Desactivar',
-    locations: 'Ubicaciones',
     selectPlaceholder: 'Selecciona…',
     roleCreated: 'Rol creado.',
     roleUpdated: 'Rol actualizado.',

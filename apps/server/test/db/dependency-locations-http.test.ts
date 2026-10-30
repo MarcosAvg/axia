@@ -15,24 +15,18 @@ let context: TicketHttpContext
 let refs: WriteRefs
 let linkedDependency: string
 let otherDependency: string
+let unlinkedDependency: string
 let locationA2: string
 let locationB1: string
 
-async function get(url: string, cookie: string) {
-  return context.app.inject({
-    method: 'GET',
-    url,
-    headers: authHeaders(cookie),
-  })
-}
-
-async function put(
+async function request(
+  method: 'GET' | 'POST' | 'PATCH',
   url: string,
   cookie: string,
-  payload: Record<string, unknown>,
+  payload?: Record<string, unknown>,
 ) {
   return context.app.inject({
-    method: 'PUT',
+    method,
     url,
     headers: authHeaders(cookie),
     payload,
@@ -55,24 +49,20 @@ function ticketBody(dependencyId: string, locationId: string) {
   }
 }
 
-async function post(cookie: string, payload: Record<string, unknown>) {
-  return context.app.inject({
-    method: 'POST',
-    url: '/api/tickets',
-    headers: authHeaders(cookie),
-    payload,
-  })
-}
-
-async function insertDependency(name: string, locationId: string) {
+async function insertDependency(
+  name: string,
+  locationIds: string[],
+): Promise<string> {
   const result = await context.db.execute(sql`
     insert into public.dependencies (name) values (${name}) returning id
   `)
   const id = (result.rows[0] as { id: string }).id
-  await context.db.execute(sql`
-    insert into public.dependency_locations (dependency_id, location_id)
-    values (${id}, ${locationId})
-  `)
+  for (const locationId of locationIds) {
+    await context.db.execute(sql`
+      insert into public.dependency_locations (dependency_id, location_id)
+      values (${id}, ${locationId})
+    `)
+  }
   return id
 }
 
@@ -87,14 +77,13 @@ beforeAll(async () => {
   const row = places.rows[0] as { a2: string; b1: string }
   locationA2 = row.a2
   locationB1 = row.b1
-  linkedDependency = await insertDependency(
-    'Dependencia vinculada',
+  linkedDependency = await insertDependency('Dependencia vinculada', [
     refs.locationId,
-  )
-  otherDependency = await insertDependency(
-    'Dependencia de otra sede',
+  ])
+  otherDependency = await insertDependency('Dependencia de otra sede', [
     locationB1,
-  )
+  ])
+  unlinkedDependency = await insertDependency('Dependencia sin ubicación', [])
 }, 60_000)
 
 afterAll(async () => {
@@ -102,8 +91,9 @@ afterAll(async () => {
 })
 
 describe('catálogo de dependencias por ubicación', () => {
-  it('ofrece las vinculadas y las de respaldo, y oculta las de otra ubicación', async () => {
-    const response = await get(
+  it('ofrece solo las vinculadas y oculta las de otra ubicación o sin vínculos', async () => {
+    const response = await request(
+      'GET',
       `/api/catalogs/dependencies?locationId=${refs.locationId}`,
       context.cookies.requester,
     )
@@ -115,38 +105,77 @@ describe('catálogo de dependencias por ubicación', () => {
       expect.arrayContaining(['Dependencia', 'Dependencia vinculada']),
     )
     expect(names).not.toContain('Dependencia de otra sede')
+    expect(names).not.toContain('Dependencia sin ubicación')
   })
 })
 
-describe('administración de ubicaciones de una dependencia', () => {
-  it('reemplaza y devuelve los vínculos', async () => {
-    const url = `/api/admin/catalogs/dependencies/${linkedDependency}/locations`
+describe('administración de dependencias', () => {
+  it('actualiza la dependencia y reemplaza sus ubicaciones', async () => {
+    const url = `/api/admin/catalogs/dependencies/${linkedDependency}`
     const locationIds = [refs.locationId, locationA2]
-    const saved = await put(url, context.cookies.admin, { locationIds })
+    const saved = await request('PATCH', url, context.cookies.admin, {
+      name: 'Dependencia vinculada',
+      active: true,
+      locationIds,
+    })
     expect(saved.statusCode).toBe(204)
 
-    const loaded = await get(url, context.cookies.admin)
+    const loaded = await request(
+      'GET',
+      `${url}/locations`,
+      context.cookies.admin,
+    )
     expect(loaded.statusCode).toBe(200)
     expect((loaded.json() as { locationIds: string[] }).locationIds).toEqual(
       expect.arrayContaining(locationIds),
     )
+  })
 
-    const all = await get(
-      '/api/admin/catalogs/dependencies/locations',
+  it('crea una dependencia con al menos una ubicación', async () => {
+    const response = await request(
+      'POST',
+      '/api/admin/catalogs/dependencies',
+      context.cookies.admin,
+      {
+        name: 'Dependencia nueva',
+        active: true,
+        locationIds: [refs.locationId],
+      },
+    )
+    expect(response.statusCode).toBe(201)
+    const id = (response.json() as { id: string }).id
+    const links = await request(
+      'GET',
+      `/api/admin/catalogs/dependencies/${id}/locations`,
       context.cookies.admin,
     )
-    expect((all.json() as { items: { dependencyId: string }[] }).items).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ dependencyId: linkedDependency }),
-      ]),
+    expect((links.json() as { locationIds: string[] }).locationIds).toEqual([
+      refs.locationId,
+    ])
+  })
+})
+
+describe('validación de dependencias', () => {
+  it('rechaza una dependencia sin ubicaciones', async () => {
+    const response = await request(
+      'POST',
+      '/api/admin/catalogs/dependencies',
+      context.cookies.admin,
+      { name: 'Dependencia vacía', active: true, locationIds: [] },
     )
+    expect(response.statusCode).toBe(400)
   })
 
   it('exige catalog.manage', async () => {
-    const response = await put(
-      `/api/admin/catalogs/dependencies/${linkedDependency}/locations`,
+    const response = await request(
+      'PATCH',
+      `/api/admin/catalogs/dependencies/${linkedDependency}`,
       context.cookies.requester,
-      { locationIds: [] },
+      {
+        name: 'Intento',
+        active: true,
+        locationIds: [refs.locationId],
+      },
     )
     expect(response.statusCode).toBe(403)
   })
@@ -154,7 +183,9 @@ describe('administración de ubicaciones de una dependencia', () => {
 
 describe('alta con dependencia vinculada', () => {
   it('rechaza una dependencia vinculada a otra ubicación', async () => {
-    const response = await post(
+    const response = await request(
+      'POST',
+      '/api/tickets',
       context.cookies.admin,
       ticketBody(otherDependency, refs.locationId),
     )
@@ -162,18 +193,22 @@ describe('alta con dependencia vinculada', () => {
   })
 
   it('acepta una dependencia vinculada a la ubicación', async () => {
-    const response = await post(
+    const response = await request(
+      'POST',
+      '/api/tickets',
       context.cookies.admin,
       ticketBody(linkedDependency, refs.locationId),
     )
     expect(response.statusCode).toBe(201)
   })
 
-  it('acepta una dependencia sin vínculos como respaldo', async () => {
-    const response = await post(
+  it('rechaza una dependencia sin ubicaciones', async () => {
+    const response = await request(
+      'POST',
+      '/api/tickets',
       context.cookies.admin,
-      ticketBody(refs.dependencyId, refs.locationId),
+      ticketBody(unlinkedDependency, refs.locationId),
     )
-    expect(response.statusCode).toBe(201)
+    expect(response.statusCode).toBe(400)
   })
 })

@@ -59,7 +59,7 @@ para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
 | Método | Ruta | Uso |
 |---|---|---|
 | `GET` | `/api/catalogs/:catalog` | Catálogos de lectura |
-| `GET` | `/api/catalogs/dependencies?locationId=…` | Dependencias disponibles en la ubicación (vinculadas + respaldo) |
+| `GET` | `/api/catalogs/dependencies?locationId=…` | Dependencias vinculadas a la ubicación |
 | `POST` | `/api/tickets/:id/evidence` | Reservar evidencia y obtener URL TUS |
 | `GET` | `/api/tickets/:id/evidence` | Listar evidencias |
 | `GET` | `/api/evidence/:id/file` | Archivo autenticado |
@@ -91,8 +91,9 @@ y `createdAt`.
 | `GET` | `/api/admin/roles` | Roles |
 | `GET/POST/PATCH` | `/api/admin/access` y rutas asociadas | Roles, permisos, vínculos y ámbitos |
 | `GET/POST/PATCH` | `/api/admin/catalogs/:table` | Catálogos |
+| `POST/PATCH` | `/api/admin/catalogs/dependencies` y `/:id` | Dependencia con al menos una ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/locations` | Vínculos dependencia–ubicación |
-| `GET/PUT` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
+| `GET` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
 | `GET/POST/PATCH/DELETE` | `/api/admin/calendars` y rutas asociadas | Calendarios |
 | `GET/PATCH` | `/api/admin/settings` | Configuración de instancia |
 

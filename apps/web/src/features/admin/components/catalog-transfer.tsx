@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import type { ImportReport } from '../api/catalog-transfer-api'
-import { DEPENDENCY_LOCATION_SHEET } from '../api/catalog-workbook'
+import { DEPENDENCY_SHEET } from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
 import { useCatalogTransfer } from '../hooks/use-catalog-transfer'
 import { adminMessages } from '../i18n'
@@ -24,14 +24,16 @@ function totalsOf(report: ImportReport[]) {
 
 function Preview({ transfer }: { transfer: Transfer }) {
   if (!transfer.workbook) return null
-  const links = transfer.workbook.dependencyLocations
+  const dependencies = transfer.workbook.dependencies
   const rows = [
-    ...CATALOG_IMPORT_SPECS.map((spec) => ({
-      title: spec.title,
-      count: transfer.workbook?.sheets[spec.key]?.length ?? 0,
-    })),
-    ...(links.length > 0
-      ? [{ title: DEPENDENCY_LOCATION_SHEET, count: links.length }]
+    ...CATALOG_IMPORT_SPECS.filter((spec) => spec.key !== 'dependencies').map(
+      (spec) => ({
+        title: spec.title,
+        count: transfer.workbook?.sheets[spec.key]?.length ?? 0,
+      }),
+    ),
+    ...(dependencies.length > 0
+      ? [{ title: DEPENDENCY_SHEET, count: dependencies.length }]
       : []),
   ].filter((item) => item.count > 0)
 

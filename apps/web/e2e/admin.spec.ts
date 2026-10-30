@@ -10,6 +10,11 @@ async function trimWorkbook(path: string): Promise<string> {
   const ExcelJS = nodeRequire('exceljs') as typeof import('exceljs')
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.readFile(path)
+  const dependencies = workbook.getWorksheet('Dependencias')
+  expect(dependencies?.getRow(1).values).toEqual(
+    expect.arrayContaining(['Nombre', 'Activo', 'Edificio', 'Ubicación']),
+  )
+  expect(dependencies?.rowCount ?? 0).toBeGreaterThan(1)
   for (const sheet of [...workbook.worksheets]) {
     if (!['Equipos', 'Categorías'].includes(sheet.name)) {
       workbook.removeWorksheet(sheet.id)
@@ -46,7 +51,7 @@ test('el administrador crea un equipo desde la administración', async ({
   await expect(page.getByRole('table').getByText(name)).toBeVisible()
 })
 
-test('@smoke vincula una dependencia a una ubicación', async ({ page }) => {
+test('@smoke crea una dependencia con ubicación', async ({ page }) => {
   const name = `Dependencia E2E ${crypto.randomUUID().slice(0, 8)}`
   await signIn(page, 'demo.admin')
   await page.goto('/admin/catalogos?catalog=dependencies')
@@ -55,17 +60,22 @@ test('@smoke vincula una dependencia a una ubicación', async ({ page }) => {
   ).toBeVisible()
 
   await page.getByRole('button', { name: 'Agregar' }).click()
-  await page.getByLabel('Nombre').fill(name)
-  await page.getByRole('button', { name: 'Guardar' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('Nueva dependencia')).toBeVisible()
+  await dialog.getByLabel('Nombre').fill(name)
+  await dialog.getByRole('checkbox', { name: 'Planta baja' }).first().check()
+  await dialog.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByText('Dependencia guardada.')).toBeVisible()
   await expect(page.getByRole('table').getByText(name)).toBeVisible()
 
   await page.getByRole('button', { name: `Editar: ${name}` }).click()
-  await page.getByRole('menuitem', { name: 'Ubicaciones' }).click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog.getByText('Ubicaciones de la dependencia')).toBeVisible()
-  await dialog.getByRole('checkbox').first().check()
-  await dialog.getByRole('button', { name: 'Guardar ubicaciones' }).click()
-  await expect(page.getByText('Ubicaciones guardadas.')).toBeVisible()
+  await page.getByRole('menuitem', { name: 'Editar' }).click()
+  await expect(
+    page
+      .getByRole('dialog')
+      .getByRole('checkbox', { name: 'Planta baja' })
+      .first(),
+  ).toBeChecked()
 })
 
 test('@smoke exporta y reimporta los catálogos sin inválidas', async ({

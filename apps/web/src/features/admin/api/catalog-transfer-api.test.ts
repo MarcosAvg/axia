@@ -24,7 +24,7 @@ const mocks = vi.hoisted(() => {
         if (row) Object.assign(row, values)
       },
     ),
-    adminReplaceDependencyLocations: vi.fn(async () => undefined),
+    adminSaveDependency: vi.fn(async () => 'dep-1'),
   }
 })
 
@@ -32,17 +32,17 @@ vi.mock('./admin-api', () => ({
   adminList: mocks.adminList,
   adminInsert: mocks.adminInsert,
   adminUpdate: mocks.adminUpdate,
-  adminReplaceDependencyLocations: mocks.adminReplaceDependencyLocations,
+  adminSaveDependency: mocks.adminSaveDependency,
 }))
 
 import { importCatalogSheets } from './catalog-transfer-api'
 
-describe('importCatalogSheets', () => {
-  beforeEach(() => {
-    mocks.reset()
-    vi.clearAllMocks()
-  })
+beforeEach(() => {
+  mocks.reset()
+  vi.clearAllMocks()
+})
 
+describe('catálogos', () => {
   it('inserta un motivo hijo después de su padre aunque venga primero', async () => {
     const base = {
       Uso: 'Pausa',
@@ -68,8 +68,10 @@ describe('importCatalogSheets', () => {
     const child = mocks.store.reasons?.find((row) => row.name === 'Sin stock')
     expect(child?.parent_id).toBe(parent?.id)
   })
+})
 
-  it('reemplaza los vínculos dependencia–ubicación', async () => {
+describe('dependencias', () => {
+  it('agrupa una dependencia con varias ubicaciones', async () => {
     mocks.store.dependencies = [{ id: 'dep-1', name: 'Sistemas' }]
     mocks.store.buildings = [{ id: 'bld-1', name: 'Edificio Central' }]
     mocks.store.locations = [
@@ -78,25 +80,46 @@ describe('importCatalogSheets', () => {
     ]
     const result = await importCatalogSheets({}, [
       {
-        dependency: 'Sistemas',
+        name: 'Sistemas',
+        active: 'Sí',
         building: 'Edificio Central',
         location: 'Piso 1',
       },
       {
-        dependency: 'Sistemas',
+        name: 'Sistemas',
+        active: 'Sí',
         building: 'Edificio Central',
         location: 'Piso 2',
       },
     ])
 
-    expect(mocks.adminReplaceDependencyLocations).toHaveBeenCalledWith(
+    expect(mocks.adminSaveDependency).toHaveBeenCalledWith(
+      {
+        name: 'Sistemas',
+        active: true,
+        locationIds: ['loc-1', 'loc-2'],
+      },
       'dep-1',
-      ['loc-1', 'loc-2'],
     )
-    expect(result.report.at(-1)).toMatchObject({
+    expect(result.report[0]).toMatchObject({
       updated: 1,
       invalid: 0,
       errors: 0,
     })
+  })
+
+  it('rechaza una dependencia sin ubicación', async () => {
+    mocks.store.buildings = [{ id: 'bld-1', name: 'Edificio Central' }]
+    const result = await importCatalogSheets({}, [
+      {
+        name: 'Sistemas',
+        active: 'Sí',
+        building: 'Edificio Central',
+        location: '',
+      },
+    ])
+
+    expect(mocks.adminSaveDependency).not.toHaveBeenCalled()
+    expect(result.report[0]).toMatchObject({ invalid: 1, inserted: 0 })
   })
 })

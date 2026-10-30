@@ -8,19 +8,20 @@ import type { ExportRow } from '../domain/catalog-export'
 
 export type CatalogSheets = Partial<Record<string, ExportRow[]>>
 
-export interface DependencyLocationRow {
-  dependency: string
+export interface DependencyRow {
+  name: string
+  active: string
   building: string
   location: string
 }
 
 export interface CatalogWorkbook {
   sheets: CatalogSheetRows
-  dependencyLocations: DependencyLocationRow[]
+  dependencies: DependencyRow[]
 }
 
-export const DEPENDENCY_LOCATION_SHEET = 'Dependencia–Ubicación'
-const DEPENDENCY_LOCATION_HEADERS = ['Dependencia', 'Edificio', 'Ubicación']
+export const DEPENDENCY_SHEET = 'Dependencias'
+const DEPENDENCY_HEADERS = ['Nombre', 'Activo', 'Edificio', 'Ubicación']
 
 const XLSX_MIME =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -58,17 +59,16 @@ function readRows(sheet: Worksheet): Record<string, unknown>[] {
   return rows
 }
 
-function relationRows(
-  rows: Record<string, unknown>[],
-): DependencyLocationRow[] {
+function dependencyRows(rows: Record<string, unknown>[]): DependencyRow[] {
   return rows.map((row) => ({
-    dependency: String(row.Dependencia ?? ''),
+    name: String(row.Nombre ?? ''),
+    active: String(row.Activo ?? ''),
     building: String(row.Edificio ?? ''),
     location: String(row.Ubicación ?? ''),
   }))
 }
 
-/** Lee un XLSX y devuelve las hojas reconocidas y los vínculos dependencia–ubicación. */
+/** Lee un XLSX y devuelve las hojas de catálogo y las dependencias con sus ubicaciones. */
 export async function readCatalogWorkbook(
   file: File,
 ): Promise<CatalogWorkbook> {
@@ -76,31 +76,29 @@ export async function readCatalogWorkbook(
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(await file.arrayBuffer())
   const sheets: CatalogSheetRows = {}
-  const dependencyLocations: DependencyLocationRow[] = []
-  const relationName = DEPENDENCY_LOCATION_SHEET.toLocaleLowerCase('es-MX')
+  const dependencies: DependencyRow[] = []
+  const dependencyName = DEPENDENCY_SHEET.toLocaleLowerCase('es-MX')
 
   workbook.eachSheet((sheet) => {
     const name = sheet.name.trim().toLocaleLowerCase('es-MX')
-    if (name === relationName) {
-      dependencyLocations.push(...relationRows(readRows(sheet)))
+    if (name === dependencyName) {
+      dependencies.push(...dependencyRows(readRows(sheet)))
       return
     }
     const spec = CATALOG_IMPORT_SPECS.find(
       (item) =>
-        item.title.toLocaleLowerCase('es-MX') === name || item.key === name,
+        item.key !== 'dependencies' &&
+        (item.title.toLocaleLowerCase('es-MX') === name || item.key === name),
     )
     if (spec) sheets[spec.key] = readRows(sheet)
   })
 
-  return { sheets, dependencyLocations }
+  return { sheets, dependencies }
 }
 
-function writeDependencyLocations(
-  workbook: Workbook,
-  rows: DependencyLocationRow[],
-): void {
-  const sheet = workbook.addWorksheet(DEPENDENCY_LOCATION_SHEET)
-  sheet.columns = DEPENDENCY_LOCATION_HEADERS.map((header) => ({
+function writeDependencySheet(workbook: Workbook, rows: DependencyRow[]): void {
+  const sheet = workbook.addWorksheet(DEPENDENCY_SHEET)
+  sheet.columns = DEPENDENCY_HEADERS.map((header) => ({
     header,
     key: header,
     width: 24,
@@ -108,7 +106,8 @@ function writeDependencyLocations(
   sheet.getRow(1).font = { bold: true }
   for (const row of rows) {
     sheet.addRow({
-      Dependencia: row.dependency,
+      Nombre: row.name,
+      Activo: row.active,
       Edificio: row.building,
       Ubicación: row.location,
     })
@@ -118,12 +117,16 @@ function writeDependencyLocations(
 /** Descarga el libro con una hoja por catálogo y los encabezados de importación. */
 export async function writeCatalogWorkbook(
   sheets: CatalogSheets,
-  dependencyLocations: DependencyLocationRow[] = [],
+  dependencies: DependencyRow[] = [],
 ): Promise<void> {
   const ExcelJS = (await import('exceljs')).default
   const workbook = new ExcelJS.Workbook()
 
   for (const spec of CATALOG_IMPORT_SPECS) {
+    if (spec.key === 'dependencies') {
+      writeDependencySheet(workbook, dependencies)
+      continue
+    }
     const sheet = workbook.addWorksheet(spec.title)
     sheet.columns = spec.columns.map((column) => ({
       header: column.header,
@@ -132,9 +135,6 @@ export async function writeCatalogWorkbook(
     }))
     sheet.getRow(1).font = { bold: true }
     for (const row of sheets[spec.key] ?? []) sheet.addRow(row)
-    if (spec.key === 'dependencies') {
-      writeDependencyLocations(workbook, dependencyLocations)
-    }
   }
 
   downloadBlob(

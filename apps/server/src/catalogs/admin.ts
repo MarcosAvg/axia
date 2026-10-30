@@ -161,20 +161,25 @@ export async function listDependencyLocationIds(
   )
 }
 
-export async function replaceDependencyLocations(
+export async function saveDependency(
   db: Database,
-  dependencyId: string,
-  locationIds: string[],
-) {
-  const unique = [...new Set(locationIds)]
-  await db.transaction(async (tx) => {
-    const dependency = await tx.execute(sql`
-      select id from public.dependencies where id = ${dependencyId}
-    `)
-    if (!dependency.rows[0]) {
-      throw new AppError(404, 'not_found', 'Dependencia no encontrada')
-    }
-    for (const locationId of unique) {
+  input: {
+    id?: string
+    name: string
+    active: boolean
+    locationIds: string[]
+  },
+): Promise<string> {
+  const locationIds = [...new Set(input.locationIds)]
+  if (locationIds.length === 0) {
+    throw new AppError(
+      400,
+      'validation_error',
+      'Marca al menos una ubicación para la dependencia',
+    )
+  }
+  return db.transaction(async (tx) => {
+    for (const locationId of locationIds) {
       const location = await tx.execute(sql`
         select id from public.locations where id = ${locationId}
       `)
@@ -182,16 +187,37 @@ export async function replaceDependencyLocations(
         throw new AppError(400, 'validation_error', 'Ubicación no encontrada')
       }
     }
+    let dependencyId = input.id
+    if (dependencyId) {
+      const updated = await tx.execute(sql`
+        update public.dependencies
+        set name = ${input.name}, active = ${input.active}
+        where id = ${dependencyId}
+        returning id
+      `)
+      if (!updated.rows[0]) {
+        throw new AppError(404, 'not_found', 'Dependencia no encontrada')
+      }
+    } else {
+      const inserted = await tx.execute(sql`
+        insert into public.dependencies (name, active)
+        values (${input.name}, ${input.active})
+        returning id
+      `)
+      dependencyId = (inserted.rows[0] as { id: string } | undefined)?.id
+      if (!dependencyId) throw new Error('No se pudo crear la dependencia')
+    }
     await tx.execute(sql`
       delete from public.dependency_locations
       where dependency_id = ${dependencyId}
     `)
-    for (const locationId of unique) {
+    for (const locationId of locationIds) {
       await tx.execute(sql`
         insert into public.dependency_locations (dependency_id, location_id)
         values (${dependencyId}, ${locationId})
       `)
     }
+    return dependencyId
   })
 }
 

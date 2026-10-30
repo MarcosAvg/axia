@@ -13,8 +13,8 @@ import type {
 import { toReferences } from '../domain/catalog-export'
 import { adminInsert, adminList, adminUpdate } from './admin-api'
 import type { AdminRow, AdminTable } from './admin-api'
-import { applyDependencyLocations } from './catalog-transfer-links'
-import type { DependencyLocationRow } from './catalog-workbook'
+import { applyDependencies } from './catalog-transfer-dependencies'
+import type { DependencyRow } from './catalog-workbook'
 
 const LABEL_COLUMN: Partial<Record<CatalogKey, string>> = {
   requesters: 'full_name',
@@ -127,6 +127,7 @@ async function applySheet(
 function createStates(sheets: CatalogSheetRows): SheetState[] {
   const states: SheetState[] = []
   for (const spec of CATALOG_IMPORT_SPECS) {
+    if (spec.key === 'dependencies') continue
     const rows = sheets[spec.key]
     if (!rows || rows.length === 0) continue
     states.push({
@@ -180,9 +181,13 @@ function reportOf(states: SheetState[]): ImportReport[] {
  */
 export async function importCatalogSheets(
   sheets: CatalogSheetRows,
-  dependencyLocations: DependencyLocationRow[] = [],
+  dependencies: DependencyRow[] = [],
 ): Promise<{ report: ImportReport[]; issues: ImportIssue[] }> {
   const cache = await loadCatalogRows()
+  const dependencyResult =
+    dependencies.length > 0
+      ? await applyDependencies(dependencies, cache)
+      : null
   const states = createStates(sheets)
 
   let progressed = true
@@ -195,13 +200,12 @@ export async function importCatalogSheets(
   }
 
   const issues = flushPending(states)
-  const linkResult =
-    dependencyLocations.length > 0
-      ? await applyDependencyLocations(dependencyLocations, cache)
-      : null
 
   return {
-    report: [...reportOf(states), ...(linkResult ? [linkResult.report] : [])],
-    issues: [...issues, ...(linkResult?.issues ?? [])],
+    report: [
+      ...(dependencyResult ? [dependencyResult.report] : []),
+      ...reportOf(states),
+    ],
+    issues: [...(dependencyResult?.issues ?? []), ...issues],
   }
 }

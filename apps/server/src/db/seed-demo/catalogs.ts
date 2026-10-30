@@ -227,6 +227,15 @@ export async function buildDemoCatalogs(client: Client): Promise<{
     northGround: await ensureLocation(client, places.north, 'Planta baja'),
     northFirst: await ensureLocation(client, places.north, 'Piso 1'),
   }
+  for (const dependencyId of [places.systems, places.hr]) {
+    for (const locationId of Object.values(locations)) {
+      await client.query(
+        `insert into public.dependency_locations (dependency_id, location_id)
+         values ($1, $2) on conflict (dependency_id, location_id) do nothing`,
+        [dependencyId, locationId],
+      )
+    }
+  }
   const classification = await ensureClassification(
     client,
     places.maintenance,

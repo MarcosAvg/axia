@@ -1,6 +1,6 @@
 # 0095 — Dependencias solicitantes por ubicación
 
-**Estado:** aceptada
+**Estado:** aceptada; el respaldo “sin vínculos = todas” queda sustituido por el ADR 0097.
 **Fecha:** 2026-10-30
 
 ## Contexto

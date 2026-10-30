@@ -31,6 +31,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   tiquets y edición desde Administración.
 - El XLSX de catálogos separa equipo, categoría, subcategoría y problema en columnas propias; sigue
   leyendo el formato anterior con rutas.
+- Las dependencias exigen al menos una ubicación; se editan juntas en el mismo formulario y en una
+  sola hoja del XLSX.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido

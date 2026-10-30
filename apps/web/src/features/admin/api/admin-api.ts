@@ -78,12 +78,26 @@ export async function adminDependencyLocationIds(
   return body.locationIds
 }
 
-export async function adminReplaceDependencyLocations(
-  id: string,
-  locationIds: string[],
-): Promise<void> {
-  await apiFetch(`/api/admin/catalogs/dependencies/${id}/locations`, {
-    method: 'PUT',
-    body: JSON.stringify({ locationIds }),
-  })
+export interface DependencyValues {
+  name: string
+  active: boolean
+  locationIds: string[]
+}
+
+export async function adminSaveDependency(
+  values: DependencyValues,
+  id?: string,
+): Promise<string> {
+  if (id) {
+    await apiFetch(`/api/admin/catalogs/dependencies/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(values),
+    })
+    return id
+  }
+  const body = await apiFetch<{ id: string }>(
+    '/api/admin/catalogs/dependencies',
+    { method: 'POST', body: JSON.stringify(values) },
+  )
+  return body.id
 }

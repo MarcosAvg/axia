@@ -36,19 +36,12 @@ export async function assertPair(
   locationId: string,
 ) {
   const result = await tx.execute(sql`
-    select
-      exists (
-        select 1 from public.dependency_locations
-        where dependency_id = ${dependencyId}
-      ) as linked,
-      exists (
-        select 1 from public.dependency_locations
-        where dependency_id = ${dependencyId} and location_id = ${locationId}
-      ) as matches
+    select 1
+    from public.dependency_locations
+    where dependency_id = ${dependencyId} and location_id = ${locationId}
+    limit 1
   `)
-  const row = result.rows[0] as
-    { linked: boolean; matches: boolean } | undefined
-  if (row?.linked && !row.matches) {
+  if (!result.rows[0]) {
     throw new AppError(
       400,
       'validation_error',

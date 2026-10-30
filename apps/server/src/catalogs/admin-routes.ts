@@ -5,13 +5,14 @@ import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { authGuards, requirePermission, type Guard } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
+import { AppError } from '../http/errors.js'
 import {
   adminTable,
   insertAdminRow,
   listAdminRows,
   listDependencyLocationIds,
   listDependencyLocations,
-  replaceDependencyLocations,
+  saveDependency,
   updateAdminRow,
   type AdminValues,
 } from './admin.js'
@@ -19,8 +20,10 @@ import {
 const tableParams = z.object({ table: z.string().min(1).max(40) })
 const rowParams = tableParams.extend({ id: z.string().uuid() })
 const dependencyParams = z.object({ id: z.string().uuid() })
-const locationIdsBody = z.object({
-  locationIds: z.array(z.string().uuid()).max(500),
+const dependencyBody = z.object({
+  name: z.string().trim().min(1).max(200),
+  active: z.boolean(),
+  locationIds: z.array(z.string().uuid()).min(1).max(500),
 })
 const bodySchema = z.record(
   z.string().min(1).max(64),
@@ -51,29 +54,43 @@ function registerDependencyLocationRoutes(
     },
   )
 
-  app.put(
-    '/api/admin/catalogs/dependencies/:id/locations',
+  app.post(
+    '/api/admin/catalogs/dependencies',
+    { preHandler: guard },
+    async (request, reply) => {
+      const body = dependencyBody.parse(request.body)
+      const id = await saveDependency(db, body)
+      return reply.status(201).send({ id })
+    },
+  )
+
+  app.patch(
+    '/api/admin/catalogs/dependencies/:id',
     { preHandler: guard },
     async (request, reply) => {
       const { id } = dependencyParams.parse(request.params)
-      const { locationIds } = locationIdsBody.parse(request.body)
-      await replaceDependencyLocations(db, id, locationIds)
+      const body = dependencyBody.parse(request.body)
+      await saveDependency(db, { ...body, id })
       return reply.status(204).send()
     },
   )
 }
 
-export function registerAdminCatalogRoutes(
+function assertNotDependency(table: string) {
+  if (table === 'dependencies') {
+    throw new AppError(
+      400,
+      'validation_error',
+      'Usa el formulario de dependencia',
+    )
+  }
+}
+
+function registerGenericCatalogRoutes(
   app: FastifyInstance,
-  auth: AuthService,
-  config: AppConfig,
+  guard: Guard[],
   db: Database,
 ) {
-  const guard: Guard[] = [
-    authGuards(auth, config, false),
-    requirePermission('catalog.manage'),
-  ]
-
   app.get(
     '/api/admin/catalogs/:table',
     { preHandler: guard },
@@ -88,13 +105,12 @@ export function registerAdminCatalogRoutes(
     },
   )
 
-  registerDependencyLocationRoutes(app, guard, db)
-
   app.post(
     '/api/admin/catalogs/:table',
     { preHandler: guard },
     async (request, reply) => {
       const { table } = tableParams.parse(request.params)
+      assertNotDependency(table)
       const id = await insertAdminRow(
         db,
         adminTable(table),
@@ -118,4 +134,18 @@ export function registerAdminCatalogRoutes(
       return reply.status(204).send()
     },
   )
+}
+
+export function registerAdminCatalogRoutes(
+  app: FastifyInstance,
+  auth: AuthService,
+  config: AppConfig,
+  db: Database,
+) {
+  const guard: Guard[] = [
+    authGuards(auth, config, false),
+    requirePermission('catalog.manage'),
+  ]
+  registerGenericCatalogRoutes(app, guard, db)
+  registerDependencyLocationRoutes(app, guard, db)
 }

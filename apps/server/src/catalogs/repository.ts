@@ -63,17 +63,8 @@ async function listDependencies(
   const result = await db.execute(sql`
     select d.id, d.name
     from public.dependencies d
-    where d.active
-      and (
-        not exists (
-          select 1 from public.dependency_locations dl
-          where dl.dependency_id = d.id
-        )
-        or exists (
-          select 1 from public.dependency_locations dl
-          where dl.dependency_id = d.id and dl.location_id = ${locationId}
-        )
-      )
+    join public.dependency_locations dl on dl.dependency_id = d.id
+    where d.active and dl.location_id = ${locationId}
     order by d.name
   `)
   return result.rows as SimpleOption[]

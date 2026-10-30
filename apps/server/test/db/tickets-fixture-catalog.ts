@@ -82,6 +82,13 @@ export async function createCatalog(db: Database): Promise<Catalog> {
     db,
     sql`insert into public.dependencies (name) values ('Dependencia') returning id`,
   )
+  await db.execute(sql`
+    insert into public.dependency_locations (dependency_id, location_id)
+    values
+      (${dependency.id}, ${places.locationA1.id}),
+      (${dependency.id}, ${places.locationA2.id}),
+      (${dependency.id}, ${places.locationB1.id})
+  `)
   const categoryA = await insertOne(
     db,
     sql`insert into public.categories (team_id, name)

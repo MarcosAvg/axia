@@ -15,7 +15,7 @@ import {
 import type {
   CatalogSheets,
   CatalogWorkbook,
-  DependencyLocationRow,
+  DependencyRow,
 } from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
 import type { CatalogKey } from '../domain/catalog-import'
@@ -39,26 +39,28 @@ async function runTask(
   }
 }
 
-function linkRows(
+function dependencyRows(
   rows: Record<CatalogKey, AdminRow[]>,
   links: DependencyLocationLink[],
-): DependencyLocationRow[] {
-  const byDependency = new Map<string, DependencyLocationRow[]>()
+): DependencyRow[] {
+  const byDependency = new Map<
+    string,
+    { building: string; location: string }[]
+  >()
   for (const link of links) {
     const list = byDependency.get(link.dependencyId) ?? []
-    list.push({
-      dependency: link.dependencyName,
-      building: link.buildingName,
-      location: link.locationName,
-    })
+    list.push({ building: link.buildingName, location: link.locationName })
     byDependency.set(link.dependencyId, list)
   }
-  return rows.dependencies.flatMap(
-    (row) =>
-      byDependency.get(String(row.id)) ?? [
-        { dependency: String(row.name ?? ''), building: '', location: '' },
-      ],
-  )
+  return rows.dependencies.flatMap((row) => {
+    const name = String(row.name ?? '')
+    const active = row.active === true ? 'Sí' : 'No'
+    return (byDependency.get(String(row.id)) ?? []).map((link) => ({
+      name,
+      active,
+      ...link,
+    }))
+  })
 }
 
 async function exportWorkbook() {
@@ -69,16 +71,18 @@ async function exportWorkbook() {
   const references = toReferences(rows)
   const data: CatalogSheets = {}
   for (const spec of CATALOG_IMPORT_SPECS) {
-    data[spec.key] = toExportRows(spec, rows[spec.key], references)
+    if (spec.key !== 'dependencies') {
+      data[spec.key] = toExportRows(spec, rows[spec.key], references)
+    }
   }
-  await writeCatalogWorkbook(data, linkRows(rows, links))
+  await writeCatalogWorkbook(data, dependencyRows(rows, links))
 }
 
-/** Lee el archivo; `null` si no trae hojas de catálogo ni vínculos. */
+/** Lee el archivo; `null` si no trae hojas de catálogo ni dependencias. */
 async function loadSheets(file: File): Promise<CatalogWorkbook | null> {
   const workbook = await readCatalogWorkbook(file)
   const hasRows =
-    workbook.dependencyLocations.length > 0 ||
+    workbook.dependencies.length > 0 ||
     Object.values(workbook.sheets).some((rows) => rows?.length)
   return hasRows ? workbook : null
 }
@@ -115,7 +119,7 @@ export function useCatalogTransfer() {
     return run(async () => {
       const result = await importCatalogSheets(
         workbook.sheets,
-        workbook.dependencyLocations,
+        workbook.dependencies,
       )
       setReport(result.report)
       setIssues(result.issues)

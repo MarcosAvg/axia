@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import type { AdminCatalogConfig } from '../domain/catalogs'
 import { useCatalogManager } from '../hooks/use-catalog-manager'
@@ -6,7 +5,7 @@ import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { CatalogForm } from './catalog-form'
 import { CatalogTable } from './catalog-table'
-import { DependencyLocationsDialog } from './dependency-locations-dialog'
+import { DependencyFormDialog } from './dependency-form'
 import { EntityDialog } from './entity-dialog'
 
 type Manager = ReturnType<typeof useCatalogManager>
@@ -20,6 +19,14 @@ function EditDialog({
 }) {
   const editing = manager.editing
   if (!editing) return null
+  if (config.key === 'dependencies') {
+    return (
+      <DependencyFormDialog
+        dependency={editing === 'new' ? undefined : editing}
+        onClose={() => manager.setEditing(null)}
+      />
+    )
+  }
   const { form } = adminMessages
   return (
     <EntityDialog
@@ -46,10 +53,6 @@ function EditDialog({
 export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
   const manager = useCatalogManager(config)
   const { actions, list } = adminMessages
-  const [locationsFor, setLocationsFor] = useState<Record<
-    string,
-    unknown
-  > | null>(null)
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
@@ -72,19 +75,10 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
           onSortChange={manager.toggleSort}
           onEdit={(row) => manager.setEditing(row)}
           onToggle={manager.toggle}
-          onLocations={
-            config.key === 'dependencies' ? setLocationsFor : undefined
-          }
         />
       ) : null}
       <EditDialog config={config} manager={manager} />
       {manager.isError ? <ErrorAlert message={actions.error} /> : null}
-      {locationsFor ? (
-        <DependencyLocationsDialog
-          dependency={locationsFor}
-          onClose={() => setLocationsFor(null)}
-        />
-      ) : null}
     </div>
   )
 }
