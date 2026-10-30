@@ -28,6 +28,14 @@ export interface ImportColumn {
   required?: boolean
   reference?: CatalogKey
   options?: { value: string; label: string }[]
+  /** Encabezado anterior, para leer archivos exportados antes del cambio. */
+  legacyHeader?: string
+  /** Columna de contexto: resuelve pero no se escribe en la tabla. */
+  context?: boolean
+  /** Columna (de contexto o de datos) cuyo id filtra las referencias. */
+  scopeBy?: string
+  /** Posición del ancestro que se exporta en una columna de contexto. */
+  contextIndex?: number
 }
 
 export interface ImportSpec {
@@ -43,6 +51,10 @@ export interface ReferenceRow {
   label: string
   /** Nombre con la ruta de padres; desambigua etiquetas repetidas. */
   path?: string
+  /** Id del padre inmediato, para resolver una referencia con contexto. */
+  parentId?: string
+  /** Etiquetas de los ancestros, de la raíz al padre. */
+  ancestors?: string[]
   /** Solo motivos: el uso, para desambiguar el padre. */
   use?: string
 }
@@ -61,12 +73,12 @@ const clockClassOptions = Object.entries(adminMessages.clockClass).map(
   ([value, label]) => ({ value, label }),
 )
 
-const text = (key: string, header: string, required = false): ImportColumn => ({
-  key,
-  header,
-  kind: 'text',
-  required,
-})
+const text = (
+  key: string,
+  header: string,
+  required = false,
+  legacyHeader?: string,
+): ImportColumn => ({ key, header, kind: 'text', required, legacyHeader })
 const number = (key: string, header: string): ImportColumn => ({
   key,
   header,
@@ -83,6 +95,22 @@ const reference = (
   to: CatalogKey,
   required = false,
 ): ImportColumn => ({ key, header, kind: 'reference', reference: to, required })
+
+const referenceWith = (
+  key: string,
+  header: string,
+  to: CatalogKey,
+  extra: Pick<
+    ImportColumn,
+    'required' | 'legacyHeader' | 'context' | 'scopeBy' | 'contextIndex'
+  >,
+): ImportColumn => ({
+  key,
+  header,
+  kind: 'reference',
+  reference: to,
+  ...extra,
+})
 const fixed = (
   key: string,
   header: string,
@@ -121,7 +149,7 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
     'Categorías',
     [
       reference('team_id', 'Equipo', 'teams', true),
-      text('name', 'Nombre', true),
+      text('name', 'Categoría', true, 'Nombre'),
       active,
     ],
     ['team_id', 'name'],
@@ -130,8 +158,15 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
     'subcategories',
     'Subcategorías',
     [
-      reference('category_id', 'Categoría', 'categories', true),
-      text('name', 'Nombre', true),
+      referenceWith('team_id', 'Equipo', 'teams', {
+        context: true,
+        contextIndex: 0,
+      }),
+      referenceWith('category_id', 'Categoría', 'categories', {
+        required: true,
+        scopeBy: 'team_id',
+      }),
+      text('name', 'Subcategoría', true, 'Nombre'),
       active,
     ],
     ['category_id', 'name'],
@@ -151,8 +186,20 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
     'problems',
     'Problemas',
     [
-      reference('subcategory_id', 'Subcategoría', 'subcategories', true),
-      text('name', 'Nombre', true),
+      referenceWith('team_id', 'Equipo', 'teams', {
+        context: true,
+        contextIndex: 0,
+      }),
+      referenceWith('category_id', 'Categoría', 'categories', {
+        context: true,
+        scopeBy: 'team_id',
+        contextIndex: 1,
+      }),
+      referenceWith('subcategory_id', 'Subcategoría', 'subcategories', {
+        required: true,
+        scopeBy: 'category_id',
+      }),
+      text('name', 'Problema', true, 'Nombre'),
       reference('default_priority_id', 'Prioridad por defecto', 'priorities'),
       active,
     ],

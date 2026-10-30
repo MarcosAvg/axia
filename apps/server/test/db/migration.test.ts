@@ -36,7 +36,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_tables where schemaname = 'public'",
       ),
-    ).toBe(58)
+    ).toBe(59)
     expect(
       await scalar(
         owner,
@@ -283,7 +283,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(13)
+    ).toBe(14)
   })
 
   it('enforces username normalization and uniqueness', async () => {

@@ -5,6 +5,7 @@ import type {
   CatalogKey,
   ImportColumn,
   ImportSpec,
+  ReferenceRow,
   References,
 } from './catalog-import-specs'
 
@@ -19,30 +20,49 @@ function labelOf(row: Record<string, unknown>): string {
  * Referencias (id, nombre y ruta con el padre) por catálogo. La ruta desambigua
  * catálogos donde el nombre se repite bajo padres distintos (categorías, ubicaciones…).
  */
+function parentOf(
+  spec: ImportSpec,
+  row: Record<string, unknown>,
+  column: ImportColumn | undefined,
+  references: References,
+): ReferenceRow | undefined {
+  if (!column || spec.key === 'reasons') return undefined
+  return references[column.reference as CatalogKey]?.find(
+    (item) => item.id === String(row[column.key] ?? ''),
+  )
+}
+
+function referenceRow(
+  spec: ImportSpec,
+  row: Record<string, unknown>,
+  column: ImportColumn | undefined,
+  references: References,
+): ReferenceRow {
+  const label = labelOf(row)
+  const parent = parentOf(spec, row, column, references)
+  return {
+    id: String(row.id ?? ''),
+    label,
+    path: parent ? `${parent.path ?? parent.label} / ${label}` : label,
+    parentId: parent?.id,
+    ancestors: parent ? [...(parent.ancestors ?? []), parent.label] : [],
+    use: spec.key === 'reasons' ? String(row.use ?? '') : undefined,
+  }
+}
+
 export function toReferences(
   rows: Record<CatalogKey, Record<string, unknown>[]>,
 ): References {
   const references = {} as References
 
   for (const spec of CATALOG_IMPORT_SPECS) {
-    const parent = spec.columns.find((column) => column.kind === 'reference')
-    references[spec.key] = (rows[spec.key] ?? []).map((row) => {
-      const label = labelOf(row)
-      const parentRow =
-        parent && spec.key !== 'reasons'
-          ? references[parent.reference as CatalogKey]?.find(
-              (item) => item.id === String(row[parent.key] ?? ''),
-            )
-          : undefined
-      return {
-        id: String(row.id ?? ''),
-        label,
-        path: parentRow
-          ? `${parentRow.path ?? parentRow.label} / ${label}`
-          : label,
-        use: spec.key === 'reasons' ? String(row.use ?? '') : undefined,
-      }
-    })
+    const parent = spec.columns.find(
+      (column) =>
+        column.kind === 'reference' && spec.match.includes(column.key),
+    )
+    references[spec.key] = (rows[spec.key] ?? []).map((row) =>
+      referenceRow(spec, row, parent, references),
+    )
   }
 
   return references
@@ -63,7 +83,7 @@ function referenceLabel(
   const row = references[column.reference as CatalogKey]?.find(
     (item) => item.id === String(value),
   )
-  return row ? (row.path ?? row.label) : null
+  return row ? row.label : null
 }
 
 function booleanCell(value: unknown): ExportCell {
@@ -105,8 +125,18 @@ export function toExportRows(
 ): ExportRow[] {
   return rows.map((row) => {
     const exported: ExportRow = {}
+    const reference = references[spec.key]?.find(
+      (item) => item.id === String(row.id ?? ''),
+    )
     for (const column of spec.columns) {
-      exported[column.header] = cellValue(column, row[column.key], references)
+      if (column.context) {
+        exported[column.header] =
+          column.contextIndex === undefined
+            ? null
+            : (reference?.ancestors?.[column.contextIndex] ?? null)
+      } else {
+        exported[column.header] = cellValue(column, row[column.key], references)
+      }
     }
     return exported
   })

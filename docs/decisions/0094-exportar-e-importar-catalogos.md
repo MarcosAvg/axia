@@ -14,6 +14,7 @@ exportación. El requisito es que **el archivo exportado sea el mismo que se imp
 
 - **Un solo libro `catalogos.xlsx`** con una hoja por catálogo, en orden de dependencias, usando los
   encabezados en español de `CATALOG_IMPORT_SPECS` (las mismas reglas de la importación anterior).
+  La clasificación se detalla en el ADR 0096, con una columna por nivel.
 - **Referencias por nombre**, no por UUID: el id no sirve fuera de la instancia. En catálogos donde
   el nombre se repite bajo padres distintos (categorías, subcategorías, problemas, ubicaciones) la
   celda lleva la ruta completa (`Equipo / Categoría`) y el importador acepta el nombre simple si es

@@ -96,14 +96,22 @@ export function matchKeyOf(
 
 type Parsed = { value: CellValue } | { issue: string }
 
+interface ResolveContext {
+  references: References
+  raw: Record<string, unknown>
+  scopeId?: CellValue
+}
+
 function parseReferenceColumn(
   column: ImportColumn,
   rawValue: unknown,
-  references: References,
-  raw: Record<string, unknown>,
+  { references, raw, scopeId }: ResolveContext,
 ): Parsed {
   const label = String(rawValue).trim()
   let rows = references[column.reference as CatalogKey]
+  if (scopeId !== null && scopeId !== undefined) {
+    rows = rows?.filter((row) => row.parentId === String(scopeId))
+  }
   if (column.reference === 'reasons') {
     const resolvedUse = findFixedReasonUse(String(raw['Uso'] ?? ''))
     rows = rows?.filter((row) => !row.use || row.use === resolvedUse)
@@ -120,8 +128,7 @@ function parseReferenceColumn(
 function columnValue(
   column: ImportColumn,
   rawValue: unknown,
-  references: References,
-  raw: Record<string, unknown>,
+  context: ResolveContext,
 ): Parsed {
   if (column.kind === 'text') return { value: String(rawValue).trim() }
   if (column.kind === 'number') {
@@ -142,7 +149,18 @@ function columnValue(
       ? { issue: `${column.header} no es válido` }
       : { value: parsed }
   }
-  return parseReferenceColumn(column, rawValue, references, raw)
+  return parseReferenceColumn(column, rawValue, context)
+}
+
+function isEmpty(value: unknown): boolean {
+  return value === null || value === undefined || String(value).trim() === ''
+}
+
+function rawValueOf(
+  column: ImportColumn,
+  raw: Record<string, unknown>,
+): unknown {
+  return raw[column.header] ?? raw[column.legacyHeader ?? '']
 }
 
 /** Convierte una fila cruda (por encabezado) a datos tipados o a incidencias. */
@@ -153,21 +171,27 @@ export function prepareRow(
   references: References,
 ): PreparedRow {
   const data: Record<string, CellValue> = {}
+  const resolved: Record<string, CellValue> = {}
   const issues: string[] = []
 
   for (const column of spec.columns) {
-    const rawValue = raw[column.header]
-    const empty =
-      rawValue === null ||
-      rawValue === undefined ||
-      String(rawValue).trim() === ''
-    if (empty) {
+    const rawValue = rawValueOf(column, raw)
+    if (isEmpty(rawValue)) {
       if (column.required) issues.push(`Falta ${column.header}`)
       continue
     }
-    const parsed = columnValue(column, rawValue, references, raw)
-    if ('issue' in parsed) issues.push(parsed.issue)
-    else data[column.key] = parsed.value
+    const scopeId = column.scopeBy ? resolved[column.scopeBy] : undefined
+    const parsed = columnValue(column, rawValue, {
+      references,
+      raw,
+      scopeId,
+    })
+    if ('issue' in parsed) {
+      issues.push(parsed.issue)
+      continue
+    }
+    resolved[column.key] = parsed.value
+    if (!column.context) data[column.key] = parsed.value
   }
 
   for (const column of spec.match) {

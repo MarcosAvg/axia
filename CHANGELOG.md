@@ -29,6 +29,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   nombre y reporte por fila.
 - Dependencias solicitantes vinculadas a una o varias ubicaciones (N:M), con filtro en el alta de
   tiquets y edición desde Administración.
+- El XLSX de catálogos separa equipo, categoría, subcategoría y problema en columnas propias; sigue
+  leyendo el formato anterior con rutas.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido
