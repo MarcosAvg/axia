@@ -1,6 +1,6 @@
 # 0096 — Clasificación en columnas dentro del XLSX
 
-**Estado:** aceptada
+**Estado:** aceptada; la columna Equipo pasó a Problemas en el ADR 0098.
 **Fecha:** 2026-10-30
 
 ## Contexto

@@ -21,10 +21,16 @@ function first<T>(items: T[]): T {
 
 const categoryRows = rows({
   teams: [{ id: 'team-1', name: 'Mantenimiento' }],
-  categories: [{ id: 'cat-1', team_id: 'team-1', name: 'Eléctrico' }],
+  categories: [{ id: 'cat-1', name: 'Eléctrico' }],
   subcategories: [{ id: 'sub-1', category_id: 'cat-1', name: 'Luminarias' }],
   problems: [
-    { id: 'prob-1', subcategory_id: 'sub-1', name: 'Falla', active: true },
+    {
+      id: 'prob-1',
+      subcategory_id: 'sub-1',
+      team_id: 'team-1',
+      name: 'Falla',
+      active: true,
+    },
   ],
 })
 
@@ -48,13 +54,15 @@ const reasonRows = rows({
 })
 
 describe('toReferences', () => {
-  it('compone la ruta con los padres para desambiguar nombres repetidos', () => {
+  it('compone los ancestros para desambiguar la clasificación', () => {
     const references = toReferences(categoryRows)
 
-    expect(references.categories[0]?.path).toBe('Mantenimiento / Eléctrico')
-    expect(references.subcategories[0]?.path).toBe(
-      'Mantenimiento / Eléctrico / Luminarias',
-    )
+    expect(references.subcategories[0]?.parentId).toBe('cat-1')
+    expect(references.subcategories[0]?.ancestors).toEqual(['Eléctrico'])
+    expect(references.problems[0]?.ancestors).toEqual([
+      'Eléctrico',
+      'Luminarias',
+    ])
   })
 })
 
@@ -63,13 +71,12 @@ describe('toExportRows', () => {
     const exported = first(
       toExportRows(
         specByKey('categories'),
-        [{ id: 'cat-1', team_id: 'team-1', name: 'Eléctrico', active: true }],
+        [{ id: 'cat-1', name: 'Eléctrico', active: true }],
         toReferences(categoryRows),
       ),
     )
 
     expect(exported).toEqual({
-      Equipo: 'Mantenimiento',
       Categoría: 'Eléctrico',
       Activo: 'Sí',
     })
@@ -94,7 +101,6 @@ describe('toExportRows', () => {
     )
 
     expect(exported).toEqual({
-      Equipo: 'Mantenimiento',
       Categoría: 'Eléctrico',
       Subcategoría: 'Luminarias',
       Activo: 'No',
@@ -110,7 +116,7 @@ describe('toExportRows', () => {
 })
 
 describe('problemas', () => {
-  it('exporta el problema con los tres niveles de ancestros', () => {
+  it('exporta la clasificación y el equipo del problema', () => {
     const references = toReferences(categoryRows)
     const spec = specByKey('problems')
     const exported = first(
@@ -118,30 +124,17 @@ describe('problemas', () => {
     )
 
     expect(exported).toEqual({
-      Equipo: 'Mantenimiento',
       Categoría: 'Eléctrico',
       Subcategoría: 'Luminarias',
       Problema: 'Falla',
+      Equipo: 'Mantenimiento',
       'Prioridad por defecto': null,
       Activo: 'Sí',
     })
     const prepared = prepareRow(spec, exported, 2, references)
     expect(prepared.issues).toEqual([])
     expect(prepared.data.subcategory_id).toBe('sub-1')
-  })
-})
-
-describe('compatibilidad con el formato anterior', () => {
-  it('resuelve la ruta antigua cuando falta la columna de contexto', () => {
-    const references = toReferences(categoryRows)
-    const row = prepareRow(
-      specByKey('subcategories'),
-      { Categoría: 'Mantenimiento / Eléctrico', Nombre: 'Luminarias' },
-      2,
-      references,
-    )
-    expect(row.issues).toEqual([])
-    expect(row.data.category_id).toBe('cat-1')
+    expect(prepared.data.team_id).toBe('team-1')
   })
 })
 

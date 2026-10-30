@@ -7,9 +7,7 @@ export interface LocationOption extends Option {
   buildingId: string
 }
 
-export interface CategoryOption extends Option {
-  teamId: string
-}
+export type CategoryOption = Option
 
 export interface SubcategoryOption extends Option {
   categoryId: string

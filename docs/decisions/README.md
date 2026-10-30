@@ -98,6 +98,7 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 | [0095](0095-dependencias-por-ubicacion.md) | Dependencias solicitantes por ubicación |
 | [0096](0096-clasificacion-por-columnas.md) | Clasificación en columnas dentro del XLSX |
 | [0097](0097-ubicacion-obligatoria-en-dependencias.md) | Ubicación obligatoria en las dependencias |
+| [0098](0098-equipo-por-problema.md) | El equipo se asigna al problema |
 
 ## Archivo
 

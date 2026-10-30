@@ -71,7 +71,7 @@ políticas y hasta los nombres con que se muestran los conceptos.
 
 | Concepto | Significado |
 |---|---|
-| **Equipo** (`team`) | Grupo que atiende: mantenimiento, seguridad, etc. Cada instancia lo puede llamar departamento, jefatura, área o como quiera (etiqueta configurable). La **categoría pertenece a un equipo** |
+| **Equipo** (`team`) | Grupo que atiende: mantenimiento, seguridad, etc. Cada instancia lo puede llamar departamento, jefatura, área o como quiera (etiqueta configurable). El **problema pertenece a un equipo** |
 | **Dependencia** (`dependency`) | Unidad que solicita. **No es lo mismo que el equipo**. Siempre se vincula a una o varias ubicaciones |
 | Edificio / Ubicación | Dónde ocurre el problema; la ubicación pertenece a un edificio |
 | Categoría → Subcategoría → Problema | Clasificación jerárquica de tres niveles |
@@ -158,8 +158,8 @@ puede, precondiciones y efectos.
   subcategoría, problema, tipo de servicio, prioridad, descripción y contacto (nombre y extensión o
   teléfono, tomados del perfil y editables). Evidencia de tipo `request`: opcional pero muy recomendada (ver sección 8). Antes de confirmar el
   registro se aplica la detección de posibles duplicados (RN-29).
-- **RN-02 Equipo del tiquet.** Se deriva de la categoría y se guarda como instantánea en el tiquet
-  (la categoría podría cambiar de equipo después sin alterar el historial).
+- **RN-02 Equipo del tiquet.** Se deriva del problema y se guarda como instantánea en el tiquet
+  (el problema podría cambiar de equipo después sin alterar el historial).
 - **RN-03 Ruteo.** Candidatos = supervisores activos del equipo del tiquet cuyo ámbito incluye su
   edificio. Se genera una oferta por candidato. Sin candidatos: el tiquet va a la cola de
   administradores como "sin ruteo" y genera alerta.
@@ -274,8 +274,8 @@ puede, precondiciones y efectos.
 evidencia y tipos de participación). Los catálogos se desactivan, no se borran. Lo que se use en un
 tiquet debe conservar el valor que tenía en ese momento aunque el catálogo cambie después.
 
-- **Maestros:** edificios, ubicaciones, equipos, dependencias, categorías (de un equipo), subcategorías,
-  problemas, tipos de servicio, prioridades, canales de registro.
+- **Maestros:** edificios, ubicaciones, equipos, dependencias, categorías, subcategorías,
+  problemas (con equipo), tipos de servicio, prioridades, canales de registro.
 - **Motivos jerárquicos (profundidad ilimitada, por tipo de uso):** pausa, rechazo, cancelación,
   reasignación de supervisor, reasignación de técnico, recaptura, reclamación, resultado de
   reclamación, reactivación y tipo de apoyo auxiliar. Cada nodo puede tener: activo, orden,

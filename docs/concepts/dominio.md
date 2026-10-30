@@ -106,8 +106,8 @@ admite fecha estimada y su **clasificación de reloj** (cómo cuenta para el tie
 Administrables, con activar/desactivar en lugar de borrar. Todo lo que se use en un tiquet
 **conserva el valor que tenía en ese momento** aunque el catálogo cambie después.
 
-- **Maestros**: edificios → ubicaciones, dependencias, **equipos** (la categoría pertenece a un
-  equipo), categorías → subcategorías → problemas, tipos de servicio, prioridades, canales de
+- **Maestros**: edificios → ubicaciones, dependencias, **equipos**, categorías → subcategorías →
+  problemas (el problema pertenece a un equipo), tipos de servicio, prioridades, canales de
   registro, **solicitantes** (con vínculo opcional a una cuenta) y **técnicos** (con vínculo
   opcional a una cuenta).
 - **Motivos jerárquicos** por tipo de uso (ver §6).

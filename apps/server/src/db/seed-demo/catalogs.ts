@@ -73,13 +73,13 @@ async function ensureLocation(
   )
 }
 
-async function ensureCategory(client: Client, teamId: string, name: string) {
+async function ensureCategory(client: Client, name: string) {
   return one(
     client,
-    `insert into public.categories (team_id, name) values ($1, $2)
-     on conflict (team_id, name) do update set name = excluded.name
+    `insert into public.categories (name) values ($1)
+     on conflict (name) do update set name = excluded.name
      returning id`,
-    [teamId, name],
+    [name],
   )
 }
 
@@ -100,14 +100,16 @@ async function ensureSubcategory(
 async function ensureProblem(
   client: Client,
   subcategoryId: string,
+  teamId: string,
   name: string,
 ) {
   return one(
     client,
-    `insert into public.problems (subcategory_id, name) values ($1, $2)
-     on conflict (subcategory_id, name) do update set name = excluded.name
+    `insert into public.problems (subcategory_id, team_id, name) values ($1, $2, $3)
+     on conflict (subcategory_id, name) do update set
+       name = excluded.name, team_id = excluded.team_id
      returning id`,
-    [subcategoryId, name],
+    [subcategoryId, teamId, name],
   )
 }
 
@@ -156,10 +158,10 @@ async function ensureClassification(
   maintenance: string,
   security: string,
 ) {
-  const electrical = await ensureCategory(client, maintenance, 'Eléctrico')
-  const plumbing = await ensureCategory(client, maintenance, 'Plomería')
-  const climate = await ensureCategory(client, maintenance, 'Clima')
-  const access = await ensureCategory(client, security, 'Accesos')
+  const electrical = await ensureCategory(client, 'Eléctrico')
+  const plumbing = await ensureCategory(client, 'Plomería')
+  const climate = await ensureCategory(client, 'Clima')
+  const access = await ensureCategory(client, 'Accesos')
 
   const contact = await ensureSubcategory(client, electrical, 'Contacto')
   const lighting = await ensureSubcategory(client, electrical, 'Iluminación')
@@ -179,12 +181,12 @@ async function ensureClassification(
     drainage,
     air,
     doors,
-    spark: await ensureProblem(client, contact, 'Chispa o corto'),
-    lamp: await ensureProblem(client, lighting, 'Lámpara fundida'),
-    drip: await ensureProblem(client, leak, 'Goteo'),
-    clog: await ensureProblem(client, drainage, 'Taponamiento'),
-    noCooling: await ensureProblem(client, air, 'No enfría'),
-    noClose: await ensureProblem(client, doors, 'No cierra'),
+    spark: await ensureProblem(client, contact, maintenance, 'Chispa o corto'),
+    lamp: await ensureProblem(client, lighting, maintenance, 'Lámpara fundida'),
+    drip: await ensureProblem(client, leak, maintenance, 'Goteo'),
+    clog: await ensureProblem(client, drainage, maintenance, 'Taponamiento'),
+    noCooling: await ensureProblem(client, air, maintenance, 'No enfría'),
+    noClose: await ensureProblem(client, doors, security, 'No cierra'),
   }
 }
 

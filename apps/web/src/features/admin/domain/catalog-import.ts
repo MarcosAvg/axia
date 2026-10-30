@@ -43,9 +43,7 @@ function findReference(
 ): { row?: ReferenceRow; ambiguous?: true } {
   const target = label.trim().toLocaleLowerCase('es-MX')
   const matches = (rows ?? []).filter(
-    (row) =>
-      row.label.toLocaleLowerCase('es-MX') === target ||
-      row.path?.toLocaleLowerCase('es-MX') === target,
+    (row) => row.label.toLocaleLowerCase('es-MX') === target,
   )
   if (matches.length > 1) return { ambiguous: true }
   return { row: matches[0] }
@@ -160,7 +158,7 @@ function rawValueOf(
   column: ImportColumn,
   raw: Record<string, unknown>,
 ): unknown {
-  return raw[column.header] ?? raw[column.legacyHeader ?? '']
+  return raw[column.header]
 }
 
 /** Convierte una fila cruda (por encabezado) a datos tipados o a incidencias. */

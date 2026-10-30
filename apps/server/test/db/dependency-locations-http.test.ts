@@ -39,6 +39,8 @@ function ticketBody(dependencyId: string, locationId: string) {
     locationId,
     dependencyId,
     categoryId: refs.categoryId,
+    subcategoryId: refs.subcategoryId,
+    problemId: refs.problemId,
     serviceTypeId: refs.serviceTypeId,
     priorityId: refs.priorityId,
     channelId: refs.channelId,

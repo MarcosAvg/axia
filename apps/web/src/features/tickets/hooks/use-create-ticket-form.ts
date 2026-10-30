@@ -12,6 +12,8 @@ const defaultValues: CreateTicketInput = {
   locationId: '',
   dependencyId: '',
   categoryId: '',
+  subcategoryId: '',
+  problemId: '',
   channelId: '',
   description: '',
   requesterId: '',

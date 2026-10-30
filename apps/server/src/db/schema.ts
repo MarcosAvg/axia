@@ -1936,7 +1936,6 @@ export const categories = pgTable(
   'categories',
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
-    teamId: uuid('team_id').notNull(),
     name: text().notNull(),
     active: boolean().default(true).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
@@ -1946,14 +1945,7 @@ export const categories = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [
-    foreignKey({
-      columns: [table.teamId],
-      foreignColumns: [teams.id],
-      name: 'categories_team_id_fkey',
-    }),
-    unique('categories_team_id_name_key').on(table.teamId, table.name),
-  ],
+  (table) => [unique('categories_name_key').on(table.name)],
 )
 
 export const subcategories = pgTable(
@@ -1997,6 +1989,7 @@ export const problems = pgTable(
       .defaultNow()
       .notNull(),
     defaultPriorityId: uuid('default_priority_id'),
+    teamId: uuid('team_id').notNull(),
   },
   (table) => [
     foreignKey({
@@ -2008,6 +2001,11 @@ export const problems = pgTable(
       columns: [table.subcategoryId],
       foreignColumns: [subcategories.id],
       name: 'problems_subcategory_id_fkey',
+    }),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: 'problems_team_id_fkey',
     }),
     unique('problems_subcategory_id_name_key').on(
       table.subcategoryId,

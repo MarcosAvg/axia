@@ -21,6 +21,8 @@ function ticketBody() {
     locationId: refs.locationId,
     dependencyId: refs.dependencyId,
     categoryId: refs.categoryId,
+    subcategoryId: refs.subcategoryId,
+    problemId: refs.problemId,
     serviceTypeId: refs.serviceTypeId,
     priorityId: refs.priorityId,
     channelId: refs.channelId,
@@ -68,24 +70,9 @@ afterAll(async () => {
   await closeTicketHttpApp(context)
 })
 
-describe('recapture nullable fields', () => {
-  it('clears a subcategory and problem with explicit nulls', async () => {
+describe('recapture classification', () => {
+  it('rejects clearing the problem', async () => {
     const ticketId = await createTicket()
-    const subcategory = await context.db.execute(sql`
-      insert into public.subcategories (category_id, name)
-      values (${refs.categoryId}, 'Subcategoría A') returning id
-    `)
-    const subcategoryId = (subcategory.rows[0] as { id: string }).id
-    const problem = await context.db.execute(sql`
-      insert into public.problems (subcategory_id, name)
-      values (${subcategoryId}, 'Problema A') returning id
-    `)
-    const problemId = (problem.rows[0] as { id: string }).id
-    await context.db.execute(sql`
-      update public.tickets
-      set subcategory_id = ${subcategoryId}, problem_id = ${problemId}
-      where id = ${ticketId}
-    `)
 
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',
@@ -93,16 +80,7 @@ describe('recapture nullable fields', () => {
       reasonId: recaptureReason,
       clientRequestId: randomUUID(),
     })
-    expect(response.statusCode).toBe(200)
-
-    const ticket = await context.db.execute(sql`
-      select subcategory_id, problem_id
-      from public.tickets where id = ${ticketId}
-    `)
-    expect(ticket.rows[0]).toMatchObject({
-      subcategory_id: null,
-      problem_id: null,
-    })
+    expect(response.statusCode).toBe(400)
   })
 })
 
@@ -129,20 +107,11 @@ describe('recapture catalog integrity', () => {
 
   it('rejects a subcategory from another category', async () => {
     const ticketId = await createTicket()
-    const other = await context.db.execute(sql`
-      select id from public.categories where name = 'Categoría B'
-    `)
-    const categoryB = (other.rows[0] as { id: string }).id
-    const subcategory = await context.db.execute(sql`
-      insert into public.subcategories (category_id, name)
-      values (${categoryB}, 'Subcategoría B') returning id
-    `)
-    const subcategoryId = (subcategory.rows[0] as { id: string }).id
 
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',
       changes: {
-        subcategoryId,
+        subcategoryId: refs.subcategoryIdB,
         description: 'Subcategoría cruzada',
       },
       reasonId: recaptureReason,

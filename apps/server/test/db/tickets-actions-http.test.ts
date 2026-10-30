@@ -26,6 +26,8 @@ function ticketBody(clientRequestId = randomUUID()) {
     locationId: refs.locationId,
     dependencyId: refs.dependencyId,
     categoryId: refs.categoryId,
+    subcategoryId: refs.subcategoryId,
+    problemId: refs.problemId,
     serviceTypeId: refs.serviceTypeId,
     priorityId: refs.priorityId,
     channelId: refs.channelId,

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { testImage } from './fixtures.js'
+import { selectDefaultClassification, testImage } from './fixtures.js'
 
 const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const ATTENDED_TICKET = 'de000000-0000-4000-8000-000000000005'
@@ -52,6 +52,7 @@ test('un solicitante registra un tiquet con foto', async ({ page }) => {
   await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
+  await selectDefaultClassification(page)
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByLabel('Foto de la solicitud (opcional)').setInputFiles({
     name: 'solicitud.png',

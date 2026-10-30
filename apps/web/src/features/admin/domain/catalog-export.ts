@@ -43,7 +43,6 @@ function referenceRow(
   return {
     id: String(row.id ?? ''),
     label,
-    path: parent ? `${parent.path ?? parent.label} / ${label}` : label,
     parentId: parent?.id,
     ancestors: parent ? [...(parent.ancestors ?? []), parent.label] : [],
     use: spec.key === 'reasons' ? String(row.use ?? '') : undefined,

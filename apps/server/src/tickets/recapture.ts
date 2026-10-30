@@ -107,13 +107,13 @@ async function updateFields(
   `)
 }
 
-async function categoryTeam(tx: DbExecutor, categoryId: string) {
-  const category = await tx.execute(sql`
-    select team_id from public.categories where id = ${categoryId} limit 1
+async function problemTeam(tx: DbExecutor, problemId: string) {
+  const problem = await tx.execute(sql`
+    select team_id from public.problems where id = ${problemId} limit 1
   `)
-  const teamId = (category.rows[0] as { team_id: string } | undefined)?.team_id
+  const teamId = (problem.rows[0] as { team_id: string } | undefined)?.team_id
   if (!teamId) {
-    throw new AppError(400, 'validation_error', 'Categoría no válida')
+    throw new AppError(400, 'validation_error', 'Problema no válido')
   }
   return teamId
 }
@@ -228,14 +228,14 @@ async function applyChanges(
 
   const categoryChanged =
     changes.categoryId !== undefined && changes.categoryId !== before.categoryId
-  const newTeamId = categoryChanged
-    ? await categoryTeam(tx, changes.categoryId as string)
+  const newTeamId = changes.problemId
+    ? await problemTeam(tx, changes.problemId)
     : before.teamId
   const newBuildingId = changes.buildingId ?? before.buildingId
   const moved =
     newTeamId !== before.teamId || newBuildingId !== before.buildingId
 
-  if (categoryChanged) {
+  if (newTeamId !== before.teamId) {
     await tx.execute(sql`
       update public.tickets set team_id = ${newTeamId} where id = ${ticket.id}
     `)

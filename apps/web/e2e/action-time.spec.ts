@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { testImage } from './fixtures.js'
+import { selectDefaultClassification, testImage } from './fixtures.js'
 
 const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
@@ -48,6 +48,7 @@ async function createTicketAt(page: Page, occurredAt: Date) {
   await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
+  await selectDefaultClassification(page)
   await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
   await page.getByRole('button', { name: 'Registrar tiquet' }).click()

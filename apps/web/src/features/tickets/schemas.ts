@@ -144,8 +144,8 @@ export const createTicketSchema = z.object({
   locationId: z.string().min(1, 'Selecciona una ubicación.'),
   dependencyId: z.string().min(1, 'Selecciona una dependencia.'),
   categoryId: z.string().min(1, 'Selecciona una categoría.'),
-  subcategoryId: z.string().optional(),
-  problemId: z.string().optional(),
+  subcategoryId: z.string().min(1, 'Selecciona una subcategoría.'),
+  problemId: z.string().min(1, 'Selecciona un problema.'),
   channelId: z.string().optional(),
   description: z
     .string()

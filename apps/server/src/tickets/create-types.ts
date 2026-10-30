@@ -3,8 +3,8 @@ export type CreateTicketInput = {
   locationId: string
   dependencyId: string
   categoryId: string
-  subcategoryId?: string
-  problemId?: string
+  subcategoryId: string
+  problemId: string
   serviceTypeId?: string
   priorityId?: string
   channelId?: string

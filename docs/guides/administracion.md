@@ -40,7 +40,8 @@ En `/admin/ambitos` se vinculan cuentas con solicitantes y técnicos, se crean �
 ## Catálogos
 
 En `/admin/catalogos` se administran equipos, edificios, ubicaciones, dependencias, categorías,
-subcategorías, problemas, tipos de servicio, prioridades, canales, solicitantes, técnicos y motivos.
+subcategorías, problemas (con su equipo), tipos de servicio, prioridades, canales, solicitantes,
+técnicos y motivos.
 
 - Los catálogos se desactivan; no se borran.
 - En **Dependencias**, el formulario de alta/edición incluye las ubicaciones. Hay que marcar al
@@ -48,8 +49,8 @@ subcategorías, problemas, tipos de servicio, prioridades, canales, solicitantes
 - **Exportar** descarga `catalogos.xlsx` con una hoja por catálogo, referencias por nombre y las
   filas activas e inactivas. Ese mismo archivo se puede **Importar** en otra instancia o en la
   misma: inserta lo nuevo y actualiza lo existente sin duplicar, sin borrar y sin tocar las celdas
-  vacías. Categorías, subcategorías y problemas llevan cada nivel en su propia columna (`Equipo`,
-  `Categoría`, `Subcategoría`, `Problema`).
+  vacías. Categorías, subcategorías y problemas llevan cada nivel en su propia columna
+  (`Categoría`, `Subcategoría`, `Problema`) y el problema incluye su `Equipo`.
 - Cada tiquet conserva una instantánea de los valores usados.
 - Los motivos son jerárquicos y se agrupan por uso: pausa, rechazo, cancelación, reasignación,
   recaptura, reclamación, reactivación y apoyo auxiliar.

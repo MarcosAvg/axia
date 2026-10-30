@@ -16,6 +16,10 @@ export type Catalog = {
   dependency: Id
   categoryA: Id
   categoryB: Id
+  subcategoryA: Id
+  subcategoryB: Id
+  problemA: Id
+  problemB: Id
   serviceType: Id
   priority: Id
   channel: Id
@@ -76,6 +80,42 @@ async function createPlaces(db: Database) {
   }
 }
 
+async function createClassification(
+  db: Database,
+  context: {
+    categoryA: Id
+    categoryB: Id
+    teamA: Id
+    teamB: Id
+  },
+) {
+  const { categoryA, categoryB, teamA, teamB } = context
+  const subcategoryA = await insertOne(
+    db,
+    sql`insert into public.subcategories (category_id, name)
+        values (${categoryA.id}, 'Subcategoría A') returning id`,
+  )
+  const subcategoryB = await insertOne(
+    db,
+    sql`insert into public.subcategories (category_id, name)
+        values (${categoryB.id}, 'Subcategoría B') returning id`,
+  )
+  return {
+    subcategoryA,
+    subcategoryB,
+    problemA: await insertOne(
+      db,
+      sql`insert into public.problems (subcategory_id, team_id, name)
+          values (${subcategoryA.id}, ${teamA.id}, 'Problema A') returning id`,
+    ),
+    problemB: await insertOne(
+      db,
+      sql`insert into public.problems (subcategory_id, team_id, name)
+          values (${subcategoryB.id}, ${teamB.id}, 'Problema B') returning id`,
+    ),
+  }
+}
+
 export async function createCatalog(db: Database): Promise<Catalog> {
   const places = await createPlaces(db)
   const dependency = await insertOne(
@@ -91,14 +131,18 @@ export async function createCatalog(db: Database): Promise<Catalog> {
   `)
   const categoryA = await insertOne(
     db,
-    sql`insert into public.categories (team_id, name)
-        values (${places.teamA.id}, 'Categoría A') returning id`,
+    sql`insert into public.categories (name) values ('Categoría A') returning id`,
   )
   const categoryB = await insertOne(
     db,
-    sql`insert into public.categories (team_id, name)
-        values (${places.teamB.id}, 'Categoría B') returning id`,
+    sql`insert into public.categories (name) values ('Categoría B') returning id`,
   )
+  const classification = await createClassification(db, {
+    categoryA,
+    categoryB,
+    teamA: places.teamA,
+    teamB: places.teamB,
+  })
   const serviceType = await insertOne(
     db,
     sql`select id from public.service_types where name = 'Correctivo'`,
@@ -116,6 +160,7 @@ export async function createCatalog(db: Database): Promise<Catalog> {
     dependency,
     categoryA,
     categoryB,
+    ...classification,
     serviceType,
     priority,
     channel,

@@ -72,6 +72,8 @@ export function missingRecaptureFields(
     'locationId',
     'dependencyId',
     'categoryId',
+    'subcategoryId',
+    'problemId',
     'priorityId',
     'reasonId',
   ]

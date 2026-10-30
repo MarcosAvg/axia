@@ -36,7 +36,9 @@ function call(
 
 async function createTicketAt(occurredAt: string): Promise<string> {
   const source = await context.db.execute(sql`
-    select requester_id, building_id, location_id, dependency_id, category_id
+    select requester_id, building_id, location_id, dependency_id, category_id,
+      (select id from public.subcategories where name = 'Subcategoría A') as subcategory_id,
+      (select id from public.problems where name = 'Problema A') as problem_id
     from public.tickets where id = ${context.ids.ticketA1}
   `)
   const ticket = source.rows[0] as Record<string, string>
@@ -45,6 +47,8 @@ async function createTicketAt(occurredAt: string): Promise<string> {
     locationId: ticket.location_id,
     dependencyId: ticket.dependency_id,
     categoryId: ticket.category_id,
+    subcategoryId: ticket.subcategory_id,
+    problemId: ticket.problem_id,
     description: `Alta con hora ${crypto.randomUUID()}`,
     requesterId: ticket.requester_id,
     occurredAt,

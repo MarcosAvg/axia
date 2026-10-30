@@ -6,7 +6,7 @@ import type { CatalogName, CatalogQuery } from './names.js'
 type SimpleOption = { id: string; name: string }
 type PriorityOption = SimpleOption & { position: number }
 type LocationOption = SimpleOption & { buildingId: string }
-type CategoryOption = SimpleOption & { teamId: string }
+type CategoryOption = SimpleOption
 type SubcategoryOption = SimpleOption & { categoryId: string }
 type ProblemOption = SimpleOption & { subcategoryId: string }
 type RequesterOption = {
@@ -95,7 +95,7 @@ async function listLocations(
 
 async function listCategories(db: Database): Promise<CategoryOption[]> {
   const result = await db.execute(sql`
-    select id, name, team_id as "teamId"
+    select id, name
     from public.categories
     where active
     order by name

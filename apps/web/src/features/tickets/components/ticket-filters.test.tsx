@@ -24,7 +24,7 @@ function renderFilters(onChange: (next: TicketListSearch) => void) {
       value={{ page: 1 }}
       onChange={onChange}
       buildings={[{ id: 'b1', name: 'Edificio Central' }]}
-      categories={[{ id: 'c1', name: 'Eléctrico', teamId: 't1' }]}
+      categories={[{ id: 'c1', name: 'Eléctrico' }]}
     />,
   )
 }

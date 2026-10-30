@@ -163,22 +163,8 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
     key: 'categories',
     table: 'categories',
     title: titles.categories,
-    columns: [
-      nameColumn,
-      { key: 'team_id', label: fields.team_id, optionsTable: 'teams' },
-      activeColumn,
-    ],
-    fields: [
-      {
-        name: 'team_id',
-        label: fields.team_id,
-        kind: 'select-table',
-        optionsTable: 'teams',
-        required: true,
-      },
-      nameField,
-      activeField,
-    ],
+    columns: [nameColumn, activeColumn],
+    fields: [nameField, activeField],
   },
   {
     key: 'subcategories',
@@ -216,6 +202,7 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
         label: fields.subcategory_id,
         optionsTable: 'subcategories',
       },
+      { key: 'team_id', label: fields.team_id, optionsTable: 'teams' },
       {
         key: 'default_priority_id',
         label: fields.default_priority_id,
@@ -232,6 +219,13 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
         required: true,
       },
       nameField,
+      {
+        name: 'team_id',
+        label: fields.team_id,
+        kind: 'select-table',
+        optionsTable: 'teams',
+        required: true,
+      },
       {
         name: 'default_priority_id',
         label: fields.default_priority_id,

@@ -8,7 +8,6 @@ import {
   loadRequester,
   resolveCreateDefaults,
   validateCreateInputs,
-  type CategoryRow,
   type ResolvedCreateInput,
   type RequesterRow,
 } from './create-validation.js'
@@ -149,7 +148,7 @@ type InsertTicketInput = {
   actor: Actor
   input: ResolvedCreateInput
   requester: RequesterRow
-  category: CategoryRow
+  teamId: string
   occurredAt: string
 }
 
@@ -158,7 +157,7 @@ async function insertTicket({
   actor,
   input,
   requester,
-  category,
+  teamId,
   occurredAt,
 }: InsertTicketInput): Promise<{ id: string; cycle: number }> {
   const inserted = await tx.execute(sql`
@@ -174,7 +173,7 @@ async function insertTicket({
       ${input.channelId}, ${input.description}, ${requester.id},
       ${input.requesterName ?? requester.full_name},
       ${input.requesterContact ?? requester.contact},
-      ${actor.id}, ${category.team_id}, ${occurredAt}
+      ${actor.id}, ${teamId}, ${occurredAt}
     )
     returning id, cycle
   `)
@@ -212,13 +211,13 @@ async function createInTransaction(
       'La hora real de registro solo se puede fijar al registrar a nombre de otra persona',
     )
   }
-  const category = await validateCreateInputs(tx, resolved)
+  const { teamId } = await validateCreateInputs(tx, resolved)
   const ticket = await insertTicket({
     tx,
     actor,
     input: resolved,
     requester,
-    category,
+    teamId,
     occurredAt,
   })
   await writeEvent(tx, {
@@ -232,7 +231,7 @@ async function createInTransaction(
     tx,
     ticketId: ticket.id,
     cycle: ticket.cycle,
-    teamId: category.team_id,
+    teamId,
     buildingId: input.buildingId,
     actorId: actor.id,
   })

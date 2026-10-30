@@ -33,6 +33,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   leyendo el formato anterior con rutas.
 - Las dependencias exigen al menos una ubicación; se editan juntas en el mismo formulario y en una
   sola hoja del XLSX.
+- El equipo se asigna al problema (obligatorio) y el tiquet lo hereda; las categorías dejan de tener
+  equipo. La migración reinicia tiquets y clasificación por ser una estructura todavía en definición.
 - Documentación organizada por audiencia y verificación de enlaces con `pnpm check:docs`.
 
 ### Corregido

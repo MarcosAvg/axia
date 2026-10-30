@@ -18,9 +18,8 @@ export type RequesterRow = {
   contact: string | null
   user_id: string | null
 }
-export type CategoryRow = {
-  id: string
-  team_id: string
+export type ResolvedTeam = {
+  teamId: string
 }
 
 type LocationRow = {
@@ -66,19 +65,14 @@ export async function loadRequester(
   return row
 }
 
-async function loadCategory(
-  tx: DbExecutor,
-  categoryId: string,
-): Promise<CategoryRow> {
+async function loadCategory(tx: DbExecutor, categoryId: string) {
   const result = await tx.execute(sql`
-    select id, team_id
+    select id
     from public.categories
     where id = ${categoryId} and active
     limit 1
   `)
-  const row = result.rows[0] as CategoryRow | undefined
-  if (!row) throw invalid('Categoría no válida')
-  return row
+  if (!result.rows[0]) throw invalid('Categoría no válida')
 }
 
 async function validateLocation(
@@ -120,17 +114,19 @@ async function validateProblem(
   tx: DbExecutor,
   subcategoryId: string,
   problemId: string,
-) {
+): Promise<string> {
   const result = await tx.execute(sql`
-    select id, subcategory_id as parent_id
+    select id, subcategory_id as parent_id, team_id
     from public.problems
     where id = ${problemId} and active
     limit 1
   `)
-  const row = result.rows[0] as ChildRow | undefined
+  const row = result.rows[0] as
+    { id: string; parent_id: string; team_id: string } | undefined
   if (!row || row.parent_id !== subcategoryId) {
     throw invalid('El problema no pertenece a la subcategoría')
   }
+  return row.team_id
 }
 
 export type ResolvedCreateInput = CreateTicketInput & {
@@ -142,7 +138,7 @@ export type ResolvedCreateInput = CreateTicketInput & {
 export async function validateCreateInputs(
   tx: DbExecutor,
   input: ResolvedCreateInput,
-): Promise<CategoryRow> {
+): Promise<ResolvedTeam> {
   await requireActive(tx, 'buildings', input.buildingId, 'Edificio')
   await requireActive(tx, 'dependencies', input.dependencyId, 'Dependencia')
   await assertPair(tx, input.dependencyId, input.locationId)
@@ -154,18 +150,13 @@ export async function validateCreateInputs(
   )
   await requireActive(tx, 'priorities', input.priorityId, 'Prioridad')
   await requireActive(tx, 'channels', input.channelId, 'Canal')
-  const category = await loadCategory(tx, input.categoryId)
+  await loadCategory(tx, input.categoryId)
   await validateLocation(tx, input.locationId, input.buildingId)
-  if (input.subcategoryId) {
-    await validateSubcategory(tx, input.categoryId, input.subcategoryId)
-  }
-  if (input.problemId) {
-    if (!input.subcategoryId) {
-      throw invalid('No se puede indicar un problema sin subcategoría')
-    }
-    await validateProblem(tx, input.subcategoryId, input.problemId)
-  }
-  return category
+  if (!input.subcategoryId) throw invalid('Selecciona una subcategoría')
+  if (!input.problemId) throw invalid('Selecciona un problema')
+  await validateSubcategory(tx, input.categoryId, input.subcategoryId)
+  const teamId = await validateProblem(tx, input.subcategoryId, input.problemId)
+  return { teamId }
 }
 
 type DefaultRow = { id: string }
@@ -238,6 +229,24 @@ async function validateRecapturePlace(
   await validateLocation(tx, locationId, buildingId)
 }
 
+function assertClassificationComplete(input: {
+  categoryChanged: boolean
+  subcategoryChanged: boolean
+  problemChanged: boolean
+  subcategoryId: string | null
+  problemId: string | null
+}) {
+  if (
+    !input.categoryChanged &&
+    !input.subcategoryChanged &&
+    !input.problemChanged
+  ) {
+    return
+  }
+  if (!input.subcategoryId) throw invalid('Selecciona una subcategoría')
+  if (!input.problemId) throw invalid('Selecciona un problema')
+}
+
 async function validateRecaptureClassification(
   tx: DbExecutor,
   { current, changes }: RecaptureValidationInput,
@@ -255,14 +264,18 @@ async function validateRecaptureClassification(
 
   const subcategoryId = resolved(changes.subcategoryId, current.subcategoryId)
   const problemId = resolved(changes.problemId, current.problemId)
+  assertClassificationComplete({
+    categoryChanged,
+    subcategoryChanged,
+    problemChanged,
+    subcategoryId,
+    problemId,
+  })
   if (subcategoryId) {
     await validateSubcategory(tx, categoryId, subcategoryId)
   }
   if (problemId) {
-    if (!subcategoryId) {
-      throw invalid('No se puede indicar un problema sin subcategoría')
-    }
-    await validateProblem(tx, subcategoryId, problemId)
+    await validateProblem(tx, subcategoryId as string, problemId)
   }
 }
 

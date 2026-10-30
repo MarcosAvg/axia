@@ -20,11 +20,13 @@ Referencia conceptual del modelo de datos actual. El esquema ejecutable está en
 
 ## Relaciones clave
 
-- Un tiquet pertenece a un equipo, edificio, ubicación, dependencia, categoría y prioridad.
+- Un tiquet pertenece a un edificio, ubicación, dependencia, categoría, subcategoría, problema y
+  prioridad. El equipo se deriva del problema.
+- El problema pertenece a un equipo (`problems.team_id`); la categoría ya no tiene equipo.
 - Una dependencia se vincula a una o varias ubicaciones (`dependency_locations`); una ubicación
   puede tener varias dependencias. El vínculo es obligatorio: una dependencia sin ubicación no es
   válida.
-- Un tiquet puede tener subcategoría, problema y tipo de servicio.
+- Un tiquet puede tener tipo de servicio; la subcategoría y el problema son obligatorios.
 - El solicitante puede tener cuenta o existir solo en el catálogo.
 - El técnico puede tener cuenta o existir solo en el catálogo.
 - Las asignaciones y participantes conservan el histórico con `ended_at`.

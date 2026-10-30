@@ -10,6 +10,12 @@ export type WriteRefs = {
   locationId: string
   dependencyId: string
   categoryId: string
+  subcategoryId: string
+  problemId: string
+  categoryIdB: string
+  subcategoryIdB: string
+  problemIdB: string
+  teamIdB: string
   serviceTypeId: string
   priorityId: string
   channelId: string
@@ -18,15 +24,38 @@ export type WriteRefs = {
   teamId: string
 }
 
-export async function loadWriteRefs(
-  context: TicketHttpContext,
-): Promise<WriteRefs> {
+type RefsRow = {
+  building_id: string
+  location_id: string
+  dependency_id: string
+  category_id: string
+  subcategory_id: string
+  problem_id: string
+  category_b_id: string
+  subcategory_b_id: string
+  problem_b_id: string
+  team_b_id: string
+  service_type_id: string
+  priority_id: string
+  channel_id: string
+  requester_id: string
+  technician_id: string
+  team_id: string
+}
+
+async function loadRefsRow(context: TicketHttpContext): Promise<RefsRow> {
   const result = await context.db.execute(sql`
     select
       (select id from public.buildings where name = 'Edificio A1') as building_id,
       (select id from public.locations where name = 'Sala A1') as location_id,
       (select id from public.dependencies where name = 'Dependencia') as dependency_id,
       (select id from public.categories where name = 'Categoría A') as category_id,
+      (select id from public.subcategories where name = 'Subcategoría A') as subcategory_id,
+      (select id from public.problems where name = 'Problema A') as problem_id,
+      (select id from public.categories where name = 'Categoría B') as category_b_id,
+      (select id from public.subcategories where name = 'Subcategoría B') as subcategory_b_id,
+      (select id from public.problems where name = 'Problema B') as problem_b_id,
+      (select id from public.teams where name = 'Equipo B') as team_b_id,
       (select id from public.service_types where name = 'Correctivo') as service_type_id,
       (select id from public.priorities where name = 'Media') as priority_id,
       (select id from public.channels where name = 'Teléfono') as channel_id,
@@ -34,26 +63,26 @@ export async function loadWriteRefs(
       (select id from public.technicians where full_name = 'Técnico A') as technician_id,
       (select id from public.teams where name = 'Equipo A') as team_id
   `)
-  const row = result.rows[0] as
-    | {
-        building_id: string
-        location_id: string
-        dependency_id: string
-        category_id: string
-        service_type_id: string
-        priority_id: string
-        channel_id: string
-        requester_id: string
-        technician_id: string
-        team_id: string
-      }
-    | undefined
+  const row = result.rows[0] as RefsRow | undefined
   if (!row) throw new Error('Write refs could not be loaded')
+  return row
+}
+
+export async function loadWriteRefs(
+  context: TicketHttpContext,
+): Promise<WriteRefs> {
+  const row = await loadRefsRow(context)
   return {
     buildingId: row.building_id,
     locationId: row.location_id,
     dependencyId: row.dependency_id,
     categoryId: row.category_id,
+    subcategoryId: row.subcategory_id,
+    problemId: row.problem_id,
+    categoryIdB: row.category_b_id,
+    subcategoryIdB: row.subcategory_b_id,
+    problemIdB: row.problem_b_id,
+    teamIdB: row.team_b_id,
     serviceTypeId: row.service_type_id,
     priorityId: row.priority_id,
     channelId: row.channel_id,

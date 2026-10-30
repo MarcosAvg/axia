@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { selectDefaultClassification } from './fixtures.js'
 
 const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
@@ -51,6 +52,7 @@ test('@smoke un solicitante recibe un aviso en vivo por SSE', async ({
     await admin
       .getByLabel('Categoría', { exact: true })
       .selectOption({ label: 'Eléctrico' })
+    await selectDefaultClassification(admin)
     await admin.getByLabel('Canal').selectOption({ label: 'Web' })
     await admin
       .getByLabel('Descripción del problema')

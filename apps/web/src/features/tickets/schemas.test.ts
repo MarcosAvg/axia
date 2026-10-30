@@ -108,6 +108,8 @@ describe('createTicketSchema', () => {
     locationId: 'l1',
     dependencyId: 'd1',
     categoryId: 'c1',
+    subcategoryId: 'sc1',
+    problemId: 'pr1',
     serviceTypeId: 's1',
     priorityId: 'p1',
     channelId: 'ch1',

@@ -22,8 +22,8 @@ prueba de restauración en el host definitivo. Si se decide, Web Push y escalami
 - **Administración:** usuarios, roles, catálogos, calendarios, configuración de instancia, ámbitos,
   designaciones y métricas. Las cuentas se pueden desactivar o eliminar: sin historial se borran y
   con historial se archivan para conservar la bitácora. Los catálogos se exportan e importan en un
-  único XLSX idempotente (ADR 0094), con clasificación en columnas (ADR 0096) y dependencias con
-  ubicación obligatoria en el mismo formulario y hoja (ADR 0097).
+  único XLSX idempotente (ADR 0094), con clasificación en columnas (ADR 0096), dependencias con
+  ubicación obligatoria (ADR 0097) y equipo asignado al problema (ADR 0098).
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
 - **Despliegue con Compose:** `compose.yaml` descarga las imágenes `:latest` de GHCR, deja `app` solo
