@@ -10,6 +10,8 @@ export interface AdminField {
   required?: boolean
   optionsTable?: AdminTable
   options?: { value: string; label: string }[]
+  /** Valor para registros nuevos y para números vacíos. */
+  defaultValue?: string | number | boolean
 }
 
 export interface AdminColumn {

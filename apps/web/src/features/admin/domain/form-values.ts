@@ -11,9 +11,10 @@ export function initialValues(
   for (const field of fields) {
     const current = row?.[field.name]
     if (field.kind === 'boolean') {
-      values[field.name] = current === undefined ? false : Boolean(current)
+      values[field.name] =
+        current === undefined ? (field.defaultValue ?? false) : Boolean(current)
     } else if (current === undefined || current === null) {
-      values[field.name] = ''
+      values[field.name] = field.defaultValue ?? ''
     } else {
       values[field.name] =
         typeof current === 'number' ? current : String(current)
@@ -34,7 +35,12 @@ function valueFor(
   if (field.kind === 'boolean') return { value: Boolean(raw) }
   const text = textOf(raw)
   if (field.kind === 'number' || field.kind === 'minutes') {
-    if (text === '') return { value: null }
+    if (text === '') {
+      return {
+        value:
+          typeof field.defaultValue === 'number' ? field.defaultValue : null,
+      }
+    }
     const parsed = Number(text)
     if (!Number.isFinite(parsed)) return { invalid: true }
     return { value: parsed }

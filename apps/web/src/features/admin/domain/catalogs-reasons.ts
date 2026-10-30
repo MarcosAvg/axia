@@ -50,7 +50,12 @@ export const reasonsCatalog: AdminCatalogConfig = {
       options: clockClassOptions,
       required: true,
     },
-    { name: 'position', label: fields.position, kind: 'number' },
+    {
+      name: 'position',
+      label: fields.position,
+      kind: 'number',
+      defaultValue: 0,
+    },
     { name: 'active', label: fields.active, kind: 'boolean' },
   ],
 }

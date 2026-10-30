@@ -25,6 +25,7 @@ const activeField: AdminField = {
   name: 'active',
   label: fields.active,
   kind: 'boolean',
+  defaultValue: true,
 }
 const activeColumn: AdminColumn = { key: 'active', label: list.active }
 const nameColumn: AdminColumn = { key: 'name', label: fields.name }
@@ -129,7 +130,12 @@ export const ADMIN_CATALOGS: AdminCatalogConfig[] = [
     ],
     fields: [
       nameField,
-      { name: 'position', label: fields.position, kind: 'number' },
+      {
+        name: 'position',
+        label: fields.position,
+        kind: 'number',
+        defaultValue: 0,
+      },
       { name: 'target_minutes', label: fields.target_minutes, kind: 'minutes' },
       activeField,
     ],

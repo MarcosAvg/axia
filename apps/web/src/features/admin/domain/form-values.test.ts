@@ -13,11 +13,22 @@ const fields: AdminField[] = [
   },
 ]
 
+const fieldsWithDefaults: AdminField[] = [
+  { name: 'active', label: 'Activo', kind: 'boolean', defaultValue: true },
+  { name: 'position', label: 'Orden', kind: 'number', defaultValue: 0 },
+]
+
 describe('initialValues', () => {
   it('deja los textos vacíos y los booleanos en falso', () => {
     const values = initialValues(fields)
     expect(values.name).toBe('')
     expect(values.active).toBe(false)
+  })
+
+  it('usa los valores por defecto de los campos nuevos', () => {
+    const values = initialValues(fieldsWithDefaults)
+    expect(values.active).toBe(true)
+    expect(values.position).toBe(0)
   })
 
   it('copia los valores de una fila', () => {
@@ -42,6 +53,15 @@ describe('toAdminValues', () => {
       team_id: '',
     })
     expect(result.errors).toEqual(['name'])
+  })
+
+  it('usa el número por defecto cuando el campo está vacío', () => {
+    const result = toAdminValues(fieldsWithDefaults, {
+      active: true,
+      position: '',
+    })
+    expect(result.errors).toEqual([])
+    expect(result.values.position).toBe(0)
   })
 
   it('señala un número inválido', () => {
