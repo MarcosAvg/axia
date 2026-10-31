@@ -36,6 +36,15 @@ En un clon superficial que no contenga ese commit, recuperar primero el historia
 - `docs/superpowers/plans/2026-10-31-consolidacion-self-hosted.md`
 - `docs/superpowers/plans/2026-10-31-consolidacion-interna.md`
 
+## Plan de esta limpieza
+
+El plan de retirada también se concluyó y se retiró del checkout. Su versión final, con las
+pruebas y decisiones de ejecución, se conserva en el commit `b26c1b4`:
+
+```bash
+git show b26c1b4:docs/superpowers/plans/2026-10-31-retirada-historica.md
+```
+
 ## Referencias conservadas
 
 - [Decisiones](../decisions/README.md): índice de criterios vigentes y decisiones parciales, con

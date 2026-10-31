@@ -11,6 +11,7 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   una migración nueva; los datos históricos o dependencias inesperadas abortan la actualización.
 - Veinte documentos exclusivamente históricos del checkout; contenido recuperable desde Git
   mediante el índice histórico, sin duplicar los archivos.
+- Plan de esta limpieza al concluir; la versión final y su evidencia también se consultan en Git.
 
 ### Cambiado
 

@@ -15,7 +15,8 @@ métricas HTTP ya se calculan con consultas parametrizadas sobre el conjunto aut
 1. **Historia en Git.** Retirar doce ADR ya archivados, ADR 0031/0035 obsoletos, tres documentos
    históricos de UI/modelo, la auditoría estructural resuelta y dos planes concluidos. El índice
    [histórico](../history/README.md) conserva rutas y el commit `488862f` para recuperarlos con
-   `git show`. Se conserva el documento de integraciones exigido por AGENTS.md. Los ADR con
+   `git show`. El plan de esta limpieza también se retira al terminar y su commit final queda en
+   ese índice. Se conserva el documento de integraciones exigido por AGENTS.md. Los ADR con
    criterios funcionales vigentes y detalles técnicos sustituidos se marcan como parciales y
    enlazan los reemplazos actuales; no se reescribe su historia como si el stack nunca cambiara.
 2. **Retirada SQL explícita.** Añadir `0017_remove_retired_objects.sql`; ningún archivo aplicado se

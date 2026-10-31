@@ -32,6 +32,8 @@ operativos y de producto. No hay preguntas técnicas bloqueantes.
   de la imagen coincide con el checkout. Persiste aviso previo de chunks >500 kB. Sin dependencias
   nuevas, SQL integrado editado, push ni despliegue real. El plan concluido también se conserva
   exclusivamente en Git.
+  Verificación documental final tras archivarlo: 117 documentos/0 enlaces rotos; independencia
+  827 fuentes/0 coincidencias.
 - **Consolidación vigente:** desarrollo independiente con watchers host; pruebas locales tmpfs y
   bases `_test`/`_e2e`; imagen única app/migrador, releases por digest y respaldo/recuperación
   coordinados (ADR 0099). Contratos HTTP validados, comandos tipados, alcance único de métricas,
