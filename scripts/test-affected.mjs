@@ -1,204 +1,74 @@
 #!/usr/bin/env node
-// Ejecuta solo las pruebas relacionadas con los archivos cambiados.
-// Uso: pnpm test:affected
-// Base opcional: AXIA_TEST_BASE=origin/main pnpm test:affected
-
+// Uso: pnpm test:affected; base opcional: AXIA_TEST_BASE=origin/main.
 import { execFileSync, spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import { planAffectedTests } from './test-plan.mjs'
 
-const root = new URL('..', import.meta.url).pathname
+const root = fileURLToPath(new URL('..', import.meta.url))
 const base = process.env.AXIA_TEST_BASE ?? 'main'
 
-function git(args) {
-  return execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
-}
-
-function changedFiles() {
-  const tracked = git(['diff', '--name-only', '--diff-filter=ACMRD', base])
-  const deleted = git(['diff', '--name-only', '--diff-filter=D', base])
-  if (deleted.split('\n').some((file) => file && !isDocumentation(file))) {
-    return null
-  }
-  const untracked = git(['ls-files', '--others', '--exclude-standard'])
-  return [
-    ...new Set([...tracked.split('\n'), ...untracked.split('\n')]),
-  ].filter(Boolean)
-}
-
-function isDocumentation(file) {
-  return (
-    !file.startsWith('.github/') &&
-    (file.startsWith('docs/') || file.endsWith('.md'))
-  )
+function gitFiles(args) {
+  return execFileSync('git', args, {
+    cwd: root,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+    .split('\0')
+    .filter(Boolean)
 }
 
 function discoverChanges() {
+  if (process.env.AXIA_TEST_FILES) {
+    return {
+      files: process.env.AXIA_TEST_FILES.split(',')
+        .map((file) => file.trim())
+        .filter(Boolean),
+    }
+  }
   try {
-    return changedFiles()
+    const tracked = gitFiles([
+      'diff',
+      '-z',
+      '--name-only',
+      '--diff-filter=ACMRD',
+      base,
+    ])
+    const deletedFiles = gitFiles([
+      'diff',
+      '-z',
+      '--name-only',
+      '--diff-filter=D',
+      base,
+    ])
+    const untracked = gitFiles([
+      'ls-files',
+      '-z',
+      '--others',
+      '--exclude-standard',
+    ])
+    return { files: [...new Set([...tracked, ...untracked])], deletedFiles }
   } catch {
     console.warn(
       'No se pudieron descubrir los cambios; se ejecuta la compuerta completa.',
     )
-    return null
+    return { files: [], discoveryFailed: true }
   }
 }
 
-function appPath(file, app) {
-  return file.startsWith(`apps/${app}/`)
-    ? file.slice(`apps/${app}/`.length)
-    : null
-}
-
-function run(command, args) {
+function run([command, ...args]) {
   console.log(`\n$ ${command} ${args.join(' ')}`)
   const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' })
-  if (result.status !== 0) process.exit(result.status ?? 1)
+  if (result.error)
+    console.error(`No se pudo ejecutar ${command}: ${result.error.message}`)
+  if (result.error || result.status !== 0) process.exit(result.status || 1)
 }
 
-const files = process.env.AXIA_TEST_FILES
-  ? process.env.AXIA_TEST_FILES.split(',')
-      .map((file) => file.trim())
-      .filter(Boolean)
-  : discoverChanges()
-if (files === null) {
-  run('pnpm', ['check'])
-  process.exit(0)
+const changes = discoverChanges()
+const commands = planAffectedTests(changes)
+if (changes.files.length > 0) {
+  console.log(`Archivos cambiados respecto a ${base}:`)
+  for (const file of changes.files) console.log(`  - ${file}`)
 }
-if (files.length === 0) {
+if (commands.length === 0)
   console.log(`Sin cambios respecto a ${base}; no hay pruebas que ejecutar.`)
-  process.exit(0)
-}
-
-console.log(`Archivos cambiados respecto a ${base}:`)
-for (const file of files) console.log(`  - ${file}`)
-
-const structural = files.some(
-  (file) =>
-    file === 'package.json' ||
-    file === 'pnpm-lock.yaml' ||
-    /(^|\/)(?:docker-)?compose(?:[.-][^/]*)?\.ya?ml$/.test(file) ||
-    /(^|\/)Dockerfile(?:\.[^/]*)?$/.test(file) ||
-    file.endsWith('.dockerignore') ||
-    /(^|\/)\.env(?:\.[^/]*)?\.(?:example|template)$/.test(file) ||
-    file.startsWith('deploy/') ||
-    file === 'pnpm-workspace.yaml' ||
-    file === 'tsconfig.base.json' ||
-    file === 'knip.json' ||
-    file === 'lint-staged.config.mjs' ||
-    file === 'apps/web/package.json' ||
-    file === 'apps/server/package.json' ||
-    file.endsWith('vitest.config.ts') ||
-    file.endsWith('playwright.config.ts') ||
-    file.endsWith('playwright.visual.config.ts') ||
-    file.startsWith('scripts/') ||
-    file.startsWith('.github/'),
-)
-if (structural) {
-  console.log('\nCambio estructural: se ejecuta la compuerta completa.')
-  run('pnpm', ['check'])
-  process.exit(0)
-}
-
-if (files.every(isDocumentation)) {
-  run('pnpm', ['check:docs'])
-  process.exit(0)
-}
-
-const serverFiles = files
-  .map((file) => appPath(file, 'server'))
-  .filter((file) => file && /\.(ts|tsx)$/.test(file))
-const webFiles = files
-  .map((file) => appPath(file, 'web'))
-  .filter((file) => file && /\.(ts|tsx)$/.test(file))
-
-const e2eSpecs = webFiles.filter((file) => file.startsWith('e2e/'))
-const webPaths = files.map((file) => appPath(file, 'web')).filter(Boolean)
-const webUi = webPaths.filter(
-  (file) =>
-    !file.includes('.test.') &&
-    (/\.(css|scss)$/.test(file) ||
-      file.startsWith('src/routes/') ||
-      file.startsWith('src/components/') ||
-      file.startsWith('src/app/') ||
-      /^src\/features\/[^/]+\/components\//.test(file)),
-)
-const serverMigration = files
-  .map((file) => appPath(file, 'server'))
-  .some(
-    (file) =>
-      file &&
-      (file.startsWith('db/migrations/') ||
-        file === 'db/schema.ts' ||
-        file.startsWith('src/db/')),
-  )
-
-// Un archivo desconocido no debe terminar validado solo como documentación.
-const recognized = files.every(
-  (file) =>
-    isDocumentation(file) ||
-    (/\.(ts|tsx)$/.test(file) &&
-      (appPath(file, 'server') || appPath(file, 'web'))) ||
-    appPath(file, 'server')?.startsWith('db/migrations/') ||
-    (appPath(file, 'web') && /\.(css|scss)$/.test(file)),
-)
-if (!recognized) {
-  run('pnpm', ['check'])
-  process.exit(0)
-}
-
-let ran = false
-
-if (serverMigration) {
-  ran = true
-  console.log(
-    '\nCambio de esquema/migración: se ejecuta la integración completa.',
-  )
-  run('pnpm', ['--filter', '@axia/server', 'test'])
-  run('pnpm', ['db:test'])
-} else if (serverFiles.length > 0) {
-  ran = true
-  run('pnpm', [
-    '--filter',
-    '@axia/server',
-    'exec',
-    'vitest',
-    'related',
-    '--run',
-    ...serverFiles,
-  ])
-}
-
-if (webFiles.length > 0 || webUi.length > 0) {
-  ran = true
-  const unitFiles = webFiles.filter((file) => !file.startsWith('e2e/'))
-  if (unitFiles.length > 0) {
-    run('pnpm', [
-      '--filter',
-      '@axia/web',
-      'exec',
-      'vitest',
-      'related',
-      '--run',
-      ...unitFiles,
-    ])
-  }
-  if (e2eSpecs.length > 0) {
-    run('pnpm', [
-      '--filter',
-      '@axia/web',
-      'exec',
-      'playwright',
-      'test',
-      ...e2eSpecs,
-    ])
-  }
-  if (webUi.length > 0 && e2eSpecs.length === 0) {
-    run('pnpm', ['test:e2e:smoke'])
-  }
-}
-
-if (!ran) {
-  console.log(
-    '\nNo se identificaron pruebas relacionadas; se ejecuta la compuerta completa.',
-  )
-  run('pnpm', ['check'])
-}
+for (const command of commands) run(command)

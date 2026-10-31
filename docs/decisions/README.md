@@ -13,6 +13,8 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 ## Decisiones vigentes
 
 La consolidación operativa vigente se describe en [ADR 0099](0099-consolidacion-self-hosted.md).
+La consolidación interna de contratos, alcance, cola y herramientas está en
+[ADR 0100](0100-consolidacion-interna.md).
 
 | ADR | Tema |
 |---|---|

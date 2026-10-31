@@ -5,8 +5,9 @@
 // Los nombres a buscar viven en scripts/agnostic-names.json (única excepción
 // permitida). Aquí solo se define dónde sí se pueden nombrar.
 
-import { readFileSync, readdirSync } from 'node:fs'
-import { dirname, join, relative, resolve, sep } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { listSourceFiles } from './source-inventory.mjs'
 import { fileURLToPath } from 'node:url'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
@@ -19,19 +20,6 @@ const ALLOWED_PATTERNS = [
   'docs/decisions/**',
   'scripts/**',
 ]
-
-// Directorios que nunca se recorren.
-const IGNORED_DIRS = new Set([
-  '.git',
-  '.turbo',
-  '.vite',
-  'coverage',
-  'dist',
-  'dist-ssr',
-  'node_modules',
-  'playwright-report',
-  'test-results',
-])
 
 function globToRegExp(pattern) {
   const escaped = pattern
@@ -69,18 +57,6 @@ function loadNames() {
   return names.map((name) => name.trim())
 }
 
-function walk(directory, files) {
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      if (!IGNORED_DIRS.has(entry.name))
-        walk(join(directory, entry.name), files)
-    } else if (entry.isFile()) {
-      files.push(join(directory, entry.name))
-    }
-  }
-  return files
-}
-
 function findMatches(text, names) {
   const lowerText = text.toLowerCase()
   const found = []
@@ -98,14 +74,13 @@ function findMatches(text, names) {
 
 function main() {
   const names = loadNames()
-  const files = walk(repoRoot, [])
+  const files = listSourceFiles(repoRoot)
   const violations = []
 
-  for (const file of files) {
-    const relativePath = relative(repoRoot, file).split(sep).join('/')
+  for (const relativePath of files) {
     if (isAllowed(relativePath)) continue
 
-    const buffer = readFileSync(file)
+    const buffer = readFileSync(join(repoRoot, relativePath))
     if (buffer.includes(0)) continue // binario
 
     for (const match of findMatches(buffer.toString('utf8'), names)) {
