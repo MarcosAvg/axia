@@ -5,6 +5,19 @@ en [arquitectura](../concepts/arquitectura.md) y los [ADR](../decisions/README.m
 
 **Última actualización:** 2026-10-31
 
+## En curso: publicación v0.5.0
+
+1. Push de `main` hasta `bf2d74e` completado; etiqueta `v0.5.0` publicada con autorización explícita.
+2. Release run `41249870317`: Docker/instalación/recuperación verdes; `pnpm check` falló y el job
+   de publicación quedó omitido. La imagen y el paquete no se publicaron.
+3. Causa confirmada en logs autenticados: `recovery.test.sh` exigía `rg`, ausente en el runner.
+   Reproducción local: `PATH=/usr/bin:/bin AXIA_ENV_FILE=/dev/null bash deploy/scripts/recovery.test.sh`
+   falla antes del cambio. Sustituir búsqueda por `grep -E`, preservando patrones y aserciones.
+4. Corrección verificada RED→GREEN sin ripgrep; revisión independiente sin hallazgos.
+   `check:fast` y `test:affected` (selecciona `pnpm check`) código 0: 46 Node, 57 servidor,
+   298 web, 52 navegador y 243 PostgreSQL; lint, tipos, estáticos y build verdes.
+5. Siguiente: integrar/push y publicar `v0.5.1` sin mover `v0.5.0`; confirmar imagen y paquete.
+
 ## Tarea cerrada
 
 Rediseño documental completado: una entrada por tarea, procedimientos y contratos contrastados,

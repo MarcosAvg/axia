@@ -13,6 +13,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   mediante el índice histórico, sin duplicar los archivos.
 - Plan de esta limpieza al concluir; la versión final y su evidencia también se consultan en Git.
 
+### Corregido
+
+- Pruebas de respaldo/recuperación ejecutables sin ripgrep en runners de CI; mismas aserciones
+  y expresiones regulares extendidas con `grep -E`.
+
 ### Cambiado
 
 - Documentación organizada por tareas, con una referencia vigente por tema; desarrollo separado de

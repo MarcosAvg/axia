@@ -46,18 +46,18 @@ MOCK
 chmod +x "$TEST_DIR/bin/docker"
 run_backup() { : > "$TRACE"; BACKUP_DIR="$TEST_DIR/$1" bash "$ROOT/deploy/scripts/backup-all.sh" >"$TEST_DIR/output" 2>&1; }
 run_restore() { : > "$TRACE"; bash "$ROOT/deploy/scripts/restore-all.sh" "$1" >"$TEST_DIR/output" 2>&1; }
-assert_trace() { rg -q -- "$1" "$TRACE" || { cat "$TRACE"; exit 1; }; }
+assert_trace() { grep -Eq -- "$1" "$TRACE" || { cat "$TRACE"; exit 1; }; }
 (unset AXIA_IMAGE; run_backup configured) || { cat "$TEST_DIR/output"; exit 1; }
 [[ -n "$(find "$TEST_DIR/configured" -name manifest)" ]]
 assert_trace 'config --format yaml app'
-if rg -q -- '--user 0' "$TRACE"; then echo 'La copia usa root aunque la imagen limita capacidades'; exit 1; fi
-! rg -q 'must-not-escape' "$TEST_DIR/output"
+if grep -Eq -- '--user 0' "$TRACE"; then echo 'La copia usa root aunque la imagen limita capacidades'; exit 1; fi
+! grep -Eq 'must-not-escape' "$TEST_DIR/output"
 if MIGRATE_IMAGE=axia:other run_backup migrate_mismatch; then echo 'Aceptó migrador distinto'; exit 1; fi
-! rg -q ' stop app|pg_dump ' "$TRACE"
+! grep -Eq ' stop app|pg_dump ' "$TRACE"
 if ACTIVE_JOB=yes run_backup job; then echo 'Aceptó trabajo activo'; exit 1; fi
-! rg -q ' stop app|pg_dump ' "$TRACE"
+! grep -Eq ' stop app|pg_dump ' "$TRACE"
 if APP_IMAGE_ID=sha256:other run_backup mismatch; then echo 'Aceptó release diferente'; exit 1; fi
-! rg -q 'pg_dump ' "$TRACE"
+! grep -Eq 'pg_dump ' "$TRACE"
 if FAIL_DUMP=yes run_backup dump_failure; then echo 'Aceptó dump fallido'; exit 1; fi
 [[ -z "$(find "$TEST_DIR/dump_failure" -name manifest)" ]]
 assert_trace 'start app'
@@ -66,30 +66,30 @@ SET="$(find "$TEST_DIR/valid" -name manifest -printf '%h\n')"
 [[ -n "$SET" && $(stat -c %a "$SET") == 700 && $(stat -c %a "$SET/database.dump") == 600 ]]
 assert_trace 'compose -f compose.test.yaml --env-file /dev/null stop app'
 assert_trace 'start app'
-stop_line="$(rg -n ' stop app' "$TRACE" | cut -d: -f1)"
-dump_line="$(rg -n 'pg_dump ' "$TRACE" | cut -d: -f1)"
-start_line="$(rg -n ' start app' "$TRACE" | cut -d: -f1)"
+stop_line="$(grep -En ' stop app' "$TRACE" | cut -d: -f1)"
+dump_line="$(grep -En 'pg_dump ' "$TRACE" | cut -d: -f1)"
+start_line="$(grep -En ' start app' "$TRACE" | cut -d: -f1)"
 [[ "$stop_line" -lt "$dump_line" && "$dump_line" -lt "$start_line" ]]
 if FAIL_EVIDENCE=yes run_backup failed; then echo 'Aceptó fallo de evidencia'; exit 1; fi
 [[ -z "$(find "$TEST_DIR/failed" -name manifest)" && -f "$SET/manifest" ]]
 assert_trace 'start app'
 APP_RUNNING=no run_backup stopped
-! rg -q 'start app' "$TRACE"
+! grep -Eq 'start app' "$TRACE"
 if STOP_EXIT=137 run_backup killed; then echo 'Aceptó cierre forzado'; exit 1; fi
-! rg -q 'pg_dump ' "$TRACE"
+! grep -Eq 'pg_dump ' "$TRACE"
 if FAIL_RESTORE=yes run_restore "$SET"; then echo 'Aceptó restore fallido'; exit 1; fi
-! rg -q 'start app' "$TRACE"
+! grep -Eq 'start app' "$TRACE"
 assert_trace --single-transaction
 (unset AXIA_IMAGE; run_restore "$SET")
 assert_trace 'run --rm --no-deps -T migrate node dist/db/migrate.js'
 assert_trace 'tar --no-same-owner -C /data/evidence -xzf -'
-! rg -q -- '--user 0' "$TRACE"
+! grep -Eq -- '--user 0' "$TRACE"
 assert_trace 'start app'
 if DB_OBJECTS=3 run_restore "$SET"; then echo 'Aceptó destino con datos'; exit 1; fi
-! rg -q 'pg_restore ' "$TRACE"
+! grep -Eq 'pg_restore ' "$TRACE"
 if OLD_EVIDENCE=yes run_restore "$SET"; then echo 'Aceptó evidencia vieja'; exit 1; fi
-! rg -q 'pg_restore ' "$TRACE"
+! grep -Eq 'pg_restore ' "$TRACE"
 printf corrupt >> "$SET/database.dump"
 if run_restore "$SET"; then echo 'Aceptó checksum corrupto'; exit 1; fi
-! rg -q 'stop app|pg_restore ' "$TRACE"
+! grep -Eq 'stop app|pg_restore ' "$TRACE"
 echo 'OK: respaldo, fallos, permisos, aislamiento y recuperación transaccional'
