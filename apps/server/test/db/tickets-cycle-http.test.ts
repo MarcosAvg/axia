@@ -122,7 +122,7 @@ beforeAll(async () => {
     'supervisor_reassignment',
     'Reasignación de ciclo',
   )
-  pauseReason = await createReason('pause', 'Pausa de ciclo')
+  pauseReason = refs.pauseReasonId
   claimReason = await createReason('claim', 'Reclamación de ciclo')
   const other = await context.db.execute(sql`
     select

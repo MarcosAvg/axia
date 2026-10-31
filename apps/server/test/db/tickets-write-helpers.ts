@@ -22,6 +22,7 @@ export type WriteRefs = {
   requesterId: string
   technicianId: string
   teamId: string
+  pauseReasonId: string
 }
 
 type RefsRow = {
@@ -41,6 +42,7 @@ type RefsRow = {
   requester_id: string
   technician_id: string
   team_id: string
+  pause_reason_id: string
 }
 
 async function loadRefsRow(context: TicketHttpContext): Promise<RefsRow> {
@@ -61,7 +63,8 @@ async function loadRefsRow(context: TicketHttpContext): Promise<RefsRow> {
       (select id from public.channels where name = 'Teléfono') as channel_id,
       (select id from public.requesters where full_name = 'Solicitante vinculado') as requester_id,
       (select id from public.technicians where full_name = 'Técnico A') as technician_id,
-      (select id from public.teams where name = 'Equipo A') as team_id
+      (select id from public.teams where name = 'Equipo A') as team_id,
+      (select id from public.reasons where name = 'Falta de material' and use = 'pause' and parent_id is null) as pause_reason_id
   `)
   const row = result.rows[0] as RefsRow | undefined
   if (!row) throw new Error('Write refs could not be loaded')
@@ -89,6 +92,7 @@ export async function loadWriteRefs(
     requesterId: row.requester_id,
     technicianId: row.technician_id,
     teamId: row.team_id,
+    pauseReasonId: row.pause_reason_id,
   }
 }
 

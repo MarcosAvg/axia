@@ -32,6 +32,8 @@ export function useAdminRows(table: AdminTable, orderBy = 'name') {
 export interface AdminOption {
   id: string
   label: string
+  use?: string
+  parentId?: string | null
 }
 
 export interface OptionSource {
@@ -55,6 +57,8 @@ export function useAdminOptions(sources: OptionSource[]) {
       rows.map((row) => ({
         id: String(row.id ?? ''),
         label: String(row[labelColumn] ?? ''),
+        use: typeof row.use === 'string' ? row.use : undefined,
+        parentId: typeof row.parent_id === 'string' ? row.parent_id : null,
       })),
     )
   })
@@ -76,6 +80,7 @@ export function useDependencySave() {
       adminSaveDependency(variables.values, variables.id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
+      void queryClient.invalidateQueries({ queryKey: ['catalogs'] })
     },
   })
 }
@@ -96,6 +101,7 @@ export function useAdminSave() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
+      void queryClient.invalidateQueries({ queryKey: ['catalogs'] })
     },
   })
 }

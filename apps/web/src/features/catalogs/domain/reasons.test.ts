@@ -3,6 +3,7 @@ import {
   indentReasons,
   pathToReason,
   rootReasons,
+  resumablePauseRoots,
 } from './reasons'
 import type { ReasonOption } from './types'
 
@@ -42,5 +43,12 @@ describe('pathToReason', () => {
     expect(pathToReason(reasons, 'r1', 'r2')).toEqual(['r2'])
     expect(pathToReason(reasons, 'r1', 'r4')).toEqual([])
     expect(pathToReason(reasons, null, 'r3')).toEqual([])
+  })
+})
+
+describe('resumablePauseRoots', () => {
+  it('solo ofrece pausas con un subestado accesible para reanudar', () => {
+    expect(resumablePauseRoots(reasons).map((r) => r.id)).toEqual(['r1'])
+    expect(resumablePauseRoots([reasons[0]!, reasons[2]!])).toEqual([])
   })
 })

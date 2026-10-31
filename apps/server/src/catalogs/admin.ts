@@ -100,7 +100,7 @@ export async function listAdminRows(
 }
 
 export async function insertAdminRow(
-  db: Database,
+  db: Pick<Database, 'execute'>,
   table: AdminCatalogTable,
   values: AdminValues,
 ) {
@@ -228,7 +228,7 @@ export async function saveDependency(
 }
 
 export async function updateAdminRow(
-  db: Database,
+  db: Pick<Database, 'execute'>,
   table: AdminCatalogTable,
   id: string,
   values: AdminValues,

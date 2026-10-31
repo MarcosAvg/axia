@@ -102,3 +102,40 @@ test('@smoke exporta y reimporta los catálogos sin inválidas', async ({
   )
   await expect(dialog.getByText('Sin incidencias.')).toBeVisible()
 })
+
+test('@smoke crea motivos activos con subestados del mismo uso', async ({
+  page,
+}) => {
+  const name = `Pausa E2E ${crypto.randomUUID().slice(0, 8)}`
+  await signIn(page, 'demo.admin')
+  await page.goto('/admin/catalogos?catalog=reasons')
+  await expect(
+    page.getByRole('heading', { name: 'Motivos', exact: true }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Agregar' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Uso', { exact: true }).selectOption('pause')
+  await dialog.getByLabel('Nombre', { exact: true }).fill(name)
+  await dialog.getByLabel('Clasificación de reloj').selectOption('counted')
+  await expect(
+    dialog.getByRole('checkbox', { name: 'Activo', exact: true }),
+  ).toBeChecked()
+  await dialog.getByRole('button', { name: 'Guardar' }).click()
+  await expect(dialog).not.toBeVisible()
+  await page.getByRole('button', { name: 'Agregar' }).click()
+  await dialog.getByLabel('Uso', { exact: true }).selectOption('pause')
+  await dialog.getByLabel('Nombre', { exact: true }).fill(`${name} disponible`)
+  await dialog.getByLabel('Motivo padre').selectOption({ label: name })
+  await dialog.getByLabel('Clasificación de reloj').selectOption('counted')
+  await expect(
+    dialog
+      .getByLabel('Motivo padre')
+      .locator('option', { hasText: 'A petición del solicitante' }),
+  ).toHaveCount(0)
+  await dialog.getByRole('button', { name: 'Guardar' }).click()
+  await expect(dialog).not.toBeVisible()
+  await page.getByRole('textbox', { name: 'Buscar…', exact: true }).fill(name)
+  await expect(
+    page.getByRole('table').getByText(`${name} disponible`),
+  ).toBeVisible()
+})

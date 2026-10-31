@@ -50,6 +50,20 @@ técnicos y motivos.
 - Los motivos son jerárquicos y se agrupan por uso: pausa, rechazo, cancelación, reasignación,
   recaptura, reclamación, reactivación y apoyo auxiliar.
 
+Para un motivo de pausa nuevo, crear primero la raíz y después al menos un subestado con el mismo
+uso y la raíz como padre. Ambos deben estar activos. Las raíces incompletas no se ofrecen al
+pausar; los diez motivos preconfigurados ya tienen subestados. El padre no puede ser el mismo
+motivo ni uno de sus descendientes. Los motivos nuevos se crean activos por defecto.
+
+Mientras haya pausas abiertas en el árbol, solo se pueden cambiar nombres/orden o agregar nodos;
+desactivar, mover o cambiar su uso se rechaza para conservar una salida. Guardar refresca también
+los selectores operativos. La interfaz muestra los errores esperados de captura o duplicado.
+
+Antes de operar una instancia propia, configurar al menos un recorrido activo de edificio →
+ubicación → dependencia vinculada y categoría → subcategoría → problema con equipo; añadir técnicos,
+designaciones y cobertura de supervisión. Una persona de catálogo puede existir sin cuenta.
+La ausencia de supervisor candidato se trata como «sin ruteo» para administración (RN-03).
+
 ## Calendarios
 
 En `/admin/calendarios` se configuran calendarios, franjas semanales y festivos. El calendario por

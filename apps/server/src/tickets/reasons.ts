@@ -11,6 +11,7 @@ export async function requirePauseRoot(
   tx: DbExecutor,
   reasonId: string,
 ): Promise<void> {
+  await tx.execute(sql`lock table public.reasons in share mode`)
   const result = await tx.execute(sql`
     select id
     from public.reasons
@@ -18,10 +19,16 @@ export async function requirePauseRoot(
       and active
       and use = 'pause'
       and parent_id is null
+      and exists (
+        select 1 from public.reasons child
+        where child.parent_id = reasons.id and child.active and child.use = 'pause'
+      )
     limit 1
   `)
   if (!result.rows[0]) {
-    throw invalid('El motivo de pausa no es válido')
+    throw invalid(
+      'El motivo de pausa debe estar activo y tener al menos un subestado activo para reanudar',
+    )
   }
 }
 
@@ -38,7 +45,7 @@ export async function requirePauseDescendant(
       select id, parent_id
       from public.reasons
       where id = ${reasonId} and active and use = 'pause'
-      union all
+      union
       select r.id, r.parent_id
       from public.reasons r
       join ancestors a on r.id = a.parent_id

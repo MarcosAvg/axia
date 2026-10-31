@@ -1,4 +1,5 @@
 import type { AdminField } from './catalogs'
+import { reasonsCatalog } from './catalogs-reasons'
 import { initialValues, toAdminValues } from './form-values'
 
 const fields: AdminField[] = [
@@ -85,5 +86,18 @@ describe('toAdminValues', () => {
     expect(result.values.position).toBe(5)
     expect(result.values.team_id).toBeNull()
     expect(result.values.active).toBe(true)
+  })
+})
+
+it('crea motivos operativos activos sin marcar opciones adicionales', () => {
+  const raw = {
+    ...initialValues(reasonsCatalog.fields),
+    use: 'pause',
+    name: 'Material',
+    clock_class: 'counted',
+  }
+  expect(toAdminValues(reasonsCatalog.fields, raw)).toMatchObject({
+    errors: [],
+    values: { active: true, parent_id: null },
   })
 })

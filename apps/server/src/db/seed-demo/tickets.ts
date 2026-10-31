@@ -1,33 +1,23 @@
 import type { Client } from 'pg'
 
+import {
+  resolveTicketIds,
+  ticketTimes,
+  type ResolvedTicket,
+  type TicketTimes,
+} from './ticket-data.js'
+
 import type { DemoCatalogs } from './catalogs.js'
 import { STAGE, type DemoTicket } from './data.js'
 import type { DemoPeople } from './people.js'
+import {
+  insertDemoOffers,
+  insertDemoValidations,
+  repairDemoOffers,
+} from './flow.js'
+import { insertDemoEvidence, type DemoEvidenceStorage } from './evidence.js'
 
 type IdRow = { id: string }
-
-type ResolvedTicket = {
-  categoryId: string
-  subcategoryId: string
-  problemId: string
-  buildingId: string
-  locationId: string
-  dependencyId: string
-  teamId: string
-  requesterId: string
-  requesterName: string
-  requesterContact: string
-}
-
-type TicketTimes = {
-  reportedAt: Date
-  created: Date
-  taken: Date
-  assigned: Date
-  started: Date
-  attended: Date
-  validated: Date
-}
 
 type TicketContext = {
   client: Client
@@ -36,6 +26,7 @@ type TicketContext = {
   people: DemoPeople
   times: TicketTimes
   stage: number
+  storage: DemoEvidenceStorage
 }
 
 type DemoEvent = {
@@ -43,94 +34,7 @@ type DemoEvent = {
   at: Date
   actorId: string
   technicianId?: string
-}
-
-function pick(
-  values: Record<string, string>,
-  key: string,
-  label: string,
-): string {
-  const value = values[key]
-  if (!value) throw new Error(`Demo catalog not found: ${label} ${key}`)
-  return value
-}
-
-function resolveTicketIds(
-  ticket: DemoTicket,
-  catalogs: DemoCatalogs,
-  people: DemoPeople,
-): ResolvedTicket {
-  const categories: Record<string, string> = {
-    Eléctrico: catalogs.electrical,
-    Plomería: catalogs.plumbing,
-    Clima: catalogs.climate,
-    Accesos: catalogs.access,
-  }
-  const subcategories: Record<string, string> = {
-    Contacto: catalogs.contact,
-    Iluminación: catalogs.lighting,
-    Fuga: catalogs.leak,
-    Drenaje: catalogs.drainage,
-    'Aire acondicionado': catalogs.air,
-    Puertas: catalogs.doors,
-  }
-  const problems: Record<string, string> = {
-    'Chispa o corto': catalogs.spark,
-    'Lámpara fundida': catalogs.lamp,
-    Goteo: catalogs.drip,
-    Taponamiento: catalogs.clog,
-    'No enfría': catalogs.noCooling,
-    'No cierra': catalogs.noClose,
-  }
-  const buildings: Record<string, string> = {
-    'Edificio Central': catalogs.central,
-    'Edificio Norte': catalogs.north,
-  }
-  const locations: Record<string, string> = {
-    'Edificio Central|Planta baja': catalogs.locations.centralGround,
-    'Edificio Central|Piso 1': catalogs.locations.centralFirst,
-    'Edificio Norte|Planta baja': catalogs.locations.northGround,
-    'Edificio Norte|Piso 1': catalogs.locations.northFirst,
-  }
-  const dependencies: Record<string, string> = {
-    Sistemas: catalogs.systems,
-    'Recursos Humanos': catalogs.hr,
-  }
-  const isAccess = ticket.category === 'Accesos'
-  const isAna = ticket.requester === 'ana'
-  return {
-    categoryId: pick(categories, ticket.category, 'categoría'),
-    subcategoryId: pick(subcategories, ticket.subcategory, 'subcategoría'),
-    problemId: pick(problems, ticket.problem, 'problema'),
-    buildingId: pick(buildings, ticket.building, 'edificio'),
-    locationId: pick(
-      locations,
-      `${ticket.building}|${ticket.location}`,
-      'ubicación',
-    ),
-    dependencyId: pick(dependencies, ticket.dependency, 'dependencia'),
-    teamId: isAccess ? catalogs.security : catalogs.maintenance,
-    requesterId: isAna ? people.requesters.ana : people.requesters.beto,
-    requesterName: isAna ? 'Ana Pérez' : 'Beto Lima',
-    requesterContact: isAna ? 'ana@example.test' : 'beto@example.test',
-  }
-}
-
-function ticketTimes(ticket: DemoTicket): TicketTimes {
-  const reportedAt = new Date(
-    Date.now() - ticket.reportedHoursAgo * 60 * 60 * 1000,
-  )
-  const at = (hours: number) =>
-    new Date(reportedAt.getTime() + hours * 60 * 60 * 1000)
-  return {
-    reportedAt,
-    created: reportedAt,
-    taken: at(0.5),
-    assigned: at(1),
-    started: at(2),
-    attended: at(24),
-    validated: at(48),
-  }
+  payload?: Record<string, unknown>
 }
 
 async function insertTicketRow(context: TicketContext) {
@@ -195,15 +99,16 @@ async function insertAssignments(context: TicketContext) {
       people.technicians.lead,
       people.supervisorId,
       times.assigned,
-      stage >= 4 ? times.attended : null,
+      null,
     ],
   )
 }
 
 function buildEvents(context: TicketContext): DemoEvent[] {
-  const { people, times, stage } = context
+  const { people, times, stage, ticket } = context
   const events: DemoEvent[] = [
     { type: 'created', at: times.created, actorId: people.supervisorId },
+    { type: 'offered', at: times.created, actorId: people.supervisorId },
   ]
   if (stage >= 1) {
     events.push({
@@ -218,6 +123,10 @@ function buildEvents(context: TicketContext): DemoEvent[] {
       at: times.assigned,
       actorId: people.supervisorId,
       technicianId: people.technicians.lead,
+      payload: {
+        technicianId: people.technicians.lead,
+        auxiliary: ticket.category === 'Accesos',
+      },
     })
   }
   if (stage >= 3) {
@@ -230,11 +139,21 @@ function buildEvents(context: TicketContext): DemoEvent[] {
   if (stage >= 4) {
     events.push({
       type: 'attended',
+      payload: {
+        workDescription:
+          'Trabajo de demostración concluido; se verificó el funcionamiento.',
+      },
       at: times.attended,
       actorId: people.technicianUserId,
     })
   }
   if (stage >= 5) {
+    events.push({
+      type: 'validated',
+      at: times.validated,
+      actorId: people.supervisorId,
+      payload: { partial: true, role: 'requester' },
+    })
     events.push({
       type: 'validated',
       at: times.validated,
@@ -245,18 +164,28 @@ function buildEvents(context: TicketContext): DemoEvent[] {
 }
 
 async function insertEvents(context: TicketContext) {
-  const { client, ticket } = context
+  const { client, ticket, storage, people } = context
   for (const event of buildEvents(context)) {
+    if (event.type === 'started' || event.type === 'attended') {
+      await insertDemoEvidence(client, storage, {
+        ticketId: ticket.id,
+        actorId: people.technicianUserId,
+        technicianId: people.technicians.lead,
+        type: event.type === 'started' ? 'before' : 'after',
+        at: event.at,
+      })
+    }
     await client.query(
       `insert into public.ticket_events (
-         ticket_id, cycle, type, actor_id, subject_technician_id, occurred_at
-       ) values ($1, 1, $2::public.event_type, $3, $4, $5)`,
+         ticket_id, cycle, type, actor_id, subject_technician_id, occurred_at, payload
+       ) values ($1, 1, $2::public.event_type, $3, $4, $5, $6::jsonb)`,
       [
         ticket.id,
         event.type,
         event.actorId,
         event.technicianId ?? null,
         event.at,
+        JSON.stringify(event.payload ?? {}),
       ],
     )
   }
@@ -269,34 +198,54 @@ async function insertParticipant(context: TicketContext) {
     `insert into public.ticket_participants (
        ticket_id, cycle, technician_id, participation_type, category_id,
        started_at, ended_at
-     ) values ($1, 1, $2, 'leader', $3, $4, $5)`,
+     ) values ($1, 1, $2, $6::public.participation_type, $3, $4, $5)`,
     [
       ticket.id,
       people.technicians.lead,
       ids.categoryId,
       times.assigned,
-      stage >= 4 ? times.attended : null,
+      stage >= 5 ? times.validated : null,
+      ticket.category === 'Accesos' ? 'auxiliary' : 'leader',
     ],
   )
 }
 
-export async function insertDemoTicket(
-  client: Client,
-  ticket: DemoTicket,
-  catalogs: DemoCatalogs,
-  people: DemoPeople,
-) {
+export async function insertDemoTicket(input: {
+  client: Client
+  ticket: DemoTicket
+  catalogs: DemoCatalogs
+  people: DemoPeople
+  storage: DemoEvidenceStorage
+}) {
+  const { client, ticket, catalogs, people, storage } = input
   const context: TicketContext = {
     client,
     ticket,
-    ids: resolveTicketIds(ticket, catalogs, people),
     people,
+    storage,
+    ids: resolveTicketIds(ticket, catalogs, people),
     times: ticketTimes(ticket),
     stage: STAGE[ticket.status],
   }
-  if (!(await insertTicketRow(context))) return false
+  if (!(await insertTicketRow(context))) {
+    await repairDemoOffers(client, ticket)
+    return false
+  }
+  await insertDemoOffers(client, ticket.id, {
+    ...context.times,
+    stage: context.stage,
+    supervisorId: people.supervisorId,
+  })
   await insertAssignments(context)
   await insertEvents(context)
   await insertParticipant(context)
+  if (context.stage >= 5) {
+    await insertDemoValidations(
+      client,
+      ticket.id,
+      people.supervisorId,
+      context.times.validated,
+    )
+  }
   return true
 }

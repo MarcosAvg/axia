@@ -171,6 +171,8 @@ export const adminMessages = {
     settings: 'Parámetros generales de la instancia.',
   },
   catalogPicker: 'Catálogo',
+  reasonsHelp:
+    'Los motivos nuevos están activos por defecto. El padre debe tener el mismo uso. Para pausar, configura una raíz de pausa con al menos un subestado activo.',
   transfer: {
     export: 'Exportar',
     import: 'Importar',

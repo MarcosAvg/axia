@@ -37,7 +37,7 @@ async function expectReferenceCounts() {
   ).toBe(28)
   expect(
     await scalar('select count(*)::text as value from public.reasons'),
-  ).toBe(62)
+  ).toBe(91)
   expect(
     await scalar('select count(*)::text as value from public.escalation_rules'),
   ).toBe(5)
@@ -69,6 +69,19 @@ describe('reference seed catalogs', () => {
     ).toBe(4)
   })
 
+  it('gives every active pause root an active substate for resuming', async () => {
+    const rootsWithoutExit = await owner.query(`
+      select r.name from public.reasons r
+      where r.use = 'pause' and r.parent_id is null and r.active
+        and not exists (
+          select 1 from public.reasons child
+          where child.parent_id = r.id and child.use = 'pause' and child.active
+        )
+      order by r.name
+    `)
+    expect(rootsWithoutExit.rows).toEqual([])
+  })
+
   it('does not seed permissions without an action', async () => {
     expect(
       await scalar(`
@@ -97,7 +110,7 @@ describe('reference seed catalogs', () => {
       await scalar(
         "select count(*)::text as value from public.reasons where use = 'pause' and parent_id is not null",
       ),
-    ).toBe(10)
+    ).toBe(39)
   })
 })
 
@@ -145,6 +158,24 @@ describe('reference seed boundaries', () => {
 })
 
 describe('reference seed idempotency', () => {
+  it('does not overwrite operator choices when adding missing substates', async () => {
+    const migration = await readFile(
+      new URL('../../db/migrations/0018_pause_substates.sql', import.meta.url),
+      'utf8',
+    )
+    await owner.query(`update public.reasons set active = false, position = 42, requires_note = true
+      where name = 'Personal disponible' and parent_id is not null`)
+    await owner.query(migration)
+    await owner.query(migration)
+    const state =
+      await owner.query(`select active, position, requires_note from public.reasons
+      where name = 'Personal disponible' and parent_id is not null`)
+    expect(state.rows).toEqual([
+      { active: false, position: 42, requires_note: true },
+    ])
+    await expectReferenceCounts()
+  })
+
   it('can be re-run without duplicating reference data', async () => {
     const migration = await readFile(
       new URL(

@@ -48,6 +48,13 @@ contraseña fija ni un acceso especial. La demo no se carga al migrar ni se perm
 existentes. Sin ella, una nueva ejecución conserva las contraseñas ya creadas salvo que se pase
 `--reset-passwords`. Reiniciar la API no cambia contraseñas guardadas en la base.
 
+Los escenarios nuevos incluyen ofertas, evidencias WebP ficticias rotuladas DEMO y validaciones
+coherentes con su estado. El comando local y la API comparten `AXIA_DEV_STORAGE_DIR` o, si no está
+definida, `apps/server/data/evidence`. Las pruebas usan su propio `STORAGE_DIR`. Reaplicar la semilla recupera ofertas ausentes de tiquets demo aún registrados y
+sin actividad; no reescribe los ya operados ni agrega retrospectivamente evidencias a escenarios
+antiguos. Para obtener todos los escenarios nuevos se necesita una base demo nueva; no reiniciar
+una base con trabajo que deba conservarse.
+
 ## Pruebas
 
 ```bash

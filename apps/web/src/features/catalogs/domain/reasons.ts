@@ -67,3 +67,15 @@ export function pathToReason(
   }
   return []
 }
+
+/** Raíces de pausa que permiten elegir un subestado activo al reanudar. */
+export function resumablePauseRoots(reasons: ReasonOption[]): ReasonOption[] {
+  const parents = new Set(
+    reasons
+      .filter((reason) => reason.use === 'pause')
+      .map((reason) => reason.parentId),
+  )
+  return rootReasons(reasons).filter(
+    (reason) => reason.use === 'pause' && parents.has(reason.id),
+  )
+}

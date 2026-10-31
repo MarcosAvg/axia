@@ -38,7 +38,10 @@ beforeEach(async () => {
   await prepareTestDatabase(previous)
   owner = new Client({ connectionString: ownerConnectionString() })
   await owner.connect()
-  await seedDemo(owner, { password: 'FixturePassword123!' })
+  await seedDemo(owner, {
+    password: 'FixturePassword123!',
+    evidenceDir: join(previous, 'evidence'),
+  })
   await owner.query(
     "insert into public.external_systems (name) values ('fixture')",
   )

@@ -4,6 +4,7 @@ import { generateTemporaryPassword, hashPassword } from '../../auth/password.js'
 import { buildDemoCatalogs } from './catalogs.js'
 import { DEMO_TICKETS, MIN_PASSWORD_LENGTH } from './data.js'
 import { buildDemoPeople, buildDemoScopes } from './people.js'
+import { removeDemoFiles, type DemoEvidenceStorage } from './evidence.js'
 import { insertDemoTicket } from './tickets.js'
 
 const DEMO_LOCK_KEY = 1_147_365_203 // "AXIA-DEMO"
@@ -11,6 +12,7 @@ const DEMO_LOCK_KEY = 1_147_365_203 // "AXIA-DEMO"
 export type DemoSeedOptions = {
   password?: string
   resetPasswords?: boolean
+  evidenceDir?: string
 }
 
 export type DemoSeedResult = {
@@ -39,10 +41,7 @@ async function ensureReference(client: Client) {
   }
 }
 
-export async function seedDemo(
-  client: Client,
-  options: DemoSeedOptions = {},
-): Promise<DemoSeedResult> {
+function demoPassword(options: DemoSeedOptions) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('The demo seed cannot run with NODE_ENV=production')
   }
@@ -52,8 +51,20 @@ export async function seedDemo(
       `The demo password must have at least ${MIN_PASSWORD_LENGTH} characters`,
     )
   }
+  return password
+}
+
+export async function seedDemo(
+  client: Client,
+  options: DemoSeedOptions = {},
+): Promise<DemoSeedResult> {
+  const password = demoPassword(options)
   const passwordHash = await hashPassword(password)
   const resetPasswords = options.resetPasswords ?? false
+  const storage: DemoEvidenceStorage = {
+    directory: options.evidenceDir ?? './data/evidence',
+    createdFiles: [],
+  }
   let usersCreated = 0
   let ticketsCreated = 0
   let ticketsSkipped = 0
@@ -75,7 +86,9 @@ export async function seedDemo(
     ).length
 
     for (const ticket of DEMO_TICKETS) {
-      if (await insertDemoTicket(client, ticket, catalogs, people)) {
+      if (
+        await insertDemoTicket({ client, ticket, catalogs, people, storage })
+      ) {
         ticketsCreated += 1
       } else {
         ticketsSkipped += 1
@@ -84,6 +97,7 @@ export async function seedDemo(
     await client.query('commit')
   } catch (error) {
     await client.query('rollback')
+    await removeDemoFiles(storage)
     throw error
   }
 

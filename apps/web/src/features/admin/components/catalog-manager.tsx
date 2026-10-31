@@ -57,6 +57,11 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <h2 className="text-lg font-semibold">{config.title}</h2>
+      {config.key === 'reasons' ? (
+        <p className="text-sm text-muted-foreground">
+          {adminMessages.reasonsHelp}
+        </p>
+      ) : null}
       <AdminToolbar
         query={manager.query}
         onQueryChange={manager.setQuery}
@@ -78,7 +83,7 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
         />
       ) : null}
       <EditDialog config={config} manager={manager} />
-      {manager.isError ? <ErrorAlert message={actions.error} /> : null}
+      {manager.isError ? <ErrorAlert message={manager.errorMessage} /> : null}
     </div>
   )
 }

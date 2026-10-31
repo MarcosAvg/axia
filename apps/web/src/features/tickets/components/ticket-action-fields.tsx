@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { SelectOption } from '@/components/shared/form-fields'
 import { SelectField, TextAreaField } from '@/components/shared/form-fields'
-import { indentReasons, rootReasons } from '@/features/catalogs'
+import { indentReasons, resumablePauseRoots } from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import type { ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
@@ -137,7 +137,7 @@ function reasonOptionsFor(
   action: ActionKey,
   reasons: ReasonOption[],
 ): SelectOption[] {
-  if (action === 'pause') return reasonNameOptions(rootReasons(reasons))
+  if (action === 'pause') return reasonNameOptions(resumablePauseRoots(reasons))
   return toOptions(
     indentReasons(reasons).map((reason) => ({
       id: reason.id,

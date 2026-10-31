@@ -6,6 +6,7 @@ import type { Database } from '../db/client.js'
 import { authGuards, requirePermission, type Guard } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
+import { saveAdminReason } from './admin-reasons.js'
 import {
   adminTable,
   insertAdminRow,
@@ -111,6 +112,10 @@ function registerGenericCatalogRoutes(
     async (request, reply) => {
       const { table } = tableParams.parse(request.params)
       assertNotDependency(table)
+      if (table === 'reasons') {
+        const id = await saveAdminReason(db, request.body)
+        return reply.status(201).send({ id })
+      }
       const id = await insertAdminRow(
         db,
         adminTable(table),
@@ -125,6 +130,10 @@ function registerGenericCatalogRoutes(
     { preHandler: guard },
     async (request, reply) => {
       const params = rowParams.parse(request.params)
+      if (params.table === 'reasons') {
+        await saveAdminReason(db, request.body, params.id)
+        return reply.status(204).send()
+      }
       await updateAdminRow(
         db,
         adminTable(params.table),

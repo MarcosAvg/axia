@@ -29,5 +29,5 @@ export {
   childReasons,
   indentReasons,
   pathToReason,
-  rootReasons,
+  resumablePauseRoots,
 } from './domain/reasons'

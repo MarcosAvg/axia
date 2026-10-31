@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { ApiError } from '@/lib/api-client'
 import type { AdminTable } from '../api/admin-api'
 import { optionSourcesFor } from '../domain/catalog-options'
 import type { AdminCatalogConfig } from '../domain/catalogs'
@@ -14,6 +15,13 @@ import { useCatalogList } from './use-catalog-list'
 
 type Editing = Record<string, unknown> | 'new' | null
 type Values = Record<string, string | number | boolean | null>
+
+function saveErrorMessage(error: unknown): string {
+  return error instanceof ApiError &&
+    (error.status === 400 || error.status === 409)
+    ? error.message
+    : adminMessages.actions.error
+}
 
 /** Estado y acciones del gestor de un catálogo: lista, búsqueda, orden y guardado. */
 export function useCatalogManager(config: AdminCatalogConfig) {
@@ -35,7 +43,7 @@ export function useCatalogManager(config: AdminCatalogConfig) {
           setEditing(null)
           toast.success(adminMessages.actions.saved)
         },
-        onError: () => toast.error(adminMessages.actions.error),
+        onError: (error) => toast.error(saveErrorMessage(error)),
       },
     )
   }
@@ -47,7 +55,7 @@ export function useCatalogManager(config: AdminCatalogConfig) {
         id: String(row.id),
         values: { active: row.active !== true },
       },
-      { onError: () => toast.error(adminMessages.actions.error) },
+      { onError: (error) => toast.error(saveErrorMessage(error)) },
     )
   }
 
@@ -61,5 +69,6 @@ export function useCatalogManager(config: AdminCatalogConfig) {
     toggle,
     isSaving: save.isPending,
     isError: save.isError,
+    errorMessage: saveErrorMessage(save.error),
   }
 }

@@ -56,6 +56,11 @@ export const reasonsCatalog: AdminCatalogConfig = {
       kind: 'number',
       defaultValue: 0,
     },
-    { name: 'active', label: fields.active, kind: 'boolean' },
+    {
+      name: 'active',
+      label: fields.active,
+      kind: 'boolean',
+      defaultValue: true,
+    },
   ],
 }

@@ -15,6 +15,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- Catálogos iniciales de pausa completos y comprobación de salida antes de pausar; edición de
+  motivos validada y protegida mientras haya pausas abiertas. Alta activa por defecto, padres
+  compatibles, selectores actualizados y errores de captura comprensibles.
+- Demo con ofertas utilizables, evidencias ficticias privadas, validaciones y participación
+  coherentes; reaplicar recupera ruteo ausente de escenarios intactos sin reescribir historial.
+
 - Pruebas de respaldo/recuperación ejecutables sin ripgrep en runners de CI; mismas aserciones
   y expresiones regulares extendidas con `grep -E`.
 

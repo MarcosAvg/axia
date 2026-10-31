@@ -1,3 +1,7 @@
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import { Client } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -8,6 +12,7 @@ import { ownerConnectionString, prepareTestDatabase } from './helpers.js'
 const DEMO_PASSWORD = 'DemoPassword123!'
 
 let owner: Client
+let evidenceDir: string
 
 async function scalar(sql: string): Promise<number> {
   const result = await owner.query<{ value: string }>(sql)
@@ -41,7 +46,7 @@ async function expectDemoCounts() {
   ).toBe(6)
   expect(
     await scalar('select count(*)::text as value from public.ticket_events'),
-  ).toBe(21)
+  ).toBe(33)
   expect(
     await scalar(
       'select count(*)::text as value from public.ticket_assignments',
@@ -60,6 +65,7 @@ async function expectDemoCounts() {
 }
 
 beforeAll(async () => {
+  evidenceDir = await mkdtemp(join(tmpdir(), 'axia-demo-seed-'))
   await prepareTestDatabase()
   owner = new Client({ connectionString: ownerConnectionString() })
   await owner.connect()
@@ -67,11 +73,15 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await owner?.end()
+  await rm(evidenceDir, { recursive: true, force: true })
 })
 
 describe('demo seed', () => {
   it('creates demo users, catalogs and one ticket per state', async () => {
-    const result = await seedDemo(owner, { password: DEMO_PASSWORD })
+    const result = await seedDemo(owner, {
+      password: DEMO_PASSWORD,
+      evidenceDir,
+    })
     expect(result).toMatchObject({
       usersCreated: 4,
       ticketsCreated: 6,
@@ -104,7 +114,10 @@ describe('demo seed', () => {
   })
 
   it('is idempotent and does not rotate passwords by default', async () => {
-    const result = await seedDemo(owner, { password: DEMO_PASSWORD })
+    const result = await seedDemo(owner, {
+      password: DEMO_PASSWORD,
+      evidenceDir,
+    })
     expect(result).toMatchObject({
       usersCreated: 0,
       ticketsCreated: 0,
@@ -120,9 +133,9 @@ describe('demo seed safeguards', () => {
     const before = await scalar(
       'select count(*)::text as value from public.tickets',
     )
-    await expect(seedDemo(owner, { password: 'short' })).rejects.toThrow(
-      /at least 12/,
-    )
+    await expect(
+      seedDemo(owner, { password: 'short', evidenceDir }),
+    ).rejects.toThrow(/at least 12/)
     expect(
       await scalar('select count(*)::text as value from public.tickets'),
     ).toBe(before)
@@ -131,6 +144,7 @@ describe('demo seed safeguards', () => {
   it('can reset the demo passwords explicitly', async () => {
     const result = await seedDemo(owner, {
       password: 'AnotherDemoPassword123!',
+      evidenceDir,
       resetPasswords: true,
     })
     expect(result.passwordApplied).toBe(true)
@@ -144,5 +158,58 @@ describe('demo seed safeguards', () => {
         'AnotherDemoPassword123!',
       ),
     ).toBe(true)
+  })
+})
+
+describe('demo catalog coverage', () => {
+  it('keeps all locations, classification paths and routing operational', async () => {
+    const gaps = await owner.query(`
+      select 'building' as kind, b.name from public.buildings b where b.active
+        and not exists (select 1 from public.locations l where l.building_id = b.id and l.active)
+      union all
+      select 'location', l.name from public.locations l where l.active
+        and not exists (select 1 from public.dependency_locations dl
+          join public.dependencies d on d.id = dl.dependency_id and d.active where dl.location_id = l.id)
+      union all
+      select 'dependency', d.name from public.dependencies d where d.active
+        and not exists (select 1 from public.dependency_locations dl
+          join public.locations l on l.id = dl.location_id and l.active where dl.dependency_id = d.id)
+      union all
+      select 'category', c.name from public.categories c where c.active
+        and not exists (select 1 from public.subcategories s where s.category_id = c.id and s.active)
+      union all
+      select 'subcategory', s.name from public.subcategories s where s.active
+        and not exists (select 1 from public.problems p where p.subcategory_id = s.id and p.active)
+      union all
+      select 'problem', p.name from public.problems p
+        join public.subcategories s on s.id = p.subcategory_id
+        join public.categories c on c.id = s.category_id
+        where p.active and (not exists (select 1 from public.teams t where t.id = p.team_id and t.active)
+          or not exists (select 1 from public.technician_categories tc
+            join public.technicians t on t.id = tc.technician_id and t.active
+            where tc.category_id = c.id and t.team_id = p.team_id))
+      union all
+      select 'coverage', t.name || ' / ' || b.name from public.teams t cross join public.buildings b
+        where t.active and b.active and not exists (select 1 from public.supervisor_scopes ss
+          join public.users u on u.id = ss.user_id and u.active
+          join public.supervisor_scope_buildings sb on sb.scope_id = ss.id
+          where ss.team_id = t.id and ss.active and sb.building_id = b.id)
+    `)
+    expect(gaps.rows).toEqual([])
+    const reasonUses = await owner.query(
+      `select use::text from public.reasons where active group by use`,
+    )
+    expect(reasonUses.rows.map((row) => row.use).sort()).toEqual([
+      'auxiliary_support',
+      'cancellation',
+      'claim',
+      'claim_outcome',
+      'pause',
+      'reactivation',
+      'recapture',
+      'rejection',
+      'supervisor_reassignment',
+      'technician_reassignment',
+    ])
   })
 })

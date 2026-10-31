@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { Client } from 'pg'
 
@@ -11,6 +11,7 @@ export type DemoCliOptions = {
   connectionString: string
   password?: string
   resetPasswords: boolean
+  evidenceDir?: string
 }
 
 function localConnectionString(raw: string) {
@@ -26,6 +27,18 @@ function localConnectionString(raw: string) {
     )
   }
   return url.toString()
+}
+
+/** El comando local comparte STORAGE_DIR con pnpm dev y dev:api. */
+export function localDemoEnvironment(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  return {
+    ...env,
+    STORAGE_DIR:
+      env.AXIA_DEV_STORAGE_DIR ??
+      fileURLToPath(new URL('../../../data/evidence/', import.meta.url)),
+  }
 }
 
 export function parseDemoCli(
@@ -47,6 +60,7 @@ export function parseDemoCli(
   return {
     connectionString: localConnectionString(env.MIGRATION_DATABASE_URL),
     password,
+    evidenceDir: env.STORAGE_DIR,
     // Una contraseña explícita en .env es la fuente de verdad: se reaplica a
     // los usuarios demo existentes. Sin ella, solo --reset-passwords rota.
     resetPasswords:
@@ -87,6 +101,7 @@ export async function runDemoSeedCli(argv: string[], env: NodeJS.ProcessEnv) {
     const result = await seedDemo(client, {
       password: options.password,
       resetPasswords: options.resetPasswords,
+      evidenceDir: options.evidenceDir,
     })
     printResult(result)
     return result

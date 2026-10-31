@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseDemoCli } from '../../src/db/seed-demo/cli.js'
+import {
+  localDemoEnvironment,
+  parseDemoCli,
+} from '../../src/db/seed-demo/cli.js'
 
 const localUrl = 'postgres://axia_owner:secret@127.0.0.1:5433/axia'
 
@@ -64,4 +67,34 @@ describe('demo seed CLI', () => {
       password: undefined,
     })
   })
+})
+
+it('passes the configured private storage directory to the demo seed', () => {
+  expect(
+    parseDemoCli(['--demo'], {
+      MIGRATION_DATABASE_URL: localUrl,
+      STORAGE_DIR: '/tmp/axia-demo-private',
+    }),
+  ).toMatchObject({ evidenceDir: '/tmp/axia-demo-private' })
+})
+
+it('uses the same local storage override as the development API', () => {
+  const env = localDemoEnvironment({
+    MIGRATION_DATABASE_URL: localUrl,
+    AXIA_DEV_STORAGE_DIR: '/tmp/axia-custom-demo',
+    STORAGE_DIR: '/data/evidence',
+  })
+  expect(parseDemoCli(['--demo'], env).evidenceDir).toBe(
+    '/tmp/axia-custom-demo',
+  )
+})
+
+it('uses repository storage instead of a container path for local demo', () => {
+  const env = localDemoEnvironment({
+    MIGRATION_DATABASE_URL: localUrl,
+    STORAGE_DIR: '/data/evidence',
+  })
+  expect(parseDemoCli(['--demo'], env).evidenceDir).toMatch(
+    /apps\/server\/data\/evidence\/$/,
+  )
 })

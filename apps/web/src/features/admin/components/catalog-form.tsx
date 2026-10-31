@@ -1,10 +1,7 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminField } from '../domain/catalogs'
-import { initialValues, toAdminValues } from '../domain/form-values'
-import type { RawValues } from '../domain/form-values'
 import type { AdminOption } from '../hooks/use-admin-catalog'
+import { useCatalogForm } from '../hooks/use-catalog-form'
 import { adminMessages } from '../i18n'
 import { CatalogFieldInput } from './catalog-field-input'
 import { EntityForm } from './entity-form'
@@ -43,27 +40,21 @@ export function CatalogForm({
   onSave,
   onCancel,
 }: CatalogFormProps) {
-  const [raw, setRaw] = useState<RawValues>(() => initialValues(fields, row))
-  const [invalid, setInvalid] = useState<string[]>([])
+  const { raw, invalid, submit, onChange, fieldOptions } = useCatalogForm({
+    fields,
+    row,
+    optionsFor,
+    onSave,
+  })
   const { form } = adminMessages
   const groups = groupFields(fields)
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    const { values, errors } = toAdminValues(fields, raw)
-    setInvalid(errors)
-    if (errors.length === 0) onSave(values)
-  }
-
-  const onChange = (name: string, value: string | number | boolean) =>
-    setRaw((current) => ({ ...current, [name]: value }))
 
   const renderField = (field: AdminField) => (
     <CatalogFieldInput
       key={field.name}
       field={field}
       value={raw[field.name] ?? ''}
-      options={field.optionsTable ? optionsFor(field.optionsTable) : []}
+      options={fieldOptions(field)}
       error={invalid.includes(field.name) ? form.required : undefined}
       onChange={(value) => onChange(field.name, value)}
     />

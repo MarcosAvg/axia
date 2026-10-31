@@ -38,7 +38,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `assign_supervisor` | `with_supervisor`, `assigned`, `in_progress`, `paused` | Titular o permiso de alcance global; motivo y destino; a un equipo pasa a `registered`, a un supervisor a `with_supervisor` |
 | `add_auxiliary` | `assigned`, `in_progress`, `paused` | Técnico y motivo; agrega participación sin cambiar estado |
 | `start` | `assigned` | Evidencia `before` del ciclo; pasa a `in_progress` |
-| `pause` | `in_progress` | Motivo raíz de pausa; pasa a `paused` |
+| `pause` | `in_progress` | Motivo raíz activo con al menos un subestado activo; pasa a `paused` |
 | `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
 | `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
