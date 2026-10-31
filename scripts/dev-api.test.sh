@@ -27,22 +27,13 @@ grep -qxF 'PORT=3100' <<<"$OUT" || {
   exit 1
 }
 
-OUT="$(PATH="$TMP_DIR/bin:$PATH" AXIA_DEV_STORAGE_DIR="$TMP_DIR/evidence" "$ROOT_DIR/scripts/dev-api.sh")"
+OUT="$(PATH="$TMP_DIR/bin:$PATH" AXIA_ENV_FILE=/dev/null AXIA_DEV_STORAGE_DIR="$TMP_DIR/evidence" "$ROOT_DIR/scripts/dev-api.sh")"
 grep -qxF "STORAGE_DIR=$TMP_DIR/evidence" <<<"$OUT" || {
   echo 'dev-api.sh debe respetar AXIA_DEV_STORAGE_DIR' >&2
   exit 1
 }
 
-OUT="$(
-  PATH="$TMP_DIR/bin:$PATH" \
-    MIGRATION_DATABASE_URL='postgres://local/test' \
-    AXIA_APP_PASSWORD='test' \
-    DATABASE_URL='postgres://local/test' \
-    "$ROOT_DIR/scripts/e2e-server.sh"
-)"
-grep -qxF "STORAGE_DIR=$ROOT_DIR/apps/server/data/evidence-e2e" <<<"$OUT" || {
-  echo 'e2e-server.sh debe usar una ruta local de evidencias' >&2
-  exit 1
-}
-
-echo 'dev-api.sh y e2e-server.sh: ruta local de evidencias verificada.'
+# E2E runs its validating preparer directly and must not invoke a generic reset.
+OUT="$(PATH="$TMP_DIR/bin:$PATH" AXIA_ENV_FILE=/dev/null "$ROOT_DIR/scripts/e2e-server.sh")"
+grep -qxF "STORAGE_DIR=$ROOT_DIR/apps/server/data/evidence-e2e" <<<"$OUT"
+echo 'dev-api.sh y e2e-server.sh: rutas locales verificadas.'

@@ -1,11 +1,6 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+// Tests never discover developer or production environment files.
+import { TEST_APP_PASSWORD, TEST_OWNER_URL } from '../scripts/test-target.js'
 
-const rootEnv = fileURLToPath(new URL('../../../.env', import.meta.url))
-const serverEnv = fileURLToPath(new URL('../.env', import.meta.url))
-
-for (const path of [rootEnv, serverEnv]) {
-  if (existsSync(path)) {
-    process.loadEnvFile(path)
-  }
-}
+process.env.AXIA_ENV_FILE = '/dev/null'
+process.env.MIGRATION_DATABASE_URL ??= TEST_OWNER_URL
+process.env.AXIA_APP_PASSWORD ??= TEST_APP_PASSWORD

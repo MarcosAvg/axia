@@ -7,7 +7,9 @@ import { cleanupPendingEvidence } from './cleanup.js'
 import { storagePaths } from './paths.js'
 
 async function main() {
-  const envFile = new URL('../../../../.env', import.meta.url)
+  const envFile =
+    process.env.AXIA_ENV_FILE ??
+    new URL('../../../../.env.dev', import.meta.url)
   if (existsSync(envFile)) process.loadEnvFile(envFile)
 
   const hours = Number(process.env.EVIDENCE_CLEANUP_HOURS ?? 24)

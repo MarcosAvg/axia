@@ -1,6 +1,7 @@
 # 0075 — Instalación, secretos, respaldos y CI del stack propio
 
-**Estado:** aceptada
+**Estado:** parcial; los recorridos operativos se sustituyen por
+[ADR 0099](0099-consolidacion-self-hosted.md).
 **Fecha:** 2026-10-21
 
 ## Contexto

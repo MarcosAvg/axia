@@ -10,12 +10,13 @@ git pull
 pnpm install
 ```
 
-Si cambió el esquema, reconstruir la base local o ejecutar las migraciones:
+Si cambió el esquema, `pnpm dev` aplica las migraciones pendientes sin borrar datos. Un reinicio
+intencional de desarrollo exige `pnpm db:reset -- --development` y una base `_dev`; elimina todos
+sus datos. No es necesario reiniciar la base para actualizar normalmente.
 
-```bash
-pnpm db:reset                     # base local
-docker compose pull && docker compose up -d   # instalación con Compose
-```
+Una instalación de producción usa imágenes y paquetes de release. La actualización requiere
+respaldo previo y parada explícita de la app según la
+[guía de operación](../guides/operacion.md); no se actualiza mediante `git pull` ni un tag `latest`.
 
 ## Retomar una tarea
 
@@ -30,11 +31,12 @@ docker compose pull && docker compose up -d   # instalación con Compose
 | Elemento | Recuperación |
 |---|---|
 | `node_modules` | `pnpm install` |
-| Base local | `pnpm db:reset` |
-| `.env` | `./scripts/install.sh` o recuperar el archivo original |
+| Base de desarrollo | Recuperar `.env.dev` y ejecutar `pnpm dev`; para entorno nuevo usar el instalador |
+| `.env.dev` | Recuperar el original si existe el volumen; para entorno nuevo usar `./scripts/install.sh` |
+| `.env` de producción | Recuperar la configuración original junto con su release; no regenerar sobre datos existentes |
 | Imágenes y navegadores | se descargan por equipo |
 
-La base y `.env` no viajan por Git. El archivo `.env` debe conservarse fuera del repositorio y con
+La base y los archivos `.env`/`.env.dev` no viajan por Git. Conservar los archivos privados fuera del repositorio y con
 permisos `0600`.
 
 ## Problemas frecuentes
@@ -42,12 +44,12 @@ permisos `0600`.
 | Síntoma | Causa y solución |
 |---|---|
 | `permission denied` con Docker | Falta el grupo `docker` o no se reinició la sesión |
-| `install.sh` detecta un `.env` existente | No se sobrescriben secretos; recuperar el original |
-| `pnpm check` falla en `db:test` | Revisar `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y el puerto de PostgreSQL |
+| `install.sh` detecta un `.env.dev` existente | No se sobrescriben secretos; recuperar el original |
+| `pnpm check` falla en `db:test` | Iniciar `pnpm test:db:start`; si se cambió el servidor, revisar sus conexiones locales de pruebas |
 | Playwright no encuentra Chromium | `pnpm --filter @axia/web exec playwright install chromium` |
 | No se puede iniciar sesión | Definir `AXIA_DEMO_PASSWORD` y ejecutar `pnpm db:demo -- --demo` (reaplica la contraseña a los usuarios existentes); revisar el bloqueo por intentos |
-| El puerto 3100 está ocupado | Cambiar `PORT` y `AXIA_API_URL`; Vite reenvía `/api` |
-| La API no responde | Revisar `docker compose ps` y `docker compose logs app` |
+| El puerto 3100 está ocupado | Cambiar `PORT` de desarrollo; `pnpm dev` ajusta el proxy de Vite automáticamente |
+| La API no responde | En desarrollo revisar el watcher; en producción revisar `docker compose ps` y logs de app |
 
 ## Seguridad
 

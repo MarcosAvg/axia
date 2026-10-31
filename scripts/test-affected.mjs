@@ -13,11 +13,33 @@ function git(args) {
 }
 
 function changedFiles() {
-  const tracked = git(['diff', '--name-only', '--diff-filter=ACMR', base])
+  const tracked = git(['diff', '--name-only', '--diff-filter=ACMRD', base])
+  const deleted = git(['diff', '--name-only', '--diff-filter=D', base])
+  if (deleted.split('\n').some((file) => file && !isDocumentation(file))) {
+    return null
+  }
   const untracked = git(['ls-files', '--others', '--exclude-standard'])
-  return [...new Set([...tracked.split('\n'), ...untracked.split('\n')])]
-    .filter(Boolean)
-    .filter((file) => file !== 'pnpm-lock.yaml')
+  return [
+    ...new Set([...tracked.split('\n'), ...untracked.split('\n')]),
+  ].filter(Boolean)
+}
+
+function isDocumentation(file) {
+  return (
+    !file.startsWith('.github/') &&
+    (file.startsWith('docs/') || file.endsWith('.md'))
+  )
+}
+
+function discoverChanges() {
+  try {
+    return changedFiles()
+  } catch {
+    console.warn(
+      'No se pudieron descubrir los cambios; se ejecuta la compuerta completa.',
+    )
+    return null
+  }
 }
 
 function appPath(file, app) {
@@ -36,7 +58,11 @@ const files = process.env.AXIA_TEST_FILES
   ? process.env.AXIA_TEST_FILES.split(',')
       .map((file) => file.trim())
       .filter(Boolean)
-  : changedFiles()
+  : discoverChanges()
+if (files === null) {
+  run('pnpm', ['check'])
+  process.exit(0)
+}
 if (files.length === 0) {
   console.log(`Sin cambios respecto a ${base}; no hay pruebas que ejecutar.`)
   process.exit(0)
@@ -45,20 +71,15 @@ if (files.length === 0) {
 console.log(`Archivos cambiados respecto a ${base}:`)
 for (const file of files) console.log(`  - ${file}`)
 
-const docsOnly = files.every(
-  (file) =>
-    file.startsWith('docs/') ||
-    file.startsWith('.github/') ||
-    file.endsWith('.md'),
-)
-if (docsOnly) {
-  run('pnpm', ['check:docs'])
-  process.exit(0)
-}
-
 const structural = files.some(
   (file) =>
     file === 'package.json' ||
+    file === 'pnpm-lock.yaml' ||
+    /(^|\/)(?:docker-)?compose(?:[.-][^/]*)?\.ya?ml$/.test(file) ||
+    /(^|\/)Dockerfile(?:\.[^/]*)?$/.test(file) ||
+    file.endsWith('.dockerignore') ||
+    /(^|\/)\.env(?:\.[^/]*)?\.(?:example|template)$/.test(file) ||
+    file.startsWith('deploy/') ||
     file === 'pnpm-workspace.yaml' ||
     file === 'tsconfig.base.json' ||
     file === 'knip.json' ||
@@ -77,6 +98,11 @@ if (structural) {
   process.exit(0)
 }
 
+if (files.every(isDocumentation)) {
+  run('pnpm', ['check:docs'])
+  process.exit(0)
+}
+
 const serverFiles = files
   .map((file) => appPath(file, 'server'))
   .filter((file) => file && /\.(ts|tsx)$/.test(file))
@@ -85,10 +111,13 @@ const webFiles = files
   .filter((file) => file && /\.(ts|tsx)$/.test(file))
 
 const e2eSpecs = webFiles.filter((file) => file.startsWith('e2e/'))
-const webUi = webFiles.filter(
+const webPaths = files.map((file) => appPath(file, 'web')).filter(Boolean)
+const webUi = webPaths.filter(
   (file) =>
     !file.includes('.test.') &&
-    (file.startsWith('src/components/') ||
+    (/\.(css|scss)$/.test(file) ||
+      file.startsWith('src/routes/') ||
+      file.startsWith('src/components/') ||
       file.startsWith('src/app/') ||
       /^src\/features\/[^/]+\/components\//.test(file)),
 )
@@ -101,6 +130,20 @@ const serverMigration = files
         file === 'db/schema.ts' ||
         file.startsWith('src/db/')),
   )
+
+// Un archivo desconocido no debe terminar validado solo como documentación.
+const recognized = files.every(
+  (file) =>
+    isDocumentation(file) ||
+    (/\.(ts|tsx)$/.test(file) &&
+      (appPath(file, 'server') || appPath(file, 'web'))) ||
+    appPath(file, 'server')?.startsWith('db/migrations/') ||
+    (appPath(file, 'web') && /\.(css|scss)$/.test(file)),
+)
+if (!recognized) {
+  run('pnpm', ['check'])
+  process.exit(0)
+}
 
 let ran = false
 
@@ -124,7 +167,7 @@ if (serverMigration) {
   ])
 }
 
-if (webFiles.length > 0) {
+if (webFiles.length > 0 || webUi.length > 0) {
   ran = true
   const unitFiles = webFiles.filter((file) => !file.startsWith('e2e/'))
   if (unitFiles.length > 0) {
@@ -149,19 +192,13 @@ if (webFiles.length > 0) {
     ])
   }
   if (webUi.length > 0 && e2eSpecs.length === 0) {
-    if (process.env.MIGRATION_DATABASE_URL) {
-      run('pnpm', ['test:e2e:smoke'])
-    } else {
-      console.warn(
-        '\nHay cambios de interfaz; define MIGRATION_DATABASE_URL para ejecutar el smoke E2E.',
-      )
-    }
+    run('pnpm', ['test:e2e:smoke'])
   }
 }
 
 if (!ran) {
   console.log(
-    '\nNo hay archivos de código afectados; ejecutando chequeo documental.',
+    '\nNo se identificaron pruebas relacionadas; se ejecuta la compuerta completa.',
   )
-  run('pnpm', ['check:docs'])
+  run('pnpm', ['check'])
 }

@@ -2,15 +2,9 @@ import { Client } from 'pg'
 
 import { ensureAppRole, runMigrations } from '../src/db/migrate.js'
 import { loadRootEnv } from './load-env.js'
+import { assertDatabaseTarget } from './test-target.js'
 
 loadRootEnv()
-
-function assertLocal(databaseUrl: string) {
-  const url = new URL(databaseUrl)
-  if (!['127.0.0.1', 'localhost', '::1'].includes(url.hostname)) {
-    throw new Error('db:reset only runs against a local PostgreSQL host')
-  }
-}
 
 async function main() {
   const connectionString = process.env.MIGRATION_DATABASE_URL
@@ -18,7 +12,13 @@ async function main() {
     throw new Error('MIGRATION_DATABASE_URL is required')
   }
 
-  assertLocal(connectionString)
+  const kind = process.argv.includes('--development')
+    ? 'development'
+    : process.argv.includes('--e2e')
+      ? 'e2e'
+      : undefined
+  if (!kind) throw new Error('Reset requires explicit --development or --e2e')
+  assertDatabaseTarget(connectionString, kind)
 
   const client = new Client({ connectionString })
   await client.connect()

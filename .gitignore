@@ -12,6 +12,7 @@ dist-ssr
 .env.*
 !.env.example
 !.env.dev.example
+!.env.test.example
 
 
 # Registros y reportes
@@ -31,3 +32,5 @@ apps/server/data/
 
 # Respaldos locales
 backups/
+.release/
+.superpowers/

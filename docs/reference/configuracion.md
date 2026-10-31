@@ -1,21 +1,24 @@
 # Configuración
 
 Variables de entorno del servidor y del compose. Los valores reales viven en `.env`, con permisos
-`0600` y fuera del repositorio. La plantilla de producción es `.env.example`; la de desarrollo y
-pruebas es `.env.dev.example`.
+`0600` y fuera del repositorio. La plantilla de producción es `.env.example`; la de desarrollo es
+`.env.dev.example` y los valores ficticios de pruebas están en `.env.test.example`. Los comandos de
+pruebas no descubren archivos privados.
 
 ## Producción mínima
 
-`compose.yaml` solo exige dos secretos:
+`compose.yaml` exige una imagen de release y dos secretos:
 
 | Variable | Uso |
 |---|---|
+| `AXIA_IMAGE` | Referencia exacta de la release (tag o digest); misma para app y migrador |
 | `POSTGRES_OWNER_PASSWORD` | Contraseña del rol dueño; obligatoria |
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
 
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
-`.env` solo cuando se necesita cambiar el comportamiento. La app usa las imágenes `:latest`; para
-fijar una versión se edita `compose.yaml`.
+`.env` solo cuando se necesita cambiar el comportamiento. El paquete de release fija `AXIA_IMAGE`
+por digest. No se debe usar `latest` para actualizar una instancia con datos reales sin seleccionar y verificar la versión. El rol interno `axia_app` es
+fijo; `AXIA_APP_USER` no es una opción de despliegue.
 
 ## Base de datos
 
@@ -24,7 +27,6 @@ fijar una versión se edita `compose.yaml`.
 | `POSTGRES_DB` | `axia` | Nombre de la base |
 | `POSTGRES_OWNER_USER` | `axia_owner` | Rol dueño; solo migraciones |
 | `POSTGRES_OWNER_PASSWORD` | — | Obligatoria; secreto |
-| `AXIA_APP_USER` | `axia_app` | Rol de la aplicación |
 | `AXIA_APP_PASSWORD` | — | Obligatoria; secreto |
 | `MIGRATION_DATABASE_URL` | — | Solo scripts del host; Compose construye la suya |
 | `DATABASE_URL` | — | Solo scripts del host; Compose construye la suya |
@@ -36,10 +38,10 @@ fijar una versión se edita `compose.yaml`.
 |---|---|---|
 | `HOST` | `0.0.0.0` | Interfaz de escucha |
 | `PORT` | `3100` | Puerto HTTP; dentro de Compose es fijo `3100` |
-| `APP_PORT` | `3100` | Solo desarrollo local; puerto de `app` en `compose.dev.yaml` |
-| `NODE_ENV` | `development` | Compose fija `production`; el overlay de desarrollo usa `development` |
+| `APP_PORT` | `3100` | Alias histórico; desarrollo host usa `PORT` |
+| `NODE_ENV` | `development` | Compose fija `production`; desarrollo ejecuta los watchers del host con `development` |
 | `LOG_LEVEL` | `info` | Nivel de registro |
-| `TRUST_PROXY` | `true` | Fijo en producción; `false` en el overlay de desarrollo |
+| `TRUST_PROXY` | `false` en host | Fijo `true` en Compose de producción detrás del proxy |
 | `BODY_LIMIT_BYTES` | `1048576` | Límite del cuerpo JSON |
 | `HEALTH_TIMEOUT_MS` | `2000` | Timeout de salud |
 | `SHUTDOWN_TIMEOUT_MS` | `10000` | Cierre ordenado |
@@ -86,3 +88,26 @@ fijar una versión se edita `compose.yaml`.
 Al cambiarla, vuelve a ejecutar la semilla demo para reaplicarla a los usuarios existentes.
 
 Las contraseñas de base, aplicación y demo nunca se versionan ni se imprimen en producción.
+
+## Red y mantenimiento
+
+| Variable | Valor por defecto | Uso |
+|---|---|---|
+| `AXIA_PROXY_NETWORK` | `proxy` | Red externa del proxy que debe existir antes del arranque |
+| `AXIA_PROXY_ALIAS` | `axia` | Alias de la app; usar uno distinto entre instancias en la misma red |
+| `EVIDENCE_CLEANUP_HOURS` | `24` | Antigüedad de subidas parciales |
+| `RETENTION_SESSION_DAYS` | `30` | Retención de sesiones caducadas/revocadas |
+| `RETENTION_LOGIN_ATTEMPT_DAYS` | `90` | Retención de intentos de acceso |
+| `RETENTION_NOTIFICATION_DAYS` | `90` | Retención de avisos leídos |
+
+Las opciones de sesiones, login y mantenimiento se entregan explícitamente al proceso por Compose.
+No se pasa el archivo de entorno completo a la app: la contraseña del dueño permanece fuera de ella.
+
+## Entornos locales
+
+Desarrollo usa `.env.dev` (o `AXIA_ENV_FILE` explícito), `compose.dev.yaml`, base `axia_dev` y
+puertos `5433`/`3100`/`5173`. `PORT` cambia la API y `AXIA_DEV_WEB_PORT` cambia Vite. Cambiar `DB_PORT`
+requiere ajustar también las dos URLs locales; el instalador lo hace al generar el archivo.
+Pruebas usa `compose.test.yaml`, puerto `55433` y base `axia_test`. `MIGRATION_DATABASE_URL` permite
+seleccionar otro servidor loopback de pruebas; `AXIA_E2E_MIGRATION_DATABASE_URL` permite elegir una
+base `_e2e` explícita. Ninguna admite parámetros en la URL que puedan sustituir host o destino.

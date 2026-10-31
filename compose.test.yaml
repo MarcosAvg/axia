@@ -1,0 +1,18 @@
+# Entorno desechable independiente; no lee .env y no tiene volúmenes persistentes.
+name: axia-test
+services:
+  db:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: axia_test
+      POSTGRES_USER: axia_test_owner
+      POSTGRES_PASSWORD: test-owner-password
+    ports:
+      - '127.0.0.1:55433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U axia_test_owner -d axia_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30

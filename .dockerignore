@@ -13,3 +13,7 @@ test-results
 **/.env
 **/.env.*
 backups
+apps/server/data
+.superpowers
+.worktrees
+.release

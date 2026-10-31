@@ -18,7 +18,8 @@
     "db:reset": "tsx scripts/reset-db.ts",
     "db:indexes": "tsx scripts/index-audit.ts",
     "db:demo": "tsx scripts/seed-demo.ts",
-    "test:unit": "vitest run test/unit test/http"
+    "test:unit": "vitest run test/unit test/http",
+    "test:e2e:server": "node --import tsx scripts/prepare-e2e.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.3",

@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { test } from 'node:test'
+
+const revision = 'a'.repeat(40)
+const image = `ghcr.io/marcosavg/axia/axia-app@sha256:${'b'.repeat(64)}`
+
+test('release package contains only runtime files and immutable identity, never private env', () => {
+  const root = mkdtempSync(join(tmpdir(), 'axia-package-test-'))
+  const output = join(root, 'bundle')
+  try {
+    const result = spawnSync(
+      process.execPath,
+      ['scripts/package-release.mjs', output, image, revision, 'v0.1.0'],
+      { encoding: 'utf8' },
+    )
+    assert.equal(result.status, 0, result.stderr)
+    assert.match(
+      readFileSync(join(output, '.env.example'), 'utf8'),
+      new RegExp(`AXIA_IMAGE=${image}`),
+    )
+    assert.equal(
+      JSON.parse(readFileSync(join(output, 'release.json'), 'utf8')).revision,
+      revision,
+    )
+    assert.ok(existsSync(join(output, 'deploy/scripts/compose-operations.sh')))
+    assert.ok(existsSync(join(output, 'OPERATIONS.md')))
+    assert.ok(!existsSync(join(output, '.env')))
+    assert.ok(!existsSync(join(output, 'package.json')))
+    assert.ok(!existsSync(join(output, 'apps')))
+    assert.ok(
+      readdirSync(join(output, 'deploy/scripts')).every(
+        (name) => !name.includes('.test.'),
+      ),
+    )
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('mutable latest is rejected without creating output', () => {
+  const root = mkdtempSync(join(tmpdir(), 'axia-package-test-'))
+  const output = join(root, 'bundle')
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [
+        'scripts/package-release.mjs',
+        output,
+        'axia:latest',
+        revision,
+        'v0.1.0',
+      ],
+      { encoding: 'utf8' },
+    )
+    assert.notEqual(result.status, 0)
+    assert.match(result.stderr, /immutable release image/)
+    assert.ok(!existsSync(output))
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})

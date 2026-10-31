@@ -59,7 +59,7 @@ function printResult(result: DemoSeedResult) {
     `Demo lista: ${result.usersCreated} usuarios nuevos, ${result.ticketsCreated} tiquets nuevos, ${result.ticketsSkipped} ya existentes.\n`,
   )
   process.stdout.write(
-    'Usuarios: demo.supervisor, demo.technician, demo.requester\n',
+    'Usuarios: demo.admin, demo.supervisor, demo.technician, demo.requester\n',
   )
   if (result.passwordApplied && result.passwordGenerated) {
     process.stdout.write(

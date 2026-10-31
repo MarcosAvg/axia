@@ -37,66 +37,59 @@ autoalojable para instituciones que requieren control de sus datos.
 La autorización vive en el servidor y se aplica con `can`/`canAct` y repositorios con alcance. Cada cambio de estado pasa por una acción del servidor y escribe un evento
 en la misma transacción.
 
-## Requisitos
+## Instalar una instancia
 
-| Requisito | Detalle |
-|---|---|
-| Node.js | LTS (probado con Node 24; ver `.nvmrc`) |
-| pnpm | 12, activado con `corepack enable` |
-| Git | — |
-| Docker | PostgreSQL local, migraciones e imágenes |
-| openssl | Generación de secretos en la instalación |
+En producción solo se necesitan Docker Engine, Compose v2 y un reverse proxy con TLS. No se
+necesitan Node.js, pnpm ni compilar código en el servidor.
 
-## Puesta en marcha local
+El workflow de release verifica el commit completo, publica una única imagen y adjunta el paquete
+`axia-self-hosted.tar.gz` con Compose, plantilla de entorno y scripts operativos. Su plantilla fija
+la imagen por digest; aplicación y migrador usan exactamente el mismo artefacto.
+
+La instalación, red del proxy y primer administrador están en
+[`deploy/README.md`](deploy/README.md). La actualización y recuperación están en
+[`docs/guides/operacion.md`](docs/guides/operacion.md).
+
+## Desarrollar
+
+Requisitos: Node.js 24, pnpm 12, Git, Docker/Compose y `openssl`.
 
 ```bash
-corepack enable
 pnpm install
-./scripts/install.sh --demo
+./scripts/install.sh
 pnpm dev
 ```
 
-El instalador genera `.env` con secretos aleatorios, levanta PostgreSQL, aplica las migraciones y
-arranca la API. Con `--demo` carga usuarios y tiquets ficticios. La API queda en
-`http://127.0.0.1:3100` y el SPA en `http://localhost:5173`; Vite reenvía `/api` al servidor.
+El instalador genera `.env.dev`, prepara PostgreSQL y aplica migraciones; no inicia HTTP.
+`pnpm dev` arranca la API y la web con recarga automática, y usa solo PostgreSQL en Docker.
+El proyecto de desarrollo (`axia-dev`) es independiente de producción. Si el puerto `5433` ya lo
+usa una instalación anterior, se elige otro puerto antes de preparar el entorno.
 
-Para desarrollo sin el contenedor `app`, la API se inicia en otra terminal con `pnpm dev:api`.
-Ese comando carga `.env` y usa el puerto `3100`; la web se inicia con `pnpm dev`.
+La demo es opcional: `./scripts/install.sh --demo` crea `demo.admin` y los demás usuarios ficticios.
+Sin demo, la primera cuenta se crea desde la pantalla de primer arranque. La contraseña demo se
+comunica al sembrar o se obtiene de `AXIA_DEMO_PASSWORD`; no hay un bypass de autenticación.
 
-La primera cuenta de administración se crea desde la pantalla de primer arranque (o con
-`POST /api/setup`). La contraseña debe tener al menos 12 caracteres.
+No se sobrescribe ni se convierte automáticamente una instalación anterior con `.env`. Los pasos
+y opciones están en [`docs/start/instalacion.md`](docs/start/instalacion.md).
 
-### Usuarios demo
-
-La semilla demo genera `demo.admin`, `demo.supervisor`, `demo.technician` y `demo.requester`. La
-contraseña se toma de `AXIA_DEMO_PASSWORD` en `.env` o se genera una sola vez al ejecutar la semilla.
-**No hay contraseña fija en el repositorio.** Si defines o cambias `AXIA_DEMO_PASSWORD`, vuelve a
-ejecutar `pnpm db:demo -- --demo`: se reaplica a los usuarios demo existentes. Reiniciar solo la
-API no cambia la contraseña, porque el hash vive en la base.
-
-## Comandos
-
-| Comando | Descripción |
-|---|---|
-| `pnpm dev` / `pnpm dev:api` | SPA y API en desarrollo |
-| `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
-| **`pnpm check`** | **Compuerta completa antes de integrar** |
-| `pnpm db:demo -- --demo` | Carga la semilla demo local |
-
-La lista completa está en [`docs/reference/comandos.md`](docs/reference/comandos.md).
-
-`pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`; en CI se
-configuran contra el servicio PostgreSQL. Durante el desarrollo usa `pnpm check:fast`; la
-compuerta completa se ejecuta antes de integrar. Playwright prepara su propia base con la semilla demo.
-
-Ejemplo local:
+## Probar
 
 ```bash
-MIGRATION_DATABASE_URL='postgres://axia_owner:owner-test@127.0.0.1:55433/axia_test' \
-AXIA_APP_PASSWORD='test-app-password' \
-DATABASE_URL='postgres://axia_app:test-app-password@127.0.0.1:55433/axia_test' \
+pnpm test:db:start
+pnpm check:fast
 pnpm check
+pnpm test:db:stop
 ```
+
+Las pruebas no descubren archivos `.env` privados. PostgreSQL de pruebas tiene otro proyecto,
+puerto `55433` y datos desechables; integración usa `axia_test` y navegador `axia_e2e` con API
+`3101` y web `5174`. Los destinos se validan antes de reiniciarlos.
+
+`pnpm check` es la compuerta completa. El smoke operativo de Docker, además de esa compuerta,
+comprueba instalación vacía, actualización del historial de migraciones, backup, restauración en
+otro proyecto, login y conservación de archivos. Se ejecuta en CI con la imagen construida.
+
+La lista de comandos está en [`docs/reference/comandos.md`](docs/reference/comandos.md).
 
 ## Estructura
 
@@ -126,12 +119,14 @@ axia/
 
 ## Despliegue
 
-La instalación está en
-[`docs/start/instalacion.md`](docs/start/instalacion.md) y la guía de despliegue en
-[`deploy/README.md`](deploy/README.md). El despliegue en un servidor real lo ejecuta la persona. En
-producción, `docker compose up -d` descarga las imágenes de GHCR, aplica migraciones y arranca la
-app; no se construye nada en el servidor. El stack no incluye NPM ni `cloudflared`: `app` queda solo
-en la red Docker `proxy` como `axia:3100` para que el proxy o túnel del usuario lo alcance.
+`compose.yaml` separa `db`, `migrate` y `app`; esta última publica la API y el SPA. Los datos y
+las evidencias tienen volúmenes diferentes. La app no publica puertos del host; el proxy del
+operador accede por una red externa elegida mediante `AXIA_PROXY_NETWORK`.
+
+Las versiones se eligen con `AXIA_IMAGE`. Antes de actualizar se conserva un conjunto de respaldo
+consistente; volver a un tag antiguo no revierte cambios de base. Las guías operativas describen
+la recuperación en un destino vacío. El agente prepara y verifica localmente estos recorridos;
+las operaciones del servidor real corresponden al operador.
 
 ## Contribución
 

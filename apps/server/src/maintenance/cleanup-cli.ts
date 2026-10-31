@@ -14,7 +14,9 @@ function days(name: string, fallback: number): number {
 }
 
 async function main() {
-  const envFile = new URL('../../../../.env', import.meta.url)
+  const envFile =
+    process.env.AXIA_ENV_FILE ??
+    new URL('../../../../.env.dev', import.meta.url)
   if (existsSync(envFile)) process.loadEnvFile(envFile)
 
   const config = loadConfig()

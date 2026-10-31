@@ -6,7 +6,7 @@ Comandos disponibles desde la raíz del repositorio.
 
 | Comando | Efecto |
 |---|---|
-| `pnpm dev` | SPA en `http://localhost:5173`; Vite reenvía `/api` |
+| `pnpm dev` | PostgreSQL aislado y API/web host con recarga (`3100`/`5173`) |
 | `pnpm dev:api` | API local en `http://127.0.0.1:3100`; guarda evidencias en `apps/server/data/evidence` |
 | `pnpm build` | Compila servidor y SPA |
 | `pnpm lint` | ESLint en todo el monorepo |
@@ -20,8 +20,10 @@ Comandos disponibles desde la raíz del repositorio.
 | Comando | Efecto |
 |---|---|
 | `pnpm db:start` | Levanta PostgreSQL local con Compose |
+| `pnpm test:db:start` | PostgreSQL desechable para integración y E2E (`55433`) |
+| `pnpm test:db:stop` | Retira solo el proyecto de pruebas, sin volúmenes persistentes |
 | `pnpm db:stop` | Detiene PostgreSQL local |
-| `pnpm db:reset` | Reconstruye la base con las migraciones |
+| `pnpm db:reset` | Requiere `-- --development`; reconstruye solo una base local `_dev` |
 | `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
 | `pnpm db:demo -- --demo` | Carga la semilla demo local |
 | `pnpm db:indexes` | Audita índices y claves foráneas |
@@ -43,22 +45,23 @@ Comandos disponibles desde la raíz del repositorio.
 | `pnpm check:agnostic` | Verifica que el núcleo no nombre plataformas externas |
 | `pnpm check:boundaries` | Verifica las reglas de dependencia |
 | `pnpm knip` | Detecta código y dependencias sin uso |
-| `pnpm test:scripts` | Prueba el instalador en dry-run y el arranque local del API |
+| `pnpm test:scripts` | Regresiones de instalación, entornos, Compose, releases, selección de pruebas y recuperación simulada |
 
-`pnpm check` necesita `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`. Playwright
-prepara su propia base con la semilla demo. Durante el desarrollo usa `pnpm check:fast`; la
+`pnpm check` requiere el PostgreSQL de `pnpm test:db:start`. Los valores de pruebas locales
+son ficticios y predeterminados; CI puede exportar los de `.env.test.example`. Ninguna prueba carga
+archivos privados. Playwright prepara su base `_e2e` y puertos `3101`/`5174`. Durante el desarrollo usa `pnpm check:fast`; la
 compuerta completa se reserva para el cierre y para CI.
 
 ## Instalación y operación
 
 | Comando | Efecto |
 |---|---|
-| `./scripts/install.sh` | Instala y levanta el stack local |
+| `./scripts/install.sh` | Genera `.env.dev`, prepara PostgreSQL y migraciones; luego usa `pnpm dev` |
 | `./scripts/install.sh --demo` | Instala y carga la semilla demo |
 | `./scripts/install.sh --dry-run` | Muestra los pasos sin escribir archivos |
 | `docker compose up -d` | Descarga imágenes, migra y arranca la app |
-| `docker compose pull && docker compose up -d` | Actualiza imágenes y migra |
-| `docker compose run --rm migrate` | Aplica migraciones manualmente |
+| Actualización | Respaldar, detener app, seleccionar digest, descargar, migrar y arrancar según la guía de operación |
+| `docker compose run --rm --no-deps migrate` | Aplica migraciones; detener app antes durante mantenimiento |
 | `deploy/scripts/cleanup.sh` | Limpia evidencias abandonadas y aplica retención |
 | `deploy/scripts/backup.sh` | Respalda la base |
 | `deploy/scripts/backup-evidence.sh` | Respalda el volumen de evidencias |
@@ -67,3 +70,8 @@ compuerta completa se reserva para el cierre y para CI.
 
 Ver [`../start/instalacion.md`](../start/instalacion.md) y
 [`../guides/operacion.md`](../guides/operacion.md).
+
+La validación operativa Docker real se ejecuta con `AXIA_IMAGE=<imagen-local> bash
+scripts/docker-smoke.sh`. Crea y elimina únicamente sus propios proyectos desechables; requiere
+una imagen construida del código actual. La prueba de permisos de evidencias puede ejecutarse con
+`AXIA_IMAGE=<imagen-local> bash deploy/scripts/evidence-volume.test.sh`.

@@ -1,5 +1,8 @@
 name: axia
 
+x-image: &axia-image
+  image: ${AXIA_IMAGE:?set AXIA_IMAGE to the release image tag or digest}
+
 x-logging: &default-logging
   driver: json-file
   options:
@@ -44,25 +47,25 @@ services:
       start_period: 5s
 
   migrate:
-    image: ghcr.io/marcosavg/axia/axia-migrate:latest
+    <<: *axia-image
+    command: ['node', 'dist/db/migrate.js']
     logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
     environment:
       MIGRATION_DATABASE_URL: postgres://${POSTGRES_OWNER_USER:-axia_owner}:${POSTGRES_OWNER_PASSWORD:?set POSTGRES_OWNER_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
-      AXIA_APP_USER: ${AXIA_APP_USER:-axia_app}
       AXIA_APP_PASSWORD: ${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}
     restart: 'no'
 
   app:
-    image: ghcr.io/marcosavg/axia/axia-app:latest
+    <<: *axia-image
     restart: unless-stopped
     networks:
       default:
       proxy:
         aliases:
-          - axia
+          - ${AXIA_PROXY_ALIAS:-axia}
     logging: *default-logging
     security_opt:
       - no-new-privileges:true
@@ -74,7 +77,7 @@ services:
       migrate:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: postgres://${AXIA_APP_USER:-axia_app}:${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
+      DATABASE_URL: postgres://axia_app:${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
       HOST: 0.0.0.0
       PORT: 3100
       NODE_ENV: production
@@ -92,6 +95,18 @@ services:
       SSE_HEARTBEAT_MS: ${SSE_HEARTBEAT_MS:-15000}
       SYNC_FUTURE_TOLERANCE_MS: ${SYNC_FUTURE_TOLERANCE_MS:-300000}
       SYNC_MAX_AGE_MS: ${SYNC_MAX_AGE_MS:-2592000000}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-axia_session}
+      SESSION_ABSOLUTE_TTL_HOURS: ${SESSION_ABSOLUTE_TTL_HOURS:-168}
+      SESSION_IDLE_TTL_HOURS: ${SESSION_IDLE_TTL_HOURS:-24}
+      SESSION_TOUCH_INTERVAL_SECONDS: ${SESSION_TOUCH_INTERVAL_SECONDS:-60}
+      LOGIN_MAX_ATTEMPTS: ${LOGIN_MAX_ATTEMPTS:-5}
+      LOGIN_MAX_IP_ATTEMPTS: ${LOGIN_MAX_IP_ATTEMPTS:-20}
+      LOGIN_WINDOW_MINUTES: ${LOGIN_WINDOW_MINUTES:-15}
+      PASSWORD_MIN_LENGTH: ${PASSWORD_MIN_LENGTH:-12}
+      EVIDENCE_CLEANUP_HOURS: ${EVIDENCE_CLEANUP_HOURS:-24}
+      RETENTION_SESSION_DAYS: ${RETENTION_SESSION_DAYS:-30}
+      RETENTION_LOGIN_ATTEMPT_DAYS: ${RETENTION_LOGIN_ATTEMPT_DAYS:-90}
+      RETENTION_NOTIFICATION_DAYS: ${RETENTION_NOTIFICATION_DAYS:-90}
     volumes:
       - axia_evidence:/data/evidence
     healthcheck:
@@ -108,7 +123,8 @@ services:
 
 networks:
   proxy:
-    name: proxy
+    name: ${AXIA_PROXY_NETWORK:-proxy}
+    external: true
 
 volumes:
   axia_db_data:

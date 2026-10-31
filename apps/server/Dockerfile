@@ -21,6 +21,12 @@ RUN pnpm --filter @axia/server build && pnpm --filter @axia/web build
 
 FROM node:24-bookworm-slim AS runtime
 
+ARG AXIA_VERSION=development
+ARG AXIA_REVISION=unknown
+LABEL org.opencontainers.image.title="Axia" \
+      org.opencontainers.image.version=$AXIA_VERSION \
+      org.opencontainers.image.revision=$AXIA_REVISION
+
 RUN npm install --global pnpm@12.8.1
 
 WORKDIR /app
@@ -36,10 +42,6 @@ RUN HUSKY=0 pnpm install --frozen-lockfile --prod --filter @axia/server... --ign
 COPY --from=build --chown=node:node /app/apps/server/dist ./apps/server/dist
 COPY --from=build --chown=node:node /app/apps/server/db ./apps/server/db
 COPY --from=build --chown=node:node /app/apps/web/dist ./web
-
-FROM runtime AS migrate
-WORKDIR /app/apps/server
-CMD ["node", "dist/db/migrate.js"]
 
 FROM runtime AS app
 WORKDIR /app/apps/server

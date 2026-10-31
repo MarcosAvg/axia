@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Arranca la API en desarrollo usando .env y el puerto local del proyecto.
+# Arranca la API en desarrollo usando .env.dev y el puerto local del proyecto.
 set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
-ENV_FILE="${AXIA_ENV_FILE:-$ROOT_DIR/.env}"
+ENV_FILE="${AXIA_ENV_FILE:-$ROOT_DIR/.env.dev}"
 if [[ -f "$ENV_FILE" ]]; then
   set -a
   # shellcheck disable=SC1090

@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { Client } from 'pg'
+import { assertDatabaseTarget } from '../../scripts/test-target.js'
 
 import { ensureAppRole, runMigrations } from '../../src/db/migrate.js'
 
@@ -11,14 +12,14 @@ const MIGRATIONS_DIR = fileURLToPath(
   new URL('../../db/migrations', import.meta.url),
 )
 
-const APP_USER = process.env.AXIA_APP_USER ?? 'axia_app'
+const APP_USER = 'axia_app'
 
 function requiredUrl(): URL {
   const raw = process.env.MIGRATION_DATABASE_URL
   if (!raw) {
     throw new Error('MIGRATION_DATABASE_URL is required for database tests')
   }
-  return new URL(raw)
+  return assertDatabaseTarget(raw, 'test')
 }
 
 function quoteIdentifier(value: string): string {

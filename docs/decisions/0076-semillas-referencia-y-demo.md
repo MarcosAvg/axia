@@ -1,6 +1,9 @@
 # 0076 — Semillas de referencia y demostración
 
 **Fecha:** 2026-10-21
+
+**Actualización:** el recorrido operativo y la cuenta `demo.admin` se precisan en
+[ADR 0099](0099-consolidacion-self-hosted.md). Los comandos `db:next:*` siguientes son históricos.
 **Estado:** aceptada
 
 ## Contexto
@@ -36,8 +39,8 @@ contraseña fija de demostración.
 
 - La referencia se aplica una vez como parte de las migraciones y queda versionada.
 - La demo se puede borrar/recrear sin tocar la referencia.
-- El primer administrador se crea con el flujo de primer arranque; los usuarios demo solo tienen
-  roles de supervisor, técnico y solicitante.
+- El primer administrador se crea con el flujo de primer arranque; la demo actual incluye `demo.admin` además de
+  supervisor, técnico y solicitante.
 - Las contraseñas demo nunca viven en el repositorio.
 
 ## Alternativas descartadas

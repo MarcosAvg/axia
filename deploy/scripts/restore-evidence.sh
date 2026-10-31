@@ -1,33 +1,17 @@
 #!/usr/bin/env bash
-# Restaura un respaldo de evidencias. Detén `app` antes de ejecutar y vuelve a levantarlo después.
-# Uso:
-#   ./deploy/scripts/restore-evidence.sh backups/axia-evidence-<fecha>.tgz
+# Restauración individual; app debe estar detenida y el volumen vacío.
 set -euo pipefail
-
+source "$(dirname "${BASH_SOURCE[0]}")/compose-operations.sh"
 BACKUP_FILE="${1:?Uso: restore-evidence.sh <archivo.tgz>}"
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VOLUME="${EVIDENCE_VOLUME:-axia_axia_evidence}"
-IMAGE="${AXIA_APP_IMAGE:-}"
-if [[ -z "$IMAGE" ]]; then
-  app_container="$(cd "$ROOT_DIR" && docker compose ps -aq app 2>/dev/null | head -n1 || true)"
-  if [[ -n "$app_container" ]]; then
-    IMAGE="$(docker inspect --format '{{.Config.Image}}' "$app_container")"
-  fi
+[[ -f "$BACKUP_FILE" ]] || fail "No existe el archivo: $BACKUP_FILE"
+if [[ -n "${EVIDENCE_VOLUME:-}" ]]; then
+  IMAGE="${AXIA_IMAGE:-${AXIA_APP_IMAGE:?Define AXIA_IMAGE para usar EVIDENCE_VOLUME}}"
+  existing="$(docker run --rm -v "$EVIDENCE_VOLUME:/data/evidence" "$IMAGE" find /data/evidence -mindepth 1 -maxdepth 1 -print -quit)"
+  [[ -z "$existing" ]] || fail 'El volumen de evidencias destino no está vacío.'
+  docker run --rm -i -v "$EVIDENCE_VOLUME:/data/evidence" "$IMAGE" tar --no-same-owner -C /data/evidence -xzf - < "$BACKUP_FILE"
+else
+  existing="$(compose run --rm --no-deps -T app find /data/evidence -mindepth 1 -maxdepth 1 -print -quit)"
+  [[ -z "$existing" ]] || fail 'El volumen de evidencias destino no está vacío.'
+  compose run --rm --no-deps -T app tar --no-same-owner -C /data/evidence -xzf - < "$BACKUP_FILE"
 fi
-IMAGE="${IMAGE:-ghcr.io/marcosavg/axia/axia-app:latest}"
-
-if [[ ! -f "$BACKUP_FILE" ]]; then
-  echo "No existe el archivo: $BACKUP_FILE" >&2
-  exit 1
-fi
-if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
-  echo "No existe la imagen $IMAGE; ejecuta docker compose pull o define AXIA_APP_IMAGE." >&2
-  exit 1
-fi
-
-docker run --rm --user 0 \
-  -v "$VOLUME:/data" \
-  -v "$(cd "$(dirname "$BACKUP_FILE")" && pwd):/backup:ro" \
-  "$IMAGE" tar -C /data -xzf "/backup/$(basename "$BACKUP_FILE")"
-
-echo "Evidencias restauradas en el volumen $VOLUME."
+echo 'Evidencias restauradas.'

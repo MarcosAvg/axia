@@ -65,11 +65,16 @@ const pluginsAfterCompiler = [
 // Ver: https://react.dev/learn/react-compiler/installation y ADR 0083.
 // En desarrollo Babel transforma cada módulo del SPA y el arranque en frío
 // pasa de ~2 s a ~6.5 s; el resultado compilado se sigue validando en `build`.
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   const isReactCompilerEnabled =
     command === 'build' || process.env.AXIA_REACT_COMPILER === '1'
 
   return {
+    // Never discover private env files during automated tests.
+    envDir:
+      mode === 'test' || process.env.AXIA_ENV_FILE === '/dev/null'
+        ? false
+        : undefined,
     plugins: [
       ...pluginsBeforeCompiler,
       ...(isReactCompilerEnabled

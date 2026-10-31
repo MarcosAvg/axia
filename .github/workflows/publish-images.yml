@@ -1,44 +1,100 @@
-name: Publicar imágenes
+name: Publicar release
 
-# Construye y publica las imágenes de Axia en GHCR (manual o al etiquetar `v*`).
-# El push usa el token del repositorio (`packages: write`) y se dispara de forma manual.
 on:
   workflow_dispatch:
   push:
     tags: ['v*']
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: verify
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: app
-            target: app
-          - name: migrate
-            target: migrate
     steps:
       - uses: actions/checkout@v4
-      - id: img
-        # GHCR exige el nombre de la imagen en minúsculas.
-        run: echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - id: identity
+        env:
+          RELEASE_REF: ${{ github.ref_name }}
+          RELEASE_TYPE: ${{ github.ref_type }}
+        run: |
+          repo="${GITHUB_REPOSITORY,,}"
+          image="ghcr.io/$repo/axia-app"
+          version="$GITHUB_SHA"
+          if [[ "$RELEASE_TYPE" == tag ]]; then
+            [[ "$RELEASE_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9.-]+)?$ ]]
+            version="$RELEASE_REF"
+          fi
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tags=$image:$GITHUB_SHA,$image:$version" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - id: build
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: apps/server/Dockerfile
-          target: ${{ matrix.target }}
-          push: true
-          tags: |
-            ghcr.io/${{ steps.img.outputs.repo }}/axia-${{ matrix.name }}:latest
-            ghcr.io/${{ steps.img.outputs.repo }}/axia-${{ matrix.name }}:${{ github.sha }}
+          target: app
+          push: false
+          load: true
+          cache-from: type=gha
+          tags: ${{ steps.identity.outputs.tags }}
+          build-args: |
+            AXIA_VERSION=${{ steps.identity.outputs.version }}
+            AXIA_REVISION=${{ github.sha }}
+      - name: Verificar la imagen exacta antes de publicarla
+        env:
+          AXIA_IMAGE: ${{ steps.identity.outputs.image }}:${{ github.sha }}
+        run: bash scripts/docker-smoke.sh
+      - id: publish
+        name: Publicar el artefacto probado
+        env:
+          RELEASE_IMAGE: ${{ steps.identity.outputs.image }}
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+        run: |
+          docker push "$RELEASE_IMAGE:$GITHUB_SHA"
+          if [[ "$RELEASE_VERSION" != "$GITHUB_SHA" ]]; then
+            docker push "$RELEASE_IMAGE:$RELEASE_VERSION"
+          fi
+          reference="$(docker image inspect --format '{{index .RepoDigests 0}}' "$RELEASE_IMAGE:$GITHUB_SHA")"
+          [[ "$reference" == "$RELEASE_IMAGE@sha256:"* ]]
+          echo "image=$reference" >> "$GITHUB_OUTPUT"
+      - name: Empaquetar instalación sin herramientas de desarrollo
+        env:
+          RELEASE_IMAGE: ${{ steps.publish.outputs.image }}
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+        run: |
+          node scripts/package-release.mjs .release/bundle "$RELEASE_IMAGE" "$GITHUB_SHA" "$RELEASE_VERSION"
+          tar -C .release/bundle -czf .release/axia-self-hosted.tar.gz .
+          cd .release
+          sha256sum axia-self-hosted.tar.gz > axia-self-hosted.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: axia-self-hosted
+          path: |
+            .release/axia-self-hosted.tar.gz
+            .release/axia-self-hosted.tar.gz.sha256
+      - name: Adjuntar paquete a la release etiquetada
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+        run: |
+          gh release create "$RELEASE_VERSION" .release/axia-self-hosted.tar.gz .release/axia-self-hosted.tar.gz.sha256 --verify-tag --generate-notes

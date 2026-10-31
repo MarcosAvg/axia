@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,28 +19,27 @@ jobs:
         image: postgres:17.11-alpine
         env:
           POSTGRES_DB: axia_test
-          POSTGRES_USER: axia_owner
-          POSTGRES_PASSWORD: owner-test
+          POSTGRES_USER: axia_test_owner
+          POSTGRES_PASSWORD: test-owner-password
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U axia_owner -d axia_test"
+          --health-cmd "pg_isready -U axia_test_owner -d axia_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
     env:
-      MIGRATION_DATABASE_URL: postgres://axia_owner:owner-test@127.0.0.1:5432/axia_test
+      AXIA_ENV_FILE: /dev/null
+      MIGRATION_DATABASE_URL: postgres://axia_test_owner:test-owner-password@127.0.0.1:5432/axia_test
       AXIA_APP_PASSWORD: test-app-password
       DATABASE_URL: postgres://axia_app:test-app-password@127.0.0.1:5432/axia_test
       AXIA_DEMO_PASSWORD: E2ePassword123!
-      PORT: 3100
-      AXIA_API_URL: http://127.0.0.1:3100
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @axia/web exec playwright install chromium --with-deps
@@ -51,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      AXIA_ENV_FILE: /dev/null
+      AXIA_IMAGE: axia-app:ci
       POSTGRES_OWNER_PASSWORD: compose-test
       AXIA_APP_PASSWORD: compose-test
     steps:
@@ -58,7 +60,8 @@ jobs:
       - name: Validar Compose
         run: |
           docker compose -f compose.yaml config -q
-          docker compose -f compose.yaml -f compose.dev.yaml config -q
+          docker compose --env-file /dev/null -f compose.dev.yaml config -q
+          docker compose --env-file /dev/null -f compose.test.yaml config -q
       - uses: docker/setup-buildx-action@v3
       - name: Construir imagen
         uses: docker/build-push-action@v6
@@ -67,5 +70,12 @@ jobs:
           file: apps/server/Dockerfile
           target: app
           push: false
+          load: true
+          tags: axia-app:ci
+          build-args: |
+            AXIA_VERSION=${{ github.sha }}
+            AXIA_REVISION=${{ github.sha }}
           cache-from: type=gha
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
+      - name: Instalación, actualización y recuperación reales
+        run: bash scripts/docker-smoke.sh

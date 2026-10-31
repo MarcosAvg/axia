@@ -7,6 +7,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Añadido
 
+- Entornos independientes de desarrollo, integración y navegador; conexiones y reinicios protegidos,
+  pruebas sin descubrimiento de dotenv privado y arranque de desarrollo con ambos watchers.
+- Una imagen verificada para app/migrador y paquete operativo de release fijado por digest, sin
+  herramientas de desarrollo en el servidor; configuración explícita de sesiones/login/retención.
+- Conjuntos coordinados de backup con manifiesto y hashes, recuperación transaccional sobre destino
+  vacío y prueba real de instalación, actualización de historial y recuperación de datos/archivos.
+- Huellas SHA-256 para migraciones, adopción compatible del historial anterior y rechazo de SQL
+  aplicado cambiado o ausente; correcciones del selector de pruebas y recorridos demo/setup.
+
 - Stack propio con PostgreSQL 17, Drizzle, Fastify 5 y TypeScript.
 - Autenticación local con usuario y contraseña, sesiones opacas, bloqueo por intentos y primer
   arranque.

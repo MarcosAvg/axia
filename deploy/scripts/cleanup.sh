@@ -4,8 +4,6 @@
 #   ./deploy/scripts/cleanup.sh
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT_DIR"
-
-docker compose run --rm app node dist/evidence/cleanup-cli.js
-docker compose run --rm app node dist/maintenance/cleanup-cli.js
+source "$(dirname "${BASH_SOURCE[0]}")/compose-operations.sh"
+compose run --rm --no-deps app node dist/evidence/cleanup-cli.js
+compose run --rm --no-deps app node dist/maintenance/cleanup-cli.js
