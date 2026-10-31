@@ -18,6 +18,12 @@ Una instalación de producción usa imágenes y paquetes de release. La actualiz
 respaldo previo y parada explícita de la app según la
 [guía de operación](../guides/operacion.md); no se actualiza mediante `git pull` ni un tag `latest`.
 
+La migración `0017_remove_retired_objects.sql` retira objetos de importación y métricas sin uso.
+Si una tabla histórica contiene filas, la actualización se detiene y conserva el estado anterior.
+Realizar el respaldo coordinado y exportar/revisar esas filas con el operador antes de autorizar
+su vaciado y reintentar; no eliminar datos solo para forzar el arranque. Una dependencia SQL
+inesperada o un bloqueo ocupado también aborta la migración sin aplicarla.
+
 ## Retomar una tarea
 
 1. Revisar `git status` y `git branch`.
@@ -38,6 +44,9 @@ respaldo previo y parada explícita de la app según la
 
 La base y los archivos `.env`/`.env.dev` no viajan por Git. Conservar los archivos privados fuera del repositorio y con
 permisos `0600`.
+
+La prosa exclusivamente histórica se consulta desde el [índice de Git](../history/README.md),
+sin restaurarla al checkout como documentación vigente.
 
 ## Problemas frecuentes
 

@@ -240,4 +240,4 @@ al usarse. La seguridad se impone en el servidor, no en la interfaz.
 
 - [`negocio.md`](../concepts/negocio.md): fuente de verdad del negocio.
 - [`dominio.md`](../concepts/dominio.md): resumen del núcleo y glosario.
-- [`datos.md`](../concepts/datos.md): entidades, matriz de transiciones, RLS e indicadores.
+- [`datos.md`](../concepts/datos.md): entidades, relaciones, integridad y alcance de datos.

@@ -1,7 +1,14 @@
 # 0053 — Integridad de participantes (una activa por técnico y tiquet)
 
 - Fecha: 2026-10-10
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste la integridad de participantes. Las pruebas pgTAP citadas
+> pertenecen al stack retirado; servicios y pruebas de integración PostgreSQL actuales conservan
+> las garantías de participación.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0077](0077-pruebas-postgresql-real.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

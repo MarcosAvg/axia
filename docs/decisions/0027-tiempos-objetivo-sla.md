@@ -1,7 +1,13 @@
 # 0027 — Tiempos objetivo (SLA) configurables
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten los objetivos configurables y el SLA. La mención de escalamiento
+> describe el diseño de condiciones, no un planificador operativo: ese envío sigue pendiente.
+> Sustitución vigente: [ADR 0090](0090-tablero-metricas-operativo.md), [guía](../guides/notificaciones.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

@@ -1,10 +1,14 @@
 # 0067 — Base de datos autoalojada y migraciones
 
 **Fecha:** 2026-10-20
-**Estado:** aceptada
+**Estado:** parcial
 
 > El punto 3 fue sustituido por [ADR 0100](0100-consolidacion-interna.md): las migraciones SQL son
 > la única definición ejecutable; se retiró la introspección TypeScript sin consumidores.
+> El corte de [ADR 0078](0078-corte-final-frontend.md) cerró el trabajo en paralelo: la mención
+> de `check:next` de las consecuencias es histórica; la compuerta vigente es `pnpm check`.
+> La autorización actual es exclusivamente del servidor ([ADR 0071](0071-autorizacion-y-alcance.md));
+> añadir RLS no es un pendiente adoptado. El texto original se conserva como registro fechado.
 
 ## Contexto
 

@@ -8,50 +8,34 @@
 
 ## En curso
 
-Sin implementación abierta. Consolidación interna verificada; siguientes trabajos en los pendientes
+Sin implementación abierta. Limpieza histórica verificada; siguientes trabajos en los pendientes
 operativos y de producto. No hay preguntas técnicas bloqueantes.
 
 ## Hecho
 
-- **Consolidación interna (2026-10-31):** DTO HTTP actuales validados, comandos discriminados y
-  wrappers retirados; métricas intersectan alcance/filtros antes de agregar, conservando permiso
-  de cada ruta. Cola offline bloquea dependientes del tiquet entre procesamientos, incluida
-  evidencia antigua, y comprueba sesión después de leer/escribir IndexedDB. Retirada copia de
-  esquema Drizzle sin consumidores; SQL versionado sigue siendo la definición completa. Inventario
-  Git excluye privados, ignorados (también forzados al índice), salidas y symlinks; planificador de
-  pruebas puro. ADR [0100](../decisions/0100-consolidacion-interna.md) documenta decisiones y las
-  pruebas históricas sustituidas por fronteras/contratos actuales, sin debilitar cobertura.
-  Revisión independiente cerrada; corregido su hallazgo de ignorados y las ventanas de sesión con
-  regresiones RED→GREEN. `AXIA_ENV_FILE=/dev/null pnpm check:fast` pasó (57 servidor + 298 web).
-  `pnpm test:affected` seleccionó `pnpm check`; ejecución final código 0: 46 Node y scripts Bash,
-  57 servidor, 298 web, 52 navegador y 231 PostgreSQL, lint/tipos/estáticos/build verdes.
-  Docs 135/0 enlaces rotos; independencia 842/0 coincidencias. Compuerta repetida después del
-  último ajuste de sesión. Persiste aviso web de chunks >500 kB; sin nuevas dependencias,
-  migraciones ni ejecución de despliegues. Las acciones disponibles calculadas por servidor y
-  zona horaria de métricas siguen fuera de esta tarea.
-
-- **Consolidación (2026-10-31):** desarrollo `axia-dev` con `.env.dev` y watchers host; pruebas tmpfs
-  en `55433`, bases `_test`/`_e2e`, puertos navegador `3101`/`5174` y reinicios protegidos. Demo/setup
-  coherentes. Imagen única app/migrador y opciones de sesiones/login/retención efectivas; release
-  por digest después de la compuerta y smoke del artefacto exacto. Backup/restore coordinados,
-  destino vacío, usuario propietario de evidencias y hashes del historial (migración 0016).
-  Revisión independiente: tres hallazgos corregidos con regresiones RED→GREEN; sin menores abiertos.
-  `check:fast` pasó; `test:affected` seleccionó `pnpm check` completo y terminó con código 0:
-  30 regresiones Node y scripts Bash, 57 unitarias/HTTP servidor, 269 web, 52 E2E y 197 PostgreSQL;
-  lint, tipos, estáticos y build en verde. Docs: 133 archivos/0 enlaces rotos; independencia:
-  909 archivos/0 coincidencias. Smoke Docker real pasó instalación, actualización de historial,
-  respaldo, recuperación en volúmenes nuevos, login/archivo y rechazo de destino ocupado. El build
-  mantiene un aviso de chunks web >500 kB, sin fallo ni cambio de límites. GHCR y despliegue real
-  no ejecutados; el smoke no certifica saltos arbitrarios entre futuras versiones.
-- **Auditoría de estructura (2026-10-31):** Compose separa correctamente `db`, `migrate` y `app`;
-  conviene conservar el stack. Se documentaron riesgos del reset E2E sin base exclusiva, publicación
-  independiente de dos `latest`, respaldo de base/archivos sin punto común y configuración omitida
-  por Compose. También contradicciones de demo/setup y huecos del selector de pruebas.
-  Pasaron `test:scripts` con entorno vacío, validación de ambos Compose con valores ficticios,
-  `check:docs` (131 archivos, 0 enlaces rotos), `check:agnostic` (850 archivos, 0 coincidencias),
-  `test:affected` documental y `git diff --check`. El selector requirió ejecución fuera del sandbox
-  tras `spawnSync git EPERM`. No se ejecutaron E2E, integración ni la compuerta completa; no se
-  tocaron bases ni secretos. Sin ADR nuevo: son propuestas, no decisiones adoptadas.
+- **Retirada histórica (2026-10-31):** veinte documentos antiguos fuera del checkout y ADR con
+  implementación sustituida clasificados como parciales; recuperación desde Git en el índice
+  histórico. Nueva migración 0017 retira ocho tablas y once funciones sin consumidores; bloquea
+  escrituras concurrentes y aborta ante datos/dependencias inesperadas, sin pérdida ni DDL parcial.
+  Conserva referencias externas, garantías del núcleo y compatibilidad de datos. ADR
+  [0101](../decisions/0101-retirada-historica.md) documenta retirada y cambio de recuentos de pruebas.
+  Revisión independiente cerrada sin hallazgos; regresiones RED→GREEN incluidas para cada tabla y
+  escritura concurrente. `AXIA_ENV_FILE=/dev/null pnpm check:fast` y `pnpm db:test` verdes (243 DB).
+  `pnpm test:affected` seleccionó `pnpm check`: ejecución final código 0, 46 Node y scripts Bash,
+  57 servidor, 298 web, 52 navegador y 243 PostgreSQL; lint/tipos/estáticos/build en verde.
+  Primera compuerta: fallaron `claims.spec.ts` (registro con foto, carga de módulo) y
+  `metrics.spec.ts` (filtro edificio, formulario de acceso no visible) mientras se ejecutaba Docker.
+  Ambos pasaron por separado (2/2) y toda la compuerta se repitió sin operaciones Docker
+  concurrentes; no se cambiaron pruebas ni límites. No se confirmó una causa única de esos fallos.
+  Imagen local verificada por smoke real: instalación, adopción de historial, respaldo,
+  recuperación en volúmenes nuevos, login/evidencia y rechazo de destino ocupado. SHA-256 del SQL
+  de la imagen coincide con el checkout. Persiste aviso previo de chunks >500 kB. Sin dependencias
+  nuevas, SQL integrado editado, push ni despliegue real. El plan concluido también se conserva
+  exclusivamente en Git.
+- **Consolidación vigente:** desarrollo independiente con watchers host; pruebas locales tmpfs y
+  bases `_test`/`_e2e`; imagen única app/migrador, releases por digest y respaldo/recuperación
+  coordinados (ADR 0099). Contratos HTTP validados, comandos tipados, alcance único de métricas,
+  dependencias offline por tiquet, SQL como definición completa e inventario Git seguro (ADR 0100).
 - **Stack propio:** PostgreSQL 17 + Drizzle + Fastify 5 + TypeScript. Un solo servidor sirve la API
   y el SPA; Compose define `db`, `migrate` y `app`.
 - **Núcleo:** autenticación local, autorización por permisos y ámbitos, ciclo completo del tiquet,
@@ -74,7 +58,9 @@ operativos y de producto. No hay preguntas técnicas bloqueantes.
 ## Decisiones vigentes
 
 El índice completo está en [`../decisions/README.md`](../decisions/README.md). Las más recientes:
-ADR 0085 a 0092 (ciclo del tiquet, evidencia por tipo, retención, métricas y móvil por rol).
+ADR [0099](../decisions/0099-consolidacion-self-hosted.md),
+[0100](../decisions/0100-consolidacion-interna.md) y [0101](../decisions/0101-retirada-historica.md):
+entornos/operación, contratos/alcance/cola y retirada histórica segura.
 
 ## Verificación
 

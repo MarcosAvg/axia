@@ -1,7 +1,13 @@
 # 0026 — Indicadores de duplicados y satisfacción
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten los duplicados y la satisfacción. RLS y ticket_rate describen la
+> implementación retirada; las acciones y la lectura se autorizan en el servidor.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0078](0078-corte-final-frontend.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

@@ -1,7 +1,13 @@
 # 0069 — Servidor Fastify, compilación y estáticos
 
 **Fecha:** 2026-10-21
-**Estado:** aceptada
+**Estado:** parcial
+
+> **Vigencia parcial.** Persisten Fastify, la API y el servicio del SPA. El corte quedó cerrado
+> en [ADR 0078](0078-corte-final-frontend.md). La imagen única y el desarrollo autónomo de
+> [ADR 0099](0099-consolidacion-self-hosted.md) sustituyen los destinos separados y el overlay
+> descritos abajo; el mismo artefacto compila y ejecuta tanto la app como el migrador.
+> Las menciones de frontend pendiente y transición entre stacks son históricas.
 
 ## Contexto
 

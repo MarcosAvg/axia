@@ -1,7 +1,14 @@
 # 0043 — Semilla con nombres legibles
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste la semilla con nombres legibles. Las pruebas pgTAP citadas
+> pertenecen al stack retirado; las semillas y sus pruebas actuales usan PostgreSQL real desde el
+> servidor.
+> Sustitución vigente: [ADR 0076](0076-semillas-referencia-y-demo.md), [ADR 0077](0077-pruebas-postgresql-real.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

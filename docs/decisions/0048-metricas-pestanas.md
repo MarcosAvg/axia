@@ -1,7 +1,13 @@
 # 0048 — Rediseño del tablero de métricas por pestañas
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste la organización del tablero por pestañas. Las referencias a
+> RPC/RLS son históricas; las métricas vigentes llegan por API con permisos y alcance.
+> Sustitución vigente: [ADR 0090](0090-tablero-metricas-operativo.md), [ADR 0100](0100-consolidacion-interna.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

@@ -1,7 +1,13 @@
 # 0024 — Tablero de métricas: Recharts, agregación y exportación
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el tablero de métricas. La autorización por RLS de las vistas
+> descrita abajo fue sustituida por permisos y filtros de alcance en la API.
+> Sustitución vigente: [ADR 0090](0090-tablero-metricas-operativo.md), [ADR 0100](0100-consolidacion-interna.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

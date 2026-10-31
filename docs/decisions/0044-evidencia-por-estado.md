@@ -1,7 +1,14 @@
 # 0044 — Evidencia por estado y acciones guiadas
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el requisito de evidencia según el estado y el tipo. Las RPC,
+> migraciones fechadas y pgTAP citadas corresponden al stack retirado; la autorización actual es
+> por tipo en el servidor.
+> Sustitución vigente: [ADR 0072](0072-evidencias-tus-sharp.md), [ADR 0086](0086-evidencia-por-tipo.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

@@ -2,7 +2,14 @@
 
 - Fecha: 2026-10-08
 - Actualizado: 2026-10-29
-- Estado: aceptada (ajusta la 0032; convive con 0075)
+- Estado: parcial (ajusta la 0032; convive con 0075)
+
+> **Vigencia parcial.** Persiste la elección externa del proxy y la app privada en la red proxy.
+> La publicación mediante latest, las imágenes separadas y el desarrollo como overlay fueron
+> sustituidos por una release fija compartida por app/migrador y Compose de desarrollo autónomo.
+> Sustitución vigente: [ADR 0099](0099-consolidacion-self-hosted.md), [guía](../guides/operacion.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

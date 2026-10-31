@@ -1,4 +1,4 @@
-// Especificaciones de importación de catálogos (claves coinciden con `catalog_import_specs`).
+// Especificaciones del XLSX de catálogos; la importación usa el CRUD actual.
 
 import { adminMessages } from '../i18n'
 

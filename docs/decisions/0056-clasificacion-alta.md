@@ -1,7 +1,14 @@
 # 0056 — Clasificación del alta: servicio en la atención, prioridad del problema y canal de plataforma
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el criterio de clasificación durante el alta. La firma RPC y
+> pgTAP citados pertenecen al stack retirado; la validación actual se realiza en el servidor y la
+> relación equipo/problema se ajustó después.
+> Sustitución vigente: [ADR 0078](0078-corte-final-frontend.md), [ADR 0098](0098-equipo-por-problema.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

@@ -45,9 +45,7 @@ cuando no avanza, evidencias y tiempos medibles. Esta página reúne la document
 
 | Documento | Contenido |
 |---|---|
-| [Decisiones](decisions/README.md) | ADR vigentes y archivo |
+| [Decisiones](decisions/README.md) | ADR vigentes, parciales e índice histórico |
 | [Estado](internal/estado.md) | Memoria de trabajo del proyecto |
-| [Diseño de UI](history/diseno-ui.md) | Referencia histórica de interfaz |
-| [Auditoría UI/UX](history/auditoria-ui-ux.md) | Auditoría histórica |
-| [Modelo de datos inicial](history/modelo-datos-fase-1.md) | Diseño histórico |
+| [Historia en Git](history/README.md) | Índice de documentos retirados y consulta sin restaurarlos |
 | [Integraciones](history/integraciones-y-migracion.md) | Referencia histórica de importación |

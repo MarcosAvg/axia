@@ -1,7 +1,13 @@
 # 0042 — Rediseño de la operación (lista, alta, detalle y bandejas)
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el criterio de operación por lista, alta y detalle. Las menciones
+> a RPC/RLS documentan el stack de esa fecha, sustituido por API HTTP y autorización del servidor.
+> Sustitución vigente: [ADR 0078](0078-corte-final-frontend.md), [ADR 0071](0071-autorizacion-y-alcance.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

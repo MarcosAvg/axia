@@ -13,6 +13,8 @@ export AXIA_APP_PASSWORD=smoke-app-password
 export POSTGRES_OWNER_USER=axia_owner POSTGRES_DB=axia
 export COMPOSE_FILE="$ROOT_DIR/compose.yaml:$SCRATCH/compose.smoke.yaml"
 cd "$ROOT_DIR"
+MIGRATION_FILES=("$ROOT_DIR"/apps/server/db/migrations/*.sql)
+EXPECTED_MIGRATIONS="${#MIGRATION_FILES[@]}"
 cat > "$SCRATCH/compose.smoke.yaml" <<'YAML'
 networks:
   proxy:
@@ -45,8 +47,9 @@ compose exec -T app node -e '
   fs.mkdirSync("/data/evidence/files", {recursive:true});
   fs.writeFileSync("/data/evidence/files/smoke-probe.txt", "evidence-witness");
 '
-# This change only adds runner metadata: recreate the actual pre-checksum
-# history and upgrade it with the new runner, preserving real first-run data.
+# Simulate migration history from before checksums and adopt it with the
+# current runner, preserving first-run data. The 0016-to-0017 DDL upgrade
+# is covered by the database integration tests.
 compose stop app
 compose exec -T db psql -U axia_owner -d axia -v ON_ERROR_STOP=1 -c "delete from axia_migrations.schema_migrations where name='0016_migration_history.sql'; alter table axia_migrations.schema_migrations drop column checksum;" >/dev/null
 compose run --rm --no-deps -T migrate
@@ -70,7 +73,11 @@ compose exec -T app node -e '
 BEFORE="$(compose exec -T db psql -U axia_owner -d axia -At -c 'select count(*) from axia_migrations.schema_migrations;')"
 compose run --rm --no-deps -T migrate
 AFTER="$(compose exec -T db psql -U axia_owner -d axia -At -c 'select count(*) from axia_migrations.schema_migrations;')"
-[[ "$BEFORE" == "$AFTER" && "$AFTER" == 17 ]]
+[[ "$BEFORE" == "$AFTER" ]]
+if [[ "$AFTER" != "$EXPECTED_MIGRATIONS" ]]; then
+  echo "Image migration count ($AFTER) does not match checkout ($EXPECTED_MIGRATIONS); rebuild the image." >&2
+  exit 1
+fi
 # Restoring over a populated instance must fail before replacing its data.
 if bash deploy/scripts/restore-all.sh "$BACKUP_SET" > "$SCRATCH/rejected-restore.log" 2>&1; then
   echo 'Restore unexpectedly accepted a populated destination' >&2

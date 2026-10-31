@@ -16,7 +16,7 @@ no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
 | Tiempo | `time_spans`, `work_calendars`, `work_calendar_intervals`, `work_calendar_holidays` |
 | Evidencia | `evidence` y el volumen privado de archivos |
 | Notificaciones | `notification_rules`, `notifications`, `notification_deliveries`, `push_subscriptions` |
-| Importación | `ticket_external_refs`, `catalog_import_*`, `import_*`; adaptadores deshabilitados |
+| Referencias externas | `external_systems`, `ticket_external_refs`; sin adaptadores publicados |
 | Configuración | `instance_settings`, `reasons`, `escalation_rules` |
 
 ## Relaciones clave
@@ -42,5 +42,11 @@ no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
 - Las claves foráneas protegen la integridad; los índices se añaden después de medir.
 - Las vistas de métricas no aplican autorización por sí mismas: la API aplica el alcance.
 
-El diseño histórico de la primera fase está en
-[`../history/modelo-datos-fase-1.md`](../history/modelo-datos-fase-1.md).
+Las tablas históricas de importación y tareas de integración sin consumidores se retiran mediante
+la migración `0017_remove_retired_objects.sql`, que rechaza tablas con filas antes de eliminar
+objetos. Se conservan las referencias externas genéricas y sus claves. `push_subscriptions` y
+`escalation_rules` siguen reservadas para funciones futuras; su presencia no implica Web Push ni
+planificador activos.
+
+El [índice histórico](../history/README.md) explica cómo consultar el diseño de la primera fase
+en Git sin confundirlo con el esquema actual.

@@ -1,8 +1,8 @@
 import Dexie, { type EntityTable } from 'dexie'
 
 // Cola de salida: toda acción que pueda ocurrir sin conexión se guarda aquí
-// primero, con un UUID generado en el cliente (`crypto.randomUUID()`). La función
-// en Postgres usa ese UUID como clave de idempotencia (`client_request_id`).
+// primero, con un UUID generado en el cliente (`crypto.randomUUID()`). El servidor
+// usa ese UUID como clave de idempotencia (`client_request_id`).
 // Ver docs/decisions/0004-cola-offline-con-dexie.md.
 export interface OutboxItem {
   id: string

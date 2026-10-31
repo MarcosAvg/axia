@@ -1,7 +1,14 @@
 # 0057 — Rediseño de Administración (desktop-first)
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el criterio de administración agrupada por tareas. Las
+> referencias a RPC describen el stack de esa fecha; las escrituras actuales se autorizan en el
+> servidor.
+> Sustitución vigente: [ADR 0078](0078-corte-final-frontend.md), [ADR 0066](0066-administracion-red-seguridad.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

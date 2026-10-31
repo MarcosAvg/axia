@@ -1,7 +1,14 @@
 # 0041 — Panel de inicio como centro de bandejas
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el panel personal por rol. La autorización por RLS descrita abajo
+> fue sustituida por alcance en el servidor; la experiencia móvil se ajustó posteriormente por
+> rol.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0091](0091-movil-por-rol.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

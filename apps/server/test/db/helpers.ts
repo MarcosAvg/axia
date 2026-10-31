@@ -40,12 +40,12 @@ function databaseConnectionString(database: string): string {
   return url.toString()
 }
 
-function migrationFingerprint(): string {
-  const content = readdirSync(MIGRATIONS_DIR)
+function migrationFingerprint(migrationsDir: string): string {
+  const content = readdirSync(migrationsDir)
     .filter((file) => file.endsWith('.sql'))
     .sort()
     .map(
-      (file) => `${file}\n${readFileSync(join(MIGRATIONS_DIR, file), 'utf8')}`,
+      (file) => `${file}\n${readFileSync(join(migrationsDir, file), 'utf8')}`,
     )
     .join('\n')
   return createHash('sha256').update(content).digest('hex').slice(0, 12)
@@ -54,8 +54,9 @@ function migrationFingerprint(): string {
 async function ensureTemplate(
   admin: Client,
   database: string,
+  migrationsDir: string,
 ): Promise<string> {
-  const template = `${database}_template_${migrationFingerprint()}`
+  const template = `${database}_template_${migrationFingerprint(migrationsDir)}`
   const exists = await admin.query(
     'select 1 from pg_database where datname = $1',
     [template],
@@ -69,7 +70,7 @@ async function ensureTemplate(
   await owner.connect()
   try {
     await ensureAppRole(owner)
-    await runMigrations(owner)
+    await runMigrations(owner, migrationsDir)
   } finally {
     await owner.end()
   }
@@ -87,7 +88,7 @@ export function appConnectionString(): string {
   return url.toString()
 }
 
-export async function prepareTestDatabase() {
+export async function prepareTestDatabase(migrationsDir = MIGRATIONS_DIR) {
   const target = requiredUrl()
   const database = target.pathname.replace(/^\//, '')
   if (!database.endsWith('_test')) {
@@ -100,7 +101,7 @@ export async function prepareTestDatabase() {
   const admin = new Client({ connectionString: maintenance.toString() })
   await admin.connect()
   try {
-    const template = await ensureTemplate(admin, database)
+    const template = await ensureTemplate(admin, database, migrationsDir)
     await admin.query(
       `drop database if exists ${quoteIdentifier(database)} with (force)`,
     )

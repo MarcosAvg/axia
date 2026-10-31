@@ -1,7 +1,13 @@
 # 0054 — Tomar la oferta al abrir el tiquet
 
 - Fecha: 2026-10-10
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste la toma explícita al abrir. La RPC citada es histórica; la acción
+> actual se ejecuta mediante API y servicio transaccional del servidor.
+> Sustitución vigente: [ADR 0078](0078-corte-final-frontend.md), [ADR 0085](0085-correcciones-ciclo-tiquet.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

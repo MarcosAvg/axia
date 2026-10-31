@@ -1,7 +1,14 @@
 # 0020 — Tiempos manuales atribuidos y proxy del técnico (Fase 4B)
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten los tiempos manuales, la atribución de actor/sujeto y el proxy.
+> RPC, auth.uid() y security definer describen la implementación retirada; la API usa sesiones
+> locales y servicios transaccionales.
+> Sustitución vigente: [ADR 0070](0070-autenticacion-local-y-sesiones.md), [ADR 0084](0084-hora-manual-solo-por-proxy.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

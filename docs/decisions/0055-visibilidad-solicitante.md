@@ -1,7 +1,13 @@
 # 0055 — Visibilidad del solicitante en la línea de tiempo
 
 - Fecha: 2026-10-10
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el criterio de visibilidad del solicitante. Las vistas y pruebas
+> pgTAP citadas corresponden al stack retirado; el servidor aplica ahora alcance y filtrado.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0077](0077-pruebas-postgresql-real.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

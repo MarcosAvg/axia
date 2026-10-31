@@ -53,7 +53,7 @@ function pageItems(page: PageLike | undefined): TicketListItem[] {
   return page ? page.items : []
 }
 
-/** Actividad reciente visible para el usuario (RLS). */
+/** Actividad reciente filtrada por el alcance autorizado del servidor. */
 function useRecentActivity() {
   return useQuery({
     queryKey: ['dashboard', 'activity'],

@@ -1,7 +1,16 @@
 # 0049 — Indicadores de métricas filtrables y nuevos temas
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el criterio funcional: filtrar antes de agregar en el servidor y
+> aplicar los filtros a todos los indicadores. Las RPC metrics_*, metrics_dims_in, RLS,
+> database.types.ts, db:types y pgTAP descritos abajo pertenecen a la implementación sustituida.
+> La API vigente intersecta alcance y filtros antes de agregar; el retiro SQL elimina los
+> agregadores sin consumidores y conserva metrics_date_in.
+> Sustitución vigente: [ADR 0090](0090-tablero-metricas-operativo.md), [ADR 0100](0100-consolidacion-interna.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

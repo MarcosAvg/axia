@@ -1,7 +1,13 @@
 # 0008 — Técnicos de catálogo con cuenta opcional y "actuar en nombre de"
 
 - Fecha: 2026-10-07
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten los técnicos con o sin cuenta y el proxy. La lectura por RLS
+> descrita abajo fue sustituida por autorización y alcance en el servidor.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0078](0078-corte-final-frontend.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

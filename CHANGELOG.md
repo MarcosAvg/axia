@@ -5,6 +5,18 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Eliminado
+
+- Ocho tablas del importador retirado y once funciones SQL de métricas sin consumidores mediante
+  una migración nueva; los datos históricos o dependencias inesperadas abortan la actualización.
+- Veinte documentos exclusivamente históricos del checkout; contenido recuperable desde Git
+  mediante el índice histórico, sin duplicar los archivos.
+
+### Cambiado
+
+- Decisiones con implementación sustituida clasificadas como parciales; referencias al stack
+  vigente, al XLSX y al esquema instalado corregidas. Smoke compara imagen y SQL del checkout.
+
 ### Añadido
 
 - Consolidación interna: DTO HTTP de tiquets validados y comandos tipados; métricas con alcance y

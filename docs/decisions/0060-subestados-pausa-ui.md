@@ -1,7 +1,14 @@
 # 0060 — Subestados de pausa en la interfaz
 
 - Fecha: 2026-10-10
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste la gestión de subestados de pausa. Las RPC, firmas SQL y pgTAP
+> descritos abajo pertenecen al stack retirado; las acciones se validan en servicios
+> transaccionales del servidor.
+> Sustitución vigente: [ADR 0078](0078-corte-final-frontend.md), [ADR 0077](0077-pruebas-postgresql-real.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

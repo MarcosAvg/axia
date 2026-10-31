@@ -1,7 +1,14 @@
 # 0021 — Tiempo laboral e indicadores (Fase 5A)
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten el cálculo laboral y los indicadores de tiempo. Las vistas
+> actuales no autorizan por sí mismas: la lectura por RLS descrita abajo fue sustituida por
+> alcance en la API.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0088](0088-indicadores-agregados-y-abanico-sse.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

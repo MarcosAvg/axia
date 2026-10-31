@@ -1,7 +1,14 @@
 # 0019 — Evidencia sin conexión: compresión, Dexie y subida reanudable
 
 - Fecha: 2026-10-08
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten la evidencia offline, Dexie y TUS. Storage y evidence_add
+> pertenecen al stack retirado; las cargas actuales se reciben en el servidor propio y la cola
+> aplica las garantías de sesión actuales.
+> Sustitución vigente: [ADR 0072](0072-evidencias-tus-sharp.md), [ADR 0100](0100-consolidacion-interna.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

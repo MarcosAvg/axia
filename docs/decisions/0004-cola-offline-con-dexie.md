@@ -1,7 +1,13 @@
 # 0004 — Cola offline con Dexie
 
 - Fecha: 2026-10-07
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten Dexie, el UUID del cliente y la cola offline. La idempotencia se
+> valida ahora en el servidor; la función de acción en PostgreSQL pertenece al stack retirado.
+> Sustitución vigente: [ADR 0074](0074-sincronizacion-offline.md), [ADR 0100](0100-consolidacion-interna.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

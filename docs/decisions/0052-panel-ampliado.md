@@ -1,7 +1,15 @@
 # 0052 — Panel de inicio ampliado por rol
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persiste el panel personal con indicadores, tendencias y pendientes según
+> rol. RLS y el descarte de un endpoint personal corresponden a la implementación sustituida: la
+> API actual calcula los indicadores con alcance autorizado. La experiencia móvil se ajustó
+> posteriormente por rol.
+> Sustitución vigente: [ADR 0088](0088-indicadores-agregados-y-abanico-sse.md), [ADR 0091](0091-movil-por-rol.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

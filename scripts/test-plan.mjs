@@ -62,10 +62,7 @@ function serverCommands(files) {
     .map((file) => appPath(file, 'server'))
     .filter(Boolean)
   const migration = serverPaths.some(
-    (file) =>
-      file.startsWith('db/migrations/') ||
-      file === 'db/schema.ts' ||
-      file.startsWith('src/db/'),
+    (file) => file.startsWith('db/migrations/') || file.startsWith('src/db/'),
   )
   if (migration)
     return [

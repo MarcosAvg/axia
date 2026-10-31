@@ -154,7 +154,7 @@ estas reglas requiere un comentario con la razón y se evita.
 ## 9. Offline y evidencias
 
 - Toda acción que pueda ocurrir sin conexión se guarda primero en `outbox` (Dexie) con un
-  **UUID generado en el cliente** (`crypto.randomUUID()`), que la función en Postgres usa
+  **UUID generado en el cliente** (`crypto.randomUUID()`), que el servidor usa
   como clave de idempotencia (`client_request_id`).
 - La sincronización se dispara al abrir la aplicación, al evento `online` y al volver a primer
   plano (`visibilitychange`). **No se depende de Background Sync** (no existe en iOS Safari).
@@ -174,17 +174,19 @@ estas reglas requiere un comentario con la razón y se evita.
 
 - `snake_case`; tablas en plural (`tickets`, `ticket_events`); claves primarias `id`; claves
   foráneas `<singular>_id`; marcas de tiempo `created_at` y `updated_at` (con disparador).
-- Enums en inglés `snake_case`. Funciones con `<entidad>_<verbo>`: `ticket_assign_technician`,
-  `blocker_advance_state`.
-- Índices: `idx_<tabla>_<columnas>`. Políticas: `<tabla>_<acción>_<rol>`.
+- Enums en inglés `snake_case`. Funciones con nombres explícitos del dominio, como
+  `ticket_time_total` y `tickets_set_folio`; las acciones de flujo viven en el servidor.
+- Índices: `idx_<tabla>_<columnas>`. No se definen políticas RLS en este stack.
 
 ### Independencia del esquema
 
 - El esquema del núcleo **no contiene columnas, enums, funciones ni semillas con nombres de
   plataformas externas**.
-- Identificadores externos solo en `ticket_external_refs(system, external_id)` y datos crudos de
-  importación solo en `import_records.raw`. No se añaden columnas al núcleo para un sistema
-  concreto.
+- Identificadores externos solo en `ticket_external_refs(system, external_id)`, con el catálogo
+  genérico `external_systems`. No se añaden columnas al núcleo para un sistema concreto.
+- No hay tablas activas de importación cruda: las históricas se retiran en la migración 0017.
+  Un adaptador futuro debe definir su almacenamiento aislado y su propia migración antes de
+  conservar datos crudos; no debe asumir que existe `import_records.raw`.
 - Si una integración necesita estructura propia, va en tablas con prefijo `integration_` y su
   propia migración, sin llaves foráneas desde el núcleo hacia ellas.
 

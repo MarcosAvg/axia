@@ -1,7 +1,14 @@
 # 0005 — Modelo de bloqueos dirigido por datos
 
 - Fecha: 2026-10-07
-- Estado: sustituida por 0011
+- Estado: parcial; modelo inicial sustituido por 0011
+
+> **Vigencia parcial.** Persisten los motivos configurables y sus campos obligatorios. La
+> validación mediante RPC descrita abajo fue sustituida por servicios transaccionales del
+> servidor.
+> Sustitución vigente: [ADR 0011](0011-motivos-jerarquicos.md), [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0078](0078-corte-final-frontend.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 

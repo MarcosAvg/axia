@@ -1,7 +1,13 @@
 # 0058 — Rediseño de Usuarios, Ámbitos y Calendarios
 
 - Fecha: 2026-10-09
-- Estado: aceptada
+- Estado: parcial
+
+> **Vigencia parcial.** Persisten la administración de usuarios, ámbitos y calendarios. Las
+> referencias a RPC son históricas; usuarios y permisos tienen los recorridos actuales de la API.
+> Sustitución vigente: [ADR 0071](0071-autorizacion-y-alcance.md), [ADR 0093](0093-borrado-de-usuarios.md).
+> El texto fechado que sigue conserva la decisión original; sus detalles sustituidos no son
+> instrucciones actuales.
 
 ## Contexto
 
