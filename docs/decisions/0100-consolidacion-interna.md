@@ -1,7 +1,7 @@
 # 0100 — Contratos, alcance y fuentes canónicas
 
 **Fecha:** 2026-10-31
-**Estado:** aceptada; sustituye el punto 3 de ADR 0067.
+**Estado:** aceptada; sustituye el punto 3 de ADR 0067 (original en [Git](../history/README.md)).
 
 ## Contexto
 

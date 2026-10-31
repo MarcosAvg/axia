@@ -1,77 +1,38 @@
-# Estilo de documentación
+# Criterios de documentación
 
-Normas para la documentación de Axia (`README.md`, `deploy/`, `docs/`). El objetivo es que cualquier
-persona pueda seguir los documentos sin ambigüedad y sin conocer el historial de la conversación.
+La documentación describe el Axia disponible. El [índice](../README.md) asigna una referencia a cada
+tema; un documento nuevo debe resolver una necesidad que los existentes no cubran.
 
-## Alcance
+## Organización
 
-Se aplican a los documentos **operativos y de referencia**: `README.md`, todo `deploy/`, y las guías
-de `docs/` que describen procedimientos (por ejemplo, `docs/guides/notificaciones.md` y las secciones
-de despliegue de `docs/start/instalacion.md`).
+- README presenta el producto y sus entradas; no reproduce instalación, comandos y configuración.
+- Las guías explican tareas; las referencias reúnen contratos y tablas de consulta.
+- Arquitectura explica componentes y razones técnicas. La especificación de negocio se conserva
+  como autoridad normativa y no se reescribe para ajustarla a limitaciones del código.
+- Se enlaza una regla existente en lugar de copiarla. Los detalles actuales se contrastan con
+  código, scripts, plantillas o pruebas; el historial no certifica el comportamiento disponible.
+- Una capacidad futura o una discrepancia conocida se identifica como tal y se registra en estado.
+- Los diseños y planes concluidos se recuperan desde Git. Los ADR nuevos explican decisiones con
+  alternativas y consecuencias duraderas; no son notas de cada corrección o pantalla.
 
-No se aplican a los documentos **internos de decisión y memoria** (ADR en `docs/decisions/`,
-`docs/internal/estado.md`) ni a los documentos de negocio redactados por la institución.
+## Redacción
 
-## Registro
+Usar español es-MX, títulos en oración y nombres coherentes con el glosario. Las guías operativas
+usan infinitivo o forma impersonal, sin contexto de la conversación, elogios ni promesas. Explicar
+qué se necesita, los pasos, el resultado verificable y cómo recuperar un fallo cuando corresponda.
+Omitir secciones vacías y detalles internos que no cambien una decisión del lector.
 
-1. **Impersonal**: no se usa la segunda persona ("tú", "tu", "ti"), ni la primera ("yo",
-   "nosotros"). Ejemplo: "Se configura…", no "Configura…".
-2. **Instrucciones en infinitivo** o pasiva refleja: "Crear el archivo", "Se aplica la migración".
-   No se usan preguntas retóricas ni exclamaciones.
-3. **Sin meta-comentarios**: no se describe quién ejecuta algo ni el proceso de la conversación
-   ("tú lo ejecutas", "por petición de…", "si quieres"). Un documento describe **qué** y **cómo**, no
-   el contexto de su redacción.
-4. **Hechos, no opiniones**. Una recomendación se acompaña de su criterio objetivo; en caso
-   contrario, se presenta como una alternativa más.
+Los comandos se ejecutan desde la raíz que indique la guía. Los ejemplos usan valores ficticios,
+identifican pasos destructivos y no imprimen secretos. Las variables completas se documentan solo
+en configuración. Una guía referencia ese contrato y explica únicamente las opciones de su tarea.
 
-## Estructura
+## Enlaces y comprobación
 
-Cada documento se organiza con las secciones que apliquen, en este orden:
+Usar enlaces Markdown relativos dentro del repositorio; preferir destinos concretos a nombres de
+archivo sin enlace. Para fuentes externas, enlazar documentación oficial que sustente la afirmación.
+No afirmar que una opción, default o límite de un proveedor externo permanece vigente sin verificarlo.
 
-1. **Objeto**: qué resuelve el documento en una o dos frases.
-2. **Requisitos**: lo necesario antes de empezar.
-3. **Procedimiento**: pasos numerados y reproducibles.
-4. **Verificación**: cómo comprobar que el resultado es correcto.
-5. **Referencias**: enlaces a documentos relacionados.
-
-Las secciones que no apliquen se omiten.
-
-## Formato
-
-- **Encabezados en oración** (solo la primera palabra en mayúscula), texto en **es-MX**.
-- **Datos enumerables en tablas**: requisitos, variables, comandos, endpoints, mensajes de error.
-- **Avisos impersonales**: `> **Nota:** …` y `> **Advertencia:** …`. No se usan "ojo", "no subas",
-  "revisa".
-- **Bloques de código con lenguaje** (`bash`, `yaml`, `sql`, `ts`) e instrucciones copiables sin
-  edición, salvo marcadores explícitos entre `MAYÚSCULAS` o `<ángulos>`.
-- **Rutas relativas** para referencias cruzadas dentro del repositorio.
-- **Terminología consistente**: un concepto, un término.
-
-## Terminología
-
-| Término | Significado |
-|---|---|
-| Frontend | Aplicación web (SPA/PWA) de Axia |
-| Backend | PostgreSQL 17 + Drizzle + Fastify 5 |
-| Reverse proxy | Servidor que termina TLS y enruta hacia la app y la API |
-| Migración | Archivo SQL versionado en `apps/server/db/migrations/` |
-| Imagen | Artefacto de contenedor compartido por la app y el migrador de una release |
-| Instancia | Despliegue concreto de Axia con su base de datos y su configuración |
-
-## Ejemplos
-
-| No adecuado | Adecuado |
-|---|---|
-| "Copia `.env.example` a `.env` y edítalo" | "Crear el archivo de entorno a partir de la plantilla y ajustar los valores" |
-| "tu proxy TLS apunta ahí" | "el reverse proxy TLS apunta a ese puerto" |
-| "no subas este archivo al repositorio" | "este archivo no debe incorporarse al repositorio" |
-| "o hazlo a mano" | "o generarlo manualmente" |
-
-## Lista de verificación
-
-- [ ] No contiene "tú", "tu", "ti", "yo" ni "nosotros".
-- [ ] Las instrucciones están en infinitivo o pasiva refleja.
-- [ ] Los datos enumerables están en tablas.
-- [ ] Los avisos usan `Nota` o `Advertencia`.
-- [ ] No hay meta-comentarios ni preguntas retóricas.
-- [ ] Los términos coinciden con el glosario.
+Comprobar enlaces con `pnpm check:docs` y ejemplos con sus consumidores reales cuando sea seguro.
+La documentación del paquete operativo debe seguir disponible en el paquete; no convertir sus
+instrucciones esenciales en enlaces que requieran el checkout. No añadir pruebas que comparen
+texto por texto la prosa. Registrar límites y comprobaciones reales en la memoria de trabajo.

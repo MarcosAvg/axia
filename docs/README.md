@@ -1,51 +1,51 @@
 # Documentación de Axia
 
-Axia es una plataforma autoalojable para seguir tiquets de mantenimiento: estado exacto, motivo
-cuando no avanza, evidencias y tiempos medibles. Esta página reúne la documentación vigente.
+Elegir la guía según la tarea. Cada tema tiene una referencia principal; los pasos de instalación,
+las variables y las reglas no se repiten en varios manuales.
 
-## Primeros pasos
+## Instalar y mantener una instancia
 
-| Documento | Contenido |
+| Tarea | Documento |
 |---|---|
-| [Instalación](start/instalacion.md) | Requisitos, instalación local, primer administrador y variables |
-| [Continuidad](start/continuidad.md) | Actualizar, retomar el proyecto y resolver problemas |
-| [Operación](guides/operacion.md) | Despliegue, TLS, respaldos y restauración |
+| Instalar, conectar HTTPS y crear el primer administrador | [Instalación](../deploy/README.md) |
+| Actualizar, respaldar, recuperar y mantener | [Operación](guides/operacion.md) |
+| Consultar variables y valores predeterminados | [Configuración](reference/configuracion.md) |
+| Diagnosticar PostgreSQL | [Rendimiento](reference/rendimiento-postgres.md) |
 
-## Uso
+## Usar y administrar
 
-| Documento | Contenido |
+| Tarea | Documento |
 |---|---|
-| [Flujo de un tiquet](guides/uso.md) | Ciclo completo, estados, transiciones, tiempos y duplicados |
-| [Administración](guides/administracion.md) | Usuarios, roles, catálogos, calendarios y configuración |
-| [Notificaciones](guides/notificaciones.md) | Bandeja in-app, SSE y estado de push |
+| Registrar y atender tiquets, adjuntar evidencia y trabajar offline | [Uso](guides/uso.md) |
+| Gestionar usuarios, permisos, catálogos y calendarios | [Administración](guides/administracion.md) |
+| Consultar avisos y capacidades de notificación | [Notificaciones](guides/notificaciones.md) |
 
-## Referencia
+## Desarrollar y contribuir
 
-| Documento | Contenido |
+| Tarea | Documento |
 |---|---|
-| [Comandos](reference/comandos.md) | Comandos de desarrollo, base y calidad |
-| [Configuración](reference/configuracion.md) | Variables de entorno |
-| [Permisos](reference/permisos.md) | Roles, permisos y ámbitos |
-| [Estados y transiciones](reference/estados-y-transiciones.md) | Estados y acciones del tiquet |
-| [API](reference/api.md) | Rutas HTTP |
-| [Convenciones de código](reference/convenciones-codigo.md) | Estructura, estilo y reglas |
-| [Estilo de documentación](reference/estilo-documentacion.md) | Reglas de redacción |
-| [Rendimiento de PostgreSQL](reference/rendimiento-postgres.md) | Índices, conexiones y mantenimiento |
+| Preparar el entorno, demo, pruebas y resolver fallos locales | [Desarrollo](start/desarrollo.md) |
+| Entregar un cambio | [Contribución](../CONTRIBUTING.md) |
+| Aplicar estructura y estándares de código | [Convenciones](reference/convenciones-codigo.md) |
+| Escribir documentación | [Criterios editoriales](reference/estilo-documentacion.md) |
+| Consultar comandos | [Comandos](reference/comandos.md) |
 
-## Conceptos
+## Entender el sistema
 
-| Documento | Contenido |
+| Tema | Fuente principal |
 |---|---|
-| [Negocio](concepts/negocio.md) | Fuente de verdad del negocio |
-| [Dominio](concepts/dominio.md) | Resumen conceptual y glosario |
-| [Arquitectura](concepts/arquitectura.md) | Componentes y flujo de una petición |
-| [Datos](concepts/datos.md) | Modelo de datos actual |
+| Reglas de negocio aprobadas | [Especificación](concepts/negocio.md) |
+| Vocabulario y resumen del flujo | [Dominio](concepts/dominio.md) |
+| Componentes y decisiones técnicas actuales | [Arquitectura](concepts/arquitectura.md) |
+| Entidades y relaciones | [Datos](concepts/datos.md) |
+| Acciones y estados | [Transiciones](reference/estados-y-transiciones.md) |
+| Autorización | [Permisos](reference/permisos.md) |
+| Rutas y contratos HTTP | [API](reference/api.md) |
 
-## Historia e interno
+## Mantenimiento de la documentación
 
-| Documento | Contenido |
-|---|---|
-| [Decisiones](decisions/README.md) | ADR vigentes, parciales e índice histórico |
-| [Estado](internal/estado.md) | Memoria de trabajo del proyecto |
-| [Historia en Git](history/README.md) | Índice de documentos retirados y consulta sin restaurarlos |
-| [Integraciones](history/integraciones-y-migracion.md) | Referencia histórica de importación |
+La especificación expresa las reglas aprobadas; las guías describen la implementación disponible.
+Una diferencia se registra como pendiente, sin alterar la regla ni afirmar que ya está resuelta.
+El [estado](internal/estado.md) reúne trabajo actual y límites conocidos. Las [decisiones recientes](decisions/README.md)
+explican consolidaciones vigentes; el [historial en Git](history/README.md) permite recuperar diseños
+anteriores sin presentarlos como instrucciones actuales.

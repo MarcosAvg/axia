@@ -1,119 +1,17 @@
 # Decisiones de arquitectura
 
-Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y sus consecuencias.
+Las referencias actuales explican cómo funciona Axia: [arquitectura](../concepts/arquitectura.md),
+[datos](../concepts/datos.md) y [convenciones](../reference/convenciones-codigo.md).
+Este índice conserva las decisiones de consolidación que justifican sus límites.
 
-## Estado
-
-| Estado | Significado |
+| ADR | Decisión |
 |---|---|
-| Vigente | Describe el sistema actual |
-| Parcial | Conserva criterios vigentes, con implementación sustituida o partes pendientes explícitas |
-| Histórica | Prosa retirada del checkout; consultable en Git |
+| [0099](0099-consolidacion-self-hosted.md) | Entornos, imagen única y recuperación coordinada |
+| [0100](0100-consolidacion-interna.md) | Contratos, alcance SQL y dependencias offline |
+| [0101](0101-retirada-historica.md) | Retirada segura de objetos y documentación sin vigencia |
+| [0102](0102-documentacion-por-tareas.md) | Documentación canónica organizada por tareas |
 
-## Decisiones vigentes
-
-La consolidación operativa vigente se describe en [ADR 0099](0099-consolidacion-self-hosted.md).
-La consolidación interna de contratos, alcance, cola y herramientas está en
-[ADR 0100](0100-consolidacion-interna.md).
-La retirada segura de objetos sin consumidores e historia duplicada está en
-[ADR 0101](0101-retirada-historica.md).
-
-| ADR | Tema |
-|---|---|
-| [0001](0001-vite-react-spa-con-react-compiler.md) | Vite + React + TypeScript |
-| [0003](0003-recharts-en-lugar-de-echarts.md) | Recharts |
-| [0006](0006-independencia-del-nucleo.md) | Independencia del núcleo |
-| [0007](0007-solicitante-mixto.md) | Solicitante con o sin cuenta |
-| [0009](0009-tiempos-tramos-y-manuales.md) | Tramos de tiempo y tiempos manuales |
-| [0011](0011-motivos-jerarquicos.md) | Motivos jerárquicos |
-| [0012](0012-folio.md) | Folio |
-| [0013](0013-deteccion-duplicados-pg-trgm.md) | Duplicados con `pg_trgm` |
-| [0014](0014-ofertas-de-ruteo.md) | Ofertas de ruteo |
-| [0022](0022-cobertura-por-equipo-y-extra.md) | Cobertura por equipo y extra |
-| [0025](0025-fundacion-interfaz.md) | Fundación de interfaz |
-| [0028](0028-xlsx-y-progreso.md) | XLSX y progreso |
-| [0038](0038-sistema-de-tokens-y-temas.md) | Tokens y temas |
-| [0039](0039-armazon-de-navegacion.md) | Armazón de navegación |
-| [0040](0040-componentes-de-datos.md) | Componentes de datos |
-| [0045](0045-permisos-evidencia-y-acciones.md) | Permisos de evidencia y acciones |
-| [0046](0046-rediseno-administracion.md) | Rediseño de administración |
-| [0047](0047-metricas-acceso-perfil.md) | Métricas, acceso y perfil |
-| [0050](0050-dimensiones-simultaneas.md) | Dimensiones simultáneas |
-| [0051](0051-resumen-cantidades.md) | Resumen de cantidades |
-| [0063](0063-paleta-acentos.md) | Paleta de acentos |
-| [0064](0064-tiempo-acumulado.md) | Tiempo promedio o acumulado |
-| [0065](0065-enfasis-acciones-y-movil.md) | Énfasis de acciones y móvil |
-| [0066](0066-administracion-red-seguridad.md) | Administración con red de seguridad |
-| [0068](0068-operacion-postgresql.md) | Operación de PostgreSQL |
-| [0070](0070-autenticacion-local-y-sesiones.md) | Autenticación local y sesiones |
-| [0071](0071-autorizacion-y-alcance.md) | Autorización y alcance |
-| [0072](0072-evidencias-tus-sharp.md) | Evidencias con TUS y Sharp |
-| [0073](0073-sse-y-notificaciones.md) | SSE y notificaciones |
-| [0074](0074-sincronizacion-offline.md) | Sincronización offline |
-| [0076](0076-semillas-referencia-y-demo.md) | Semillas de referencia y demo |
-| [0077](0077-pruebas-postgresql-real.md) | Pruebas contra PostgreSQL real |
-| [0078](0078-corte-final-frontend.md) | Corte final del frontend |
-| [0079](0079-navegacion-por-capacidad.md) | Navegación por capacidad y permisos |
-| [0081](0081-hora-por-accion.md) | Hora por acción y ajuste auditado |
-| [0082](0082-pruebas-por-cambio.md) | Pruebas por cambio y compuerta por niveles |
-| [0083](0083-react-compiler-solo-al-compilar.md) | React Compiler solo al compilar |
-| [0084](0084-hora-manual-solo-por-proxy.md) | Hora manual solo al actuar por proxy |
-| [0085](0085-correcciones-ciclo-tiquet.md) | Correcciones del ciclo de vida y de la barra de acciones |
-| [0086](0086-evidencia-por-tipo.md) | Autorización de evidencia por tipo |
-| [0087](0087-cambios-de-rol-exigen-role-manage.md) | Los cambios de rol exigen `role.manage` |
-| [0088](0088-indicadores-agregados-y-abanico-sse.md) | Indicadores agregados y abanico SSE acotado |
-| [0089](0089-sesiones-evidencia-y-retencion.md) | Sesiones, evidencia y retención |
-| [0090](0090-tablero-metricas-operativo.md) | Tablero de métricas operativo |
-| [0091](0091-movil-por-rol.md) | Experiencia móvil recortada por rol |
-| [0092](0092-navegacion-movil-inferior.md) | Navegación móvil inferior |
-| [0093](0093-borrado-de-usuarios.md) | Borrado de usuarios sin romper la bitácora |
-| [0094](0094-exportar-e-importar-catalogos.md) | Exportar e importar catálogos en un solo XLSX |
-| [0095](0095-dependencias-por-ubicacion.md) | Dependencias solicitantes por ubicación |
-| [0096](0096-clasificacion-por-columnas.md) | Clasificación en columnas dentro del XLSX |
-| [0097](0097-ubicacion-obligatoria-en-dependencias.md) | Ubicación obligatoria en las dependencias |
-| [0098](0098-equipo-por-problema.md) | El equipo se asigna al problema |
-
-## Decisiones parcialmente vigentes
-
-Las notas iniciales de cada ADR separan el criterio conservado de la implementación sustituida.
-Las referencias a RLS, RPC, pgTAP y comandos de transición en su texto fechado no son instrucciones
-operativas actuales.
-
-| ADR | Criterio conservado |
-|---|---|
-| [0004](0004-cola-offline-con-dexie.md) | Cola offline con Dexie |
-| [0005](0005-modelo-de-bloqueos-dirigido-por-datos.md) | Bloqueos dirigidos por datos |
-| [0008](0008-tecnicos-catalogo-y-proxy.md) | Técnicos de catálogo y proxy |
-| [0010](0010-roles-y-permisos-configurables.md) | Roles y permisos configurables |
-| [0019](0019-evidencia-offline.md) | Evidencia offline |
-| [0020](0020-tiempos-manuales-y-proxy.md) | Tiempos manuales y proxy |
-| [0021](0021-tiempo-laboral-e-indicadores.md) | Tiempo laboral e indicadores |
-| [0023](0023-administracion-calendarios-y-zona.md) | Calendarios y zona horaria |
-| [0024](0024-tablero-metricas.md) | Tablero de métricas |
-| [0026](0026-duplicados-y-satisfaccion.md) | Duplicados y satisfacción |
-| [0027](0027-tiempos-objetivo-sla.md) | Tiempos objetivo y SLA |
-| [0036](0036-proxy-a-eleccion.md) | Proxy a elección |
-| [0041](0041-panel-de-inicio.md) | Panel de inicio |
-| [0042](0042-operacion-lista-alta-detalle.md) | Operación: lista, alta y detalle |
-| [0043](0043-semilla-con-nombres-legibles.md) | Semilla con nombres legibles |
-| [0044](0044-evidencia-por-estado.md) | Evidencia por estado |
-| [0048](0048-metricas-pestanas.md) | Pestañas de métricas |
-| [0049](0049-metricas-filtros-servidor.md) | Filtros de métricas en servidor |
-| [0052](0052-panel-ampliado.md) | Panel ampliado |
-| [0053](0053-participantes-integridad.md) | Integridad de participantes |
-| [0054](0054-tomar-al-abrir.md) | Tomar al abrir |
-| [0055](0055-visibilidad-solicitante.md) | Visibilidad del solicitante |
-| [0056](0056-clasificacion-alta.md) | Clasificación en el alta |
-| [0057](0057-rediseno-administracion.md) | Rediseño de administración |
-| [0058](0058-admin-usuarios-ambitos-calendarios.md) | Usuarios, ámbitos y calendarios |
-| [0060](0060-subestados-pausa-ui.md) | Subestados de pausa en la interfaz |
-| [0061](0061-pausa-motivo-subestados.md) | Pausa por motivo y subestados |
-| [0062](0062-pausa-subestados-cascada.md) | Subestados en cascada |
-| [0067](0067-base-de-datos-autoalojada.md) | Base de datos autoalojada |
-| [0069](0069-servidor-fastify-y-estaticos.md) | Servidor Fastify y estáticos |
-| [0075](0075-instalacion-secretos-respaldos.md) | Instalación, secretos y respaldos |
-
-## Historia retirada del checkout
-
-Los doce ADR antes archivados, ADR 0031/0035 y otros documentos exclusivamente históricos se
-consultan mediante el [índice histórico y Git](../history/README.md). Los números no se reutilizan.
+Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
+reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles
+que ya no corresponden al código. Una decisión nueva explica una alternativa relevante, el motivo
+de elegirla y sus consecuencias duraderas; correcciones y resultados de pruebas van en CHANGELOG.

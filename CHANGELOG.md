@@ -15,6 +15,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- Documentación organizada por tareas, con una referencia vigente por tema; desarrollo separado de
+  instalación, contratos contrastados con el código y 83 ADR anteriores conservados en Git.
+
 - Decisiones con implementación sustituida clasificadas como parciales; referencias al stack
   vigente, al XLSX y al esquema instalado corregidas. Smoke compara imagen y SQL del checkout.
 

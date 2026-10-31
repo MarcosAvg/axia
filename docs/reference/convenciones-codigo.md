@@ -1,382 +1,195 @@
 # Convenciones de código
 
-## Objeto
-
-Documento de cumplimiento obligatorio para el código de Axia. Como no hay revisión humana del
-código, **lo que se pueda verificar con una herramienta se verifica con una herramienta** (sección
-14); lo demás se cumple por disciplina y se comprueba en la definición de terminado (sección 15).
-
-## Contenido
-
-1. [Principios](#1-principios)
-2. [Idioma y nombres](#2-idioma-y-nombres)
-3. [Estructura del frontend (por funcionalidad)](#3-estructura-del-frontend-por-funcionalidad)
-4. [Reglas de dependencia](#4-reglas-de-dependencia-se-verifican-con-herramienta)
-5. [Límites de tamaño y complejidad](#5-límites-de-tamaño-y-complejidad)
-6. [TypeScript](#6-typescript)
-7. [React](#7-react)
-8. [Acceso a datos desde el cliente](#8-acceso-a-datos-desde-el-cliente)
-9. [Offline y evidencias](#9-offline-y-evidencias)
-10. [Base de datos (SQL)](#10-base-de-datos-sql)
-11. [Servidor y procesos](#11-servidor-y-procesos)
-12. [Errores, registro y seguridad](#12-errores-registro-y-seguridad)
-13. [Pruebas](#13-pruebas)
-14. [Herramientas que hacen cumplir estas reglas](#14-herramientas-que-hacen-cumplir-estas-reglas)
-15. [Definición de terminado](#15-definición-de-terminado-toda-tarea)
-16. [Documentación](#16-documentación)
-17. [Git](#17-git)
-18. [Dependencias](#18-dependencias)
-19. [Anti-patrones prohibidos](#19-anti-patrones-prohibidos)
+Reglas obligatorias para mantener Axia. La estructura y las decisiones se explican en
+[arquitectura](../concepts/arquitectura.md); el negocio se define en la [especificación](../concepts/negocio.md).
+Este documento reúne estándares de implementación, no otro manual de instalación.
 
 ## 1. Principios
 
-1. **Simple antes que ingenioso.** Se elige la solución más sencilla que cumpla el requisito.
-2. **Pequeño y con un solo propósito**: archivos, funciones y componentes hacen una cosa.
-3. **Las reglas de negocio viven en servicios del servidor y funciones puras**, no en componentes;
-   la base conserva restricciones, integridad y transacciones.
-4. **Todo lo importante se prueba.** Las reglas de seguridad y de transición, primero.
-5. **No abstraer antes de tiempo.** Se extrae algo común cuando se repite por tercera vez.
-6. **Legible sobre corto.** El código se lee muchas más veces de las que se escribe.
-7. **Nada de sorpresas**: sin efectos ocultos, sin estado global implícito, sin valores mágicos.
-8. **Núcleo independiente.** Axia no se ancla a ninguna plataforma externa (sección 4).
+Elegir la solución más simple y reversible que cumpla el requisito. Cada archivo y función tiene
+un propósito concreto. La lógica de negocio vive en servicios del servidor y funciones puras;
+la base conserva integridad y transacciones. No abstraer sin una repetición real ni añadir
+frameworks para sustituir unas pocas operaciones claras.
 
 ## 2. Idioma y nombres
 
-- **Código, tablas, columnas, valores de enum, rutas de API y nombres de archivo: inglés.**
-- **Textos que ve el usuario (etiquetas, mensajes, errores): español (es-MX)**, centralizados
-  en un diccionario (`features/*/i18n` o `lib/i18n`), nunca incrustados en la lógica.
-- **Documentación y mensajes de commit: español.**
-- Nombres completos y descriptivos; sin abreviaturas ni nombres de una letra (salvo índices
-  de bucles triviales).
-- Booleanos con prefijo `is`, `has`, `can`, `should` (`isBlocked`, `canReassign`).
-- Funciones con verbo (`calculateTotalInterval`), tipos y componentes en `PascalCase`,
-  variables y funciones en `camelCase`, constantes en `UPPER_SNAKE_CASE`.
-- Archivos en `kebab-case` (`ticket-list.tsx`); hooks en `use-...`.
-- Para términos del negocio se usa el glosario de `docs/concepts/dominio.md`; no se inventan sinónimos.
+Código, SQL, valores y archivos en inglés; interfaz y documentación en español es-MX.
+Usar nombres descriptivos, archivos `kebab-case`, tipos `PascalCase`, funciones/variables
+`camelCase` y constantes `UPPER_SNAKE_CASE`. Booleanos con `is`, `has`, `can` o `should`.
+Centralizar textos de interfaz en los diccionarios existentes; no incrustarlos en reglas de
+negocio. Utilizar el [vocabulario del dominio](../concepts/dominio.md).
 
-## 3. Estructura del frontend (por funcionalidad)
+## 3. Estructura por funcionalidad
 
-```
-apps/web/src/
-├── app/                 → providers, configuración global, router
-├── routes/              → SOLO definición de rutas y composición de páginas (sin lógica)
-├── features/
-│   ├── <feature>/       → tickets, assignments, blockers, evidence, catalogs,
-│   │   │                  metrics, auth, admin
-│   │   ├── api/         → queries y mutaciones (TanStack Query + HTTP)
-│   │   ├── components/  → interfaz propia del feature
-│   │   ├── hooks/       → lógica de pantalla
-│   │   ├── domain/      → funciones puras de negocio (cálculos, mapeos, reglas)
-│   │   ├── i18n.ts      → textos en español del feature
-│   │   ├── schemas.ts   → validación con Zod
-│   │   └── index.ts     → único punto de entrada público del feature
-├── components/
-│   ├── ui/              → shadcn/ui (no editar salvo necesidad justificada)
-│   └── shared/          → componentes genéricos reutilizables
-└── lib/                 → cliente HTTP, offline (Dexie), formateadores, utilidades
-```
+En `apps/web/src`, `routes/` compone páginas; `app/` configura proveedores/router y `lib/`
+contiene infraestructura compartida. Cada `features/<feature>/` organiza `api/`, `components/`,
+`hooks/`, `domain/`, esquemas y textos, con `index.ts` como entrada pública. No crear carpetas
+vacías para cumplir una plantilla. Los componentes UI compartidos viven en `components/`.
 
-En el servidor: `apps/server/src/<dominio>/` para rutas y servicios, `apps/server/db/migrations/`
-para SQL. Los adaptadores externos, si se añaden, viven aislados y no modifican el núcleo.
+El servidor organiza rutas, servicios y repositorios por dominio en `apps/server/src/`.
+Las migraciones SQL viven en `apps/server/db/migrations/`.
 
-## 4. Reglas de dependencia (se verifican con herramienta)
+## 4. Reglas de dependencia
 
-- `routes/` puede importar de `features/*` (vía su `index.ts`) y de `components/`.
-- `features/A` **no importa** archivos internos de `features/B`; solo `features/B/index.ts`.
-- `components/` y `lib/` **no importan** de `features/` ni de `routes/`.
-- **Solo `features/*/api` y `lib/` pueden usar el cliente HTTP.** Ningún componente, hook de
-  interfaz ni ruta llama a `/api` directamente.
-- `domain/` no importa React, TanStack, cliente HTTP ni Dexie: es TypeScript puro.
-- Sin dependencias circulares.
-- **Independencia del núcleo:**
-  - **Los nombres de plataformas de terceros solo pueden aparecer** en
-    `docs/history/integraciones-y-migracion.md`, `docs/internal/estado.md`,
-    `docs/decisions/**` y `scripts/**`. Esto incluye identificadores, textos, comentarios, enums,
-    columnas, valores de semillas y pruebas del núcleo. Lo verifica `pnpm check:agnostic`.
-  - El núcleo trata los sistemas externos solo como datos genéricos: `system` en
-    `ticket_external_refs`, `source` en eventos, `channel` en tiquets.
+- Una feature importa otra únicamente a través de su `index.ts`.
+- `routes/` compone features y componentes; `components/` y `lib/` no importan features ni rutas.
+- Solo `features/*/api` y `lib/` usan el cliente HTTP. Componentes, rutas y hooks de interfaz no
+  llaman directamente a `/api`.
+- `domain/` es TypeScript puro: no importa React, HTTP, TanStack ni Dexie. No hay ciclos.
+- Los adaptadores externos quedan aislados; no añaden nombres, reglas o columnas de otro sistema
+  al núcleo. Las referencias externas usan `ticket_external_refs` y `external_systems`.
+- El verificador de independencia admite nombres externos únicamente en las excepciones
+  históricas/internas, decisiones y scripts que define `scripts/check-agnostic.mjs`. Su lista de
+  nombres está en `scripts/agnostic-names.json`; no se amplían excepciones para ocultar infracciones.
 
 ## 5. Límites de tamaño y complejidad
 
 | Elemento | Límite |
 |---|---|
-| Archivo | 300 líneas (sin comentarios ni líneas vacías) |
-| Función | 60 líneas (advertencia a 50) |
-| Componente React | 150 líneas; si crece, se divide |
-| Parámetros | 4; con más, recibe un objeto |
+| Archivo | 300 líneas, sin comentarios ni vacías |
+| Función | 60 líneas |
+| Componente | 150 líneas; dividir si crece |
+| Parámetros | 4; utilizar objeto si hacen falta más |
 | Anidación | 3 niveles |
 | Complejidad ciclomática | 10 |
 
-Si un límite estorba, **se divide el código, no se sube el límite**. Un `eslint-disable` de
-estas reglas requiere un comentario con la razón y se evita.
+Dividir código en lugar de subir límites. Cualquier supresión de lint requiere justificación
+escrita; no se desactivan reglas para conseguir que una comprobación pase.
 
-## 6. TypeScript
+## 6. TypeScript y fronteras
 
-- `strict: true`, `noUncheckedIndexedAccess: true`, `noFallthroughCasesInSwitch: true`.
-- **Prohibido `any`**, `@ts-ignore` y `as` para forzar tipos. Si no hay alternativa, se usa
-  `@ts-expect-error` con una explicación.
-- Las migraciones SQL son la definición del esquema. Los repositorios tipan sus resultados y
-  Drizzle ejecuta SQL parametrizado y transacciones, sin otra copia de las tablas en TypeScript.
-  La API define contratos con Zod; la web valida DTO HTTP y no genera tipos desde la base.
-- **Validación en las fronteras con Zod**: formularios, datos importados, respuestas externas y
-  entradas del servidor. Dentro del sistema se confía en los tipos.
-- Estados, roles y tipos como uniones literales en el feature o el servidor.
-- Se prefiere `type` para uniones e `interface` para formas de objetos públicos.
-- Sin exportaciones por defecto, excepto donde el framework lo exija.
+Mantener `strict`, `noUncheckedIndexedAccess` y `noFallthroughCasesInSwitch`. No utilizar `any`,
+`@ts-ignore` ni conversiones `as` para forzar tipos; una excepción necesaria usa una explicación
+y, cuando corresponda, `@ts-expect-error`. Preferir uniones literales y comandos discriminados.
+Usar `type` para uniones e `interface` para objetos públicos; sin exportación por defecto salvo
+requisito del framework.
 
-## 7. React
+Zod valida entradas del servidor, formularios, importaciones y DTO externos en sus fronteras.
+Los repositorios tipan resultados SQL; la web no genera tipos desde la base. Dentro del dominio
+se conserva la información de tipos, sin volver a convertir argumentos en registros genéricos.
 
-- **Datos del servidor en TanStack Query**, no en `useState` + `useEffect`.
-  Claves de consulta centralizadas por feature (`ticketKeys.list(filters)`).
-- **Filtros, orden y paginación de listas viven en la URL** (parámetros de búsqueda del
-  router) para poder recargar y compartir.
-- El componente presenta; la lógica va en un hook o en `domain/`.
-- Estado local lo más cerca posible de donde se usa; se evita el estado global salvo sesión y
-  preferencias.
-- Nada de `useEffect` para derivar datos: se calcula durante el render o se usa `useMemo` con
-  criterio.
-- Listas largas paginadas o virtualizadas; nunca se cargan miles de filas de una vez.
-- Cada pantalla maneja los cuatro estados: **cargando, vacío, error y con datos**.
-- Formularios con React Hook Form + Zod; mensajes de error en español junto al campo.
-- **Accesibilidad**: etiquetas en todos los campos, navegación por teclado, foco visible,
-  contraste suficiente y `alt` en imágenes. Es una PWA de uso en campo, con sol y con prisa:
-  objetivos táctiles de al menos 44 px.
+## 7. React e interfaz
 
-## 8. Acceso a datos desde el cliente
+TanStack Query mantiene datos del servidor; no copiarlos a estado local. Centralizar claves de
+consulta. Los filtros de listas, orden y paginación usan la URL. Evitar efectos para derivar datos;
+la lógica de pantalla va en hooks y la lógica pura en dominio. Reservar estado global para sesión
+y preferencias compartidas.
 
-- Toda llamada HTTP está en `features/*/api/` o `lib/`, con tipos de retorno explícitos.
-- Las **mutaciones que cambian el flujo** usan `POST /api/tickets/:id/actions` o
-  `POST /api/sync/actions`. No se actualiza el estado directamente.
-- Se piden solo los datos necesarios; las listas se paginan y filtran en el servidor.
-- Los errores de la API (`ApiError`) se convierten en errores de dominio tipados antes de llegar a
-  la interfaz.
+Toda pantalla maneja carga, vacío, error y datos; las listas grandes se paginan o virtualizan.
+Formularios con React Hook Form y Zod, errores junto al campo, etiquetas, teclado, foco visible,
+contraste, texto alternativo y objetivos táctiles de 44 px. Los componentes shadcn regenerables
+solo se modifican con una necesidad justificada.
+
+## 8. Cliente HTTP
+
+Las lecturas y mutaciones tienen contratos explícitos. Los cambios de flujo se envían como acciones
+del servidor o como sincronización; la web no actualiza columnas de estado. Mantener errores
+interpretables para la interfaz y pedir únicamente datos paginados/filtrados que se necesiten.
+Las rutas y formatos actuales están en [API](api.md).
 
 ## 9. Offline y evidencias
 
-- Toda acción que pueda ocurrir sin conexión se guarda primero en `outbox` (Dexie) con un
-  **UUID generado en el cliente** (`crypto.randomUUID()`), que el servidor usa
-  como clave de idempotencia (`client_request_id`).
-- La sincronización se dispara al abrir la aplicación, al evento `online` y al volver a primer
-  plano (`visibilitychange`). **No se depende de Background Sync** (no existe en iOS Safari).
-- Las fotos se comprimen antes de guardarse, se guardan como `Blob` en IndexedDB y se suben
-  con carga reanudable (TUS). El evento queda marcado como "evidencia pendiente" hasta que
-  la subida termine.
-- Reintentos con espera creciente y límite; los fallos permanentes se muestran al usuario.
-- La cola ordena evidencia y acciones por tiquet. Un error o envío aún activo impide adelantar
-  operaciones posteriores de ese tiquet, incluso en otro procesamiento; los demás siguen.
-  Reintentar o descartar el error explícitamente permite continuar, con validación del servidor.
-- El service worker nunca se cachea (`Cache-Control: no-cache`); las actualizaciones se
-  aplican con confirmación (`registerType: 'prompt'`).
+Las acciones offline conservan UUID del cliente, hora, argumentos y dueño. El reenvío es idempotente;
+no se genera otro comando para reintentar. La cola mantiene dependencias de evidencia/acciones por
+tiquet y no envía con la sesión de otra persona. Los conflictos definitivos se muestran para
+revisión; no se descartan silenciosamente. El detalle del mecanismo y sus límites está en
+[arquitectura](../concepts/arquitectura.md).
 
-## 10. Base de datos (SQL)
+Las fotos se comprimen, se guardan como Blob y se cargan con TUS. Los archivos son privados y
+requieren autorización, también al descargarse. Las actualizaciones PWA se confirman y el service
+worker se entrega sin caché; no depender de Background Sync para conservar trabajo.
 
-### Nombres
+## 10. SQL y migraciones
 
-- `snake_case`; tablas en plural (`tickets`, `ticket_events`); claves primarias `id`; claves
-  foráneas `<singular>_id`; marcas de tiempo `created_at` y `updated_at` (con disparador).
-- Enums en inglés `snake_case`. Funciones con nombres explícitos del dominio, como
-  `ticket_time_total` y `tickets_set_folio`; las acciones de flujo viven en el servidor.
-- Índices: `idx_<tabla>_<columnas>`. No se definen políticas RLS en este stack.
+- SQL es la definición completa del esquema. Una migración por preocupación, con nombre
+  `NNNN_verbo_objeto.sql`; nunca editar una integrada a `main`.
+- Usar parámetros SQL, claves y restricciones; comentar los objetos no evidentes. Tablas plurales,
+  columnas `snake_case`, claves `id` / `<singular>_id` e índices descriptivos.
+- Fechas `timestamptz`, zona configurable; indicadores derivados de eventos/tramos, sin copiar
+  cifras calculadas a columnas ni fijar una zona en el código.
+- Toda consulta de tiquets incorpora alcance autorizado. No hay RLS ni metadatos editables como
+  fuente de permisos; roles y ámbitos son datos controlados del servidor.
+- El cambio de estado y su evento se escriben en la misma transacción. La bitácora es de solo
+  agregar; separar acciones y validar permiso, precondiciones e idempotencia.
+- Las integraciones futuras definen almacenamiento aislado, sin dependencias desde el núcleo.
+  No asumir la existencia de tablas retiradas de importación.
+- Referencia en migraciones, demo explícita local; nunca datos reales en semillas o pruebas.
+- Añadir índices según filtros/claves y medición; no introducir particiones o cachés sin evidencia.
 
-### Independencia del esquema
+## 11. Servidor
 
-- El esquema del núcleo **no contiene columnas, enums, funciones ni semillas con nombres de
-  plataformas externas**.
-- Identificadores externos solo en `ticket_external_refs(system, external_id)`, con el catálogo
-  genérico `external_systems`. No se añaden columnas al núcleo para un sistema concreto.
-- No hay tablas activas de importación cruda: las históricas se retiran en la migración 0017.
-  Un adaptador futuro debe definir su almacenamiento aislado y su propia migración antes de
-  conservar datos crudos; no debe asumir que existe `import_records.raw`.
-- Si una integración necesita estructura propia, va en tablas con prefijo `integration_` y su
-  propia migración, sin llaves foráneas desde el núcleo hacia ellas.
+Las rutas Fastify validan y delegan en servicios/repositorios. Separar acciones por responsabilidad,
+usando funciones puras donde corresponda. Autorización y alcance son obligatorios antes de leer o
+modificar datos; no confiar en restricciones de la interfaz. Un recurso fuera de alcance devuelve
+404 opaco, según el contrato de [permisos](permisos.md).
 
-### Migraciones
+## 12. Errores, registro y secretos
 
-- Una migración, una preocupación. Nombre: `NNNN_verbo_objeto.sql`, siguiendo la secuencia existente.
-- Una migración ya integrada a `main` no se edita: se agrega otra.
-- Toda migración debe aplicarse limpia con `pnpm db:reset` y dejar las pruebas en verde.
-- Se incluye `comment on table` / `comment on column` para todo lo que no sea obvio.
-- Datos de referencia en migraciones y demo explícita en `apps/server/src/db/seed-demo/`.
+Manejar, transformar o propagar errores; nunca un `catch` vacío. Utilizar el logger de Fastify
+para servidor; evitar `console.log` en aplicación y no inventar un módulo de logging inexistente.
+Los scripts pueden comunicar su resultado según su configuración de lint. No registrar datos
+personales, tokens ni secretos. Solo valores públicos pueden llegar al bundle web.
 
-### Seguridad (autorización en el servidor)
-
-- **No hay RLS.** Toda consulta de tiquets pasa por un repositorio con alcance
-  (`scopePredicate`).
-- Los permisos se evalúan con `can`/`canAct`; un acceso fuera de alcance devuelve 404 opaco.
-- **Los roles viven en `users`/`user_roles`**; nunca en metadatos editables por el usuario.
-- `ticket_events` es **solo de agregar**: sin permisos de `update`/`delete` y con un disparador
-  que lo impida.
-- Las acciones validan: permiso, transición permitida, campos obligatorios e idempotencia
-  (`client_request_id`), y escriben el evento en la misma transacción.
-- Una acción por transición; nada de una función gigante con `case`.
-
-### Rendimiento
-
-- Índices en claves foráneas y en columnas de filtro frecuentes (estado, fechas, edificio).
-- Las métricas son **vistas** (o materializadas si el volumen lo pide). Los intervalos y el
-  mes **se calculan, no se almacenan**.
-
-## 11. Servidor y procesos
-
-- La API vive en `apps/server/src/<dominio>/` con rutas Fastify, esquemas Zod y servicios.
-- Las rutas no contienen lógica de negocio: delegan en servicios y repositorios.
-- Las acciones de tiquet se ejecutan en una transacción y escriben el evento en la misma
-  transacción. No hay actualizaciones directas de estado desde la web.
-- Las integraciones externas, si existen, viven en adaptadores aislados y no modifican el núcleo.
-- Los secretos se leen del entorno; nunca llegan al frontend, al repositorio ni a los logs.
-
-## 12. Errores, registro y seguridad
-
-- Nunca un `catch` vacío. Un error se maneja, se transforma en un error de dominio o se
-  propaga; el usuario recibe un mensaje claro en español.
-- Sin `console.log` en el código integrado (se permiten `console.warn` y `console.error`).
-  Se usa un módulo `lib/logger` para centralizar.
-- No se registran datos personales, tokens ni claves.
-- Entradas siempre validadas; salidas de texto libre siempre escapadas (React lo hace; no se
-  usa `dangerouslySetInnerHTML`).
-- Variables de entorno: solo `VITE_*` públicas en el cliente; lo secreto nunca llega al
-  cliente. `.env.example` y `.env.dev.example` se mantienen al día.
-- Archivos de evidencia en almacenamiento privado con URL firmadas y límites de tipo y tamaño.
+Validar entradas, conservar el escape de React y no utilizar `dangerouslySetInnerHTML` con texto
+externo. No incorporar `.env`, claves, dumps ni archivos de evidencia al repositorio. Las plantillas
+se actualizan junto al contrato de [configuración](configuracion.md).
 
 ## 13. Pruebas
 
-| Nivel | Qué cubre | Prioridad |
-|---|---|---|
-| Vitest + PostgreSQL | API, permisos, transacciones, migraciones e invariantes del esquema | **Máxima** |
-| Vitest | Funciones de `domain/`, esquemas Zod, hooks con lógica | Alta |
-| Playwright | Flujos críticos, incluido el del técnico sin conexión | Pocos y bien elegidos |
+| Nivel | Cobertura |
+|---|---|
+| Vitest sin DB | Dominio, contratos, formularios y lógica de cliente/servidor |
+| Vitest + PostgreSQL real | API, permisos positivos/negativos, transacciones, migraciones e integridad |
+| Playwright | Flujos de usuario, incluidos evidencia y trabajo offline |
 
-- Toda función `domain/` nueva lleva pruebas. Toda ruta y tabla nueva lleva pruebas positivas y
-  negativas de permiso y alcance. Toda acción, pruebas de caso válido, rol incorrecto, transición
-  inválida y repetición idempotente.
-- Las pruebas son deterministas: sin dependencia de hora real (se inyecta el reloj), de orden
-  ni de red externa.
-- Nombres de prueba descriptivos en español: `rechaza la transición si el rol no es supervisor`.
-- **Ninguna prueba se debilita, se omite ni se borra para que pase.** Un error corregido se
-  acompaña de una prueba que lo reproduce.
-- El núcleo debe tener sus pruebas completas **sin cargar ningún adaptador de integración**.
+Todo bug corregido tiene una regresión. Dominios nuevos llevan pruebas de reglas; rutas/tablas
+nuevas, permisos y alcance positivos y negativos. Las acciones cubren éxito, permiso incorrecto,
+transición inválida e idempotencia. Usar datos ficticios, reloj controlado cuando sea relevante y
+sin dependencia de orden ni red externa. Nombrar las pruebas por comportamiento en español.
+El núcleo se prueba sin cargar adaptadores. No debilitar, omitir o borrar pruebas para pasar.
 
-## 14. Herramientas que hacen cumplir estas reglas
+## 14. Verificación automática
 
-Se configuran en el arranque; el CI y `pnpm check` las ejecutan.
+TypeScript, ESLint y dependency-cruiser verifican tipos, límites y fronteras. Knip detecta código
+sin uso; los scripts de documentos/independencia revisan fuentes pertinentes de Git. Prettier,
+lint-staged y commitlint verifican formato y commits. Las configuraciones ejecutables son la
+referencia de las reglas aplicadas; no se copia aquí otra configuración divergente.
 
-- **TypeScript**: banderas de la sección 6.
-- **ESLint** (`typescript-eslint`, `react-hooks`, `jsx-a11y`) con:
+El [catálogo de comandos](comandos.md) detalla cada comprobación. La CI ejecuta la compuerta
+completa y el smoke de imagen. Para preparar el entorno se sigue [desarrollo](../start/desarrollo.md).
 
-```js
-rules: {
-  'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-  'max-lines-per-function': ['error', { max: 60, skipBlankLines: true, skipComments: true }],
-  complexity: ['error', 10],
-  'max-depth': ['error', 3],
-  'max-params': ['error', 4],
-  'no-console': ['error', { allow: ['warn', 'error'] }],
-  '@typescript-eslint/no-explicit-any': 'error',
-  '@typescript-eslint/ban-ts-comment': ['error', { 'ts-ignore': true }],
-}
-```
+## 15. Terminado
 
-- **Fronteras entre capas** con `dependency-cruiser`, que hagan fallar el build al violar la
-  sección 4 (uso del cliente HTTP solo desde `features/*/api` y `lib/`, dominio puro y ausencia de
-  ciclos).
-- **`pnpm check:agnostic`** (por ejemplo `scripts/check-agnostic.mjs`): busca una lista
-  configurable de nombres de plataformas de terceros (mayúsculas y minúsculas) en todo el
-  repositorio y falla si aparecen fuera de las rutas permitidas de la sección 4. La lista vive
-  en un archivo de configuración dentro de `scripts/`, que es la única excepción.
-- **Prettier** para formato; **knip** para código y dependencias sin uso.
-- **Husky + lint-staged** (formato y lint al confirmar) y **commitlint** (Conventional Commits).
-- **`pnpm db:test`** aplica las migraciones contra PostgreSQL real y verifica el esquema.
-- **CI** (GitHub Actions o Forgejo) ejecutando la compuerta completa en pull requests y en
-  `main`. El ciclo local usa `pnpm check:fast` y `pnpm test:affected`; la compuerta completa no
-  se repite tras cada edición.
-
-## 15. Definición de terminado (toda tarea)
-
-- [ ] `pnpm check` completo en verde antes de integrar (lint, tipos, independencia, Vitest,
-      Playwright, PostgreSQL y build), con la salida mostrada. Durante el desarrollo basta
-      `pnpm check:fast` + `pnpm test:affected`.
-- [ ] Pruebas nuevas o actualizadas para el comportamiento cambiado.
-- [ ] Si hubo migración: `pnpm db:reset` limpio y `pnpm db:test` en verde.
-- [ ] Documentación actualizada en el mismo commit (incluido `docs/concepts/dominio.md` si cambió el negocio).
-- [ ] Sin `console.log`, sin código comentado, sin `TODO` sin registrar en `docs/internal/estado.md`.
-- [ ] Sin secretos, `.env.example` y `.env.dev.example` al día.
-- [ ] El núcleo no depende de ninguna plataforma externa.
-- [ ] `docs/internal/estado.md` actualizado y, si aplica, un ADR creado.
+Un cambio queda terminado con pruebas apropiadas, documentación y estado actualizados, sin secretos
+ni código comentado o pendientes ocultos. Usar `check:fast` y `test:affected` en el ciclo; antes de
+integrar a `main`, `pnpm check` completo en verde y evidencia real. Para migraciones, verificar
+instalación limpia en pruebas y toda la integración PostgreSQL. No reiniciar una base con datos
+para comprobar una migración. Si falló algo, informar y corregir antes de afirmar éxito.
 
 ## 16. Documentación
 
-| Documento | Contenido |
-|---|---|
-| `README.md` | Puesta en marcha, comandos y estructura del repositorio |
-| `AGENTS.md` | Reglas cortas para el agente |
-| `docs/README.md` | Índice de la documentación |
-| `docs/internal/estado.md` | Estado, hoja de ruta y bloqueos |
-| `docs/concepts/dominio.md` | Flujo, modelo conceptual y glosario del núcleo |
-| `docs/history/integraciones-y-migracion.md` | Referencia histórica de importación |
-| `docs/reference/estilo-documentacion.md` | Normas de redacción de la documentación |
-| `docs/reference/convenciones-codigo.md` | Este documento |
-| `docs/decisions/NNNN-titulo.md` | Una decisión de arquitectura por archivo |
-
-- **TSDoc** solo en funciones públicas de `lib/` y en el `index.ts` de cada feature: qué hace,
-  parámetros y errores. No se comenta lo evidente.
-- **Los comentarios en el código explican el porqué**, nunca el qué. Si hace falta explicar qué
-  hace, se renombra o se reestructura.
-- **Comentarios SQL** con `comment on` en tablas, columnas y funciones.
-- **Plantilla de ADR** (`docs/decisions/0001-titulo.md`):
-
-```markdown
-# 0001 — Título de la decisión
-- Fecha: AAAA-MM-DD
-- Estado: aceptada | sustituida por 000X
-## Contexto
-Qué problema o restricción había.
-## Decisión
-Qué se decidió.
-## Alternativas consideradas
-Y por qué se descartaron.
-## Consecuencias
-Qué se gana, qué se paga y cómo revertirlo.
-```
-
-- Decisiones que ya merecen ADR desde el arranque: Vite + React como SPA, PostgreSQL + Drizzle +
-  Fastify, Recharts en lugar de ECharts, cola offline con Dexie, modelo de bloqueos dirigido por
-  datos e independencia del núcleo respecto a plataformas externas.
-- **Regla clave:** un cambio que altera el comportamiento actualiza su documentación en el
-  mismo commit.
+Actualizar la referencia canónica del comportamiento en el mismo commit; el [índice](../README.md)
+define dónde vive cada tema. Los comentarios explican decisiones no obvias, no repiten el código.
+Documentar interfaces públicas y objetos SQL que lo necesiten. Un ADR nuevo contiene contexto,
+alternativas, decisión, consecuencias y forma de revertir; no se crea para cada cambio de pantalla.
 
 ## 17. Git
 
-- Ramas cortas: `feat/...`, `fix/...`, `refactor/...`, `docs/...`, `chore/...`. Se integra a
-  `main` solo con `pnpm check` completo en verde.
-- **Conventional Commits** en español: `feat(tickets): agrega asignación a técnico`.
-  Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `build`, `ci`.
-- Un commit, una idea; cada commit deja el proyecto compilando y con pruebas en verde.
-- No se suben `.env`, claves, volcados de datos reales ni archivos generados por el build.
-- Datos reales de cualquier fuente nunca se suben al repositorio; se usan datos ficticios en las
-  pruebas y las semillas.
+Commits convencionales en español, una idea por commit y ramas cortas desde `main`. El flujo de
+entrega está en [CONTRIBUTING](../../CONTRIBUTING.md). No subir secretos, datos reales o salidas de
+build. Las decisiones con efecto en producción se preparan localmente; requieren autorización
+explícita antes de ejecutarlas en infraestructura real.
 
 ## 18. Dependencias
 
-- Antes de añadir una dependencia se comprueba si se resuelve con lo existente o con pocas
-  líneas propias. En caso contrario, se verifica en el registro que existe, es la oficial, está
-  mantenida y su licencia es MIT, Apache-2.0, BSD o ISC.
-- Versiones fijadas por el archivo de bloqueo (`pnpm-lock.yaml`), que siempre se confirma.
-- Cada dependencia nueva se justifica en el mensaje del commit. `knip` detecta las que sobran.
-- No se añaden SDK ni clientes de plataformas de terceros al núcleo; si una integración los
-  necesita, viven solo en su adaptador.
+Reutilizar lo existente cuando resuelva el problema. Antes de añadir una dependencia, verificar
+registro, origen oficial, mantenimiento y licencia MIT, Apache-2.0, BSD o ISC; justificarla en el
+commit. Confirmar el bloqueo de pnpm y retirar dependencias sin uso. Los SDK de sistemas externos
+pertenecen a su adaptador, no al núcleo.
 
-## 19. Anti-patrones prohibidos
+## 19. Cambios que requieren cuidado
 
-- Componentes con llamadas directas a `/api`.
-- `update` directo al estatus del tiquet fuera de una acción del servidor.
-- Lógica de negocio dentro de componentes o rutas.
-- Archivos "utils" o "helpers" genéricos que crecen sin límite: se nombran por propósito.
-- Estado del servidor copiado a `useState`.
-- Valores mágicos (cadenas de estado, roles, IDs) repetidos en varios archivos.
-- `any`, `@ts-ignore`, `eslint-disable` sin razón escrita.
-- Consultas de tiquets fuera de un repositorio con alcance; acciones sin transacción e idempotencia.
-- Modificar migraciones ya integradas.
-- Nombres, campos, estados o reglas de otra plataforma dentro del núcleo; hacer que el núcleo
-  espere o dependa de un sistema externo.
-- Tocar producción, infraestructura real o credenciales sin confirmación de la persona.
-- Hacer pasar una prueba modificándola en lugar de corregir el código.
+No ejecutar operaciones destructivas de Git, borrar datos fuera del proyecto, instalar globalmente,
+leer secretos o actuar en producción sin autorización. No sustituir una regla de negocio por una
+suposición técnica ni hacer que el núcleo dependa de un sistema externo. Los límites específicos
+para agentes permanecen en [AGENTS.md](../../AGENTS.md).

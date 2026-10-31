@@ -1,77 +1,67 @@
 # Comandos
 
-Comandos disponibles desde la raíz del repositorio.
+Ejecutar desde la raíz del checkout. Preparación del entorno en [desarrollo](../start/desarrollo.md);
+instalación de una instancia en [deploy](../../deploy/README.md). El manifiesto `package.json`
+contiene los scripts ejecutables; esta referencia explica sus efectos.
 
-## Desarrollo
+## Desarrollo y calidad
 
 | Comando | Efecto |
 |---|---|
-| `pnpm dev` | PostgreSQL aislado y API/web host con recarga (`3100`/`5173`) |
-| `pnpm dev:api` | API local en `http://127.0.0.1:3100`; guarda evidencias en `apps/server/data/evidence` |
+| `pnpm dev` | Prepara PostgreSQL/migraciones y arranca API/web con recarga |
+| `pnpm dev:api` | Arranca solo el watcher API; exige base y configuración preparadas |
 | `pnpm build` | Compila servidor y SPA |
-| `pnpm lint` | ESLint en todo el monorepo |
-| `pnpm typecheck` | TypeScript en todo el monorepo |
-| `pnpm test` | Vitest y Playwright |
-| `pnpm format` | Prettier |
-| `pnpm test:visual` | Regresión visual opt-in |
+| `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript del monorepo |
+| `pnpm format` | Formatea fuentes; Markdown escrito a mano se conserva |
+| `pnpm test:unit` | Vitest de servidor y web, sin integración DB ni navegador |
+| `pnpm test` | Vitest y Playwright; no incluye por sí solo `db:test` |
+| `pnpm test:affected` | Selecciona pruebas desde cambios Git; usa compuerta completa si hay borrados de código, infraestructura o dudas |
+| `pnpm test:e2e:smoke` / `pnpm test:e2e` | Flujos críticos / todos los flujos de navegador |
+| `pnpm test:visual` | Regresión visual opcional; usa el entorno E2E |
+| `pnpm check:fast` | Lint, tipos y unitarias para el ciclo local |
+| `pnpm check:static` | Scripts, enlaces, independencia, fronteras y knip |
+| `pnpm check` | Compuerta completa: estáticos, pruebas, PostgreSQL y build |
 
-## Base de datos
-
-| Comando | Efecto |
-|---|---|
-| `pnpm db:start` | Levanta PostgreSQL local con Compose |
-| `pnpm test:db:start` | PostgreSQL desechable para integración y E2E (`55433`) |
-| `pnpm test:db:stop` | Retira solo el proyecto de pruebas, sin volúmenes persistentes |
-| `pnpm db:stop` | Detiene PostgreSQL local |
-| `pnpm db:reset` | Requiere `-- --development`; reconstruye solo una base local `_dev` |
-| `pnpm db:test` | Pruebas de integración contra PostgreSQL real |
-| `pnpm db:demo -- --demo` | Carga la semilla demo local |
-| `pnpm db:indexes` | Audita índices y claves foráneas |
-| `pnpm db:cleanup` | Aplica la retención de sesiones, intentos y avisos |
-| `pnpm db:cleanup-evidence` | Limpia subidas de evidencia abandonadas |
-
-## Calidad
+## Base local
 
 | Comando | Efecto |
 |---|---|
-| `pnpm check:fast` | Ciclo local: lint, tipos y unitarias |
-| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
-| `pnpm test:affected` | Pruebas relacionadas con los archivos cambiados |
-| `pnpm test:e2e` | Todos los flujos de Playwright |
-| `pnpm test:e2e:smoke` | Flujos críticos de Playwright |
-| `pnpm test:unit` | Unitarias de servidor y web |
-| `pnpm check:docs` | Verifica los enlaces relativos de la documentación |
-| `pnpm check` | Compuerta completa: lint, tipos, scripts, agnóstico, fronteras, knip, tests, base y build |
-| `pnpm check:agnostic` | Verifica que el núcleo no nombre plataformas externas |
-| `pnpm check:boundaries` | Verifica las reglas de dependencia |
-| `pnpm knip` | Detecta código y dependencias sin uso |
-| `pnpm test:scripts` | Regresiones de instalación, entornos, Compose, releases, selección de pruebas y recuperación simulada |
+| `pnpm db:start` / `pnpm db:stop` | Inicia/detiene PostgreSQL de desarrollo |
+| `pnpm test:db:start` / `pnpm test:db:stop` | Inicia/retira únicamente PostgreSQL desechable de pruebas |
+| `pnpm db:test` | Ejecuta integración contra PostgreSQL real; reconstruye la base exclusiva de pruebas |
+| `pnpm db:demo -- --demo` | Carga demo explícita local; no se ejecuta en producción |
+| `pnpm db:reset -- --development` | Borra y reconstruye deliberadamente una base local `_dev` |
+| `pnpm db:indexes` | Auditoría de índices; el script carga `.env` automáticamente, ver [limitación](rendimiento-postgres.md) |
+| `pnpm db:cleanup` | Retención de sesiones, intentos y avisos |
+| `pnpm db:cleanup-evidence` | Limpia subidas abandonadas, sin borrar evidencia lista |
 
-`pnpm check` requiere el PostgreSQL de `pnpm test:db:start`. Los valores de pruebas locales
-son ficticios y predeterminados; CI puede exportar los de `.env.test.example`. Ninguna prueba carga
-archivos privados. Playwright prepara su base `_e2e` y puertos `3101`/`5174`. Durante el desarrollo usa `pnpm check:fast`; la
-compuerta completa se reserva para el cierre y para CI.
+`check`, `db:test` y las suites de navegador requieren el PostgreSQL de pruebas iniciado. Usan
+valores locales ficticios por defecto, sin descubrir dotenv privados. `test:unit` y `check:fast`
+no requieren ese contenedor. No ejecutar varias suites que reconstruyan la misma base a la vez.
 
-## Instalación y operación
+## Comprobaciones individuales
 
-| Comando | Efecto |
+| Comando | Verificación |
 |---|---|
-| `./scripts/install.sh` | Genera `.env.dev`, prepara PostgreSQL y migraciones; luego usa `pnpm dev` |
-| `./scripts/install.sh --demo` | Instala y carga la semilla demo |
-| `./scripts/install.sh --dry-run` | Muestra los pasos sin escribir archivos |
-| `docker compose up -d` | Descarga imágenes, migra y arranca la app |
-| Actualización | Respaldar, detener app, seleccionar digest, descargar, migrar y arrancar según la guía de operación |
-| `docker compose run --rm --no-deps migrate` | Aplica migraciones; detener app antes durante mantenimiento |
-| `deploy/scripts/cleanup.sh` | Limpia evidencias abandonadas y aplica retención |
-| `deploy/scripts/backup.sh` | Respalda la base |
-| `deploy/scripts/backup-evidence.sh` | Respalda el volumen de evidencias |
-| `deploy/scripts/restore.sh` | Restaura la base |
-| `deploy/scripts/restore-evidence.sh` | Restaura las evidencias |
+| `pnpm check:docs` | Enlaces relativos en documentación fuente |
+| `pnpm check:agnostic` | Independencia del núcleo |
+| `pnpm check:boundaries` | Fronteras entre capas y ausencia de ciclos |
+| `pnpm knip` | Código y dependencias sin uso |
+| `pnpm test:scripts` | Instalación, entornos, Compose, paquete de release y recuperación simulada |
 
-Ver [`../start/instalacion.md`](../start/instalacion.md) y
-[`../guides/operacion.md`](../guides/operacion.md).
+## Imagen y operación
 
-La validación operativa Docker real se ejecuta con `AXIA_IMAGE=<imagen-local> bash
-scripts/docker-smoke.sh`. Crea y elimina únicamente sus propios proyectos desechables; requiere
-una imagen construida del código actual. La prueba de permisos de evidencias puede ejecutarse con
-`AXIA_IMAGE=<imagen-local> bash deploy/scripts/evidence-volume.test.sh`.
+Los comandos de instalación, actualización, backup y recuperación tienen un único procedimiento
+en [instalación](../../deploy/README.md) y [operación](../guides/operacion.md). Para copias completas
+se usa `backup-all.sh` / `restore-all.sh`; las utilidades individuales no coordinan base y fotos.
+
+El smoke local requiere una imagen construida del checkout y crea únicamente sus proyectos
+Docker desechables. En CI se construye antes de ejecutarlo:
+
+```bash
+docker build -f apps/server/Dockerfile --target app -t axia-app:local .
+AXIA_IMAGE=axia-app:local bash scripts/docker-smoke.sh
+```
+
+`AXIA_IMAGE=axia-app:local bash deploy/scripts/evidence-volume.test.sh` comprueba permisos de
+archivos con la imagen. Estas pruebas Docker se ejecutan por separado de las suites de navegador.

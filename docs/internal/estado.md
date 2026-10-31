@@ -1,96 +1,58 @@
 # Axia — Estado del proyecto
 
-> Memoria de trabajo entre sesiones. Mantenerla corta: el detalle cronológico vive en
-> [`CHANGELOG.md`](../../CHANGELOG.md) y las decisiones en [`../decisions/`](../decisions/).
+Memoria de continuidad. El historial vive en [CHANGELOG](../../CHANGELOG.md), las razones técnicas
+en [arquitectura](../concepts/arquitectura.md) y los [ADR](../decisions/README.md).
 
 **Última actualización:** 2026-10-31
-**Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
-## En curso
+## Tarea cerrada
 
-Sin implementación abierta. Limpieza histórica verificada; siguientes trabajos en los pendientes
-operativos y de producto. No hay preguntas técnicas bloqueantes.
+Rediseño documental completado: una entrada por tarea, procedimientos y contratos contrastados,
+83 ADR consolidados con originales en Git y desarrollo separado de instalación. Especificación de
+negocio intacta; sin cambios funcionales, dependencias ni SQL. Revisión independiente cerrada tras
+corregir el contrato de prioridad y conservar la restricción de sesión por contraseña temporal.
 
-## Hecho
+## Base disponible
 
-- **Retirada histórica (2026-10-31):** veinte documentos antiguos fuera del checkout y ADR con
-  implementación sustituida clasificados como parciales; recuperación desde Git en el índice
-  histórico. Nueva migración 0017 retira ocho tablas y once funciones sin consumidores; bloquea
-  escrituras concurrentes y aborta ante datos/dependencias inesperadas, sin pérdida ni DDL parcial.
-  Conserva referencias externas, garantías del núcleo y compatibilidad de datos. ADR
-  [0101](../decisions/0101-retirada-historica.md) documenta retirada y cambio de recuentos de pruebas.
-  Revisión independiente cerrada sin hallazgos; regresiones RED→GREEN incluidas para cada tabla y
-  escritura concurrente. `AXIA_ENV_FILE=/dev/null pnpm check:fast` y `pnpm db:test` verdes (243 DB).
-  `pnpm test:affected` seleccionó `pnpm check`: ejecución final código 0, 46 Node y scripts Bash,
-  57 servidor, 298 web, 52 navegador y 243 PostgreSQL; lint/tipos/estáticos/build en verde.
-  Primera compuerta: fallaron `claims.spec.ts` (registro con foto, carga de módulo) y
-  `metrics.spec.ts` (filtro edificio, formulario de acceso no visible) mientras se ejecutaba Docker.
-  Ambos pasaron por separado (2/2) y toda la compuerta se repitió sin operaciones Docker
-  concurrentes; no se cambiaron pruebas ni límites. No se confirmó una causa única de esos fallos.
-  Imagen local verificada por smoke real: instalación, adopción de historial, respaldo,
-  recuperación en volúmenes nuevos, login/evidencia y rechazo de destino ocupado. SHA-256 del SQL
-  de la imagen coincide con el checkout. Persiste aviso previo de chunks >500 kB. Sin dependencias
-  nuevas, SQL integrado editado, push ni despliegue real. El plan concluido también se conserva
-  exclusivamente en Git.
-  Verificación documental final tras archivarlo: 117 documentos/0 enlaces rotos; independencia
-  827 fuentes/0 coincidencias.
-- **Consolidación vigente:** desarrollo independiente con watchers host; pruebas locales tmpfs y
-  bases `_test`/`_e2e`; imagen única app/migrador, releases por digest y respaldo/recuperación
-  coordinados (ADR 0099). Contratos HTTP validados, comandos tipados, alcance único de métricas,
-  dependencias offline por tiquet, SQL como definición completa e inventario Git seguro (ADR 0100).
-- **Stack propio:** PostgreSQL 17 + Drizzle + Fastify 5 + TypeScript. Un solo servidor sirve la API
-  y el SPA; Compose define `db`, `migrate` y `app`.
-- **Núcleo:** autenticación local, autorización por permisos y ámbitos, ciclo completo del tiquet,
-  evidencias TUS/Sharp, tiempo real con SSE, cola offline y tiempos por acción.
-- **Administración:** usuarios, roles, catálogos, calendarios, configuración de instancia, ámbitos,
-  designaciones y métricas. Las cuentas se pueden desactivar o eliminar: sin historial se borran y
-  con historial se archivan para conservar la bitácora. Los catálogos se exportan e importan en un
-  único XLSX idempotente (ADR 0094), con clasificación en columnas (ADR 0096), dependencias con
-  ubicación obligatoria (ADR 0097) y equipo asignado al problema (ADR 0098).
-- **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
-  probada.
-- **Despliegue con Compose:** `compose.yaml` exige una release `AXIA_IMAGE` compartida por app y
-  migrador; app solo se alcanza en la red externa del proxy. El paquete fija digest, y la publicación
-  depende de la CI del mismo commit. Desarrollo usa Compose autónomo y `.env.dev`; pruebas usa otro
-  proyecto tmpfs y bases separadas. ADR 0099 consolida estos recorridos.
-- **UI:** escritorio y móvil por rol, navegación inferior, temas y regresión visual.
-- **Calidad:** Vitest contra PostgreSQL real, Playwright, fronteras de dependencias, knip y
-  verificación de enlaces.
+- PostgreSQL 17, Drizzle, Fastify 5 y SPA React; un servidor sirve web y API. Compose separa base,
+  migrador y app. Desarrollo, integración y navegador usan entornos independientes (ADR 0099).
+- Autenticación local, permisos/ámbitos, ciclo del tiquet, evidencias, SSE, cola offline,
+  administración y métricas. La [especificación de negocio](../concepts/negocio.md) es normativa.
+- Migraciones SQL como definición de base; contratos HTTP validados, métricas con alcance común y
+  dependencias offline por tiquet (ADR 0100). La migración 0017 retira estructuras sin consumo y
+  aborta ante datos o dependencias inesperadas (ADR 0101).
+- Instalación local y recuperación en volúmenes nuevos verificadas en la tarea anterior;
+  publicación/arranque en infraestructura real todavía pendientes.
+- Documentación consolidada por tareas (ADR [0102](../decisions/0102-documentacion-por-tareas.md));
+  antiguos documentos y decisiones se recuperan mediante el [índice histórico](../history/README.md).
 
-## Decisiones vigentes
+## Verificación de esta tarea
 
-El índice completo está en [`../decisions/README.md`](../decisions/README.md). Las más recientes:
-ADR [0099](../decisions/0099-consolidacion-self-hosted.md),
-[0100](../decisions/0100-consolidacion-interna.md) y [0101](../decisions/0101-retirada-historica.md):
-entornos/operación, contratos/alcance/cola y retirada histórica segura.
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos y 355 pruebas verdes.
+- `AXIA_ENV_FILE=/dev/null pnpm test:affected`: seleccionó `pnpm check`, código 0; 46 pruebas Node,
+  scripts Bash, 57 servidor, 298 web, 52 navegador y 243 PostgreSQL; estáticos y build verdes.
+- `pnpm check:docs`: 34 documentos y cero enlaces rotos (antes 117 documentos).
+- Paquete operativo: dos pruebas existentes verdes y generación real comprobada; README/OPERATIONS
+  presentes y enlaces locales válidos. Formato y `git diff --check` sin errores.
+- SHA-256 de negocio sin cambios. Persiste aviso previo de chunks >500 kB en build.
+- Integración local; sin push ni despliegue real.
 
-## Verificación
+## Siguiente: diferencias de producto documentadas
 
-```bash
-pnpm check:fast   # ciclo local
-pnpm check        # antes de integrar
-```
+La documentación describe el código disponible sin cambiar las reglas aprobadas. Revisar cada
+brecha contra negocio y añadir regresiones al implementarla:
 
-Para el ciclo local usar `pnpm check:fast` y `pnpm test:affected`. La compuerta completa incluye
-lint, tipos, independencia del núcleo, fronteras, knip, Vitest, Playwright, integración contra
-PostgreSQL real y build. `pnpm test:db:start` prepara PostgreSQL exclusivo; integración y Playwright
-usan conexiones locales seguras por defecto y bases separadas `_test`/`_e2e`, sin descubrir dotenv
-privados. Playwright prepara su base con semilla demo. Se ejecuta una vez antes de integrar.
+- RN27: una acción offline tardía rechazada/conflictiva no deja el evento sin efecto requerido.
+- RN17: recaptura limitada a registrado/con supervisor/asignado; no durante reclamación y sin
+  motivo obligatorio. RN06: reasignación directa a supervisor termina en `with_supervisor`.
+- Tipo de servicio opcional en la API de alta/atención; la UI lo exige al atender.
+- `auto_validation_days` configurable sin tarea automática; tampoco hay Web Push ni escalamiento.
+- Acciones visibles calculadas en cliente sin ámbito/participación/ventana de reclamación; el
+  servidor rechaza acciones inválidas. `open_claim` puede ofrecerse fuera de plazo.
 
 ## Pendientes operativos
 
-- Descargar y arrancar las imágenes de GHCR en un host limpio.
-- Configurar dominio y TLS en Nginx Proxy Manager o Cloudflare Tunnel; apuntarlo a `axia:3100` en la
-  red `proxy`.
-- Programar respaldos de base y evidencias, con prueba de restauración trimestral.
-- Programar `deploy/scripts/cleanup.sh` junto con los respaldos (cron de ejemplo en
-  `docs/guides/operacion.md`).
-- Revisar logs, monitorización y espacio en disco.
-- Decidir si se implementan Web Push, escalamiento y adaptadores de importación.
-
-## Pendientes de producto
-
-- La barra de acciones se calcula en el cliente con permiso + estado; no conoce ámbito,
-  participación ni ventana de reclamación. Conviene migrarla a acciones calculadas por el servidor.
-- `open_claim` sobre `closed` se ofrece sin comprobar la ventana de reclamación; el servidor lo
-  rechaza con 409 cuando ya venció.
+- Probar descarga/arranque de release en host limpio y configurar dominio/TLS en el proxy.
+- Programar respaldo coordinado, limpieza, restauración periódica y monitorización de disco/logs.
+- Infraestructura real requiere autorización de la persona. Sin credenciales ni reglas de negocio
+  pendientes para terminar el rediseño documental.

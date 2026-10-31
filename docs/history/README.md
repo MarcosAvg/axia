@@ -1,56 +1,27 @@
-# Historia en Git
+# Consultar historia en Git
 
-La documentación exclusivamente histórica se retiró del checkout. Git conserva su contenido en
-el commit base `488862f`; no describe la implementación actual. Para consultar cualquier ruta del
-índice, ejecutar desde la raíz del repositorio:
+Las referencias del checkout describen Axia actual. Los diseños, auditorías, planes concluidos y
+ADR anteriores se conservan en Git, sin mantener otra copia ni usarlos como instrucciones vigentes.
 
-```bash
-git show 488862f:docs/decisions/archivo/0002-stack-anterior.md
-```
+| Commit | Contenido recuperable |
+|---|---|
+| `2455a48` | Los 83 ADR anteriores a 0099, consolidados en las referencias actuales |
+| `488862f` | Documentación histórica retirada antes: ADR archivados, diseños, auditoría y planes |
+| `b26c1b4` | Versión final del plan de retirada histórica |
 
-Sustituir la ruta después de `:` por la del documento deseado. El comando consulta la prosa sin
-restaurar archivos al checkout ni modificar el árbol de trabajo.
-En un clon superficial que no contenga ese commit, recuperar primero el historial con
-`git fetch --unshallow`.
-
-## Documentos retirados
-
-- `docs/decisions/archivo/0002-stack-anterior.md`
-- `docs/decisions/archivo/0015-rpc-definer-y-rls-de-lectura.md`
-- `docs/decisions/archivo/0016-autenticacion-anterior.md`
-- `docs/decisions/archivo/0017-evidencias-en-storage.md`
-- `docs/decisions/archivo/0018-escritura-administracion-por-rls.md`
-- `docs/decisions/archivo/0029-infraestructura-importacion.md`
-- `docs/decisions/archivo/0030-adaptador-importacion.md`
-- `docs/decisions/archivo/0032-despliegue-y-respaldos.md`
-- `docs/decisions/archivo/0033-linea-de-tiempo-importada.md`
-- `docs/decisions/archivo/0034-convivencia.md`
-- `docs/decisions/archivo/0037-app-docker-compose.md`
-- `docs/decisions/archivo/0059-importar-catalogos.md`
-- `docs/decisions/0031-verificacion-metricas.md`
-- `docs/decisions/0035-produccion-push-ci-capacitor.md`
-- `docs/history/diseno-ui.md`
-- `docs/history/auditoria-ui-ux.md`
-- `docs/history/modelo-datos-fase-1.md`
-- `docs/internal/auditoria-estructura-self-hosted-2026-10-31.md`
-- `docs/superpowers/plans/2026-10-31-consolidacion-self-hosted.md`
-- `docs/superpowers/plans/2026-10-31-consolidacion-interna.md`
-
-## Plan de esta limpieza
-
-El plan de retirada también se concluyó y se retiró del checkout. Su versión final, con las
-pruebas y decisiones de ejecución, se conserva en el commit `b26c1b4`:
+Desde la raíz del repositorio se pueden descubrir rutas y leer cualquier archivo sin restaurarlo:
 
 ```bash
+git ls-tree -r --name-only 2455a48 docs/decisions
+git show 2455a48:docs/decisions/0070-autenticacion-local-y-sesiones.md
+git ls-tree -r --name-only 488862f docs
 git show b26c1b4:docs/superpowers/plans/2026-10-31-retirada-historica.md
 ```
 
-## Referencias conservadas
+Sustituir commit y ruta según la tabla. Si un clon superficial no contiene esos commits, obtener
+el historial del remoto antes de consultarlos (`git fetch --unshallow`). La historia documental no
+reemplaza un respaldo de los datos de una instancia; los números de ADR retirados no se reutilizan.
 
-- [Decisiones](../decisions/README.md): índice de criterios vigentes y decisiones parciales, con
-  enlaces a la implementación que reemplaza sus detalles históricos.
-- [Integraciones y migración](integraciones-y-migracion.md): referencia de origen y normalización,
-  conservada por las instrucciones del proyecto; no implica adaptadores activos ni tablas de
-  importación disponibles. Cualquier adaptador futuro necesita su propia decisión y migración.
-- [Notificaciones](../guides/notificaciones.md): Web Push y escalamiento siguen pendientes; no se
-  retiran como si fueran funcionalidad descartada.
+Los [ADR 0099–0102](../decisions/README.md) justifican las consolidaciones actuales. Se conserva
+[integraciones y migración](integraciones-y-migracion.md) como referencia de origen y normalización
+exigida por las instrucciones del proyecto; no implica adaptadores externos disponibles.

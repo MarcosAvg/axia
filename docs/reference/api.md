@@ -1,7 +1,23 @@
 # API
 
-La API es HTTP/JSON, con cookie de sesión y validación de origen. Las rutas de escritura y lectura de
-tiquets respetan permisos y alcance. Un recurso fuera de alcance responde 404.
+La web habla con `/api` en el mismo origen. La API usa JSON, cookie de sesión opaca y validación
+de origen para escrituras; no expone una clave de base de datos al cliente. Las comprobaciones de
+[Permisos](permisos.md) también se aplican a las lecturas y agregados.
+
+## Contratos comunes
+
+- UUID para identificadores de recursos y `clientRequestId`; fechas de acción en formato ISO con
+  zona (`occurredAt`). Los esquemas validan entradas antes de ejecutar servicios.
+- Alta, acciones y reserva de evidencia son idempotentes. Conserva `clientRequestId` al reintentar.
+  El alta devuelve `{ ticket: { id, folio, possibleDuplicate }, replayed }`: 201 al crear, 200 al
+  repetir. Una acción devuelve `{ ticketId, action, replayed }`.
+- Listas de tiquets: `page` desde 1 (por defecto 1), `pageSize` entre 1 y 100 (por defecto 20).
+  Filtros: `status` o `statuses` separados por coma, `buildingId`, `categoryId`, `search`.
+- Error JSON: `{ error: { code, message, details? }, requestId }`. Usa el código para decidir el
+  tratamiento y el mensaje para informar; los errores de campos incluyen detalles de validación.
+- Respuestas habituales: 400 datos inválidos, 401 sesión requerida, 403 permiso insuficiente,
+  404 recurso inexistente o no visible, 409 conflicto de estado o precondiciones, 429 límite de
+  intentos. Un UUID repetido no sustituye los controles de sesión y alcance.
 
 ## Salud y arranque
 
@@ -41,10 +57,10 @@ tiquets respetan permisos y alcance. Un recurso fuera de alcance responde 404.
 | `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
 
-Las acciones de flujo son `take`, `assign_technician`, `assign_supervisor`, `add_auxiliary`,
-`start`, `pause`, `advance_pause`, `resume`, `attend`, `validate`, `reject`, `cancel`,
-`change_priority`, `comment`, `recapture`, `open_claim`, `resolve_claim`, `mark_duplicate`,
-`reactivate` y `rate`.
+El cuerpo de una acción contiene `action`, `clientRequestId` y los campos específicos del comando.
+Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-transiciones.md).
+Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
+evidencia del ciclo. La API no permite escribir directamente el estado.
 
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
 hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de
@@ -66,6 +82,12 @@ para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
 | `GET` | `/api/evidence/:id/thumbnail` | Miniatura autenticada |
 | `POST` | `/api/uploads` | Subida TUS |
 
+Los archivos y miniaturas requieren sesión y acceso al tiquet en cada lectura: sus rutas son
+autenticadas, no URLs firmadas públicas. La reserva devuelve
+`{ evidence: { id }, uploadUrl, maxSize, quotaRemaining, replayed }`. El cliente sube al `uploadUrl`
+con el protocolo TUS; reservar por sí solo no completa la evidencia. El servidor aplica límites
+de tamaño, tipo y cuota, y procesa imágenes antes de dejarlas disponibles.
+
 ## Tiempo real y sincronización
 
 | Método | Ruta | Uso |
@@ -81,6 +103,18 @@ para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
 `GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`
 y `createdAt`.
 
+`GET /api/events/changes` recibe `since` (ID numérico del último evento, por defecto 0) y `limit`
+(1–200, por defecto 100); devuelve `{ items }` en orden por ID. SSE y recuperación respetan alcance
+y visibilidad de eventos para solicitantes. SSE se cierra al expirar o revocar la sesión.
+
+La sincronización recibe `{ items: [...] }` (1–100). Cada elemento lleva `clientRequestId`,
+`ticketId`, `type` (comando), `args`, `occurredAt` y `manualTime` opcional. Devuelve `{ results }`
+con estado por envío: `applied`, `duplicate`, `rejected`, `conflict` o `blocked`, y código/mensaje
+cuando corresponde. Una acción fallida bloquea las siguientes del mismo tiquet en el lote
+(`blockedBy`), sin detener otros tiquets. Valida antigüedad, tolerancia de futuro, permisos y estado;
+no existe aceptación automática por haber trabajado sin conexión. El registro histórico de una
+acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
+
 ## Administración
 
 | Método | Ruta | Uso |
@@ -89,12 +123,22 @@ y `createdAt`.
 | `POST` | `/api/admin/users/:id/reset-password` | Restablecer contraseña |
 | `POST` | `/api/admin/users/:id/revoke-sessions` | Revocar sesiones |
 | `GET` | `/api/admin/roles` | Roles |
-| `GET/POST/PATCH` | `/api/admin/access` y rutas asociadas | Roles, permisos, vínculos y ámbitos |
+| `GET` | `/api/admin/access` | Inventario de acceso |
+| `POST/PATCH` | `/api/admin/access/roles` y `/:id` | Crear y actualizar roles |
+| `POST` | `/api/admin/access/role-permissions` y `/remove` | Conceder y retirar permisos |
+| `POST` | `/api/admin/access/user-roles` y `/remove` | Conceder y retirar roles |
+| `PATCH` | `/api/admin/access/profiles/:id` | Actualizar perfil |
+| `PATCH` | `/api/admin/access/requesters/:id`, `/api/admin/access/technicians/:id` | Vincular cuenta y persona del catálogo |
+| `POST/DELETE` | `/api/admin/access/scopes` y `/:id` | Ámbitos de supervisor |
+| `POST/DELETE` | `/api/admin/access/scope-buildings` y `/:scopeId/:buildingId` | Edificios del ámbito |
+| `POST/DELETE` | `/api/admin/access/technician-categories` y `/:technicianId/:categoryId` | Designaciones |
 | `GET/POST/PATCH` | `/api/admin/catalogs/:table` | Catálogos |
 | `POST/PATCH` | `/api/admin/catalogs/dependencies` y `/:id` | Dependencia con al menos una ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/locations` | Vínculos dependencia–ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
-| `GET/POST/PATCH/DELETE` | `/api/admin/calendars` y rutas asociadas | Calendarios |
+| `GET/POST/PATCH` | `/api/admin/calendars` y `/:id` | Calendarios |
+| `POST` | `/api/admin/calendars/:id/intervals`, `/:id/holidays` | Añadir franjas y festivos |
+| `DELETE` | `/api/admin/calendar-intervals/:id`, `/api/admin/calendar-holidays/:id` | Retirar franjas y festivos |
 | `GET/PATCH` | `/api/admin/settings` | Configuración de instancia |
 
 ## Indicadores
@@ -111,7 +155,17 @@ y `createdAt`.
 | `GET` | `/api/metrics/sla` |
 | `GET` | `/api/metrics/sla-by-priority` |
 | `GET` | `/api/metrics/by-technician` |
+| `GET` | `/api/metrics/technician-times` |
+| `GET` | `/api/metrics/supervisors` |
+| `GET` | `/api/metrics/pause-substates` |
 | `GET` | `/api/metrics/reject-cancel` |
 | `GET` | `/api/metrics/routing` |
 
-Los contratos concretos están en `apps/server/src/**/schemas.ts` y en las pruebas de integración.
+Resumen y actividad requieren `ticket.view`; las demás métricas requieren `metrics.view` y usan
+su alcance. Los filtros de métricas son `from` y `to` (`YYYY-MM-DD`), `buildingId`, `teamId`,
+`categoryId` y `dependencyId`; un filtro nunca amplía el alcance. Resumen admite `compact=0|1`;
+actividad admite `limit` (1–50, por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
+
+Los contratos ejecutables están junto a las rutas y en `apps/server/src/**/schemas.ts`;
+las pruebas de integración verifican formas, permisos y casos de error. Esta referencia no es un
+SDK ni sustituye esos esquemas.

@@ -95,7 +95,7 @@ Si algún script no existe, créalo durante el arranque.
 9. Fechas en `timestamptz`; zona horaria configurable, nunca fija en el código.
 10. Código, tablas y columnas en inglés. Textos de interfaz en español (es-MX).
 11. Actualiza la documentación en el mismo commit que cambia el comportamiento.
-12. Estilo y límites: `docs/reference/convenciones-codigo.md`. Reglas del negocio: `docs/concepts/dominio.md`.
+12. Estilo y límites: `docs/reference/convenciones-codigo.md`. Reglas del negocio: `docs/concepts/negocio.md`.
 
 ## 7. Límites: requieren confirmación explícita de la persona
 
@@ -151,14 +151,14 @@ Breve y en español:
 ## 11. Documentos del proyecto
 
 - `docs/internal/estado.md`: estado, hoja de ruta y bloqueos. Se lee siempre al iniciar.
-- `docs/start/continuidad.md`: actualización, continuidad entre equipos y solución de problemas.
+- `docs/start/desarrollo.md`: entorno local, demo, pruebas, continuidad y solución de problemas.
 - `docs/concepts/negocio.md`: **fuente de verdad del negocio** (flujo, estados, reglas,
   tiempos y permisos). **Léela antes de tocar cualquiera de esos temas.** Si algo contradice a la
   especificación, manda la especificación.
-- `docs/concepts/dominio.md`: resumen consistente del núcleo (flujo, modelo conceptual y glosario).
+- `docs/concepts/dominio.md`: vocabulario y orientación del núcleo, sin duplicar reglas.
 - `docs/concepts/datos.md`: modelo de datos actual (dominios, relaciones y reglas).
 - `docs/reference/convenciones-codigo.md`: estructura, estilo, pruebas, SQL, git, herramientas.
-- `docs/start/instalacion.md`: requisitos, instalación y primer administrador.
+- `deploy/README.md`: instalación de una instancia y primer administrador.
 - `docs/history/integraciones-y-migracion.md`: **solo léelo al trabajar en importadores o
   integraciones**. Describe el origen actual de los datos como referencia.
 - `docs/decisions/`: decisiones de arquitectura (ADR).

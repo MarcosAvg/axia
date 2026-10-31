@@ -20,17 +20,12 @@ restablecen contraseñas.
 
 ## Roles y permisos
 
-En `/admin/roles` se crean roles y se asigna cada permiso con su ámbito:
+En `/admin/roles` se crean roles y se asignan permisos con su ámbito. Consulta la tabla de
+[Permisos](../reference/permisos.md) antes de ampliar un acceso: dar un rol no crea por sí solo
+vínculos con solicitantes, técnicos ni edificios.
 
-| Ámbito | Alcance |
-|---|---|
-| `own` | Solo los tiquets propios o asignados, según el permiso |
-| `team` | Los tiquets del equipo |
-| `buildings` | Los edificios del ámbito de supervisor |
-| `all` | Toda la instancia |
-
-Los roles son datos: se pueden renombrar y recomponer sin cambiar el código. La interfaz se protege
-por permiso, no por nombre de rol.
+Los roles se pueden renombrar y recomponer; la interfaz y el servidor comprueban permisos,
+no nombres de rol. Prueba la cuenta afectada después de cambiar roles o ámbitos.
 
 ## Ámbitos y designaciones
 
@@ -65,9 +60,14 @@ defecto y el calendario de cada equipo determinan el tiempo laboral de los indic
 En `/admin/configuracion` se ajustan:
 
 - la etiqueta del equipo y la zona horaria;
-- la política de validación y los días de validación automática;
+- la política de validación y el valor de días de validación automática;
 - la ventana de reclamación y la política de evidencia de la solicitud;
 - el patrón de folio, la prioridad y el calendario por defecto;
 - el modo de reloj de SLA y los eventos visibles para el solicitante.
 
-Los cambios aplican a los cálculos y a las pantallas siguientes; no reescriben el historial.
+Los cambios no reescriben el historial. Aunque se puede guardar un número de días para validación
+automática, actualmente no hay un planificador que la ejecute. Tampoco se ejecutan escalamiento
+ni entregas Web Push: consulta [Notificaciones](notificaciones.md).
+
+La administración de cuentas y catálogos se realiza aquí; respaldos, actualización y recuperación
+de la instancia corresponden a [Operación](operacion.md).

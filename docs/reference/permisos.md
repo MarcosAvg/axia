@@ -6,12 +6,26 @@ Axia usa permisos fijos y roles configurables. Cada permiso se asigna a un rol c
 
 | Ámbito | Alcance |
 |---|---|
-| `own` | Tiquets propios o asignados, según el permiso |
-| `team` | Tiquets del equipo |
+| `own` | Relación con el tiquet según el permiso; detalle debajo |
+| `team` | Equipos del perfil técnico y de los ámbitos activos de supervisor |
 | `buildings` | Equipos y edificios del ámbito de supervisor |
 | `all` | Toda la instancia |
 
-Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito más amplio.
+Cuando una cuenta tiene el mismo permiso por varios roles activos, se selecciona uno por este
+orden: `all` > `buildings` > `team` > `own`. No se unen los resultados de distintos ámbitos.
+`buildings` exige coincidencia tanto del equipo como del edificio.
+
+Para `own`, el servidor distingue:
+
+| Permiso | Relación requerida |
+|---|---|
+| `ticket.view` | Solicitante vinculado a la cuenta, técnico/auxiliar activo o supervisor asignado |
+| `ticket.validate`, `ticket.open_claim`, `ticket.rate` | Solicitante vinculado a la cuenta |
+| `ticket.start`, `ticket.attend`, `ticket.pause`, `ticket.resume`, `ticket.recapture`, `ticket.record_progress` | Técnico asignado o participante técnico activo |
+| `ticket.cancel`, `ticket.reject`, `ticket.mark_duplicate` | Solicitante vinculado o técnico/participante activo |
+
+Registrar a nombre de alguien no concede por sí solo visibilidad con `own`. Los permisos restantes
+no adquieren alcance propio sobre un tiquet por el mero hecho de configurar `own`.
 
 ## Roles semilla
 
@@ -32,8 +46,22 @@ Cuando un usuario tiene el mismo permiso por varios roles, prevalece el ámbito 
 | Métricas | `metrics.view` |
 | Administración | `act_on_behalf`, `catalog.manage`, `user.manage`, `role.manage`, `assignment.manage` |
 
-La comprobación se realiza en el servidor con `can` y `canAct`. Un tiquet fuera de alcance devuelve
-404; un permiso ausente devuelve 403.
+La comprobación se realiza en el servidor con `can`, `canAct` y consultas con alcance. Una acción
+requiere primero poder ver el tiquet y después su permiso concreto. Un recurso no visible responde
+404; la falta de autorización sobre un recurso visible responde 403. Estado, evidencia, plazo y
+otras precondiciones pueden causar rechazo aunque exista el permiso. La semilla demo no evita
+estas comprobaciones.
+
+## Actuar a nombre de otra persona
+
+Para acciones de técnico, `subjectTechnicianId` activa el control de `act_on_behalf`: con ámbito
+`all` admite cualquier técnico activo; con `team`, técnicos de los equipos de la cuenta. El sujeto
+debe participar en el tiquet, salvo en recaptura, cuyo servicio no exige participación. Otros ámbitos no habilitan este mecanismo. El actor debe poder ver el tiquet.
+
+Sin sujeto se comprueba el permiso directo de la acción. `time.record_manual` no sustituye estos
+controles: se exige además para fijar o ajustar la hora. Validar o calificar por el solicitante
+usa los permisos específicos `ticket.validate_on_behalf` y `ticket.rate_on_behalf`; no basta con
+`act_on_behalf`.
 
 ## Evidencia por tipo
 
@@ -50,22 +78,22 @@ habilita cualquier tipo para quien lo tenga en el ámbito del tiquet.
 El solicitante puede adjuntar la foto de su solicitud y la evidencia de una reclamación sin recibir
 `evidence.attach`; no puede adjuntar evidencias de trabajo ni “otras”.
 
-## Vistas por rol
+## Acceso a pantallas
 
-La navegación combina permisos con capacidades de la cuenta. Una vista oculta tampoco es accesible
-por URL directa: muestra “Sin acceso”.
+El menú y las rutas combinan permisos y perfil; entrar por URL no evita el control.
 
-| Vista | Administrador | Supervisor | Técnico | Solicitante |
-|---|---|---|---|---|
-| Panel | Sí | Sí | Sí | Sí |
-| Tiquets | Sí | Sí | Sí | Sí |
-| Mi trabajo | Solo con perfil de técnico | Solo con perfil de técnico | Sí | No |
-| Bandeja | Sí | Sí | No | No |
-| Métricas | Sí | Sí | No | No |
-| Administración | Según sus permisos | No | No | No |
-| Mi perfil | Sí | Sí | Sí | Sí |
-| Avisos | Campana | Campana | Campana | Campana |
+| Pantalla | Requisito |
+|---|---|
+| Tiquets | `ticket.view`; resultados limitados por alcance |
+| Mi trabajo | Perfil de técnico (`technicianId`) |
+| Bandeja | `ticket.take_offer` |
+| Métricas | `metrics.view` |
+| Catálogos, calendarios y configuración | `catalog.manage` |
+| Usuarios | `user.manage` |
+| Roles | `role.manage` |
+| Ámbitos y designaciones | `assignment.manage` |
+| Perfil y avisos | Sesión activa |
 
-“Mi trabajo” requiere `technicianId`; “Bandeja” requiere `ticket.take_offer`. Las secciones de
-administración usan su permiso específico: `catalog.manage`, `user.manage`, `role.manage` o
-`assignment.manage`. Un rol personalizado ve únicamente las tarjetas y destinos que puede abrir.
+Los roles semilla orientan la configuración inicial; una cuenta con un rol personalizado ve las
+secciones permitidas por sus capacidades actuales. El [panel y las métricas de API](api.md)
+aplican alcance incluso al calcular agregados.

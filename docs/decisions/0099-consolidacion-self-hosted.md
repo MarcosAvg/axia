@@ -65,7 +65,9 @@ identificable y recuperable.
   generador de configuración ni una CLI operativa extensa.
 - Se conserva el runner SQL propio y las garantías de permisos del servidor. La migración nueva
   solo cambia metadatos privados del migrador, no tablas del negocio ni permisos de la app.
-- Se sustituyen los recorridos operativos de ADR 0075 y se precisa la demo descrita en ADR 0076.
+- Se sustituyen los recorridos operativos de ADR 0075 y se precisa la demo de ADR 0076; ambos
+  originales se consultan en el [historial Git](../history/README.md). Los procedimientos actuales
+  están en [instalación](../../deploy/README.md) y [desarrollo](../start/desarrollo.md).
 
 ## Alternativas descartadas
 

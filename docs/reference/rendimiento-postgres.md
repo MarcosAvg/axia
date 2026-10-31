@@ -1,202 +1,90 @@
-# Rendimiento y mantenimiento de PostgreSQL
+# Diagnosticar rendimiento de PostgreSQL
 
-**Estado:** base inicial vacía, sin datos ni cargas representativas. Este documento fija el
-procedimiento y las decisiones; todavía no afirma que una consulta concreta sea rápida.
+Utilizar esta guía cuando una consulta o la base muestre lentitud. No hay un objetivo de capacidad
+validado para cualquier instalación: medir con datos, distribución de usuarios y concurrencia
+representativos antes de cambiar parámetros o índices. Para salud, limpieza y respaldos, consultar
+[Operación](../guides/operacion.md).
 
-## 1. Ajuste de la instancia
+## Identificar el problema
 
-`compose.yaml` fija valores conservadores y permite cambiarlos por entorno:
+1. Anotar la operación lenta, duración, volumen de datos y concurrencia; distinguir API, subida de
+   evidencia y base de datos.
+2. Revisar logs de app, espacio disponible y conexiones antes de cambiar el esquema.
+3. Reproducir la consulta con los mismos filtros y alcance del usuario en una copia de prueba.
+4. Comparar el plan y duración antes y después de un único cambio. Registrar datos y parámetros
+   usados; una cifra sin ese contexto no demuestra una mejora.
 
-| Parámetro | Valor inicial | Regla |
-|---|---:|---|
-| `shared_buffers` | `256MB` | En un servidor dedicado, ~25 % de la RAM asignada a la base |
-| `effective_cache_size` | `1GB` | ~50–75 % de la RAM del host; es una estimación para el planificador |
-| `work_mem` | `8MB` | Moderado; para métricas, usar `SET LOCAL work_mem` en la transacción |
-| `maintenance_work_mem` | `128MB` | Suficiente para índices y vacuum de una instalación pequeña |
-| `max_connections` | `50` | El pool de la app es de 10; deja margen para migraciones y administración |
-| `track_io_timing` | `on` | Necesario para leer `EXPLAIN (ANALYZE, BUFFERS)` con tiempos de E/S |
+El pool de app tiene un máximo de 10 conexiones por proceso, con espera de conexión de 10 segundos
+y liberación de conexiones ociosas a los 30 segundos. SSE utiliza una conexión dedicada para
+`LISTEN/NOTIFY`; el migrador usa otra conexión. Los parámetros de PostgreSQL aplicados por el
+Compose de producción se consultan en [Configuración](configuracion.md#parámetros-de-postgresql-en-producción).
+No añadir un pooler, réplicas o particiones como respuesta automática a lentitud.
 
-La imagen está fijada a `postgres:17.11-alpine`. No se incrustan valores de un servidor concreto en
-la imagen: se pasan por `.env` o por el orquestador.
+## Revisar consultas e índices
 
-Opcional: `pg_stat_statements` para medir consultas acumuladas. Requiere
-`shared_preload_libraries=pg_stat_statements` y `CREATE EXTENSION pg_stat_statements`; no se activa
-por defecto para no romper instalaciones gestionadas donde no esté disponible.
+En una copia con datos representativos y una sesión SQL autorizada, usar
+`EXPLAIN (ANALYZE, BUFFERS)` para la consulta concreta. `ANALYZE` ejecuta la consulta: no usarlo sobre
+una escritura real sin preparar su aislamiento y recuperación. Revisar tiempo total, filas
+estimadas frente a reales, filtros, ordenamientos y lecturas de bloques.
 
-## 2. Conexiones
+El comando disponible para auditar índices es:
 
-- Un único proceso Node usa `pg.Pool` con máximo 10 conexiones. Es suficiente para decenas de
-  usuarios y evita añadir PgBouncer prematuramente.
-- `LISTEN/NOTIFY` usa una **conexión dedicada**, fuera del pool, con reconexión y re-suscripción.
-  No debe consumir una conexión del pool ni participar en transacciones de negocio.
-- Si aparecen varias réplicas del servidor, cientos de usuarios o conexiones ociosas, la ampliación
-  natural es PgBouncer en modo `transaction` o un pool por réplica más pequeño. No entra en esta
-  instalación.
-- La migración usa su propia conexión y un advisory lock; no compite con el pool de la app.
+```bash
+pnpm db:indexes
+```
 
-## 3. Índices: medir antes de crear
+**Antes de ejecutarlo:** `apps/server/scripts/index-audit.ts` carga automáticamente `.env` de la
+raíz si existe, y usa `DATABASE_URL` o, en su ausencia, `MIGRATION_DATABASE_URL`. No selecciona
+`.env.dev` ni respeta `AXIA_ENV_FILE`. Usarlo en un checkout de diagnóstico sin archivo `.env`
+privado, con la conexión de la copia de prueba proporcionada al proceso de forma segura; no asumir
+que apunta a desarrollo. No imprimir la URL ni copiar contraseñas a comandos o historial.
 
-PostgreSQL no indexa automáticamente las columnas de una FK. Eso **no** significa indexarlas todas:
-cada índice cuesta escrituras, espacio y vacuum. El orden es:
+El informe muestra:
 
-1. Ejecutar consultas reales de bandeja, detalle, timeline, métricas, notificaciones y sesiones.
-2. Medir con `EXPLAIN (ANALYZE, BUFFERS)`.
-3. Revisar `pg_stat_user_tables` (`seq_scan`, `idx_scan`, filas muertas) y
-   `pg_stat_user_indexes` (`idx_scan`).
-4. Añadir solo el índice que cambie el plan y reduzca el coste real.
-5. Reejecutar `EXPLAIN` para verificar que se usa.
-6. Crear el índice con `CONCURRENTLY` en una migración no transaccional.
+| Resultado | Qué revisar |
+|---|---|
+| FKs sin índice que cubra todas sus columnas | Consultas que filtran o unen esas columnas; confirmar con el plan antes de crear un índice |
+| Hasta 20 índices no únicos con cero lecturas, ordenados por tamaño | Tiempo y carga cubiertos por las estadísticas; cero lecturas no autoriza a borrar un índice |
+| Actividad por tabla | Filas estimadas, filas muertas, recorridos secuenciales/por índice y fechas de análisis |
 
-El script `pnpm db:indexes` lista FKs sin un índice que cubra todas sus columnas, índices no
-usados e indicadores por tabla. Es una **herramienta de revisión**, no una orden de crear índices.
-En una base vacía o recién reiniciada sus estadísticas no son concluyentes.
+La búsqueda de cobertura de FKs comprueba índices válidos no parciales y presencia de columnas;
+no prueba que su orden o selectividad sirvan para una consulta concreta. Las estadísticas de una
+base recién creada, reiniciada o sin tráfico representativo no son concluyentes.
 
-Candidatos que ya existen o que se revisarán primero:
+No indexar todas las FKs por defecto. Un recorrido secuencial puede ser adecuado si la consulta lee
+muchas filas. Antes de añadir o retirar un índice, medir también escrituras y espacio y comprobar
+que no sostiene una restricción o consulta menos frecuente. La definición vigente de índices vive
+en las [migraciones SQL](../../apps/server/db/migrations/), no en un inventario duplicado aquí.
 
-- B-tree para `tickets (status, reported_at)`, `ticket_events (ticket_id, occurred_at)`,
-  `notifications (recipient_user_id, read_at)`, `sessions (user_id, revoked_at)` y
-  `notification_deliveries (status, next_attempt_at)`.
-- GIN trigram para búsqueda/duplicados en `tickets.description` y `tickets.folio`; ambos creados
-  (`0004_tickets_search_index.sql`).
-- BRIN sobre `ticket_events (recorded_at)` **solo** si el volumen y las consultas por rango lo
-  justifican. No sustituye al B-tree por `ticket_id`.
+## Cambiar índices mediante migración
 
-No se particiona ninguna tabla todavía. Umbral inicial para revisar `ticket_events`: decenas de
-millones de filas o varios GB, con un patrón de consulta por rango de fechas. Si se decide, la clave
-primaria y las FKs deben rediseñarse para incluir la clave de partición; no es un cambio cosmético.
-
-### 3.1 Consultas de alcance y lectura (tramos 4 y 5A)
-
-La lista de tiquets usa un predicado de alcance con `EXISTS` sobre asignaciones y participantes,
-o un filtro por equipo/edificio. Las consultas por tiquet se apoyan en los índices existentes
-`ticket_assignments(ticket_id)`, `ticket_participants(ticket_id)`, `tickets(building_id)` y
-`tickets(status, reported_at)`. **No existe un índice por `tickets(team_id)`**; se probó en la base
-de rendimiento y el planificador siguió eligiendo un recorrido secuencial con 20 000 filas, así que
-no se creó. El timeline usa `idx_ticket_events_ticket` y ordena por `occurred_at`.
-
-Medición con 20 000 tiquets, 5 476 asignaciones, 2 000 participantes y 40 000 eventos:
-
-| Consulta | Antes | Decisión |
-|---|---:|---|
-| Lista sin alcance (administrador) | 56 ms | Sin índice nuevo; el coste está en `count(*) over()` |
-| Lista por edificio (supervisor) | 11 ms | Usa `idx_tickets_building` |
-| Lista por equipo | 27 ms | Sin índice nuevo; 50 % de selectividad no lo justifica |
-| Lista propia (técnico) | 255 ms | Candidatos parciales; no usados por el planificador a este volumen |
-| Búsqueda `%19999%` | 22 ms | Índice trigram de folio: 0,36 ms |
-| Timeline de un tiquet | 0,6 ms | Sin cambio |
-
-Se añadió `idx_tickets_folio_trgm` en la migración no transaccional
-`0004_tickets_search_index.sql`.
-
-Para las bandejas del tramo 5B se midió con 3 333 ofertas activas y 5 476 asignaciones:
-
-| Consulta | Antes | Decisión |
-|---|---:|---|
-| Bandeja propia (`ticket_assignments` activas) | 27 ms | Sin índice nuevo; el filtro por técnico usa recorrido secuencial porque 5 000 de 5 476 asignaciones son del mismo técnico |
-| Bandeja de ofertas (`ticket_offers` por supervisor y estado) | 13 ms | Sin índice nuevo; candidato parcial si hay muchos supervisores |
-| Supervisores por ámbito | < 1 ms | Sin índice; tablas pequeñas |
-
-Los índices parciales por asignado/participante activo y por oferta dirigida siguen como candidatos
-y solo se crearán si un volumen mayor y `EXPLAIN` demuestran que se usan. No se añadió particionado
-ni PgBouncer; el pool de la aplicación sigue limitado a 10 conexiones.
-
-### 3.2 Escrituras y concurrencia (tramo 5C.1)
-
-Las altas y acciones usan transacciones cortas y bloqueo `FOR UPDATE` sobre el tiquet. Las claves de
-idempotencia se apoyan en el índice único de `ticket_events(client_request_id)`.
-
-| Consulta | Tiempo | Decisión |
-|---|---:|---|
-| Detección de duplicados al registrar (20 000 tiquets) | 1,8 ms | Usa `idx_tickets_building` + `idx_tickets_reported_at`; sin índice nuevo |
-| Buscar oferta activa del supervisor | 0,09 ms | Usa el índice único de `ticket_offers` por `ticket_id`; sin índice nuevo |
-| Bloqueo y actualización del tiquet | por PK | Sin índice nuevo |
-
-No se añadieron índices en 5C.1. Las pruebas de concurrencia cubren dos altas con la misma clave y
-dos supervisores tomando el mismo tiquet; solo una operación gana.
-
-En 5C.2 las comprobaciones de evidencia usan `idx_evidence_ticket_type` y la validación usa el
-índice único `ticket_validations(ticket_id, cycle, validator_role)`. Las transiciones bloquean por
-PK; no se añadieron índices nuevos.
-
-En 5C.3 la pausa usa el índice único parcial `ticket_pauses_one_open`; las reclamaciones y enlaces
-usan `idx_ticket_claims_ticket` e `idx_ticket_links_ticket`; la calificación usa el índice único de
-`ticket_ratings(ticket_id)`. No se añadieron índices nuevos.
-
-### 3.3 Evidencias (tramo 6)
-
-La lista de evidencias usa `idx_evidence_ticket`; la comprobación de evidencia del flujo usa
-`idx_evidence_ticket_type`. La cuota por usuario consulta `evidence` por `uploaded_by` y
-`processing_state = 'ready'`.
-
-Con 20 000 evidencias asignadas a un solo usuario, esa consulta tarda 9,2 ms con recorrido
-secuencial; el índice parcial no cambia el plan porque el usuario concentra el 100 % de las filas.
-Se añadió igualmente `idx_evidence_uploaded_by_ready` en
-`0005_evidence_quota_index.sql` porque la consulta de cuota es selectiva por usuario en producción y
-se ejecuta al crear y al terminar cada evidencia. Debe revisarse con una distribución real de
-usuarios.
-
-### 3.4 SSE y notificaciones (tramo 7A)
-
-El catch-up usa la PK de `ticket_events` y el predicado de alcance; la bandeja usa
-`idx_notifications_recipient` (`recipient_user_id, read_at`). Cada evento SSE se filtra con una
-consulta por PK del tiquet. No se añadieron índices nuevos.
-
-
-### 3.5 Sincronización offline (tramo 8A)
-
-Cada ítem se valida y aplica en su propia transacción, igual que la acción online. La idempotencia
-usa el índice único de `ticket_events(client_request_id)`; no se añadieron índices nuevos.
-
-
-## 4. Migraciones no transaccionales
-
-`CREATE INDEX CONCURRENTLY`, `VACUUM` y `REINDEX CONCURRENTLY` no pueden ejecutarse dentro de una
-transacción. El runner soporta el marcador:
+Todo cambio de esquema se agrega en una migración nueva. El runner admite una sentencia no
+transaccional por archivo con el marcador:
 
 ```sql
 -- axia:no-transaction
-create index concurrently if not exists idx_ejemplo on public.tickets (status);
+create index concurrently if not exists idx_example on public.tickets (status);
 ```
 
-Reglas:
+El ejemplo ilustra el formato; no es una recomendación de índice. Una migración no transaccional
+se registra cuando termina la sentencia y no tiene rollback automático: debe ser idempotente y
+revisarse su estado antes de reintentar un fallo. No modificar migraciones integradas. Véanse
+[Convenciones](convenciones-codigo.md) y [Datos](../concepts/datos.md).
 
-- Una sola sentencia por archivo no transaccional.
-- Debe ser idempotente (`IF NOT EXISTS`), porque si falla después de aplicar parte del trabajo no hay
-  rollback automático.
-- La migración se registra solo cuando la sentencia termina.
-- La migración base y los grants pueden seguir siendo transaccionales.
+## Mantenimiento y ajuste
 
-## 5. Vacuum, analyze y mantenimiento
+Revisar `n_dead_tup`, `last_autovacuum` y `last_autoanalyze` en `pg_stat_user_tables` para identificar
+acumulación de filas muertas o estadísticas antiguas. Después de una carga grande, evaluar
+`ANALYZE` sobre las tablas afectadas. No programar reescrituras o reconstrucciones de tablas como
+limpieza rutinaria sin medir su necesidad y bloqueo.
 
-- Autovacuum se mantiene activo. Las tablas de sesiones, intentos, notificaciones y entregas tienen
-  limpieza programada, pero no se depende de ella para el mantenimiento estructural.
-- Ejecutar `ANALYZE` después de una semilla grande o de una importación masiva.
-- Revisar `n_dead_tup`, `last_autovacuum` y `last_autoanalyze` en `pg_stat_user_tables`.
-- No ejecutar `VACUUM FULL` como rutina: bloquea y reescribe la tabla. Primero medir bloat.
-- Los respaldos siguen el procedimiento de `pg_dump` + volumen de fotos; no se sustituyen por
-  copias en caliente del directorio de datos.
+Antes de aumentar memoria o conexiones, medir memoria disponible y consumo bajo concurrencia;
+los parámetros de [Configuración](configuracion.md) son valores iniciales del proyecto, no una
+fórmula ajustada al host. Registrar el problema observado, cambio y resultado antes de conservarlo.
+Las copias y la recuperación siguen el procedimiento coordinado de
+[Operación](../guides/operacion.md#respaldos-y-recuperación), no copias del directorio de PostgreSQL
+en uso.
 
-## 6. Consultas y vistas internas
-
-Las vistas de métricas y `v_ticket_timeline` no aplican autorización por sí mismas. **No deben
-exponerse desde una ruta HTTP** hasta que el tramo 4/5 implemente `can` y el alcance por repositorio.
-Antes de exponerlas, añadir pruebas negativas para otro equipo, otro edificio, solicitante y usuario
-inactivo. Un `EXPLAIN` correcto no compensa una fuga de datos.
-
-## 7. Procedimiento de revisión
-
-```bash
-# Base de desarrollo con datos representativos
-pnpm db:indexes
-psql "$DATABASE_URL" -c "EXPLAIN (ANALYZE, BUFFERS) <consulta>"
-```
-
-Checklist antes de producción:
-
-- [ ] Ejecutar las consultas críticas con datos representativos.
-- [ ] Revisar FKs sin índice y decidir cuáles se justifican.
-- [ ] Verificar que los índices nuevos se crean con `CONCURRENTLY` y una migración no transaccional.
-- [ ] Ajustar `shared_buffers`/`effective_cache_size` a la RAM real del servidor.
-- [ ] Comprobar `ANALYZE` tras la semilla o importación.
-- [ ] Confirmar que las vistas internas no están publicadas sin alcance.
-- [ ] Probar restauración de respaldo y medir el tiempo de recuperación.
+La optimización debe conservar permisos y alcance de las consultas. Los repositorios aplican la
+autorización; una consulta SQL directa o un plan rápido no demuestran aislamiento entre usuarios.
+Los cambios en consultas con alcance requieren pruebas positivas y negativas de permisos.

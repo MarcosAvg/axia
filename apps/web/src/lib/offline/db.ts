@@ -3,7 +3,7 @@ import Dexie, { type EntityTable } from 'dexie'
 // Cola de salida: toda acción que pueda ocurrir sin conexión se guarda aquí
 // primero, con un UUID generado en el cliente (`crypto.randomUUID()`). El servidor
 // usa ese UUID como clave de idempotencia (`client_request_id`).
-// Ver docs/decisions/0004-cola-offline-con-dexie.md.
+// Ver docs/concepts/arquitectura.md para el contrato offline actual.
 export interface OutboxItem {
   id: string
   // Secuencia monótona (sin índice): da un orden determinista al procesar la cola, para que

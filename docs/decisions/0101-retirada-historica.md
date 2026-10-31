@@ -14,7 +14,7 @@ métricas HTTP ya se calculan con consultas parametrizadas sobre el conjunto aut
 
 1. **Historia en Git.** Retirar doce ADR ya archivados, ADR 0031/0035 obsoletos, tres documentos
    históricos de UI/modelo, la auditoría estructural resuelta y dos planes concluidos. El índice
-   [histórico](../history/README.md) conserva rutas y el commit `488862f` para recuperarlos con
+   [histórico](../history/README.md) permite descubrir las rutas en el commit `488862f` y leerlas con
    `git show`. El plan de esta limpieza también se retira al terminar y su commit final queda en
    ese índice. Se conserva el documento de integraciones exigido por AGENTS.md. Los ADR con
    criterios funcionales vigentes y detalles técnicos sustituidos se marcan como parciales y
@@ -68,3 +68,7 @@ filas antes de autorizar su vaciado y volver a ejecutar migraciones. No vaciar t
 forzar el arranque. El historial en Git conserva el diseño retirado, no reemplaza un respaldo de
 los datos de una instancia. Esta tarea no toca producción ni añade un importador o archivo de
 datos paralelo.
+
+La [decisión 0102](0102-documentacion-por-tareas.md) consolidó después los criterios conservados
+en referencias actuales y retiró también los ADR parciales. Sus originales fechados permanecen
+en Git; la clasificación descrita en esta decisión corresponde al cierre de esta retirada.

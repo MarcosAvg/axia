@@ -2,14 +2,14 @@
 
 Referencia conceptual del modelo de datos actual. La definición ejecutable completa está en las
 migraciones SQL de `apps/server/db/migrations/`. Drizzle ejecuta SQL parametrizado y transacciones;
-no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
+no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../decisions/0100-consolidacion-interna.md)).
 
 ## Dominios
 
 | Dominio | Tablas principales |
 |---|---|
-| Identidad | `users`, `sessions`, `login_attempts`, `roles`, `permissions`, `user_roles` |
-| Catálogos | `teams`, `buildings`, `locations`, `dependencies`, `categories`, `subcategories`, `problems`, `service_types`, `priorities`, `channels` |
+| Identidad | `users`, `sessions`, `login_attempts`, `roles`, `permissions`, `user_roles`, `role_permissions` |
+| Catálogos | `teams`, `buildings`, `locations`, `dependencies`, `dependency_locations`, `categories`, `subcategories`, `problems`, `service_types`, `priorities`, `channels` |
 | Personas | `requesters`, `technicians`, `technician_categories`, `supervisor_scopes`, `supervisor_scope_buildings` |
 | Tiquets | `tickets`, `ticket_events`, `ticket_assignments`, `ticket_participants`, `ticket_offers` |
 | Flujo | `ticket_pauses`, `ticket_pause_steps`, `ticket_captures`, `ticket_claims`, `ticket_links`, `ticket_ratings`, `ticket_validations` |
@@ -27,7 +27,9 @@ no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
 - Una dependencia se vincula a una o varias ubicaciones (`dependency_locations`); una ubicación
   puede tener varias dependencias. El vínculo es obligatorio: una dependencia sin ubicación no es
   válida.
-- Un tiquet puede tener tipo de servicio; la subcategoría y el problema son obligatorios.
+- La API actual permite omitir el tipo de servicio; subcategoría y problema son obligatorios al
+  registrar. Esto no cambia RN-01 de [Negocio](negocio.md), que exige tipo de servicio. La interfaz
+  lo exige al marcar atendido; esa condición aún no es obligatoria en el contrato del servidor.
 - El solicitante puede tener cuenta o existir solo en el catálogo.
 - El técnico puede tener cuenta o existir solo en el catálogo.
 - Las asignaciones y participantes conservan el histórico con `ended_at`.
@@ -42,9 +44,8 @@ no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
 - Las claves foráneas protegen la integridad; los índices se añaden después de medir.
 - Las vistas de métricas no aplican autorización por sí mismas: la API aplica el alcance.
 
-Las tablas históricas de importación y tareas de integración sin consumidores se retiran mediante
-la migración `0017_remove_retired_objects.sql`, que rechaza tablas con filas antes de eliminar
-objetos. Se conservan las referencias externas genéricas y sus claves. `push_subscriptions` y
+La migración `0017_remove_retired_objects.sql` retiró objetos sin consumidores; se conservaron las
+referencias externas genéricas y sus claves. `push_subscriptions` y
 `escalation_rules` siguen reservadas para funciones futuras; su presencia no implica Web Push ni
 planificador activos.
 
