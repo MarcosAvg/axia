@@ -118,6 +118,32 @@ describe('errores definitivos', () => {
 })
 
 describe('propietario de la cola', () => {
+  it('no envía si cambia la sesión mientras IndexedDB prepara el envío', async () => {
+    const handler = vi.fn(async () => {})
+    registerOutboxHandler('session_at_sending', handler)
+    await enqueue('session_at_sending', {})
+    const update = db.outbox.update.bind(db.outbox)
+    const spy = vi
+      .spyOn(db.outbox, 'update')
+      .mockImplementationOnce((key, changes) =>
+        update(key, changes).then((result) => {
+          setOfflineUserId('user-b')
+          return result
+        }),
+      )
+    try {
+      await processOutbox()
+      expect(handler).not.toHaveBeenCalled()
+      expect((await db.outbox.toArray())[0]).toMatchObject({
+        userId: 'user-a',
+        state: 'pending',
+        attempts: 0,
+      })
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   it('no envía la cola de otra persona', async () => {
     const handled = vi.fn(async () => {})
     registerOutboxHandler('test_owner', handled)
@@ -134,5 +160,145 @@ describe('propietario de la cola', () => {
 
     expect(handled).toHaveBeenCalledTimes(1)
     expect(await db.outbox.count()).toBe(0)
+  })
+})
+
+describe('dependencias por tiquet', () => {
+  it('mantiene el bloqueo tras un error entre procesamientos y deja avanzar otro tiquet', async () => {
+    const sent: string[] = []
+    registerOutboxHandler('ordered', async (payload) => {
+      const name = payload as string
+      sent.push(name)
+      if (name === 'fallo') throw new Error('Conflicto de estado')
+    })
+    await enqueue('ordered', 'fallo', 'ticket-a')
+    await enqueue('ordered', 'dependiente', 'ticket-a')
+    await enqueue('ordered', 'independiente', 'ticket-b')
+
+    await processOutbox()
+    await processOutbox()
+
+    expect(sent).toEqual(['fallo', 'independiente'])
+    const pending = (await db.outbox.toArray()).find(
+      (item) => item.payload === 'dependiente',
+    )
+    expect(pending).toMatchObject({ state: 'pending', attempts: 0 })
+    const [failed] = await errorsForCurrentUser()
+    await discardOutboxItem(failed!.id)
+    await processOutbox()
+    expect(sent).toEqual(['fallo', 'independiente', 'dependiente'])
+  })
+
+  it('espera al reintento de red antes de enviar la siguiente acción', async () => {
+    let online = false
+    const sent: string[] = []
+    registerOutboxHandler('ordered_network', async (payload) => {
+      if (!online) throw new TypeError('Failed to fetch')
+      sent.push(payload as string)
+    })
+    await enqueue('ordered_network', 'primera', 'ticket-a')
+    await enqueue('ordered_network', 'segunda', 'ticket-a')
+    await processOutbox()
+    expect(
+      (await db.outbox.toArray()).map((item) => item.attempts).sort(),
+    ).toEqual([0, 1])
+
+    online = true
+    await processOutbox()
+    expect(sent).toEqual(['primera', 'segunda'])
+    expect(await db.outbox.count()).toBe(0)
+  })
+})
+
+describe('compatibilidad de dependencias', () => {
+  it('comprueba la sesión después de resolver una fila antigua', async () => {
+    const handler = vi.fn(async () => {})
+    registerOutboxHandler('legacy_session', handler, undefined, async () => {
+      setOfflineUserId('user-b')
+      return 'ticket-a'
+    })
+    await enqueue('legacy_session', {})
+    await processOutbox()
+    expect(handler).not.toHaveBeenCalled()
+    expect(await db.outbox.count()).toBe(1)
+  })
+
+  it('resuelve las dependencias de filas antiguas de distintos manejadores', async () => {
+    registerOutboxHandler(
+      'legacy_evidence',
+      async () => {
+        throw new Error('Subida rechazada')
+      },
+      undefined,
+      async () => 'ticket-a',
+    )
+    const action = vi.fn(async () => {})
+    registerOutboxHandler(
+      'legacy_action',
+      action,
+      undefined,
+      async () => 'ticket-a',
+    )
+    await enqueue('legacy_evidence', { evidenceId: 'local' })
+    await enqueue('legacy_action', { ticketId: 'ticket-a' })
+
+    await processOutbox()
+    await processOutbox()
+
+    expect(action).not.toHaveBeenCalled()
+    expect(await db.outbox.count()).toBe(2)
+  })
+})
+
+describe('recuperación de dependencias', () => {
+  it('no adelanta una acción a un envío todavía activo y recupera el envío interrumpido', async () => {
+    const sent: string[] = []
+    registerOutboxHandler('active_order', async (payload) => {
+      sent.push(payload as string)
+    })
+    await enqueue('active_order', 'primera', 'ticket-a')
+    await enqueue('active_order', 'segunda', 'ticket-a')
+    const [first] = (await db.outbox.toArray()).sort((a, b) => a.seq - b.seq)
+    await db.outbox.update(first!.id, {
+      state: 'sending',
+      sendingAt: Date.now(),
+    })
+    await processOutbox()
+    expect(sent).toEqual([])
+
+    await db.outbox.update(first!.id, { sendingAt: Date.now() - 60_001 })
+    await processOutbox()
+    expect(sent).toEqual(['primera', 'segunda'])
+  })
+
+  it('reanuda la cadena solo después de reintentar explícitamente el error de dominio', async () => {
+    let valid = false
+    const sent: string[] = []
+    registerOutboxHandler('retry_order', async (payload) => {
+      if (!valid) throw new Error('Conflicto')
+      sent.push(payload as string)
+    })
+    await enqueue('retry_order', 'primera', 'ticket-a')
+    await enqueue('retry_order', 'segunda', 'ticket-a')
+    await processOutbox()
+    valid = true
+    await processOutbox()
+    expect(sent).toEqual([])
+    const [failed] = await errorsForCurrentUser()
+    await retryOutboxItem(failed!.id)
+    await processOutbox()
+    expect(sent).toEqual(['primera', 'segunda'])
+  })
+
+  it('interrumpe el procesamiento si cambia la sesión durante un envío', async () => {
+    const handler = vi.fn(async () => {
+      setOfflineUserId('user-b')
+    })
+    registerOutboxHandler('session_changes', handler)
+    await enqueue('session_changes', {})
+    await enqueue('session_changes', {})
+    await processOutbox()
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(await db.outbox.count()).toBe(1)
   })
 })

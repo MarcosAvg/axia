@@ -8,15 +8,21 @@ export type OutboxDiscardHandler = (payload: unknown) => Promise<void>
 
 const handlers = new Map<string, OutboxHandler>()
 const discarders = new Map<string, OutboxDiscardHandler>()
+const orderingKeys = new Map<
+  string,
+  (payload: unknown) => Promise<string | undefined>
+>()
 
 /** Registra el manejador de un tipo de ítem de la cola y su limpieza al descartar. */
 export function registerOutboxHandler(
   type: string,
   handler: OutboxHandler,
   discard?: OutboxDiscardHandler,
+  orderingKey?: (payload: unknown) => Promise<string | undefined>,
 ) {
   handlers.set(type, handler)
   if (discard) discarders.set(type, discard)
+  if (orderingKey) orderingKeys.set(type, orderingKey)
 }
 
 let seqCounter = 0
@@ -40,7 +46,11 @@ function exclusive<T>(task: () => Promise<T>): Promise<T> {
 }
 
 /** Encola una operación (primero lo que se encoló antes). */
-export async function enqueue(type: string, payload: unknown): Promise<void> {
+export async function enqueue(
+  type: string,
+  payload: unknown,
+  orderingKey?: string,
+): Promise<void> {
   await exclusive(async () => {
     await db.outbox.add({
       id: crypto.randomUUID(),
@@ -48,6 +58,7 @@ export async function enqueue(type: string, payload: unknown): Promise<void> {
       type,
       userId: currentOfflineUserId() ?? undefined,
       payload,
+      orderingKey,
       state: 'pending',
       attempts: 0,
       lastError: null,
@@ -77,26 +88,38 @@ export async function processOutbox(): Promise<void> {
   try {
     await exclusive(async () => {
       if (currentOfflineUserId() !== userId) return
-      const items = await db.outbox
-        .where('state')
-        .anyOf('pending', 'sending')
-        .toArray()
-      const mine = items.filter(
-        (item) =>
-          item.userId === userId &&
-          (item.state === 'pending' ||
-            !item.sendingAt ||
-            item.sendingAt < Date.now() - STALE_SENDING_MS),
-      )
+      // Los errores también son barreras: el bloqueo se conserva entre invocaciones.
+      const items = await db.outbox.toArray()
+      const mine = items.filter((item) => item.userId === userId)
       mine.sort((a, b) => a.seq - b.seq)
-      for (const item of mine) {
-        await processItem(item)
-      }
+      await processOrderedItems(mine, userId)
     })
   } finally {
     isProcessing = false
     afterProcess?.()
   }
+}
+
+async function processOrderedItems(items: OutboxItem[], userId: string) {
+  const blocked = new Set<string>()
+  for (const item of items) {
+    const key =
+      item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
+    if (currentOfflineUserId() !== userId) break
+    if (key && blocked.has(key)) continue
+    if (!(await processReadyItem(item)) && key) blocked.add(key)
+  }
+}
+
+async function processReadyItem(item: OutboxItem): Promise<boolean> {
+  if (item.state === 'error') return false
+  if (
+    item.state === 'sending' &&
+    item.sendingAt &&
+    item.sendingAt >= Date.now() - STALE_SENDING_MS
+  )
+    return false
+  return processItem(item)
 }
 
 /** Elementos pendientes del usuario actual; el aviso no cuenta los de otra sesión. */
@@ -141,22 +164,27 @@ export async function discardOutboxItem(id: string): Promise<void> {
   })
 }
 
-async function processItem(item: OutboxItem): Promise<void> {
+async function processItem(item: OutboxItem): Promise<boolean> {
   const handler = handlers.get(item.type)
   if (!handler) {
     await db.outbox.update(item.id, {
       state: 'error',
       lastError: `Sin manejador para ${item.type}`,
     })
-    return
+    return false
   }
   await db.outbox.update(item.id, {
     state: 'sending',
     sendingAt: Date.now(),
   })
+  if (currentOfflineUserId() !== item.userId) {
+    await db.outbox.update(item.id, { state: 'pending', sendingAt: null })
+    return false
+  }
   try {
     await handler(item.payload)
     await db.outbox.delete(item.id)
+    return true
   } catch (error) {
     const attempts = item.attempts + 1
     const permanent = !isNetworkError(error)
@@ -166,5 +194,6 @@ async function processItem(item: OutboxItem): Promise<void> {
       sendingAt: null,
       lastError: error instanceof Error ? error.message : String(error),
     })
+    return false
   }
 }

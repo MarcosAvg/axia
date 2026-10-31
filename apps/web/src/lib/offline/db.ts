@@ -13,6 +13,8 @@ export interface OutboxItem {
   /** Dueño del elemento; nunca se reenvía con la sesión de otra persona. */
   userId?: string
   payload: unknown
+  /** Operaciones con la misma clave dependen de las anteriores (un tiquet). */
+  orderingKey?: string
   state: 'pending' | 'sending' | 'error'
   attempts: number
   lastError: string | null

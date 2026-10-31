@@ -64,7 +64,7 @@ export function useRecaptureForm(
       {
         changes: recaptureChanges(values),
         reasonId: values.reasonId,
-        note: values.note || null,
+        note: values.note || undefined,
       },
       { onSuccess: onClose },
     )

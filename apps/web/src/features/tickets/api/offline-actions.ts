@@ -2,50 +2,61 @@
 // reenvía con el contrato de sincronización, conservando `occurredAt` y el UUID.
 
 import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
+import { z } from 'zod'
 import { sendSyncBatch } from './sync-api'
-import type { TicketOperation } from './ticket-operations'
+import { ticketCommandSchema } from './ticket-commands'
+import type { TicketCommandInput } from './ticket-commands'
 
 const TICKET_ACTION = 'ticket_action'
 
-interface TicketActionPayload {
-  operation: TicketOperation
-  ticketId: string
-  args: Record<string, unknown>
-  clientRequestId: string
-  occurredAt: string
-}
+const contextSchema = z.object({
+  ticketId: z.string().min(1),
+  clientRequestId: z.string().uuid(),
+  occurredAt: z.string().datetime(),
+  manualTime: z.boolean().optional(),
+})
 
-export async function enqueueTicketAction(input: {
-  operation: TicketOperation
-  ticketId: string
-  args: Record<string, unknown>
-  clientRequestId: string
-  occurredAt?: string
-}): Promise<void> {
-  await enqueue(TICKET_ACTION, {
-    operation: input.operation,
-    ticketId: input.ticketId,
-    args: input.args,
-    clientRequestId: input.clientRequestId,
-    occurredAt: input.occurredAt ?? new Date().toISOString(),
-  } satisfies TicketActionPayload)
+export async function enqueueTicketAction(
+  input: TicketCommandInput,
+): Promise<void> {
+  const command = ticketCommandSchema.parse(input)
+  await enqueue(
+    TICKET_ACTION,
+    {
+      ...command,
+      ...contextSchema.parse({
+        ...input,
+        occurredAt: input.occurredAt ?? new Date().toISOString(),
+      }),
+    },
+    input.ticketId,
+  )
 }
 
 /** Registra el reenvío de acciones del tiquet en la cola de salida. */
 export function registerTicketActionHandler() {
-  registerOutboxHandler(TICKET_ACTION, async (payload) => {
-    const data = payload as TicketActionPayload
-    const [result] = await sendSyncBatch([
-      {
-        clientRequestId: data.clientRequestId,
-        ticketId: data.ticketId,
-        type: data.operation,
-        args: data.args,
-        occurredAt: data.occurredAt,
-      },
-    ])
-    if (!result) throw new Error('La sincronización no devolvió resultado')
-    if (result.status === 'applied' || result.status === 'duplicate') return
-    throw new Error(result.message ?? result.code ?? result.status)
-  })
+  registerOutboxHandler(
+    TICKET_ACTION,
+    async (payload) => {
+      const data = {
+        ...ticketCommandSchema.parse(payload),
+        ...contextSchema.parse(payload),
+      }
+      const [result] = await sendSyncBatch([
+        {
+          clientRequestId: data.clientRequestId,
+          ticketId: data.ticketId,
+          type: data.operation,
+          args: data.args,
+          occurredAt: data.occurredAt,
+          manualTime: data.manualTime,
+        },
+      ])
+      if (!result) throw new Error('La sincronización no devolvió resultado')
+      if (result.status === 'applied' || result.status === 'duplicate') return
+      throw new Error(result.message ?? result.code ?? result.status)
+    },
+    undefined,
+    async (payload) => contextSchema.safeParse(payload).data?.ticketId,
+  )
 }

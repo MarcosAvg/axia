@@ -24,9 +24,9 @@ export function useAssignSupervisorForm(ticketId: string, onClose: () => void) {
     actions.assignSupervisor.mutate(
       {
         reasonId,
-        teamId: toTeam ? teamId : null,
-        supervisorUserId: toTeam ? null : supervisorId,
-        note: note || null,
+        teamId: toTeam ? teamId : undefined,
+        supervisorUserId: toTeam ? undefined : supervisorId,
+        note: note || undefined,
       },
       { onSuccess: onClose },
     )

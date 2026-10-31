@@ -68,7 +68,7 @@ function pauseHandlers(
   values: ActionValues,
   options: MutateOptions,
 ): Handlers {
-  const note = values.note || null
+  const note = values.note || undefined
   return {
     pause: () => {
       if (values.reasonId) {
@@ -96,7 +96,7 @@ function simpleHandlers(
   values: ActionValues,
   options: MutateOptions,
 ): Handlers {
-  const note = values.note || null
+  const note = values.note || undefined
   const text = values.text.trim()
   return {
     ...pauseHandlers(actions, values, options),
@@ -146,7 +146,7 @@ function claimHandlers(
   values: ActionValues,
   options: MutateOptions,
 ): Handlers {
-  const note = values.note || null
+  const note = values.note || undefined
   const text = values.text.trim()
   return {
     open_claim: () => {
@@ -161,7 +161,7 @@ function claimHandlers(
       actions.resolveClaim.mutate(
         {
           resolution: values.resolution,
-          resultId: values.reasonId || null,
+          resultId: values.reasonId || undefined,
           note,
         },
         options,

@@ -32,7 +32,8 @@ código, **lo que se pueda verificar con una herramienta se verifica con una her
 
 1. **Simple antes que ingenioso.** Se elige la solución más sencilla que cumpla el requisito.
 2. **Pequeño y con un solo propósito**: archivos, funciones y componentes hacen una cosa.
-3. **Las reglas de negocio viven en la base de datos y en funciones puras**, no en componentes.
+3. **Las reglas de negocio viven en servicios del servidor y funciones puras**, no en componentes;
+   la base conserva restricciones, integridad y transacciones.
 4. **Todo lo importante se prueba.** Las reglas de seguridad y de transición, primero.
 5. **No abstraer antes de tiempo.** Se extrae algo común cuando se repite por tercera vez.
 6. **Legible sobre corto.** El código se lee muchas más veces de las que se escribe.
@@ -114,8 +115,9 @@ estas reglas requiere un comentario con la razón y se evita.
 - `strict: true`, `noUncheckedIndexedAccess: true`, `noFallthroughCasesInSwitch: true`.
 - **Prohibido `any`**, `@ts-ignore` y `as` para forzar tipos. Si no hay alternativa, se usa
   `@ts-expect-error` con una explicación.
-- Los tipos del esquema viven en `apps/server/src/db/schema.ts` (Drizzle). La API define sus
-  contratos con Zod; la web no genera tipos desde la base.
+- Las migraciones SQL son la definición del esquema. Los repositorios tipan sus resultados y
+  Drizzle ejecuta SQL parametrizado y transacciones, sin otra copia de las tablas en TypeScript.
+  La API define contratos con Zod; la web valida DTO HTTP y no genera tipos desde la base.
 - **Validación en las fronteras con Zod**: formularios, datos importados, respuestas externas y
   entradas del servidor. Dentro del sistema se confía en los tipos.
 - Estados, roles y tipos como uniones literales en el feature o el servidor.
@@ -160,6 +162,9 @@ estas reglas requiere un comentario con la razón y se evita.
   con carga reanudable (TUS). El evento queda marcado como "evidencia pendiente" hasta que
   la subida termine.
 - Reintentos con espera creciente y límite; los fallos permanentes se muestran al usuario.
+- La cola ordena evidencia y acciones por tiquet. Un error o envío aún activo impide adelantar
+  operaciones posteriores de ese tiquet, incluso en otro procesamiento; los demás siguen.
+  Reintentar o descartar el error explícitamente permite continuar, con validación del servidor.
 - El service worker nunca se cachea (`Cache-Control: no-cache`); las actualizaciones se
   aplican con confirmación (`registerType: 'prompt'`).
 
@@ -185,7 +190,7 @@ estas reglas requiere un comentario con la razón y se evita.
 
 ### Migraciones
 
-- Una migración, una preocupación. Nombre: `AAAAMMDDHHMMSS_verbo_objeto.sql`.
+- Una migración, una preocupación. Nombre: `NNNN_verbo_objeto.sql`, siguiendo la secuencia existente.
 - Una migración ya integrada a `main` no se edita: se agrega otra.
 - Toda migración debe aplicarse limpia con `pnpm db:reset` y dejar las pruebas en verde.
 - Se incluye `comment on table` / `comment on column` para todo lo que no sea obvio.

@@ -8,14 +8,27 @@
 
 ## En curso
 
-Consolidación implementada y verificada localmente. Se conserva el stack; no se modificó la
-instalación local anterior ni se publicó/desplegó nada. Ver [ADR 0099](../decisions/0099-consolidacion-self-hosted.md).
-
-**Siguiente:** publicar la primera release mediante el workflow preparado y realizar la puesta en
-marcha real con dominio/TLS y copias fuera del host. Las operaciones reales siguen a cargo del
-operador; no hay preguntas de negocio pendientes para esta consolidación.
+Sin implementación abierta. Consolidación interna verificada; siguientes trabajos en los pendientes
+operativos y de producto. No hay preguntas técnicas bloqueantes.
 
 ## Hecho
+
+- **Consolidación interna (2026-10-31):** DTO HTTP actuales validados, comandos discriminados y
+  wrappers retirados; métricas intersectan alcance/filtros antes de agregar, conservando permiso
+  de cada ruta. Cola offline bloquea dependientes del tiquet entre procesamientos, incluida
+  evidencia antigua, y comprueba sesión después de leer/escribir IndexedDB. Retirada copia de
+  esquema Drizzle sin consumidores; SQL versionado sigue siendo la definición completa. Inventario
+  Git excluye privados, ignorados (también forzados al índice), salidas y symlinks; planificador de
+  pruebas puro. ADR [0100](../decisions/0100-consolidacion-interna.md) documenta decisiones y las
+  pruebas históricas sustituidas por fronteras/contratos actuales, sin debilitar cobertura.
+  Revisión independiente cerrada; corregido su hallazgo de ignorados y las ventanas de sesión con
+  regresiones RED→GREEN. `AXIA_ENV_FILE=/dev/null pnpm check:fast` pasó (57 servidor + 298 web).
+  `pnpm test:affected` seleccionó `pnpm check`; ejecución final código 0: 46 Node y scripts Bash,
+  57 servidor, 298 web, 52 navegador y 231 PostgreSQL, lint/tipos/estáticos/build verdes.
+  Docs 135/0 enlaces rotos; independencia 842/0 coincidencias. Compuerta repetida después del
+  último ajuste de sesión. Persiste aviso web de chunks >500 kB; sin nuevas dependencias,
+  migraciones ni ejecución de despliegues. Las acciones disponibles calculadas por servidor y
+  zona horaria de métricas siguen fuera de esta tarea.
 
 - **Consolidación (2026-10-31):** desarrollo `axia-dev` con `.env.dev` y watchers host; pruebas tmpfs
   en `55433`, bases `_test`/`_e2e`, puertos navegador `3101`/`5174` y reinicios protegidos. Demo/setup
@@ -72,8 +85,9 @@ pnpm check        # antes de integrar
 
 Para el ciclo local usar `pnpm check:fast` y `pnpm test:affected`. La compuerta completa incluye
 lint, tipos, independencia del núcleo, fronteras, knip, Vitest, Playwright, integración contra
-PostgreSQL real y build. Requiere `MIGRATION_DATABASE_URL`, `AXIA_APP_PASSWORD` y `DATABASE_URL`;
-Playwright prepara su propia base con la semilla demo. Se ejecuta una vez antes de integrar.
+PostgreSQL real y build. `pnpm test:db:start` prepara PostgreSQL exclusivo; integración y Playwright
+usan conexiones locales seguras por defecto y bases separadas `_test`/`_e2e`, sin descubrir dotenv
+privados. Playwright prepara su base con semilla demo. Se ejecuta una vez antes de integrar.
 
 ## Pendientes operativos
 

@@ -7,6 +7,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Añadido
 
+- Consolidación interna: DTO HTTP de tiquets validados y comandos tipados; métricas con alcance y
+  filtros comunes antes de agregar; bloqueo offline por tiquet entre reintentos, incluida evidencia.
+- Una sola definición de base en migraciones SQL, sin introspección Drizzle sin consumo;
+  verificadores limitados a fuentes Git seguras y planificador de pruebas puro (ADR 0100).
+
 - Entornos independientes de desarrollo, integración y navegador; conexiones y reinicios protegidos,
   pruebas sin descubrimiento de dotenv privado y arranque de desarrollo con ambos watchers.
 - Una imagen verificada para app/migrador y paquete operativo de release fijado por digest, sin

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchRating, rateTicket } from '../api/rating-api'
+import { fetchRating } from '../api/rating-api'
+import { sendTicketCommand } from '../api/ticket-commands'
 import type { RatingInput } from '../schemas'
 
 const ratingKey = (ticketId: string) => ['tickets', 'rating', ticketId] as const
@@ -18,7 +19,12 @@ export function useRateTicket(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (variables: { input: RatingInput; clientRequestId: string }) =>
-      rateTicket(ticketId, variables.input, variables.clientRequestId),
+      sendTicketCommand({
+        ticketId,
+        clientRequestId: variables.clientRequestId,
+        operation: 'rate',
+        args: variables.input,
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })
     },

@@ -2,34 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isNetworkError } from '@/lib/offline/errors'
 import { processOutbox } from '@/lib/offline/outbox'
 import { enqueueTicketAction } from '../api/offline-actions'
-import { sendSyncBatch } from '../api/sync-api'
-import { TICKET_OPERATIONS } from '../api/ticket-operations'
-import type { TicketOperation } from '../api/ticket-operations'
+import { sendTicketCommand, ticketCommandSchema } from '../api/ticket-commands'
+import type { ArgsFor, TicketOperation } from '../api/ticket-commands'
 
-async function sendManualTimeAction(input: {
-  operation: TicketOperation
-  ticketId: string
-  args: Record<string, unknown>
-  clientRequestId: string
-  occurredAt: string
-}) {
-  const [result] = await sendSyncBatch([
-    {
-      clientRequestId: input.clientRequestId,
-      ticketId: input.ticketId,
-      type: input.operation,
-      args: input.args,
-      occurredAt: input.occurredAt,
-      manualTime: true,
-    },
-  ])
-  if (result?.status !== 'applied' && result?.status !== 'duplicate') {
-    throw new Error(result?.message ?? 'No se pudo ajustar la hora')
-  }
-}
-
-function useTicketMutation<TVariables extends Record<string, unknown>>(
-  operation: TicketOperation,
+function useTicketMutation<Operation extends TicketOperation>(
+  operation: Operation,
   ticketId: string,
   subjectTechnicianId?: string,
   occurredAt?: string,
@@ -38,32 +15,26 @@ function useTicketMutation<TVariables extends Record<string, unknown>>(
   return useMutation({
     // Sin esto, cuando no hay conexión React Query pausa la mutación y nunca se ejecuta.
     networkMode: 'always',
-    mutationFn: async (variables: TVariables) => {
+    mutationFn: async (variables: ArgsFor<Operation>) => {
       const clientRequestId = crypto.randomUUID()
-      const args: Record<string, unknown> = subjectTechnicianId
-        ? { ...variables, subjectTechnicianId }
-        : variables
-      if (occurredAt) {
-        await sendManualTimeAction({
-          operation,
-          ticketId,
-          args,
-          clientRequestId,
-          occurredAt,
-        })
-        return
+      const command = ticketCommandSchema.parse({
+        operation,
+        args: subjectTechnicianId
+          ? { ...variables, subjectTechnicianId }
+          : variables,
+      })
+      const input = {
+        ...command,
+        ticketId,
+        clientRequestId,
+        occurredAt,
+        manualTime: Boolean(occurredAt),
       }
       try {
-        await TICKET_OPERATIONS[operation](ticketId, args, clientRequestId)
+        await sendTicketCommand(input)
       } catch (error) {
         if (isNetworkError(error)) {
-          await enqueueTicketAction({
-            operation,
-            ticketId,
-            args,
-            clientRequestId,
-            occurredAt,
-          })
+          await enqueueTicketAction(input)
           void processOutbox()
           return
         }

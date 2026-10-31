@@ -14,7 +14,13 @@ import type {
   TicketStatus,
   TicketTimelineItem,
 } from '../domain/types'
-import { parseDuplicateCandidates } from '../schemas'
+import {
+  parseDuplicateCandidates,
+  ticketPageResponseSchema,
+  ticketItemsResponseSchema,
+  ticketDetailResponseSchema,
+  timelineResponseSchema,
+} from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
 const TICKETS_PAGE_SIZE = 20
@@ -55,15 +61,17 @@ export async function fetchTickets(
     page,
     pageSize: TICKETS_PAGE_SIZE,
   })
-  return apiFetch<TicketPage>(`/api/tickets?${query}`)
+  return ticketPageResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets?${query}`),
+  )
 }
 
 export async function fetchTicket(
   id: string,
 ): Promise<TicketDetailWithTimes | null> {
   try {
-    const body = await apiFetch<{ ticket: TicketDetailWithTimes }>(
-      `/api/tickets/${id}`,
+    const body = ticketDetailResponseSchema.parse(
+      await apiFetch<unknown>(`/api/tickets/${id}`),
     )
     return body.ticket
   } catch (error) {
@@ -90,17 +98,6 @@ export async function fetchPauseState(
   return body.item
 }
 
-type TimelineResponse = {
-  id: number
-  cycle: number
-  type: TicketTimelineItem['type']
-  payload: Record<string, unknown> | null
-  occurredAt: string
-  actorName: string | null
-  subjectTechnicianName: string | null
-  reasonName: string | null
-}
-
 export async function adjustEventTime(
   ticketId: string,
   eventId: number,
@@ -115,19 +112,9 @@ export async function adjustEventTime(
 export async function fetchTimeline(
   ticketId: string,
 ): Promise<TicketTimelineItem[]> {
-  const body = await apiFetch<{ items: TimelineResponse[] }>(
-    `/api/tickets/${ticketId}/timeline`,
-  )
-  return body.items.map((item) => ({
-    id: item.id,
-    cycle: item.cycle,
-    type: item.type,
-    occurredAt: item.occurredAt,
-    actorName: item.actorName,
-    subjectTechnicianName: item.subjectTechnicianName,
-    reasonName: item.reasonName,
-    payload: item.payload ?? {},
-  }))
+  return timelineResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets/${ticketId}/timeline`),
+  ).items
 }
 
 export async function fetchParticipants(
@@ -212,8 +199,8 @@ export async function checkDuplicates(
 
 export async function fetchMyWork(_userId: string): Promise<TicketListItem[]> {
   void _userId
-  const body = await apiFetch<{ items: TicketListItem[] }>(
-    `/api/tickets/mine?page=${1}&pageSize=100`,
+  const body = ticketItemsResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets/mine?page=${1}&pageSize=100`),
   )
   return body.items.filter((ticket) => !isFinalStatus(ticket.status))
 }
@@ -222,8 +209,8 @@ export async function fetchMyOffers(
   _userId: string,
 ): Promise<TicketListItem[]> {
   void _userId
-  const body = await apiFetch<{ items: TicketListItem[] }>(
-    `/api/tickets/offers?page=1&pageSize=100`,
+  const body = ticketItemsResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets/offers?page=1&pageSize=100`),
   )
   return body.items
 }
@@ -233,8 +220,10 @@ export async function searchTicketsByFolio(
 ): Promise<TicketListItem[]> {
   const cleaned = term.replace(/[%,()]/g, '').trim()
   if (!cleaned) return []
-  const body = await apiFetch<{ items: TicketListItem[] }>(
-    `/api/tickets?search=${encodeURIComponent(cleaned)}&page=1&pageSize=10`,
+  const body = ticketItemsResponseSchema.parse(
+    await apiFetch<unknown>(
+      `/api/tickets?search=${encodeURIComponent(cleaned)}&page=1&pageSize=10`,
+    ),
   )
   return body.items
 }

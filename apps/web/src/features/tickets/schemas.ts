@@ -1,143 +1,95 @@
 import { z } from 'zod'
 import { EVENT_TYPES, TICKET_STATUSES } from './domain/types'
-import type {
-  DuplicateCandidate,
-  TicketDetail,
-  TicketListItem,
-  TicketRating,
-  TicketTimelineItem,
-} from './domain/types'
+import type { DuplicateCandidate } from './domain/types'
 
 export const ticketStatusSchema = z.enum(TICKET_STATUSES)
-const eventTypeSchema = z.enum(EVENT_TYPES)
-
-const namedRef = z.object({ name: z.string() }).nullable()
-const priorityRef = z
-  .object({ name: z.string(), position: z.number() })
-  .nullable()
-
-const ticketBaseRowSchema = z.object({
+const nullableText = z.string().nullable()
+const ticketListItemSchema = z.object({
   id: z.string(),
   folio: z.string(),
   status: ticketStatusSchema,
-  reported_at: z.string(),
-  closed_at: z.string().nullable(),
+  reportedAt: z.string(),
+  closedAt: nullableText,
   description: z.string(),
-  requester_name: z.string(),
-  possible_duplicate: z.boolean(),
-  building: namedRef,
-  category: namedRef,
-  priority: priorityRef,
-  team: namedRef,
+  requesterName: z.string(),
+  possibleDuplicate: z.boolean(),
+  buildingName: nullableText,
+  categoryName: nullableText,
+  priorityName: nullableText,
+  priorityPosition: z.number().nullable(),
+  teamName: nullableText,
 })
-
-export function parseTicketListItem(raw: unknown): TicketListItem {
-  const row = ticketBaseRowSchema.parse(raw)
-  return {
-    id: row.id,
-    folio: row.folio,
-    status: row.status,
-    reportedAt: row.reported_at,
-    closedAt: row.closed_at,
-    description: row.description,
-    requesterName: row.requester_name,
-    possibleDuplicate: row.possible_duplicate,
-    buildingName: nameOf(row.building),
-    categoryName: nameOf(row.category),
-    priorityName: nameOf(row.priority),
-    priorityPosition: row.priority ? row.priority.position : null,
-    teamName: nameOf(row.team),
-  }
-}
-
-const ticketDetailRowSchema = ticketBaseRowSchema.extend({
-  cycle: z.number(),
-  building_id: z.string(),
-  location_id: z.string(),
-  dependency_id: z.string(),
-  category_id: z.string(),
-  subcategory_id: z.string().nullable(),
-  problem_id: z.string().nullable(),
-  service_type_id: z.string().nullable(),
-  priority_id: z.string(),
-  requester_contact: z.string().nullable(),
-  duplicate_of_id: z.string().nullable(),
-  location: namedRef,
-  dependency: namedRef,
-  subcategory: namedRef,
-  problem: namedRef,
-  service_type: namedRef,
-  channel: namedRef,
+export const ticketItemsResponseSchema = z.object({
+  items: z.array(ticketListItemSchema),
 })
-
-function nameOf(ref: { name: string } | null): string | null {
-  return ref ? ref.name : null
-}
-
-export function parseTicketDetail(raw: unknown): TicketDetail {
-  const row = ticketDetailRowSchema.parse(raw)
-  return {
-    ...parseTicketListItem(row),
-    cycle: row.cycle,
-    buildingId: row.building_id,
-    locationId: row.location_id,
-    dependencyId: row.dependency_id,
-    categoryId: row.category_id,
-    subcategoryId: row.subcategory_id,
-    problemId: row.problem_id,
-    serviceTypeId: row.service_type_id,
-    priorityId: row.priority_id,
-    locationName: nameOf(row.location),
-    dependencyName: nameOf(row.dependency),
-    subcategoryName: nameOf(row.subcategory),
-    problemName: nameOf(row.problem),
-    serviceTypeName: nameOf(row.service_type),
-    channelName: nameOf(row.channel),
-    requesterContact: row.requester_contact,
-    duplicateOfId: row.duplicate_of_id,
-  }
-}
-
-const timelineRowSchema = z.object({
-  id: z.number(),
-  cycle: z.number(),
-  type: eventTypeSchema,
-  payload: z.record(z.string(), z.unknown()).nullable(),
-  occurred_at: z.string(),
-  actor_name: z.string().nullable(),
-  subject_technician_name: z.string().nullable(),
-  reason_name: z.string().nullable(),
+export const ticketPageResponseSchema = ticketItemsResponseSchema.extend({
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
 })
-
-export function parseTimelineItem(raw: unknown): TicketTimelineItem {
-  const row = timelineRowSchema.parse(raw)
-  return {
-    id: row.id,
-    cycle: row.cycle,
-    type: row.type,
-    occurredAt: row.occurred_at,
-    actorName: row.actor_name,
-    subjectTechnicianName: row.subject_technician_name,
-    reasonName: row.reason_name,
-    payload: row.payload ?? {},
-  }
-}
+export const ticketDetailResponseSchema = z.object({
+  ticket: ticketListItemSchema.extend({
+    cycle: z.number().int().positive(),
+    buildingId: z.string(),
+    locationId: z.string(),
+    dependencyId: z.string(),
+    categoryId: z.string(),
+    subcategoryId: nullableText,
+    problemId: nullableText,
+    serviceTypeId: nullableText,
+    priorityId: z.string(),
+    locationName: nullableText,
+    dependencyName: nullableText,
+    subcategoryName: nullableText,
+    problemName: nullableText,
+    serviceTypeName: nullableText,
+    channelName: nullableText,
+    requesterContact: nullableText,
+    duplicateOfId: nullableText,
+    cycleTimes: z.object({
+      total: z.number(),
+      response: z.number(),
+      assignment: z.number(),
+      reassignment: z.number(),
+      wait: z.number(),
+      active: z.number(),
+      pause: z.number(),
+      validation: z.number(),
+      claim: z.number(),
+    }),
+  }),
+})
+export const timelineResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.number().int(),
+      cycle: z.number().int().positive(),
+      type: z.enum(EVENT_TYPES),
+      payload: z
+        .record(z.string(), z.unknown())
+        .nullable()
+        .transform((payload) => payload ?? {}),
+      occurredAt: z.string(),
+      actorName: nullableText,
+      subjectTechnicianName: nullableText,
+      reasonName: nullableText,
+    }),
+  ),
+})
+export const ratingResponseSchema = z.object({
+  item: z
+    .object({
+      score: z.number().int().min(1).max(5),
+      comment: nullableText,
+    })
+    .nullable(),
+})
 
 export const ratingSchema = z.object({
   score: z.coerce.number().int().min(1).max(5),
   comment: z.string().trim().max(1000).optional(),
 })
 export type RatingInput = z.infer<typeof ratingSchema>
-
-const ratingRowSchema = z.object({
-  score: z.number(),
-  comment: z.string().nullable(),
-})
-
-export function parseRating(raw: unknown): TicketRating {
-  const row = ratingRowSchema.parse(raw)
-  return { score: row.score, comment: row.comment }
-}
 
 export const createTicketSchema = z.object({
   buildingId: z.string().min(1, 'Selecciona un edificio.'),

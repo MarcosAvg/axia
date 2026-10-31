@@ -59,8 +59,8 @@ Reglas de negocio completas: `docs/concepts/negocio.md` §3 y §5 (RN-01 a RN-30
 `paused`, `under_claim` y los finales de descarte `rejected`, `cancelled` y `duplicate`.
 
 Todo movimiento relevante es un **registro explícito del historial** (tipo, motivo, quién, cuándo
-y duración); cambiar una columna no basta. Los cambios de estado ocurren **solo** por funciones
-RPC de transición, que validan permiso, estado y precondiciones y escriben el historial en la
+y duración); cambiar una columna no basta. Los cambios de estado ocurren **solo** por acciones
+del servidor Fastify, que validan permiso, estado y precondiciones y escriben el historial en la
 misma transacción. La matriz de transiciones se detalla en `docs/concepts/datos.md`.
 
 **Concurrencia y acciones tardías:** "la primera es verdad". Una acción que llega tarde (sin

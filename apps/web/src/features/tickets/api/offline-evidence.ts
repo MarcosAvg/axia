@@ -120,7 +120,7 @@ export async function saveAndUploadEvidence(
       }
     }
   }
-  await enqueue(EVIDENCE_UPLOAD, { evidenceId: id })
+  await enqueue(EVIDENCE_UPLOAD, { evidenceId: id }, params.ticketId)
   void processOutbox()
   return id
 }
@@ -134,6 +134,10 @@ export function registerEvidenceUploadHandler() {
       const { evidenceId } = payload as { evidenceId: string }
       const evidence = await db.evidences.get(evidenceId)
       if (evidence?.state !== 'uploaded') await db.evidences.delete(evidenceId)
+    },
+    async (payload) => {
+      const { evidenceId } = payload as { evidenceId: string }
+      return (await db.evidences.get(evidenceId))?.ticketId
     },
   )
 }

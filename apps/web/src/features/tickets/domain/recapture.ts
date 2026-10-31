@@ -47,9 +47,7 @@ export function applyRecaptureChange(
 }
 
 /** Campos que envía la recaptura. Los opcionales vacíos viajan como `null`. */
-export function recaptureChanges(
-  values: RecaptureValues,
-): Record<string, string | null> {
+export function recaptureChanges(values: RecaptureValues) {
   return {
     buildingId: values.buildingId,
     locationId: values.locationId,
