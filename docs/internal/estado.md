@@ -3,18 +3,30 @@
 > Memoria de trabajo entre sesiones. Mantenerla corta: el detalle cronológico vive en
 > [`CHANGELOG.md`](../../CHANGELOG.md) y las decisiones en [`../decisions/`](../decisions/).
 
-**Última actualización:** 2026-10-30
+**Última actualización:** 2026-10-31
 **Fase actual:** migración cerrada; Axia funciona sobre su stack propio.
 
 ## En curso
 
-Nada en curso. La compuerta completa está en verde sobre `main`.
+Nada en curso. Auditoría documental terminada; no se cambió el comportamiento de la aplicación.
 
-**Siguiente:** puesta en marcha real (servidor, TLS y el proxy elegido), respaldos programados y
-prueba de restauración en el host definitivo. Si se decide, Web Push y escalamiento programado.
+**Siguiente recomendado:** aislar bases y archivos de pruebas antes de ejecutar E2E con datos de
+trabajo; después consolidar desarrollo/demo/configuración, releases y recuperación. El diagnóstico
+y los criterios de aceptación están en la
+[auditoría de estructura self-hosted](auditoria-estructura-self-hosted-2026-10-31.md).
+La implementación de estas recomendaciones no forma parte de la auditoría ni está realizada.
 
 ## Hecho
 
+- **Auditoría de estructura (2026-10-31):** Compose separa correctamente `db`, `migrate` y `app`;
+  conviene conservar el stack. Se documentaron riesgos del reset E2E sin base exclusiva, publicación
+  independiente de dos `latest`, respaldo de base/archivos sin punto común y configuración omitida
+  por Compose. También contradicciones de demo/setup y huecos del selector de pruebas.
+  Pasaron `test:scripts` con entorno vacío, validación de ambos Compose con valores ficticios,
+  `check:docs` (131 archivos, 0 enlaces rotos), `check:agnostic` (850 archivos, 0 coincidencias),
+  `test:affected` documental y `git diff --check`. El selector requirió ejecución fuera del sandbox
+  tras `spawnSync git EPERM`. No se ejecutaron E2E, integración ni la compuerta completa; no se
+  tocaron bases ni secretos. Sin ADR nuevo: son propuestas, no decisiones adoptadas.
 - **Stack propio:** PostgreSQL 17 + Drizzle + Fastify 5 + TypeScript. Un solo servidor sirve la API
   y el SPA; Compose define `db`, `migrate` y `app`.
 - **Núcleo:** autenticación local, autorización por permisos y ámbitos, ciclo completo del tiquet,
