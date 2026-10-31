@@ -5,18 +5,20 @@ en [arquitectura](../concepts/arquitectura.md) y los [ADR](../decisions/README.m
 
 **Última actualización:** 2026-10-31
 
-## En curso: publicación v0.5.0
+## Publicación cerrada: v0.5.1
 
-1. Push de `main` hasta `bf2d74e` completado; etiqueta `v0.5.0` publicada con autorización explícita.
-2. Release run `41249870317`: Docker/instalación/recuperación verdes; `pnpm check` falló y el job
-   de publicación quedó omitido. La imagen y el paquete no se publicaron.
-3. Causa confirmada en logs autenticados: `recovery.test.sh` exigía `rg`, ausente en el runner.
-   Reproducción local: `PATH=/usr/bin:/bin AXIA_ENV_FILE=/dev/null bash deploy/scripts/recovery.test.sh`
-   falla antes del cambio. Sustituir búsqueda por `grep -E`, preservando patrones y aserciones.
-4. Corrección verificada RED→GREEN sin ripgrep; revisión independiente sin hallazgos.
-   `check:fast` y `test:affected` (selecciona `pnpm check`) código 0: 46 Node, 57 servidor,
-   298 web, 52 navegador y 243 PostgreSQL; lint, tipos, estáticos y build verdes.
-5. Siguiente: integrar/push y publicar `v0.5.1` sin mover `v0.5.0`; confirmar imagen y paquete.
+- `main` subido; release e imagen publicadas desde `63c7488`. `v0.5.0` permanece intacta:
+  su flujo falló antes de publicar porque una prueba exigía ripgrep, ausente en el runner.
+- Corrección mínima: `grep -E` conserva todos los patrones y aserciones. Reproducción local sin
+  ripgrep RED→GREEN y revisión independiente sin hallazgos. `check:fast` y `test:affected`
+  (seleccionó `pnpm check`) código 0: 46 Node, 57 servidor, 298 web, 52 navegador y 243 PostgreSQL.
+- [Flujo de release](https://github.com/MarcosAvg/axia/actions/runs/41250305586): comprobación
+  general, Docker y publicación con resultado `success`, incluida recuperación real.
+- [Release v0.5.1](https://github.com/MarcosAvg/axia/releases/tag/v0.5.1): paquete y checksum
+  descargados y verificados. Identidad, README y OPERATIONS presentes; sin archivo `.env` privado.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.5.1`; digest confirmado en GHCR y coincidente
+  con `release.json`: `sha256:d903736d59a028540760edd69f7c018ff7f358b5e06908dcb59f9e656ad07b8d`.
+- Sin despliegue ni cambios en infraestructura de producción. Siguiente: prueba en host limpio.
 
 ## Tarea cerrada
 
@@ -35,7 +37,7 @@ corregir el contrato de prioridad y conservar la restricción de sesión por con
   dependencias offline por tiquet (ADR 0100). La migración 0017 retira estructuras sin consumo y
   aborta ante datos o dependencias inesperadas (ADR 0101).
 - Instalación local y recuperación en volúmenes nuevos verificadas en la tarea anterior;
-  publicación/arranque en infraestructura real todavía pendientes.
+  release pública verificada; arranque en infraestructura real todavía pendiente.
 - Documentación consolidada por tareas (ADR [0102](../decisions/0102-documentacion-por-tareas.md));
   antiguos documentos y decisiones se recuperan mediante el [índice histórico](../history/README.md).
 
@@ -48,7 +50,7 @@ corregir el contrato de prioridad y conservar la restricción de sesión por con
 - Paquete operativo: dos pruebas existentes verdes y generación real comprobada; README/OPERATIONS
   presentes y enlaces locales válidos. Formato y `git diff --check` sin errores.
 - SHA-256 de negocio sin cambios. Persiste aviso previo de chunks >500 kB en build.
-- Integración local; sin push ni despliegue real.
+- Rediseño integrado y subido; publicación posterior registrada arriba. Sin despliegue real.
 
 ## Siguiente: diferencias de producto documentadas
 
