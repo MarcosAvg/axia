@@ -8,13 +8,14 @@
 
 ## En curso
 
-Nada en curso. Auditoría documental terminada; no se cambió el comportamiento de la aplicación.
+Implementación de la consolidación aprobada en la auditoría, en rama propia:
 
-**Siguiente recomendado:** aislar bases y archivos de pruebas antes de ejecutar E2E con datos de
-trabajo; después consolidar desarrollo/demo/configuración, releases y recuperación. El diagnóstico
-y los criterios de aceptación están en la
-[auditoría de estructura self-hosted](auditoria-estructura-self-hosted-2026-10-31.md).
-La implementación de estas recomendaciones no forma parte de la auditoría ni está realizada.
+1. Separar desarrollo, integración y E2E; proteger reinicios y simplificar arranque/demo.
+2. Unificar la imagen y la versión de app/migrador; cerrar contrato de configuración.
+3. Coordinar respaldos y restauración con pruebas de fallo y destino vacío.
+4. Añadir integridad de migraciones y corregir selección de pruebas.
+5. Automatizar instalación/actualización/recuperación del stack local en CI y empaquetar releases.
+6. Actualizar guías/ADR, pasar chequeos, revisar el conjunto y guardar commits pequeños.
 
 ## Hecho
 
@@ -38,10 +39,10 @@ La implementación de estas recomendaciones no forma parte de la auditoría ni e
   ubicación obligatoria (ADR 0097) y equipo asignado al problema (ADR 0098).
 - **Instalación y respaldos:** `scripts/install.sh`, respaldo de base y evidencias, y restauración
   probada.
-- **Despliegue con Compose:** `compose.yaml` descarga las imágenes `:latest` de GHCR, deja `app` solo
-  en la red `proxy` con el alias `axia` y ejecuta `migrate` antes de arrancar. El `.env` de
-  producción solo pide los dos secretos; el desarrollo usa `compose.dev.yaml` y `.env.dev.example`.
-  La guía cubre Nginx Proxy Manager y Cloudflare Tunnel, y CI valida Compose y construye la imagen.
+- **Despliegue con Compose:** `compose.yaml` exige una release `AXIA_IMAGE` compartida por app y
+  migrador; app solo se alcanza en la red externa del proxy. El paquete fija digest, y la publicación
+  depende de la CI del mismo commit. Desarrollo usa Compose autónomo y `.env.dev`; pruebas usa otro
+  proyecto tmpfs y bases separadas. ADR 0099 consolida estos recorridos.
 - **UI:** escritorio y móvil por rol, navegación inferior, temas y regresión visual.
 - **Calidad:** Vitest contra PostgreSQL real, Playwright, fronteras de dependencias, knip y
   verificación de enlaces.

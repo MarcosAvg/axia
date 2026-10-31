@@ -1,6 +1,7 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { Client } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -35,6 +36,12 @@ describe('migration modes', () => {
     ]
 
     try {
+      // A release must include its already applied history as well as new SQL.
+      cpSync(
+        fileURLToPath(new URL('../../db/migrations', import.meta.url)),
+        dir,
+        { recursive: true },
+      )
       writeFileSync(
         join(dir, names[0]!),
         '-- axia:no-transaction\ncreate table if not exists public.migration_no_tx (id integer);',

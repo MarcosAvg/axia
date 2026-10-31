@@ -1,8 +1,13 @@
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { Client } from 'pg'
+
+import {
+  ensureHistoryChecksums,
+  readMigrationSources,
+  verifyMigrationHistory,
+  type MigrationSource,
+} from './migration-history.js'
 
 const MIGRATIONS_DIR = fileURLToPath(
   new URL('../../db/migrations', import.meta.url),
@@ -47,6 +52,11 @@ export async function ensureAppRole(
   options: MigrationOptions = {},
 ) {
   const appUser = options.appUser ?? process.env.AXIA_APP_USER ?? 'axia_app'
+  if (appUser !== 'axia_app') {
+    throw new Error(
+      'The application role is fixed to axia_app by the SQL grants',
+    )
+  }
   const appPassword = options.appPassword ?? process.env.AXIA_APP_PASSWORD
 
   const existing = await client.query<{ rolcanlogin: boolean }>(
@@ -69,18 +79,19 @@ export async function ensureAppRole(
   }
 }
 
-async function recordMigration(client: Client, file: string) {
+async function recordMigration(client: Client, source: MigrationSource) {
   await client.query(
-    'insert into axia_migrations.schema_migrations (name) values ($1)',
-    [file],
+    'insert into axia_migrations.schema_migrations (name, checksum) values ($1, $2)',
+    [source.name, source.checksum],
   )
 }
 
-async function applyMigration(client: Client, file: string, sql: string) {
+async function applyMigration(client: Client, source: MigrationSource) {
+  const { name: file, sql } = source
   if (usesNoTransaction(sql)) {
     try {
       await client.query(sql)
-      await recordMigration(client, file)
+      await recordMigration(client, source)
     } catch (error) {
       throw new Error(
         `Migration ${file} failed (no transaction): ${error instanceof Error ? error.message : error}`,
@@ -93,7 +104,7 @@ async function applyMigration(client: Client, file: string, sql: string) {
   await client.query('begin')
   try {
     await client.query(sql)
-    await recordMigration(client, file)
+    await recordMigration(client, source)
     await client.query('commit')
   } catch (error) {
     await client.query('rollback')
@@ -120,25 +131,12 @@ export async function runMigrations(
       )
     `)
 
-    const files = readdirSync(migrationsDir)
-      .filter((file) => file.endsWith('.sql'))
-      .sort()
-
-    for (const file of files) {
-      const alreadyApplied = await client.query(
-        'select 1 from axia_migrations.schema_migrations where name = $1',
-        [file],
-      )
-
-      if (alreadyApplied.rowCount && alreadyApplied.rowCount > 0) {
-        continue
-      }
-
-      await applyMigration(
-        client,
-        file,
-        readFileSync(join(migrationsDir, file), 'utf8'),
-      )
+    const sources = readMigrationSources(migrationsDir)
+    await ensureHistoryChecksums(client, sources)
+    const applied = await verifyMigrationHistory(client, sources)
+    for (const source of sources) {
+      if (applied.has(source.name)) continue
+      await applyMigration(client, source)
     }
   } finally {
     await client.query('select pg_advisory_unlock($1)', [MIGRATION_LOCK_KEY])

@@ -12,6 +12,8 @@ Registro de decisiones (ADR). Cada archivo explica el contexto, la decisión y s
 
 ## Decisiones vigentes
 
+La consolidación operativa vigente se describe en [ADR 0099](0099-consolidacion-self-hosted.md).
+
 | ADR | Tema |
 |---|---|
 | [0001](0001-vite-react-spa-con-react-compiler.md) | Vite + React + TypeScript |

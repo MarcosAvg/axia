@@ -276,6 +276,22 @@ describe('application role runtime', () => {
 })
 
 describe('migration runner', () => {
+  it('keeps migration fingerprints private to the migration role', async () => {
+    await expect(
+      app.query('select checksum from axia_migrations.schema_migrations'),
+    ).rejects.toMatchObject({ code: '42501' })
+    await expect(
+      app.query('update axia_migrations.schema_migrations set checksum = null'),
+    ).rejects.toMatchObject({ code: '42501' })
+    const result = await owner.query(
+      'select checksum from axia_migrations.schema_migrations',
+    )
+    expect(result.rows).toHaveLength(17)
+    expect(
+      result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
+    ).toBe(true)
+  })
+
   it('is idempotent', async () => {
     await runMigrations(owner)
     expect(
@@ -283,7 +299,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(16)
+    ).toBe(17)
   })
 
   it('enforces username normalization and uniqueness', async () => {
