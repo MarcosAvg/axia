@@ -2,71 +2,91 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
-import { getPermissionScope } from '../tickets/access.js'
 import { scopePredicate } from '../tickets/scope.js'
-import { filterParams, type MetricsFilters } from './filters.js'
-import {
-  intervalMinutes,
-  mergeBy,
-  minutesToInterval,
-  number,
-} from './merge-impl.js'
+import { activityQueries } from './activity-sql.js'
+import type { MetricsFilters } from './filters.js'
+import { intervalMinutes, minutesToInterval, number } from './format.js'
+import { qualityQueries } from './quality-sql.js'
+import { visibleTickets } from './summary-sql.js'
 export type { MetricsFilters } from './filters.js'
 export { metricsSummary } from './summary.js'
 
 type MetricsRow = Record<string, unknown>
+const queries = { ...activityQueries, ...qualityQueries }
+type Metric = keyof typeof queries
 
-async function callMetrics(
-  db: Database,
-  name: string,
-  filters: MetricsFilters,
-): Promise<MetricsRow[]> {
-  const p = filterParams(filters)
-  const result = await db.execute(sql`
-    select * from ${sql.raw(`public.${name}`)}(
-      ${p.p_from}::date, ${p.p_to}::date,
-      ${p.p_building}::uuid, ${p.p_team}::uuid,
-      ${p.p_category}::uuid, ${p.p_dependency}::uuid
-    )
-  `)
-  return result.rows as MetricsRow[]
+const countFields = [
+  'tickets',
+  'pauses',
+  'candidates',
+  'duplicates',
+  'ratings',
+  'with_target',
+  'met',
+  'leader_count',
+  'auxiliary_count',
+  'assigned_count',
+  'offers',
+  'pending_offers',
+  'taken',
+]
+const intervalFields = [
+  'pause_time',
+  'pause_time_labor',
+  'participation_time',
+  'participation_time_labor',
+  'participation_time_extra',
+  'avg_time_to_take',
+]
+
+/** Conserva la representación HTTP sin volver a agrupar resultados SQL. */
+function normalizeRow(row: MetricsRow): MetricsRow {
+  const normalized = { ...row }
+  for (const field of countFields) {
+    if (field in row) normalized[field] = number(row[field])
+  }
+  for (const field of intervalFields) {
+    if (field in row) {
+      normalized[field] = minutesToInterval(intervalMinutes(row[field]))
+    }
+  }
+  for (const field of [
+    'average_score',
+    'avg_target_minutes',
+    'avg_resolution_minutes',
+  ]) {
+    if (field in row)
+      normalized[field] = row[field] === null ? null : number(row[field])
+  }
+  return normalizeRates(row, normalized)
 }
 
-type ScopeCall = MetricsFilters
-
-function scopeCalls(actor: Actor, filters: MetricsFilters): ScopeCall[] {
-  const scope = getPermissionScope(actor, 'metrics.view')
-  if (!scope) return []
-  if (scope === 'all') return [filters]
-  if (scope === 'team') {
-    if (actor.teamIds.length === 0) return []
-    return actor.teamIds.map((teamId) => ({ ...filters, teamId }))
+function normalizeRates(row: MetricsRow, normalized: MetricsRow) {
+  if ('duplicate_rate' in row) {
+    normalized.duplicate_rate = number(row.duplicates) / number(row.tickets)
   }
-  if (scope === 'buildings') {
-    return actor.supervisorScopes.flatMap((grant) =>
-      grant.buildingIds.length === 0
-        ? [{ ...filters, teamId: grant.teamId }]
-        : grant.buildingIds.map((buildingId) => ({
-            ...filters,
-            teamId: grant.teamId,
-            buildingId,
-          })),
-    )
+  if ('compliance_rate' in row) {
+    normalized.compliance_rate =
+      number(row.with_target) > 0
+        ? number(row.met) / number(row.with_target)
+        : null
   }
-  return []
+  return normalized
 }
 
 async function scopedRows(
   db: Database,
   actor: Actor,
   filters: MetricsFilters,
-  name: string,
+  name: Metric,
 ): Promise<MetricsRow[]> {
-  const calls = scopeCalls(actor, filters)
-  const groups = await Promise.all(
-    calls.map((call) => callMetrics(db, name, call)),
-  )
-  return groups.flat()
+  const result = await db.execute(sql`
+    with visible_tickets as materialized (
+      ${visibleTickets(actor, filters, 'metrics.view')}
+    )
+    ${queries[name]}
+  `)
+  return result.rows.map(normalizeRow)
 }
 
 export async function recentActivity(
@@ -91,13 +111,7 @@ export async function pausesByReason(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_pauses_by_reason')
-  return mergeBy(
-    rows,
-    (row) => String(row.reason_name),
-    ['pauses'],
-    ['pause_time', 'pause_time_labor'],
-  )
+  return scopedRows(db, actor, filters, 'metrics_pauses_by_reason')
 }
 
 export async function duplicateTickets(
@@ -113,8 +127,7 @@ export async function duplicateAlerts(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_duplicate_alerts')
-  return mergeBy(rows, (row) => String(row.decision), ['candidates', 'tickets'])
+  return scopedRows(db, actor, filters, 'metrics_duplicate_alerts')
 }
 
 export async function duplicatesByDimension(
@@ -122,23 +135,7 @@ export async function duplicatesByDimension(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(
-    db,
-    actor,
-    filters,
-    'metrics_duplicates_by_dimension',
-  )
-  return mergeBy(
-    rows,
-    (row) => `${String(row.dimension)}:${String(row.dimension_id)}`,
-    ['tickets', 'duplicates'],
-  ).map((row) => ({
-    ...row,
-    duplicate_rate:
-      number(row.tickets) > 0
-        ? number(row.duplicates) / number(row.tickets)
-        : 0,
-  }))
+  return scopedRows(db, actor, filters, 'metrics_duplicates_by_dimension')
 }
 
 export async function satisfaction(
@@ -146,38 +143,11 @@ export async function satisfaction(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_satisfaction')
-  let ratings = 0
-  let total = 0
-  for (const row of rows) {
-    const count = number(row.ratings)
-    ratings += count
-    total += number(row.average_score) * count
-  }
-  return [{ average_score: ratings > 0 ? total / ratings : null, ratings }]
+  return scopedRows(db, actor, filters, 'metrics_satisfaction')
 }
 
 export async function sla(db: Database, actor: Actor, filters: MetricsFilters) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_sla')
-  let withTarget = 0
-  let met = 0
-  let target = 0
-  let resolution = 0
-  for (const row of rows) {
-    withTarget += number(row.with_target)
-    met += number(row.met)
-    target += number(row.avg_target_minutes) * number(row.with_target)
-    resolution += number(row.avg_resolution_minutes) * number(row.with_target)
-  }
-  return [
-    {
-      with_target: withTarget,
-      met,
-      compliance_rate: withTarget > 0 ? met / withTarget : null,
-      avg_target_minutes: withTarget > 0 ? target / withTarget : null,
-      avg_resolution_minutes: withTarget > 0 ? resolution / withTarget : null,
-    },
-  ]
+  return scopedRows(db, actor, filters, 'metrics_sla')
 }
 
 export async function slaByPriority(
@@ -185,17 +155,7 @@ export async function slaByPriority(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_sla_by_priority')
-  return mergeBy(rows, (row) => String(row.priority_id), [
-    'with_target',
-    'met',
-  ]).map((row) => ({
-    ...row,
-    compliance_rate:
-      number(row.with_target) > 0
-        ? number(row.met) / number(row.with_target)
-        : null,
-  }))
+  return scopedRows(db, actor, filters, 'metrics_sla_by_priority')
 }
 
 export async function byTechnician(
@@ -203,17 +163,7 @@ export async function byTechnician(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_by_technician')
-  return mergeBy(
-    rows,
-    (row) => String(row.technician_id),
-    ['tickets', 'leader_count', 'auxiliary_count', 'assigned_count'],
-    [
-      'participation_time',
-      'participation_time_labor',
-      'participation_time_extra',
-    ],
-  )
+  return scopedRows(db, actor, filters, 'metrics_by_technician')
 }
 
 export async function rejectCancel(
@@ -221,17 +171,7 @@ export async function rejectCancel(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(
-    db,
-    actor,
-    filters,
-    'metrics_reject_cancel_by_reason',
-  )
-  return mergeBy(
-    rows,
-    (row) => `${String(row.event_type)}:${String(row.reason_name)}`,
-    ['tickets'],
-  )
+  return scopedRows(db, actor, filters, 'metrics_reject_cancel_by_reason')
 }
 
 export async function routing(
@@ -239,23 +179,5 @@ export async function routing(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  const rows = await scopedRows(db, actor, filters, 'metrics_routing')
-  let offers = 0
-  let pending = 0
-  let taken = 0
-  let weighted = 0
-  for (const row of rows) {
-    offers += number(row.offers)
-    pending += number(row.pending_offers)
-    taken += number(row.taken)
-    weighted += intervalMinutes(row.avg_time_to_take) * number(row.taken)
-  }
-  return [
-    {
-      offers,
-      pending_offers: pending,
-      taken,
-      avg_time_to_take: minutesToInterval(taken > 0 ? weighted / taken : 0),
-    },
-  ]
+  return scopedRows(db, actor, filters, 'metrics_routing')
 }

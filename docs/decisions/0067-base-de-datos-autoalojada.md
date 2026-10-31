@@ -3,6 +3,9 @@
 **Fecha:** 2026-10-20
 **Estado:** aceptada
 
+> El punto 3 fue sustituido por [ADR 0100](0100-consolidacion-interna.md): las migraciones SQL son
+> la única definición ejecutable; se retiró la introspección TypeScript sin consumidores.
+
 ## Contexto
 
 La Etapa A de la migración definió PostgreSQL estándar, Drizzle ORM/Kit y un servidor Node

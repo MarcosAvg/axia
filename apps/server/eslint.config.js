@@ -4,7 +4,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig([
-  globalIgnores(['node_modules', 'db/migrations/**', 'src/db/schema.ts']),
+  globalIgnores(['node_modules', 'db/migrations/**']),
   {
     files: ['**/*.ts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],

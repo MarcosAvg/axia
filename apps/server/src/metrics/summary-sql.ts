@@ -10,28 +10,39 @@ const OPEN_STATUSES = sql`(
   'attended', 'under_claim'
 )`
 
-/** Base visible por alcance, con las dimensiones que no están en la vista. */
-export function metricsBase(actor: Actor, filters: MetricsFilters) {
+/** Base visible y filtrada; cada llamador conserva el permiso de su endpoint. */
+export function visibleTickets(
+  actor: Actor,
+  filters: MetricsFilters,
+  permission: string,
+) {
   const p = filterParams(filters)
   return sql`
-    select
-      v.*,
-      t.subcategory_id,
-      t.problem_id,
-      t.location_id,
-      t.channel_id,
-      t.service_type_id
-    from public.v_ticket_metrics_base v
-    join public.tickets t on t.id = v.id
+    select t.*
+    from public.tickets t
     join public.requesters r on r.id = t.requester_id
-    where ${scopePredicate(actor, 'ticket.view')}
+    where ${scopePredicate(actor, permission)}
       and public.metrics_date_in(
-        v.reported_at, ${p.p_from}::date, ${p.p_to}::date
+        t.reported_at, ${p.p_from}::date, ${p.p_to}::date
       )
-      and (${p.p_building}::uuid is null or v.building_id = ${p.p_building}::uuid)
-      and (${p.p_team}::uuid is null or v.team_id = ${p.p_team}::uuid)
-      and (${p.p_category}::uuid is null or v.category_id = ${p.p_category}::uuid)
-      and (${p.p_dependency}::uuid is null or v.dependency_id = ${p.p_dependency}::uuid)
+      and (${p.p_building}::uuid is null or t.building_id = ${p.p_building}::uuid)
+      and (${p.p_team}::uuid is null or t.team_id = ${p.p_team}::uuid)
+      and (${p.p_category}::uuid is null or t.category_id = ${p.p_category}::uuid)
+      and (${p.p_dependency}::uuid is null or t.dependency_id = ${p.p_dependency}::uuid)
+  `
+}
+
+/** Añade las dimensiones y los tiempos de la vista al conjunto autorizado. */
+export function metricsBase(
+  actor: Actor,
+  filters: MetricsFilters,
+  permission = 'ticket.view',
+) {
+  return sql`
+    select v.*, t.subcategory_id, t.problem_id, t.location_id,
+      t.channel_id, t.service_type_id
+    from public.v_ticket_metrics_base v
+    join (${visibleTickets(actor, filters, permission)}) t on t.id = v.id
   `
 }
 

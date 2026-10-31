@@ -1,7 +1,8 @@
 # Datos
 
-Referencia conceptual del modelo de datos actual. El esquema ejecutable está en
-`apps/server/src/db/schema.ts` y las migraciones en `apps/server/db/migrations/`.
+Referencia conceptual del modelo de datos actual. La definición ejecutable completa está en las
+migraciones SQL de `apps/server/db/migrations/`. Drizzle ejecuta SQL parametrizado y transacciones;
+no se mantiene una segunda definición de tablas en TypeScript (ADR 0100).
 
 ## Dominios
 
