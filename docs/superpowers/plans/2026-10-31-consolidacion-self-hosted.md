@@ -1,6 +1,6 @@
 # Consolidación self-hosted Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Convertir los recorridos operativos auditados en procedimientos seguros y reproducibles.
 **Architecture:** Conservar PostgreSQL y servidor único. Separar datos y preparación de entornos;
@@ -31,11 +31,11 @@ servidor; configuraciones Playwright; compose.dev.yaml y nuevo Compose de prueba
 **Interfaces:** Mantener `pnpm dev`, `dev:api`, `db:start`, `db:test`, `test:e2e` y `test:visual`.
 Producir preparación reproducible de bases test y E2E distintas, sin cargar `.env` real en tests.
 
-- [ ] Escribir y observar fallar regresiones de reset no autorizado y aislamiento E2E.
-- [ ] Implementar validación antes de conectar, destinos exclusivos y evidencias separadas.
-- [ ] Unificar arranque con recarga y separar demo explícita de primer administrador vacío.
-- [ ] Probar scripts/fixtures y documentar contratos en notas de entrega al integrador.
-- [ ] Commit tras verificación del subconjunto.
+- [x] Escribir y observar fallar regresiones de reset no autorizado y aislamiento E2E.
+- [x] Implementar validación antes de conectar, destinos exclusivos y evidencias separadas.
+- [x] Unificar arranque con recarga y separar demo explícita de primer administrador vacío.
+- [x] Probar scripts/fixtures y documentar contratos en notas de entrega al integrador.
+- [x] Commit tras verificación del subconjunto.
 
 ### Task 2: Respaldo y recuperación
 
@@ -43,11 +43,11 @@ Producir preparación reproducible de bases test y E2E distintas, sin cargar `.e
 **Interfaces:** Preservar scripts individuales; añadir `backup-all.sh` y `restore-all.sh` que
 coordinan PostgreSQL y evidencias mediante un conjunto identificado y validado.
 
-- [ ] Escribir regresiones de fallo intermedio, permisos y restauración parcial; observar fallos.
-- [ ] Implementar coordinación con pausa de app, manifiesto e integridad; recuperación segura.
-- [ ] Preparar roles/base en recuperación vacía; restauración transaccional; no volcar secretos.
-- [ ] Verificar scripts con mocks y dejar preparado recorrido real desechable para Task 5.
-- [ ] Commit tras verificación del subconjunto.
+- [x] Escribir regresiones de fallo intermedio, permisos y restauración parcial; observar fallos.
+- [x] Implementar coordinación con pausa de app, manifiesto e integridad; recuperación segura.
+- [x] Preparar roles/base en recuperación vacía; restauración transaccional; no volcar secretos.
+- [x] Verificar scripts con mocks y dejar preparado recorrido real desechable para Task 5.
+- [x] Commit tras verificación del subconjunto.
 
 ### Task 3: Imagen, configuración y release
 
@@ -55,11 +55,11 @@ coordinan PostgreSQL y evidencias mediante un conjunto identificado y validado.
 **Interfaces:** `AXIA_IMAGE` selecciona exactamente una imagen; `migrate` cambia solo comando y
 credenciales. `AXIA_APP_USER` deja de ofrecer una personalización incompatible con SQL existente.
 
-- [ ] Añadir pruebas del contrato Compose e imagen compartida; observar fallos.
-- [ ] Unificar artefacto, variables operativas y requisitos de producción/desarrollo.
-- [ ] Enlazar publicación a checks del mismo commit y distribuir paquete operativo versionado.
-- [ ] Probar expansión con entorno vacío y valores ficticios; verificar paquete sin secretos.
-- [ ] Commit de imagen/contrato y ADR.
+- [x] Añadir pruebas del contrato Compose e imagen compartida; observar fallos.
+- [x] Unificar artefacto, variables operativas y requisitos de producción/desarrollo.
+- [x] Enlazar publicación a checks del mismo commit y distribuir paquete operativo versionado.
+- [x] Probar expansión con entorno vacío y valores ficticios; verificar paquete sin secretos.
+- [x] Commit de imagen/contrato y ADR.
 
 ### Task 4: Migraciones y selección de pruebas
 
@@ -67,11 +67,11 @@ credenciales. `AXIA_APP_USER` deja de ofrecer una personalización incompatible 
 **Interfaces:** Conservar `runMigrations(client, migrationsDir)` y metadatos previos; añadir checksum
 sin modificar SQL histórico. Mantener `pnpm test:affected` con fallback conservador.
 
-- [ ] Añadir pruebas de checksum alterado, adopción de historial sin checksum y archivo ausente.
-- [ ] Observar fallos, implementar controles compatibles y probar integración PostgreSQL.
-- [ ] Añadir regresiones del selector para Compose, workflows, lockfile y rutas UI.
-- [ ] Corregir clasificación y ejecutar sin conexión a bases mediante intercepción de comandos.
-- [ ] Commit tras verificación.
+- [x] Añadir pruebas de checksum alterado, adopción de historial sin checksum y archivo ausente.
+- [x] Observar fallos, implementar controles compatibles y probar integración PostgreSQL.
+- [x] Añadir regresiones del selector para Compose, workflows, lockfile y rutas UI.
+- [x] Corregir clasificación y ejecutar sin conexión a bases mediante intercepción de comandos.
+- [x] Commit tras verificación.
 
 ### Task 5: Verificación integral y documentación
 
@@ -80,10 +80,10 @@ ADR 0099 e índice, estado.md y CHANGELOG.md.
 **Interfaces:** Smoke desechable crea instancia limpia, datos testigo y evidencia; verifica
 backup/restore y rerun de migraciones con conservación de datos y registra versión del artefacto.
 
-- [ ] Implementar y ejecutar smoke local con proyecto/volúmenes exclusivos de pruebas.
-- [ ] Ejecutar `pnpm check:fast`, `pnpm test:affected` y compuerta `pnpm check` al cierre.
-- [ ] Revisar diff con agente independiente y corregir hallazgos con regresiones.
-- [ ] Documentar evidencia y límites reales; commit final. No publicar ni desplegar.
+- [x] Implementar y ejecutar smoke local con proyecto/volúmenes exclusivos de pruebas.
+- [x] Ejecutar `pnpm check:fast`, `pnpm test:affected` y compuerta `pnpm check` al cierre.
+- [x] Revisar diff con agente independiente y corregir hallazgos con regresiones.
+- [x] Documentar evidencia y límites reales; commit final. No publicar ni desplegar.
 
 ## Ledger
 
@@ -91,3 +91,23 @@ backup/restore y rerun de migraciones con conservación de datos y registra vers
 - Decisión: continuar en el checkout y rama de trabajo de esta conversación; no hay trabajo ajeno.
 - Tareas 1 y 2 pueden implementarse en paralelo sin editar Compose de producción ni workflows.
 - Tareas 3 y 4 se implementan aquí; Task 5 integra las interfaces y verifica el conjunto.
+- Task 1: complete — destinos protegidos 7/7; desarrollo real HTTP200 y cierre de ambos watchers;
+  smoke navegador serial 11/11. El fallo paralelo motivó serializar fixtures compartidos sin
+  cambiar aserciones ni añadir retries locales.
+- Task 2: complete — mocks de éxito/fallo y selección de imagen con dependencias; prueba Docker
+  RED root sin capacidades → GREEN usuario propietario, sin alterar hardening.
+- Task 3: complete — contrato Compose 4/4, empaquetado 2/2, publicación condicionada a CI y smoke
+  del artefacto exacto antes de push. No se ejecutó publicación remota.
+- Task 4: complete — migraciones 20/20 en subconjunto; selector 20/20. La revisión detectó bootstrap
+  repetido y smoke condicionado a variable; ambas regresiones fallaron antes de corregirlas.
+- Task 5: complete — `test:affected` → `pnpm check`, código 0: 57 servidor + 269 web + 52 E2E +
+  197 PostgreSQL, 30 regresiones Node y scripts Bash; build y estáticos verdes. Smoke Docker final
+  con imagen reconstruida pasó; revisión independiente completada sin menores pendientes.
+- Ruling: continuar en rama del checkout existente — no había trabajo ajeno y AGENTS.md pide
+  autonomía; evita otro entorno duplicado. Riesgo residual: no hay segundo checkout físico.
+- Ruling: recuperar solo sobre destino vacío y mantener app parada si falla — impide mezcla de
+  datos; el costo es requerir otro conjunto de volúmenes para reintentar un restore fallido.
+- Ruling: el smoke actualiza el historial real previo a hashes, no una release histórica completa
+  descargada — aún no hay un catálogo de releases verificadas; futuros saltos requieren sus notas
+  y pruebas. No se anuncia ARM ni recuperación entre arquitecturas.
+- Final review: tres hallazgos importantes corregidos con RED→GREEN; ninguno menor diferido.

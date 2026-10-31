@@ -8,17 +8,28 @@
 
 ## En curso
 
-Implementación de la consolidación aprobada en la auditoría, en rama propia:
+Consolidación implementada y verificada localmente. Se conserva el stack; no se modificó la
+instalación local anterior ni se publicó/desplegó nada. Ver [ADR 0099](../decisions/0099-consolidacion-self-hosted.md).
 
-1. Separar desarrollo, integración y E2E; proteger reinicios y simplificar arranque/demo.
-2. Unificar la imagen y la versión de app/migrador; cerrar contrato de configuración.
-3. Coordinar respaldos y restauración con pruebas de fallo y destino vacío.
-4. Añadir integridad de migraciones y corregir selección de pruebas.
-5. Automatizar instalación/actualización/recuperación del stack local en CI y empaquetar releases.
-6. Actualizar guías/ADR, pasar chequeos, revisar el conjunto y guardar commits pequeños.
+**Siguiente:** publicar la primera release mediante el workflow preparado y realizar la puesta en
+marcha real con dominio/TLS y copias fuera del host. Las operaciones reales siguen a cargo del
+operador; no hay preguntas de negocio pendientes para esta consolidación.
 
 ## Hecho
 
+- **Consolidación (2026-10-31):** desarrollo `axia-dev` con `.env.dev` y watchers host; pruebas tmpfs
+  en `55433`, bases `_test`/`_e2e`, puertos navegador `3101`/`5174` y reinicios protegidos. Demo/setup
+  coherentes. Imagen única app/migrador y opciones de sesiones/login/retención efectivas; release
+  por digest después de la compuerta y smoke del artefacto exacto. Backup/restore coordinados,
+  destino vacío, usuario propietario de evidencias y hashes del historial (migración 0016).
+  Revisión independiente: tres hallazgos corregidos con regresiones RED→GREEN; sin menores abiertos.
+  `check:fast` pasó; `test:affected` seleccionó `pnpm check` completo y terminó con código 0:
+  30 regresiones Node y scripts Bash, 57 unitarias/HTTP servidor, 269 web, 52 E2E y 197 PostgreSQL;
+  lint, tipos, estáticos y build en verde. Docs: 133 archivos/0 enlaces rotos; independencia:
+  909 archivos/0 coincidencias. Smoke Docker real pasó instalación, actualización de historial,
+  respaldo, recuperación en volúmenes nuevos, login/archivo y rechazo de destino ocupado. El build
+  mantiene un aviso de chunks web >500 kB, sin fallo ni cambio de límites. GHCR y despliegue real
+  no ejecutados; el smoke no certifica saltos arbitrarios entre futuras versiones.
 - **Auditoría de estructura (2026-10-31):** Compose separa correctamente `db`, `migrate` y `app`;
   conviene conservar el stack. Se documentaron riesgos del reset E2E sin base exclusiva, publicación
   independiente de dos `latest`, respaldo de base/archivos sin punto común y configuración omitida
