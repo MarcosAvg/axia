@@ -5,7 +5,29 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-10-31
 
-## Tarea cerrada: catálogos completos, jerarquía y orden
+## Tarea cerrada: eliminar catálogos sin uso
+
+- Cada fila de catálogo ofrece “Eliminar” con confirmación explícita. Se borra solo si nada lo
+  referencia; si tiquets, historial o configuración lo usan, el servidor responde 409 con la causa
+  (“tiene subestados”, “tiene ubicaciones”) y sugiere desactivarlo.
+- Los vínculos propios se retiran con el registro (dependencia–ubicación, franjas y festivos,
+  designaciones del técnico). Los compartidos se comprueban antes: designaciones de una categoría,
+  ubicaciones vinculadas a dependencias y avisos de un solicitante.
+- RN-22 admite la excepción de registros nunca usados; decisión en el
+  [ADR 0104](../decisions/0104-borrado-catalogos-sin-uso.md).
+- Pruebas: borrado libre, dependencia con vínculos, conflicto por edificio, motivo con subestados y
+  categoría designada, 404 al repetir y permiso. E2E crea edificio y ubicación, bloquea el borrado
+  y después elimina ambos.
+
+## Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip, 60 pruebas de
+  servidor, 331 de web, 276 PostgreSQL y build. Documentación: 36 archivos, 0 enlaces rotos.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 15/15 verdes, incluida la eliminación bloqueada y
+  permitida.
+- Persiste el aviso previo de chunks >500 kB.
+
+## Tarea anterior: catálogos completos, jerarquía y orden
 
 - La lectura administrativa de los 14 catálogos devuelve datos derivados: conteos de uso
   (ubicaciones, edificios, subcategorías, problemas, técnicos y designaciones), la cuenta
@@ -21,7 +43,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   activo y por actualización; en árbol se ordenan hermanos sin aplanar la jerarquía; en pantalla
   angosta hay selector de columna y dirección.
 
-## Evidencia de esta tarea
+## Evidencia de catálogos completos
 
 - Regresiones nuevas para orden por etiqueta, agrupación y contracción del árbol, datos derivados
   del catálogo y cuenta inactiva.
@@ -49,7 +71,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión [0103](../decisions/0103-catalogos-operables-y-demo-coherente.md). Revisión independiente
   sin hallazgos pendientes tras corregir desfase de rutas demo/desarrollo. Negocio intacto.
 
-## Evidencia de la tarea anterior
+## Evidencia de catálogos y demo
 
 - Regresiones RED→GREEN para raíz sin salida, alta de motivos, padre inválido, duplicados, edición
   con pausa abierta, demo sin ofertas, evidencias/validaciones y ruta local de imágenes.
