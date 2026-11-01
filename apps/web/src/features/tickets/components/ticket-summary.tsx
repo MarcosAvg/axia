@@ -26,6 +26,10 @@ function Field({
   )
 }
 
+function DuplicateLinkField({ folio }: { folio: string }) {
+  return <Field label={ticketMessages.detail.duplicateOf} value={folio} />
+}
+
 /** Encabezado y captura del tiquet. */
 export function TicketSummary({ ticket }: { ticket: TicketDetail }) {
   const { fields } = ticketMessages.detail
@@ -72,6 +76,9 @@ export function TicketSummary({ ticket }: { ticket: TicketDetail }) {
           label={fields.requesterContact}
           value={ticket.requesterContact}
         />
+        {ticket.duplicateOfFolio ? (
+          <DuplicateLinkField folio={ticket.duplicateOfFolio} />
+        ) : null}
         <Field
           label={fields.reportedAt}
           value={formatDateTime(ticket.reportedAt)}

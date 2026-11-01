@@ -1,5 +1,18 @@
 import type { EventType } from '@/features/tickets'
 
+export const DUPLICATE_SHOWN_FIELDS = [
+  'folio',
+  'status',
+  'reported_at',
+  'building',
+  'location',
+  'problem',
+  'subcategory',
+  'dependency',
+  'requester_contact',
+] as const
+type DuplicateShownField = (typeof DUPLICATE_SHOWN_FIELDS)[number]
+
 export type ValidationPolicy = 'requester' | 'supervisor' | 'both'
 export type EvidencePolicy = 'optional' | 'recommended' | 'required'
 type SlaClockMode = 'calendar' | 'laboral'
@@ -35,6 +48,9 @@ export interface InstanceSettings {
   slaClockMode: SlaClockMode
   requesterVisibleEventTypes: EventType[]
   defaultPriorityId: string | null
+  duplicateWindowDays: number
+  duplicateSimilarity: number
+  duplicateShownFields: DuplicateShownField[]
 }
 
 /** Días a partir de un intervalo de Postgres (p. ej. `1 day`). */
@@ -56,6 +72,9 @@ export interface SettingsFormValues {
   slaClockMode: SlaClockMode
   requesterVisibleEventTypes: EventType[]
   defaultPriorityId?: string
+  duplicateWindowDays: string
+  duplicateSimilarity: string
+  duplicateShownFields: DuplicateShownField[]
 }
 
 export interface SettingsUpdate {
@@ -70,6 +89,9 @@ export interface SettingsUpdate {
   sla_clock_mode: SlaClockMode
   requester_visible_event_types: EventType[]
   default_priority_id: string | null
+  duplicate_window_days: number
+  duplicate_similarity: number
+  duplicate_shown_fields: DuplicateShownField[]
 }
 
 export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
@@ -85,5 +107,8 @@ export function settingsToUpdate(settings: InstanceSettings): SettingsUpdate {
     sla_clock_mode: settings.slaClockMode,
     requester_visible_event_types: settings.requesterVisibleEventTypes,
     default_priority_id: settings.defaultPriorityId,
+    duplicate_window_days: settings.duplicateWindowDays,
+    duplicate_similarity: settings.duplicateSimilarity,
+    duplicate_shown_fields: settings.duplicateShownFields,
   }
 }

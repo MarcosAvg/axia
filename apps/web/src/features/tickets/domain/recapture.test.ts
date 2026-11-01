@@ -38,6 +38,7 @@ const ticket = {
   channelName: null,
   requesterContact: null,
   duplicateOfId: null,
+  duplicateOfFolio: null,
 } satisfies TicketDetail
 
 describe('initialRecaptureValues', () => {

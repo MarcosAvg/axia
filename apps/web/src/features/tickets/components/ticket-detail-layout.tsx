@@ -15,6 +15,7 @@ import type {
 } from '../domain/types'
 import { useTicketEvidence } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
+import { DuplicateAlertsPanel } from './duplicate-alerts-panel'
 import { EvidenceUploader } from './evidence-uploader'
 import { PausePanel } from './pause-panel'
 import { PendingEvidence } from './pending-evidence'
@@ -138,6 +139,49 @@ function TicketActivity({
   )
 }
 
+function ActionsSection({
+  shared,
+  isDesktop,
+  hasActions,
+}: {
+  shared: {
+    ticket: TicketDetailWithTimes
+    actions: ActionKey[]
+    identity: Identity | null
+    participants: TicketParticipant[]
+  }
+  isDesktop: boolean
+  hasActions: boolean
+}) {
+  if (!isDesktop || !hasActions) return null
+  return (
+    <Section
+      title={ticketMessages.detail.actions}
+      hint={detailSectionHints.actions}
+    >
+      <TicketActionsPanel {...shared} />
+    </Section>
+  )
+}
+
+function CycleTimesSection({
+  times,
+  canSee,
+}: {
+  times: TicketDetailWithTimes['cycleTimes']
+  canSee: boolean
+}) {
+  return (
+    <Section
+      title={ticketMessages.detail.cycleTimes}
+      hint={detailSectionHints.cycleTimes}
+      className={cn(!canSee && 'hidden lg:block')}
+    >
+      <TicketCycleChart times={times} />
+    </Section>
+  )
+}
+
 interface TicketLayoutProps {
   ticketId: string
   ticket: TicketDetailWithTimes
@@ -165,23 +209,17 @@ export function TicketLayout({
 
   return (
     <div className="flex flex-col gap-6 pb-44 lg:pb-0">
-      <Section
-        title={ticketMessages.detail.cycleTimes}
-        hint={detailSectionHints.cycleTimes}
-        className={cn(!can(identity, 'metrics.view') && 'hidden lg:block')}
-      >
-        <TicketCycleChart times={ticket.cycleTimes} />
-      </Section>
+      <CycleTimesSection
+        times={ticket.cycleTimes}
+        canSee={Boolean(can(identity, 'metrics.view'))}
+      />
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
         <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
-          {isDesktop && hasActions ? (
-            <Section
-              title={ticketMessages.detail.actions}
-              hint={detailSectionHints.actions}
-            >
-              <TicketActionsPanel {...shared} />
-            </Section>
-          ) : null}
+          <ActionsSection
+            shared={shared}
+            isDesktop={isDesktop}
+            hasActions={hasActions}
+          />
           <Section
             title={ticketMessages.detail.capture}
             hint={detailSectionHints.capture}
@@ -189,6 +227,11 @@ export function TicketLayout({
             <TicketSummary ticket={ticket} />
           </Section>
           <PausePanel ticketId={ticketId} />
+          <DuplicateAlertsPanel
+            ticketId={ticketId}
+            possibleDuplicate={ticket.possibleDuplicate}
+            canResolve={actions.includes('mark_duplicate')}
+          />
         </div>
         <TicketActivity ticketId={ticketId} timeline={timeline} />
         <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">

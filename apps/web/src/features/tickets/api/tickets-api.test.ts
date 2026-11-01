@@ -42,6 +42,7 @@ const detail = {
   channelName: null,
   requesterContact: null,
   duplicateOfId: null,
+  duplicateOfFolio: null,
   cycleTimes: {
     total: 20,
     response: 1,

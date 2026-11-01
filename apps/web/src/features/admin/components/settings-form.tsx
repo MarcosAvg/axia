@@ -8,10 +8,12 @@ import { FormSection } from '@/components/shared/form-section'
 import { Button } from '@/components/ui/button'
 import { EVENT_TYPES } from '@/features/tickets'
 import { useUnsavedChangesGuard } from '@/lib/use-unsaved-changes-guard'
+import { DUPLICATE_SHOWN_FIELDS } from '../domain/settings'
 import type { InstanceSettings } from '../domain/settings'
 import { settingsHints } from '../hints'
 import { adminMessages } from '../i18n'
 import {
+  DuplicateFields,
   GeneralFields,
   TimeFields,
   ValidationFields,
@@ -30,6 +32,12 @@ const schema = z.object({
   slaClockMode: z.enum(['calendar', 'laboral']),
   requesterVisibleEventTypes: z.array(z.enum(EVENT_TYPES)).min(1),
   defaultPriorityId: z.string().optional(),
+  duplicateWindowDays: z.string().regex(/^\d+$/),
+  duplicateSimilarity: z.string().refine((value) => {
+    const number = Number(value)
+    return Number.isFinite(number) && number >= 0.05 && number <= 1
+  }),
+  duplicateShownFields: z.array(z.enum(DUPLICATE_SHOWN_FIELDS)).min(1),
 })
 
 type SettingsValues = z.infer<typeof schema>
@@ -61,6 +69,9 @@ function SettingsFormView({
       </FormSection>
       <FormSection title={sections.visibility} hint={settingsHints.visibility}>
         <VisibilityFields register={register} errors={errors} />
+      </FormSection>
+      <FormSection title={sections.duplicates} hint={settingsHints.duplicates}>
+        <DuplicateFields register={register} errors={errors} />
       </FormSection>
       <FormActionsBar>
         <Button
@@ -97,6 +108,9 @@ function toFormValues(settings: InstanceSettings): SettingsValues {
     slaClockMode: settings.slaClockMode,
     requesterVisibleEventTypes: settings.requesterVisibleEventTypes,
     defaultPriorityId: settings.defaultPriorityId ?? '',
+    duplicateWindowDays: String(settings.duplicateWindowDays),
+    duplicateSimilarity: String(settings.duplicateSimilarity),
+    duplicateShownFields: settings.duplicateShownFields,
   }
 }
 
@@ -137,6 +151,9 @@ export function SettingsForm({
       slaClockMode: values.slaClockMode,
       requesterVisibleEventTypes: values.requesterVisibleEventTypes,
       defaultPriorityId: values.defaultPriorityId || null,
+      duplicateWindowDays: Number(values.duplicateWindowDays),
+      duplicateSimilarity: Number(values.duplicateSimilarity),
+      duplicateShownFields: values.duplicateShownFields,
     })
   })
 

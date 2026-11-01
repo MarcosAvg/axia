@@ -7,4 +7,6 @@ export const settingsHints = {
   time: 'Zona horaria, calendario laboral y prioridad por defecto para los tiempos.',
   visibility:
     'Qué tipos de evento de la línea de tiempo puede ver el solicitante.',
+  duplicates:
+    'Cuándo se avisa de un posible duplicado y qué datos del otro tiquet se muestran.',
 } as const

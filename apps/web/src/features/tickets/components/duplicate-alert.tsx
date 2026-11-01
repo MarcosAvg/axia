@@ -7,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { formatDateTime } from '@/lib/format'
 import type { DuplicateCandidate } from '../domain/types'
 import { statusLabels, ticketMessages } from '../i18n'
+import { DuplicateCandidateDetails } from './duplicate-candidate-details'
 
 interface DuplicateAlertProps {
   candidates: DuplicateCandidate[]
@@ -17,6 +17,8 @@ interface DuplicateAlertProps {
   onCancel: () => void
   isSubmitting: boolean
 }
+
+const { create } = ticketMessages
 
 function CandidateItem({ candidate }: { candidate: DuplicateCandidate }) {
   return (
@@ -29,16 +31,7 @@ function CandidateItem({ candidate }: { candidate: DuplicateCandidate }) {
           </span>
         ) : null}
       </div>
-      {candidate.building ? <p>{candidate.building}</p> : null}
-      {candidate.problem ? <p>{candidate.problem}</p> : null}
-      {candidate.requester_contact ? (
-        <p>{candidate.requester_contact}</p>
-      ) : null}
-      {candidate.reported_at ? (
-        <p className="text-xs text-muted-foreground">
-          {formatDateTime(candidate.reported_at)}
-        </p>
-      ) : null}
+      <DuplicateCandidateDetails candidate={candidate} />
     </li>
   )
 }
@@ -50,8 +43,6 @@ export function DuplicateAlert({
   onCancel,
   isSubmitting,
 }: DuplicateAlertProps) {
-  const { create } = ticketMessages
-
   return (
     <Card className="border-warning/50 bg-warning/5">
       <CardHeader>
@@ -60,11 +51,8 @@ export function DuplicateAlert({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <ul className="flex flex-col gap-2 text-sm">
-          {candidates.map((candidate, index) => (
-            <CandidateItem
-              key={candidate.folio ?? index}
-              candidate={candidate}
-            />
+          {candidates.map((candidate) => (
+            <CandidateItem key={candidate.id} candidate={candidate} />
           ))}
         </ul>
         <ButtonGrid>

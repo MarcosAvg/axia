@@ -46,6 +46,7 @@ export const ticketDetailResponseSchema = z.object({
     channelName: nullableText,
     requesterContact: nullableText,
     duplicateOfId: nullableText,
+    duplicateOfFolio: nullableText,
     cycleTimes: z.object({
       total: z.number(),
       response: z.number(),
@@ -122,11 +123,20 @@ export type TicketListSearch = z.infer<typeof ticketListSearchSchema>
 
 const duplicateCandidateSchema = z
   .object({
+    id: z.string(),
+    score: z.number(),
+    similarity: z.number(),
+    reasons: z.array(z.string()).catch([]),
+    decision: z.enum(['ignored', 'linked', 'dismissed']).nullable().optional(),
+    decided_at: z.string().nullable().optional(),
     folio: z.string().optional(),
     status: ticketStatusSchema.optional(),
     reported_at: z.string().optional(),
     building: z.string().nullable().optional(),
+    location: z.string().nullable().optional(),
     problem: z.string().nullable().optional(),
+    subcategory: z.string().nullable().optional(),
+    dependency: z.string().nullable().optional(),
     requester_contact: z.string().nullable().optional(),
   })
   .passthrough()

@@ -105,6 +105,7 @@ export interface TicketDetail extends TicketListItem {
   channelName: string | null
   requesterContact: string | null
   duplicateOfId: string | null
+  duplicateOfFolio: string | null
 }
 
 /** Tiempos del ciclo de un tiquet, en minutos. */
@@ -172,11 +173,20 @@ export interface TicketEvidenceItem {
 }
 
 export interface DuplicateCandidate {
+  id: string
+  score: number
+  similarity: number
+  reasons: string[]
+  decision?: 'ignored' | 'linked' | 'dismissed' | null
+  decided_at?: string | null
   folio?: string
   status?: TicketStatus
   reported_at?: string
   building?: string | null
+  location?: string | null
   problem?: string | null
+  subcategory?: string | null
+  dependency?: string | null
   requester_contact?: string | null
 }
 

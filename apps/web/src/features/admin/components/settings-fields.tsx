@@ -3,6 +3,7 @@ import { SelectField, TextField } from '@/components/shared/form-fields'
 import { usePriorities } from '@/features/catalogs'
 import { EVENT_TYPES, eventLabels } from '@/features/tickets'
 import { useCalendars } from '../hooks/use-calendars'
+import { DUPLICATE_SHOWN_FIELDS } from '../domain/settings'
 import type { SettingsFormValues } from '../domain/settings'
 import { adminMessages } from '../i18n'
 
@@ -177,6 +178,58 @@ export function VisibilityFields({ register, errors }: SettingsFieldsProps) {
       {errors.requesterVisibleEventTypes ? (
         <p className="text-sm text-destructive">
           {settings.requesterVisibleEventsError}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+/** Detección de duplicados: ventana, umbral y datos visibles. */
+export function DuplicateFields({ register, errors }: SettingsFieldsProps) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField
+          id="settings-duplicate-window"
+          type="number"
+          label={settings.duplicateWindowDays}
+          error={errors.duplicateWindowDays?.message}
+          {...register('duplicateWindowDays')}
+        />
+        <TextField
+          id="settings-duplicate-similarity"
+          type="number"
+          step="0.05"
+          min="0.05"
+          max="1"
+          label={settings.duplicateSimilarity}
+          error={errors.duplicateSimilarity?.message}
+          {...register('duplicateSimilarity')}
+        />
+      </div>
+      <span className="text-sm font-medium">{settings.duplicateFields}</span>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {DUPLICATE_SHOWN_FIELDS.map((field) => (
+          <label
+            key={field}
+            className="flex min-h-11 items-center gap-2 text-sm"
+          >
+            <input
+              type="checkbox"
+              value={field}
+              className="size-4 rounded border-input accent-primary"
+              {...register('duplicateShownFields')}
+            />
+            {settings.duplicateFieldsLabels[field]}
+          </label>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {settings.duplicateFieldsHelp}
+      </p>
+      {errors.duplicateShownFields ? (
+        <p className="text-sm text-destructive">
+          {settings.duplicateFieldsError}
         </p>
       ) : null}
     </div>

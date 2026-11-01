@@ -22,8 +22,11 @@ async function findDuplicates(
 ): Promise<DuplicateCandidate[]> {
   return check.mutateAsync({
     buildingId: values.buildingId,
+    locationId: values.locationId,
     categoryId: values.categoryId,
-    problemId: values.problemId,
+    subcategoryId: values.subcategoryId || undefined,
+    problemId: values.problemId || undefined,
+    dependencyId: values.dependencyId,
     description: values.description,
   })
 }
@@ -62,10 +65,10 @@ export function useCreateTicketSubmission(
   const createMutation = useCreateTicket()
   const checkMutation = useCheckDuplicates()
 
-  function createWith(input: CreateTicketInput) {
+  function createWith(input: CreateTicketInput, shownCandidateIds?: string[]) {
     setAllowLeave(true)
     createMutation.mutate(
-      { input, clientRequestId: crypto.randomUUID() },
+      { input, clientRequestId: crypto.randomUUID(), shownCandidateIds },
       {
         onSuccess: async (ticketId) => {
           await uploadRequestPhoto(ticketId, photo, input)
@@ -90,7 +93,12 @@ export function useCreateTicketSubmission(
   })
 
   function confirmDuplicate() {
-    if (pending) createWith(pending.input)
+    if (pending) {
+      createWith(
+        pending.input,
+        pending.candidates.map((candidate) => candidate.id),
+      )
+    }
     setPending(null)
   }
 

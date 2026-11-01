@@ -8,7 +8,16 @@ import {
 describe('parseDuplicateCandidates', () => {
   it('acepta un arreglo de candidatos', () => {
     expect(
-      parseDuplicateCandidates([{ folio: 'AX-1', status: 'attended' }]),
+      parseDuplicateCandidates([
+        {
+          id: 't1',
+          score: 0.75,
+          similarity: 0.6,
+          reasons: ['location'],
+          folio: 'AX-1',
+          status: 'attended',
+        },
+      ]),
     ).toHaveLength(1)
   })
 

@@ -8,6 +8,8 @@ import {
   adjustEventTime,
   checkDuplicates,
   createTicket,
+  dismissDuplicateAlerts,
+  fetchDuplicateAlerts,
   fetchEvidence,
   fetchMyOffers,
   fetchMyWork,
@@ -34,6 +36,7 @@ const ticketKeys = {
   evidence: (id: string) => ['tickets', 'evidence', id] as const,
   pauseSteps: (id: string) => ['tickets', 'pause-steps', id] as const,
   pauseState: (id: string) => ['tickets', 'pause-state', id] as const,
+  duplicateAlerts: (id: string) => ['tickets', 'duplicate-alerts', id] as const,
 }
 
 export function useTicketsList(filters: TicketFilters, page: number) {
@@ -98,7 +101,13 @@ export function useCreateTicket() {
     mutationFn: (variables: {
       input: CreateTicketInput
       clientRequestId: string
-    }) => createTicket(variables.input, variables.clientRequestId),
+      shownCandidateIds?: string[]
+    }) =>
+      createTicket(
+        variables.input,
+        variables.clientRequestId,
+        variables.shownCandidateIds,
+      ),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })
     },
@@ -108,6 +117,24 @@ export function useCreateTicket() {
 export function useCheckDuplicates() {
   return useMutation({
     mutationFn: (input: DuplicateCheckInput) => checkDuplicates(input),
+  })
+}
+
+export function useDuplicateAlerts(ticketId: string, enabled = true) {
+  return useQuery({
+    queryKey: ticketKeys.duplicateAlerts(ticketId),
+    queryFn: () => fetchDuplicateAlerts(ticketId),
+    enabled,
+  })
+}
+
+export function useDismissDuplicateAlerts(ticketId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => dismissDuplicateAlerts(ticketId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['tickets'] })
+    },
   })
 }
 

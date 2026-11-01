@@ -16,6 +16,23 @@ export const settingsMessages = {
   requesterVisibleEventsHelp:
     'Elige qué tipos de evento ve el solicitante en la línea de tiempo. Las notas internas nunca se muestran.',
   requesterVisibleEventsError: 'Elige al menos un tipo de evento.',
+  duplicateWindowDays: 'Ventana de búsqueda de duplicados (días)',
+  duplicateSimilarity: 'Umbral de coincidencia (0.05 a 1)',
+  duplicateFields: 'Datos del otro tiquet que se muestran',
+  duplicateFieldsHelp:
+    'Elige qué datos ve quien registra cuando hay un posible duplicado. Menos datos protege mejor la privacidad.',
+  duplicateFieldsError: 'Elige al menos un dato.',
+  duplicateFieldsLabels: {
+    folio: 'Folio',
+    status: 'Estado',
+    reported_at: 'Fecha de registro',
+    building: 'Edificio',
+    location: 'Ubicación',
+    problem: 'Problema',
+    subcategory: 'Subcategoría',
+    dependency: 'Dependencia',
+    requester_contact: 'Contacto del solicitante',
+  } as Record<string, string>,
   saved: 'Configuración guardada.',
   unsaved: 'Hay cambios sin guardar en la configuración.',
   sections: {
@@ -23,5 +40,6 @@ export const settingsMessages = {
     validation: 'Validación y evidencia',
     time: 'Tiempos y SLA',
     visibility: 'Visibilidad del solicitante',
+    duplicates: 'Duplicados',
   },
 } as const

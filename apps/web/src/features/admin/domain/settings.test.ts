@@ -40,8 +40,13 @@ describe('settingsToUpdate', () => {
       slaClockMode: 'calendar',
       requesterVisibleEventTypes: ['created', 'taken'],
       defaultPriorityId: null,
+      duplicateWindowDays: 7,
+      duplicateSimilarity: 0.3,
+      duplicateShownFields: ['folio', 'problem'],
     })
     expect(update.claim_window).toBe('2 days')
+    expect(update.duplicate_window_days).toBe(7)
+    expect(update.duplicate_shown_fields).toEqual(['folio', 'problem'])
     expect(update.auto_validation_days).toBeNull()
     expect(update.validation_policy).toBe('both')
     expect(update.default_calendar_id).toBeNull()

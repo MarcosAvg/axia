@@ -153,6 +153,7 @@ export async function fetchEvidence(
 export async function createTicket(
   input: CreateTicketInput,
   clientRequestId: string,
+  shownCandidateIds?: string[],
 ): Promise<string> {
   const body = await apiFetch<{ ticket: { id: string } }>('/api/tickets', {
     method: 'POST',
@@ -170,6 +171,7 @@ export async function createTicket(
         ? new Date(input.occurredAt).toISOString()
         : undefined,
       clientRequestId,
+      shownCandidateIds,
     }),
   })
   return body.ticket.id
@@ -177,8 +179,11 @@ export async function createTicket(
 
 export interface DuplicateCheckInput {
   buildingId: string
+  locationId?: string
   categoryId: string
+  subcategoryId?: string
   problemId?: string
+  dependencyId?: string
   description: string
 }
 
@@ -189,12 +194,31 @@ export async function checkDuplicates(
     method: 'POST',
     body: JSON.stringify({
       buildingId: input.buildingId,
+      locationId: input.locationId || undefined,
       categoryId: input.categoryId,
+      subcategoryId: input.subcategoryId || undefined,
       problemId: input.problemId || undefined,
+      dependencyId: input.dependencyId || undefined,
       description: input.description,
     }),
   })
   return parseDuplicateCandidates(body.items)
+}
+
+export async function fetchDuplicateAlerts(
+  ticketId: string,
+): Promise<DuplicateCandidate[]> {
+  const body = await apiFetch<{ items: unknown }>(
+    `/api/tickets/${ticketId}/duplicate-alerts`,
+  )
+  return parseDuplicateCandidates(body.items)
+}
+
+export async function dismissDuplicateAlerts(ticketId: string): Promise<void> {
+  await apiFetch(`/api/tickets/${ticketId}/duplicate-alerts/dismiss`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
 }
 
 export async function fetchMyWork(_userId: string): Promise<TicketListItem[]> {
