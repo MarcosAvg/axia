@@ -196,10 +196,13 @@ describe('marcar duplicado desde una alerta', () => {
     const text = description()
     const originalId = await createTicket(text)
     const duplicateId = await createTicket(text)
+    await backfillDuplicateAlerts(context.db)
     expect((await action(duplicateId, originalId)).statusCode).toBe(200)
     const row = await candidateRow(duplicateId, originalId)
     expect(row).toMatchObject({ decision: 'linked' })
     expect(row?.decided_by).not.toBeNull()
+    const reciprocal = await candidateRow(originalId, duplicateId)
+    expect(reciprocal).toMatchObject({ decision: 'dismissed' })
     const ticket = await context.db.execute(sql`
       select possible_duplicate from public.tickets where id = ${duplicateId}
     `)

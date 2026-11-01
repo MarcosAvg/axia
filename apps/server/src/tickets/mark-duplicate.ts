@@ -75,6 +75,31 @@ async function assertLinkableOriginal(
   }
 }
 
+async function dismissReciprocalCandidates(
+  tx: DbExecutor,
+  ticketId: string,
+  actorId: string,
+) {
+  const affected = await tx.execute(sql`
+    update public.ticket_duplicate_candidates
+    set decision = 'dismissed', decided_by = ${actorId}, decided_at = now()
+    where candidate_ticket_id = ${ticketId} and decision is null
+    returning ticket_id
+  `)
+  const affectedIds = affected.rows.map(
+    (row) => (row as { ticket_id: string }).ticket_id,
+  )
+  if (affectedIds.length === 0) return
+  await tx.execute(sql`
+    update public.tickets t
+    set possible_duplicate = exists (
+      select 1 from public.ticket_duplicate_candidates c
+      where c.ticket_id = t.id
+    )
+    where t.id = any(string_to_array(${affectedIds.join(',')}, ',')::uuid[])
+  `)
+}
+
 async function applyDuplicate(
   tx: DbExecutor,
   actor: Actor,
@@ -105,6 +130,7 @@ async function applyDuplicate(
     where id = ${input.ticketId}
   `)
   await linkCandidate(tx, input.ticketId, actor.id, input.originalId)
+  await dismissReciprocalCandidates(tx, input.ticketId, actor.id)
   await endOpenParticipants(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
     tx,
