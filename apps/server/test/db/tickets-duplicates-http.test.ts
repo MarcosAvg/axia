@@ -131,6 +131,17 @@ describe('aviso previo de duplicados', () => {
     expect(match).not.toHaveProperty('location')
   })
 
+  it('avisa por misma ubicación y problema aunque el texto sea distinto', async () => {
+    const firstId = await createTicket(`Texto distinto ${randomUUID()}`)
+    const items = await checkDuplicates(`Otra redacción ${randomUUID()}`)
+    const match = items.find((item) => item.id === firstId)
+    expect(match).toBeDefined()
+    expect(match?.reasons).toEqual(
+      expect.arrayContaining(['location', 'problem']),
+    )
+    expect(Number(match?.score)).toBeGreaterThanOrEqual(0.5)
+  })
+
   it('marca como ignorados los candidatos que se mostraron al registrar', async () => {
     const text = description()
     const firstId = await createTicket(text)

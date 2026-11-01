@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { selectDefaultClassification } from './fixtures.js'
+import { selectDefaultClassification, submitTicketForm } from './fixtures.js'
 
 const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
@@ -46,7 +46,7 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await selectDefaultClassification(page)
   await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
-  await page.getByRole('button', { name: 'Registrar tiquet' }).click()
+  await submitTicketForm(page)
   await expect(page.getByText(description)).toBeVisible()
 
   // Asigna técnico y agrega un auxiliar.

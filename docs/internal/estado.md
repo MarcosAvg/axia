@@ -8,9 +8,9 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 ## Tarea cerrada: detección y revisión de duplicados
 
-- Una sola detección para el aviso y el alta: tiquets no finales del mismo edificio, problema o
-  categoría afín y ventana configurable, con texto normalizado por encima del umbral. El puntaje
-  compuesto (ubicación, problema, subcategoría y dependencia) ordena y explica las coincidencias.
+- Una sola detección para el aviso y el alta: tiquets no finales del mismo edificio y ventana
+  configurable. Son candidatos los de misma ubicación y problema, o texto normalizado por encima del
+  umbral; el puntaje compuesto ordena y explica las coincidencias.
 - Configuración real de ventana, umbral y campos visibles en `/admin/configuracion`, con API,
   formulario y pruebas; el aviso proyecta solo los campos permitidos.
 - Decisiones auditadas: se marcan los candidatos mostrados al registrar de todas formas, el elegido
@@ -24,7 +24,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 ## Evidencia de esta tarea
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip, 60 pruebas de
-  servidor, 331 de web, 285 PostgreSQL y build.
+  servidor, 331 de web, 286 PostgreSQL y build.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluidas las dos pruebas nuevas de
   aviso, marcado y descarte de duplicados.
 - Documentación: 37 archivos, 0 enlaces rotos. Persiste el aviso previo de chunks >500 kB.

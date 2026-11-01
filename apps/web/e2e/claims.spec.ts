@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { selectDefaultClassification, testImage } from './fixtures.js'
+import {
+  selectDefaultClassification,
+  submitTicketForm,
+  testImage,
+} from './fixtures.js'
 
 const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const ATTENDED_TICKET = 'de000000-0000-4000-8000-000000000005'
@@ -59,7 +63,7 @@ test('un solicitante registra un tiquet con foto', async ({ page }) => {
     mimeType: 'image/png',
     buffer: testImage,
   })
-  await page.getByRole('button', { name: 'Registrar tiquet' }).click()
+  await submitTicketForm(page)
 
   await expect(page.getByText(description)).toBeVisible()
   await expect(

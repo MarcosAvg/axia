@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { selectDefaultClassification, testImage } from './fixtures.js'
+import {
+  selectDefaultClassification,
+  submitTicketForm,
+  testImage,
+} from './fixtures.js'
 
 const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
@@ -31,6 +35,15 @@ async function clickAndWait(page: Page, name: string, action: string) {
   await done
 }
 
+async function expectStatus(page: Page, label: string) {
+  await expect(
+    page
+      .getByRole('heading', { level: 1 })
+      .locator('..')
+      .getByText(label, { exact: true }),
+  ).toBeVisible()
+}
+
 test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', async ({
   page,
 }) => {
@@ -53,7 +66,7 @@ test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', asyn
   await selectDefaultClassification(page)
   await page.getByLabel('Canal').selectOption({ label: 'Web' })
   await page.getByLabel('Descripción del problema').fill(description)
-  await page.getByRole('button', { name: 'Registrar tiquet' }).click()
+  await submitTicketForm(page)
   await expect(page.getByText(description)).toBeVisible()
 
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
@@ -79,7 +92,7 @@ test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', asyn
     buffer: testImage,
   })
   await clickAndWait(page, 'Confirmar', 'ticket_start')
-  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
+  await expectStatus(page, 'En proceso')
 
   // Atender pide tipo de servicio, descripción y evidencia "después".
   await page.getByRole('button', { name: 'Marcar atendido' }).click()

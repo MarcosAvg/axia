@@ -144,15 +144,16 @@ export async function findDuplicateCandidates(
       select
         scored.*,
         round((
-          0.5 * scored.similarity
-          + case when scored.same_location then 0.15 else 0 end
-          + case when scored.same_problem then 0.2 else 0 end
+          0.35 * scored.similarity
+          + case when scored.same_location then 0.25 else 0 end
+          + case when scored.same_problem then 0.3 else 0 end
           + case when scored.same_subcategory then 0.05 else 0 end
           + case when scored.same_dependency then 0.05 else 0 end
         )::numeric, 3) as score
       from scored
     ) candidate
-    where candidate.similarity >= ${settings.similarity}
+    where (candidate.same_location and candidate.same_problem)
+      or candidate.similarity >= ${settings.similarity}
     order by candidate.score desc, candidate.reported_at desc
     limit ${limit}
   `)
