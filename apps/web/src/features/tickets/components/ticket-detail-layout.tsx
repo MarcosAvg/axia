@@ -15,7 +15,6 @@ import type {
 } from '../domain/types'
 import { useTicketEvidence } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
-import { DuplicateAlertsPanel } from './duplicate-alerts-panel'
 import { EvidenceUploader } from './evidence-uploader'
 import { PausePanel } from './pause-panel'
 import { PendingEvidence } from './pending-evidence'
@@ -227,11 +226,6 @@ export function TicketLayout({
             <TicketSummary ticket={ticket} />
           </Section>
           <PausePanel ticketId={ticketId} />
-          <DuplicateAlertsPanel
-            ticketId={ticketId}
-            possibleDuplicate={ticket.possibleDuplicate}
-            canResolve={actions.includes('mark_duplicate')}
-          />
         </div>
         <TicketActivity ticketId={ticketId} timeline={timeline} />
         <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">

@@ -57,13 +57,17 @@ test('@smoke avisa, registra y permite marcar el duplicado', async ({
   await expect(
     page.getByText('Se registró a pesar del aviso.').first(),
   ).toBeVisible()
+  await expect(
+    page.getByText('Posible duplicado', { exact: true }).first(),
+  ).toBeVisible()
+  await page
+    .getByRole('button', { name: 'Marcar duplicado', exact: true })
+    .click()
+  await expect(page.getByText('Candidatos detectados')).toBeVisible()
   await page
     .getByRole('button', { name: 'Es duplicado de este' })
     .first()
     .click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog.getByText('Marcar como duplicado')).toBeVisible()
-  await dialog.getByRole('button', { name: 'Marcar duplicado' }).click()
   await expect(page.getByText('Duplicado de', { exact: true })).toBeVisible()
 })
 

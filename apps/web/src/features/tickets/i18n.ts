@@ -111,6 +111,7 @@ export const ticketMessages = {
       `El tiquet quedará cerrado y enlazado a ${folio}. Esta acción no se puede deshacer sin reactivarlo.`,
     duplicateOf: 'Duplicado de',
     alertsDismissed: 'Se descartaron las alertas.',
+    noPendingAlerts: 'No hay candidatos pendientes de revisión.',
     alertIgnored: 'Se registró a pesar del aviso.',
     alertsError: 'No se pudieron actualizar las alertas.',
     fields: {
@@ -241,6 +242,12 @@ export const ticketMessages = {
     claimDescription: 'Describe la reclamación',
     resolution: 'Resultado',
     searchFolio: 'Buscar por folio',
+    detectedCandidates: 'Candidatos detectados',
+    loadingCandidates: 'Buscando candidatos…',
+    noDetectedCandidates:
+      'No se detectaron candidatos automáticamente. Busca el folio del tiquet original.',
+    searchHelp:
+      'También puedes enlazar un tiquet que no aparezca en la lista anterior.',
     destination: 'Destino',
     toTeam: 'A un equipo',
     toSupervisor: 'A un supervisor',

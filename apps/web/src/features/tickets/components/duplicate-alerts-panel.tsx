@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TriangleAlertIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { Button } from '@/components/ui/button'
@@ -139,20 +140,29 @@ export function DuplicateAlertsPanel({
   return (
     <Card className="border-warning/40">
       <CardHeader>
-        <CardTitle>{detail.possibleDuplicates}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <TriangleAlertIcon className="size-4 text-warning" aria-hidden />
+          {detail.possibleDuplicates}
+        </CardTitle>
         <CardDescription>{detail.possibleDuplicatesHelp}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <ul className="flex flex-col gap-2">
-          {items.map((candidate) => (
-            <AlertItem
-              key={candidate.id}
-              candidate={candidate}
-              canResolve={canResolve}
-              onChoose={() => setChosen(candidate)}
-            />
-          ))}
-        </ul>
+        {items.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {items.map((candidate) => (
+              <AlertItem
+                key={candidate.id}
+                candidate={candidate}
+                canResolve={canResolve}
+                onChoose={() => setChosen(candidate)}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {detail.noPendingAlerts}
+          </p>
+        )}
         {canResolve ? <DismissAlertsButton ticketId={ticketId} /> : null}
       </CardContent>
       {chosen ? (

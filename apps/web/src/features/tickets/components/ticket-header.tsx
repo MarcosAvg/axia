@@ -1,4 +1,5 @@
 import type { TicketDetail } from '../domain/types'
+import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 
 /** Encabezado del detalle: folio, estado, prioridad y descripción. */
@@ -10,6 +11,7 @@ export function TicketHeader({ ticket }: { ticket: TicketDetail }) {
           {ticket.folio}
         </h1>
         <StatusBadge status={ticket.status} />
+        {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
         {ticket.priorityName ? (
           <span className="text-sm text-muted-foreground">
             {ticket.priorityName}

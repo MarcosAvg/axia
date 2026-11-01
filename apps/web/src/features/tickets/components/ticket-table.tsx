@@ -7,6 +7,7 @@ import { toneForId } from '@/lib/tones'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { PriorityBadge } from './priority-badge'
+import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 
 const { columns } = ticketMessages.list
@@ -41,11 +42,7 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     cell: (ticket) => (
       <div className="flex items-center gap-2">
         <StatusBadge status={ticket.status} />
-        {ticket.possibleDuplicate ? (
-          <span className="text-xs text-warning">
-            {ticketMessages.list.duplicateMark}
-          </span>
-        ) : null}
+        {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
       </div>
     ),
   },

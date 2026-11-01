@@ -13,6 +13,7 @@ import {
   useTicketTimeline,
 } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
+import { DuplicateAlertsPanel } from './duplicate-alerts-panel'
 import { TicketHeader } from './ticket-header'
 import { canRateTicket, TicketLayout } from './ticket-detail-layout'
 
@@ -85,6 +86,11 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <TicketHeader ticket={ticket.data} />
+      <DuplicateAlertsPanel
+        ticketId={ticketId}
+        possibleDuplicate={ticket.data.possibleDuplicate}
+        canResolve={actions.includes('mark_duplicate')}
+      />
       <TicketLayout
         ticketId={ticketId}
         ticket={ticket.data}

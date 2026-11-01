@@ -3,6 +3,7 @@ import { ClockIcon } from 'lucide-react'
 import { formatDateTime, formatElapsed } from '@/lib/format'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 
 /** Lista de tiquets con enlace al detalle. */
@@ -51,11 +52,7 @@ export function TicketList({
                     {formatElapsed(ticket.reportedAt)}
                   </span>
                 ) : null}
-                {ticket.possibleDuplicate ? (
-                  <span className="font-medium text-amber-700 dark:text-amber-400">
-                    {ticketMessages.list.duplicateMark}
-                  </span>
-                ) : null}
+                {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
               </span>
             </div>
           </Link>
