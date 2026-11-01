@@ -5,6 +5,7 @@ import { authGuards, requirePermission, type Guard } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
+import { DUPLICATE_SHOWN_FIELDS } from '../tickets/duplicates.js'
 import { getSettings, updateSettings } from './settings.js'
 
 const settingsSchema = z.object({
@@ -19,6 +20,9 @@ const settingsSchema = z.object({
   sla_clock_mode: z.enum(['calendar', 'laboral']),
   requester_visible_event_types: z.array(z.string()).min(1),
   default_priority_id: z.string().uuid().nullable(),
+  duplicate_window_days: z.number().int().min(1).max(365),
+  duplicate_similarity: z.number().min(0.05).max(1),
+  duplicate_shown_fields: z.array(z.enum(DUPLICATE_SHOWN_FIELDS)).min(1),
 })
 
 export function registerAdminSettingsRoutes(

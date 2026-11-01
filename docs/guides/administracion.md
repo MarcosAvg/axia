@@ -77,6 +77,7 @@ En `/admin/configuracion` se ajustan:
 - la política de validación y el valor de días de validación automática;
 - la ventana de reclamación y la política de evidencia de la solicitud;
 - el patrón de folio, la prioridad y el calendario por defecto;
+- la ventana, el umbral y los datos visibles de la detección de duplicados;
 - el modo de reloj de SLA y los eventos visibles para el solicitante.
 
 Los cambios no reescriben el historial. Aunque se puede guardar un número de días para validación

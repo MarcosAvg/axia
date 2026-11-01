@@ -249,22 +249,28 @@ puede, precondiciones y efectos.
   con historial.
 - **RN-29 Duplicados.**
   - **Detección al registrar:** antes de confirmar, el sistema busca posibles duplicados entre tiquets
-    no finales (por ejemplo: misma ubicación y problema, texto similar, ventana de tiempo). Si los
-    encuentra, **avisa y muestra** datos del otro tiquet para que la persona hable con quien lo
-    registró o recuerde que ya lo había hecho (puede ser ella misma). **No bloquea**: puede registrarlo
-    igualmente. Se guarda qué candidatos se mostraron y qué decidió la persona, y el tiquet queda
-    marcado como **posible duplicado** para los revisores.
+    no finales del mismo edificio y de una ventana configurable, con texto normalizado y parecido por
+    encima del umbral configurable. El puntaje de coincidencia, que ordena los candidatos, también
+    considera coincidencias exactas de ubicación, problema, subcategoría y dependencia. Si encuentra
+    candidatos, **avisa y muestra** los datos permitidos
+    del otro tiquet para que la persona hable con quien lo registró o recuerde que ya lo había hecho
+    (puede ser ella misma). **No bloquea**: puede registrarlo igualmente. Se guarda qué candidatos se
+    mostraron y qué decidió la persona (ignorado, enlazado o descartado, con quién y cuándo), y el
+    tiquet queda marcado como **posible duplicado** para los revisores.
   - **Marcar duplicado:** puede hacerlo **cualquier persona que participe en el flujo del tiquet**: el
     solicitante (sobre sus propios tiquets), los supervisores a quienes se ofreció o que lo tomaron, el
     técnico y los auxiliares asignados, y los administradores. Es un permiso configurable que por
     defecto se concede a todos ellos; quien no participa en el tiquet no puede marcarlo. Exige enlazar
-    al tiquet original (`duplicate_of`). El tiquet pasa a `duplicate` (final).
-  - **Efectos:** el solicitante del duplicado queda como **seguidor** del original y se le avisa.
+    al tiquet original (`duplicate_of`). El original debe ser visible para quien actúa o haber sido
+    mostrado como candidato; no puede ser ya un duplicado ni crear un ciclo. El tiquet pasa a
+    `duplicate` (final) y se avisa al solicitante.
   - **Tiempos:** un duplicado **no cuenta** en los indicadores de desempeño (respuesta, asignación,
     resolución, cumplimiento de tiempos objetivo ni carga de trabajo). Solo se mide aparte el **tiempo
     de revisión del duplicado** (registro → marcado) y se cuentan en indicadores propios.
-  - Qué datos del otro tiquet se muestran en la alerta (por ejemplo, el contacto de quien lo registró)
-    es configurable.
+  - Qué datos del otro tiquet se muestran en la alerta (folio, estado, fecha, edificio, ubicación,
+    problema, subcategoría, dependencia y contacto) es configurable. Los revisores ven las alertas
+    pendientes en el detalle y pueden enlazar el original o descartar la alerta; al recapturar se
+    recalculan las alertas pendientes.
 - **RN-30 Reactivación.** Un administrador puede reactivar un tiquet en estado final de descarte
   (`rejected`, `cancelled` o `duplicate`), con motivo; queda en el historial y se evalúa cómo se tratan
   sus tiempos.

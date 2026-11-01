@@ -59,3 +59,13 @@ export function requirePermission(permission: string): Guard {
     }
   }
 }
+
+/** Exige al menos uno de los permisos indicados. */
+export function requireAnyPermission(...permissions: string[]): Guard {
+  return async (request) => {
+    const actor = currentActor(request)
+    if (!permissions.some((permission) => can(actor, permission))) {
+      throw new AppError(403, 'forbidden', 'No tienes permiso para esta acción')
+    }
+  }
+}

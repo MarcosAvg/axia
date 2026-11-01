@@ -18,6 +18,7 @@ import type {
 } from './create-types.js'
 import { assertCreateTime } from './action-time.js'
 import type { DbExecutor } from './db.js'
+import { detectAndStoreDuplicates } from './duplicates.js'
 import { withOccurredAt } from './event-context.js'
 import { findHandledEvent, isUniqueViolation, writeEvent } from './events.js'
 
@@ -86,46 +87,20 @@ export async function routeTicket({
   }
 }
 
-async function detectDuplicates(
+async function replayedCreate(
   tx: DbExecutor,
-  ticketId: string,
-  input: CreateTicketInput,
-): Promise<TicketSummaryRow> {
-  await tx.execute(sql`
-    insert into public.ticket_duplicate_candidates (
-      ticket_id, candidate_ticket_id, similarity
-    )
-    select
-      ${ticketId},
-      t.id,
-      extensions.similarity(t.description, ${input.description})
-    from public.tickets t
-    where t.id <> ${ticketId}
-      and t.status not in ('closed', 'rejected', 'cancelled', 'duplicate')
-      and t.building_id = ${input.buildingId}
-      and (
-        t.problem_id is not distinct from ${input.problemId ?? null}
-        or t.category_id = ${input.categoryId}
-      )
-      and t.reported_at > now() - (
-        select duplicate_window from public.instance_settings limit 1
-      )
-      and extensions.similarity(t.description, ${input.description}) >= (
-        select duplicate_similarity from public.instance_settings limit 1
-      )
-    on conflict do nothing
-  `)
-
-  const updated = await tx.execute(sql`
-    update public.tickets
-    set possible_duplicate = exists (
-      select 1 from public.ticket_duplicate_candidates c
-      where c.ticket_id = ${ticketId}
-    )
-    where id = ${ticketId}
-    returning id, folio, possible_duplicate
-  `)
-  return updated.rows[0] as TicketSummaryRow
+  handled: { type: string; ticketId: string },
+): Promise<CreateTicketResult> {
+  if (handled.type !== 'created') {
+    throw conflict('La clave de idempotencia ya se usó para otra acción')
+  }
+  const ticket = await ticketSummary(tx, handled.ticketId)
+  return {
+    ticketId: ticket.id,
+    folio: ticket.folio,
+    possibleDuplicate: ticket.possible_duplicate,
+    replayed: true,
+  }
 }
 
 async function ticketSummary(
@@ -182,6 +157,65 @@ async function insertTicket({
   return ticket
 }
 
+type FinalizeCreate = {
+  tx: DbExecutor
+  actor: Actor
+  input: CreateTicketInput
+  ticket: { id: string; cycle: number }
+  teamId: string
+  occurredAt: string
+  onBehalf: boolean
+}
+
+async function finalizeCreate({
+  tx,
+  actor,
+  input,
+  ticket,
+  teamId,
+  occurredAt,
+  onBehalf,
+}: FinalizeCreate): Promise<CreateTicketResult> {
+  await writeEvent(tx, {
+    ticketId: ticket.id,
+    type: 'created',
+    actorId: actor.id,
+    clientRequestId: input.clientRequestId,
+    payload: { onBehalf },
+  })
+  await routeTicket({
+    tx,
+    ticketId: ticket.id,
+    cycle: ticket.cycle,
+    teamId,
+    buildingId: input.buildingId,
+    actorId: actor.id,
+  })
+  await detectAndStoreDuplicates(tx, {
+    ticketId: ticket.id,
+    actorId: actor.id,
+    shownCandidateIds: input.shownCandidateIds,
+    input: {
+      buildingId: input.buildingId,
+      locationId: input.locationId,
+      categoryId: input.categoryId,
+      subcategoryId: input.subcategoryId,
+      problemId: input.problemId,
+      dependencyId: input.dependencyId,
+      description: input.description,
+      reportedAt: occurredAt,
+      excludeTicketId: ticket.id,
+    },
+  })
+  const summary = await ticketSummary(tx, ticket.id)
+  return {
+    ticketId: summary.id,
+    folio: summary.folio,
+    possibleDuplicate: summary.possible_duplicate,
+    replayed: false,
+  }
+}
+
 async function createInTransaction(
   tx: DbExecutor,
   actor: Actor,
@@ -189,18 +223,7 @@ async function createInTransaction(
   occurredAt: string,
 ): Promise<CreateTicketResult> {
   const handled = await findHandledEvent(tx, input.clientRequestId)
-  if (handled) {
-    if (handled.type !== 'created') {
-      throw conflict('La clave de idempotencia ya se usó para otra acción')
-    }
-    const ticket = await ticketSummary(tx, handled.ticketId)
-    return {
-      ticketId: ticket.id,
-      folio: ticket.folio,
-      possibleDuplicate: ticket.possible_duplicate,
-      replayed: true,
-    }
-  }
+  if (handled) return replayedCreate(tx, handled)
 
   const resolved = await resolveCreateDefaults(tx, input)
   const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
@@ -220,28 +243,15 @@ async function createInTransaction(
     teamId,
     occurredAt,
   })
-  await writeEvent(tx, {
-    ticketId: ticket.id,
-    type: 'created',
-    actorId: actor.id,
-    clientRequestId: input.clientRequestId,
-    payload: { onBehalf },
-  })
-  await routeTicket({
+  return finalizeCreate({
     tx,
-    ticketId: ticket.id,
-    cycle: ticket.cycle,
+    actor,
+    input,
+    ticket,
     teamId,
-    buildingId: input.buildingId,
-    actorId: actor.id,
+    occurredAt,
+    onBehalf,
   })
-  const summary = await detectDuplicates(tx, ticket.id, resolved)
-  return {
-    ticketId: summary.id,
-    folio: summary.folio,
-    possibleDuplicate: summary.possible_duplicate,
-    replayed: false,
-  }
 }
 
 export async function createTicket(

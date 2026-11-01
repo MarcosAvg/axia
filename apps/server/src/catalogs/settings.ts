@@ -15,6 +15,17 @@ export type SettingsInput = {
   sla_clock_mode: string
   requester_visible_event_types: string[]
   default_priority_id: string | null
+  duplicate_window_days: number
+  duplicate_similarity: number
+  duplicate_shown_fields: string[]
+}
+
+function textArray(value: string[] | string): string[] {
+  if (Array.isArray(value)) return value
+  return value
+    .replace(/^\{|\}$/g, '')
+    .split(',')
+    .filter(Boolean)
 }
 
 export async function getSettings(db: Database) {
@@ -24,7 +35,9 @@ export async function getSettings(db: Database) {
       extract(day from claim_window)::int as claim_window_days,
       request_evidence_policy, folio_pattern, timezone,
       default_calendar_id, sla_clock_mode,
-      requester_visible_event_types, default_priority_id
+      requester_visible_event_types, default_priority_id,
+      extract(day from duplicate_window)::int as duplicate_window_days,
+      duplicate_similarity, duplicate_shown_fields
     from public.instance_settings limit 1
   `)
   const row = result.rows[0] as
@@ -38,8 +51,11 @@ export async function getSettings(db: Database) {
         timezone: string
         default_calendar_id: string | null
         sla_clock_mode: string
-        requester_visible_event_types: string[]
+        requester_visible_event_types: string[] | string
         default_priority_id: string | null
+        duplicate_window_days: number
+        duplicate_similarity: string
+        duplicate_shown_fields: string[]
       }
     | undefined
   if (!row)
@@ -54,8 +70,11 @@ export async function getSettings(db: Database) {
     timezone: row.timezone,
     defaultCalendarId: row.default_calendar_id,
     slaClockMode: row.sla_clock_mode,
-    requesterVisibleEventTypes: row.requester_visible_event_types,
+    requesterVisibleEventTypes: textArray(row.requester_visible_event_types),
     defaultPriorityId: row.default_priority_id,
+    duplicateWindowDays: row.duplicate_window_days,
+    duplicateSimilarity: Number(row.duplicate_similarity),
+    duplicateShownFields: row.duplicate_shown_fields,
   }
 }
 
@@ -72,8 +91,15 @@ export async function updateSettings(db: Database, input: SettingsInput) {
       timezone = ${input.timezone},
       default_calendar_id = ${input.default_calendar_id},
       sla_clock_mode = ${input.sla_clock_mode},
-      requester_visible_event_types = ${input.requester_visible_event_types}::public.event_type[],
-      default_priority_id = ${input.default_priority_id}
+      requester_visible_event_types = string_to_array(
+        ${input.requester_visible_event_types.join(',')}, ','
+      )::public.event_type[],
+      default_priority_id = ${input.default_priority_id},
+      duplicate_window = make_interval(days => ${input.duplicate_window_days}),
+      duplicate_similarity = ${input.duplicate_similarity},
+      duplicate_shown_fields = string_to_array(
+        ${input.duplicate_shown_fields.join(',')}, ','
+      )::text[]
     where singleton
   `)
 }

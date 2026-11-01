@@ -2,7 +2,6 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
-import { AppError } from '../http/errors.js'
 import {
   conflict,
   isFinalStatus,
@@ -135,103 +134,6 @@ export function cancelTicket(
     eventType: 'cancelled',
     action: 'cancel',
   })
-}
-
-export type MarkDuplicateInput = {
-  ticketId: string
-  originalId: string
-  clientRequestId: string
-}
-
-async function applyDuplicate(
-  tx: DbExecutor,
-  actor: Actor,
-  input: MarkDuplicateInput,
-  ticket: LockedTicket,
-) {
-  if (input.ticketId === input.originalId) {
-    throw new AppError(
-      400,
-      'validation_error',
-      'Un tiquet no puede ser duplicado de sí mismo',
-    )
-  }
-  const original = await tx.execute(sql`
-    select id from public.tickets where id = ${input.originalId} limit 1
-  `)
-  if (!original.rows[0]) {
-    throw new AppError(400, 'validation_error', 'El tiquet original no existe')
-  }
-  await tx.execute(sql`
-    insert into public.ticket_links (ticket_id, linked_ticket_id, link_type, created_by)
-    values (${input.ticketId}, ${input.originalId}, 'duplicate_of', ${actor.id})
-    on conflict do nothing
-  `)
-  await tx.execute(sql`
-    update public.tickets
-    set
-      status = 'duplicate',
-      status_before_discard = ${ticket.status},
-      duplicate_of_id = ${input.originalId},
-      closed_at = ${actionTimestamp()}
-    where id = ${input.ticketId}
-  `)
-  await endOpenParticipants(tx, input.ticketId)
-  await resolveOpenClaimOnDiscard(
-    tx,
-    input.ticketId,
-    actor.id,
-    'Tiquet marcado como duplicado',
-  )
-  await writeEvent(tx, {
-    ticketId: input.ticketId,
-    type: 'duplicate_marked',
-    actorId: actor.id,
-    clientRequestId: input.clientRequestId,
-    payload: { duplicateOf: input.originalId },
-  })
-}
-
-async function markDuplicateInTransaction(
-  tx: DbExecutor,
-  actor: Actor,
-  input: MarkDuplicateInput,
-): Promise<ActionResult> {
-  const before = validateHandled(
-    await findHandledEvent(tx, input.clientRequestId),
-    input.ticketId,
-    'duplicate_marked',
-    'mark_duplicate',
-  )
-  if (before) return before
-  const ticket = await lockTicket(tx, input.ticketId)
-  const after = validateHandled(
-    await findHandledEvent(tx, input.clientRequestId),
-    input.ticketId,
-    'duplicate_marked',
-    'mark_duplicate',
-  )
-  if (after) return after
-  if (isFinalStatus(ticket.status)) {
-    throw conflict('El tiquet ya está cerrado o descartado')
-  }
-  await applyDuplicate(tx, actor, input, ticket)
-  return {
-    ticketId: input.ticketId,
-    action: 'mark_duplicate',
-    replayed: false,
-  }
-}
-
-export async function markDuplicate(
-  db: Database,
-  actor: Actor,
-  input: MarkDuplicateInput,
-): Promise<ActionResult> {
-  const access = await findVisibleTicket(db, actor, input.ticketId)
-  if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.mark_duplicate', access)
-  return db.transaction((tx) => markDuplicateInTransaction(tx, actor, input))
 }
 
 export type ReactivateInput = {

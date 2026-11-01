@@ -49,6 +49,7 @@ export type TicketDetail = {
   channelName: string | null
   requesterContact: string | null
   duplicateOfId: string | null
+  duplicateOfFolio: string | null
 }
 
 type DetailRow = {
@@ -91,6 +92,7 @@ type DetailRow = {
   channel_name: string | null
   requester_contact: string | null
   duplicate_of_id: string | null
+  duplicate_of_folio: string | null
 }
 
 function toDetail(row: DetailRow): TicketDetail {
@@ -136,6 +138,7 @@ function toDetail(row: DetailRow): TicketDetail {
     channelName: row.channel_name,
     requesterContact: row.requester_contact,
     duplicateOfId: row.duplicate_of_id,
+    duplicateOfFolio: row.duplicate_of_folio,
   }
 }
 
@@ -146,7 +149,7 @@ function detailQuery(ticketId: string) {
       t.requester_name, t.possible_duplicate,
       t.cycle, t.building_id, t.location_id, t.dependency_id, t.category_id,
       t.subcategory_id, t.problem_id, t.service_type_id, t.priority_id,
-      t.requester_contact, t.duplicate_of_id,
+      t.requester_contact, t.duplicate_of_id, dup.folio as duplicate_of_folio,
       b.name as building_name,
       l.name as location_name,
       d.name as dependency_name,
@@ -168,6 +171,7 @@ function detailQuery(ticketId: string) {
       extract(epoch from public.ticket_time_by_kind(t.id, 'validation'::public.time_span_kind)) / 60 as validation_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'claim'::public.time_span_kind)) / 60 as claim_minutes
     from public.tickets t
+    left join public.tickets dup on dup.id = t.duplicate_of_id
     left join public.buildings b on b.id = t.building_id
     left join public.locations l on l.id = t.location_id
     left join public.dependencies d on d.id = t.dependency_id

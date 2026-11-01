@@ -8,6 +8,10 @@ import { getTicketDetail } from './detail.js'
 import { listParticipants } from './participants.js'
 import { getPauseState, getPauseSteps } from './pause-read.js'
 import { getRating } from './rating-read.js'
+import {
+  dismissDuplicateAlerts,
+  listDuplicateAlerts,
+} from './duplicate-alerts.js'
 import { checkDuplicateCandidates } from './duplicates.js'
 import {
   getTimeline,
@@ -43,15 +47,19 @@ export function createTicketService(db: Database) {
       eventId: number,
       occurredAt: string,
     ) => adjustEventTime(db, actor, { ticketId, eventId, occurredAt }),
-    duplicateCandidates: (
-      actor: Actor,
-      input: {
-        buildingId: string
-        categoryId: string
-        problemId?: string | null
-        description: string
-      },
-    ) => checkDuplicateCandidates(db, actor, input),
+    duplicateCandidates: (input: {
+      buildingId: string
+      locationId?: string | null
+      categoryId: string
+      subcategoryId?: string | null
+      problemId?: string | null
+      dependencyId?: string | null
+      description: string
+    }) => checkDuplicateCandidates(db, input),
+    duplicateAlerts: (actor: Actor, ticketId: string) =>
+      listDuplicateAlerts(db, actor, ticketId),
+    dismissDuplicateAlerts: (actor: Actor, ticketId: string) =>
+      dismissDuplicateAlerts(db, actor, ticketId),
     myWork: (actor: Actor, page: number, pageSize: number) => {
       if (!actor.technicianId) return emptyPage(page, pageSize)
       return listTickets(db, actor, {

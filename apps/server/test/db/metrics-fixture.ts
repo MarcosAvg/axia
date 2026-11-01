@@ -10,9 +10,9 @@ export async function seedMetrics(context: TicketHttpContext) {
   `)
   await db.execute(sql`
     insert into public.ticket_duplicate_candidates
-      (ticket_id, candidate_ticket_id, similarity, decision)
-    values (${ids.ticketA1}, ${ids.ticketA2}, 0.9, 'ignored'),
-      (${ids.ticketB1}, ${ids.ticketA2}, 0.8, 'ignored')
+      (ticket_id, candidate_ticket_id, similarity, score, decision)
+    values (${ids.ticketA1}, ${ids.ticketA2}, 0.9, 0.9, 'ignored'),
+      (${ids.ticketB1}, ${ids.ticketA2}, 0.8, 0.8, 'ignored')
   `)
   await db.execute(sql`
     insert into public.ticket_pauses

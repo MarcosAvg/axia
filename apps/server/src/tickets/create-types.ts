@@ -14,6 +14,8 @@ export type CreateTicketInput = {
   requesterContact?: string
   occurredAt?: string
   clientRequestId: string
+  /** Candidatos que el aviso previo mostró y la persona decidió omitir. */
+  shownCandidateIds?: string[]
 }
 
 export type CreateTicketResult = {

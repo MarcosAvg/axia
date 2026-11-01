@@ -5,6 +5,7 @@ import type { AppConfig } from '../config.js'
 import {
   authGuards,
   currentActor,
+  requireAnyPermission,
   requirePermission,
   type Guard,
 } from '../auth/guards.js'
@@ -151,10 +152,36 @@ function registerDuplicateRoute(
     { preHandler: guard },
     async (request) => ({
       items: await tickets.duplicateCandidates(
-        currentActor(request),
         duplicateCheckSchema.parse(request.body),
       ),
     }),
+  )
+}
+
+function registerDuplicateAlertRoutes(
+  app: FastifyInstance,
+  tickets: TicketService,
+  guard: Guard[],
+) {
+  app.get(
+    '/api/tickets/:id/duplicate-alerts',
+    { preHandler: guard },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      return {
+        items: await tickets.duplicateAlerts(currentActor(request), id),
+      }
+    },
+  )
+
+  app.post(
+    '/api/tickets/:id/duplicate-alerts/dismiss',
+    { preHandler: guard },
+    async (request, reply) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      await tickets.dismissDuplicateAlerts(currentActor(request), id)
+      return reply.status(204).send()
+    },
   )
 }
 
@@ -273,7 +300,11 @@ export function registerTicketRoutes(
   registerListRoute(app, tickets, guards.canView)
   registerWorklistRoutes(app, tickets, guards)
   registerWriteRoutes(app, tickets, guards)
-  registerDuplicateRoute(app, tickets, guards.canView)
+  registerDuplicateRoute(app, tickets, [
+    guards.active,
+    requireAnyPermission('ticket.create', 'ticket.create_on_behalf'),
+  ])
+  registerDuplicateAlertRoutes(app, tickets, guards.canView)
   registerCoreDetailRoutes(app, tickets, guards.canView)
   registerPauseReadRoutes(app, tickets, guards.canView)
   registerEventTimeRoute(app, tickets, guards.canView)

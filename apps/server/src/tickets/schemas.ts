@@ -46,8 +46,11 @@ export const ticketIdParamsSchema = z.object({
 
 export const duplicateCheckSchema = z.object({
   buildingId: z.string().uuid(),
+  locationId: z.string().uuid().optional(),
   categoryId: z.string().uuid(),
+  subcategoryId: z.string().uuid().optional(),
   problemId: z.string().uuid().optional(),
+  dependencyId: z.string().uuid().optional(),
   description: z.string().trim().min(5).max(4000),
 })
 
@@ -67,6 +70,7 @@ export const createTicketSchema = z.object({
   requesterContact: z.string().trim().min(1).max(120).optional(),
   occurredAt: z.string().datetime().optional(),
   clientRequestId: z.string().uuid(),
+  shownCandidateIds: z.array(z.string().uuid()).max(20).optional(),
 })
 
 const actionBase = {

@@ -108,7 +108,7 @@ describe('base schema relationships', () => {
         owner,
         "select count(*)::text as value from pg_constraint where contype = 'f' and confrelid = 'public.users'::regclass",
       ),
-    ).toBe(29)
+    ).toBe(30)
     expect(
       await scalar(
         owner,
@@ -286,7 +286,7 @@ describe('migration runner', () => {
     const result = await owner.query(
       'select checksum from axia_migrations.schema_migrations',
     )
-    expect(result.rows).toHaveLength(19)
+    expect(result.rows).toHaveLength(20)
     expect(
       result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
     ).toBe(true)
@@ -299,7 +299,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(19)
+    ).toBe(20)
   })
 
   it('enforces username normalization and uniqueness', async () => {

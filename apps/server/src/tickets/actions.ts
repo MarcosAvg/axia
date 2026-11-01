@@ -6,12 +6,8 @@ import { assignTechnician } from './assign.js'
 import { addAuxiliary } from './auxiliary.js'
 import { changePriority, commentTicket } from './annotation.js'
 import { openClaim, resolveClaim } from './claims.js'
-import {
-  cancelTicket,
-  markDuplicate,
-  reactivateTicket,
-  rejectTicket,
-} from './disposition.js'
+import { cancelTicket, reactivateTicket, rejectTicket } from './disposition.js'
+import { markDuplicate } from './mark-duplicate.js'
 import { advancePause, pauseTicket, resumeTicket } from './pause.js'
 import { rateTicket } from './rating.js'
 import { recaptureTicket } from './recapture.js'
