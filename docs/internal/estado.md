@@ -5,7 +5,35 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-10-31
 
-## Tarea cerrada: catálogos y demo operables
+## Tarea cerrada: catálogos completos, jerarquía y orden
+
+- La lectura administrativa de los 14 catálogos devuelve datos derivados: conteos de uso
+  (ubicaciones, edificios, subcategorías, problemas, técnicos y designaciones), la cuenta
+  vinculada de solicitantes y técnicos, la categoría de cada problema, la ruta y profundidad de
+  cada motivo y los totales de franjas y festivos de los calendarios.
+- Los derivados se consultan en un read model aparte (`admin-row-queries.ts`) y nunca se aceptan
+  al guardar; las columnas editables conservan su validación.
+- Las tablas muestran todas sus columnas declaradas más la última actualización; los textos largos
+  se recortan con su título completo y la cuenta inactiva se marca.
+- Motivos: árbol real con sangría por profundidad, guía visual, contraer/expandir por rama,
+  agrupación por uso y búsqueda que conserva a los antecesores. Se retiró la sangría con guiones.
+- Orden: relaciones y enums ordenan por su etiqueta visible (antes por UUID); se puede ordenar por
+  activo y por actualización; en árbol se ordenan hermanos sin aplanar la jerarquía; en pantalla
+  angosta hay selector de columna y dirección.
+
+## Evidencia de esta tarea
+
+- Regresiones nuevas para orden por etiqueta, agrupación y contracción del árbol, datos derivados
+  del catálogo y cuenta inactiva.
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos y 60 pruebas de servidor + 330
+  de web.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 14/14 verdes, incluidas las dos pruebas nuevas de
+  datos derivados, contracción de motivos y orden en pantalla angosta.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: cierre código 0; estáticos y knip, 60 + 330 unitarias,
+  268 pruebas PostgreSQL, lint, tipos y build. Persiste el aviso previo de chunks >500 kB.
+- Documentación: `docs/reference/api.md` describe la lectura enriquecida.
+
+## Tarea anterior: catálogos y demo operables
 
 - Migración nueva 0018: 29 subestados para los nueve motivos iniciales de pausa incompletos;
   los diez árboles permiten pausar/reanudar. No cambia SQL integrado ni nodos personalizados.
@@ -21,7 +49,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión [0103](../decisions/0103-catalogos-operables-y-demo-coherente.md). Revisión independiente
   sin hallazgos pendientes tras corregir desfase de rutas demo/desarrollo. Negocio intacto.
 
-## Evidencia de esta tarea
+## Evidencia de la tarea anterior
 
 - Regresiones RED→GREEN para raíz sin salida, alta de motivos, padre inválido, duplicados, edición
   con pausa abierta, demo sin ofertas, evidencias/validaciones y ruta local de imágenes.
