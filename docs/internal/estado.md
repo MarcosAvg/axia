@@ -33,18 +33,24 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   307 web, 53 navegador y 261 PostgreSQL; lint, tipos, estáticos y build verdes.
   Se corrigieron antes límites de tamaño de fixtures y una exportación sin consumidor; reglas intactas.
 - Documentación: 35 archivos, cero enlaces rotos. Persiste aviso previo de chunks >500 kB.
-- Integración local; sin push, publicación nueva ni cambios en infraestructura de producción.
+- Integración y push completados; imagen publicada y verificada como se indica abajo.
+  Sin cambios en infraestructura de producción.
 
-## Publicación disponible y siguiente paso operativo
+## Imagen publicada y siguiente paso operativo
 
-[Release v0.5.1](https://github.com/MarcosAvg/axia/releases/tag/v0.5.1), desde `63c7488`, publicada y
-verificada en la tarea anterior. **No incluye las correcciones de catálogos/demo de esta tarea.**
-Imagen `ghcr.io/marcosavg/axia/axia-app:v0.5.1`; paquete y checksum verificados. `v0.5.0` no publicó.
+- Publicación manual autorizada desde `main`, commit `b3b1fa90253ba373ace68c88bda624aaf95d15e3`.
+- [Flujo 41254674345](https://github.com/MarcosAvg/axia/actions/runs/41254674345): verificación,
+  Docker y publicación `success`. La CI de `main` también terminó correctamente.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:b3b1fa90253ba373ace68c88bda624aaf95d15e3`.
+  Digest confirmado directamente en GHCR:
+  `sha256:30bd3af0de7ce2981de50ae7cb5c03d965377d136155ac21e8ffeae1ebbd5533`.
+- Paquete `axia-self-hosted` generado como artefacto del flujo. No se creó una etiqueta semántica
+  ni una release nueva. `v0.5.1` sigue disponible y no incluye estas correcciones.
 
-Publicar una versión nueva y actualizar la instancia requiere autorización. La migración 0018 se
-aplica durante la actualización normal. Para escenarios demo completos usar una base local nueva;
-no reiniciar una base cuyo trabajo deba conservarse. Probar instalación en host limpio, configurar
-TLS y programar respaldos/limpieza con restauración periódica siguen pendientes operativos.
+Actualizar la instancia requiere autorización. La migración 0018 se aplica durante la actualización
+normal. Para escenarios demo completos usar una base local nueva; no reiniciar una base cuyo
+trabajo deba conservarse. Probar instalación en host limpio, configurar TLS y programar
+respaldos/limpieza con restauración periódica siguen pendientes operativos.
 
 ## Diferencias de producto conocidas
 
