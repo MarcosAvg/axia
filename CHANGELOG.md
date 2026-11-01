@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-31
+
 ### Eliminado
 
 - Ocho tablas del importador retirado y once funciones SQL de métricas sin consumidores mediante
@@ -15,6 +17,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- El detalle del tiquet ya no mezcla el estado del tiquet con el de sus candidatos; al marcar un
+  duplicado se descartan las alertas recíprocas.
 - Catálogos iniciales de pausa completos y comprobación de salida antes de pausar; edición de
   motivos validada y protegida mientras haya pausas abiertas. Alta activa por defecto, padres
   compatibles, selectores actualizados y errores de captura comprensibles.
@@ -26,6 +30,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- Configuración de duplicados con ventana, umbral y campos visibles; los tipos de evento se leen
+  como arreglo.
 - Documentación organizada por tareas, con una referencia vigente por tema; desarrollo separado de
   instalación, contratos contrastados con el código y 83 ADR anteriores conservados en Git.
 
@@ -34,6 +40,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Añadido
 
+- Catálogos administrables con datos derivados, árbol de motivos, orden por etiqueta y última
+  actualización; borrado de registros sin uso con conflicto explicado.
+- Detección de duplicados configurable, revisión con decisiones auditadas, aviso destacado, badge y
+  candidatos al marcar; relleno de tiquets abiertos y descarte de alertas recíprocas.
 - Consolidación interna: DTO HTTP de tiquets validados y comandos tipados; métricas con alcance y
   filtros comunes antes de agregar; bloqueo offline por tiquet entre reintentos, incluida evidencia.
 - Una sola definición de base en migraciones SQL, sin introspección Drizzle sin consumo;
