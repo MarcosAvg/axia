@@ -30,6 +30,7 @@ interface CatalogTableProps {
   onSortChange: (key: string) => void
   onEdit: (row: Row) => void
   onToggle: (row: Row) => void
+  onDelete: (row: Row) => void
 }
 
 function nameOf(row: Row, columns: AdminColumn[], tree?: AdminCatalogTree) {
@@ -63,6 +64,7 @@ function actionsColumn(
   name: (row: Row) => string,
   onEdit: (row: Row) => void,
   onToggle: (row: Row) => void,
+  onDelete: (row: Row) => void,
 ): DataTableColumn<Row> {
   return {
     id: 'actions',
@@ -77,6 +79,7 @@ function actionsColumn(
           name={name(row)}
           onEdit={() => onEdit(row)}
           onToggle={() => onToggle(row)}
+          onDelete={() => onDelete(row)}
         />
       </div>
     ),
@@ -160,7 +163,8 @@ function LabelCell({
 function buildColumns(
   options: CatalogTableProps & { controls?: TreeControls },
 ): DataTableColumn<Row>[] {
-  const { columns, optionsFor, tree, controls, onEdit, onToggle } = options
+  const { columns, optionsFor, tree, controls, onEdit, onToggle, onDelete } =
+    options
   const label = (row: Row) => nameOf(row, columns, tree)
   return [
     ...columns.map((column) => ({
@@ -185,7 +189,7 @@ function buildColumns(
         ),
     })),
     activeColumn(label, onToggle),
-    actionsColumn(label, onEdit, onToggle),
+    actionsColumn(label, onEdit, onToggle, onDelete),
   ]
 }
 
@@ -214,6 +218,7 @@ export function CatalogTable(props: CatalogTableProps) {
             optionsFor={optionsFor}
             onEdit={props.onEdit}
             onToggle={props.onToggle}
+            onDelete={props.onDelete}
           />
         ))}
       </ul>

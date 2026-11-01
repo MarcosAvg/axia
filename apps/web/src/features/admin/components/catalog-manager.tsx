@@ -1,4 +1,5 @@
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import type { AdminCatalogConfig } from '../domain/catalogs'
 import { useCatalogManager } from '../hooks/use-catalog-manager'
 import { adminMessages } from '../i18n'
@@ -10,6 +11,11 @@ import { DependencyFormDialog } from './dependency-form'
 import { EntityDialog } from './entity-dialog'
 
 type Manager = ReturnType<typeof useCatalogManager>
+
+function rowName(config: AdminCatalogConfig, row: Record<string, unknown>) {
+  const key = config.tree?.labelKey ?? config.columns[0]?.key
+  return key ? String(row[key] ?? '') : ''
+}
 
 function EditDialog({
   config,
@@ -89,9 +95,24 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
           onSortChange={manager.toggleSort}
           onEdit={(row) => manager.setEditing(row)}
           onToggle={manager.toggle}
+          onDelete={(row) => manager.setDeleting(row)}
         />
       ) : null}
       <EditDialog config={config} manager={manager} />
+      {manager.deleting && manager.deleting !== 'new' ? (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) manager.setDeleting(null)
+          }}
+          title={actions.deleteTitle}
+          description={actions.deleteHelp(rowName(config, manager.deleting))}
+          confirmLabel={actions.delete}
+          destructive
+          isPending={manager.isDeleting}
+          onConfirm={manager.handleDelete}
+        />
+      ) : null}
       {manager.isError ? <ErrorAlert message={manager.errorMessage} /> : null}
     </div>
   )

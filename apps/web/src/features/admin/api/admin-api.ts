@@ -51,6 +51,14 @@ export async function adminUpdate(
   })
 }
 
+/** Elimina un registro que no está en uso; el servidor responde 409 si lo está. */
+export async function adminDelete(
+  table: AdminTable,
+  id: string,
+): Promise<void> {
+  await apiFetch(`/api/admin/catalogs/${table}/${id}`, { method: 'DELETE' })
+}
+
 export interface DependencyLocationLink {
   dependencyId: string
   dependencyName: string

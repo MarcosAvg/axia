@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import {
+  adminDelete,
   adminDependencyLocationIds,
   adminInsert,
   adminList,
@@ -99,6 +100,18 @@ export function useAdminSave() {
         await adminInsert(variables.table, variables.values)
       }
     },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin'] })
+      void queryClient.invalidateQueries({ queryKey: ['catalogs'] })
+    },
+  })
+}
+
+export function useAdminDelete() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (variables: { table: AdminTable; id: string }) =>
+      adminDelete(variables.table, variables.id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin'] })
       void queryClient.invalidateQueries({ queryKey: ['catalogs'] })

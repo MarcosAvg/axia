@@ -14,6 +14,7 @@ interface CatalogCardProps {
   optionsFor: (table: AdminTable) => { id: string; label: string }[]
   onEdit: (row: Record<string, unknown>) => void
   onToggle: (row: Record<string, unknown>) => void
+  onDelete: (row: Record<string, unknown>) => void
 }
 
 /** Tarjeta de un registro en pantalla angosta, con todos sus datos visibles. */
@@ -25,6 +26,7 @@ export function CatalogCard({
   optionsFor,
   onEdit,
   onToggle,
+  onDelete,
 }: CatalogCardProps) {
   const labelKey = tree?.labelKey ?? columns[0]?.key
   const nameColumn = columns.find((column) => column.key === labelKey)
@@ -59,6 +61,7 @@ export function CatalogCard({
             name={name}
             onEdit={() => onEdit(row)}
             onToggle={() => onToggle(row)}
+            onDelete={() => onDelete(row)}
           />
         </div>
       </div>

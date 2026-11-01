@@ -6,6 +6,7 @@ import { optionSourcesFor } from '../domain/catalog-options'
 import type { AdminCatalogConfig } from '../domain/catalogs'
 import { adminMessages } from '../i18n'
 import {
+  useAdminDelete,
   useAdminOptions,
   useAdminRows,
   useAdminSave,
@@ -16,11 +17,31 @@ import { useCatalogList } from './use-catalog-list'
 type Editing = Record<string, unknown> | 'new' | null
 type Values = Record<string, string | number | boolean | null>
 
-function saveErrorMessage(error: unknown): string {
+function actionErrorMessage(error: unknown): string {
   return error instanceof ApiError &&
     (error.status === 400 || error.status === 409)
     ? error.message
     : adminMessages.actions.error
+}
+
+function useDeleteRecord(table: AdminTable, onFinished: () => void) {
+  const remove = useAdminDelete()
+  function removeRecord(row: Record<string, unknown>) {
+    remove.mutate(
+      { table, id: String(row.id) },
+      {
+        onSuccess: () => {
+          onFinished()
+          toast.success(adminMessages.actions.deleted)
+        },
+        onError: (error) => {
+          onFinished()
+          toast.error(actionErrorMessage(error))
+        },
+      },
+    )
+  }
+  return { removeRecord, isDeleting: remove.isPending }
 }
 
 /** Estado y acciones del gestor de un catálogo: lista, búsqueda, orden y guardado. */
@@ -29,6 +50,10 @@ export function useCatalogManager(config: AdminCatalogConfig) {
   const options = useAdminOptions(optionSourcesFor(config))
   const save = useAdminSave()
   const [editing, setEditing] = useState<Editing>(null)
+  const [deleting, setDeleting] = useState<Editing>(null)
+  const { removeRecord, isDeleting } = useDeleteRecord(config.table, () =>
+    setDeleting(null),
+  )
 
   const optionsFor = (table: AdminTable): AdminOption[] =>
     options.get(table) ?? []
@@ -43,9 +68,13 @@ export function useCatalogManager(config: AdminCatalogConfig) {
           setEditing(null)
           toast.success(adminMessages.actions.saved)
         },
-        onError: (error) => toast.error(saveErrorMessage(error)),
+        onError: (error) => toast.error(actionErrorMessage(error)),
       },
     )
+  }
+
+  function handleDelete() {
+    if (deleting && deleting !== 'new') removeRecord(deleting)
   }
 
   function toggle(row: Record<string, unknown>) {
@@ -55,7 +84,7 @@ export function useCatalogManager(config: AdminCatalogConfig) {
         id: String(row.id),
         values: { active: row.active !== true },
       },
-      { onError: (error) => toast.error(saveErrorMessage(error)) },
+      { onError: (error) => toast.error(actionErrorMessage(error)) },
     )
   }
 
@@ -64,11 +93,15 @@ export function useCatalogManager(config: AdminCatalogConfig) {
     ...list,
     editing,
     setEditing,
+    deleting,
+    setDeleting,
+    handleDelete,
+    isDeleting,
     optionsFor,
     handleSave,
     toggle,
     isSaving: save.isPending,
     isError: save.isError,
-    errorMessage: saveErrorMessage(save.error),
+    errorMessage: actionErrorMessage(save.error),
   }
 }

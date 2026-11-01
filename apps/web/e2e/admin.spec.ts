@@ -184,3 +184,54 @@ test('@smoke crea motivos activos con subestados del mismo uso', async ({
     page.getByRole('table').getByText(`${name} disponible`),
   ).toBeVisible()
 })
+
+test('@smoke elimina un registro sin uso y bloquea el que está en uso', async ({
+  page,
+}) => {
+  const suffix = crypto.randomUUID().slice(0, 8)
+  const building = `Edificio E2E ${suffix}`
+  const location = `Ubicación E2E ${suffix}`
+  await signIn(page, 'demo.admin')
+
+  await page.goto('/admin/catalogos?catalog=buildings')
+  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByLabel('Nombre').fill(building)
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('table').getByText(building)).toBeVisible()
+
+  await page.goto('/admin/catalogos?catalog=locations')
+  await page.getByRole('button', { name: 'Agregar' }).click()
+  const locationDialog = page.getByRole('dialog')
+  await locationDialog.getByLabel('Edificio').selectOption({ label: building })
+  await locationDialog.getByLabel('Nombre').fill(location)
+  await locationDialog.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('table').getByText(location)).toBeVisible()
+
+  await page.goto('/admin/catalogos?catalog=buildings')
+  await page.getByRole('button', { name: `Editar: ${building}` }).click()
+  await page.getByRole('menuitem', { name: 'Eliminar' }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Eliminar' })
+    .click()
+  await expect(page.getByText(/Tiene ubicaciones/)).toBeVisible()
+  await expect(page.getByRole('table').getByText(building)).toBeVisible()
+
+  await page.goto('/admin/catalogos?catalog=locations')
+  await page.getByRole('button', { name: `Editar: ${location}` }).click()
+  await page.getByRole('menuitem', { name: 'Eliminar' }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Eliminar' })
+    .click()
+  await expect(page.getByRole('table').getByText(location)).toHaveCount(0)
+
+  await page.goto('/admin/catalogos?catalog=buildings')
+  await page.getByRole('button', { name: `Editar: ${building}` }).click()
+  await page.getByRole('menuitem', { name: 'Eliminar' }).click()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Eliminar' })
+    .click()
+  await expect(page.getByRole('table').getByText(building)).toHaveCount(0)
+})

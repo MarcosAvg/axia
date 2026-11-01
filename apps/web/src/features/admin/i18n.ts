@@ -136,6 +136,11 @@ export const adminMessages = {
     close: 'Cerrar',
     saved: 'Se guardó.',
     error: 'No se pudo guardar.',
+    delete: 'Eliminar',
+    deleted: 'Se eliminó.',
+    deleteTitle: 'Eliminar registro',
+    deleteHelp: (name: string) =>
+      `Se eliminará «${name}». Si ya tiene tiquets o configuración asociada, no se borrará y podrás desactivarlo.`,
     activate: 'Activar',
     deactivate: 'Desactivar',
     selectPlaceholder: 'Selecciona…',

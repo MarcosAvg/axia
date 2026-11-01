@@ -56,6 +56,7 @@ function Harness({
       onSortChange={list.toggleSort}
       onEdit={() => undefined}
       onToggle={() => undefined}
+      onDelete={() => undefined}
     />
   )
 }

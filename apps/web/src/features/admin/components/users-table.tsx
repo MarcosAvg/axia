@@ -151,6 +151,7 @@ function actionsColumn({
           onResetPassword={() => onResetPassword(profile)}
           onRevokeSessions={() => onRevokeSessions(profile)}
           onDelete={() => onDelete(profile)}
+          deleteLabel={adminMessages.users.deleteUser}
         />
       </div>
     ),
