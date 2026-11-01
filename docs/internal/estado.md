@@ -5,7 +5,31 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-10-31
 
-## Tarea cerrada: eliminar catálogos sin uso
+
+## Tarea cerrada: detección y revisión de duplicados
+
+- Una sola detección para el aviso y el alta: tiquets no finales del mismo edificio, problema o
+  categoría afín y ventana configurable, con texto normalizado por encima del umbral. El puntaje
+  compuesto (ubicación, problema, subcategoría y dependencia) ordena y explica las coincidencias.
+- Configuración real de ventana, umbral y campos visibles en `/admin/configuracion`, con API,
+  formulario y pruebas; el aviso proyecta solo los campos permitidos.
+- Decisiones auditadas: se marcan los candidatos mostrados al registrar de todas formas, el elegido
+  al enlazar y los descartados, con actor y fecha. Panel en el detalle para enlazar o descartar y
+  enlace visible “Duplicado de”.
+- El original debe ser visible o haber sido candidato, no puede ser ya un duplicado y no se permiten
+  ciclos. Al recapturar se recalculan las alertas pendientes.
+- Migración 0019; se corrigió la lectura de los tipos de evento como arreglo. Decisión en el
+  [ADR 0105](../decisions/0105-deteccion-revision-duplicados.md).
+
+## Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip, 60 pruebas de
+  servidor, 331 de web, 285 PostgreSQL y build.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluidas las dos pruebas nuevas de
+  aviso, marcado y descarte de duplicados.
+- Documentación: 37 archivos, 0 enlaces rotos. Persiste el aviso previo de chunks >500 kB.
+
+## Tarea anterior: eliminar catálogos sin uso
 
 - Cada fila de catálogo ofrece “Eliminar” con confirmación explícita. Se borra solo si nada lo
   referencia; si tiquets, historial o configuración lo usan, el servidor responde 409 con la causa
@@ -19,7 +43,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   categoría designada, 404 al repetir y permiso. E2E crea edificio y ubicación, bloquea el borrado
   y después elimina ambos.
 
-## Evidencia de esta tarea
+## Evidencia de catálogos sin uso
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip, 60 pruebas de
   servidor, 331 de web, 276 PostgreSQL y build. Documentación: 36 archivos, 0 enlaces rotos.
