@@ -10,6 +10,7 @@ import {
   type TicketHttpContext,
 } from './tickets-http-helpers.js'
 import { loadWriteRefs, type WriteRefs } from './tickets-write-helpers.js'
+import { backfillDuplicateAlerts } from '../../src/tickets/duplicate-alerts.js'
 
 let context: TicketHttpContext
 let refs: WriteRefs
@@ -238,5 +239,30 @@ describe('marcar duplicado desde una alerta', () => {
     })
     const response = await action(ownId, hiddenId)
     expect(response.statusCode).toBe(404)
+  })
+})
+
+describe('relleno de tiquets existentes', () => {
+  it('recalcula candidatos y el indicador de un tiquet ya creado', async () => {
+    const text = description()
+    const firstId = await createTicket(text)
+    const secondId = await createTicket(text)
+    await context.db.execute(sql`
+      delete from public.ticket_duplicate_candidates
+      where ticket_id = ${secondId}
+    `)
+    await context.db.execute(sql`
+      update public.tickets set possible_duplicate = false where id = ${secondId}
+    `)
+    const result = await backfillDuplicateAlerts(context.db)
+    expect(result.tickets).toBeGreaterThan(0)
+    const row = await candidateRow(secondId, firstId)
+    expect(row?.decision).toBeNull()
+    const ticket = await context.db.execute(sql`
+      select possible_duplicate from public.tickets where id = ${secondId}
+    `)
+    expect(
+      (ticket.rows[0] as { possible_duplicate: boolean }).possible_duplicate,
+    ).toBe(true)
   })
 })

@@ -3,10 +3,12 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
+import { findDuplicateCandidates } from './duplicate-detect.js'
 import {
   dismissPendingCandidates,
   duplicateSettings,
   projectCandidate,
+  storeDuplicateCandidates,
   type ScoredCandidate,
 } from './duplicates.js'
 import { optionalIso } from './format.js'
@@ -108,4 +110,71 @@ export async function dismissDuplicateAlerts(
       where id = ${ticketId}
     `)
   })
+}
+
+type CaptureRow = {
+  id: string
+  building_id: string
+  location_id: string
+  dependency_id: string
+  category_id: string
+  subcategory_id: string | null
+  problem_id: string | null
+  description: string
+  reported_at: Date | string
+}
+
+/**
+ * Recalcula las alertas pendientes de los tiquets no finales. Útil al estrenar
+ * la detección o tras cambiar la configuración de duplicados.
+ */
+export async function backfillDuplicateAlerts(
+  db: Database,
+): Promise<{ tickets: number; flagged: number; alerts: number }> {
+  const settings = await duplicateSettings(db)
+  const result = await db.execute(sql`
+    select id, building_id, location_id, dependency_id, category_id,
+      subcategory_id, problem_id, description, reported_at
+    from public.tickets
+    where status not in ('closed', 'rejected', 'cancelled', 'duplicate')
+    order by reported_at
+  `)
+  const tickets = result.rows as CaptureRow[]
+  let flagged = 0
+  let alerts = 0
+  for (const ticket of tickets) {
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`
+        delete from public.ticket_duplicate_candidates
+        where ticket_id = ${ticket.id} and decision is null
+      `)
+      const candidates = await findDuplicateCandidates(
+        tx,
+        {
+          buildingId: ticket.building_id,
+          locationId: ticket.location_id,
+          categoryId: ticket.category_id,
+          subcategoryId: ticket.subcategory_id,
+          problemId: ticket.problem_id,
+          dependencyId: ticket.dependency_id,
+          description: ticket.description,
+          reportedAt: new Date(ticket.reported_at).toISOString(),
+          excludeTicketId: ticket.id,
+        },
+        settings,
+      )
+      await storeDuplicateCandidates(tx, ticket.id, candidates)
+      await tx.execute(sql`
+        update public.tickets
+        set possible_duplicate = exists (
+          select 1 from public.ticket_duplicate_candidates
+          where ticket_id = ${ticket.id}
+        )
+        where id = ${ticket.id}
+      `)
+      alerts += candidates.length
+      if (candidates.length > 0) flagged += 1
+    })
+  }
+  return { tickets: tickets.length, flagged, alerts }
 }
