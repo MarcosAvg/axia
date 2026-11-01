@@ -230,7 +230,8 @@ puede, precondiciones y efectos.
 - **RN-21 Escalamiento y alertas.** Reglas configurables: tiquet sin tomar tras N tiempo, sin técnico
   tras N tiempo, sin supervisor candidato, y cercanía o incumplimiento de un tiempo objetivo.
 - **RN-22 Nada se borra.** El historial es de solo agregar; los tiquets solo cambian de estado; los
-  catálogos se desactivan.
+  catálogos se desactivan. Un registro de catálogo que **nunca se usó** puede eliminarse; en cuanto
+  tiquets, historial o configuración lo referencian, solo se desactiva.
 - **RN-23 Visibilidad.** Las notas son **internas**. El solicitante ve lo relevante (cambios de estado,
   pausas a nivel de motivo, atendido y solicitud de validación, reclamaciones, recaptura propuesta).
   Define y documenta qué tipos de evento son visibles al solicitante, configurable por tipo.
@@ -271,8 +272,9 @@ puede, precondiciones y efectos.
 ## 6. Catálogos configurables
 
 **Todo es catálogo, excepto los estados de la sección 4** y las constantes del sistema (tipos de
-evidencia y tipos de participación). Los catálogos se desactivan, no se borran. Lo que se use en un
-tiquet debe conservar el valor que tenía en ese momento aunque el catálogo cambie después.
+evidencia y tipos de participación). Los catálogos se desactivan; solo se borra un registro que
+nunca se usó. Lo que se use en un tiquet debe conservar el valor que tenía en ese momento aunque el
+catálogo cambie después.
 
 - **Maestros:** edificios, ubicaciones, equipos, dependencias, categorías, subcategorías,
   problemas (con equipo), tipos de servicio, prioridades, canales de registro.

@@ -12,6 +12,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0102](0102-documentacion-por-tareas.md) | Documentación canónica organizada por tareas |
 
 | [0103](0103-catalogos-operables-y-demo-coherente.md) | Catálogos sin pausas sin salida y demo con relaciones coherentes |
+| [0104](0104-borrado-catalogos-sin-uso.md) | Borrado de catálogos solo cuando no tienen uso |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

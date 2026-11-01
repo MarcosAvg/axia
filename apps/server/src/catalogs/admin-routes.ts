@@ -17,6 +17,7 @@ import {
   type AdminValues,
 } from './admin.js'
 import { listAdminRows } from './admin-rows.js'
+import { deleteAdminRow } from './admin-delete.js'
 
 const tableParams = z.object({ table: z.string().min(1).max(40) })
 const rowParams = tableParams.extend({ id: z.string().uuid() })
@@ -145,6 +146,22 @@ function registerGenericCatalogRoutes(
   )
 }
 
+function registerDeleteRoute(
+  app: FastifyInstance,
+  guard: Guard[],
+  db: Database,
+) {
+  app.delete(
+    '/api/admin/catalogs/:table/:id',
+    { preHandler: guard },
+    async (request, reply) => {
+      const params = rowParams.parse(request.params)
+      await deleteAdminRow(db, adminTable(params.table), params.id)
+      return reply.status(204).send()
+    },
+  )
+}
+
 export function registerAdminCatalogRoutes(
   app: FastifyInstance,
   auth: AuthService,
@@ -156,5 +173,6 @@ export function registerAdminCatalogRoutes(
     requirePermission('catalog.manage'),
   ]
   registerGenericCatalogRoutes(app, guard, db)
+  registerDeleteRoute(app, guard, db)
   registerDependencyLocationRoutes(app, guard, db)
 }

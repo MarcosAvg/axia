@@ -37,7 +37,7 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 
 ## Reglas
 
-- Los catálogos se desactivan; no se borran.
+- Los catálogos se desactivan; solo se borra un registro que nunca se usó.
 - El tiquet conserva una instantánea de los valores usados.
 - El folio es inmutable y único.
 - `ticket_events` es de solo agregar.

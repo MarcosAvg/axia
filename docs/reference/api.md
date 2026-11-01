@@ -133,7 +133,7 @@ acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
 | `POST/DELETE` | `/api/admin/access/scope-buildings` y `/:scopeId/:buildingId` | Edificios del ámbito |
 | `POST/DELETE` | `/api/admin/access/technician-categories` y `/:technicianId/:categoryId` | Designaciones |
 | `GET` | `/api/admin/catalogs/:table?orderBy=…` | Catálogos con datos derivados: conteos, ruta de motivos y cuenta vinculada |
-| `POST/PATCH` | `/api/admin/catalogs/:table` y `/:id` | Alta y edición de catálogos |
+| `POST/PATCH/DELETE` | `/api/admin/catalogs/:table` y `/:id` | Alta, edición y borrado de catálogos sin uso (si están en uso responde 409) |
 | `POST/PATCH` | `/api/admin/catalogs/dependencies` y `/:id` | Dependencia con al menos una ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/locations` | Vínculos dependencia–ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
