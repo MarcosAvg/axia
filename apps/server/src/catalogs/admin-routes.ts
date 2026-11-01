@@ -10,13 +10,13 @@ import { saveAdminReason } from './admin-reasons.js'
 import {
   adminTable,
   insertAdminRow,
-  listAdminRows,
   listDependencyLocationIds,
   listDependencyLocations,
   saveDependency,
   updateAdminRow,
   type AdminValues,
 } from './admin.js'
+import { listAdminRows } from './admin-rows.js'
 
 const tableParams = z.object({ table: z.string().min(1).max(40) })
 const rowParams = tableParams.extend({ id: z.string().uuid() })
@@ -98,7 +98,7 @@ function registerGenericCatalogRoutes(
     async (request) => {
       const { table } = tableParams.parse(request.params)
       const query = z
-        .object({ orderBy: z.string().min(1).max(64).default('name') })
+        .object({ orderBy: z.string().min(1).max(64).optional() })
         .parse(request.query)
       return {
         items: await listAdminRows(db, adminTable(table), query.orderBy),

@@ -86,19 +86,6 @@ function valueList(table: AdminCatalogTable, values: AdminValues): SQL[] {
   })
 }
 
-export async function listAdminRows(
-  db: Database,
-  table: AdminCatalogTable,
-  orderBy = 'name',
-) {
-  assertColumn(table, orderBy)
-  const result = await db.execute(sql`
-    select * from ${sql.identifier(table)}
-    order by ${sql.identifier(orderBy)}
-  `)
-  return result.rows
-}
-
 export async function insertAdminRow(
   db: Pick<Database, 'execute'>,
   table: AdminCatalogTable,

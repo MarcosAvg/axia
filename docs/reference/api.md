@@ -132,7 +132,8 @@ acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
 | `POST/DELETE` | `/api/admin/access/scopes` y `/:id` | Ámbitos de supervisor |
 | `POST/DELETE` | `/api/admin/access/scope-buildings` y `/:scopeId/:buildingId` | Edificios del ámbito |
 | `POST/DELETE` | `/api/admin/access/technician-categories` y `/:technicianId/:categoryId` | Designaciones |
-| `GET/POST/PATCH` | `/api/admin/catalogs/:table` | Catálogos |
+| `GET` | `/api/admin/catalogs/:table?orderBy=…` | Catálogos con datos derivados: conteos, ruta de motivos y cuenta vinculada |
+| `POST/PATCH` | `/api/admin/catalogs/:table` y `/:id` | Alta y edición de catálogos |
 | `POST/PATCH` | `/api/admin/catalogs/dependencies` y `/:id` | Dependencia con al menos una ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/locations` | Vínculos dependencia–ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
