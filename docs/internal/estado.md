@@ -30,6 +30,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluidas las dos pruebas nuevas de
   aviso, marcado y descarte de duplicados.
 - Documentación: 37 archivos, 0 enlaces rotos. Persiste el aviso previo de chunks >500 kB.
+- Versión v0.6.0 etiquetada y publicada; imagen y release verificadas abajo.
 
 ## Tarea anterior: eliminar catálogos sin uso
 
@@ -114,19 +115,22 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 ## Imagen publicada y siguiente paso operativo
 
-- Publicación manual autorizada desde `main`, commit `b3b1fa90253ba373ace68c88bda624aaf95d15e3`.
-- [Flujo 41254674345](https://github.com/MarcosAvg/axia/actions/runs/41254674345): verificación,
+- Etiqueta `v0.6.0` creada desde `main`, commit
+  `e2f7ff1e64ce0e31b03778a2d3086a6bc2f16bf8`.
+- [Flujo 41267688905](https://github.com/MarcosAvg/axia/actions/runs/41267688905): verificación,
   Docker y publicación `success`. La CI de `main` también terminó correctamente.
-- Imagen pública `ghcr.io/marcosavg/axia/axia-app:b3b1fa90253ba373ace68c88bda624aaf95d15e3`.
-  Digest confirmado directamente en GHCR:
-  `sha256:30bd3af0de7ce2981de50ae7cb5c03d965377d136155ac21e8ffeae1ebbd5533`.
-- Paquete `axia-self-hosted` generado como artefacto del flujo. No se creó una etiqueta semántica
-  ni una release nueva. `v0.5.1` sigue disponible y no incluye estas correcciones.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.6.0` y
+  `ghcr.io/marcosavg/axia/axia-app:e2f7ff1e64ce0e31b03778a2d3086a6bc2f16bf8`. Digest confirmado
+  directamente en GHCR:
+  `sha256:b916e9003d759c32e37233a05c8ff7bde73f80cb0b3fd3b181ba71b35089e8db`.
+- Release `v0.6.0` con el paquete `axia-self-hosted.tar.gz` y su `.sha256`. `v0.5.1` sigue
+  disponible.
 
-Actualizar la instancia requiere autorización. La migración 0018 se aplica durante la actualización
-normal. Para escenarios demo completos usar una base local nueva; no reiniciar una base cuyo
-trabajo deba conservarse. Probar instalación en host limpio, configurar TLS y programar
-respaldos/limpieza con restauración periódica siguen pendientes operativos.
+Actualizar la instancia requiere autorización. Las migraciones 0019 (revisión de duplicados) y 0020
+(permiso para retirar alertas pendientes) se aplican durante la actualización normal. Para
+escenarios demo completos usar una base local nueva; no reiniciar una base cuyo trabajo deba
+conservarse. Probar instalación en host limpio, configurar TLS y programar respaldos/limpieza con
+restauración periódica siguen pendientes operativos.
 
 ## Diferencias de producto conocidas
 
