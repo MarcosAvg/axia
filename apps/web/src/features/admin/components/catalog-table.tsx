@@ -1,117 +1,57 @@
-import type { ReactNode } from 'react'
-import { LibraryIcon } from 'lucide-react'
+import {
+  ChevronRightIcon,
+  CornerDownRightIcon,
+  LibraryIcon,
+} from 'lucide-react'
+import { cn } from 'cn'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn, SortState } from '@/components/shared/data-table'
 import { EmptyState } from '@/components/shared/empty-state'
 import type { AdminTable } from '../api/admin-api'
+import type { AdminCatalogTree } from '../domain/catalog-types'
 import type { AdminColumn } from '../domain/catalogs'
-import { fixedOptionLabel } from '../domain/catalog-list'
-import { formatTargetMinutes } from '../domain/target'
-import type { AdminOption } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
+import { CatalogCard } from './catalog-card'
+import { CellContent } from './catalog-cell-content'
 import { RowActions } from './row-actions'
 import { StatusSwitch } from './status-switch'
+import { useTreeControls, type TreeControls } from './catalog-tree-controls'
+
+type Row = Record<string, unknown>
+type OptionsFor = (table: AdminTable) => { id: string; label: string }[]
 
 interface CatalogTableProps {
-  rows: Record<string, unknown>[]
+  rows: Row[]
   columns: AdminColumn[]
-  optionsFor: (table: AdminTable) => AdminOption[]
+  tree?: AdminCatalogTree
+  isFiltering: boolean
+  optionsFor: OptionsFor
   sort: SortState | null
   onSortChange: (key: string) => void
-  onEdit: (row: Record<string, unknown>) => void
-  onToggle: (row: Record<string, unknown>) => void
+  onEdit: (row: Row) => void
+  onToggle: (row: Row) => void
 }
 
-function relationLabel(options: AdminOption[], value: unknown): string | null {
-  return options.find((option) => option.id === String(value))?.label ?? null
-}
-
-function plainValue(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—'
-  if (typeof value === 'boolean') return value ? 'Sí' : 'No'
-  return String(value)
-}
-
-function CellContent({
-  row,
-  column,
-  optionsFor,
-}: {
-  row: Record<string, unknown>
-  column: AdminColumn
-  optionsFor: (table: AdminTable) => AdminOption[]
-}) {
-  const value = row[column.key]
-  if (column.optionsTable) {
-    const label = relationLabel(optionsFor(column.optionsTable), value)
-    return label ? (
-      <span>{label}</span>
-    ) : (
-      <span className="text-muted-foreground">—</span>
-    )
-  }
-  if (column.options) {
-    return <span>{fixedOptionLabel(column.options, value)}</span>
-  }
-  if (column.format === 'minutes') {
-    return (
-      <span>
-        {formatTargetMinutes(typeof value === 'number' ? value : null)}
-      </span>
-    )
-  }
-  if (value === null || value === undefined || value === '') {
-    return <span className="text-muted-foreground">—</span>
-  }
-  return <span>{plainValue(value)}</span>
-}
-
-function displayName(
-  row: Record<string, unknown>,
-  column: AdminColumn,
-): string {
-  const value = row[column.key]
-  return value === null || value === undefined ? '' : String(value)
-}
-
-interface BuildColumnsOptions {
-  rows: Record<string, unknown>[]
-  dataColumns: AdminColumn[]
-  optionsFor: (table: AdminTable) => AdminOption[]
-  onEdit: (row: Record<string, unknown>) => void
-  onToggle: (row: Record<string, unknown>) => void
-}
-
-function depthFunction(
-  rows: Record<string, unknown>[],
-  indentBy: string,
-): (row: Record<string, unknown>) => number {
-  const byId = new Map(rows.map((row) => [String(row.id), row]))
-  return (row) => {
-    let depth = 0
-    let cursor = row[indentBy]
-    while (cursor && byId.has(String(cursor)) && depth < 50) {
-      depth += 1
-      cursor = byId.get(String(cursor))?.[indentBy]
-    }
-    return depth
-  }
+function nameOf(row: Row, columns: AdminColumn[], tree?: AdminCatalogTree) {
+  const key = tree?.labelKey ?? columns[0]?.key
+  return key ? String(row[key] ?? '') : ''
 }
 
 function activeColumn(
-  nameOf: (row: Record<string, unknown>) => string,
-  onToggle: (row: Record<string, unknown>) => void,
-): DataTableColumn<Record<string, unknown>> {
+  name: (row: Row) => string,
+  onToggle: (row: Row) => void,
+): DataTableColumn<Row> {
   return {
     id: 'active',
     header: adminMessages.list.active,
     align: 'center',
     className: 'w-24',
+    sortable: true,
     cell: (row) => (
       <div className="flex justify-center">
         <StatusSwitch
           active={row.active !== false}
-          name={nameOf(row)}
+          name={name(row)}
           onToggle={() => onToggle(row)}
         />
       </div>
@@ -120,10 +60,10 @@ function activeColumn(
 }
 
 function actionsColumn(
-  nameOf: (row: Record<string, unknown>) => string,
-  onEdit: (row: Record<string, unknown>) => void,
-  onToggle: (row: Record<string, unknown>) => void,
-): DataTableColumn<Record<string, unknown>> {
+  name: (row: Row) => string,
+  onEdit: (row: Row) => void,
+  onToggle: (row: Row) => void,
+): DataTableColumn<Row> {
   return {
     id: 'actions',
     header: '',
@@ -133,7 +73,7 @@ function actionsColumn(
       <div className="flex justify-end">
         <RowActions
           active={row.active !== false}
-          name={nameOf(row)}
+          name={name(row)}
           onEdit={() => onEdit(row)}
           onToggle={() => onToggle(row)}
         />
@@ -142,119 +82,116 @@ function actionsColumn(
   }
 }
 
-function buildTableColumns(
-  options: BuildColumnsOptions,
-): DataTableColumn<Record<string, unknown>>[] {
-  const { rows, dataColumns, optionsFor, onEdit, onToggle } = options
-  const nameColumn = dataColumns[0]
-  const nameOf = (row: Record<string, unknown>) =>
-    nameColumn ? displayName(row, nameColumn) : ''
-  const indentBy = nameColumn?.indentBy
-  const depthOf = indentBy ? depthFunction(rows, indentBy) : undefined
-
-  return [
-    ...dataColumns.map((column, index) => ({
-      id: column.key,
-      header: column.label,
-      align: column.align,
-      sortable: true,
-      cell: (row: Record<string, unknown>) => {
-        const content: ReactNode = (
-          <CellContent row={row} column={column} optionsFor={optionsFor} />
-        )
-        if (index !== 0) return content
-        const prefix = indentBy && depthOf ? '— '.repeat(depthOf(row)) : ''
-        return (
-          <span className="font-medium text-foreground">
-            {prefix}
-            {content}
-          </span>
-        )
-      },
-    })),
-    activeColumn(nameOf, onToggle),
-    actionsColumn(nameOf, onEdit, onToggle),
-  ]
-}
-
-interface CatalogCardProps {
-  row: Record<string, unknown>
-  columns: AdminColumn[]
-  optionsFor: (table: AdminTable) => AdminOption[]
-  onEdit: (row: Record<string, unknown>) => void
-  onToggle: (row: Record<string, unknown>) => void
-}
-
-function CatalogCard({
+function TreeMarker({
+  name,
   row,
-  columns,
-  optionsFor,
-  onEdit,
-  onToggle,
-}: CatalogCardProps) {
-  const dataColumns = columns.filter((column) => column.key !== 'active')
-  const nameColumn = dataColumns[0]
-  const name = nameColumn ? displayName(row, nameColumn) : ''
-
+  depth,
+  controls,
+}: {
+  name: string
+  row: Row
+  depth: number
+  controls: TreeControls
+}) {
+  if (!controls.hasChildren(row)) {
+    return depth > 0 ? (
+      <CornerDownRightIcon
+        className="size-3.5 shrink-0 text-muted-foreground/70"
+        aria-hidden
+      />
+    ) : null
+  }
+  const isCollapsed = controls.isCollapsed(row)
   return (
-    <li className="flex flex-col gap-3 rounded-xl border bg-card p-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="break-words font-medium">{name || '—'}</p>
-          {dataColumns[1] ? (
-            <p className="truncate text-xs text-muted-foreground">
-              <CellContent
-                row={row}
-                column={dataColumns[1]}
-                optionsFor={optionsFor}
-              />
-            </p>
-          ) : null}
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <StatusSwitch
-            active={row.active !== false}
-            name={name}
-            onToggle={() => onToggle(row)}
-          />
-          <RowActions
-            active={row.active !== false}
-            name={name}
-            onEdit={() => onEdit(row)}
-            onToggle={() => onToggle(row)}
-          />
-        </div>
-      </div>
-      {dataColumns.length > 2 ? (
-        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
-          {dataColumns.slice(2).map((column) => (
-            <div key={column.key} className="contents">
-              <dt className="text-muted-foreground">{column.label}</dt>
-              <dd className="min-w-0 break-words">
-                <CellContent
-                  row={row}
-                  column={column}
-                  optionsFor={optionsFor}
-                />
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-    </li>
+    <button
+      type="button"
+      aria-expanded={!isCollapsed}
+      aria-label={`${isCollapsed ? adminMessages.list.expand : adminMessages.list.collapse}: ${name}`}
+      className="shrink-0 rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      onClick={(event) => {
+        event.stopPropagation()
+        controls.toggle(row)
+      }}
+    >
+      <ChevronRightIcon
+        className={cn(
+          'size-4 transition-transform',
+          !isCollapsed && 'rotate-90',
+        )}
+      />
+    </button>
   )
 }
 
-/** Lista de registros de un catálogo con columnas propias, orden y acciones. */
-export function CatalogTable({
-  rows,
-  columns,
+function LabelCell({
+  row,
+  column,
+  tree,
+  controls,
   optionsFor,
-  sort,
-  onSortChange,
-  onEdit,
-  onToggle,
-}: CatalogTableProps) {
+}: {
+  row: Row
+  column: AdminColumn
+  tree: AdminCatalogTree
+  controls: TreeControls
+  optionsFor: OptionsFor
+}) {
+  const depth = controls.depthOf(row)
+  return (
+    <span
+      className="flex min-w-0 items-center gap-1.5 font-medium text-foreground"
+      style={{ paddingInlineStart: depth * 16 }}
+      title={String(row.path ?? '')}
+    >
+      <TreeMarker
+        name={String(row[tree.labelKey ?? 'name'] ?? '')}
+        row={row}
+        depth={depth}
+        controls={controls}
+      />
+      <span className="truncate">
+        <CellContent row={row} column={column} optionsFor={optionsFor} />
+      </span>
+    </span>
+  )
+}
+
+function buildColumns(
+  options: CatalogTableProps & { controls?: TreeControls },
+): DataTableColumn<Row>[] {
+  const { columns, optionsFor, tree, controls, onEdit, onToggle } = options
+  const label = (row: Row) => nameOf(row, columns, tree)
+  return [
+    ...columns.map((column) => ({
+      id: column.key,
+      header: column.label,
+      align: column.align,
+      hideBelow: column.hideBelow,
+      sortable: true,
+      cell: (row: Row) =>
+        tree &&
+        controls &&
+        column.key === (tree.labelKey ?? columns[0]?.key) ? (
+          <LabelCell
+            row={row}
+            column={column}
+            tree={tree}
+            controls={controls}
+            optionsFor={optionsFor}
+          />
+        ) : (
+          <CellContent row={row} column={column} optionsFor={optionsFor} />
+        ),
+    })),
+    activeColumn(label, onToggle),
+    actionsColumn(label, onEdit, onToggle),
+  ]
+}
+
+/** Lista de registros de un catálogo con columnas propias, orden y acciones. */
+export function CatalogTable(props: CatalogTableProps) {
+  const { rows, columns, tree, isFiltering, optionsFor, sort } = props
+  const { controls, visible } = useTreeControls(rows, tree, isFiltering)
   if (rows.length === 0) {
     return (
       <div className="rounded-xl border bg-card">
@@ -262,35 +199,29 @@ export function CatalogTable({
       </div>
     )
   }
-
-  const dataColumns = columns.filter((column) => column.key !== 'active')
-
+  const depthOf = controls?.depthOf ?? (() => 0)
   return (
     <>
       <ul className="flex flex-col gap-2 lg:hidden">
-        {rows.map((row) => (
+        {visible.map((row) => (
           <CatalogCard
             key={String(row.id)}
             row={row}
             columns={columns}
+            tree={tree}
+            depth={depthOf(row)}
             optionsFor={optionsFor}
-            onEdit={onEdit}
-            onToggle={onToggle}
+            onEdit={props.onEdit}
+            onToggle={props.onToggle}
           />
         ))}
       </ul>
       <div className="hidden lg:block">
         <DataTable
-          columns={buildTableColumns({
-            rows,
-            dataColumns,
-            optionsFor,
-            onEdit,
-            onToggle,
-          })}
-          rows={rows}
+          columns={buildColumns({ ...props, controls })}
+          rows={visible}
           sort={sort}
-          onSortChange={onSortChange}
+          onSortChange={props.onSortChange}
           getRowId={(row) => String(row.id)}
         />
       </div>

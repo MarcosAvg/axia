@@ -52,4 +52,20 @@ describe('sortRows', () => {
   it('sin orden devuelve la misma lista', () => {
     expect(sortRows(rows, null)).toBe(rows)
   })
+
+  it('ordena con un valor derivado (por ejemplo, la etiqueta de una relación)', () => {
+    const labels = new Map([
+      ['t2', 'Seguridad'],
+      ['t1', 'Mantenimiento'],
+    ])
+    const withTeam = [
+      { id: 'a', team_id: 't2' },
+      { id: 'b', team_id: 't1' },
+    ]
+    expect(
+      sortRows(withTeam, { key: 'team_id', dir: 'asc' }, (row, key) =>
+        labels.get(String(row[key as 'team_id'])),
+      ).map((row) => row.id),
+    ).toEqual(['b', 'a'])
+  })
 })

@@ -17,9 +17,50 @@ export const reasonsCatalog: AdminCatalogConfig = {
   key: 'reasons',
   table: 'reasons',
   title: titles.reasons,
+  tree: {
+    parentKey: 'parent_id',
+    orderKey: 'position',
+    labelKey: 'name',
+    groupKey: 'use',
+  },
   columns: [
-    { key: 'name', label: fields.name, indentBy: 'parent_id' },
+    { key: 'name', label: fields.name },
     { key: 'use', label: fields.use, options: reasonUseOptions },
+    {
+      key: 'parent_id',
+      label: fields.parent_id,
+      optionsTable: 'reasons',
+      hideBelow: 'lg',
+    },
+    {
+      key: 'children_count',
+      label: fields.children_count,
+      align: 'right',
+      hideBelow: 'xl',
+    },
+    {
+      key: 'requires_note',
+      label: fields.requires_note,
+      align: 'center',
+      hideBelow: 'xl',
+    },
+    {
+      key: 'allows_estimated_date',
+      label: fields.allows_estimated_date,
+      align: 'center',
+      hideBelow: '2xl',
+    },
+    {
+      key: 'clock_class',
+      label: fields.clock_class,
+      options: clockClassOptions,
+    },
+    {
+      key: 'position',
+      label: fields.position,
+      align: 'right',
+      hideBelow: '2xl',
+    },
     { key: 'active', label: list.active },
   ],
   fields: [

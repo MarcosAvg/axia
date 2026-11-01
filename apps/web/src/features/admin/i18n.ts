@@ -1,9 +1,11 @@
 // Textos de la administración (es-MX).
 
+import { catalogMessages } from './catalogs-i18n'
 import { settingsMessages } from './settings-i18n'
 import { usersMessages } from './users-i18n'
 
 export const adminMessages = {
+  ...catalogMessages,
   title: 'Administración',
   subtitle: 'Catálogos, motivos, roles y usuarios de la instancia.',
   nav: {
@@ -159,6 +161,12 @@ export const adminMessages = {
     error: 'No se pudo cargar.',
     search: 'Buscar…',
     results: 'registros',
+    sortBy: 'Ordenar por',
+    defaultOrder: 'Orden predeterminado',
+    ascending: 'Ascendente',
+    descending: 'Descendente',
+    expand: 'Expandir',
+    collapse: 'Contraer',
   },
   descriptions: {
     catalogs: 'Catálogos maestros y motivos jerárquicos.',
@@ -208,64 +216,6 @@ export const adminMessages = {
     required: 'Este campo es obligatorio.',
     dataSection: 'Datos',
     optionsSection: 'Opciones',
-  },
-  titles: {
-    teams: 'Equipos',
-    buildings: 'Edificios',
-    locations: 'Ubicaciones',
-    dependencies: 'Dependencias',
-    categories: 'Categorías',
-    subcategories: 'Subcategorías',
-    problems: 'Problemas',
-    service_types: 'Tipos de servicio',
-    priorities: 'Prioridades',
-    channels: 'Canales',
-    requesters: 'Solicitantes',
-    technicians: 'Técnicos',
-    reasons: 'Motivos',
-  },
-  fields: {
-    name: 'Nombre',
-    full_name: 'Nombre completo',
-    contact: 'Contacto',
-    active: 'Activo',
-    position: 'Orden',
-    target_minutes: 'Tiempo objetivo',
-    target_unit: 'Unidad',
-    building_id: 'Edificio',
-    team_id: 'Equipo',
-    category_id: 'Categoría',
-    subcategory_id: 'Subcategoría',
-    dependency_id: 'Dependencia',
-    use: 'Uso',
-    parent_id: 'Motivo padre',
-    requires_note: 'Exige nota',
-    allows_estimated_date: 'Admite fecha estimada',
-    clock_class: 'Clasificación de reloj',
-    work_calendar_id: 'Calendario laboral',
-    default_priority_id: 'Prioridad por defecto',
-    is_platform: 'Canal de la plataforma',
-  },
-  reasonUse: {
-    pause: 'Pausa',
-    rejection: 'Rechazo',
-    cancellation: 'Cancelación',
-    supervisor_reassignment: 'Reasignación de supervisor',
-    technician_reassignment: 'Reasignación de técnico',
-    recapture: 'Recaptura',
-    claim: 'Reclamación',
-    claim_outcome: 'Resultado de reclamación',
-    reactivation: 'Reactivación',
-    auxiliary_support: 'Apoyo auxiliar',
-  },
-  clockClass: {
-    counted: 'Cuenta',
-    not_counted: 'No cuenta',
-  },
-  targetUnits: {
-    minutes: 'Minutos',
-    hours: 'Horas',
-    days: 'Días',
   },
   integrations: {
     title: 'Integraciones e importación',

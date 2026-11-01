@@ -74,7 +74,7 @@ function SortIcon({
 }) {
   if (!active) {
     return (
-      <ArrowUpDownIcon className="size-3.5 opacity-0 group-hover:opacity-60" />
+      <ArrowUpDownIcon className="size-3.5 opacity-40 group-hover:opacity-80" />
     )
   }
   return dir === 'asc' ? (

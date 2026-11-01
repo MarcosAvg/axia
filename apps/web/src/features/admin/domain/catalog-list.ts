@@ -1,16 +1,10 @@
 import type { AdminTable } from '../api/admin-api'
+import { cellText } from './catalog-cell'
 import type { AdminColumn } from './catalogs'
 
-type OptionsFor = (table: AdminTable) => { id: string; label: string }[]
+export { fixedOptionLabel } from './catalog-cell'
 
-/** Etiqueta legible de un valor de columna con opciones fijas. */
-export function fixedOptionLabel(
-  options: { value: string; label: string }[],
-  value: unknown,
-): string {
-  const option = options.find((item) => item.value === String(value))
-  return option?.label ?? String(value ?? '')
-}
+type OptionsFor = (table: AdminTable) => { id: string; label: string }[]
 
 /** Texto buscable de una fila: valores crudos más las etiquetas de sus relaciones. */
 function catalogSearchText(
@@ -24,13 +18,8 @@ function catalogSearchText(
     if (value !== null && value !== undefined && value !== '') {
       parts.push(String(value))
     }
-    if (column.optionsTable) {
-      const option = optionsFor(column.optionsTable).find(
-        (candidate) => candidate.id === String(value),
-      )
-      if (option) parts.push(option.label)
-    }
-    if (column.options) parts.push(fixedOptionLabel(column.options, value))
+    const label = cellText(column, row, optionsFor)
+    if (label) parts.push(label)
   }
   return parts.join(' ').toLocaleLowerCase('es-MX')
 }

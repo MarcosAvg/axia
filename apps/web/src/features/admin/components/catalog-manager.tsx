@@ -4,6 +4,7 @@ import { useCatalogManager } from '../hooks/use-catalog-manager'
 import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
 import { CatalogForm } from './catalog-form'
+import { CatalogSortControl } from './catalog-sort-control'
 import { CatalogTable } from './catalog-table'
 import { DependencyFormDialog } from './dependency-form'
 import { EntityDialog } from './entity-dialog'
@@ -69,12 +70,20 @@ export function CatalogManager({ config }: { config: AdminCatalogConfig }) {
         addLabel={actions.add}
         onAdd={() => manager.setEditing('new')}
       />
+      <CatalogSortControl
+        columns={manager.sortableColumns}
+        sort={manager.sort}
+        onSelect={manager.selectSort}
+        onToggleDirection={manager.toggleDirection}
+      />
       {manager.rows.isLoading ? <LoadingList rows={4} /> : null}
       {manager.rows.isError ? <ErrorAlert message={list.error} /> : null}
       {manager.rows.data ? (
         <CatalogTable
           rows={manager.visibleRows}
-          columns={config.columns}
+          columns={manager.columns}
+          tree={config.tree}
+          isFiltering={manager.isFiltering}
           optionsFor={manager.optionsFor}
           sort={manager.sort}
           onSortChange={manager.toggleSort}

@@ -31,21 +31,30 @@ export function compareValues(a: unknown, b: unknown): number {
   return String(left).localeCompare(String(right), 'es-MX', { numeric: true })
 }
 
+/** Compara dos valores aplicando la dirección; los vacíos siempre al final. */
+export function compareWith(
+  a: unknown,
+  b: unknown,
+  dir: SortDirection,
+): number {
+  const left = normalize(a)
+  const right = normalize(b)
+  if (left === null || right === null) return compareValues(a, b)
+  return compareValues(a, b) * (dir === 'asc' ? 1 : -1)
+}
+
 /** Copia ordenada por la columna indicada (los vacíos siempre al final). */
-export function sortRows<T>(rows: T[], sort: SortState | null): T[] {
+export function sortRows<T>(
+  rows: T[],
+  sort: SortState | null,
+  valueOf?: (row: T, key: string) => unknown,
+): T[] {
   if (!sort) return rows
-  const factor = sort.dir === 'asc' ? 1 : -1
-  return [...rows].sort((a, b) => {
-    const left = normalize((a as Record<string, unknown>)[sort.key])
-    const right = normalize((b as Record<string, unknown>)[sort.key])
-    if (left === null || right === null) {
-      if (left === null && right === null) return 0
-      return left === null ? 1 : -1
-    }
-    const base =
-      typeof left === 'number' && typeof right === 'number'
-        ? left - right
-        : String(left).localeCompare(String(right), 'es-MX', { numeric: true })
-    return base * factor
-  })
+  const valueFor = (row: T): unknown =>
+    valueOf
+      ? valueOf(row, sort.key)
+      : (row as Record<string, unknown>)[sort.key]
+  return [...rows].sort((a, b) =>
+    compareWith(valueFor(a), valueFor(b), sort.dir),
+  )
 }

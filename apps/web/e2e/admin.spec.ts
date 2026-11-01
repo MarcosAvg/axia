@@ -103,6 +103,51 @@ test('@smoke exporta y reimporta los catálogos sin inválidas', async ({
   await expect(dialog.getByText('Sin incidencias.')).toBeVisible()
 })
 
+test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
+  await signIn(page, 'demo.admin')
+
+  await page.goto('/admin/catalogos?catalog=dependencies')
+  const dependencies = page.getByRole('table')
+  await expect(
+    dependencies.getByRole('columnheader', { name: 'Ubicaciones' }),
+  ).toBeVisible()
+  await expect(
+    dependencies.getByRole('columnheader', { name: 'Edificios', exact: true }),
+  ).toBeVisible()
+
+  await page.goto('/admin/catalogos?catalog=reasons')
+  const reasons = page.getByRole('table')
+  const search = page.getByRole('textbox', { name: 'Buscar…', exact: true })
+  await search.fill('En cotización')
+  await expect(reasons.getByText('En cotización')).toBeVisible()
+  await search.fill('')
+  await expect(
+    reasons.getByText('Falta de material', { exact: true }).first(),
+  ).toBeVisible()
+
+  await page
+    .getByRole('button', { name: 'Contraer: Falta de material' })
+    .click()
+  await expect(reasons.getByText('En cotización')).toHaveCount(0)
+})
+
+test('@smoke ofrece orden y jerarquía en pantalla angosta', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await signIn(page, 'demo.admin')
+  await page.goto('/admin/catalogos?catalog=reasons')
+
+  const sort = page.getByLabel('Ordenar por')
+  await expect(sort).toBeVisible()
+  await expect(sort.getByRole('option', { name: 'Nombre' })).toHaveCount(1)
+  await sort.selectOption('Nombre')
+  await expect(page.getByRole('button', { name: 'Descendente' })).toBeVisible()
+  await expect(
+    page.getByText('Falta de material', { exact: true }).first(),
+  ).toBeVisible()
+})
+
 test('@smoke crea motivos activos con subestados del mismo uso', async ({
   page,
 }) => {
