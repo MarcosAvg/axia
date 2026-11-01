@@ -68,7 +68,8 @@ function actionsColumn(
     id: 'actions',
     header: '',
     align: 'right',
-    className: 'w-14',
+    className:
+      'sticky right-0 z-10 w-14 border-l bg-card shadow-[-6px_0_12px_-6px_rgba(0,0,0,0.18)]',
     cell: (row) => (
       <div className="flex justify-end">
         <RowActions
