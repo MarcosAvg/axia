@@ -84,5 +84,15 @@ Los cambios no reescriben el historial. Aunque se puede guardar un número de d�
 automática, actualmente no hay un planificador que la ejecute. Tampoco se ejecutan escalamiento
 ni entregas Web Push: consulta [Notificaciones](notificaciones.md).
 
+## Duplicados
+
+Un tiquet nuevo se compara con los tiquets abiertos del mismo edificio dentro de la ventana
+configurada. Si coincide en ubicación y problema, o el texto se parece por encima del umbral, se
+marca como **posible duplicado**: aparece un badge en la lista, en la tabla y en el encabezado, y un
+aviso al entrar al detalle. Quien tenga el permiso de marcar duplicados puede enlazar el original o
+descartar la alerta; el formulario de marcado muestra primero los candidatos detectados y deja la
+búsqueda por folio como alternativa. Los tiquets creados antes de activar la detección se pueden
+recalcular con `pnpm db:duplicates`.
+
 La administración de cuentas y catálogos se realiza aquí; respaldos, actualización y recuperación
 de la instancia corresponden a [Operación](operacion.md).

@@ -37,4 +37,6 @@ no se creó un evento de bitácora separado porque no cambia el estado del tique
 
 Duplicar un tiquet sigue siendo una acción explícita; no hay fusión automática. Las alertas que
 llegan sin aviso previo (por ejemplo, desde la API o una creación offline) quedan pendientes para
-que un revisor decida.
+que un revisor decida. Los tiquets abiertos creados antes de activar la detección se recalculan con
+`pnpm db:duplicates`; el aviso se muestra arriba del detalle, con badge en las listas, y el
+formulario de marcado precarga los candidatos detectados.

@@ -14,17 +14,19 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Configuración real de ventana, umbral y campos visibles en `/admin/configuracion`, con API,
   formulario y pruebas; el aviso proyecta solo los campos permitidos.
 - Decisiones auditadas: se marcan los candidatos mostrados al registrar de todas formas, el elegido
-  al enlazar y los descartados, con actor y fecha. Panel en el detalle para enlazar o descartar y
-  enlace visible “Duplicado de”.
+  al enlazar y los descartados, con actor y fecha. El aviso aparece arriba del detalle, con badge en
+  lista, tabla y encabezado; el formulario de marcado precarga los candidatos y mantiene la búsqueda
+  por folio como alternativa. Enlace visible “Duplicado de”.
 - El original debe ser visible o haber sido candidato, no puede ser ya un duplicado y no se permiten
   ciclos. Al recapturar se recalculan las alertas pendientes.
-- Migración 0019; se corrigió la lectura de los tipos de evento como arreglo. Decisión en el
+- Migraciones 0019 y 0020; se corrigió la lectura de los tipos de evento como arreglo. El relleno
+  `pnpm db:duplicates` recalcula los tiquets abiertos existentes. Decisión en el
   [ADR 0105](../decisions/0105-deteccion-revision-duplicados.md).
 
 ## Evidencia de esta tarea
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip, 60 pruebas de
-  servidor, 331 de web, 286 PostgreSQL y build.
+  servidor, 331 de web, 287 PostgreSQL y build.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluidas las dos pruebas nuevas de
   aviso, marcado y descarte de duplicados.
 - Documentación: 37 archivos, 0 enlaces rotos. Persiste el aviso previo de chunks >500 kB.
