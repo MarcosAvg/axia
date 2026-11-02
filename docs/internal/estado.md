@@ -6,7 +6,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 **Última actualización:** 2026-11-02
 
 
-## Tarea en curso: calificación en modal y bloqueo tras validar
+## Tarea en curso: calificación en modal, bloqueos y toma obligatoria
 
 - El 500 al calificar venía de `ON CONFLICT DO UPDATE`: `axia_app` no tiene `UPDATE` sobre
   `ticket_ratings` porque la tabla es de solo agregar. Ahora la inserción usa `DO NOTHING` y una
@@ -20,19 +20,23 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   aplica ambas reglas.
 - El detalle expone `isRequester` y `requesterValidated`. Decisión en el
   [ADR 0106](../decisions/0106-calificacion-modal-y-bloqueo-validacion.md).
+- Un supervisor debe tomar el tiquet antes de asignar, reasignar, recapturar, rechazar, cancelar,
+  cambiar prioridad o marcar duplicado. La toma implícita al asignar se retiró; el administrador
+  conserva la cola sin ruteo. El detalle expone `hasTaken`. Decisión en el
+  [ADR 0107](../decisions/0107-tomar-antes-de-actuar.md).
 
 ## Evidencia de esta tarea
 
 - Pruebas dirigidas: `tickets-lifecycle-http` y `tickets-rating-lock-http` con la aplicación
   conectada como `axia_app`; `tickets-read` con los fixtures del rol dueño. Todas verdes.
-- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 60 pruebas de servidor y 340 de
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 64 pruebas de servidor y 343 de
   web.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el
   modal, ocultar acciones y persistir el resumen tras recargar.
-- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 60 de
-  servidor, 340 de web, 297 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 64 de
+  servidor, 343 de web, 298 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
   previo de chunks >500 kB.
-- Documentación: 38 archivos, 0 enlaces rotos. `pnpm test:affected`: 247 pruebas de servidor, 81
+- Documentación: 39 archivos, 0 enlaces rotos. `pnpm test:affected`: 281 pruebas de servidor, 85
   de web y el flujo E2E dirigido, todas verdes.
 - Revisión independiente del diff: dos hallazgos importantes corregidos; la guarda del solicitante
   validado ahora corre dentro de la transacción, después del replay y del bloqueo, con prueba de

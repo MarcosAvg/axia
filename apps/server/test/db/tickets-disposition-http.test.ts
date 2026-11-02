@@ -117,6 +117,28 @@ describe('reject and cancel', () => {
     ).not.toBeNull()
   })
 
+  it('rejects supervisor actions until the ticket is taken', async () => {
+    const ticketId = await createTicket()
+    const before = await action(context.cookies.supervisor, ticketId, {
+      action: 'cancel',
+      reasonId: cancellationReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(before.statusCode).toBe(403)
+
+    const take = await action(context.cookies.supervisor, ticketId, {
+      action: 'take',
+      clientRequestId: randomUUID(),
+    })
+    expect(take.statusCode).toBe(200)
+    const after = await action(context.cookies.supervisor, ticketId, {
+      action: 'cancel',
+      reasonId: cancellationReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(after.statusCode).toBe(200)
+  })
+
   it('reactivates a cancelled ticket and clears its close date', async () => {
     const ticketId = await createTicket()
     await cancelTicket(ticketId)
@@ -248,6 +270,10 @@ describe('comments and priority', () => {
     })
     expect(comment.statusCode).toBe(200)
 
+    await action(context.cookies.supervisor, ticketId, {
+      action: 'take',
+      clientRequestId: randomUUID(),
+    })
     const priority = await action(context.cookies.supervisor, ticketId, {
       action: 'change_priority',
       priorityId: highPriority,

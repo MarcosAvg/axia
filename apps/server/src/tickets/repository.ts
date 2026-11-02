@@ -53,6 +53,7 @@ type AccessRow = {
   id: string
   team_id: string
   building_id: string
+  status: string
   requester_user_id: string | null
   registered_by: string | null
   is_technician: boolean
@@ -105,6 +106,7 @@ export async function loadTicketAccess(
       t.id,
       t.team_id,
       t.building_id,
+      t.status,
       t.registered_by,
       r.user_id as requester_user_id,
       exists (
@@ -142,6 +144,7 @@ export async function loadTicketAccess(
     id: row.id,
     teamId: row.team_id,
     buildingId: row.building_id,
+    status: row.status,
     requesterUserId: row.requester_user_id,
     registeredBy: row.registered_by,
     isTechnician: row.is_technician,

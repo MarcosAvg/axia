@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto'
+
 import { sql } from 'drizzle-orm'
 
-import { cookieFrom, login } from './auth-helpers.js'
+import { cookieFrom, headers, login } from './auth-helpers.js'
 import type { TicketHttpContext } from './tickets-http-helpers.js'
 
 const WRITE_PASSWORD = 'TicketPassword123!'
@@ -131,4 +133,19 @@ export async function addSecondSupervisor(
     throw new Error(`Second supervisor login failed: ${response.statusCode}`)
   }
   return cookieFrom(response)
+}
+
+export async function takeTicket(
+  context: TicketHttpContext,
+  ticketId: string,
+): Promise<void> {
+  const response = await context.app.inject({
+    method: 'POST',
+    url: `/api/tickets/${ticketId}/actions`,
+    headers: headers(context.cookies.supervisor),
+    payload: { action: 'take', clientRequestId: randomUUID() },
+  })
+  if (response.statusCode !== 200) {
+    throw new Error(`Take failed: ${response.statusCode}`)
+  }
 }

@@ -81,12 +81,14 @@ describe('ticket detail actor state', () => {
     expect(asRequester).toMatchObject({
       isRequester: true,
       requesterValidated: false,
+      hasTaken: false,
     })
 
     const asAdmin = await getTicketDetail(db, actors.admin, ids.ticketA1)
     expect(asAdmin).toMatchObject({
       isRequester: false,
       requesterValidated: false,
+      hasTaken: false,
     })
   })
 })

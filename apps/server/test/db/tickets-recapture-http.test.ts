@@ -56,6 +56,16 @@ async function createTicket() {
   return (response.json() as { ticket: { id: string } }).ticket.id
 }
 
+async function takenTicket() {
+  const ticketId = await createTicket()
+  const take = await action(context.cookies.supervisor, ticketId, {
+    action: 'take',
+    clientRequestId: randomUUID(),
+  })
+  expect(take.statusCode).toBe(200)
+  return ticketId
+}
+
 beforeAll(async () => {
   context = await buildTicketHttpApp()
   refs = await loadWriteRefs(context)
@@ -72,7 +82,7 @@ afterAll(async () => {
 
 describe('recapture classification', () => {
   it('rejects clearing the problem', async () => {
-    const ticketId = await createTicket()
+    const ticketId = await takenTicket()
 
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',
@@ -86,7 +96,7 @@ describe('recapture classification', () => {
 
 describe('recapture catalog integrity', () => {
   it('rejects a location from another building', async () => {
-    const ticketId = await createTicket()
+    const ticketId = await takenTicket()
     const other = await context.db.execute(sql`
       select id from public.buildings where name = 'Edificio B1'
     `)
@@ -106,7 +116,7 @@ describe('recapture catalog integrity', () => {
   })
 
   it('rejects a subcategory from another category', async () => {
-    const ticketId = await createTicket()
+    const ticketId = await takenTicket()
 
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',

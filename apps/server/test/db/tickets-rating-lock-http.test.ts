@@ -235,6 +235,7 @@ describe('validated requester detail', () => {
     expect((asSupervisor.json() as { ticket: unknown }).ticket).toMatchObject({
       isRequester: false,
       requesterValidated: true,
+      hasTaken: true,
     })
   })
 })

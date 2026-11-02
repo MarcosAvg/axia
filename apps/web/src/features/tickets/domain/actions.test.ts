@@ -35,6 +35,8 @@ function context(
     status,
     isRequester: false,
     requesterValidated: false,
+    isSupervisorRole: false,
+    hasTaken: false,
     ...overrides,
   }
 }
@@ -47,6 +49,8 @@ describe('allowedActions', () => {
         status: 'in_progress',
         isRequester: false,
         requesterValidated: false,
+        isSupervisorRole: false,
+        hasTaken: false,
       }),
     ).toEqual([])
   })
@@ -155,6 +159,58 @@ describe('allowedActions after requester validation', () => {
     )
     expect(actions).toContain('validate')
     expect(actions).toContain('cancel')
+  })
+})
+
+describe('supervisor before take', () => {
+  it('oculta las acciones designadas en un tiquet registrado sin tomar', () => {
+    const actions = allowedActions(
+      context(
+        [
+          'ticket.assign_technician',
+          'ticket.recapture',
+          'ticket.cancel',
+          'ticket.prioritize',
+          'ticket.mark_duplicate',
+          'ticket.view',
+        ],
+        'registered',
+        { isSupervisorRole: true, hasTaken: false },
+      ),
+    )
+    expect(actions).not.toContain('assign_technician')
+    expect(actions).not.toContain('recapture')
+    expect(actions).not.toContain('cancel')
+    expect(actions).not.toContain('change_priority')
+    expect(actions).not.toContain('mark_duplicate')
+    expect(actions).toContain('comment')
+  })
+
+  it('muestra las acciones después de tomar el tiquet', () => {
+    const actions = allowedActions(
+      context(['ticket.assign_technician'], 'with_supervisor', {
+        isSupervisorRole: true,
+        hasTaken: true,
+      }),
+    )
+    expect(actions).toContain('assign_technician')
+  })
+
+  it('no limita al administrador ni al solicitante', () => {
+    const adminActions = allowedActions(
+      context(['ticket.assign_technician'], 'registered', {
+        isSupervisorRole: false,
+      }),
+    )
+    expect(adminActions).toContain('assign_technician')
+
+    const requesterActions = allowedActions(
+      context(['ticket.cancel'], 'registered', {
+        isRequester: true,
+        isSupervisorRole: true,
+      }),
+    )
+    expect(requesterActions).toContain('cancel')
   })
 })
 

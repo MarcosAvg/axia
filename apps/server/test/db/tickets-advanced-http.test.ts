@@ -114,6 +114,10 @@ afterAll(async () => {
 describe('recapture and auxiliary support', () => {
   it('recaptures the ticket and records the version', async () => {
     const ticketId = await createTicket()
+    await action(context.cookies.supervisor, ticketId, {
+      action: 'take',
+      clientRequestId: randomUUID(),
+    })
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',
       changes: { description: 'Descripción corregida' },
@@ -159,28 +163,36 @@ describe('recapture and auxiliary support', () => {
   })
 })
 
-describe('implicit take', () => {
-  it('records the take when a supervisor assigns from registered', async () => {
+describe('take before acting', () => {
+  it('rejects assignment from registered until the supervisor takes', async () => {
     const ticketId = await createTicket()
-    const response = await action(context.cookies.supervisor, ticketId, {
+    const rejected = await action(context.cookies.supervisor, ticketId, {
       action: 'assign_technician',
       technicianId: refs.technicianId,
       clientRequestId: randomUUID(),
     })
-    expect(response.statusCode).toBe(200)
-    const events = await context.db.execute(sql`
+    expect(rejected.statusCode).toBe(403)
+
+    const before = await context.db.execute(sql`
       select type from public.ticket_events
       where ticket_id = ${ticketId}
       order by id
     `)
-    expect(events.rows.map((row) => (row as { type: string }).type)).toEqual(
-      expect.arrayContaining(['taken', 'assigned_technician']),
-    )
-    const assignment = await context.db.execute(sql`
-      select count(*)::int as count from public.ticket_assignments
-      where ticket_id = ${ticketId} and stage = 'supervisor' and ended_at is null
-    `)
-    expect((assignment.rows[0] as { count: number }).count).toBe(1)
+    expect(
+      before.rows.map((row) => (row as { type: string }).type),
+    ).not.toEqual(expect.arrayContaining(['taken', 'assigned_technician']))
+
+    const take = await action(context.cookies.supervisor, ticketId, {
+      action: 'take',
+      clientRequestId: randomUUID(),
+    })
+    expect(take.statusCode).toBe(200)
+    const assigned = await action(context.cookies.supervisor, ticketId, {
+      action: 'assign_technician',
+      technicianId: refs.technicianId,
+      clientRequestId: randomUUID(),
+    })
+    expect(assigned.statusCode).toBe(200)
   })
 })
 

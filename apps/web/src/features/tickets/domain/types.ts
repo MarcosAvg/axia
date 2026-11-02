@@ -108,6 +108,7 @@ export interface TicketDetail extends TicketListItem {
   duplicateOfFolio: string | null
   isRequester: boolean
   requesterValidated: boolean
+  hasTaken: boolean
 }
 
 /** Tiempos del ciclo de un tiquet, en minutos. */

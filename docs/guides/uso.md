@@ -28,9 +28,11 @@ para su seguimiento. La campana abre los [avisos](notificaciones.md).
 
 ## Coordinar la atención
 
-Desde una oferta, usa **Tomar tiquet**; después, **Asignar técnico**. En el detalle puedes abrir
-**Más** para otras acciones, como **Reasignar supervisor**, **Agregar auxiliar** o **Cambiar
-prioridad**. Completa el destinatario, motivo y demás campos que pida cada formulario.
+Desde una oferta, usa **Tomar tiquet**; después, **Asignar técnico**. Hasta que tomes el tiquet, las
+demás acciones de coordinación permanecen ocultas: asignar, reasignar, recapturar, rechazar, cancelar,
+cambiar prioridad o marcar duplicado. En el detalle puedes abrir **Más** para otras acciones, como
+**Reasignar supervisor**, **Agregar auxiliar** o **Cambiar prioridad**. Completa el destinatario,
+motivo y demás campos que pida cada formulario.
 
 Para corregir datos usa **Recapturar** sobre el mismo tiquet. Para un registro repetido usa
 **Marcar duplicado** y busca el original por folio. No registres otro tiquet para corregir una

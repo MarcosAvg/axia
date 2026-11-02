@@ -12,6 +12,7 @@ import {
 import {
   addSecondSupervisor,
   loadWriteRefs,
+  takeTicket,
   type WriteRefs,
 } from './tickets-write-helpers.js'
 
@@ -22,11 +23,8 @@ let recaptureReason: string
 let reassignReason: string
 let pauseReason: string
 let claimReason: string
-let buildingB1: string
-let locationB1: string
-let categoryB: string
-let teamB: string
-
+let buildingB1: string, locationB1: string
+let categoryB: string, teamB: string
 function ticketBody() {
   return {
     buildingId: refs.buildingId,
@@ -43,7 +41,6 @@ function ticketBody() {
     clientRequestId: randomUUID(),
   }
 }
-
 async function action(
   cookie: string,
   ticketId: string,
@@ -150,6 +147,7 @@ afterAll(async () => {
 describe('recapture', () => {
   it('applies the corrected building, category and location', async () => {
     const ticketId = await createTicket()
+    await takeTicket(context, ticketId)
     const response = await action(context.cookies.supervisor, ticketId, {
       action: 'recapture',
       changes: {

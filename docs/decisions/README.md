@@ -15,6 +15,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0104](0104-borrado-catalogos-sin-uso.md) | Borrado de catálogos solo cuando no tienen uso |
 | [0105](0105-deteccion-revision-duplicados.md) | Detección ponderada y revisión de duplicados |
 | [0106](0106-calificacion-modal-y-bloqueo-validacion.md) | Calificación en modal y bloqueo tras validar |
+| [0107](0107-tomar-antes-de-actuar.md) | Tomar el tiquet antes de las acciones del supervisor |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

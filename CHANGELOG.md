@@ -11,6 +11,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   solo agregar y responde 409 si el tiquet ya tiene una, sin exigir `UPDATE` sobre
   `ticket_ratings`.
 
+### Cambiado
+
+- El supervisor debe tomar el tiquet antes de asignar, reasignar, recapturar, rechazar, cancelar,
+  cambiar prioridad o marcar duplicado. Se retira la toma implícita al asignar; el administrador
+  conserva la cola de tiquets sin ruteo.
+
 ### Añadido
 
 - La calificación se captura en un modal que aparece al validar el solicitante y puede registrarse

@@ -34,6 +34,7 @@ function ticket(overrides: Partial<TicketAccess> = {}): TicketAccess {
     id: 'ticket-1',
     teamId: 'team-a',
     buildingId: 'building-a',
+    status: 'with_supervisor',
     requesterUserId: 'requester-user',
     registeredBy: 'requester-user',
     isTechnician: false,
@@ -158,5 +159,61 @@ describe('action checks', () => {
       permissions: [{ id: 'ticket.assign_technician', scope: 'own' }],
     })
     expect(can(user, 'ticket.assign_technician', ticket())).toBe(false)
+  })
+})
+
+describe('supervisor must take before acting', () => {
+  const supervisor = actor({
+    roles: [{ id: 'supervisor-role', name: 'supervisor', label: 'Supervisor' }],
+    teamIds: ['team-a'],
+    permissions: [
+      { id: 'ticket.assign_technician', scope: 'team' },
+      { id: 'ticket.assign_supervisor', scope: 'team' },
+      { id: 'ticket.recapture', scope: 'team' },
+      { id: 'ticket.reject', scope: 'team' },
+      { id: 'ticket.cancel', scope: 'team' },
+      { id: 'ticket.prioritize', scope: 'team' },
+      { id: 'ticket.mark_duplicate', scope: 'team' },
+      { id: 'ticket.take_offer', scope: 'team' },
+      { id: 'ticket.view', scope: 'team' },
+    ],
+  })
+
+  it('blocks modifying actions on a registered ticket without take', () => {
+    const registered = ticket({ status: 'registered' })
+    for (const permission of [
+      'ticket.assign_technician',
+      'ticket.assign_supervisor',
+      'ticket.recapture',
+      'ticket.reject',
+      'ticket.cancel',
+      'ticket.prioritize',
+      'ticket.mark_duplicate',
+    ]) {
+      expect(can(supervisor, permission, registered)).toBe(false)
+    }
+  })
+
+  it('allows the offer and view before take', () => {
+    const registered = ticket({ status: 'registered' })
+    expect(can(supervisor, 'ticket.take_offer', registered)).toBe(true)
+    expect(can(supervisor, 'ticket.view', registered)).toBe(true)
+  })
+
+  it('allows modifying actions after the supervisor took the ticket', () => {
+    const taken = ticket({ status: 'with_supervisor', isSupervisor: true })
+    expect(can(supervisor, 'ticket.assign_technician', taken)).toBe(true)
+  })
+
+  it('lets an administrator act on a registered ticket', () => {
+    const admin = actor({
+      roles: [
+        { id: 'admin-role', name: 'administrator', label: 'Administrador' },
+      ],
+      permissions: [{ id: 'ticket.assign_technician', scope: 'all' }],
+    })
+    expect(
+      can(admin, 'ticket.assign_technician', ticket({ status: 'registered' })),
+    ).toBe(true)
   })
 })

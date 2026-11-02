@@ -23,6 +23,14 @@ export type ActionKey =
   | 'mark_duplicate'
   | 'reactivate'
 
+/** Verdadero para un supervisor que no es administrador. */
+export function isSupervisorIdentity(identity: Identity | null): boolean {
+  return Boolean(
+    identity?.roles.includes('supervisor') &&
+    !identity.roles.includes('administrator'),
+  )
+}
+
 export interface ActionContext {
   identity: Identity | null
   status: TicketStatus
@@ -30,6 +38,10 @@ export interface ActionContext {
   isRequester: boolean
   /** El lado del solicitante ya validó en el ciclo actual. */
   requesterValidated: boolean
+  /** El actor tiene rol de supervisor y no es administrador. */
+  isSupervisorRole: boolean
+  /** El actor ya tiene una asignación abierta como supervisor del tiquet. */
+  hasTaken: boolean
 }
 
 const ASSIGNABLE: TicketStatus[] = ['registered', 'with_supervisor', 'assigned']
@@ -142,6 +154,17 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
     DISCARDED.includes(c.status) && has(c, 'ticket.reactivate'),
 }
 
+const SUPERVISOR_TAKE_REQUIRED: ActionKey[] = [
+  'assign_technician',
+  'assign_supervisor',
+  'add_auxiliary',
+  'recapture',
+  'reject',
+  'cancel',
+  'change_priority',
+  'mark_duplicate',
+]
+
 /** Acciones que el usuario puede ejecutar sobre el tiquet en su estado actual. */
 export function allowedActions(context: ActionContext): ActionKey[] {
   const actions = (Object.keys(checks) as ActionKey[]).filter((key) =>
@@ -152,6 +175,16 @@ export function allowedActions(context: ActionContext): ActionKey[] {
       return []
     }
     return actions.filter((action) => action !== 'open_claim')
+  }
+  if (
+    context.status === 'registered' &&
+    context.isSupervisorRole &&
+    !context.hasTaken &&
+    !context.isRequester
+  ) {
+    return actions.filter(
+      (action) => !SUPERVISOR_TAKE_REQUIRED.includes(action),
+    )
   }
   return actions
 }

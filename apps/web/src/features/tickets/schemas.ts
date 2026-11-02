@@ -49,6 +49,7 @@ export const ticketDetailResponseSchema = z.object({
     duplicateOfFolio: nullableText,
     isRequester: z.boolean(),
     requesterValidated: z.boolean(),
+    hasTaken: z.boolean(),
     cycleTimes: z.object({
       total: z.number(),
       response: z.number(),

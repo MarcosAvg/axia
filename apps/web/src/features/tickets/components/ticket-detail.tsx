@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
 import { useDocumentTitle } from '@/lib/use-document-title'
-import { allowedActions } from '../domain/actions'
+import { allowedActions, isSupervisorIdentity } from '../domain/actions'
 import { canRateTicket } from '../domain/rating'
 import {
   useTicket,
@@ -87,6 +87,8 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
     status: ticket.data.status,
     isRequester: ticket.data.isRequester,
     requesterValidated: ticket.data.requesterValidated,
+    isSupervisorRole: isSupervisorIdentity(identity),
+    hasTaken: ticket.data.hasTaken,
   })
 
   return (

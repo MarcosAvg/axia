@@ -52,6 +52,7 @@ export type TicketDetail = {
   duplicateOfFolio: string | null
   isRequester: boolean
   requesterValidated: boolean
+  hasTaken: boolean
 }
 
 type DetailRow = {
@@ -99,7 +100,7 @@ type DetailRow = {
   requester_validated: boolean
 }
 
-function toDetail(row: DetailRow): TicketDetail {
+function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
   return {
     id: row.id,
     folio: row.folio,
@@ -145,6 +146,7 @@ function toDetail(row: DetailRow): TicketDetail {
     duplicateOfFolio: row.duplicate_of_folio,
     isRequester: row.is_requester,
     requesterValidated: row.requester_validated,
+    hasTaken,
   }
 }
 
@@ -212,5 +214,5 @@ export async function getTicketDetail(
 
   const result = await db.execute(detailQuery(ticketId, actor.id))
   const row = result.rows[0] as DetailRow | undefined
-  return row ? toDetail(row) : null
+  return row ? toDetail(row, access.isSupervisor) : null
 }

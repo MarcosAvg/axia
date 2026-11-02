@@ -34,9 +34,9 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 |---|---|---|
 | Registrar | — | Captura válida; crea `registered` y ofertas a supervisores candidatos |
 | `take` | `registered` | Oferta activa; pasa a `with_supervisor` y retira otras ofertas |
-| `assign_technician` | `registered`, `with_supervisor`, `assigned` | Técnico activo; pasa a `assigned`; reasignar exige motivo |
+| `assign_technician` | `registered` solo administrador; `with_supervisor`, `assigned` con toma previa | Técnico activo; pasa a `assigned`; reasignar exige motivo |
 | `assign_supervisor` | `with_supervisor`, `assigned`, `in_progress`, `paused` | Titular o permiso de alcance global; motivo y destino; a un equipo pasa a `registered`, a un supervisor a `with_supervisor` |
-| `add_auxiliary` | `assigned`, `in_progress`, `paused` | Técnico y motivo; agrega participación sin cambiar estado |
+| `add_auxiliary` | `assigned`, `in_progress`, `paused` | Técnico y motivo; el supervisor debe haber tomado; agrega participación sin cambiar estado |
 | `start` | `assigned` | Evidencia `before` del ciclo; pasa a `in_progress` |
 | `pause` | `in_progress` | Motivo raíz activo con al menos un subestado activo; pasa a `paused` |
 | `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
@@ -45,11 +45,11 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `validate` | `attended` | Registra el lado que corresponda, una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
 | `open_claim` | `attended`, `closed` dentro de ventana; no si el solicitante ya validó su lado | Motivo, descripción y evidencia `claim`; pasa a `under_claim` |
 | `resolve_claim` | `under_claim` | `upheld`: nuevo ciclo en `assigned`; `dismissed`: `closed`; `new_ticket`: restaura estado anterior y crea derivado |
-| `reject`, `cancel` | No final | Motivo del uso correspondiente; guarda estado previo y descarta |
-| `mark_duplicate` | No final | Original distinto y existente; pasa a `duplicate` y enlaza |
+| `reject`, `cancel` | No final | Motivo del uso correspondiente; el supervisor debe haber tomado; guarda estado previo y descarta |
+| `mark_duplicate` | No final | Original distinto y existente; el supervisor debe haber tomado; pasa a `duplicate` y enlaza |
 | `reactivate` | Descartado | Motivo; restaura estado previo al descarte |
-| `recapture` | `registered`, `with_supervisor`, `assigned` | Al menos un cambio; conserva versión; puede recalcular ruteo o devolver al supervisor |
-| `change_priority` | Cualquiera | Prioridad válida; registra cambio sin transición |
+| `recapture` | `registered` solo administrador; `with_supervisor`, `assigned` con toma previa | Al menos un cambio; conserva versión; puede recalcular ruteo o devolver al supervisor |
+| `change_priority` | Cualquiera | Prioridad válida; el supervisor debe haber tomado; registra cambio sin transición |
 | `comment` | Cualquiera | Texto de nota interna; sin transición |
 | `rate` | `closed`, o `attended` con validación del solicitante | Puntuación de 1 a 5; única, opcional, sin transición |
 
@@ -77,3 +77,7 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   ya no se modifica. Un supervisor puede abrir la reclamación a nombre del solicitante.
 - La interfaz calcula botones por permiso y estado; el servidor también valida ámbito,
   participación y ventana de reclamación. Un botón visible no garantiza que la acción se acepte.
+- Un supervisor debe tener una asignación abierta como titular antes de asignar, reasignar,
+  recapturar, rechazar, cancelar, cambiar prioridad o marcar duplicado. La toma implícita al asignar
+  se retiró. El administrador conserva la cola de tiquets sin ruteo y el solicitante sus acciones
+  propias.

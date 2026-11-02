@@ -45,6 +45,7 @@ const detail = {
   duplicateOfFolio: null,
   isRequester: false,
   requesterValidated: false,
+  hasTaken: false,
   cycleTimes: {
     total: 20,
     response: 1,

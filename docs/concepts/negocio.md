@@ -165,16 +165,20 @@ puede, precondiciones y efectos.
   administradores como "sin ruteo" y genera alerta.
 - **RN-04 Ámbito del supervisor.** Un equipo por supervisor por ahora y varios edificios. Modela la
   relación para que permitir varios equipos a futuro no exija rediseñar (restricción relajable).
-- **RN-05 Tomar.** Al tomar un candidato (o al asignar técnico, lo cual implica tomar), se retiran las
-  ofertas de los demás conservándolas en el historial, y pasa a `with_supervisor`.
+- **RN-05 Tomar.** Al tomar un candidato se retiran las ofertas de los demás conservándolas en el
+  historial, y pasa a `with_supervisor`. **Asignar técnico ya no implica tomar**: el supervisor debe
+  haber tomado el tiquet antes de asignar, reasignar, recapturar, rechazar, cancelar, cambiar la
+  prioridad o marcar un duplicado. Un administrador conserva la cola de tiquets sin ruteo y puede
+  asignar sin toma; el solicitante mantiene sus acciones propias.
 - **RN-06 Reasignación de supervisor.** Solo quien tiene el tiquet (o un administrador). Destino: otro
   equipo (se recalculan candidatos) o un supervisor concreto. Motivo obligatorio (catálogo) y nota
   opcional. Vuelve a `registered` para el nuevo destinatario. Su tiempo se clasifica como
   **reasignación**.
-- **RN-07 Asignación de técnico.** Solo el supervisor o un administrador. Si la persona no está
-  designada para la categoría del tiquet, su participación cuenta como **apoyo auxiliar** en esa
-  categoría. Pueden agregarse auxiliares adicionales (técnicos o supervisores).
-- **RN-08 Reasignación de técnico.** Siempre por el supervisor o un administrador, con motivo. El
+- **RN-07 Asignación de técnico.** Solo el supervisor que ya tomó el tiquet o un administrador. Si
+  la persona no está designada para la categoría del tiquet, su participación cuenta como **apoyo
+  auxiliar** en esa categoría. Pueden agregarse auxiliares adicionales (técnicos o supervisores).
+- **RN-08 Reasignación de técnico.** Siempre por el supervisor que ya tomó el tiquet o un
+  administrador, con motivo. El
   técnico puede devolver el tiquet al supervisor con motivo, pero no elige sustituto.
 - **RN-09 Tiempo de participación.** Cada participante (líder o auxiliar) tiene registro de inicio,
   fin y duración por tiquet y por categoría, para demostrar cuántas horas apoyó cada persona en cada

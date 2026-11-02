@@ -6,11 +6,40 @@ export type TicketAccess = {
   id: string
   teamId: string
   buildingId: string
+  status: string
   requesterUserId: string | null
   registeredBy: string | null
   isTechnician: boolean
   isParticipant: boolean
   isSupervisor: boolean
+}
+
+const SUPERVISOR_TAKE_REQUIRED = new Set([
+  'ticket.assign_technician',
+  'ticket.assign_supervisor',
+  'ticket.add_auxiliary',
+  'ticket.recapture',
+  'ticket.reject',
+  'ticket.cancel',
+  'ticket.prioritize',
+  'ticket.mark_duplicate',
+])
+
+function isAdministrator(actor: Actor): boolean {
+  return actor.roles.some((role) => role.name === 'administrator')
+}
+
+function blocksUntakenTicket(
+  actor: Actor,
+  permission: string,
+  ticket: TicketAccess,
+): boolean {
+  return (
+    ticket.status === 'registered' &&
+    !ticket.isSupervisor &&
+    !isAdministrator(actor) &&
+    SUPERVISOR_TAKE_REQUIRED.has(permission)
+  )
 }
 
 const REQUESTER_OWN = new Set([
@@ -107,13 +136,17 @@ export function can(
   if (!ticket) return false
 
   if (scope === 'all') return true
-  if (scope === 'team') return actor.teamIds.includes(ticket.teamId)
+  if (scope === 'team') {
+    if (!actor.teamIds.includes(ticket.teamId)) return false
+    return !blocksUntakenTicket(actor, permission, ticket)
+  }
   if (scope === 'buildings') {
-    return actor.supervisorScopes.some(
+    const inScope = actor.supervisorScopes.some(
       (scopeItem) =>
         scopeItem.teamId === ticket.teamId &&
         scopeItem.buildingIds.includes(ticket.buildingId),
     )
+    return inScope && !blocksUntakenTicket(actor, permission, ticket)
   }
 
   return ownAllows(actor, permission, ticket)

@@ -41,6 +41,7 @@ const ticket = {
   duplicateOfFolio: null,
   isRequester: false,
   requesterValidated: false,
+  hasTaken: false,
 } satisfies TicketDetail
 
 describe('initialRecaptureValues', () => {
