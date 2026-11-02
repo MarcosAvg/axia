@@ -1,10 +1,7 @@
 import type { Actor } from '../auth/authorization.js'
 import { withActionTime } from './action-time.js'
 import type { Database } from '../db/client.js'
-import {
-  assertValidatedRequesterCanAct,
-  type ActionResult,
-} from './action-shared.js'
+import type { ActionResult } from './action-shared.js'
 import { assignTechnician } from './assign.js'
 import { addAuxiliary } from './auxiliary.js'
 import { changePriority, commentTicket } from './annotation.js'
@@ -227,7 +224,6 @@ async function runTicketActionNow(
   ticketId: string,
   input: TicketActionInput,
 ): Promise<ActionResult> {
-  await assertValidatedRequesterCanAct(db, actor, ticketId, input.action)
   if (input.action === 'take') {
     return takeTicket(db, actor, ticketId, input.clientRequestId)
   }

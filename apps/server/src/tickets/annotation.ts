@@ -4,6 +4,7 @@ import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
+  assertValidatedRequesterCanAct,
   conflict,
   lockTicket,
   notFound,
@@ -32,7 +33,7 @@ async function commentInTransaction(
     'comment',
   )
   if (before) return before
-  await lockTicket(tx, input.ticketId)
+  const ticket = await lockTicket(tx, input.ticketId)
   const after = validateHandled(
     await findHandledEvent(tx, input.clientRequestId),
     input.ticketId,
@@ -40,6 +41,7 @@ async function commentInTransaction(
     'comment',
   )
   if (after) return after
+  await assertValidatedRequesterCanAct(tx, actor, ticket, 'comment')
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'comment',
@@ -79,7 +81,7 @@ async function priorityInTransaction(
     'change_priority',
   )
   if (before) return before
-  await lockTicket(tx, input.ticketId)
+  const ticket = await lockTicket(tx, input.ticketId)
   const after = validateHandled(
     await findHandledEvent(tx, input.clientRequestId),
     input.ticketId,
@@ -87,6 +89,7 @@ async function priorityInTransaction(
     'change_priority',
   )
   if (after) return after
+  await assertValidatedRequesterCanAct(tx, actor, ticket, 'change_priority')
   const priority = await tx.execute(sql`
     select id from public.priorities
     where id = ${input.priorityId} and active

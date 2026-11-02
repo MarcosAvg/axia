@@ -4,6 +4,7 @@ import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
+  assertValidatedRequesterCanAct,
   conflict,
   isFinalStatus,
   lockTicket,
@@ -167,6 +168,7 @@ async function markDuplicateInTransaction(
     'mark_duplicate',
   )
   if (after) return after
+  await assertValidatedRequesterCanAct(tx, actor, ticket, 'mark_duplicate')
   if (isFinalStatus(ticket.status)) {
     throw conflict('El tiquet ya está cerrado o descartado')
   }

@@ -21,8 +21,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 ## Evidencia de esta tarea
 
-- Pruebas dirigidas: `tickets-lifecycle-http`, `tickets-rating-lock-http` y `tickets-read` con la
-  aplicación conectada como `axia_app`: 19/19 verdes.
+- Pruebas dirigidas: `tickets-lifecycle-http` y `tickets-rating-lock-http` con la aplicación
+  conectada como `axia_app`; `tickets-read` con los fixtures del rol dueño. Todas verdes.
 - `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 60 pruebas de servidor y 339 de
   web.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el

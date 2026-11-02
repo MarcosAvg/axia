@@ -137,6 +137,30 @@ describe('validated requester edits', () => {
     })
     expect(commented.statusCode).toBe(409)
   })
+
+  it('replays a comment applied before validating instead of rejecting it', async () => {
+    const ticketId = await attendedTicket()
+    const clientRequestId = randomUUID()
+    const comment = {
+      action: 'comment',
+      text: 'Comentario previo a la validación',
+      clientRequestId,
+    }
+    const applied = await action(context.cookies.requester, ticketId, comment)
+    expect(applied.statusCode).toBe(200)
+
+    await action(context.cookies.requester, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+
+    const replayed = await action(context.cookies.requester, ticketId, comment)
+    expect(replayed.statusCode).toBe(200)
+    expect(replayed.json()).toMatchObject({
+      action: 'comment',
+      replayed: true,
+    })
+  })
 })
 
 describe('validated requester claims and detail', () => {

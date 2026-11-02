@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import {
+  assertValidatedRequesterCanAct,
   conflict,
   isFinalStatus,
   lockTicket,
@@ -54,6 +55,7 @@ async function discardInTransaction(
     input.action,
   )
   if (after) return after
+  await assertValidatedRequesterCanAct(tx, actor, ticket, input.action)
   if (isFinalStatus(ticket.status)) {
     throw conflict('El tiquet ya está cerrado o descartado')
   }

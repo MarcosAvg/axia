@@ -35,22 +35,22 @@ const VALIDATED_REQUESTER_EXEMPT = new Set(['validate', 'open_claim', 'rate'])
  * la calificación.
  */
 export async function assertValidatedRequesterCanAct(
-  db: DbExecutor,
+  tx: DbExecutor,
   actor: Actor,
-  ticketId: string,
+  ticket: Pick<LockedTicket, 'id' | 'status' | 'cycle'>,
   action: string,
 ): Promise<void> {
   if (VALIDATED_REQUESTER_EXEMPT.has(action)) return
-  const result = await db.execute(sql`
+  if (ticket.status !== 'attended' && ticket.status !== 'under_claim') return
+  const result = await tx.execute(sql`
     select exists (
       select 1
       from public.tickets t
       join public.requesters r on r.id = t.requester_id
       join public.ticket_validations v
-        on v.ticket_id = t.id and v.cycle = t.cycle
+        on v.ticket_id = t.id and v.cycle = ${ticket.cycle}
        and v.validator_role = 'requester'
-      where t.id = ${ticketId}
-        and t.status in ('attended', 'under_claim')
+      where t.id = ${ticket.id}
         and r.user_id = ${actor.id}
     ) as blocked
   `)

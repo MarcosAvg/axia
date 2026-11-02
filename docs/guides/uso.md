@@ -57,7 +57,10 @@ debe quedar entre las acciones vecinas y el ajuste conserva auditoría.
 ## Validar o reclamar
 
 Cuando esté atendido, abre el detalle y usa **Validar** si te corresponde según la política de
-la instancia. La calificación de satisfacción es opcional.
+la instancia. La calificación de satisfacción es opcional: se abre en un modal al validar y, si la
+cierras sin enviarla, puedes usar **Calificar** después. Una vez validado, el solicitante no puede
+editar el tiquet mientras siga atendido o en reclamación; la reclamación sigue disponible. La
+calificación ya enviada no se modifica.
 
 Si hay una inconformidad, usa **Abrir reclamación**, indica motivo y descripción, y adjunta la
 evidencia. Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta los
