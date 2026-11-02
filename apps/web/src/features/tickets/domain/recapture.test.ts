@@ -39,6 +39,8 @@ const ticket = {
   requesterContact: null,
   duplicateOfId: null,
   duplicateOfFolio: null,
+  isRequester: false,
+  requesterValidated: false,
 } satisfies TicketDetail
 
 describe('initialRecaptureValues', () => {

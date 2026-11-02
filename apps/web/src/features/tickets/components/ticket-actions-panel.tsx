@@ -124,6 +124,7 @@ export interface TicketActionsPanelProps {
   actions: ActionKey[]
   identity: Identity | null
   participants: TicketParticipant[]
+  onValidated?: () => void
 }
 
 /** Acciones disponibles según estado y permiso, con la primaria destacada. */
@@ -132,8 +133,15 @@ export function TicketActionsPanel({
   actions,
   identity,
   participants,
+  onValidated,
 }: TicketActionsPanelProps) {
-  const panel = useActionPanel(ticket, actions, identity, participants)
+  const panel = useActionPanel({
+    ticket,
+    actions,
+    identity,
+    participants,
+    onValidated,
+  })
   if (panel.visible.length === 0) return null
 
   return (

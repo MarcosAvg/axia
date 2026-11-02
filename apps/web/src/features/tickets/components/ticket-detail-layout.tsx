@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn } from 'cn'
 import { HintLabel } from '@/components/shared/hint'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,6 +22,7 @@ import { PendingEvidence } from './pending-evidence'
 import { TicketActionBar } from './ticket-action-bar'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketEvidenceList } from './ticket-evidence-list'
+import { TicketRatingDialog } from './ticket-rating-dialog'
 import { TicketRatingPanel } from './ticket-rating-panel'
 import { TicketTimeline } from './ticket-timeline'
 import { ParticipantList, TicketSummary } from './ticket-summary'
@@ -84,22 +86,16 @@ function EvidenceSection({
   )
 }
 
-export function canRateTicket(
-  identity: Identity | null,
-  status: TicketStatus,
-): boolean {
-  if (status !== 'closed') return false
-  return can(identity, 'ticket.rate') || can(identity, 'ticket.rate_on_behalf')
-}
-
 function TicketExtras({
   ticketId,
   participants,
   canRate,
+  onOpenRating,
 }: {
   ticketId: string
   participants: TicketParticipant[]
   canRate: boolean
+  onOpenRating: () => void
 }) {
   const { detail } = ticketMessages
   return (
@@ -115,7 +111,7 @@ function TicketExtras({
           title={ticketMessages.rating.title}
           hint={detailSectionHints.rating}
         >
-          <TicketRatingPanel ticketId={ticketId} />
+          <TicketRatingPanel ticketId={ticketId} onOpen={onOpenRating} />
         </Section>
       ) : null}
     </>
@@ -142,6 +138,7 @@ function ActionsSection({
   shared,
   isDesktop,
   hasActions,
+  onValidated,
 }: {
   shared: {
     ticket: TicketDetailWithTimes
@@ -151,6 +148,7 @@ function ActionsSection({
   }
   isDesktop: boolean
   hasActions: boolean
+  onValidated: () => void
 }) {
   if (!isDesktop || !hasActions) return null
   return (
@@ -158,7 +156,7 @@ function ActionsSection({
       title={ticketMessages.detail.actions}
       hint={detailSectionHints.actions}
     >
-      <TicketActionsPanel {...shared} />
+      <TicketActionsPanel {...shared} onValidated={onValidated} />
     </Section>
   )
 }
@@ -192,7 +190,12 @@ interface TicketLayoutProps {
   canAttachEvidence: boolean
 }
 
-export function TicketLayout({
+type TicketLayoutContentProps = TicketLayoutProps & {
+  onValidated: () => void
+  onOpenRating: () => void
+}
+
+function TicketLayoutContent({
   ticketId,
   ticket,
   participants,
@@ -201,7 +204,9 @@ export function TicketLayout({
   timeline,
   canRate,
   canAttachEvidence,
-}: TicketLayoutProps) {
+  onValidated,
+  onOpenRating,
+}: TicketLayoutContentProps) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const hasActions = actions.length > 0 || can(identity, 'ticket.take_offer')
   const shared = { ticket, actions, identity, participants }
@@ -218,6 +223,7 @@ export function TicketLayout({
             shared={shared}
             isDesktop={isDesktop}
             hasActions={hasActions}
+            onValidated={onValidated}
           />
           <Section
             title={ticketMessages.detail.capture}
@@ -239,10 +245,40 @@ export function TicketLayout({
             ticketId={ticketId}
             participants={participants}
             canRate={canRate}
+            onOpenRating={onOpenRating}
           />
         </div>
       </div>
-      {!isDesktop && hasActions ? <TicketActionBar {...shared} /> : null}
+      {!isDesktop && hasActions ? (
+        <TicketActionBar {...shared} onValidated={onValidated} />
+      ) : null}
     </div>
+  )
+}
+
+export function TicketLayout(props: TicketLayoutProps) {
+  const [ratingOpen, setRatingOpen] = useState(false)
+  const canOpenRating =
+    can(props.identity, 'ticket.rate') ||
+    can(props.identity, 'ticket.rate_on_behalf')
+  const openRatingAfterValidation = () => {
+    if (props.ticket.isRequester && canOpenRating) setRatingOpen(true)
+  }
+
+  return (
+    <>
+      <TicketLayoutContent
+        {...props}
+        onValidated={openRatingAfterValidation}
+        onOpenRating={() => setRatingOpen(true)}
+      />
+      {props.canRate || ratingOpen ? (
+        <TicketRatingDialog
+          ticketId={props.ticketId}
+          open={ratingOpen}
+          onOpenChange={setRatingOpen}
+        />
+      ) : null}
+    </>
   )
 }

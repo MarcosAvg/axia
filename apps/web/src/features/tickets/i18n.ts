@@ -287,6 +287,9 @@ export const ticketMessages = {
     saved: 'Gracias por tu calificación.',
     current: 'Calificación registrada',
     score: 'Puntaje',
+    open: 'Calificar',
+    later: 'Ahora no',
+    close: 'Cerrar',
   },
   myWork: {
     title: 'Mi trabajo',

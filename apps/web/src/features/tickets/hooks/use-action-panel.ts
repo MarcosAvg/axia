@@ -27,13 +27,22 @@ const FORM_ACTIONS: ActionKey[] = [
   'reactivate',
 ]
 
+type ActionPanelInput = {
+  ticket: TicketDetail
+  actions: ActionKey[]
+  identity: Identity | null
+  participants: TicketParticipant[]
+  onValidated?: () => void
+}
+
 /** Estado compartido por el panel de acciones y su barra móvil. */
-export function useActionPanel(
-  ticket: TicketDetail,
-  actions: ActionKey[],
-  identity: Identity | null,
-  participants: TicketParticipant[],
-) {
+export function useActionPanel({
+  ticket,
+  actions,
+  identity,
+  participants,
+  onValidated,
+}: ActionPanelInput) {
   const canProxy = can(identity, 'act_on_behalf')
   const [subjectTechnicianId, setSubject] = useState('')
   const [formAction, setFormAction] = useState<ActionKey | null>(null)
@@ -46,7 +55,8 @@ export function useActionPanel(
   )
   const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
   const oneClick: Partial<Record<ActionKey, () => void>> = {
-    validate: () => mutations.validate.mutate({}),
+    validate: () =>
+      mutations.validate.mutate({}, { onSuccess: () => onValidated?.() }),
   }
   const pending: Partial<Record<ActionKey, boolean>> = {
     validate: mutations.validate.isPending,

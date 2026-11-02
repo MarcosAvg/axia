@@ -119,8 +119,15 @@ export function TicketActionBar({
   actions,
   identity,
   participants,
+  onValidated,
 }: TicketActionsPanelProps) {
-  const panel = useActionPanel(ticket, actions, identity, participants)
+  const panel = useActionPanel({
+    ticket,
+    actions,
+    identity,
+    participants,
+    onValidated,
+  })
   if (panel.visible.length === 0) return null
 
   const primary = pickPrimaryAction(panel.visible)

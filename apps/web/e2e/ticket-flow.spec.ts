@@ -44,12 +44,7 @@ async function expectStatus(page: Page, label: string) {
   ).toBeVisible()
 }
 
-test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', async ({
-  page,
-}) => {
-  const description = `Flujo técnico E2E ${crypto.randomUUID()}`
-
-  // El administrador registra y asigna el tiquet al técnico.
+async function createAndAssignTicket(page: Page, description: string) {
   await signIn(page, 'demo.admin')
   await page.goto('/tickets/nuevo')
   await page
@@ -78,6 +73,34 @@ test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', asyn
     page.getByText('Asignado', { exact: true }).first(),
   ).toBeVisible()
   await signOut(page)
+}
+
+async function validateAndRate(page: Page, ticketUrl: string) {
+  await page.goto(ticketUrl)
+  await page.getByRole('button', { name: 'Validar' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.getByRole('button', { name: '5' }).click()
+  await page.getByLabel('Comentario (opcional)').fill('Servicio excelente')
+  await page.getByRole('button', { name: 'Enviar calificación' }).click()
+  await expect(page.getByText('Calificación registrada').first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Validar' })).toHaveCount(0)
+  await expect(
+    page.getByRole('button', { name: 'Abrir reclamación' }),
+  ).toBeVisible()
+
+  // La calificación no se puede modificar y las acciones siguen cerradas.
+  await page.reload()
+  await expect(page.getByText('Calificación registrada').first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Validar' })).toHaveCount(0)
+}
+
+test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', async ({
+  page,
+}) => {
+  const description = `Flujo técnico E2E ${crypto.randomUUID()}`
+
+  // El administrador registra y asigna el tiquet al técnico.
+  await createAndAssignTicket(page, description)
 
   // El técnico ve el tiquet en su bandeja, sube evidencia e inicia.
   await signIn(page, 'demo.technician')
@@ -111,4 +134,10 @@ test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', asyn
   await expect(
     page.getByText('Atendido', { exact: true }).first(),
   ).toBeVisible()
+
+  // El solicitante valida; la calificación aparece en un modal único.
+  const ticketUrl = page.url()
+  await signOut(page)
+  await signIn(page, 'demo.requester')
+  await validateAndRate(page, ticketUrl)
 })

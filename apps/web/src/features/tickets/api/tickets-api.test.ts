@@ -43,6 +43,8 @@ const detail = {
   requesterContact: null,
   duplicateOfId: null,
   duplicateOfFolio: null,
+  isRequester: false,
+  requesterValidated: false,
   cycleTimes: {
     total: 20,
     response: 1,

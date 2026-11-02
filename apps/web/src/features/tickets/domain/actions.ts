@@ -26,6 +26,10 @@ export type ActionKey =
 export interface ActionContext {
   identity: Identity | null
   status: TicketStatus
+  /** El actor es el solicitante del tiquet. */
+  isRequester: boolean
+  /** El lado del solicitante ya validó en el ciclo actual. */
+  requesterValidated: boolean
 }
 
 const ASSIGNABLE: TicketStatus[] = ['registered', 'with_supervisor', 'assigned']
@@ -140,9 +144,17 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
 
 /** Acciones que el usuario puede ejecutar sobre el tiquet en su estado actual. */
 export function allowedActions(context: ActionContext): ActionKey[] {
-  return (Object.keys(checks) as ActionKey[]).filter((key) =>
+  const actions = (Object.keys(checks) as ActionKey[]).filter((key) =>
     checks[key](context),
   )
+  if (
+    context.isRequester &&
+    context.requesterValidated &&
+    context.status !== 'closed'
+  ) {
+    return actions.filter((action) => action === 'open_claim')
+  }
+  return actions
 }
 
 /** Orden de preferencia del "siguiente paso" que se destaca en el detalle. */

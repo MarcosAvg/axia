@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
 import { useDocumentTitle } from '@/lib/use-document-title'
 import { allowedActions } from '../domain/actions'
+import { canRateTicket } from '../domain/rating'
 import {
   useTicket,
   useTicketParticipants,
@@ -15,7 +16,7 @@ import {
 import { ticketMessages } from '../i18n'
 import { DuplicateAlertsPanel } from './duplicate-alerts-panel'
 import { TicketHeader } from './ticket-header'
-import { canRateTicket, TicketLayout } from './ticket-detail-layout'
+import { TicketLayout } from './ticket-detail-layout'
 
 function TicketLoading() {
   return (
@@ -81,7 +82,12 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   }
   if (!ticket.data) return <TicketNotFound />
 
-  const actions = allowedActions({ identity, status: ticket.data.status })
+  const actions = allowedActions({
+    identity,
+    status: ticket.data.status,
+    isRequester: ticket.data.isRequester,
+    requesterValidated: ticket.data.requesterValidated,
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,7 +104,11 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
         identity={identity}
         actions={actions}
         timeline={timeline.data ?? []}
-        canRate={canRateTicket(identity, ticket.data.status)}
+        canRate={canRateTicket(
+          identity,
+          ticket.data.status,
+          ticket.data.requesterValidated,
+        )}
         canAttachEvidence={can(identity, 'evidence.attach')}
       />
     </div>

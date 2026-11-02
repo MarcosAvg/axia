@@ -25,15 +25,30 @@ function identityWith(permissions: string[]): Identity {
   }
 }
 
-function context(permissions: string[], status: TicketStatus): ActionContext {
-  return { identity: identityWith(permissions), status }
+function context(
+  permissions: string[],
+  status: TicketStatus,
+  overrides: Partial<ActionContext> = {},
+): ActionContext {
+  return {
+    identity: identityWith(permissions),
+    status,
+    isRequester: false,
+    requesterValidated: false,
+    ...overrides,
+  }
 }
 
 describe('allowedActions', () => {
   it('sin identidad no hay acciones', () => {
-    expect(allowedActions({ identity: null, status: 'in_progress' })).toEqual(
-      [],
-    )
+    expect(
+      allowedActions({
+        identity: null,
+        status: 'in_progress',
+        isRequester: false,
+        requesterValidated: false,
+      }),
+    ).toEqual([])
   })
 
   it('el supervisor asigna técnico cuando el tiquet no está tomado', () => {
@@ -87,6 +102,48 @@ describe('allowedActions', () => {
     expect(allowedActions(context(['act_on_behalf'], 'in_progress'))).toContain(
       'attend',
     )
+  })
+})
+
+describe('allowedActions after requester validation', () => {
+  it('deja solo la reclamación al solicitante que ya validó', () => {
+    const actions = allowedActions(
+      context(
+        [
+          'ticket.validate',
+          'ticket.open_claim',
+          'ticket.cancel',
+          'ticket.mark_duplicate',
+          'ticket.view',
+        ],
+        'attended',
+        { isRequester: true, requesterValidated: true },
+      ),
+    )
+    expect(actions).toEqual(['open_claim'])
+  })
+
+  it('conserva las acciones del supervisor que validó a nombre del solicitante', () => {
+    const actions = allowedActions(
+      context(
+        ['ticket.validate', 'ticket.validate_on_behalf', 'ticket.open_claim'],
+        'attended',
+        { isRequester: false, requesterValidated: true },
+      ),
+    )
+    expect(actions).toContain('validate')
+    expect(actions).toContain('open_claim')
+  })
+
+  it('no oculta acciones al solicitante antes de validar', () => {
+    const actions = allowedActions(
+      context(['ticket.validate', 'ticket.cancel'], 'attended', {
+        isRequester: true,
+        requesterValidated: false,
+      }),
+    )
+    expect(actions).toContain('validate')
+    expect(actions).toContain('cancel')
   })
 })
 
