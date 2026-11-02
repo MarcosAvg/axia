@@ -28,10 +28,13 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el
   modal, ocultar acciones y persistir el resumen tras recargar.
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 60 de
-  servidor, 339 de web, 294 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
+  servidor, 339 de web, 295 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
   previo de chunks >500 kB.
 - Documentación: 38 archivos, 0 enlaces rotos. `pnpm test:affected`: 247 pruebas de servidor, 81
   de web y el flujo E2E dirigido, todas verdes.
+- Revisión independiente del diff: dos hallazgos importantes corregidos; la guarda del solicitante
+  validado ahora corre dentro de la transacción, después del replay y del bloqueo, con prueba de
+  reintento idempotente.
 
 ## Tarea cerrada: detección y revisión de duplicados
 
