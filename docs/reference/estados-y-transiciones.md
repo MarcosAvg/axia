@@ -42,7 +42,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
 | `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
-| `validate` | `attended` | Registra el lado que corresponda; pasa a `closed` al cumplir la política de instancia |
+| `validate` | `attended` | Registra el lado que corresponda, una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
 | `open_claim` | `attended`, `closed` dentro de ventana | Motivo, descripción y evidencia `claim`; pasa a `under_claim` |
 | `resolve_claim` | `under_claim` | `upheld`: nuevo ciclo en `assigned`; `dismissed`: `closed`; `new_ticket`: restaura estado anterior y crea derivado |
 | `reject`, `cancel` | No final | Motivo del uso correspondiente; guarda estado previo y descarta |
@@ -51,7 +51,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `recapture` | `registered`, `with_supervisor`, `assigned` | Al menos un cambio; conserva versión; puede recalcular ruteo o devolver al supervisor |
 | `change_priority` | Cualquiera | Prioridad válida; registra cambio sin transición |
 | `comment` | Cualquiera | Texto de nota interna; sin transición |
-| `rate` | `closed` | Puntuación de 1 a 5; opcional, sin transición |
+| `rate` | `closed`, o `attended` con validación del solicitante | Puntuación de 1 a 5; única, opcional, sin transición |
 
 **Registrar avance** es una acción de pantalla que agrega evidencia `during`; no es un comando
 adicional de transición. Ajustar la hora de un evento tiene su propio endpoint en [API](api.md).
@@ -71,5 +71,8 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   a `registered`. Esta diferencia no modifica la especificación aprobada.
 - La validación automática tras N días es configurable, pero no hay un proceso que la ejecute.
   El cierre actual requiere las acciones de validación o resolución correspondientes.
+- El solicitante que ya validó no puede editar mientras el tiquet siga `attended` o `under_claim`:
+  el servidor rechaza validar de nuevo su lado y conserva únicamente la reclamación. La calificación
+  puede registrarse en el tramo atendido y ya no se modifica.
 - La interfaz calcula botones por permiso y estado; el servidor también valida ámbito,
   participación y ventana de reclamación. Un botón visible no garantiza que la acción se acepte.

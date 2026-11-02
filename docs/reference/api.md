@@ -64,6 +64,11 @@ Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-t
 Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
 evidencia del ciclo. La API no permite escribir directamente el estado.
 
+El detalle del tiquet incluye `isRequester` y `requesterValidated` para que la interfaz ajuste las
+acciones y la calificación. `rate` acepta un tiquet `closed` o uno `attended` con validación del
+solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos veces el mismo rol
+en el ciclo también responde 409.
+
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
 hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de
 técnico ejecutadas por proxy (`start`, `pause`, `advance_pause`, `resume`, `attend`, `recapture`).

@@ -5,6 +5,18 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- La calificación de satisfacción vuelve a guardarse con el rol de aplicación: la inserción es de
+  solo agregar y responde 409 si el tiquet ya tiene una, sin exigir `UPDATE` sobre
+  `ticket_ratings`.
+
+### Añadido
+
+- La calificación se captura en un modal que aparece al validar el solicitante y puede registrarse
+  antes del cierre. Las acciones del solicitante que ya validó se cierran mientras el tiquet siga
+  atendido, salvo abrir una reclamación; validar de nuevo el mismo rol responde 409.
+
 ## [0.6.0] - 2026-10-31
 
 ### Eliminado

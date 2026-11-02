@@ -3,8 +3,35 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-10-31
+**Última actualización:** 2026-11-02
 
+
+## Tarea en curso: calificación en modal y bloqueo tras validar
+
+- El 500 al calificar venía de `ON CONFLICT DO UPDATE`: `axia_app` no tiene `UPDATE` sobre
+  `ticket_ratings` porque la tabla es de solo agregar. Ahora la inserción usa `DO NOTHING` y una
+  segunda calificación responde 409.
+- La calificación se abre en un modal al confirmar la validación del solicitante; también queda un
+  botón “Calificar” si se cierra sin enviar. Se permite calificar en `attended` cuando el lado del
+  solicitante ya validó, además de en `closed`.
+- Validar dos veces el mismo rol y ciclo responde 409. El solicitante que ya validó queda sin
+  acciones mientras el tiquet siga `attended`, salvo abrir una reclamación; el servidor lo aplica.
+- El detalle expone `isRequester` y `requesterValidated`. Decisión en el
+  [ADR 0106](../decisions/0106-calificacion-modal-y-bloqueo-validacion.md).
+
+## Evidencia de esta tarea
+
+- Pruebas dirigidas: `tickets-lifecycle-http`, `tickets-rating-lock-http` y `tickets-read` con la
+  aplicación conectada como `axia_app`: 19/19 verdes.
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 60 pruebas de servidor y 339 de
+  web.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el
+  modal, ocultar acciones y persistir el resumen tras recargar.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 60 de
+  servidor, 339 de web, 294 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
+  previo de chunks >500 kB.
+- Documentación: 38 archivos, 0 enlaces rotos. `pnpm test:affected`: 247 pruebas de servidor, 81
+  de web y el flujo E2E dirigido, todas verdes.
 
 ## Tarea cerrada: detección y revisión de duplicados
 
