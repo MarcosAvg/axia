@@ -62,8 +62,10 @@ cierras sin enviarla, puedes usar **Calificar** después. Una vez validado, el s
 editar el tiquet mientras siga atendido o en reclamación; la reclamación sigue disponible. La
 calificación ya enviada no se modifica.
 
-Si hay una inconformidad, usa **Abrir reclamación**, indica motivo y descripción, y adjunta la
-evidencia. Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta los
+Si hay una inconformidad y todavía no validaste, usa **Abrir reclamación**, indica motivo y
+descripción, y adjunta la evidencia. Una vez validado, el solicitante ya no puede abrir una
+reclamación, ni siquiera después del cierre; un supervisor sí puede hacerlo a nombre del solicitante.
+Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta los
 [estados y sus condiciones](../reference/estados-y-transiciones.md) para saber qué efecto tiene.
 
 ## Trabajar sin conexión

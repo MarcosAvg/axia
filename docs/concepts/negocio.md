@@ -205,14 +205,15 @@ puede, precondiciones y efectos.
   satisfacción (1 a 5) y comentario; se ofrece en un modal al confirmar su validación y también puede
   registrarse antes del cierre una vez validado su lado. La calificación es única, opcional y no se
   modifica después del primer envío. Mientras el tiquet siga `attended` o en reclamación, el
-  solicitante que ya validó no puede editar el tiquet: solo conserva abrir una reclamación. Cuando un solicitante no tiene
-  cuenta, o quien valida actúa con `ticket.validate_on_behalf`, la validación llena primero el lado
-  del solicitante y después el del supervisor. La satisfacción a nombre del solicitante exige
-  `ticket.rate_on_behalf`.
+  solicitante que ya validó no puede editar el tiquet ni abrir una reclamación; tampoco puede
+  reclamar después del cierre. Cuando un solicitante no tiene cuenta, o quien valida actúa con
+  `ticket.validate_on_behalf`, la validación llena primero el lado del solicitante y después el del
+  supervisor. La satisfacción a nombre del solicitante exige `ticket.rate_on_behalf`.
 - **RN-16 Reclamación.** La pueden abrir el solicitante, un supervisor o un administrador, **nunca el
   técnico**, mientras el tiquet esté `attended` o dentro de la ventana configurable posterior a
   `closed` (**en la semilla, 1 día**). Requiere motivo (catálogo), descripción y evidencia `claim`. Pasa
-  a `under_claim` y notifica al supervisor.
+  a `under_claim` y notifica al supervisor. Excepción: el solicitante que ya validó su lado en el
+  ciclo no puede abrir la reclamación; un supervisor sí puede hacerlo a nombre del solicitante.
 - **RN-17 Evaluación de la reclamación.** La resuelve un supervisor o un administrador, con notas
   internas y un resultado del catálogo, y al hacerlo deja el tiquet **bien capturado** (RN-11):
   - **Procedente:** se reabre (RN-18).

@@ -15,7 +15,9 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   botón “Calificar” si se cierra sin enviar. Se permite calificar en `attended` cuando el lado del
   solicitante ya validó, además de en `closed`.
 - Validar dos veces el mismo rol y ciclo responde 409. El solicitante que ya validó queda sin
-  acciones mientras el tiquet siga `attended`, salvo abrir una reclamación; el servidor lo aplica.
+  acciones mientras el tiquet siga `attended` o en reclamación y tampoco puede abrir una reclamación,
+  ni siquiera tras el cierre. Un supervisor sí puede abrirla a nombre del solicitante; el servidor
+  aplica ambas reglas.
 - El detalle expone `isRequester` y `requesterValidated`. Decisión en el
   [ADR 0106](../decisions/0106-calificacion-modal-y-bloqueo-validacion.md).
 
@@ -23,12 +25,12 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 - Pruebas dirigidas: `tickets-lifecycle-http` y `tickets-rating-lock-http` con la aplicación
   conectada como `axia_app`; `tickets-read` con los fixtures del rol dueño. Todas verdes.
-- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 60 pruebas de servidor y 339 de
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 60 pruebas de servidor y 340 de
   web.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el
   modal, ocultar acciones y persistir el resumen tras recargar.
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 60 de
-  servidor, 339 de web, 295 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
+  servidor, 340 de web, 297 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
   previo de chunks >500 kB.
 - Documentación: 38 archivos, 0 enlaces rotos. `pnpm test:affected`: 247 pruebas de servidor, 81
   de web y el flujo E2E dirigido, todas verdes.

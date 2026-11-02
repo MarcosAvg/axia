@@ -147,12 +147,11 @@ export function allowedActions(context: ActionContext): ActionKey[] {
   const actions = (Object.keys(checks) as ActionKey[]).filter((key) =>
     checks[key](context),
   )
-  if (
-    context.isRequester &&
-    context.requesterValidated &&
-    context.status !== 'closed'
-  ) {
-    return actions.filter((action) => action === 'open_claim')
+  if (context.isRequester && context.requesterValidated) {
+    if (context.status === 'attended' || context.status === 'under_claim') {
+      return []
+    }
+    return actions.filter((action) => action !== 'open_claim')
   }
   return actions
 }

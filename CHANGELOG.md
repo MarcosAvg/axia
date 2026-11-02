@@ -15,7 +15,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 - La calificación se captura en un modal que aparece al validar el solicitante y puede registrarse
   antes del cierre. Las acciones del solicitante que ya validó se cierran mientras el tiquet siga
-  atendido, salvo abrir una reclamación; validar de nuevo el mismo rol responde 409.
+  atendido y tampoco puede abrir una reclamación, ni tras el cierre; validar de nuevo el mismo rol
+  responde 409.
 
 ## [0.6.0] - 2026-10-31
 

@@ -67,7 +67,8 @@ evidencia del ciclo. La API no permite escribir directamente el estado.
 El detalle del tiquet incluye `isRequester` y `requesterValidated` para que la interfaz ajuste las
 acciones y la calificación. `rate` acepta un tiquet `closed` o uno `attended` con validación del
 solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos veces el mismo rol
-en el ciclo también responde 409.
+en el ciclo también responde 409. `open_claim` responde 409 cuando lo intenta el solicitante que ya
+validó su lado, incluso después del cierre.
 
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
 hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de

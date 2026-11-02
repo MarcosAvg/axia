@@ -86,12 +86,15 @@ async function validateAndRate(page: Page, ticketUrl: string) {
   await expect(page.getByRole('button', { name: 'Validar' })).toHaveCount(0)
   await expect(
     page.getByRole('button', { name: 'Abrir reclamación' }),
-  ).toBeVisible()
+  ).toHaveCount(0)
 
   // La calificación no se puede modificar y las acciones siguen cerradas.
   await page.reload()
   await expect(page.getByText('Calificación registrada').first()).toBeVisible()
   await expect(page.getByRole('button', { name: 'Validar' })).toHaveCount(0)
+  await expect(
+    page.getByRole('button', { name: 'Abrir reclamación' }),
+  ).toHaveCount(0)
 }
 
 test('@smoke el técnico recibe, atiende con evidencias y cierra su parte', async ({

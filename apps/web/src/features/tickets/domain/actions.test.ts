@@ -106,7 +106,7 @@ describe('allowedActions', () => {
 })
 
 describe('allowedActions after requester validation', () => {
-  it('deja solo la reclamación al solicitante que ya validó', () => {
+  it('no deja acciones al solicitante que ya validó', () => {
     const actions = allowedActions(
       context(
         [
@@ -120,7 +120,18 @@ describe('allowedActions after requester validation', () => {
         { isRequester: true, requesterValidated: true },
       ),
     )
-    expect(actions).toEqual(['open_claim'])
+    expect(actions).toEqual([])
+  })
+
+  it('quita la reclamación al solicitante validado en un tiquet cerrado', () => {
+    const actions = allowedActions(
+      context(['ticket.open_claim', 'ticket.view'], 'closed', {
+        isRequester: true,
+        requesterValidated: true,
+      }),
+    )
+    expect(actions).not.toContain('open_claim')
+    expect(actions).toContain('comment')
   })
 
   it('conserva las acciones del supervisor que validó a nombre del solicitante', () => {

@@ -43,7 +43,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
 | `validate` | `attended` | Registra el lado que corresponda, una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
-| `open_claim` | `attended`, `closed` dentro de ventana | Motivo, descripción y evidencia `claim`; pasa a `under_claim` |
+| `open_claim` | `attended`, `closed` dentro de ventana; no si el solicitante ya validó su lado | Motivo, descripción y evidencia `claim`; pasa a `under_claim` |
 | `resolve_claim` | `under_claim` | `upheld`: nuevo ciclo en `assigned`; `dismissed`: `closed`; `new_ticket`: restaura estado anterior y crea derivado |
 | `reject`, `cancel` | No final | Motivo del uso correspondiente; guarda estado previo y descarta |
 | `mark_duplicate` | No final | Original distinto y existente; pasa a `duplicate` y enlaza |
@@ -72,7 +72,8 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
 - La validación automática tras N días es configurable, pero no hay un proceso que la ejecute.
   El cierre actual requiere las acciones de validación o resolución correspondientes.
 - El solicitante que ya validó no puede editar mientras el tiquet siga `attended` o `under_claim`:
-  el servidor rechaza validar de nuevo su lado y conserva únicamente la reclamación. La calificación
-  puede registrarse en el tramo atendido y ya no se modifica.
+  el servidor rechaza validar de nuevo su lado y no le permite abrir una reclamación, ni siquiera
+  dentro de la ventana posterior al cierre. La calificación puede registrarse en el tramo atendido y
+  ya no se modifica. Un supervisor puede abrir la reclamación a nombre del solicitante.
 - La interfaz calcula botones por permiso y estado; el servidor también valida ámbito,
   participación y ventana de reclamación. Un botón visible no garantiza que la acción se acepte.

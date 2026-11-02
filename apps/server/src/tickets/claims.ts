@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import {
+  assertRequesterCanOpenClaim,
   conflict,
   hasEvidence,
   lockTicket,
@@ -101,6 +102,7 @@ async function openClaimInTransaction(
     return { ticketId: input.ticketId, action: 'open_claim', replayed: true }
   }
   const ticket = await lockClaimTicket(tx, input.ticketId)
+  await assertRequesterCanOpenClaim(tx, actor, ticket)
   if (!ticket.claim_window_ok) {
     throw conflict('El tiquet no admite una reclamación en su estado')
   }

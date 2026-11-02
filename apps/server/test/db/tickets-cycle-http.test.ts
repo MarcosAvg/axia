@@ -295,7 +295,8 @@ describe('claim reopening', () => {
     ).not.toBeNull()
 
     await addEvidence(ticketId, 'claim')
-    const open = await action(context.cookies.requester, ticketId, {
+    // El solicitante ya validó; el supervisor abre la reclamación a su nombre.
+    const open = await action(context.cookies.supervisor, ticketId, {
       action: 'open_claim',
       reasonId: claimReason,
       description: 'Volvió a fallar',

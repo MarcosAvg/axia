@@ -15,9 +15,10 @@ validación del lado `requester` en el ciclo actual. El detalle expone `isReques
 `requesterValidated` para que la interfaz decida qué acciones ofrecer.
 
 Una vez que el solicitante valida su lado, no puede editar el tiquet mientras no esté cerrado
-(`attended` o `under_claim`): la barra de acciones solo conserva **Abrir reclamación**. La regla se
-aplica en el servidor, no solo en la interfaz, y una segunda validación del mismo rol en el ciclo
-responde 409.
+(`attended` o `under_claim`): la barra de acciones queda vacía. Tampoco puede abrir una reclamación,
+ni siquiera dentro de la ventana posterior al cierre; un supervisor sí puede abrirla a nombre del
+solicitante. La regla se aplica en el servidor, no solo en la interfaz, y una segunda validación del
+mismo rol en el ciclo responde 409.
 
 ## Alternativas y consecuencias
 
@@ -35,6 +36,7 @@ es que una calificación puede convivir con un tiquet todavía `attended`; si de
 reclamación, la calificación ya no se puede crear ni modificar. Sigue habiendo una sola calificación
 por tiquet, incluso si un ciclo posterior lo reabre.
 
-El bloqueo del solicitante validado cubre `attended` y `under_claim`; al cerrar el tiquet recupera
-las acciones que su permiso y estado permitan, y la reclamación queda disponible durante todo el
-tramo atendido conforme a RN-16.
+El bloqueo de edición del solicitante validado cubre `attended` y `under_claim`; al cerrar el tiquet
+recupera las acciones que su permiso y estado permitan, excepto abrir una reclamación. La reclamación
+del propio solicitante validado queda excluida incluso dentro de la ventana posterior al cierre;
+RN-16 se mantiene para los demás actores y para un supervisor que actúe a nombre del solicitante.

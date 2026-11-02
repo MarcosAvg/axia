@@ -58,6 +58,23 @@ async function reasonId(use: string) {
   return (reasons.rows[0] as { id: string }).id
 }
 
+async function addClaimEvidence(ticketId: string) {
+  await context.db.execute(sql`
+    insert into public.evidence (
+      ticket_id, cycle, type, captured_by_technician_id, processing_state
+    ) values (${ticketId}, 1, 'claim', ${refs.technicianId}, 'ready')
+  `)
+}
+
+async function openClaimAs(cookie: string, ticketId: string) {
+  return action(cookie, ticketId, {
+    action: 'open_claim',
+    reasonId: await reasonId('claim'),
+    description: 'La reparación no quedó bien',
+    clientRequestId: randomUUID(),
+  })
+}
+
 describe('satisfaction', () => {
   it('allows a supervisor to rate on behalf of the requester', async () => {
     const ticketId = await closedTicket()
@@ -163,20 +180,27 @@ describe('validated requester edits', () => {
   })
 })
 
-describe('validated requester claims and detail', () => {
-  it('can still open a claim after validating', async () => {
+describe('validated requester cannot claim', () => {
+  it('rejects a claim after validating while the ticket is attended', async () => {
     const ticketId = await validatedAttendedTicket()
-    await context.db.execute(sql`
-      insert into public.evidence (
-        ticket_id, cycle, type, captured_by_technician_id, processing_state
-      ) values (${ticketId}, 1, 'claim', ${refs.technicianId}, 'ready')
-    `)
-    const claim = await action(context.cookies.requester, ticketId, {
-      action: 'open_claim',
-      reasonId: await reasonId('claim'),
-      description: 'La reparación no quedó bien',
-      clientRequestId: randomUUID(),
-    })
+    await addClaimEvidence(ticketId)
+    const claim = await openClaimAs(context.cookies.requester, ticketId)
+    expect(claim.statusCode).toBe(409)
+  })
+
+  it('rejects a claim after the ticket is closed', async () => {
+    const ticketId = await closedTicket()
+    await addClaimEvidence(ticketId)
+    const claim = await openClaimAs(context.cookies.requester, ticketId)
+    expect(claim.statusCode).toBe(409)
+  })
+})
+
+describe('supervisor claim after requester validation', () => {
+  it('opens on behalf but keeps the requester read-only', async () => {
+    const ticketId = await validatedAttendedTicket()
+    await addClaimEvidence(ticketId)
+    const claim = await openClaimAs(context.cookies.supervisor, ticketId)
     expect(claim.statusCode).toBe(200)
 
     const commented = await action(context.cookies.requester, ticketId, {
@@ -186,8 +210,10 @@ describe('validated requester claims and detail', () => {
     })
     expect(commented.statusCode).toBe(409)
   })
+})
 
-  it('exposes the requester validation state in the detail', async () => {
+describe('validated requester detail', () => {
+  it('exposes the requester validation state', async () => {
     const ticketId = await validatedAttendedTicket()
     const asRequester = await context.app.inject({
       method: 'GET',

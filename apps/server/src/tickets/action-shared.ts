@@ -27,21 +27,13 @@ export function conflict(message: string): AppError {
   return new AppError(409, 'conflict', message)
 }
 
-const VALIDATED_REQUESTER_EXEMPT = new Set(['validate', 'open_claim', 'rate'])
+const VALIDATED_REQUESTER_EXEMPT = new Set(['validate', 'rate'])
 
-/**
- * El solicitante que ya validó su lado no puede editar el tiquet mientras
- * siga atendido; solo conserva la reclamación, la validación pendiente y
- * la calificación.
- */
-export async function assertValidatedRequesterCanAct(
+async function requesterValidatedByActor(
   tx: DbExecutor,
   actor: Actor,
-  ticket: Pick<LockedTicket, 'id' | 'status' | 'cycle'>,
-  action: string,
-): Promise<void> {
-  if (VALIDATED_REQUESTER_EXEMPT.has(action)) return
-  if (ticket.status !== 'attended' && ticket.status !== 'under_claim') return
+  ticket: Pick<LockedTicket, 'id' | 'cycle'>,
+): Promise<boolean> {
   const result = await tx.execute(sql`
     select exists (
       select 1
@@ -52,12 +44,41 @@ export async function assertValidatedRequesterCanAct(
        and v.validator_role = 'requester'
       where t.id = ${ticket.id}
         and r.user_id = ${actor.id}
-    ) as blocked
+    ) as validated
   `)
-  if ((result.rows[0] as { blocked: boolean } | undefined)?.blocked) {
+  return Boolean(
+    (result.rows[0] as { validated: boolean } | undefined)?.validated,
+  )
+}
+
+/**
+ * El solicitante que ya validó su lado no puede editar el tiquet mientras
+ * siga atendido o en reclamación; solo conserva la validación pendiente y
+ * la calificación.
+ */
+export async function assertValidatedRequesterCanAct(
+  tx: DbExecutor,
+  actor: Actor,
+  ticket: Pick<LockedTicket, 'id' | 'status' | 'cycle'>,
+  action: string,
+): Promise<void> {
+  if (VALIDATED_REQUESTER_EXEMPT.has(action)) return
+  if (ticket.status !== 'attended' && ticket.status !== 'under_claim') return
+  if (await requesterValidatedByActor(tx, actor, ticket)) {
     throw conflict(
       'El tiquet ya fue validado; espera a que se cierre para editarlo',
     )
+  }
+}
+
+/** El solicitante que ya validó no puede abrir una reclamación, ni tras el cierre. */
+export async function assertRequesterCanOpenClaim(
+  tx: DbExecutor,
+  actor: Actor,
+  ticket: Pick<LockedTicket, 'id' | 'cycle'>,
+): Promise<void> {
+  if (await requesterValidatedByActor(tx, actor, ticket)) {
+    throw conflict('El solicitante ya validó; no puede abrir una reclamación')
   }
 }
 
