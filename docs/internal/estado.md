@@ -6,7 +6,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 **Última actualización:** 2026-11-02
 
 
-## Tarea en curso: asignación líder/auxiliar, titularidad y reclamación
+## Tarea completada en rama: asignación líder/auxiliar, titularidad y reclamación
 
 - `assign_technician` asigna líder si el técnico está designado para la categoría; si no, agrega un
   auxiliar y exige motivo `auxiliary_support`. La lista de técnicos expone `categoryIds` y marca
@@ -35,6 +35,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Documentación: 41 archivos, 0 enlaces rotos. `pnpm check:agnostic`: 812 archivos, 0 coincidencias.
 - Pruebas nuevas: `tickets-assignment-rules-http`, `tickets-claims-http`,
   `assignment-form.test` y el caso de proxy con toma previa.
+- Pendiente: integrar la rama `fix/asignacion-lider-auxiliar` a `main` (sin push ni merge todavía).
 
 ## Tarea cerrada: calificación en modal, bloqueos y toma obligatoria
 
