@@ -22,6 +22,7 @@ interface SubmitContext {
   cycle: number
   occurredAt?: string
   subjectTechnicianId?: string
+  reasonRequired?: boolean
   onClose: () => void
   upload: ReturnType<typeof useUploadEvidence>
   setFilePending: (pending: boolean) => void
@@ -81,6 +82,7 @@ async function submitAction(context: SubmitContext) {
     context.action,
     context.values,
     Boolean(context.file),
+    context.reasonRequired,
   )
   context.setValidationErrors(errorsForMissing(missing))
   context.setEvidenceError(
@@ -109,6 +111,7 @@ type ActionSubmissionOptions = {
   cycle: number
   occurredAt?: string
   subjectTechnicianId?: string
+  reasonRequired?: boolean
   onClose: () => void
 }
 
@@ -120,6 +123,7 @@ export function useActionSubmission({
   cycle,
   occurredAt,
   subjectTechnicianId,
+  reasonRequired,
   onClose,
 }: ActionSubmissionOptions) {
   const upload = useUploadEvidence()
@@ -149,6 +153,7 @@ export function useActionSubmission({
       cycle,
       occurredAt,
       subjectTechnicianId,
+      reasonRequired,
       onClose,
       upload,
       setFilePending: setUploading,

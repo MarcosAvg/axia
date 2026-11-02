@@ -13,6 +13,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 export type AuxiliaryInput = {
@@ -103,5 +104,6 @@ export async function addAuxiliary(
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, 'ticket.add_auxiliary', access)
+  assertTicketHolder(actor, access, 'ticket.add_auxiliary')
   return db.transaction((tx) => auxiliaryInTransaction(tx, actor, input))
 }

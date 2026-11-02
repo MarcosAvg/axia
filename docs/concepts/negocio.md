@@ -169,7 +169,8 @@ puede, precondiciones y efectos.
 - **RN-05 Tomar.** Al tomar un candidato se retiran las ofertas de los demás conservándolas en el
   historial, y pasa a `with_supervisor`. **Asignar técnico ya no implica tomar**: el supervisor debe
   haber tomado el tiquet antes de asignar, reasignar, recapturar, rechazar, cancelar, cambiar la
-  prioridad o marcar un duplicado. Un administrador conserva la cola de tiquets sin ruteo y puede
+  prioridad o marcar un duplicado; esto vale aunque otro supervisor del equipo lo haya tomado. Un
+  administrador conserva la cola de tiquets sin ruteo y puede
   asignar sin toma; el solicitante mantiene sus acciones propias.
 - **RN-06 Reasignación de supervisor.** Solo quien tiene el tiquet (o un administrador). Destino: otro
   equipo (se recalculan candidatos) o un supervisor concreto. Motivo obligatorio (catálogo) y nota
@@ -217,8 +218,10 @@ puede, precondiciones y efectos.
 - **RN-16 Reclamación.** La pueden abrir el solicitante, un supervisor o un administrador, **nunca el
   técnico**, mientras el tiquet esté `attended` o dentro de la ventana configurable posterior a
   `closed` (**en la semilla, 1 día**). Requiere motivo (catálogo), descripción y evidencia `claim`. Pasa
-  a `under_claim` y notifica al supervisor. Excepción: el solicitante que ya validó su lado en el
-  ciclo no puede abrir la reclamación; un supervisor sí puede hacerlo a nombre del solicitante.
+  a `under_claim` y notifica al supervisor. Al abrirla se cierra el tramo de trabajo o la pausa y
+  se terminan las participaciones abiertas; la asignación de técnico se conserva para reabrir al
+  mismo líder. Excepción: el solicitante que ya validó su lado en el ciclo no puede abrir la
+  reclamación; un supervisor sí puede hacerlo a nombre del solicitante.
 - **RN-17 Evaluación de la reclamación.** La resuelve un supervisor o un administrador, con notas
   internas y un resultado del catálogo, y al hacerlo deja el tiquet **bien capturado** (RN-11):
   - **Procedente:** se reabre (RN-18).

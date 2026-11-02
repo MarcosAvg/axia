@@ -20,6 +20,7 @@ type TechnicianOption = {
   id: string
   fullName: string
   teamId: string
+  categoryIds: string[]
 }
 type ReasonOption = {
   id: string
@@ -146,10 +147,19 @@ async function listRequesters(db: Database): Promise<RequesterOption[]> {
 
 async function listTechnicians(db: Database): Promise<TechnicianOption[]> {
   const result = await db.execute(sql`
-    select id, full_name as "fullName", team_id as "teamId"
-    from public.technicians
-    where active
-    order by full_name
+    select
+      t.id,
+      t.full_name as "fullName",
+      t.team_id as "teamId",
+      coalesce(
+        array_agg(tc.category_id) filter (where tc.category_id is not null),
+        '{}'
+      ) as "categoryIds"
+    from public.technicians t
+    left join public.technician_categories tc on tc.technician_id = t.id
+    where t.active
+    group by t.id, t.full_name, t.team_id
+    order by t.full_name
   `)
   return result.rows as TechnicianOption[]
 }

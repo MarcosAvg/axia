@@ -14,7 +14,11 @@ import {
 import type { DbExecutor } from './db.js'
 import { routeTicket } from './create.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { closeOpenWorkPhase, endTechnicianAssignments } from './flow-state.js'
+import {
+  closeOpenWorkPhase,
+  endOpenParticipants,
+  endTechnicianAssignments,
+} from './flow-state.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { getPermissionScope } from './access.js'
 
@@ -46,12 +50,29 @@ async function assertHolder(tx: DbExecutor, actor: Actor, ticketId: string) {
   }
 }
 
-async function requireActiveSupervisor(tx: DbExecutor, userId: string) {
+async function requireActiveSupervisor(
+  tx: DbExecutor,
+  userId: string,
+  ticketId: string,
+) {
   const result = await tx.execute(sql`
-    select id from public.users where id = ${userId} and active limit 1
+    select 1
+    from public.users u
+    join public.supervisor_scopes ss on ss.user_id = u.id and ss.active
+    join public.supervisor_scope_buildings ssb on ssb.scope_id = ss.id
+    join public.tickets t on t.id = ${ticketId}
+    where u.id = ${userId}
+      and u.active
+      and ss.team_id = t.team_id
+      and ssb.building_id = t.building_id
+    limit 1
   `)
   if (!result.rows[0]) {
-    throw new AppError(400, 'validation_error', 'Supervisor no válido')
+    throw new AppError(
+      400,
+      'validation_error',
+      'El supervisor no tiene alcance para este tiquet',
+    )
   }
 }
 
@@ -71,7 +92,7 @@ async function assignToSupervisor(
   cycle: number,
 ): Promise<ActionResult> {
   const supervisorUserId = input.supervisorUserId as string
-  await requireActiveSupervisor(tx, supervisorUserId)
+  await requireActiveSupervisor(tx, supervisorUserId, input.ticketId)
   await tx.execute(sql`
     update public.tickets
     set status = 'with_supervisor'
@@ -185,6 +206,7 @@ async function reassignInTransaction(
   // o el tramo activo y se termina su asignación antes de volver al supervisor.
   await closeOpenWorkPhase(tx, input.ticketId)
   await endTechnicianAssignments(tx, input.ticketId)
+  await endOpenParticipants(tx, input.ticketId)
 
   if (input.supervisorUserId) {
     return assignToSupervisor(tx, actor, input, ticket.cycle)

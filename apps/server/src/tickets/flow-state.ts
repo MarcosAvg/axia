@@ -53,13 +53,16 @@ export async function endTechnicianAssignments(
     update public.ticket_participants p set ended_at = ${at}
     where p.ticket_id = ${ticketId}
       and p.ended_at is null
-      and exists (
-        select 1
-        from public.ticket_assignments a
-        where a.ticket_id = p.ticket_id
-          and a.stage = 'technician'
-          and a.ended_at is null
-          and a.assignee_technician_id = p.technician_id
+      and (
+        p.participation_type = 'leader'
+        or exists (
+          select 1
+          from public.ticket_assignments a
+          where a.ticket_id = p.ticket_id
+            and a.stage = 'technician'
+            and a.ended_at is null
+            and a.assignee_technician_id = p.technician_id
+        )
       )
   `)
   await tx.execute(sql`
@@ -97,26 +100,6 @@ export async function isDesignatedForCategory(
   `)
   return Boolean(
     (result.rows[0] as { designated: boolean } | undefined)?.designated,
-  )
-}
-
-export async function openParticipationType(
-  tx: DbExecutor,
-  ticketId: string,
-  technicianId: string,
-): Promise<string | null> {
-  const result = await tx.execute(sql`
-    select participation_type
-    from public.ticket_participants
-    where ticket_id = ${ticketId}
-      and technician_id = ${technicianId}
-      and ended_at is null
-    order by started_at desc
-    limit 1
-  `)
-  return (
-    (result.rows[0] as { participation_type: string } | undefined)
-      ?.participation_type ?? null
   )
 }
 

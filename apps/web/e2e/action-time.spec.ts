@@ -77,7 +77,7 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
   await clickAction(page, 'Asignar técnico')
   await page
     .getByLabel('Técnico', { exact: true })
-    .selectOption({ label: 'Luis Gómez' })
+    .selectOption({ label: 'Luis Gómez · Líder' })
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 

@@ -16,8 +16,9 @@ import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
 import { isProxyAction } from '../domain/actions'
+import { assignmentState, listTechnicians } from '../domain/assignment-form'
 import { toTicketError } from '../domain/errors'
-import type { EvidenceType } from '../domain/types'
+import type { EvidenceType, TicketDetail } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
@@ -99,6 +100,8 @@ interface ActionFormViewProps {
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
   motiveReasonId: string | null
+  categoryId: string
+  reasonRequired: boolean
   values: ActionValues
   validationErrors: Partial<Record<ActionField, string>>
   occurredAt: string
@@ -122,6 +125,8 @@ function ActionFormView({
   priorities,
   serviceTypes,
   motiveReasonId,
+  categoryId,
+  reasonRequired,
   values,
   validationErrors,
   occurredAt,
@@ -157,6 +162,8 @@ function ActionFormView({
         priorities={priorities}
         serviceTypes={serviceTypes}
         motiveReasonId={motiveReasonId}
+        categoryId={categoryId}
+        reasonRequired={reasonRequired}
         values={values}
         errors={validationErrors}
         onChange={onChange}
@@ -164,16 +171,6 @@ function ActionFormView({
       <ActionFormFooter error={error} isPending={isPending} onClose={onClose} />
     </form>
   )
-}
-
-function listTechnicians(
-  data: TechnicianOption[] | undefined,
-  action: ActionKey,
-  excludeIds: string[] | undefined,
-): TechnicianOption[] {
-  const all = data ?? []
-  if (action !== 'add_auxiliary' || !excludeIds) return all
-  return all.filter((technician) => !excludeIds.includes(technician.id))
 }
 
 /** Motivo de la pausa abierta (para ofrecer sus subestados al reanudar y al gestionar). */
@@ -187,6 +184,7 @@ function usePauseMotiveReasonId(
 }
 
 interface TicketActionFormProps {
+  ticket: TicketDetail
   ticketId: string
   cycle: number
   action: ActionKey
@@ -195,7 +193,18 @@ interface TicketActionFormProps {
   onClose: () => void
 }
 
+function makeOnChange(
+  clearValidation: () => void,
+  setValues: (update: (current: ActionValues) => ActionValues) => void,
+) {
+  return (patch: Partial<ActionValues>) => {
+    clearValidation()
+    setValues((current) => ({ ...current, ...patch }))
+  }
+}
+
 function useTicketActionForm({
+  ticket,
   ticketId,
   cycle,
   action,
@@ -209,10 +218,18 @@ function useTicketActionForm({
   const actions = useTicketActions(ticketId, subjectTechnicianId, time.iso)
   const technicians = useTechnicians()
   const priorities = usePriorities()
-  const reasons = useReasons(reasonUseFor(action))
   const serviceTypes = useServiceTypes()
   const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
+  const available = listTechnicians(technicians.data, action, excludeIds)
+  const assignment = assignmentState({
+    action,
+    ticket,
+    technicians: available,
+    technicianId: values.technicianId,
+    fallbackReasonUse: reasonUseFor(action),
+  })
+  const reasons = useReasons(assignment.reasonUse)
   const submission = useActionSubmission({
     actions,
     values,
@@ -221,30 +238,28 @@ function useTicketActionForm({
     cycle,
     occurredAt: time.iso,
     subjectTechnicianId,
+    reasonRequired: assignment.reasonRequired,
     onClose,
   })
-  const state = actionFormState(
-    action,
-    mutationFor(action, actions),
-    submission.uploading,
-  )
-  const onChange = (patch: Partial<ActionValues>) => {
-    submission.clearValidation()
-    setValues((current) => ({ ...current, ...patch }))
-  }
+  const onChange = makeOnChange(submission.clearValidation, setValues)
   return {
-    state,
+    state: actionFormState(
+      action,
+      mutationFor(action, actions),
+      submission.uploading,
+    ),
     submission,
     values,
     onChange,
     occurredAt: time.value,
     showOccurredAt: time.show,
     onOccurredAtChange: time.setValue,
-    technicians: listTechnicians(technicians.data, action, excludeIds),
+    technicians: available,
     reasons: reasons.data ?? [],
     priorities: priorities.data ?? [],
     serviceTypes: serviceTypes.data ?? [],
     motiveReasonId,
+    reasonRequired: assignment.reasonRequired,
   }
 }
 
@@ -265,6 +280,8 @@ export function TicketActionForm(props: TicketActionFormProps) {
       priorities={form.priorities}
       serviceTypes={form.serviceTypes}
       motiveReasonId={form.motiveReasonId}
+      categoryId={props.ticket.categoryId}
+      reasonRequired={form.reasonRequired}
       values={form.values}
       validationErrors={form.submission.validationErrors}
       occurredAt={form.occurredAt}

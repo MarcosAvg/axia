@@ -21,6 +21,7 @@ import {
   reopenLeaderParticipation,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
+import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type DiscardInput = {
@@ -99,6 +100,7 @@ async function discard(
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, input.permission, access)
+  assertTicketHolder(actor, access, input.permission)
   return db.transaction((tx) => discardInTransaction(tx, actor, input))
 }
 

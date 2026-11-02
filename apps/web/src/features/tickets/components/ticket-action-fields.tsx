@@ -18,6 +18,8 @@ export interface TicketActionFieldsProps {
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
   motiveReasonId?: string | null
+  categoryId: string
+  reasonRequired: boolean
   values: ActionValues
   errors?: Partial<Record<ActionField, string>>
   onChange: (patch: Partial<ActionValues>) => void
@@ -161,7 +163,7 @@ function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
       />
     )
   }
-  if (!REASON_ACTIONS.includes(action)) return null
+  if (!REASON_ACTIONS.includes(action) && !props.reasonRequired) return null
   return (
     <SelectBlock
       key="reason"
@@ -179,7 +181,17 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
   const { action, values, onChange, technicians, priorities, errors } = props
   const blocks: ReactNode[] = []
   const technicianOptions = toOptions(
-    technicians.map((t) => ({ id: t.id, label: t.fullName })),
+    technicians.map((technician) => ({
+      id: technician.id,
+      label:
+        action === 'assign_technician'
+          ? `${technician.fullName} · ${
+              technician.categoryIds.includes(props.categoryId)
+                ? 'Líder'
+                : 'Auxiliar'
+            }`
+          : technician.fullName,
+    })),
   )
   const priorityOptions = toOptions(
     priorities.map((p) => ({ id: p.id, label: p.name })),
@@ -194,7 +206,12 @@ function actionSelects(props: TicketActionFieldsProps): ReactNode[] {
         options={technicianOptions}
         value={values.technicianId}
         error={errors?.technician}
-        onChange={(technicianId) => onChange({ technicianId })}
+        onChange={(technicianId) =>
+          onChange({
+            technicianId,
+            ...(action === 'assign_technician' ? { reasonId: '' } : {}),
+          })
+        }
       />,
     )
   }

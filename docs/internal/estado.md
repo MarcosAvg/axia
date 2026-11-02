@@ -6,7 +6,37 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 **Última actualización:** 2026-11-02
 
 
-## Tarea en curso: calificación en modal, bloqueos y toma obligatoria
+## Tarea en curso: asignación líder/auxiliar, titularidad y reclamación
+
+- `assign_technician` asigna líder si el técnico está designado para la categoría; si no, agrega un
+  auxiliar y exige motivo `auxiliary_support`. La lista de técnicos expone `categoryIds` y marca
+  “Líder” o “Auxiliar”. Reasignar al líder exige motivo y ya se permite en `in_progress`/`paused`;
+  los auxiliares activos permanecen. Decisión en el
+  [ADR 0109](../decisions/0109-asignacion-lider-auxiliar-y-reclamacion.md).
+- La titularidad se exige en cualquier estado para las acciones de coordinación del supervisor
+  (asignar, auxiliares, recapturar, rechazar, cancelar, prioridad, duplicado y resolver
+  reclamación). Las acciones propias (`own`) y el administrador no se bloquean. El formulario oculta
+  esas acciones a un supervisor sin toma.
+- Abrir una reclamación cierra tramo/pausa y participaciones; la asignación se conserva. Si procede,
+  el ciclo avanza y se reabre al mismo líder; si se desestima, se termina la asignación. La
+  reasignación de supervisor valida que el destino cubra el equipo y edificio.
+- Recaptura: si cambia el equipo o edificio se cierran todos los participantes; si cambia la
+  categoría solo permanece el técnico asignado cuando sigue designado. Reasignar supervisor también
+  cierra a los auxiliares.
+
+## Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 64 pruebas de servidor y 348 de
+  web.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 64 de
+  servidor, 348 de web, 312 de PostgreSQL, 58 de navegador y build correcto. Persiste el aviso de
+  chunks >500 kB.
+- Documentación: 41 archivos, 0 enlaces rotos. `pnpm check:agnostic`: 812 archivos, 0 coincidencias.
+- Pruebas nuevas: `tickets-assignment-rules-http`, `tickets-claims-http`,
+  `assignment-form.test` y el caso de proxy con toma previa.
+
+## Tarea cerrada: calificación en modal, bloqueos y toma obligatoria
 
 - El 500 al calificar venía de `ON CONFLICT DO UPDATE`: `axia_app` no tiene `UPDATE` sobre
   `ticket_ratings` porque la tabla es de solo agregar. Ahora la inserción usa `DO NOTHING` y una

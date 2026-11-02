@@ -12,6 +12,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { assertTicketHolder } from './access.js'
 import { assertTechnicianAction } from './proxy.js'
 import {
   applyChanges,
@@ -113,5 +114,6 @@ export async function recaptureTicket(
     subjectTechnicianId: input.subjectTechnicianId,
     requireParticipant: false,
   })
+  assertTicketHolder(actor, access, 'ticket.recapture')
   return db.transaction((tx) => recaptureInTransaction(tx, actor, input))
 }

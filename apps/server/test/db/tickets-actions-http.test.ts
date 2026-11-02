@@ -227,7 +227,7 @@ describe('assign technician', () => {
     `)
     expect(participants.rows).toEqual([
       expect.objectContaining({
-        participation_type: 'auxiliary',
+        participation_type: 'leader',
         ended_at: null,
       }),
     ])

@@ -53,7 +53,7 @@ test('el administrador agrega un auxiliar y reasigna al supervisor', async ({
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
-    .selectOption({ label: 'Luis Gómez' })
+    .selectOption({ label: 'Luis Gómez · Líder' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 
   await page.getByRole('button', { name: 'Agregar auxiliar' }).click()

@@ -161,6 +161,13 @@ it('rejects a proxy subject that does not participate in the ticket', async () =
 
 it('allows a supervisor to act for a technician of their team', async () => {
   const subjectTechnicianId = await technicianByName('Técnico A')
+  const take = await call(
+    'POST',
+    `/api/tickets/${context.ids.ticketAux}/actions`,
+    context.cookies.supervisor,
+    { action: 'take', clientRequestId: crypto.randomUUID() },
+  )
+  expect(take.statusCode).toBe(200)
   const action = await call(
     'POST',
     `/api/tickets/${context.ids.ticketAux}/actions`,

@@ -7,9 +7,9 @@ import { validateRecaptureInputs } from './create-validation.js'
 import type { DbExecutor } from './db.js'
 import {
   actionTimestamp,
+  endOpenParticipants,
   endTechnicianAssignments,
   isDesignatedForCategory,
-  openParticipationType,
 } from './flow-state.js'
 
 export type RecaptureChanges = {
@@ -112,6 +112,7 @@ async function resetRouting(tx: DbExecutor, input: RoutingInput) {
   const { actor, ticket, teamId, buildingId } = input
   const at = actionTimestamp()
   await endTechnicianAssignments(tx, ticket.id)
+  await endOpenParticipants(tx, ticket.id)
   await tx.execute(sql`
     update public.ticket_offers
     set status = 'withdrawn', resolved_at = ${at}
@@ -148,12 +149,11 @@ async function reconcileAssignedTechnician(
   if (ticket.status !== 'assigned' || !categoryChanged) return
   const technicianId = await openAssignmentTechnician(tx, ticket.id)
   if (!technicianId) return
-  const stays =
-    (await isDesignatedForCategory(tx, technicianId, categoryId)) ||
-    (await openParticipationType(tx, ticket.id, technicianId)) === 'auxiliary'
+  const stays = await isDesignatedForCategory(tx, technicianId, categoryId)
   if (stays) return
 
   await endTechnicianAssignments(tx, ticket.id)
+  await endOpenParticipants(tx, ticket.id)
   await tx.execute(sql`
     update public.tickets set status = 'with_supervisor' where id = ${ticket.id}
   `)

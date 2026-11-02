@@ -77,11 +77,17 @@ export async function createPeople(db: Database, catalog: Catalog) {
     sql`insert into public.technicians (full_name, user_id, team_id)
         values ('Técnico A', ${users.technicianUserId}, ${catalog.teamA.id}) returning id`,
   )
-  await insertOne(
+  const otherTechnicianRow = await insertOne(
     db,
     sql`insert into public.technicians (full_name, user_id, team_id)
         values ('Técnico B', ${users.otherTechnicianId}, ${catalog.teamB.id}) returning id`,
   )
+  await db.execute(sql`
+    insert into public.technician_categories (technician_id, category_id)
+    values
+      (${technicianRow.id}, ${catalog.categoryA.id}),
+      (${otherTechnicianRow.id}, ${catalog.categoryB.id})
+  `)
   const scope = await insertOne(
     db,
     sql`insert into public.supervisor_scopes (user_id, team_id)

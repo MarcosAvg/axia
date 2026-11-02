@@ -103,7 +103,10 @@ function simpleHandlers(
     assign_technician: () => {
       if (values.technicianId) {
         actions.assignTechnician.mutate(
-          { technicianId: values.technicianId },
+          {
+            technicianId: values.technicianId,
+            reasonId: values.reasonId || undefined,
+          },
           options,
         )
       }

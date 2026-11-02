@@ -29,6 +29,7 @@ export interface TechnicianOption {
   id: string
   fullName: string
   teamId: string
+  categoryIds: string[]
 }
 
 export type ReasonUse =

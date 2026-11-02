@@ -62,7 +62,7 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await page.getByRole('button', { name: 'Asignar técnico' }).click()
   await page
     .getByLabel('Técnico', { exact: true })
-    .selectOption({ label: 'Luis Gómez' })
+    .selectOption({ label: 'Luis Gómez · Líder' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
   await signOut(page)
   await signIn(page, 'demo.technician')

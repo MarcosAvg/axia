@@ -13,6 +13,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type CommentInput = {
@@ -132,5 +133,6 @@ export async function changePriority(
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, 'ticket.prioritize', access)
+  assertTicketHolder(actor, access, 'ticket.prioritize')
   return db.transaction((tx) => priorityInTransaction(tx, actor, input))
 }

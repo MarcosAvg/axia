@@ -53,6 +53,7 @@ function ActionForms({
   if (formAction && !DEDICATED.includes(formAction)) {
     return (
       <TicketActionForm
+        ticket={ticket}
         ticketId={ticket.id}
         cycle={ticket.cycle}
         action={formAction}

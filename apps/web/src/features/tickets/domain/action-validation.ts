@@ -47,8 +47,9 @@ export function missingActionFields(
   action: ActionKey,
   values: ActionValues,
   hasEvidence: boolean,
+  reasonRequired = false,
 ): ActionField[] {
-  return (REQUIRED[action] ?? []).filter((field) =>
-    isMissing(field, values, hasEvidence),
-  )
+  const required = [...(REQUIRED[action] ?? [])]
+  if (reasonRequired && !required.includes('reason')) required.push('reason')
+  return required.filter((field) => isMissing(field, values, hasEvidence))
 }

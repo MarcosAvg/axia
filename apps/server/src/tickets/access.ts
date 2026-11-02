@@ -1,4 +1,5 @@
 import type { Actor } from '../auth/authorization.js'
+import { AppError } from '../http/errors.js'
 
 export type PermissionScope = 'own' | 'team' | 'buildings' | 'all'
 
@@ -27,6 +28,26 @@ const SUPERVISOR_TAKE_REQUIRED = new Set([
 
 function isAdministrator(actor: Actor): boolean {
   return actor.roles.some((role) => role.name === 'administrator')
+}
+
+/**
+ * Las acciones de coordinación de un supervisor exigen que ya haya tomado el
+ * tiquet. Las acciones propias del solicitante o del técnico (ámbito `own`) y
+ * las del administrador (`all`) no pasan por esta regla.
+ */
+export function assertTicketHolder(
+  actor: Actor,
+  ticket: TicketAccess,
+  permission: string,
+): void {
+  if (ticket.isSupervisor || isAdministrator(actor)) return
+  const scope = getPermissionScope(actor, permission)
+  if (scope !== 'team' && scope !== 'buildings') return
+  throw new AppError(
+    403,
+    'forbidden',
+    'Solo el supervisor titular puede realizar esta acción',
+  )
 }
 
 function blocksUntakenTicket(

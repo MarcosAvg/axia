@@ -44,7 +44,13 @@ export interface ActionContext {
   hasTaken: boolean
 }
 
-const ASSIGNABLE: TicketStatus[] = ['registered', 'with_supervisor', 'assigned']
+const ASSIGNABLE: TicketStatus[] = [
+  'registered',
+  'with_supervisor',
+  'assigned',
+  'in_progress',
+  'paused',
+]
 // La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
 const RECAPTURABLE: TicketStatus[] = [
   'registered',
@@ -177,12 +183,7 @@ export function allowedActions(context: ActionContext): ActionKey[] {
     }
     return actions.filter((action) => action !== 'open_claim')
   }
-  if (
-    context.status === 'registered' &&
-    context.isSupervisorRole &&
-    !context.hasTaken &&
-    !context.isRequester
-  ) {
+  if (context.isSupervisorRole && !context.hasTaken && !context.isRequester) {
     return actions.filter(
       (action) => !SUPERVISOR_TAKE_REQUIRED.includes(action),
     )

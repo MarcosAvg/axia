@@ -21,6 +21,7 @@ import {
   endOpenParticipants,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
+import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { scopePredicate } from './scope.js'
 
@@ -188,5 +189,6 @@ export async function markDuplicate(
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, 'ticket.mark_duplicate', access)
+  assertTicketHolder(actor, access, 'ticket.mark_duplicate')
   return db.transaction((tx) => markDuplicateInTransaction(tx, actor, input))
 }

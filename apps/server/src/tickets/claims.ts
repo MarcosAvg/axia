@@ -14,7 +14,13 @@ import {
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { copyDerivedTicket } from './claim-derived.js'
-import { endOpenParticipants, reopenLeaderParticipation } from './flow-state.js'
+import {
+  closeOpenWorkPhase,
+  endOpenParticipants,
+  endTechnicianAssignments,
+  reopenLeaderParticipation,
+} from './flow-state.js'
+import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type OpenClaimInput = {
@@ -117,6 +123,8 @@ async function openClaimInTransaction(
   `)
   if (open.rows[0]) throw conflict('El tiquet ya tiene una reclamación abierta')
 
+  await closeOpenWorkPhase(tx, input.ticketId)
+  await endOpenParticipants(tx, input.ticketId)
   await tx.execute(sql`
     insert into public.ticket_claims (
       ticket_id, cycle, opened_by, reason_id, description, prior_status,
@@ -204,6 +212,7 @@ async function resolveDismissed(
     where id = ${input.ticketId}
   `)
   await endOpenParticipants(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'claim_resolved',
@@ -299,5 +308,6 @@ export async function resolveClaim(
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, 'ticket.resolve_claim', access)
+  assertTicketHolder(actor, access, 'ticket.resolve_claim')
   return db.transaction((tx) => resolveClaimInTransaction(tx, actor, input))
 }
