@@ -50,6 +50,8 @@ export type TicketDetail = {
   requesterContact: string | null
   duplicateOfId: string | null
   duplicateOfFolio: string | null
+  isRequester: boolean
+  requesterValidated: boolean
 }
 
 type DetailRow = {
@@ -93,6 +95,8 @@ type DetailRow = {
   requester_contact: string | null
   duplicate_of_id: string | null
   duplicate_of_folio: string | null
+  is_requester: boolean
+  requester_validated: boolean
 }
 
 function toDetail(row: DetailRow): TicketDetail {
@@ -139,10 +143,12 @@ function toDetail(row: DetailRow): TicketDetail {
     requesterContact: row.requester_contact,
     duplicateOfId: row.duplicate_of_id,
     duplicateOfFolio: row.duplicate_of_folio,
+    isRequester: row.is_requester,
+    requesterValidated: row.requester_validated,
   }
 }
 
-function detailQuery(ticketId: string) {
+function detailQuery(ticketId: string, actorId: string) {
   return sql`
     select
       t.id, t.folio, t.status, t.reported_at, t.closed_at, t.description,
@@ -150,6 +156,15 @@ function detailQuery(ticketId: string) {
       t.cycle, t.building_id, t.location_id, t.dependency_id, t.category_id,
       t.subcategory_id, t.problem_id, t.service_type_id, t.priority_id,
       t.requester_contact, t.duplicate_of_id, dup.folio as duplicate_of_folio,
+      exists (
+        select 1 from public.requesters rq
+        where rq.id = t.requester_id and rq.user_id = ${actorId}
+      ) as is_requester,
+      exists (
+        select 1 from public.ticket_validations v
+        where v.ticket_id = t.id and v.cycle = t.cycle
+          and v.validator_role = 'requester'
+      ) as requester_validated,
       b.name as building_name,
       l.name as location_name,
       d.name as dependency_name,
@@ -195,7 +210,7 @@ export async function getTicketDetail(
   const access = await findVisibleTicket(db, actor, ticketId)
   if (!access) return null
 
-  const result = await db.execute(detailQuery(ticketId))
+  const result = await db.execute(detailQuery(ticketId, actor.id))
   const row = result.rows[0] as DetailRow | undefined
   return row ? toDetail(row) : null
 }

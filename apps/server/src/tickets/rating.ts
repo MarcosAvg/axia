@@ -21,6 +21,48 @@ export type RateInput = {
   clientRequestId: string
 }
 
+async function hasRequesterValidation(
+  tx: DbExecutor,
+  ticketId: string,
+  cycle: number,
+): Promise<boolean> {
+  const result = await tx.execute(sql`
+    select exists (
+      select 1 from public.ticket_validations
+      where ticket_id = ${ticketId} and cycle = ${cycle}
+        and validator_role = 'requester'
+    ) as requester_validated
+  `)
+  return Boolean(
+    (result.rows[0] as { requester_validated: boolean } | undefined)
+      ?.requester_validated,
+  )
+}
+
+async function insertRating(
+  tx: DbExecutor,
+  actor: Actor,
+  input: RateInput,
+): Promise<void> {
+  const requester = await tx.execute(sql`
+    select requester_id from public.tickets where id = ${input.ticketId}
+  `)
+  const requesterId = (requester.rows[0] as { requester_id: string })
+    .requester_id
+  const inserted = await tx.execute(sql`
+    insert into public.ticket_ratings (
+      ticket_id, score, comment, rated_by, requester_id
+    ) values (
+      ${input.ticketId}, ${input.score}, ${input.comment}, ${actor.id}, ${requesterId}
+    )
+    on conflict (ticket_id) do nothing
+    returning id
+  `)
+  if (!inserted.rows[0]) {
+    throw conflict('El tiquet ya tiene una calificación')
+  }
+}
+
 async function rateInTransaction(
   tx: DbExecutor,
   actor: Actor,
@@ -41,26 +83,20 @@ async function rateInTransaction(
     'rate',
   )
   if (after) return after
-  if (ticket.status !== 'closed') {
-    throw conflict('Solo se puede calificar un tiquet cerrado')
-  }
-  const requester = await tx.execute(sql`
-    select requester_id from public.tickets where id = ${input.ticketId}
-  `)
-  const requesterId = (requester.rows[0] as { requester_id: string })
-    .requester_id
-  await tx.execute(sql`
-    insert into public.ticket_ratings (
-      ticket_id, score, comment, rated_by, requester_id
-    ) values (
-      ${input.ticketId}, ${input.score}, ${input.comment}, ${actor.id}, ${requesterId}
+  const requesterValidated = await hasRequesterValidation(
+    tx,
+    input.ticketId,
+    ticket.cycle,
+  )
+  if (
+    ticket.status !== 'closed' &&
+    !(ticket.status === 'attended' && requesterValidated)
+  ) {
+    throw conflict(
+      'Solo se puede calificar un tiquet cerrado o validado por el solicitante',
     )
-    on conflict (ticket_id) do update set
-      score = excluded.score,
-      comment = excluded.comment,
-      rated_by = excluded.rated_by,
-      updated_at = now()
-  `)
+  }
+  await insertRating(tx, actor, input)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'rated',

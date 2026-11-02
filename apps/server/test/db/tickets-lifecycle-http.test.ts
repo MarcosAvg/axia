@@ -3,8 +3,15 @@ import { randomUUID } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import { appConnectionString } from './helpers.js'
 import {
-  authHeaders,
+  action as runAction,
+  addEvidence as addTicketEvidence,
+  createTicket as createLifecycleTicket,
+  takeAndAssign as takeAndAssignTicket,
+  unlinkedTicket as createUnlinkedTicket,
+} from './tickets-lifecycle-helpers.js'
+import {
   buildTicketHttpApp,
   closeTicketHttpApp,
   type TicketHttpContext,
@@ -14,117 +21,22 @@ import { loadWriteRefs, type WriteRefs } from './tickets-write-helpers.js'
 let context: TicketHttpContext
 let refs: WriteRefs
 
-function ticketBody() {
-  return {
-    buildingId: refs.buildingId,
-    locationId: refs.locationId,
-    dependencyId: refs.dependencyId,
-    categoryId: refs.categoryId,
-    subcategoryId: refs.subcategoryId,
-    problemId: refs.problemId,
-    serviceTypeId: refs.serviceTypeId,
-    priorityId: refs.priorityId,
-    channelId: refs.channelId,
-    description: 'Tiquet para probar el ciclo de vida',
-    requesterId: refs.requesterId,
-    clientRequestId: randomUUID(),
-  }
-}
-
-async function createTicket() {
-  const response = await context.app.inject({
-    method: 'POST',
-    url: '/api/tickets',
-    headers: authHeaders(context.cookies.requester),
-    payload: ticketBody(),
-  })
-  expect(response.statusCode).toBe(201)
-  return (response.json() as { ticket: { id: string } }).ticket.id
-}
-
-async function action(
+const createTicket = () => createLifecycleTicket(context, refs)
+const action = (
   cookie: string,
   ticketId: string,
   payload: Record<string, unknown>,
-) {
-  return context.app.inject({
-    method: 'POST',
-    url: `/api/tickets/${ticketId}/actions`,
-    headers: authHeaders(cookie),
-    payload,
-  })
-}
-
-async function takeAndAssign(ticketId: string) {
-  const take = await action(context.cookies.supervisor, ticketId, {
-    action: 'take',
-    clientRequestId: randomUUID(),
-  })
-  expect(take.statusCode).toBe(200)
-  const assign = await action(context.cookies.supervisor, ticketId, {
-    action: 'assign_technician',
-    technicianId: refs.technicianId,
-    clientRequestId: randomUUID(),
-  })
-  expect(assign.statusCode).toBe(200)
-}
-
-async function addEvidence(ticketId: string, type: 'before' | 'after') {
-  await context.db.execute(sql`
-    insert into public.evidence (
-      ticket_id, cycle, type, captured_by_technician_id, processing_state
-    ) values (${ticketId}, 1, ${type}, ${refs.technicianId}, 'ready')
-  `)
-}
-
-async function unlinkedTicket() {
-  const requester = await context.db.execute(sql`
-    select id from public.requesters
-    where full_name = 'Solicitante sin cuenta'
-    limit 1
-  `)
-  const requesterId = (requester.rows[0] as { id: string }).id
-  const created = await context.app.inject({
-    method: 'POST',
-    url: '/api/tickets',
-    headers: authHeaders(context.cookies.admin),
-    payload: {
-      ...ticketBody(),
-      requesterId,
-      clientRequestId: randomUUID(),
-    },
-  })
-  expect(created.statusCode).toBe(201)
-  return (created.json() as { ticket: { id: string } }).ticket.id
-}
-
-async function closedTicket() {
-  const ticketId = await createTicket()
-  await takeAndAssign(ticketId)
-  await addEvidence(ticketId, 'before')
-  await action(context.cookies.technician, ticketId, {
-    action: 'start',
-    clientRequestId: randomUUID(),
-  })
-  await addEvidence(ticketId, 'after')
-  await action(context.cookies.technician, ticketId, {
-    action: 'attend',
-    workDescription: 'Trabajo terminado',
-    clientRequestId: randomUUID(),
-  })
-  await action(context.cookies.requester, ticketId, {
-    action: 'validate',
-    clientRequestId: randomUUID(),
-  })
-  await action(context.cookies.supervisor, ticketId, {
-    action: 'validate',
-    clientRequestId: randomUUID(),
-  })
-  return ticketId
-}
+) => runAction(context, cookie, ticketId, payload)
+const takeAndAssign = (ticketId: string) =>
+  takeAndAssignTicket(context, refs, ticketId)
+const addEvidence = (ticketId: string, type: 'before' | 'after') =>
+  addTicketEvidence(context, refs, ticketId, type)
+const unlinkedTicket = () => createUnlinkedTicket(context, refs)
 
 beforeAll(async () => {
-  context = await buildTicketHttpApp()
+  context = await buildTicketHttpApp({
+    runtimeConnectionString: appConnectionString(),
+  })
   refs = await loadWriteRefs(context)
 }, 60_000)
 
@@ -223,6 +135,12 @@ describe('validation policy', () => {
     `)
     expect((partial.rows[0] as { status: string }).status).toBe('attended')
 
+    const repeated = await action(context.cookies.requester, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+    expect(repeated.statusCode).toBe(409)
+
     const supervisor = await action(context.cookies.supervisor, ticketId, {
       action: 'validate',
       clientRequestId: randomUUID(),
@@ -283,23 +201,5 @@ describe('validation without an account', () => {
       { validator_role: 'requester' },
       { validator_role: 'supervisor' },
     ])
-  })
-})
-
-describe('satisfaction', () => {
-  it('allows a supervisor to rate on behalf of the requester', async () => {
-    const ticketId = await closedTicket()
-    const rated = await action(context.cookies.supervisor, ticketId, {
-      action: 'rate',
-      score: 5,
-      clientRequestId: randomUUID(),
-    })
-    expect(rated.statusCode).toBe(200)
-
-    const rating = await context.db.execute(sql`
-      select score, rated_by from public.ticket_ratings
-      where ticket_id = ${ticketId}
-    `)
-    expect(rating.rows[0]).toMatchObject({ score: 5 })
   })
 })

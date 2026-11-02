@@ -70,6 +70,27 @@ describe('ticket detail', () => {
   })
 })
 
+describe('ticket detail actor state', () => {
+  it('marks the requester and validation state for the actor', async () => {
+    const { db, actors, ids } = fixtures
+    const asRequester = await getTicketDetail(
+      db,
+      actors.requester,
+      ids.ticketA1,
+    )
+    expect(asRequester).toMatchObject({
+      isRequester: true,
+      requesterValidated: false,
+    })
+
+    const asAdmin = await getTicketDetail(db, actors.admin, ids.ticketA1)
+    expect(asAdmin).toMatchObject({
+      isRequester: false,
+      requesterValidated: false,
+    })
+  })
+})
+
 describe('ticket list fields', () => {
   it('includes closedAt in the list item', async () => {
     const { db, actors, ids } = fixtures

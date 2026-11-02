@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 
+import type { Actor } from '../auth/authorization.js'
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from './db.js'
 import type { HandledEvent } from './events.js'
@@ -24,6 +25,40 @@ export function notFound(): AppError {
 
 export function conflict(message: string): AppError {
   return new AppError(409, 'conflict', message)
+}
+
+const VALIDATED_REQUESTER_EXEMPT = new Set(['validate', 'open_claim', 'rate'])
+
+/**
+ * El solicitante que ya validó su lado no puede editar el tiquet mientras
+ * siga atendido; solo conserva la reclamación, la validación pendiente y
+ * la calificación.
+ */
+export async function assertValidatedRequesterCanAct(
+  db: DbExecutor,
+  actor: Actor,
+  ticketId: string,
+  action: string,
+): Promise<void> {
+  if (VALIDATED_REQUESTER_EXEMPT.has(action)) return
+  const result = await db.execute(sql`
+    select exists (
+      select 1
+      from public.tickets t
+      join public.requesters r on r.id = t.requester_id
+      join public.ticket_validations v
+        on v.ticket_id = t.id and v.cycle = t.cycle
+       and v.validator_role = 'requester'
+      where t.id = ${ticketId}
+        and t.status in ('attended', 'under_claim')
+        and r.user_id = ${actor.id}
+    ) as blocked
+  `)
+  if ((result.rows[0] as { blocked: boolean } | undefined)?.blocked) {
+    throw conflict(
+      'El tiquet ya fue validado; espera a que se cierre para editarlo',
+    )
+  }
 }
 
 export function forbidden(message: string): AppError {

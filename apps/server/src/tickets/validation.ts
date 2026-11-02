@@ -130,6 +130,29 @@ async function shouldClose(
   return Boolean(row?.requester && row.supervisor)
 }
 
+async function recordValidation(
+  tx: DbExecutor,
+  input: {
+    ticketId: string
+    cycle: number
+    actorId: string
+    role: 'requester' | 'supervisor'
+  },
+): Promise<void> {
+  const inserted = await tx.execute(sql`
+    insert into public.ticket_validations (
+      ticket_id, cycle, validator_user_id, validator_role
+    ) values (
+      ${input.ticketId}, ${input.cycle}, ${input.actorId}, ${input.role}
+    )
+    on conflict (ticket_id, cycle, validator_role) do nothing
+    returning id
+  `)
+  if (!inserted.rows[0]) {
+    throw conflict('Ya registraste tu validación para este ciclo')
+  }
+}
+
 async function validateInTransaction(
   tx: DbExecutor,
   actor: Actor,
@@ -157,12 +180,12 @@ async function validateInTransaction(
 
   const policy = await validationPolicy(tx)
   const role = await validationRole(tx, actor, ticket, policy)
-  await tx.execute(sql`
-    insert into public.ticket_validations (
-      ticket_id, cycle, validator_user_id, validator_role
-    ) values (${ticketId}, ${ticket.cycle}, ${actor.id}, ${role})
-    on conflict (ticket_id, cycle, validator_role) do nothing
-  `)
+  await recordValidation(tx, {
+    ticketId,
+    cycle: ticket.cycle,
+    actorId: actor.id,
+    role,
+  })
 
   const close = await shouldClose(tx, ticketId, ticket.cycle, policy)
   if (close) {

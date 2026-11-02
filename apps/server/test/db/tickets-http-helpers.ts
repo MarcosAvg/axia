@@ -38,9 +38,14 @@ export type TicketHttpContext = {
   app: FastifyInstance
   db: Database
   pool: Pool
+  runtimePool: Pool
   ids: TicketFixtureIds
   cookies: TicketHttpCookies
   events: EventHub
+}
+
+type BuildTicketHttpAppOptions = {
+  runtimeConnectionString?: string
 }
 
 async function loginCookie(app: FastifyInstance, username: string) {
@@ -82,7 +87,9 @@ async function seedLoginUsers(db: Database, passwordHash: string) {
   `)
 }
 
-export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
+export async function buildTicketHttpApp(
+  options: BuildTicketHttpAppOptions = {},
+): Promise<TicketHttpContext> {
   await prepareTestDatabase()
   const created = createDb(ownerConnectionString())
   const catalog = await createCatalog(created.db)
@@ -93,21 +100,24 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
   const passwordHash = await hashPassword(PASSWORD)
   await seedLoginUsers(created.db, passwordHash)
 
-  const auth = createAuthService(created.db, testConfig)
-  const tickets = createTicketService(created.db)
-  const catalogs = createCatalogService(created.db)
-  const evidence = createEvidenceService(created.db, testConfig)
-  const events = createEventHub(created.db)
+  const runtime = options.runtimeConnectionString
+    ? createDb(options.runtimeConnectionString)
+    : created
+  const auth = createAuthService(runtime.db, testConfig)
+  const tickets = createTicketService(runtime.db)
+  const catalogs = createCatalogService(runtime.db)
+  const evidence = createEvidenceService(runtime.db, testConfig)
+  const events = createEventHub(runtime.db)
   const app = await buildApp({
     config: testConfig,
     auth,
-    db: created.db,
+    db: runtime.db,
     tickets,
     catalogs,
     evidence,
-    realtime: { db: created.db, events },
-    sync: { db: created.db },
-    readiness: () => checkDatabase(created.pool),
+    realtime: { db: runtime.db, events },
+    sync: { db: runtime.db },
+    readiness: () => checkDatabase(runtime.pool),
     logger: false,
   })
 
@@ -120,12 +130,21 @@ export async function buildTicketHttpApp(): Promise<TicketHttpContext> {
     noAccess: await loginCookie(app, 'no-access'),
   }
 
-  return { app, db: created.db, pool: created.pool, ids, cookies, events }
+  return {
+    app,
+    db: created.db,
+    pool: created.pool,
+    runtimePool: runtime.pool,
+    ids,
+    cookies,
+    events,
+  }
 }
 
 export async function closeTicketHttpApp(context: TicketHttpContext) {
   await context.app.close()
   await context.pool.end()
+  if (context.runtimePool !== context.pool) await context.runtimePool.end()
 }
 
 export function authHeaders(cookie?: string) {
