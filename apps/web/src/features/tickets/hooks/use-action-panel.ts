@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import type { ActionKey } from '../domain/actions'
-import { actionsRequiringSubject } from '../domain/actions'
+import { actionsRequiringSubject, isProxyAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useMyOffers } from '../hooks/use-tickets'
 import { useTicketActions } from '../hooks/use-ticket-actions'
@@ -63,9 +63,10 @@ export function useActionPanel({
   }
   const visible = actions.filter(
     (action) =>
-      ONE_CLICK.includes(action) ||
-      FORM_ACTIONS.includes(action) ||
-      DEDICATED.includes(action),
+      (!subject || isProxyAction(action)) &&
+      (ONE_CLICK.includes(action) ||
+        FORM_ACTIONS.includes(action) ||
+        DEDICATED.includes(action)),
   )
   const blocked = actionsRequiringSubject(identity, visible, Boolean(subject))
   const activeIds = participants

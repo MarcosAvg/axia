@@ -21,6 +21,7 @@ interface SubmitContext {
   ticketId: string
   cycle: number
   occurredAt?: string
+  subjectTechnicianId?: string
   onClose: () => void
   upload: ReturnType<typeof useUploadEvidence>
   setFilePending: (pending: boolean) => void
@@ -45,6 +46,7 @@ async function uploadEvidenceForAction({
   ticketId,
   cycle,
   occurredAt,
+  subjectTechnicianId,
   upload,
   setFilePending,
   setEvidenceError,
@@ -62,6 +64,7 @@ async function uploadEvidenceForAction({
       file,
       note: action === 'record_progress' ? values.text.trim() || null : null,
       occurredAt,
+      subjectTechnicianId,
     })
     return true
   } catch (error) {
@@ -98,6 +101,17 @@ async function submitAction(context: SubmitContext) {
 }
 
 /** Estado y envío de una acción: valida, sube la evidencia y luego ejecuta. */
+type ActionSubmissionOptions = {
+  actions: Mutations
+  values: ActionValues
+  action: ActionKey
+  ticketId: string
+  cycle: number
+  occurredAt?: string
+  subjectTechnicianId?: string
+  onClose: () => void
+}
+
 export function useActionSubmission({
   actions,
   values,
@@ -105,16 +119,9 @@ export function useActionSubmission({
   ticketId,
   cycle,
   occurredAt,
+  subjectTechnicianId,
   onClose,
-}: {
-  actions: Mutations
-  values: ActionValues
-  action: ActionKey
-  ticketId: string
-  cycle: number
-  occurredAt?: string
-  onClose: () => void
-}) {
+}: ActionSubmissionOptions) {
   const upload = useUploadEvidence()
   const [file, setFileState] = useState<File | null>(null)
   const [evidenceError, setEvidenceError] = useState<string | null>(null)
@@ -123,17 +130,14 @@ export function useActionSubmission({
   >({})
   const [uploading, setUploading] = useState(false)
   const evidenceType: EvidenceType | undefined = evidenceForAction(action)
-
   function clearValidation() {
     setValidationErrors({})
     setEvidenceError(null)
   }
-
   function setFile(next: File | null) {
     clearValidation()
     setFileState(next)
   }
-
   const submit = (event: FormEvent) =>
     submitAction({
       event,
@@ -144,6 +148,7 @@ export function useActionSubmission({
       ticketId,
       cycle,
       occurredAt,
+      subjectTechnicianId,
       onClose,
       upload,
       setFilePending: setUploading,

@@ -20,6 +20,25 @@ export function timelineNote(item: TicketTimelineItem): string | null {
   return null
 }
 
+const TARGET_EVENTS = new Set([
+  'assigned_technician',
+  'reassigned_technician',
+  'auxiliary_added',
+  'reassigned_supervisor',
+])
+
+/** Nombre del sujeto y etiqueta según el tipo de evento. */
+export function timelineSubject(
+  item: TicketTimelineItem,
+): { label: 'subject' | 'target'; name: string } | null {
+  const name =
+    item.subjectRequesterName ??
+    item.subjectTechnicianName ??
+    item.subjectUserName
+  if (!name || name === item.actorName) return null
+  return { label: TARGET_EVENTS.has(item.type) ? 'target' : 'subject', name }
+}
+
 /** Agrupa la línea de tiempo por ciclo de atención, en orden ascendente. */
 export function groupTimelineByCycle(
   items: TicketTimelineItem[],

@@ -134,7 +134,9 @@ export interface TicketTimelineItem {
   type: EventType
   occurredAt: string
   actorName: string | null
+  subjectUserName: string | null
   subjectTechnicianName: string | null
+  subjectRequesterName: string | null
   reasonName: string | null
   payload: Record<string, unknown>
 }

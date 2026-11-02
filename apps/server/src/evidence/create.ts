@@ -8,6 +8,7 @@ import { AppError } from '../http/errors.js'
 import { parseActionTime } from '../tickets/action-time.js'
 import type { DbExecutor } from '../tickets/db.js'
 import { writeEvent } from '../tickets/events.js'
+import { assertTechnicianAction } from '../tickets/proxy.js'
 import { findVisibleTicket } from '../tickets/repository.js'
 import { canAttachEvidence } from './access.js'
 import type { CreateEvidenceInput } from './schemas.js'
@@ -103,12 +104,22 @@ async function insertEvidence(
 ): Promise<string> {
   return db.transaction(async (tx) => {
     const cycle = await ticketCycle(tx, ticketId)
+    const ticket = await tx.execute(sql`
+      select requester_id from public.tickets where id = ${ticketId}
+    `)
+    const requesterId = (ticket.rows[0] as { requester_id: string })
+      .requester_id
+    const technicianSubject = ['before', 'during', 'after'].includes(input.type)
+      ? (input.subjectTechnicianId ?? actor.technicianId)
+      : null
+    const requesterSubject =
+      input.type === 'claim' || input.type === 'request' ? requesterId : null
     const inserted = await tx.execute(sql`
       insert into public.evidence (
         ticket_id, cycle, type, captured_by_technician_id,
         captured_by_user_id, uploaded_by, client_request_id, mime_type, occurred_at
       ) values (
-        ${ticketId}, ${cycle}, ${input.type}, ${actor.technicianId},
+        ${ticketId}, ${cycle}, ${input.type}, ${technicianSubject},
         ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
         ${input.occurredAt ?? new Date().toISOString()}
       )
@@ -120,6 +131,8 @@ async function insertEvidence(
       type: 'evidence_added',
       actorId: actor.id,
       clientRequestId: input.clientRequestId,
+      subjectTechnicianId: technicianSubject,
+      subjectRequesterId: requesterSubject,
       payload: { evidenceId, type: input.type },
       occurredAt: input.occurredAt,
     })
@@ -128,6 +141,34 @@ async function insertEvidence(
     `)
     return evidenceId
   })
+}
+
+async function assertEvidenceSubject(
+  db: Database,
+  actor: Actor,
+  access: NonNullable<Awaited<ReturnType<typeof findVisibleTicket>>>,
+  input: CreateEvidenceInput,
+) {
+  if (input.subjectTechnicianId) {
+    if (!['before', 'during', 'after'].includes(input.type)) {
+      throw new AppError(
+        400,
+        'validation',
+        'El sujeto técnico solo aplica a evidencia de trabajo',
+      )
+    }
+    await assertTechnicianAction({
+      db,
+      actor,
+      access,
+      permission: 'ticket.record_progress',
+      subjectTechnicianId: input.subjectTechnicianId,
+    })
+    return
+  }
+  if (!canAttachEvidence(actor, access, input.type)) {
+    throw forbidden()
+  }
 }
 
 export async function createEvidence(
@@ -142,9 +183,7 @@ export async function createEvidence(
   if (!access) {
     throw new AppError(404, 'not_found', 'Tiquet no encontrado')
   }
-  if (!canAttachEvidence(actor, access, input.type)) {
-    throw forbidden()
-  }
+  await assertEvidenceSubject(db, actor, access, input)
   if (input.occurredAt) {
     if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
     parseActionTime(input.occurredAt)

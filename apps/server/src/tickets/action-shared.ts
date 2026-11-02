@@ -11,6 +11,7 @@ export type LockedTicket = {
   cycle: number
   category_id: string
   team_id: string
+  requester_id: string
 }
 
 export type ActionResult = {
@@ -112,7 +113,7 @@ export async function lockTicket(
   ticketId: string,
 ): Promise<LockedTicket> {
   const result = await tx.execute(sql`
-    select id, status, cycle, category_id, team_id
+    select id, status, cycle, category_id, team_id, requester_id
     from public.tickets
     where id = ${ticketId}
     for update

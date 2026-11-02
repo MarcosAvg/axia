@@ -20,7 +20,8 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
    asignación apunta al catálogo, no a la cuenta.
 3. **Actuar en nombre de otro (proxy).** Cuando el técnico o el solicitante no tienen cuenta,
    otra persona ejecuta sus acciones y registra sus tiempos. El historial distingue siempre
-   **actor** (quién lo hizo) de **sujeto** (a nombre de quién). El **administrador** puede actuar
+   **actor** (quién lo hizo) de **sujeto** (a nombre de quién). Los tramos de tiempo y la evidencia
+   se atribuyen al sujeto; el actor solo queda como auditoría. El **administrador** puede actuar
    en nombre de cualquiera; el **supervisor**, sobre sus técnicos (asignados o auxiliares).
 4. **Tiempos por acción.** Las acciones directas registran la hora en que se ejecutan. Quien lleva
    el seguimiento (supervisor o administrador) puede fijar la **hora real de la acción** solo
@@ -204,8 +205,8 @@ puede, precondiciones y efectos.
   **una pausa abierta**; modélalo de forma que relajar esa regla no exija rediseño.
 - **RN-14 Atendido.** El técnico lo marca con descripción del trabajo y evidencia `after` del ciclo.
 - **RN-15 Validación.** Política de la instancia (no por tiquet): solo solicitante, solo supervisor, o
-  ambos en cualquier orden. Opcionalmente, validación automática tras N días sin respuesta (**apagada
-  por defecto**). Cumplida la política, pasa a `closed`. El solicitante puede dejar calificación de
+  ambos con el solicitante primero y el supervisor después. Opcionalmente, validación automática tras
+  N días sin respuesta (**apagada por defecto**). Cumplida la política, pasa a `closed`. El solicitante puede dejar calificación de
   satisfacción (1 a 5) y comentario; se ofrece en un modal al confirmar su validación y también puede
   registrarse antes del cierre una vez validado su lado. La calificación es única, opcional y no se
   modifica después del primer envío. Mientras el tiquet siga `attended` o en reclamación, el

@@ -23,6 +23,7 @@ export function useUploadEvidence() {
       file: File
       note?: string | null
       occurredAt?: string
+      subjectTechnicianId?: string
     }) => saveAndUploadEvidence(variables),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({

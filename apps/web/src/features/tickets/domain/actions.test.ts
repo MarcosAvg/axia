@@ -299,6 +299,7 @@ describe('isProxyAction', () => {
   it('solo las acciones del técnico admiten sujeto', () => {
     expect(isProxyAction('start')).toBe(true)
     expect(isProxyAction('recapture')).toBe(true)
+    expect(isProxyAction('record_progress')).toBe(true)
     expect(isProxyAction('comment')).toBe(false)
     expect(isProxyAction('validate')).toBe(false)
   })

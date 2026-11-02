@@ -181,6 +181,7 @@ async function finalizeCreate({
     type: 'created',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
+    subjectRequesterId: input.requesterId,
     payload: { onBehalf },
   })
   await routeTicket({

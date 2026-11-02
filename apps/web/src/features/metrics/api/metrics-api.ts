@@ -4,8 +4,10 @@ import { apiFetch } from '@/lib/api-client'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
   RejectCancelRow,
+  RequesterTimeRow,
   RoutingSummary,
   TechnicianRow,
+  TechnicianSubjectTimeRow,
 } from '../domain/indicators'
 import { intervalToMinutes } from '../domain/metrics'
 import { toNullableNumber, toNumber } from './numbers'
@@ -217,6 +219,56 @@ export async function fetchByTechnician(
     participationLaborMinutes: intervalToMinutes(row.participation_time_labor),
     participationExtraMinutes: intervalToMinutes(row.participation_time_extra),
     assignedCount: toNumber(row.assigned_count),
+  }))
+}
+
+export async function fetchTechnicianSubjectTimes(
+  filters: MetricsFilters,
+): Promise<TechnicianSubjectTimeRow[]> {
+  const items = await fetchItems<{
+    technician_id: string
+    technician_name: string
+    tickets: number
+    active_time: string | null
+    active_time_labor: string | null
+    pause_time: string | null
+    pause_time_labor: string | null
+    wait_time: string | null
+    wait_time_labor: string | null
+  }>('/api/metrics/technician-subject-times', filters)
+  return items.map((row) => ({
+    technicianId: row.technician_id,
+    name: row.technician_name,
+    tickets: toNumber(row.tickets),
+    activeMinutes: intervalToMinutes(row.active_time),
+    activeLaborMinutes: intervalToMinutes(row.active_time_labor),
+    pauseMinutes: intervalToMinutes(row.pause_time),
+    pauseLaborMinutes: intervalToMinutes(row.pause_time_labor),
+    waitMinutes: intervalToMinutes(row.wait_time),
+    waitLaborMinutes: intervalToMinutes(row.wait_time_labor),
+  }))
+}
+
+export async function fetchRequesterTimes(
+  filters: MetricsFilters,
+): Promise<RequesterTimeRow[]> {
+  const items = await fetchItems<{
+    requester_id: string
+    requester_name: string
+    tickets: number
+    validation_time: string | null
+    validation_time_labor: string | null
+    claim_time: string | null
+    claim_time_labor: string | null
+  }>('/api/metrics/requester-times', filters)
+  return items.map((row) => ({
+    requesterId: row.requester_id,
+    name: row.requester_name,
+    tickets: toNumber(row.tickets),
+    validationMinutes: intervalToMinutes(row.validation_time),
+    validationLaborMinutes: intervalToMinutes(row.validation_time_labor),
+    claimMinutes: intervalToMinutes(row.claim_time),
+    claimLaborMinutes: intervalToMinutes(row.claim_time_labor),
   }))
 }
 

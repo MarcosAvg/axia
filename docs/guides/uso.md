@@ -32,7 +32,8 @@ Desde una oferta, usa **Tomar tiquet**; después, **Asignar técnico**. Hasta qu
 demás acciones de coordinación permanecen ocultas: asignar, reasignar, recapturar, rechazar, cancelar,
 cambiar prioridad o marcar duplicado. En el detalle puedes abrir **Más** para otras acciones, como
 **Reasignar supervisor**, **Agregar auxiliar** o **Cambiar prioridad**. Completa el destinatario,
-motivo y demás campos que pida cada formulario.
+motivo y demás campos que pida cada formulario. Si actúas a nombre de un técnico o solicitante, el
+tiempo y la evidencia se atribuyen a esa persona, no a ti.
 
 Para corregir datos usa **Recapturar** sobre el mismo tiquet. Para un registro repetido usa
 **Marcar duplicado** y busca el original por folio. No registres otro tiquet para corregir una
@@ -59,8 +60,9 @@ debe quedar entre las acciones vecinas y el ajuste conserva auditoría.
 ## Validar o reclamar
 
 Cuando esté atendido, abre el detalle y usa **Validar** si te corresponde según la política de
-la instancia. La calificación de satisfacción es opcional: se abre en un modal al validar y, si la
-cierras sin enviarla, puedes usar **Calificar** después. Una vez validado, el solicitante no puede
+la instancia. Si la política exige a ambos, el solicitante valida primero y el supervisor después.
+La calificación de satisfacción es opcional: se abre en un modal al validar y, si la cierras sin
+enviarla, puedes usar **Calificar** después. Una vez validado, el solicitante no puede
 editar el tiquet mientras siga atendido o en reclamación; la reclamación sigue disponible. La
 calificación ya enviada no se modifica.
 

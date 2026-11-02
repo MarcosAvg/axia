@@ -74,6 +74,10 @@ Un supervisor sin asignación abierta como titular no puede asignar, reasignar, 
 cancelar, cambiar prioridad ni marcar duplicado sobre un tiquet `registered`; primero debe enviar
 `take`. El administrador conserva la cola de tiquets sin ruteo y puede asignar desde `registered`.
 
+La línea de tiempo expone `subjectUserName`, `subjectTechnicianName` y `subjectRequesterName`. El
+actor es quien ejecuta; el sujeto es la persona a la que se atribuye la acción y el tiempo. En
+validación `both`, el solicitante valida primero y el supervisor después.
+
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
 hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de
 técnico ejecutadas por proxy (`start`, `pause`, `advance_pause`, `resume`, `attend`, `recapture`).
@@ -169,6 +173,8 @@ acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
 | `GET` | `/api/metrics/sla-by-priority` |
 | `GET` | `/api/metrics/by-technician` |
 | `GET` | `/api/metrics/technician-times` |
+| `GET` | `/api/metrics/technician-subject-times` |
+| `GET` | `/api/metrics/requester-times` |
 | `GET` | `/api/metrics/supervisors` |
 | `GET` | `/api/metrics/pause-substates` |
 | `GET` | `/api/metrics/reject-cancel` |

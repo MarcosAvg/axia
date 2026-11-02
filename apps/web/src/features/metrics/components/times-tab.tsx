@@ -1,9 +1,15 @@
 import type { DimensionGroup } from '../domain/dimensions'
-import type { TechnicianRow, TechnicianTimeRow } from '../domain/indicators'
+import type {
+  RequesterTimeRow,
+  TechnicianRow,
+  TechnicianSubjectTimeRow,
+  TechnicianTimeRow,
+} from '../domain/indicators'
 import type { MetricsSummary } from '../domain/metrics'
 import { CycleBar } from './cycle-bar'
 import { PhaseHeatmap } from './phase-heatmap'
 import { PhaseTable } from './phase-table'
+import { RequesterTimes } from './requester-times'
 import { TechnicianTimes } from './technician-times'
 import { TimesDimensionTable } from './times-dimension-table'
 
@@ -13,11 +19,15 @@ export function TimesTab({
   groups,
   technicians,
   technicianTimes,
+  technicianSubjectTimes,
+  requesterTimes,
 }: {
   summary: MetricsSummary
   groups: DimensionGroup[]
   technicians: TechnicianRow[]
   technicianTimes: TechnicianTimeRow[]
+  technicianSubjectTimes: TechnicianSubjectTimeRow[]
+  requesterTimes: RequesterTimeRow[]
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -25,7 +35,12 @@ export function TimesTab({
       <PhaseTable summary={summary} />
       <PhaseHeatmap groups={groups} />
       <TimesDimensionTable groups={groups} />
-      <TechnicianTimes technicians={technicians} times={technicianTimes} />
+      <TechnicianTimes
+        technicians={technicians}
+        times={technicianTimes}
+        subjectTimes={technicianSubjectTimes}
+      />
+      <RequesterTimes rows={requesterTimes} />
     </div>
   )
 }

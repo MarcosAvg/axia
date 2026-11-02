@@ -24,6 +24,7 @@ interface EvidenceInput {
   file: File
   note?: string | null
   occurredAt?: string
+  subjectTechnicianId?: string
 }
 
 /** Comprime el archivo y lo guarda en el dispositivo, sin subirlo todavía. */
@@ -41,6 +42,7 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
     fileName: params.file.name,
     note: params.note ?? null,
     occurredAt: params.occurredAt,
+    subjectTechnicianId: params.subjectTechnicianId,
     state: 'pending',
     progress: 0,
     createdAt: Date.now(),
@@ -73,6 +75,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
         mimeType: evidence.mimeType,
         sizeBytes: evidence.blob.size,
         occurredAt: evidence.occurredAt,
+        subjectTechnicianId: evidence.subjectTechnicianId,
       }),
     },
   )

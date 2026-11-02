@@ -135,6 +135,7 @@ async function openClaimInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
+    subjectRequesterId: ticket.requester_id,
     payload: { description: input.description },
   })
   return { ticketId: input.ticketId, action: 'open_claim', replayed: false }

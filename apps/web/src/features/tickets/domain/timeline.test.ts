@@ -13,6 +13,8 @@ function item(
     occurredAt: '2026-10-01T10:00:00Z',
     actorName: 'Ana',
     subjectTechnicianName: null,
+    subjectRequesterName: null,
+    subjectUserName: null,
     reasonName: null,
     payload,
   }

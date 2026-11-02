@@ -220,6 +220,7 @@ function useTicketActionForm({
     ticketId,
     cycle,
     occurredAt: time.iso,
+    subjectTechnicianId,
     onClose,
   })
   const state = actionFormState(

@@ -38,6 +38,8 @@ export interface Evidence {
   note?: string | null
   /** Hora real de la evidencia, si quien la sube puede ajustarla. */
   occurredAt?: string
+  /** Técnico proxy al que se atribuye la evidencia. */
+  subjectTechnicianId?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
   /** Porcentaje de subida (0–100). */
   progress: number

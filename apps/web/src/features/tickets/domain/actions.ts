@@ -81,6 +81,7 @@ const PROXY_ACTIONS: ActionKey[] = [
   'advance_pause',
   'resume',
   'recapture',
+  'record_progress',
 ]
 
 /** Indica si la acción admite un técnico sujeto (proxy). */

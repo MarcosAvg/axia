@@ -24,19 +24,25 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   cambiar prioridad o marcar duplicado. La toma implícita al asignar se retiró; el administrador
   conserva la cola sin ruteo. El detalle expone `hasTaken`. Decisión en el
   [ADR 0107](../decisions/0107-tomar-antes-de-actuar.md).
+- El tiempo y la evidencia se atribuyen al sujeto proxy (técnico o solicitante), no al actor. La
+  migración 0021 añade sujeto solicitante/usuario a eventos y tramos, divide el trabajo cuando cambia
+  el sujeto, rellena el historial y reconstruye los tramos. Se añaden reportes por técnico y por
+  solicitante. En validación `both` el solicitante valida primero y el supervisor después. Decisión
+  en el [ADR 0108](../decisions/0108-atribucion-sujeto-proxy.md).
 
 ## Evidencia de esta tarea
 
-- Pruebas dirigidas: `tickets-lifecycle-http` y `tickets-rating-lock-http` con la aplicación
-  conectada como `axia_app`; `tickets-read` con los fixtures del rol dueño. Todas verdes.
+- Pruebas dirigidas: `tickets-lifecycle-http`, `tickets-rating-lock-http` y
+  `tickets-subject-time-http` con la aplicación conectada como `axia_app`; `tickets-read` con los
+  fixtures del rol dueño. Todas verdes.
 - `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 64 pruebas de servidor y 343 de
   web.
 - `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 17/17 verdes, incluido validar, calificar en el
   modal, ocultar acciones y persistir el resumen tras recargar.
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 46 pruebas de scripts, 64 de
-  servidor, 343 de web, 298 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
+  servidor, 343 de web, 306 de PostgreSQL y 58 de navegador; build correcto. Persiste el aviso
   previo de chunks >500 kB.
-- Documentación: 39 archivos, 0 enlaces rotos. `pnpm test:affected`: 281 pruebas de servidor, 85
+- Documentación: 40 archivos, 0 enlaces rotos. `pnpm test:affected`: 306 pruebas de servidor, 107
   de web y el flujo E2E dirigido, todas verdes.
 - Revisión independiente del diff: dos hallazgos importantes corregidos; la guarda del solicitante
   validado ahora corre dentro de la transacción, después del replay y del bloqueo, con prueba de

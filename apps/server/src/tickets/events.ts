@@ -17,6 +17,7 @@ export type EventInput = {
   reasonId?: string | null
   subjectUserId?: string | null
   subjectTechnicianId?: string | null
+  subjectRequesterId?: string | null
   occurredAt?: string
 }
 
@@ -34,32 +35,38 @@ export async function findHandledEvent(
   return row ? { ticketId: row.ticket_id, type: row.type } : null
 }
 
+function normalizedEvent(input: EventInput) {
+  return {
+    ...input,
+    actorId: input.actorId ?? null,
+    clientRequestId: input.clientRequestId ?? null,
+    payload: input.payload ?? {},
+    reasonId: input.reasonId ?? null,
+    subjectUserId: input.subjectUserId ?? null,
+    subjectTechnicianId: input.subjectTechnicianId ?? null,
+    subjectRequesterId: input.subjectRequesterId ?? null,
+    occurredAt:
+      input.occurredAt ?? currentOccurredAt() ?? new Date().toISOString(),
+  }
+}
+
 export async function writeEvent(
   executor: DbExecutor,
-  {
-    ticketId,
-    type,
-    actorId,
-    clientRequestId,
-    payload = {},
-    reasonId = null,
-    subjectUserId = null,
-    subjectTechnicianId = null,
-    occurredAt,
-  }: EventInput,
+  input: EventInput,
 ): Promise<{ id: string }> {
+  const event = normalizedEvent(input)
   const result = await executor.execute(sql`
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
-      reason_id, payload, client_request_id, occurred_at
+      subject_requester_id, reason_id, payload, client_request_id, occurred_at
     )
     select
-      t.id, t.cycle, ${type}, ${actorId ?? null}, ${subjectUserId},
-      ${subjectTechnicianId}, ${reasonId}, ${JSON.stringify(payload)}::jsonb,
-      ${clientRequestId ?? null},
-      ${occurredAt ?? currentOccurredAt() ?? new Date().toISOString()}::timestamptz
+      t.id, t.cycle, ${event.type}, ${event.actorId}, ${event.subjectUserId},
+      ${event.subjectTechnicianId}, ${event.subjectRequesterId},
+      ${event.reasonId}, ${JSON.stringify(event.payload)}::jsonb,
+      ${event.clientRequestId}, ${event.occurredAt}::timestamptz
     from public.tickets t
-    where t.id = ${ticketId}
+    where t.id = ${event.ticketId}
     returning id
   `)
   const row = result.rows[0] as { id: string } | undefined

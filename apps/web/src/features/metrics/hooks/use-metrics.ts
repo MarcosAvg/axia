@@ -13,10 +13,12 @@ import {
   fetchMetricsSummary,
   fetchPausesByReason,
   fetchRejectCancel,
+  fetchRequesterTimes,
   fetchRouting,
   fetchSatisfaction,
   fetchSla,
   fetchSlaByPriority,
+  fetchTechnicianSubjectTimes,
 } from '../api/metrics-api'
 
 const metricsKeys = {
@@ -30,6 +32,8 @@ const metricsKeys = {
   slaByPriority: ['metrics', 'sla-by-priority'] as const,
   byTechnician: ['metrics', 'by-technician'] as const,
   technicianTimes: ['metrics', 'technician-times'] as const,
+  technicianSubjectTimes: ['metrics', 'technician-subject-times'] as const,
+  requesterTimes: ['metrics', 'requester-times'] as const,
   supervisors: ['metrics', 'supervisors'] as const,
   pauseSubstates: ['metrics', 'pause-substates'] as const,
   rejectCancel: ['metrics', 'reject-cancel'] as const,
@@ -125,6 +129,22 @@ export function useTechnicianTimes(filters: MetricsFilters) {
     metricsKeys.technicianTimes,
     filters,
     fetchTechnicianTimes,
+  )
+}
+
+export function useTechnicianSubjectTimes(filters: MetricsFilters) {
+  return useFilteredQuery(
+    metricsKeys.technicianSubjectTimes,
+    filters,
+    fetchTechnicianSubjectTimes,
+  )
+}
+
+export function useRequesterTimes(filters: MetricsFilters) {
+  return useFilteredQuery(
+    metricsKeys.requesterTimes,
+    filters,
+    fetchRequesterTimes,
   )
 }
 

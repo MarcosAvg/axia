@@ -42,6 +42,8 @@ export function MetricsDashboard() {
           satisfactionDistribution={board.satisfactionDistribution}
           technicians={board.technicians}
           technicianTimes={board.technicianTimes}
+          technicianSubjectTimes={board.technicianSubjectTimes}
+          requesterTimes={board.requesterTimes}
           supervisors={board.supervisors}
           rejectCancel={board.rejectCancel}
           routing={board.routing}

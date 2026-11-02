@@ -33,7 +33,9 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - El solicitante puede tener cuenta o existir solo en el catálogo.
 - El técnico puede tener cuenta o existir solo en el catálogo.
 - Las asignaciones y participantes conservan el histórico con `ended_at`.
-- Cada cambio de estado genera un evento con actor, sujeto, motivo y hora.
+- Cada cambio de estado genera un evento con actor, sujeto, motivo y hora. El sujeto puede ser
+  usuario, técnico o solicitante; los tramos de `time_spans` guardan el mismo sujeto para atribuir
+  el tiempo a la persona y no a quien ejecuta la acción.
 
 ## Reglas
 

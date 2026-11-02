@@ -137,6 +137,34 @@ describe('satisfaction rules', () => {
   })
 })
 
+describe('validation order', () => {
+  it('fills the requester side first when a supervisor validates', async () => {
+    const ticketId = await attendedTicket()
+    const first = await action(context.cookies.supervisor, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+    expect(first.statusCode).toBe(200)
+
+    const roles = await context.db.execute(sql`
+      select validator_role from public.ticket_validations
+      where ticket_id = ${ticketId}
+      order by validator_role
+    `)
+    expect(roles.rows).toEqual([{ validator_role: 'requester' }])
+
+    const second = await action(context.cookies.supervisor, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+    expect(second.statusCode).toBe(200)
+    const closed = await context.db.execute(sql`
+      select status from public.tickets where id = ${ticketId}
+    `)
+    expect(closed.rows[0]).toMatchObject({ status: 'closed' })
+  })
+})
+
 describe('validated requester edits', () => {
   it('cannot cancel or comment while the ticket is still attended', async () => {
     const ticketId = await validatedAttendedTicket()

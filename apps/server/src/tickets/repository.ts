@@ -45,6 +45,8 @@ export type TimelineItem = {
   subjectUserName: string | null
   subjectTechnicianId: string | null
   subjectTechnicianName: string | null
+  subjectRequesterId: string | null
+  subjectRequesterName: string | null
   reasonId: string | null
   reasonName: string | null
 }
@@ -92,6 +94,8 @@ type TimelineRow = {
   subject_user_name: string | null
   subject_technician_id: string | null
   subject_technician_name: string | null
+  subject_requester_id: string | null
+  subject_requester_name: string | null
   reason_id: string | null
   reason_name: string | null
 }
@@ -283,6 +287,7 @@ export async function getTimeline(
       e.actor_id, e.actor_name,
       e.subject_user_id, e.subject_user_name,
       e.subject_technician_id, e.subject_technician_name,
+      e.subject_requester_id, e.subject_requester_name,
       e.reason_id, e.reason_name
     from public.v_ticket_timeline e
     where e.ticket_id = ${ticketId}
@@ -304,6 +309,8 @@ export async function getTimeline(
     subjectUserName: row.subject_user_name,
     subjectTechnicianId: row.subject_technician_id,
     subjectTechnicianName: row.subject_technician_name,
+    subjectRequesterId: row.subject_requester_id,
+    subjectRequesterName: row.subject_requester_name,
     reasonId: row.reason_id,
     reasonName: row.reason_name,
   }))

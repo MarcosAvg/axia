@@ -26,7 +26,13 @@ import {
   slaByPriority,
   type MetricsFilters,
 } from './service.js'
-import { pauseSubstates, supervisors, technicianTimes } from './people.js'
+import {
+  pauseSubstates,
+  requesterTimes,
+  subjectTechnicianTimes,
+  supervisors,
+  technicianTimes,
+} from './people.js'
 
 const filterSchema = z.object({
   from: z
@@ -78,6 +84,34 @@ function registerMetric(app: FastifyInstance, route: MetricRoute) {
   }))
 }
 
+const METRIC_ROUTES = [
+  ['/api/metrics/pauses', pausesByReason],
+  ['/api/metrics/duplicate-tickets', duplicateTickets],
+  ['/api/metrics/duplicate-alerts', duplicateAlerts],
+  ['/api/metrics/duplicates-by-dimension', duplicatesByDimension],
+  ['/api/metrics/satisfaction', satisfaction],
+  ['/api/metrics/sla', sla],
+  ['/api/metrics/sla-by-priority', slaByPriority],
+  ['/api/metrics/by-technician', byTechnician],
+  ['/api/metrics/technician-times', technicianTimes],
+  ['/api/metrics/technician-subject-times', subjectTechnicianTimes],
+  ['/api/metrics/requester-times', requesterTimes],
+  ['/api/metrics/supervisors', supervisors],
+  ['/api/metrics/pause-substates', pauseSubstates],
+  ['/api/metrics/reject-cancel', rejectCancel],
+  ['/api/metrics/routing', routing],
+] as const
+
+function registerScopedMetrics(
+  app: FastifyInstance,
+  db: Database,
+  guard: Guard[],
+) {
+  for (const [path, load] of METRIC_ROUTES) {
+    registerMetric(app, { db, guard, path, load })
+  }
+}
+
 export function registerMetricsRoutes(
   app: FastifyInstance,
   auth: AuthService,
@@ -121,21 +155,5 @@ export function registerMetricsRoutes(
     },
   )
 
-  for (const [path, load] of [
-    ['/api/metrics/pauses', pausesByReason],
-    ['/api/metrics/duplicate-tickets', duplicateTickets],
-    ['/api/metrics/duplicate-alerts', duplicateAlerts],
-    ['/api/metrics/duplicates-by-dimension', duplicatesByDimension],
-    ['/api/metrics/satisfaction', satisfaction],
-    ['/api/metrics/sla', sla],
-    ['/api/metrics/sla-by-priority', slaByPriority],
-    ['/api/metrics/by-technician', byTechnician],
-    ['/api/metrics/technician-times', technicianTimes],
-    ['/api/metrics/supervisors', supervisors],
-    ['/api/metrics/pause-substates', pauseSubstates],
-    ['/api/metrics/reject-cancel', rejectCancel],
-    ['/api/metrics/routing', routing],
-  ] as const) {
-    registerMetric(app, { db, guard: metricsView, path, load })
-  }
+  registerScopedMetrics(app, db, metricsView)
 }

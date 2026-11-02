@@ -43,7 +43,7 @@ async function insertRating(
   tx: DbExecutor,
   actor: Actor,
   input: RateInput,
-): Promise<void> {
+): Promise<string> {
   const requester = await tx.execute(sql`
     select requester_id from public.tickets where id = ${input.ticketId}
   `)
@@ -61,6 +61,7 @@ async function insertRating(
   if (!inserted.rows[0]) {
     throw conflict('El tiquet ya tiene una calificación')
   }
+  return requesterId
 }
 
 async function rateInTransaction(
@@ -96,12 +97,13 @@ async function rateInTransaction(
       'Solo se puede calificar un tiquet cerrado o validado por el solicitante',
     )
   }
-  await insertRating(tx, actor, input)
+  const requesterId = await insertRating(tx, actor, input)
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'rated',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
+    subjectRequesterId: requesterId,
     payload: { score: input.score, comment: input.comment },
   })
   return { ticketId: input.ticketId, action: 'rate', replayed: false }

@@ -6,7 +6,11 @@ import {
 } from '@/components/ui/chart'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
-import type { TechnicianRow, TechnicianTimeRow } from '../domain/indicators'
+import type {
+  TechnicianRow,
+  TechnicianSubjectTimeRow,
+  TechnicianTimeRow,
+} from '../domain/indicators'
 import { formatMinutes } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
@@ -15,7 +19,9 @@ import { RankingBars } from './ranking-bars'
 
 const t = metricsMessages.times
 
-type TechnicianView = TechnicianRow & Partial<TechnicianTimeRow>
+type TechnicianView = TechnicianRow &
+  Partial<TechnicianTimeRow> &
+  Partial<TechnicianSubjectTimeRow>
 
 interface ScatterPoint {
   name: string
@@ -144,19 +150,61 @@ function timeColumns(): DataTableColumn<TechnicianView>[] {
   ]
 }
 
+function subjectColumns(): DataTableColumn<TechnicianView>[] {
+  return [
+    {
+      id: 'attributedActive',
+      header: 'Trabajo atribuido',
+      hideBelow: 'md',
+      cell: (row) =>
+        row.activeMinutes === undefined
+          ? '—'
+          : formatMinutes(row.activeMinutes),
+    },
+    {
+      id: 'attributedPause',
+      header: 'Pausa atribuida',
+      hideBelow: 'xl',
+      cell: (row) =>
+        row.pauseMinutes === undefined ? '—' : formatMinutes(row.pauseMinutes),
+    },
+    {
+      id: 'attributedWait',
+      header: 'Espera atribuida',
+      hideBelow: 'xl',
+      cell: (row) =>
+        row.waitMinutes === undefined ? '—' : formatMinutes(row.waitMinutes),
+    },
+  ]
+}
+
+function buildRows(
+  technicians: TechnicianRow[],
+  times: TechnicianTimeRow[],
+  subjectTimes: TechnicianSubjectTimeRow[],
+): TechnicianView[] {
+  const timeById = new Map(times.map((time) => [time.technicianId, time]))
+  const subjectById = new Map(
+    subjectTimes.map((time) => [time.technicianId, time]),
+  )
+  return technicians.map((technician) => ({
+    ...technician,
+    ...timeById.get(technician.technicianId),
+    ...subjectById.get(technician.technicianId),
+  }))
+}
+
 /** Tiempos de los tiquets que lideró cada técnico, con burbujas y detalle. */
 export function TechnicianTimes({
   technicians,
   times,
+  subjectTimes,
 }: {
   technicians: TechnicianRow[]
   times: TechnicianTimeRow[]
+  subjectTimes: TechnicianSubjectTimeRow[]
 }) {
-  const timeById = new Map(times.map((time) => [time.technicianId, time]))
-  const rows: TechnicianView[] = technicians.map((technician) => ({
-    ...technician,
-    ...timeById.get(technician.technicianId),
-  }))
+  const rows = buildRows(technicians, times, subjectTimes)
   const maxParticipation = Math.max(
     1,
     ...rows.map((row) => row.participationMinutes),
@@ -193,7 +241,11 @@ export function TechnicianTimes({
         )}
         <div className="max-h-80 overflow-auto">
           <DataTable
-            columns={[...identityColumns(maxParticipation), ...timeColumns()]}
+            columns={[
+              ...identityColumns(maxParticipation),
+              ...timeColumns(),
+              ...subjectColumns(),
+            ]}
             rows={rows}
             getRowId={(row) => row.technicianId}
           />

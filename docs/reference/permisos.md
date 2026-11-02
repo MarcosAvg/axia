@@ -56,7 +56,9 @@ estas comprobaciones.
 
 Para acciones de técnico, `subjectTechnicianId` activa el control de `act_on_behalf`: con ámbito
 `all` admite cualquier técnico activo; con `team`, técnicos de los equipos de la cuenta. El sujeto
-debe participar en el tiquet, salvo en recaptura, cuyo servicio no exige participación. Otros ámbitos no habilitan este mecanismo. El actor debe poder ver el tiquet.
+debe participar en el tiquet, salvo en recaptura, cuyo servicio no exige participación. Otros ámbitos no habilitan este mecanismo. El actor debe poder ver el tiquet. El sujeto técnico también se
+aplica a la evidencia de trabajo y es quien recibe el tiempo atribuido; el actor queda como
+auditoría.
 
 Sin sujeto se comprueba el permiso directo de la acción. `time.record_manual` no sustituye estos
 controles: se exige además para fijar o ajustar la hora. Validar o calificar por el solicitante

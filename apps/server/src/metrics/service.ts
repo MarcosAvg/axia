@@ -37,6 +37,16 @@ const intervalFields = [
   'participation_time_labor',
   'participation_time_extra',
   'avg_time_to_take',
+  'active_time',
+  'active_time_labor',
+  'pause_time',
+  'pause_time_labor',
+  'wait_time',
+  'wait_time_labor',
+  'validation_time',
+  'validation_time_labor',
+  'claim_time',
+  'claim_time_labor',
 ]
 
 /** Conserva la representación HTTP sin volver a agrupar resultados SQL. */

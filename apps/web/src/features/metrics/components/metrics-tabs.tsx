@@ -3,9 +3,11 @@ import type { DimensionGroup } from '../domain/dimensions'
 import type {
   PauseSubstateRow,
   RejectCancelRow,
+  RequesterTimeRow,
   RoutingSummary,
   SupervisorRow,
   TechnicianRow,
+  TechnicianSubjectTimeRow,
   TechnicianTimeRow,
 } from '../domain/indicators'
 import type {
@@ -47,6 +49,8 @@ interface MetricsTabsProps {
   satisfactionDistribution: number[]
   technicians: TechnicianRow[]
   technicianTimes: TechnicianTimeRow[]
+  technicianSubjectTimes: TechnicianSubjectTimeRow[]
+  requesterTimes: RequesterTimeRow[]
   supervisors: SupervisorRow[]
   rejectCancel: RejectCancelRow[]
   routing: RoutingSummary
@@ -103,6 +107,8 @@ export function MetricsTabs(props: MetricsTabsProps) {
           groups={props.groups}
           technicians={props.technicians}
           technicianTimes={props.technicianTimes}
+          technicianSubjectTimes={props.technicianSubjectTimes}
+          requesterTimes={props.requesterTimes}
         />
       </TabsContent>
       <TabsContent value="quality">

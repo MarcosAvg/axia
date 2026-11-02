@@ -51,6 +51,28 @@ export interface TechnicianTimeRow {
   avgValidation: number
 }
 
+export interface TechnicianSubjectTimeRow {
+  technicianId: string
+  name: string
+  tickets: number
+  activeMinutes: number
+  activeLaborMinutes: number
+  pauseMinutes: number
+  pauseLaborMinutes: number
+  waitMinutes: number
+  waitLaborMinutes: number
+}
+
+export interface RequesterTimeRow {
+  requesterId: string
+  name: string
+  tickets: number
+  validationMinutes: number
+  validationLaborMinutes: number
+  claimMinutes: number
+  claimLaborMinutes: number
+}
+
 export interface SupervisorRow {
   supervisorId: string
   name: string

@@ -142,7 +142,7 @@ export function TicketActionsPanel({
     participants,
     onValidated,
   })
-  if (panel.visible.length === 0) return null
+  if (panel.visible.length === 0 && !panel.canProxy) return null
 
   return (
     <div className="flex flex-col gap-4">

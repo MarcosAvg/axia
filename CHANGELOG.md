@@ -16,6 +16,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - El supervisor debe tomar el tiquet antes de asignar, reasignar, recapturar, rechazar, cancelar,
   cambiar prioridad o marcar duplicado. Se retira la toma implícita al asignar; el administrador
   conserva la cola de tiquets sin ruteo.
+- En la política de validación `both`, el solicitante valida primero y el supervisor después.
+- El tiempo, la evidencia y el sujeto de la línea de tiempo se atribuyen a la persona proxy
+  (técnico o solicitante), no a quien ejecuta la acción. Los reportes por técnico y solicitante
+  usan esa atribución; la métrica de reasignaciones cuenta al supervisor destino.
 
 ### Añadido
 
@@ -23,6 +27,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   antes del cierre. Las acciones del solicitante que ya validó se cierran mientras el tiquet siga
   atendido y tampoco puede abrir una reclamación, ni tras el cierre; validar de nuevo el mismo rol
   responde 409.
+- Reportes de tiempo atribuido por técnico y por solicitante, con desglose de trabajo, pausa y
+  espera; la reconstrucción histórica rellena el sujeto de los tramos existentes.
 
 ## [0.6.0] - 2026-10-31
 

@@ -128,7 +128,7 @@ export function TicketActionBar({
     participants,
     onValidated,
   })
-  if (panel.visible.length === 0) return null
+  if (panel.visible.length === 0 && !panel.canProxy) return null
 
   const primary = pickPrimaryAction(panel.visible)
   const others = panel.visible.filter((action) => action !== primary)

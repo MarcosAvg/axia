@@ -26,7 +26,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { can, useAuth } from '@/features/auth'
 import { formatDateTime } from '@/lib/format'
-import { groupTimelineByCycle, timelineNote } from '../domain/timeline'
+import {
+  groupTimelineByCycle,
+  timelineNote,
+  timelineSubject,
+} from '../domain/timeline'
 import type { EventType, TicketTimelineItem } from '../domain/types'
 import { eventLabels, ticketMessages } from '../i18n'
 import { EventTimeDialog } from './event-time-dialog'
@@ -74,6 +78,7 @@ function FeedItem({
   onAdjust: () => void
 }) {
   const Icon = EVENT_ICONS[item.type]
+  const subject = timelineSubject(item)
   return (
     <li className="flex gap-3">
       <div className="flex flex-col items-center">
@@ -86,7 +91,9 @@ function FeedItem({
         <div className="flex flex-wrap items-center gap-x-2">
           <span className="font-medium">{eventLabels[item.type]}</span>
           {item.actorName ? (
-            <span className="text-muted-foreground">{item.actorName}</span>
+            <span className="text-muted-foreground">
+              Registrado por {item.actorName}
+            </span>
           ) : null}
           <span className="text-xs text-muted-foreground">
             {formatDateTime(item.occurredAt)}
@@ -95,9 +102,10 @@ function FeedItem({
         {item.reasonName ? (
           <span className="text-muted-foreground">{item.reasonName}</span>
         ) : null}
-        {item.subjectTechnicianName ? (
+        {subject ? (
           <span className="text-muted-foreground">
-            {item.subjectTechnicianName}
+            {subject.label === 'target' ? 'Asignado a' : 'A nombre de'}{' '}
+            {subject.name}
           </span>
         ) : null}
         {timelineNote(item) ? <p>{timelineNote(item)}</p> : null}

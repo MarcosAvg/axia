@@ -94,7 +94,7 @@ async function validationRole(
     }
     return 'supervisor'
   }
-  if (userId !== null) {
+  if (userId !== null || policy !== 'supervisor') {
     throw new AppError(
       403,
       'forbidden',
@@ -195,21 +195,17 @@ async function validateInTransaction(
       where id = ${ticketId}
     `)
     await endOpenParticipants(tx, ticketId)
-    await writeEvent(tx, {
-      ticketId,
-      type: 'validated',
-      actorId: actor.id,
-      clientRequestId,
-    })
-  } else {
-    await writeEvent(tx, {
-      ticketId,
-      type: 'validated',
-      actorId: actor.id,
-      clientRequestId,
-      payload: { partial: true, role },
-    })
   }
+  await writeEvent(tx, {
+    ticketId,
+    type: 'validated',
+    actorId: actor.id,
+    clientRequestId,
+    ...(role === 'requester'
+      ? { subjectRequesterId: ticket.requester_id }
+      : { subjectUserId: actor.id }),
+    payload: { role, partial: !close },
+  })
   return { ticketId, action: 'validate', replayed: false }
 }
 

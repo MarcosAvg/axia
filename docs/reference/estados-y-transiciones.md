@@ -42,7 +42,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
 | `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
-| `validate` | `attended` | Registra el lado que corresponda, una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
+| `validate` | `attended` | Registra el lado que corresponda, solicitante primero y supervisor después, una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
 | `open_claim` | `attended`, `closed` dentro de ventana; no si el solicitante ya validó su lado | Motivo, descripción y evidencia `claim`; pasa a `under_claim` |
 | `resolve_claim` | `under_claim` | `upheld`: nuevo ciclo en `assigned`; `dismissed`: `closed`; `new_ticket`: restaura estado anterior y crea derivado |
 | `reject`, `cancel` | No final | Motivo del uso correspondiente; el supervisor debe haber tomado; guarda estado previo y descarta |
@@ -81,3 +81,7 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   recapturar, rechazar, cancelar, cambiar prioridad o marcar duplicado. La toma implícita al asignar
   se retiró. El administrador conserva la cola de tiquets sin ruteo y el solicitante sus acciones
   propias.
+- El tiempo y la evidencia se atribuyen al sujeto de la acción, no al actor. En validación `both`,
+  el tramo hasta la validación del solicitante es del solicitante y el resto del supervisor. Los
+  reportes por técnico y solicitante usan esa atribución; la participación de asignación se conserva
+  por separado.

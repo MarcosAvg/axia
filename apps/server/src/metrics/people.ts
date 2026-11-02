@@ -32,6 +32,99 @@ export async function technicianTimes(
   return result.rows
 }
 
+/** Tiempo de trabajo atribuido al técnico sujeto, no al actor. */
+export async function subjectTechnicianTimes(
+  db: Database,
+  actor: Actor,
+  filters: MetricsFilters,
+) {
+  const result = await db.execute(sql`
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    select
+      tech.id as technician_id,
+      tech.full_name as technician_name,
+      count(distinct b.id)::int as tickets,
+      coalesce(sum(
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+          - ts.started_at
+      ) filter (where ts.kind = 'active_work'), interval '0') as active_time,
+      coalesce(sum(public.work_calendar_overlap(
+        public.ticket_calendar(b.id),
+        ts.started_at,
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+      )) filter (where ts.kind = 'active_work'), interval '0') as active_time_labor,
+      coalesce(sum(
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+          - ts.started_at
+      ) filter (where ts.kind = 'pause'), interval '0') as pause_time,
+      coalesce(sum(public.work_calendar_overlap(
+        public.ticket_calendar(b.id),
+        ts.started_at,
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+      )) filter (where ts.kind = 'pause'), interval '0') as pause_time_labor,
+      coalesce(sum(
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+          - ts.started_at
+      ) filter (where ts.kind = 'wait_start'), interval '0') as wait_time,
+      coalesce(sum(public.work_calendar_overlap(
+        public.ticket_calendar(b.id),
+        ts.started_at,
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+      )) filter (where ts.kind = 'wait_start'), interval '0') as wait_time_labor
+    from base b
+    join public.tickets t on t.id = b.id
+    join public.time_spans ts
+      on ts.ticket_id = b.id and ts.subject_technician_id is not null
+    join public.technicians tech on tech.id = ts.subject_technician_id
+    where ts.voided_at is null
+    group by tech.id, tech.full_name
+    order by active_time desc, tech.full_name
+  `)
+  return result.rows
+}
+
+/** Tiempo de validación y reclamación atribuido al solicitante sujeto. */
+export async function requesterTimes(
+  db: Database,
+  actor: Actor,
+  filters: MetricsFilters,
+) {
+  const result = await db.execute(sql`
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    select
+      r.id as requester_id,
+      r.full_name as requester_name,
+      count(distinct b.id)::int as tickets,
+      coalesce(sum(
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+          - ts.started_at
+      ) filter (where ts.kind = 'validation'), interval '0') as validation_time,
+      coalesce(sum(public.work_calendar_overlap(
+        public.ticket_calendar(b.id),
+        ts.started_at,
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+      )) filter (where ts.kind = 'validation'), interval '0') as validation_time_labor,
+      coalesce(sum(
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+          - ts.started_at
+      ) filter (where ts.kind = 'claim'), interval '0') as claim_time,
+      coalesce(sum(public.work_calendar_overlap(
+        public.ticket_calendar(b.id),
+        ts.started_at,
+        greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
+      )) filter (where ts.kind = 'claim'), interval '0') as claim_time_labor
+    from base b
+    join public.tickets t on t.id = b.id
+    join public.time_spans ts
+      on ts.ticket_id = b.id and ts.subject_requester_id is not null
+    join public.requesters r on r.id = ts.subject_requester_id
+    where ts.voided_at is null
+    group by r.id, r.full_name
+    order by validation_time desc, r.full_name
+  `)
+  return result.rows
+}
+
 /** Actividad de supervisión: ofertas, tomas, reasignaciones y validaciones. */
 export async function supervisors(
   db: Database,
@@ -57,12 +150,13 @@ export async function supervisors(
       group by o.supervisor_user_id
     ),
     reassignments as (
-      select e.actor_id as supervisor_user_id,
+      select coalesce(e.subject_user_id, e.actor_id) as supervisor_user_id,
         count(distinct e.ticket_id)::int as reassigned
       from public.ticket_events e
       join base b on b.id = e.ticket_id
-      where e.type = 'reassigned_supervisor' and e.actor_id is not null
-      group by e.actor_id
+      where e.type = 'reassigned_supervisor'
+        and coalesce(e.subject_user_id, e.actor_id) is not null
+      group by coalesce(e.subject_user_id, e.actor_id)
     ),
     validations as (
       select v.validator_user_id as supervisor_user_id,

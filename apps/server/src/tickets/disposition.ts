@@ -81,6 +81,7 @@ async function discardInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
+    subjectRequesterId: ticket.requester_id,
     payload: { note: input.note },
   })
   return {
