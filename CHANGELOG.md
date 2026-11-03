@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-03
+
 ### Corregido
 
 - El despliegue Docker desactiva el healthcheck heredado en `migrate` y limita sus privilegios; una
