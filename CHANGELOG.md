@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-03
+
 ### Cambiado
 
 - La imagen `latest` es el canal por defecto; cada release publica `latest`, `vX.Y.Z` y el SHA.
