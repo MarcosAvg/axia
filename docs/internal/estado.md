@@ -5,6 +5,23 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-03
 
+## v0.7.0 publicada
+
+- Etiqueta `v0.7.0` creada desde `main` en `50bc1b56d7b445b27ec8766e64ee2eea8d381ab6`.
+  [Flujo 41676229970](https://github.com/MarcosAvg/axia/actions/runs/41676229970) y
+  [CI 41676230026](https://github.com/MarcosAvg/axia/actions/runs/41676230026) terminaron en
+  `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.7.0` y
+  `ghcr.io/marcosavg/axia/axia-app:50bc1b56d7b445b27ec8766e64ee2eea8d381ab6`, digest
+  `sha256:65d153c21e5147ad5a23b82d2868ce9c5f34444ce1044f8d01594ffb38a42382`.
+- [Release v0.7.0](https://github.com/MarcosAvg/axia/releases/tag/v0.7.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `20e36e215be2e880511999ff7eb2d8aabf3ad98ff360063d71056e7c255fedee`)
+  y su `.sha256`; `release.json` fija la imagen por el digest anterior y la plantilla
+  `.env.example` lo conserva.
+- Limpieza local: ramas fusionadas `fix/calificacion-modal-validacion`, `fix/despliegue-simple` y
+  `fix/dev-puertos-ocupados` eliminadas; PostgreSQL de pruebas detenido. La rama
+  `fix/endurecimiento-despliegue-docker` sigue sin fusionar y no se borró.
+
 ## Tarea completada en rama: endurecimiento mínimo del despliegue Docker
 
 - `migrate` desactiva el healthcheck heredado de la imagen, ejecuta con `no-new-privileges` y
