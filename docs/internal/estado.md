@@ -21,7 +21,11 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `pnpm test:scripts`: 50/50.
 - `docker compose --env-file /dev/null -f compose.yaml config -q`: correcto.
 - `node scripts/check-docs.mjs`: 41 archivos, 0 enlaces rotos.
-- Pendiente: integrar la rama a `main`; no se ejecutó el smoke Docker completo.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; 58 pruebas de navegador, 312 de PostgreSQL y
+  build correcto. Persiste el aviso previo de chunks >500 kB.
+- Integrada a `main` en `614aa1c`, junto con `fix/dev-puertos-ocupados`. La rama
+  `fix/endurecimiento-despliegue-docker` no se integra: se sustituyó por este alcance mínimo.
+- No se ejecutó el smoke Docker completo.
 
 ## Tarea completada en rama: arranque local detecta puertos ocupados
 
