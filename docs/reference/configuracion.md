@@ -28,6 +28,9 @@ Pruebas usa `compose.test.yaml` y valores ficticios: no descubre archivos privad
 | `POSTGRES_OWNER_PASSWORD` | Contraseña del rol dueño; obligatoria |
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
 
+Generar ambos secretos con `openssl rand -hex 32`. Compose los inserta en las URLs de conexión;
+usar solo hexadecimal evita que caracteres como `/`, `#`, `?` o `%` rompan la cadena.
+
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
 `.env` solo cuando se necesita cambiar el comportamiento. El paquete de release fija `AXIA_IMAGE`
 por digest. Seleccionar y verificar una release concreta; no usar `latest` para actualizar datos

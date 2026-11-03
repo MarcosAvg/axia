@@ -22,7 +22,8 @@ entorno ni generar secretos nuevos sobre una base existente.
 
 ```bash
 cp .env.example .env
-# Generar cada secreto con openssl rand -hex 32 o un generador de contraseñas.
+# Generar cada secreto con openssl rand -hex 32 (solo hexadecimal).
+# No usar caracteres como /, #, ? o %: rompen las URLs de conexión.
 # Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD sin cambiar AXIA_IMAGE.
 chmod 600 .env
 docker network inspect proxy >/dev/null 2>&1 || docker network create proxy

@@ -7,6 +7,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- El despliegue Docker desactiva el healthcheck heredado en `migrate` y limita sus privilegios; una
+  migración larga ya no hace fallar `docker compose up -d --wait`. PostgreSQL usa `shm_size`
+  explícito y la documentación exige secretos hexadecimales URL-safe.
 - `pnpm dev` detecta los puertos HTTP ocupados antes de arrancar y nombra el proceso en conflicto;
   el servidor deja de quedar vivo tras un `EADDRINUSE`, evitando una web arriba contra una API que
   nunca escuchó.

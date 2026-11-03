@@ -72,6 +72,18 @@ test('production does not publish database or app ports', () => {
   )
 })
 
+test('one-shot migration is not probed by the HTTP healthcheck', () => {
+  const { services } = compose()
+  assert.equal(services.migrate.healthcheck?.disable, true)
+  assert.deepEqual(services.migrate.security_opt, ['no-new-privileges:true'])
+  assert.deepEqual(services.migrate.cap_drop, ['ALL'])
+})
+
+test('database uses explicit shared memory', () => {
+  const { services } = compose()
+  assert.equal(services.db.shm_size, '134217728')
+})
+
 test('one runtime artifact is built without copying local evidence', () => {
   const ignore = readFileSync('.dockerignore', 'utf8')
   assert.match(ignore, /^apps\/server\/data\/?$/m)

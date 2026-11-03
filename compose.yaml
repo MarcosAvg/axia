@@ -29,6 +29,7 @@ services:
       - max_connections=${POSTGRES_MAX_CONNECTIONS:-50}
       - -c
       - track_io_timing=on
+    shm_size: 128mb
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-axia}
       POSTGRES_USER: ${POSTGRES_OWNER_USER:-axia_owner}
@@ -50,12 +51,18 @@ services:
     <<: *axia-image
     command: ['node', 'dist/db/migrate.js']
     logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       db:
         condition: service_healthy
     environment:
       MIGRATION_DATABASE_URL: postgres://${POSTGRES_OWNER_USER:-axia_owner}:${POSTGRES_OWNER_PASSWORD:?set POSTGRES_OWNER_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
       AXIA_APP_PASSWORD: ${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}
+    healthcheck:
+      disable: true
     restart: 'no'
 
   app:

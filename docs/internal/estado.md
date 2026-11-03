@@ -5,6 +5,24 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-03
 
+## Tarea completada en rama: endurecimiento mínimo del despliegue Docker
+
+- `migrate` desactiva el healthcheck heredado de la imagen, ejecuta con `no-new-privileges` y
+  `cap_drop: ALL`; una migración larga ya no deja el servicio `unhealthy` ni hace fallar
+  `docker compose up -d --wait`.
+- PostgreSQL usa `shm_size: 128mb` para que las consultas paralelas no se queden sin `/dev/shm`.
+- La documentación exige secretos hexadecimales (`openssl rand -hex 32`) y advierte que `/`, `#`,
+  `?` o `%` rompen las URLs de conexión.
+- Se mantiene el resto del despliegue sin cambios: tres servicios, una imagen, proxy externo.
+
+### Evidencia de esta tarea
+
+- `node --test scripts/compose-contract.test.mjs`: 6/6.
+- `pnpm test:scripts`: 50/50.
+- `docker compose --env-file /dev/null -f compose.yaml config -q`: correcto.
+- `node scripts/check-docs.mjs`: 41 archivos, 0 enlaces rotos.
+- Pendiente: integrar la rama a `main`; no se ejecutó el smoke Docker completo.
+
 ## Tarea completada en rama: arranque local detecta puertos ocupados
 
 - Causa del “no carga la app”: un `pnpm dev` del 2 de noviembre seguía vivo y colgado en
