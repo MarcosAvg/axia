@@ -52,7 +52,7 @@ compose exec -T app node -e '
 # is covered by the database integration tests.
 compose stop app
 compose exec -T db psql -U axia_owner -d axia -v ON_ERROR_STOP=1 -c "delete from axia_migrations.schema_migrations where name='0016_migration_history.sql'; alter table axia_migrations.schema_migrations drop column checksum;" >/dev/null
-compose run --rm --no-deps -T migrate
+compose run --rm --no-deps -T app node dist/db/migrate.js
 compose up -d --wait app
 BACKUP_DIR="$SCRATCH/backups" bash deploy/scripts/backup-all.sh
 BACKUP_SET="$(find "$SCRATCH/backups" -name manifest -printf '%h\n')"
@@ -71,7 +71,7 @@ compose exec -T app node -e '
   }); if (!response.ok) throw new Error(`Restored login failed: ${response.status}`)
 '
 BEFORE="$(compose exec -T db psql -U axia_owner -d axia -At -c 'select count(*) from axia_migrations.schema_migrations;')"
-compose run --rm --no-deps -T migrate
+compose run --rm --no-deps -T app node dist/db/migrate.js
 AFTER="$(compose exec -T db psql -U axia_owner -d axia -At -c 'select count(*) from axia_migrations.schema_migrations;')"
 [[ "$BEFORE" == "$AFTER" ]]
 if [[ "$AFTER" != "$EXPECTED_MIGRATIONS" ]]; then

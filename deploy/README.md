@@ -16,23 +16,24 @@ entorno ni generar secretos nuevos sobre una base existente.
 
 1. Descargar y extraer el paquete de una release concreta en un directorio nuevo y vacío de la instancia.
 2. Crear el archivo de entorno y completar los dos secretos con valores aleatorios. La plantilla
-   del paquete ya fija `AXIA_IMAGE` por digest; conservar esa referencia. Las demás opciones están
-   en [Configuración](../docs/reference/configuracion.md).
+   usa `:latest` por defecto; para fijar una release, descomentar `AXIA_IMAGE` con una etiqueta
+   `vX.Y.Z` o el digest de `release.json`. Las demás opciones están en
+   [Configuración](../docs/reference/configuracion.md).
 3. Preparar la red del proxy y arrancar los servicios.
 
 ```bash
 cp .env.example .env
 # Generar cada secreto con openssl rand -hex 32 (solo hexadecimal).
 # No usar caracteres como /, #, ? o %: rompen las URLs de conexión.
-# Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD sin cambiar AXIA_IMAGE.
+# Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD.
 chmod 600 .env
 docker network inspect proxy >/dev/null 2>&1 || docker network create proxy
 docker compose up -d --wait
 ```
 
-Se arrancan tres servicios: PostgreSQL (`db`), un trabajo de migraciones que termina (`migrate`) y
-el servidor (`app`). App y migrador usan exactamente la misma imagen, con comandos y credenciales
-diferentes. Los datos y evidencias viven en volúmenes separados. El rol de la app es `axia_app` fijo.
+Se arrancan dos servicios: PostgreSQL (`db`) y el servidor (`app`). La app aplica las migraciones
+pendientes antes de escuchar en `3100`; los datos y evidencias viven en volúmenes separados. El rol
+de la app es `axia_app` fijo.
 
 No ejecutar `scripts/install.sh`: prepara desarrollo, no una instancia de producción.
 
@@ -58,18 +59,18 @@ El contenedor confía en el proxy de esta red. No conectar contenedores ajenos o
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 migrate
+docker compose logs --tail=100 app
 docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 ```
 
 Abrir `/login` desde el dominio HTTPS: si la instancia está vacía, permite crear el primer
 administrador. Después, comprobar login y un tiquet con evidencia. Producción no carga demo.
 La política de contraseña se consulta en [Configuración](../docs/reference/configuracion.md).
-El migrador terminado con código cero es normal y no requiere reiniciarse continuamente.
 
 ## Actualizar y recuperar
 
 La [guía de operación](../docs/guides/operacion.md) contiene la secuencia de actualización,
-respaldos, recuperación, retención y diagnóstico. Preparar y probar un respaldo antes de utilizar
-la instancia con datos reales. Cambiar a una imagen anterior no revierte migraciones: se recupera
-su conjunto de respaldo y su imagen en un destino vacío.
+respaldos, recuperación, retención y diagnóstico. Actualizar es `docker compose pull` seguido de
+`docker compose up -d --wait`; la app aplica las migraciones antes de arrancar. Preparar y probar un
+respaldo antes de utilizar la instancia con datos reales. Cambiar a una imagen anterior no revierte
+migraciones: se recupera su conjunto de respaldo y su imagen en un destino vacío.

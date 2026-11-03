@@ -35,8 +35,8 @@ objects="$(database psql -At -v ON_ERROR_STOP=1 -c "select count(*) from pg_clas
 [[ "$objects" == 0 ]] || fail 'La base destino no está vacía. Usa otro proyecto y volúmenes nuevos.'
 existing="$(compose run --rm --no-deps -T app find /data/evidence -mindepth 1 -maxdepth 1 -print -quit)"
 [[ -z "$existing" ]] || fail 'El volumen de evidencias destino no está vacío.'
-# El migrador de la misma release crea axia_app y todos los esquemas/permisos.
-compose run --rm --no-deps -T migrate node dist/db/migrate.js
+# La misma imagen de app prepara axia_app y todos los esquemas/permisos.
+compose run --rm --no-deps -T app node dist/db/migrate.js
 database pg_restore --single-transaction --exit-on-error --clean --if-exists --no-owner < "$SET/database.dump"
 compose run --rm --no-deps -T app tar --no-same-owner -C /data/evidence -xzf - < "$SET/evidence.tgz"
 RESTORE_COMPLETE=yes

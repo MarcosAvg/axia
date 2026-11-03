@@ -2,6 +2,7 @@
 
 **Fecha:** 2026-10-31
 **Estado:** aceptada
+**Sustituida parcialmente por:** [0110](0110-latest-y-migracion-en-arranque.md)
 
 ## Contexto
 

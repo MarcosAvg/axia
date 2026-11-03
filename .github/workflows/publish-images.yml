@@ -33,13 +33,15 @@ jobs:
           repo="${GITHUB_REPOSITORY,,}"
           image="ghcr.io/$repo/axia-app"
           version="$GITHUB_SHA"
+          tags="$image:$GITHUB_SHA"
           if [[ "$RELEASE_TYPE" == tag ]]; then
             [[ "$RELEASE_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9.-]+)?$ ]]
             version="$RELEASE_REF"
+            tags="$tags,$image:$version,$image:latest"
           fi
           echo "image=$image" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tags=$image:$GITHUB_SHA,$image:$version" >> "$GITHUB_OUTPUT"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -72,6 +74,7 @@ jobs:
           docker push "$RELEASE_IMAGE:$GITHUB_SHA"
           if [[ "$RELEASE_VERSION" != "$GITHUB_SHA" ]]; then
             docker push "$RELEASE_IMAGE:$RELEASE_VERSION"
+            docker push "$RELEASE_IMAGE:latest"
           fi
           reference="$(docker image inspect --format '{{index .RepoDigests 0}}' "$RELEASE_IMAGE:$GITHUB_SHA")"
           [[ "$reference" == "$RELEASE_IMAGE@sha256:"* ]]

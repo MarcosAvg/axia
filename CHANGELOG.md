@@ -5,6 +5,14 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- La imagen `latest` es el canal por defecto; cada release publica `latest`, `vX.Y.Z` y el SHA.
+  `AXIA_IMAGE` es opcional y permite fijar una versión o un digest.
+- La app aplica las migraciones pendientes antes de arrancar y se retira el servicio `migrate`.
+  La actualización vuelve a ser `docker compose pull` y `docker compose up -d --wait`. Decisión en
+  el [ADR 0110](docs/decisions/0110-latest-y-migracion-en-arranque.md).
+
 ## [0.7.0] - 2026-11-03
 
 ### Corregido

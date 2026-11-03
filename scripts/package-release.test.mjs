@@ -24,14 +24,14 @@ test('release package contains only runtime files and immutable identity, never 
       { encoding: 'utf8' },
     )
     assert.equal(result.status, 0, result.stderr)
-    assert.match(
-      readFileSync(join(output, '.env.example'), 'utf8'),
-      new RegExp(`AXIA_IMAGE=${image}`),
+    const env = readFileSync(join(output, '.env.example'), 'utf8')
+    assert.ok(env.includes(`# AXIA_IMAGE=${image}`))
+    assert.ok(env.includes(':latest'))
+    const release = JSON.parse(
+      readFileSync(join(output, 'release.json'), 'utf8'),
     )
-    assert.equal(
-      JSON.parse(readFileSync(join(output, 'release.json'), 'utf8')).revision,
-      revision,
-    )
+    assert.equal(release.revision, revision)
+    assert.equal(release.image, image)
     assert.ok(existsSync(join(output, 'deploy/scripts/compose-operations.sh')))
     assert.ok(existsSync(join(output, 'OPERATIONS.md')))
     assert.ok(!existsSync(join(output, '.env')))

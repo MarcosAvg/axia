@@ -13,7 +13,7 @@ Las [reglas de negocio](negocio.md), el [modelo de datos](datos.md), los
 | `apps/server` | Fastify 5: API, sesiones, autorización, acciones, archivos y tiempo real |
 | PostgreSQL 17 | Datos, sesiones, bitácora, restricciones, tramos y avisos |
 | Volumen de evidencias | Imágenes normalizadas y miniaturas; no es un directorio público |
-| Compose | Base, migrador y app; una misma imagen de release para los dos últimos |
+| Compose | Base y app; la app aplica las migraciones pendientes antes de arrancar |
 
 La web habla solo con `/api` del mismo origen. Los componentes usan `features/*/api`; cada feature
 expone su `index.ts` a los demás. Router organiza rutas, Query coordina consultas y Zod valida la
@@ -69,7 +69,8 @@ Las migraciones SQL de `apps/server/db/migrations/` son la única definición ej
 esquema: tablas, restricciones, índices, vistas, funciones y disparadores. Drizzle ejecuta SQL
 parametrizado y transacciones con tipos explícitos de resultado; no hay un esquema TypeScript
 paralelo generado por introspección. Así no se pierden objetos que un modelo ORM no representa.
-El rol migrador puede hacer DDL; `axia_app` tiene permisos limitados y no modifica la bitácora.
+El rol dueño ejecuta la migración de arranque y puede hacer DDL; `axia_app` tiene permisos
+limitados y no modifica la bitácora.
 
 Cada archivo nuevo se aplica bajo advisory lock y, normalmente, en su propia transacción. Los
 SQL ya integrados no se editan. El runner verifica hashes y archivos del historial; la adopción
@@ -160,8 +161,9 @@ migraciones aportan referencia necesaria; la demo ficticia requiere activación 
 Vitest prueba reglas puras y PostgreSQL real para permisos, transacciones y concurrencia;
 Playwright verifica flujos de la PWA. Un mock de base no sustituye esas garantías.
 
-La release contiene una imagen compartida por app y migrador, con credenciales separadas y digest
-fijado en el paquete. La app solo es accesible tras el proxy elegido por el operador. El respaldo
+La release contiene una imagen de app que aplica las migraciones al arrancar, con credenciales
+separadas y digest registrado en `release.json`; `latest` es el canal por defecto. La app solo es
+accesible tras el proxy elegido por el operador. El respaldo
 coordinado detiene escrituras; la restauración exige destino vacío y conserva la app detenida si
 falla. Procedimientos en [instalación](../../deploy/README.md), [operación](../guides/operacion.md)
 y [desarrollo](../start/desarrollo.md); justificación operativa en

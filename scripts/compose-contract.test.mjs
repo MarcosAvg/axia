@@ -31,14 +31,32 @@ function compose(overrides = {}) {
   return JSON.parse(result.stdout)
 }
 
-test('server and migrator use the exact same selected artifact', () => {
+test('app runs migrations before the server and defaults to latest', () => {
+  const configured = compose()
+  assert.equal(configured.services.app.image, 'axia:audit-test')
+  assert.equal(configured.services.migrate, undefined)
+  assert.match(
+    configured.services.app.command.join(' '),
+    /dist\/db\/migrate\.js/,
+  )
+  assert.match(configured.services.app.command.join(' '), /dist\/server\.js/)
+
+  const defaults = compose({ AXIA_IMAGE: '' })
+  assert.equal(
+    defaults.services.app.image,
+    'ghcr.io/marcosavg/axia/axia-app:latest',
+  )
+})
+
+test('migration credentials reach app startup but the owner password stays out of the environment', () => {
   const { services } = compose()
-  assert.equal(services.app.image, 'axia:audit-test')
-  assert.equal(services.migrate.image, services.app.image)
-  assert.deepEqual(services.migrate.command, ['node', 'dist/db/migrate.js'])
-  assert.equal(services.app.environment.MIGRATION_DATABASE_URL, undefined)
+  assert.equal(
+    services.app.environment.MIGRATION_DATABASE_URL,
+    'postgres://axia_owner:owner-test@db:5432/axia',
+  )
+  assert.equal(services.app.environment.AXIA_APP_PASSWORD, 'app-test')
   assert.equal(services.app.environment.POSTGRES_OWNER_PASSWORD, undefined)
-  assert.equal(services.migrate.environment.AXIA_APP_USER, undefined)
+  assert.equal(services.migrate, undefined)
 })
 
 test('session, access and cleanup settings reach the runtime explicitly', () => {
@@ -66,17 +84,8 @@ test('production does not publish database or app ports', () => {
   const { services } = compose()
   assert.equal(services.db.ports, undefined)
   assert.equal(services.app.ports, undefined)
-  assert.equal(
-    services.app.depends_on.migrate.condition,
-    'service_completed_successfully',
-  )
-})
-
-test('one-shot migration is not probed by the HTTP healthcheck', () => {
-  const { services } = compose()
-  assert.equal(services.migrate.healthcheck?.disable, true)
-  assert.deepEqual(services.migrate.security_opt, ['no-new-privileges:true'])
-  assert.deepEqual(services.migrate.cap_drop, ['ALL'])
+  assert.equal(services.app.depends_on.db.condition, 'service_healthy')
+  assert.equal(services.migrate, undefined)
 })
 
 test('database uses explicit shared memory', () => {

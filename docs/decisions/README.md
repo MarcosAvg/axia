@@ -18,6 +18,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0107](0107-tomar-antes-de-actuar.md) | Tomar el tiquet antes de las acciones del supervisor |
 | [0108](0108-atribucion-sujeto-proxy.md) | Tiempo y evidencia atribuidos al sujeto proxy |
 | [0109](0109-asignacion-lider-auxiliar-y-reclamacion.md) | Asignación líder/auxiliar, titularidad y reclamación |
+| [0110](0110-latest-y-migracion-en-arranque.md) | Canal `latest` y migración en el arranque de la app |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

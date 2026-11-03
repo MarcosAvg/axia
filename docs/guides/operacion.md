@@ -8,28 +8,23 @@ desde su directorio. Para instalar, configurar TLS y crear el primer administrad
 ## Actualización
 
 1. Revisar las notas de la release destino y reservar una ventana sin escritores ni tareas
-   operativas concurrentes. Conservar el paquete, configuración y referencia de la release actual.
-2. Ejecutar un conjunto de respaldo sobre la imagen instalada; no cambiar todavía `AXIA_IMAGE`.
-3. Guardar el conjunto fuera del host y descargar el paquete de la release destino. Conservar los
-   secretos y ajustes de la instancia; no reemplazar `.env` por una plantilla vacía.
-4. Detener la app, seleccionar en `.env` el digest de la nueva release y actualizar los archivos
-   operativos desde su paquete.
-5. Descargar imágenes, aplicar migraciones explícitamente y arrancar solo si terminan bien.
+   operativas concurrentes. Conservar el paquete y la configuración de la instancia.
+2. Ejecutar un conjunto de respaldo sobre la imagen instalada.
+3. Guardar el conjunto fuera del host. Con el canal `latest` no hace falta editar `.env`; para
+   fijar una release, definir `AXIA_IMAGE` con una etiqueta `vX.Y.Z` o el digest de `release.json`.
+4. Descargar la imagen y arrancar. Compose detiene y recrea `app`; el contenedor aplica las
+   migraciones pendientes antes de escuchar en `3100`.
+5. Verificar salud, login y una evidencia antes de terminar el mantenimiento.
 
 ```bash
 ./deploy/scripts/backup-all.sh
-docker compose stop app
-# Cambiar AXIA_IMAGE por el digest exacto de la release destino y actualizar archivos operativos.
 docker compose pull
-docker compose run --rm --no-deps migrate
-docker compose up -d --wait app
+docker compose up -d --wait
 docker compose logs --tail=100 app
 ```
 
-El orden de arranque de Compose no detiene por sí mismo una app antigua que ya atiende peticiones.
-Por eso la secuencia hace explícita la parada antes de migrar. Si la migración falla, mantener app
-parada; conservar logs y recuperar el conjunto anterior en otro destino vacío si corresponde.
-Si el arranque funciona, verificar salud, login y una evidencia antes de terminar el mantenimiento.
+Si la migración falla, la app no arranca; conservar los logs y recuperar el conjunto anterior en
+otro destino vacío si corresponde. Cambiar solo la etiqueta no revierte una migración.
 
 ### Si una migración se detiene
 
@@ -44,10 +39,10 @@ migración sin aplicarla. Véase [Datos](../concepts/datos.md).
 
 ### Conjunto consistente
 
-Configurar una imagen de release fija en `AXIA_IMAGE` dentro del archivo de entorno de la instancia;
-app y migrador deben ejecutar esa misma imagen. Mantener la referencia durante todo el respaldo.
-No hace falta exportarla al shell: los scripts obtienen la imagen de la configuración de Compose
-sin imprimir la configuración completa, que contiene secretos.
+Para respaldos reproducibles, fijar `AXIA_IMAGE` en una etiqueta `vX.Y.Z` o en un digest. Con el
+canal `latest`, el manifiesto conserva la referencia usada y el ID local de la imagen. Mantener la
+referencia durante todo el respaldo. No hace falta exportarla al shell: los scripts obtienen la
+imagen de la configuración de Compose sin imprimir la configuración completa, que contiene secretos.
 
 ```bash
 # AXIA_IMAGE en el archivo de entorno ya selecciona la release instalada.
@@ -80,7 +75,7 @@ base con objetos de usuario o un volumen con cualquier archivo; no mezcla datos 
 anteriores. Conservar la instancia anterior hasta validar la recuperada.
 
 ```bash
-# Configurar los secretos del destino y AXIA_IMAGE con la release exacta del manifiesto.
+# Configurar los secretos del destino y AXIA_IMAGE con la release o el ID del manifiesto.
 # Este ejemplo utiliza un archivo de entorno propio, sin leerlo desde el shell.
 export COMPOSE_PROJECT_NAME=axia_recovery
 export AXIA_ENV_FILE=/opt/axia-recovery/instance.env
@@ -90,10 +85,10 @@ docker compose --env-file "$AXIA_ENV_FILE" up -d app
 
 La imagen local debe coincidir tanto en referencia como en ID con el manifiesto; descargarla antes
 con Compose si hace falta. `restore-all.sh` valida los archivos y sus hashes antes de detener app.
-Arranca y espera `db`, valida que ambos destinos estén vacíos y ejecuta el migrador de esa misma
-release para preparar el rol interno, los esquemas y permisos en un host vacío. Después restaura la
+Arranca y espera `db`, valida que ambos destinos estén vacíos y ejecuta la migración de esa misma
+imagen para preparar el rol interno, los esquemas y permisos en un host vacío. Después restaura la
 base con `pg_restore --single-transaction --exit-on-error --clean --if-exists --no-owner`: un error
-revierte toda la transacción de restauración. El esquema inicial del migrador puede permanecer,
+revierte toda la transacción de restauración. El esquema inicial de la migración puede permanecer,
 pero no una carga parcial del dump.
 
 Por último extrae las evidencias como el usuario de la imagen, con `--no-same-owner`: los archivos
@@ -168,10 +163,10 @@ docker compose logs --tail=100 app
 docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 ```
 
-Revisar salud, logs y espacio tanto en los volúmenes como en el destino de respaldos. Si falla una
-migración explícita, conservar la salida de `docker compose run --rm --no-deps migrate`; sus logs
-no permanecen en el contenedor eliminado por `--rm`. Para lentitud o saturación de conexiones,
-consultar [Rendimiento de PostgreSQL](../reference/rendimiento-postgres.md).
+Revisar salud, logs y espacio tanto en los volúmenes como en el destino de respaldos. Si falla la
+migración de arranque, conservar la salida de `docker compose logs app`; el contenedor no llega a
+escuchar en `3100`. Para lentitud o saturación de conexiones, consultar
+[Rendimiento de PostgreSQL](../reference/rendimiento-postgres.md).
 
 ## Secretos y rotación
 
@@ -181,8 +176,8 @@ sobre una base existente.
 
 Editar una contraseña en el archivo de entorno **no cambia la contraseña de un rol ya creado**.
 Las contraseñas de `axia_owner` (o el dueño configurado) y `axia_app` deben cambiarse también en
-PostgreSQL mediante una sesión administrativa segura (`ALTER ROLE`). El migrador crea el rol de
-aplicación si falta; no rota su contraseña cuando ya existe. Planificar una ventana sin escritores,
+PostgreSQL mediante una sesión administrativa segura (`ALTER ROLE`). La migración de arranque crea
+el rol de aplicación si falta; no rota su contraseña cuando ya existe. Planificar una ventana sin escritores,
 conservar un respaldo y coordinar cambio de rol, configuración y recreación de los servicios afectados; un simple `restart` no
 incorpora cambios en el entorno del contenedor. No poner contraseñas en comandos, logs o historial
 del shell. Verificar migración, salud y login después del cambio.

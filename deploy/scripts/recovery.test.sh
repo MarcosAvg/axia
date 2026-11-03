@@ -12,9 +12,8 @@ set -euo pipefail
 printf '%s\n' "$*" >> "$TRACE"
 case "$*" in
   'image inspect --format {{.Id}} axia:test') echo sha256:test;;
-  *'config --images app'*) printf 'axia:test\naxia:test\npostgres:17.11-alpine\n';;
-  *'config --images migrate'*) printf '%s\npostgres:17.11-alpine\n' "${MIGRATE_IMAGE:-axia:test}";;
-  *'config --format yaml app'*|*'config --format yaml migrate'*)
+  *'config --images app'*) printf 'axia:test\npostgres:17.11-alpine\n';;
+  *'config --format yaml app'*)
     cat <<YAML
 services:
   app:
@@ -23,8 +22,6 @@ services:
     image: axia:test
   db:
     image: postgres:17.11-alpine
-  migrate:
-    image: ${MIGRATE_IMAGE:-axia:test}
 networks:
   default:
     name: fixture
@@ -52,8 +49,6 @@ assert_trace() { grep -Eq -- "$1" "$TRACE" || { cat "$TRACE"; exit 1; }; }
 assert_trace 'config --format yaml app'
 if grep -Eq -- '--user 0' "$TRACE"; then echo 'La copia usa root aunque la imagen limita capacidades'; exit 1; fi
 ! grep -Eq 'must-not-escape' "$TEST_DIR/output"
-if MIGRATE_IMAGE=axia:other run_backup migrate_mismatch; then echo 'Aceptó migrador distinto'; exit 1; fi
-! grep -Eq ' stop app|pg_dump ' "$TRACE"
 if ACTIVE_JOB=yes run_backup job; then echo 'Aceptó trabajo activo'; exit 1; fi
 ! grep -Eq ' stop app|pg_dump ' "$TRACE"
 if APP_IMAGE_ID=sha256:other run_backup mismatch; then echo 'Aceptó release diferente'; exit 1; fi
@@ -81,7 +76,7 @@ if FAIL_RESTORE=yes run_restore "$SET"; then echo 'Aceptó restore fallido'; exi
 ! grep -Eq 'start app' "$TRACE"
 assert_trace --single-transaction
 (unset AXIA_IMAGE; run_restore "$SET")
-assert_trace 'run --rm --no-deps -T migrate node dist/db/migrate.js'
+assert_trace 'run --rm --no-deps -T app node dist/db/migrate.js'
 assert_trace 'tar --no-same-owner -C /data/evidence -xzf -'
 ! grep -Eq -- '--user 0' "$TRACE"
 assert_trace 'start app'

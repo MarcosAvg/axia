@@ -31,7 +31,6 @@ require_image() {
   configured_image="$(compose_image app)"
   AXIA_IMAGE="${AXIA_IMAGE:-$configured_image}"
   [[ -n "$AXIA_IMAGE" && "$AXIA_IMAGE" == "$configured_image" ]] || fail 'La imagen debe coincidir con la configuración de app.'
-  [[ "$(compose_image migrate)" == "$AXIA_IMAGE" ]] || fail 'App y migrador deben usar la misma imagen de release.'
   IMAGE_ID="$(docker image inspect --format '{{.Id}}' "$AXIA_IMAGE")"
 }
 database() {

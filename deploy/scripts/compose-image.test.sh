@@ -9,5 +9,4 @@ unset COMPOSE_FILE COMPOSE_PROJECT_NAME
 images="$(compose config --images app)"
 [[ "$images" == *postgres:* ]] || fail 'La regresión debe incluir la imagen de la dependencia db.'
 [[ "$(compose_image app)" == "$AXIA_IMAGE" ]] || fail 'No se seleccionó exactamente la imagen de app.'
-[[ "$(compose_image migrate)" == "$AXIA_IMAGE" ]] || fail 'No se seleccionó exactamente la imagen del migrador.'
-echo 'OK: selección de imágenes por servicio con dependencias en Compose real'
+echo 'OK: selección de la imagen de app con dependencias en Compose real'

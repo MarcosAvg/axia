@@ -44,8 +44,9 @@ for (const name of readdirSync(join(root, 'deploy/scripts'))) {
   }
 }
 const env = readFileSync(join(root, '.env.example'), 'utf8').replace(
-  /^AXIA_IMAGE=.*$/m,
-  () => `AXIA_IMAGE=${image}`,
+  /^# AXIA_IMAGE=.*$/m,
+  () =>
+    `# Opcional: fija esta release exacta. Por defecto se usa :latest.\n# AXIA_IMAGE=${image}`,
 )
 writeFileSync(join(output, '.env.example'), env)
 writeFileSync(

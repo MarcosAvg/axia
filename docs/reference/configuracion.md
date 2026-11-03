@@ -20,11 +20,11 @@ Pruebas usa `compose.test.yaml` y valores ficticios: no descubre archivos privad
 
 ## Producción mínima
 
-`compose.yaml` exige una imagen de release y dos secretos:
+`compose.yaml` necesita dos secretos. La imagen es opcional y usa `:latest` por defecto:
 
 | Variable | Uso |
 |---|---|
-| `AXIA_IMAGE` | Referencia exacta de release; el paquete fija digest, igual para app y migrador |
+| `AXIA_IMAGE` | Opcional; `latest` por defecto. Fijar `vX.Y.Z` o un digest para producción reproducible |
 | `POSTGRES_OWNER_PASSWORD` | Contraseña del rol dueño; obligatoria |
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
 
@@ -32,20 +32,21 @@ Generar ambos secretos con `openssl rand -hex 32`. Compose los inserta en las UR
 usar solo hexadecimal evita que caracteres como `/`, `#`, `?` o `%` rompan la cadena.
 
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
-`.env` solo cuando se necesita cambiar el comportamiento. El paquete de release fija `AXIA_IMAGE`
-por digest. Seleccionar y verificar una release concreta; no usar `latest` para actualizar datos
-reales. El rol interno `axia_app` es fijo; `AXIA_APP_USER` no es una opción de despliegue.
+`.env` solo cuando se necesita cambiar el comportamiento. El paquete usa `latest` por defecto y
+`release.json` conserva el digest de la release. Para producción reproducible, fijar `AXIA_IMAGE`
+con una etiqueta `vX.Y.Z` o el digest; `latest` es el canal de actualización continua. El rol
+interno `axia_app` es fijo; `AXIA_APP_USER` no es una opción de despliegue.
 
 ## Base de datos
 
 | Variable | Valor por defecto | Uso |
 |---|---|---|
 | `POSTGRES_DB` | `axia` | Nombre de la base |
-| `POSTGRES_OWNER_USER` | `axia_owner` | Rol dueño; solo migraciones |
+| `POSTGRES_OWNER_USER` | `axia_owner` | Rol dueño; migración de arranque |
 | `POSTGRES_OWNER_PASSWORD` | — | Obligatoria; secreto |
 | `AXIA_APP_PASSWORD` | — | Obligatoria; secreto |
-| `MIGRATION_DATABASE_URL` | — | Solo scripts del host; Compose construye la suya |
-| `DATABASE_URL` | — | Solo scripts del host; Compose construye la suya |
+| `MIGRATION_DATABASE_URL` | — | La app la usa al arrancar; no queda en el proceso servidor |
+| `DATABASE_URL` | — | Runtime del servidor y scripts del host; Compose construye la suya |
 | `DB_PORT` | `5433` | Puerto loopback de `compose.dev.yaml`; ajustar también ambas URLs host |
 
 En el contenedor `db`, Compose traduce `POSTGRES_OWNER_USER` a `POSTGRES_USER` y
@@ -154,7 +155,7 @@ Estas opciones se usan en el host, no se entregan al contenedor de producción.
 | `VITE_API_URL` | vacío | URL de API incorporada al construir la web; vacío usa el mismo origen |
 | `AXIA_REACT_COMPILER` | desactivado en desarrollo | `1` activa el compilador en Vite; build ya lo activa |
 | `AXIA_DEMO_PASSWORD` | generada si no se define | Solo local; reejecutar la semilla para reaplicarla a usuarios existentes |
-| `AXIA_APP_USER` | `axia_app` | El migrador rechaza cualquier otro valor; no es un rol configurable |
+| `AXIA_APP_USER` | `axia_app` | La migración de arranque rechaza cualquier otro valor; no es un rol configurable |
 
 Con `pnpm dev`, `HOST` vale `127.0.0.1` por defecto. La plantilla `.env.dev.example` no modifica la
 imagen de producción. No incluir secretos en variables `VITE_*`: se incorporan a la web.
@@ -193,7 +194,7 @@ de la instalación. `BACKUP_DIR` es relativo al directorio desde el que se invoc
 | `PGDATABASE` | `axia` | Base para scripts individuales con contenedor |
 | `DATABASE_URL` | sin valor | Alternativa con herramientas PostgreSQL del host en scripts individuales |
 | `EVIDENCE_VOLUME` | volumen del servicio app | Volumen explícito para scripts individuales de evidencias |
-| `AXIA_IMAGE` | imagen de app en Compose | Coordinadores: debe coincidir con app y migrador; volumen explícito: imagen del auxiliar |
+| `AXIA_IMAGE` | imagen de app en Compose | Coordinadores: imagen de app; volumen explícito: imagen del auxiliar |
 | `AXIA_APP_IMAGE` | sin valor | Compatibilidad: alternativa a `AXIA_IMAGE` solo con `EVIDENCE_VOLUME` |
 
 Los coordinadores usan las credenciales internas de `db`; no usan `PGUSER`, `PGDATABASE` ni

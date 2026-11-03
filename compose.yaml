@@ -1,7 +1,7 @@
 name: axia
 
 x-image: &axia-image
-  image: ${AXIA_IMAGE:?set AXIA_IMAGE to the release image tag or digest}
+  image: ${AXIA_IMAGE:-ghcr.io/marcosavg/axia/axia-app:latest}
 
 x-logging: &default-logging
   driver: json-file
@@ -47,24 +47,6 @@ services:
       retries: 20
       start_period: 5s
 
-  migrate:
-    <<: *axia-image
-    command: ['node', 'dist/db/migrate.js']
-    logging: *default-logging
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      MIGRATION_DATABASE_URL: postgres://${POSTGRES_OWNER_USER:-axia_owner}:${POSTGRES_OWNER_PASSWORD:?set POSTGRES_OWNER_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
-      AXIA_APP_PASSWORD: ${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}
-    healthcheck:
-      disable: true
-    restart: 'no'
-
   app:
     <<: *axia-image
     restart: unless-stopped
@@ -81,9 +63,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
+    command:
+      [
+        'sh',
+        '-c',
+        'node dist/db/migrate.js && unset MIGRATION_DATABASE_URL AXIA_APP_PASSWORD && exec node dist/server.js',
+      ]
     environment:
+      MIGRATION_DATABASE_URL: postgres://${POSTGRES_OWNER_USER:-axia_owner}:${POSTGRES_OWNER_PASSWORD:?set POSTGRES_OWNER_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
+      AXIA_APP_PASSWORD: ${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}
       DATABASE_URL: postgres://axia_app:${AXIA_APP_PASSWORD:?set AXIA_APP_PASSWORD}@db:5432/${POSTGRES_DB:-axia}
       HOST: 0.0.0.0
       PORT: 3100
@@ -125,7 +113,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 120s
     stop_grace_period: 15s
 
 networks:

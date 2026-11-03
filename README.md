@@ -31,8 +31,9 @@ conocidos y el trabajo pendiente se registran en el [estado del proyecto](docs/i
 ## Cómo se aloja
 
 Un servidor Fastify sirve la API y la web; PostgreSQL 17 conserva los datos y otro volumen las
-fotos. Compose separa base, migrador y aplicación. La instalación usa una imagen de release
-exacta y un proxy HTTPS del operador; no requiere Node.js ni compilar en el servidor.
+fotos. Compose separa base y aplicación; la app aplica las migraciones pendientes antes de
+arrancar. La instalación usa `latest` por defecto o una versión fijada, y un proxy HTTPS del
+operador; no requiere Node.js ni compilar en el servidor.
 
 El núcleo funciona de forma autónoma, sin plataformas externas. La [arquitectura](docs/concepts/arquitectura.md)
 explica el stack, la autorización y las decisiones técnicas.

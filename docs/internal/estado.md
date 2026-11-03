@@ -5,6 +5,31 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-03
 
+## Tarea completada en rama: despliegue `latest` y migración integrada
+
+- `latest` es el valor por defecto de `AXIA_IMAGE`; el workflow publica `latest`, `vX.Y.Z` y el
+  SHA en cada release. El paquete deja `AXIA_IMAGE` comentado y `release.json` conserva el digest.
+- Se retiró el servicio `migrate`: la app ejecuta `dist/db/migrate.js` antes de
+  `dist/server.js` y elimina `MIGRATION_DATABASE_URL`/`AXIA_APP_PASSWORD` del proceso servidor.
+- El healthcheck usa `start_period: 120s` para cubrir migraciones largas. La actualización es
+  `docker compose pull` y `docker compose up -d --wait`.
+- Decisión en el [ADR 0110](../decisions/0110-latest-y-migracion-en-arranque.md).
+
+### Evidencia de esta tarea
+
+- `node --test scripts/compose-contract.test.mjs scripts/package-release.test.mjs`: 8/8.
+- `pnpm test:scripts`: 50/50.
+- `docker compose --env-file /dev/null -f compose.yaml config -q`: correcto.
+- `docker build -f apps/server/Dockerfile --target app -t axia-app:local .`: correcto.
+- `AXIA_IMAGE=axia-app:local bash scripts/docker-smoke.sh`: correcto; instalación vacía, migración
+  integrada, historial antiguo, respaldo, restauración, login, evidencias y rechazo de destino
+  poblado.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; 58 pruebas de navegador, 312 de PostgreSQL y
+  build correcto. El primer intento falló por el test flaky `/perfil` a 390 px; el reintento
+  dirigido y la compuerta completa quedaron verdes.
+- `node scripts/check-docs.mjs`: 42 archivos, 0 enlaces rotos.
+- Pendiente: integrar a `main` y publicar la siguiente release.
+
 ## v0.7.0 publicada
 
 - Etiqueta `v0.7.0` creada desde `main` en `50bc1b56d7b445b27ec8766e64ee2eea8d381ab6`.
