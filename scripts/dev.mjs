@@ -4,6 +4,8 @@ import { createServer } from 'node:net'
 import { spawn, spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
+import { assertPortsFree } from './dev-ports.mjs'
+
 const root = fileURLToPath(new URL('../', import.meta.url))
 process.chdir(root)
 const envFile = process.env.AXIA_ENV_FILE ?? `${root}.env.dev`
@@ -16,6 +18,11 @@ process.env.HOST ??= '127.0.0.1'
 process.env.STORAGE_DIR =
   process.env.AXIA_DEV_STORAGE_DIR ?? `${root}apps/server/data/evidence`
 process.env.AXIA_API_URL = `http://127.0.0.1:${process.env.PORT}`
+const webPort = Number(process.env.AXIA_DEV_WEB_PORT ?? '5173')
+await assertPortsFree([
+  { name: 'API', port: Number(process.env.PORT), host: process.env.HOST },
+  { name: 'web', port: webPort, host: 'localhost' },
+])
 const compose = ['compose', '--env-file', envFile, '-f', 'compose.dev.yaml']
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { stdio: 'inherit', ...options })
@@ -57,7 +64,7 @@ if (!process.argv.includes('--prepare-only')) {
         '@axia/web',
         'dev',
         '--port',
-        process.env.AXIA_DEV_WEB_PORT ?? '5173',
+        String(webPort),
         '--strictPort',
       ],
       { stdio: 'inherit', detached: true },

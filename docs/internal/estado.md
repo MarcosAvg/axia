@@ -3,8 +3,18 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-11-02
+**Última actualización:** 2026-11-03
 
+## Tarea completada en rama: arranque local detecta puertos ocupados
+
+- Causa del “no carga la app”: un `pnpm dev` del 2 de noviembre seguía vivo y colgado en
+  `127.0.0.1:3100` (su terminal ya no existía y sus conexiones a PostgreSQL estaban en
+  `CLOSE-WAIT`). El `pnpm dev` nuevo levantaba la web en 5173, pero la API no podía escuchar y el
+  proceso quedaba vivo por el puente de eventos; el navegador hablaba con la API vieja, que no
+  respondía ni a `/api/health/live`.
+- `pnpm dev` ahora comprueba API y web antes de Docker o migraciones y falla con un mensaje que
+  nombra el puerto ocupado. El servidor detiene el puente de eventos y sale con código 1 si
+  `listen` falla. Prueba nueva: `scripts/dev-ports.test.mjs`.
 
 ## Tarea completada en rama: asignación líder/auxiliar, titularidad y reclamación
 

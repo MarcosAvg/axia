@@ -7,6 +7,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- `pnpm dev` detecta los puertos HTTP ocupados antes de arrancar y nombra el proceso en conflicto;
+  el servidor deja de quedar vivo tras un `EADDRINUSE`, evitando una web arriba contra una API que
+  nunca escuchó.
 - La calificación de satisfacción vuelve a guardarse con el rol de aplicación: la inserción es de
   solo agregar y responde 409 si el tiquet ya tiene una, sin exigir `UPDATE` sobre
   `ticket_ratings`.

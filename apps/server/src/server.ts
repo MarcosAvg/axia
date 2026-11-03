@@ -93,8 +93,11 @@ async function main() {
     app.log.info({ address }, 'Axia server listening')
   } catch (error) {
     app.log.fatal({ err: error }, 'could not start server')
+    await bridge.stop()
     await pool.end()
-    process.exitCode = 1
+    // Sin salida explícita, el puente de eventos mantiene vivo el proceso y
+    // `pnpm dev` deja la web arriba apuntando a una API que nunca escuchó.
+    process.exit(1)
   }
 }
 

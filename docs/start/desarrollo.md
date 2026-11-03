@@ -106,7 +106,7 @@ El comando borra los datos de esa base. No se utiliza para actualizar normalment
 | `db:test` no conecta | Iniciar `pnpm test:db:start`; revisar las conexiones ficticias si cambió el puerto |
 | Playwright no encuentra Chromium | Ejecutar `pnpm --filter @axia/web exec playwright install chromium` |
 | La demo no admite la contraseña esperada | Reaplicarla con `AXIA_DEMO_PASSWORD` y la semilla; revisar bloqueo de login |
-| Un puerto HTTP está ocupado | Configurar `PORT` o `AXIA_DEV_WEB_PORT`; la API se comunica al proxy de Vite |
+| Un puerto HTTP está ocupado | `pnpm dev` lo detecta antes de arrancar y nombra el puerto. Detener el proceso anterior o configurar `PORT`/`AXIA_DEV_WEB_PORT`; la API se comunica al proxy de Vite. Si el proceso viejo no responde a `SIGTERM`, terminarlo con el gestor de procesos o `kill -9` |
 
 Las bases y los archivos privados no viajan por Git. Conservarlos fuera del repositorio con
 permisos restrictivos. Un entorno anterior que use `.env` no se convierte automáticamente en
