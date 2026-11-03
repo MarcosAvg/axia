@@ -5,6 +5,23 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-03
 
+## v0.8.0 publicada
+
+- Etiqueta `v0.8.0` creada desde `main` en `7e8a299254ff39398dc445feaf78e7c5501d66e8`.
+  [Flujo 41691240576](https://github.com/MarcosAvg/axia/actions/runs/41691240576) y
+  [CI 41691240489](https://github.com/MarcosAvg/axia/actions/runs/41691240489) terminaron en
+  `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.8.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:7e8a299254ff39398dc445feaf78e7c5501d66e8`, digest
+  `sha256:e04a6678ef63788e06307f048fb4e9a421190e0b5b98a2e5a7e1caa9f50eeec1`.
+- [Release v0.8.0](https://github.com/MarcosAvg/axia/releases/tag/v0.8.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `cd92fb4f31be14c40cc6c22d9d3403ae95166059c7a06e9c308e5268f54116d8`)
+  y su `.sha256`; `release.json` fija el digest anterior y `.env.example` usa `latest` por
+  defecto, con el digest comentado para fijar la release.
+- La rama `feat/despliegue-latest-y-migracion-integrada` se integró por fast-forward y se retiró
+  del checkout local.
+
 ## Tarea completada en rama: despliegue `latest` y migración integrada
 
 - `latest` es el valor por defecto de `AXIA_IMAGE`; el workflow publica `latest`, `vX.Y.Z` y el
@@ -28,7 +45,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   build correcto. El primer intento falló por el test flaky `/perfil` a 390 px; el reintento
   dirigido y la compuerta completa quedaron verdes.
 - `node scripts/check-docs.mjs`: 42 archivos, 0 enlaces rotos.
-- Pendiente: integrar a `main` y publicar la siguiente release.
+- Integrada a `main` y publicada como `v0.8.0`; evidencia en la sección superior.
 
 ## v0.7.0 publicada
 
