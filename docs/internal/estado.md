@@ -5,7 +5,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
-## Tarea completada en rama: dependencia del solicitante acota ubicaciones
+## Tarea integrada: dependencia del solicitante acota ubicaciones
 
 - El solicitante efectivo (propio o elegido a nombre de otro) fija la dependencia del alta. Si no
   tiene dependencia, se conserva el flujo anterior sin restricción.
@@ -30,6 +30,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 46 archivos, 0 enlaces rotos.
 - `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 834 archivos, 0 coincidencias.
 - Sin migración de esquema: no cambia la base de datos.
+- Integrada a `main` por fast-forward; no se publicó ni se desplegó.
 
 ## v0.8.1 publicada
 
