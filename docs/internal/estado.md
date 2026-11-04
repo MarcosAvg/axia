@@ -5,6 +5,22 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## v0.10.0 publicada
+
+- Etiqueta `v0.10.0` creada desde `main` en `c63d11e`. Workflow
+  [41876557656](https://github.com/MarcosAvg/axia/actions/runs/41876557656): `verify/check`,
+  `verify/docker` y `publish` terminaron en `success`; la API del run puede mostrar un estado
+  retrasado, pero el artefacto y la release están verificados abajo.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.10.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:c63d11e594c970aa1d9f6ad2c474f87d2a3f13f4`, digest
+  `sha256:ce494c3d14259daaea8ae116c1bc721c8b48a074b704863308d9e68c837a0e7d`.
+- [Release v0.10.0](https://github.com/MarcosAvg/axia/releases/tag/v0.10.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `c2a69691ca2bc49873f6b3e2b98d0a802b1f6c0b82b23779f66f7e4369095b1c`)
+  y su `.sha256`.
+- La verificación del tag ejecutó la compuerta completa, incluido el build y las 60 pruebas de
+  navegador.
+
 ## Tarea integrada: arranque y lectura offline
 
 - La última sesión validada y su identidad se guardan en el dispositivo con caducidad de 7 días;
@@ -26,7 +42,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 47 archivos, 0 enlaces rotos.
 - `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 844 archivos, 0 coincidencias.
 - Sin migración de esquema: el cambio es de cliente.
-- Integrada a `main` por fast-forward; no se publicó ni se desplegó.
+- Integrada a `main` por fast-forward y publicada como `v0.10.0`; el despliegue de instancias queda
+  a cargo del operador.
 
 ## v0.9.0 publicada
 
