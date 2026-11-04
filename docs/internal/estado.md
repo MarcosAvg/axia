@@ -5,6 +5,25 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## v0.12.0 publicada
+
+- Etiqueta `v0.12.0` creada desde `main` en `b813226`. Workflow
+  [41926909496](https://github.com/MarcosAvg/axia/actions/runs/41926909496): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`. La CI de `main`
+  ([41926902427](https://github.com/MarcosAvg/axia/actions/runs/41926902427)) también terminó en
+  `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.12.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:b813226e88dd040a54158b8424a1c42dc04e0581`, digest
+  `sha256:777301c6b43f71db09533b8fbc0d8857d116347195735815210fd79048fe3f7f`.
+- [Release v0.12.0](https://github.com/MarcosAvg/axia/releases/tag/v0.12.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `a0f59d8e8359c3992fa3d023cb7d7ef5b166fbc843688423fdacd73401334df4`)
+  y su `.sha256`.
+- Incluye el ruteo de supervisor sin limbo (migraciones 0026 y 0027) y la proyección local de
+  acciones offline (ADR 0116). Al actualizar una instancia se aplican las migraciones al arrancar.
+- Evidencia local: `AXIA_ENV_FILE=/dev/null pnpm check` en código 0 con 64 pruebas de servidor, 410
+  de web, 351 de PostgreSQL, 60 de navegador y build; `pnpm test:e2e:smoke` 19/19.
+
 ## Tarea integrada: proyección de acciones offline
 
 - El detalle y las listas proyectan el estado de las acciones que siguen en la cola de Dexie. El
@@ -18,7 +37,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   limita al encabezado.
 - Decisión en el [ADR 0116](../decisions/0116-proyeccion-local-acciones-offline.md). Sin migración
   de base de datos.
-- Integrada a `main` por fast-forward en `2fb5f77`; sin push ni publicación.
+- Integrada a `main` por fast-forward en `2fb5f77`.
+- Publicada en `v0.12.0`; la etiqueta, imagen y release se detallan arriba.
 
 ### Evidencia de esta tarea
 
@@ -60,8 +80,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   compatible con ofertas existentes: reciben `offer_round = 1`.
 - Pruebas nuevas: `tickets-routing-http` (equipo sin candidatos, visibilidad, reoferta al mismo
   supervisor, destino sin permisos, recaptura y desactivación) y `actions-admin`.
-- Integrada a `main` por fast-forward en `4575393`. **No publicada**: etiqueta, imagen y release
-  quedan pendientes de autorización.
+- Integrada a `main` por fast-forward en `4575393`. Publicada en `v0.12.0`; la etiqueta, imagen y
+  release se detallan arriba.
 
 ## v0.11.0 publicada
 
