@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { buildHierarchy, hierarchyPath } from './dimensions'
+import {
+  buildHierarchy,
+  DIMENSIONS,
+  hierarchyPath,
+  rowsByDimension,
+} from './dimensions'
 import type { DimensionRow } from './dimensions'
 
 function row(
@@ -41,5 +46,17 @@ describe('buildHierarchy', () => {
   it('deja solo el nivel pedido', () => {
     const tree = buildHierarchy(groups, hierarchyPath('category'))
     expect(tree[0]?.children).toEqual([])
+  })
+})
+
+describe('outcome dimension', () => {
+  it('ofrece el desenlace como dimensión y lo devuelve en sus filas', () => {
+    expect(DIMENSIONS).toContain('outcome')
+    expect(
+      rowsByDimension(
+        [{ dimension: 'outcome', row: row('cancelled', 'cancelled', 2) }],
+        'outcome',
+      ),
+    ).toHaveLength(1)
   })
 })

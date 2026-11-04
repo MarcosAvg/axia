@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { cumulativeShare, cyclePhases, rejectReasons, shareOf } from './visuals'
 
 describe('cyclePhases', () => {
-  it('separa las fases conocidas y el resto', () => {
+  it('devuelve las ocho fases medidas, sin residuo', () => {
     expect(
       cyclePhases({
         response: 5,
@@ -24,14 +24,13 @@ describe('cyclePhases', () => {
       { phase: 'pause', minutes: 10 },
       { phase: 'validation', minutes: 5 },
       { phase: 'claim', minutes: 2 },
-      { phase: 'unclassified', minutes: 28 },
     ])
   })
 
-  it('no inventa tiempo negativo si las fases superan el total', () => {
+  it('no inventa tiempo negativo en una fase', () => {
     expect(
       cyclePhases({
-        response: 5,
+        response: -5,
         assignment: 5,
         reassignment: 5,
         wait: 5,
@@ -40,8 +39,8 @@ describe('cyclePhases', () => {
         validation: 5,
         claim: 5,
         total: 5,
-      })[8],
-    ).toEqual({ phase: 'unclassified', minutes: 0 })
+      })[0],
+    ).toEqual({ phase: 'response', minutes: 0 })
   })
 })
 

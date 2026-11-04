@@ -190,6 +190,7 @@ function FiltersPanel({
             teamId: '',
             categoryId: '',
             dependencyId: '',
+            outcome: '',
           })
         }
       >

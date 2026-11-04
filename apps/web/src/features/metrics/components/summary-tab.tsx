@@ -10,7 +10,7 @@ import type {
   VolumePoint,
 } from '../domain/metrics'
 import type { Comparison } from '../domain/period'
-import { formatPercent } from '../domain/metrics'
+import { formatMinutes, formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
@@ -47,6 +47,34 @@ function TopCategories({ groups }: { groups: DimensionGroup[] }) {
           height={200}
         />
       )}
+    </ChartCard>
+  )
+}
+
+function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
+  const t = metricsMessages.outcomes
+  const rows = rowsByDimension(groups, 'outcome')
+  if (rows.length === 0) return null
+  return (
+    <ChartCard title={t.title} hint={metricsMessages.chartHints.outcomes}>
+      <div className="flex flex-col gap-2">
+        {rows.map((row) => (
+          <div
+            key={row.id}
+            className="flex items-center justify-between gap-3 text-sm"
+          >
+            <span className="text-muted-foreground">
+              {t[row.id as keyof typeof t] ?? row.name}
+            </span>
+            <span className="tabular-nums">
+              {row.tickets} · {formatMinutes(row.avgTotal)}
+            </span>
+          </div>
+        ))}
+        <p className="pt-1 text-xs text-muted-foreground">
+          {t.tickets} y {t.average.toLowerCase()}.
+        </p>
+      </div>
     </ChartCard>
   )
 }
@@ -109,6 +137,7 @@ export function SummaryTab({
       </div>
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <TopCategories groups={groups} />
+        <OutcomeBreakdown groups={groups} />
         <SatisfactionPanel
           satisfaction={satisfaction}
           distribution={satisfactionDistribution}

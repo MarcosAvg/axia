@@ -11,7 +11,6 @@ export type CyclePhase =
   | 'pause'
   | 'validation'
   | 'claim'
-  | 'unclassified'
 
 export interface CycleInput {
   response: number
@@ -30,21 +29,8 @@ export interface CycleSlice {
   minutes: number
 }
 
-/**
- * Reparte el ciclo medio en fases. Lo que el total no explica queda como
- * "sin clasificar"; se acota a cero para no inventar tiempo negativo.
- */
+/** Devuelve las fases medidas; la cobertura se garantiza en el servidor. */
 export function cyclePhases(input: CycleInput): CycleSlice[] {
-  const known =
-    input.response +
-    input.assignment +
-    input.reassignment +
-    input.wait +
-    input.active +
-    input.pause +
-    input.validation +
-    input.claim
-  const unclassified = Math.max(0, input.total - known)
   return [
     { phase: 'response', minutes: Math.max(0, input.response) },
     { phase: 'assignment', minutes: Math.max(0, input.assignment) },
@@ -54,7 +40,6 @@ export function cyclePhases(input: CycleInput): CycleSlice[] {
     { phase: 'pause', minutes: Math.max(0, input.pause) },
     { phase: 'validation', minutes: Math.max(0, input.validation) },
     { phase: 'claim', minutes: Math.max(0, input.claim) },
-    { phase: 'unclassified', minutes: unclassified },
   ]
 }
 

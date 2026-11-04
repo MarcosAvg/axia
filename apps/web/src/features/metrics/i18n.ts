@@ -1,6 +1,8 @@
 // Textos de métricas (es-MX).
 
-export { dimensionLabels } from './dimension-labels'
+import { outcomeMessages } from './dimension-labels'
+
+export { dimensionLabels, outcomeMessages } from './dimension-labels'
 
 export const metricsMessages = {
   title: 'Métricas',
@@ -18,6 +20,7 @@ export const metricsMessages = {
     team: 'Equipo',
     category: 'Categoría',
     dependency: 'Dependencia',
+    outcome: 'Desenlace',
     all: 'Todos',
     clear: 'Limpiar',
     remove: 'Quitar',
@@ -77,7 +80,6 @@ export const metricsMessages = {
       pause: 'Pausa',
       validation: 'Validación',
       claim: 'Reclamación',
-      unclassified: 'Sin clasificar',
     },
     phaseTable: 'Fases del ciclo',
     phase: 'Fase',
@@ -107,6 +109,7 @@ export const metricsMessages = {
       discarded: 'Descartado',
     },
   },
+  outcomes: outcomeMessages,
   distribution: {
     title: 'Distribución',
     subtitle: 'Volumen, porcentaje y detalle por dimensión.',
@@ -166,8 +169,6 @@ export const metricsMessages = {
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     reassignedTechnician:
       'Porcentaje de tiquets en los que el técnico cambió después de la asignación.',
-    unclassified:
-      'Parte del ciclo que no cae en una fase medida: pausas, esperas y tramos sin clasificar.',
   },
   chartHints: {
     volume:
@@ -186,6 +187,8 @@ export const metricsMessages = {
     duplicatesByDimension:
       'Tasa de duplicados por agrupación: duplicados entre los tiquets.',
     rejectCancel: 'Tiquets rechazados o cancelados, desglosados por motivo.',
+    outcomes:
+      'Volumen y tiempo medio de cada desenlace: abiertos, cerrados, rechazados, cancelados y duplicados.',
     techniciansTable:
       'Carga y participación por técnico: tiquets como líder y auxiliar, y minutos de participación.',
   },

@@ -18,7 +18,6 @@ const COLORS: Record<CyclePhase, string> = {
   pause: 'var(--destructive)',
   validation: 'var(--chart-4)',
   claim: 'var(--chart-5)',
-  unclassified: 'var(--border)',
 }
 
 const k = metricsMessages.kpi

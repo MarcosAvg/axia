@@ -41,6 +41,7 @@ function filtersQuery(filters: MetricsFilters) {
   if (filters.teamId) params.set('teamId', filters.teamId)
   if (filters.categoryId) params.set('categoryId', filters.categoryId)
   if (filters.dependencyId) params.set('dependencyId', filters.dependencyId)
+  if (filters.outcome) params.set('outcome', filters.outcome)
   return params.toString()
 }
 

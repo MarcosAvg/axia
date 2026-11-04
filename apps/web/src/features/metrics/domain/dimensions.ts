@@ -51,6 +51,7 @@ export const DIMENSIONS: Dimension[] = [
   'dependency',
   'team',
   'requester',
+  'outcome',
   'status',
   'priority',
   'channel',

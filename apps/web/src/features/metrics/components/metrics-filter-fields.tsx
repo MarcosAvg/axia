@@ -6,7 +6,7 @@ import { metricsMessages } from '../i18n'
 const t = metricsMessages.filters
 
 export type FilterField = {
-  key: 'buildingId' | 'teamId' | 'categoryId' | 'dependencyId'
+  key: 'buildingId' | 'teamId' | 'categoryId' | 'dependencyId' | 'outcome'
   label: string
   items: NamedOption[]
 }
@@ -54,6 +54,17 @@ export function filterSelects(catalogs: FilterCatalogs): FilterField[] {
       key: 'dependencyId',
       label: t.dependency,
       items: catalogs.dependencies,
+    },
+    {
+      key: 'outcome',
+      label: t.outcome,
+      items: [
+        { id: 'open', name: metricsMessages.outcomes.open },
+        { id: 'closed', name: metricsMessages.outcomes.closed },
+        { id: 'rejected', name: metricsMessages.outcomes.rejected },
+        { id: 'cancelled', name: metricsMessages.outcomes.cancelled },
+        { id: 'duplicate', name: metricsMessages.outcomes.duplicate },
+      ],
     },
   ]
 }

@@ -7,6 +7,7 @@ export interface MetricsFilters {
   teamId: string
   categoryId: string
   dependencyId: string
+  outcome: string
 }
 
 export const EMPTY_FILTERS: MetricsFilters = {
@@ -16,6 +17,7 @@ export const EMPTY_FILTERS: MetricsFilters = {
   teamId: '',
   categoryId: '',
   dependencyId: '',
+  outcome: '',
 }
 
 export type Dimension =
@@ -27,6 +29,7 @@ export type Dimension =
   | 'problem'
   | 'dependency'
   | 'requester'
+  | 'outcome'
   | 'status'
   | 'priority'
   | 'channel'
@@ -70,12 +73,17 @@ export interface MetricsSummary {
   recaptured: number
   reopened: number
   closed: number
+  flowTickets: number
+  rejected: number
+  cancelled: number
+  duplicate: number
   reassignmentRate: number
   technicianReassignmentRate: number
   recaptureRate: number
   reopenRate: number
   firstTimeFixRate: number
   avgTotal: number
+  avgResolution: number
   avgNet: number
   avgActive: number
   avgActiveLabor: number
@@ -90,6 +98,7 @@ export interface MetricsSummary {
   avgTotalLabor: number
   avgNetLabor: number
   sumTotal: number
+  sumResolution: number
   sumNet: number
   sumActive: number
   sumActiveExtra: number
@@ -112,12 +121,17 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   recaptured: 0,
   reopened: 0,
   closed: 0,
+  flowTickets: 0,
+  rejected: 0,
+  cancelled: 0,
+  duplicate: 0,
   reassignmentRate: 0,
   technicianReassignmentRate: 0,
   recaptureRate: 0,
   reopenRate: 0,
   firstTimeFixRate: 0,
   avgTotal: 0,
+  avgResolution: 0,
   avgNet: 0,
   avgActive: 0,
   avgActiveLabor: 0,
@@ -132,6 +146,7 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   avgTotalLabor: 0,
   avgNetLabor: 0,
   sumTotal: 0,
+  sumResolution: 0,
   sumNet: 0,
   sumActive: 0,
   sumActiveExtra: 0,
