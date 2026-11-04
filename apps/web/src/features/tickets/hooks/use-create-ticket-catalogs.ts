@@ -15,16 +15,25 @@ function dataOf<T>(query: { data?: T[] }): T[] {
   return query.data ?? []
 }
 
+type CreateTicketCatalogOptions = {
+  dependencyId?: string
+  buildingId?: string
+  locationId?: string
+  categoryId?: string
+  subcategoryId?: string
+}
+
 /** Carga los catálogos que necesita el alta, con los selects dependientes. */
-export function useCreateTicketCatalogs(
-  buildingId?: string,
-  locationId?: string,
-  categoryId?: string,
-  subcategoryId?: string,
-) {
-  const buildings = useBuildings()
-  const locations = useLocations(buildingId)
-  const dependencies = useDependencies(locationId)
+export function useCreateTicketCatalogs({
+  dependencyId,
+  buildingId,
+  locationId,
+  categoryId,
+  subcategoryId,
+}: CreateTicketCatalogOptions) {
+  const buildings = useBuildings(dependencyId)
+  const locations = useLocations(buildingId, dependencyId)
+  const dependencies = useDependencies(dependencyId ? undefined : locationId)
   const categories = useCategories()
   const subcategories = useSubcategories(categoryId)
   const problems = useProblems(subcategoryId)

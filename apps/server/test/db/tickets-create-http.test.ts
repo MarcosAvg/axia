@@ -113,6 +113,44 @@ describe('ticket creation', () => {
   })
 })
 
+describe('ticket creation dependency scope', () => {
+  it('rejects a dependency outside the requester dependency', async () => {
+    const requester = await context.db.execute(sql`
+      insert into public.requesters (full_name, dependency_id)
+      values ('Solicitante con dependencia', ${refs.dependencyId})
+      returning id
+    `)
+    const requesterId = (requester.rows[0] as { id: string }).id
+    const dependency = await context.db.execute(sql`
+      insert into public.dependencies (name)
+      values ('Dependencia alterna') returning id
+    `)
+    const dependencyId = (dependency.rows[0] as { id: string }).id
+    await context.db.execute(sql`
+      insert into public.dependency_locations (dependency_id, location_id)
+      values (${dependencyId}, ${refs.locationId})
+    `)
+
+    const rejected = await post(
+      context.cookies.admin,
+      ticketBody({ requesterId, dependencyId }),
+    )
+    expect(rejected.statusCode).toBe(400)
+
+    const accepted = await post(
+      context.cookies.admin,
+      ticketBody({ requesterId }),
+    )
+    expect(accepted.statusCode).toBe(201)
+
+    const withoutDependency = await post(
+      context.cookies.admin,
+      ticketBody({ dependencyId }),
+    )
+    expect(withoutDependency.statusCode).toBe(201)
+  })
+})
+
 describe('ticket duplicate detection', () => {
   it('marks a similar ticket as possible duplicate without blocking it', async () => {
     const description = 'Fuga idéntica en el mismo baño'

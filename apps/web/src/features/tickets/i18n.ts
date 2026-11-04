@@ -187,6 +187,8 @@ export const ticketMessages = {
       building: 'Edificio',
       location: 'Ubicación',
       dependency: 'Dependencia solicitante',
+      dependencyFromRequester: 'Se toma del solicitante.',
+      locationNeedsRequester: 'Elige un solicitante para ver las ubicaciones.',
       category: 'Categoría',
       subcategory: 'Subcategoría',
       problem: 'Problema',

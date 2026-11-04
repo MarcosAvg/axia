@@ -19,6 +19,10 @@ interface TicketFormFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  fixedDependencyId?: string
+  fixedDependencyName?: string | null
+  placeDisabled: boolean
+  needsRequester: boolean
   showOccurredAt: boolean
   photo: File | null
   onPhotoChange: (file: File | null) => void
@@ -30,6 +34,10 @@ function TicketFormFields({
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  fixedDependencyId,
+  fixedDependencyName,
+  placeDisabled,
+  needsRequester,
   showOccurredAt,
   photo,
   onPhotoChange,
@@ -43,6 +51,10 @@ function TicketFormFields({
         catalogs={catalogs}
         canChooseRequester={canChooseRequester}
         ownRequesterName={ownRequesterName}
+        fixedDependencyId={fixedDependencyId}
+        fixedDependencyName={fixedDependencyName}
+        placeDisabled={placeDisabled}
+        needsRequester={needsRequester}
       />
       <FormSection
         title={sections.description}
@@ -77,6 +89,23 @@ function TicketFormFields({
   )
 }
 
+function TicketFormActions({ isSubmitting }: { isSubmitting: boolean }) {
+  return (
+    <FormActionsBar>
+      <Button type="button" variant="ghost" asChild className="min-h-11">
+        <Link to="/tickets" search={{ page: 1 }}>
+          {ticketMessages.create.cancel}
+        </Link>
+      </Button>
+      <Button type="submit" disabled={isSubmitting} className="min-h-11">
+        {isSubmitting
+          ? ticketMessages.create.submitting
+          : ticketMessages.create.submit}
+      </Button>
+    </FormActionsBar>
+  )
+}
+
 /** Formulario de alta de tiquet: secciones, aviso de duplicados y guardado fijo. */
 export function TicketForm() {
   const {
@@ -85,6 +114,10 @@ export function TicketForm() {
     canChooseRequester,
     showOccurredAt,
     ownRequester,
+    fixedDependencyId,
+    fixedDependencyName,
+    placeDisabled,
+    needsRequester,
     candidates,
     onSubmit,
     confirmDuplicate,
@@ -113,6 +146,10 @@ export function TicketForm() {
           canChooseRequester={canChooseRequester}
           showOccurredAt={showOccurredAt}
           ownRequesterName={ownRequester?.fullName ?? null}
+          fixedDependencyId={fixedDependencyId}
+          fixedDependencyName={fixedDependencyName}
+          placeDisabled={placeDisabled}
+          needsRequester={needsRequester}
           photo={photo}
           onPhotoChange={setPhoto}
         />
@@ -125,18 +162,7 @@ export function TicketForm() {
           onCancel={cancelDuplicate}
         />
       </div>
-      <FormActionsBar>
-        <Button type="button" variant="ghost" asChild className="min-h-11">
-          <Link to="/tickets" search={{ page: 1 }}>
-            {ticketMessages.create.cancel}
-          </Link>
-        </Button>
-        <Button type="submit" disabled={isSubmitting} className="min-h-11">
-          {isSubmitting
-            ? ticketMessages.create.submitting
-            : ticketMessages.create.submit}
-        </Button>
-      </FormActionsBar>
+      <TicketFormActions isSubmitting={isSubmitting} />
     </form>
   )
 }

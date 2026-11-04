@@ -13,20 +13,40 @@ interface TicketCaptureFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  fixedDependencyId?: string
+  fixedDependencyName?: string | null
+  placeDisabled: boolean
+  needsRequester: boolean
 }
 
-/** Secciones de la captura del tiquet: ubicación, clasificación, solicitante y descripción. */
+/** Secciones de la captura del tiquet: solicitante, ubicación, clasificación y descripción. */
 export function TicketCaptureFields({
   register,
   errors,
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  fixedDependencyId,
+  fixedDependencyName,
+  placeDisabled,
+  needsRequester,
 }: TicketCaptureFieldsProps) {
   const { sections } = ticketMessages.create
 
   return (
     <>
+      <FormSection
+        title={sections.requester}
+        description={sections.requesterHelp}
+      >
+        <TicketRequesterFields
+          register={register}
+          errors={errors}
+          requesters={catalogs.requesters}
+          canChooseRequester={canChooseRequester}
+          ownRequesterName={ownRequesterName}
+        />
+      </FormSection>
       <FormSection
         title={sections.location}
         description={sections.locationHelp}
@@ -37,6 +57,10 @@ export function TicketCaptureFields({
           buildings={catalogs.buildings}
           locations={catalogs.locations}
           dependencies={catalogs.dependencies}
+          fixedDependencyId={fixedDependencyId}
+          fixedDependencyName={fixedDependencyName}
+          disabled={placeDisabled}
+          needsRequester={needsRequester}
         />
       </FormSection>
       <FormSection
@@ -51,18 +75,6 @@ export function TicketCaptureFields({
           problems={catalogs.problems}
           channels={catalogs.channels}
           showChannel={canChooseRequester}
-        />
-      </FormSection>
-      <FormSection
-        title={sections.requester}
-        description={sections.requesterHelp}
-      >
-        <TicketRequesterFields
-          register={register}
-          errors={errors}
-          requesters={catalogs.requesters}
-          canChooseRequester={canChooseRequester}
-          ownRequesterName={ownRequesterName}
         />
       </FormSection>
     </>

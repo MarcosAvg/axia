@@ -235,7 +235,11 @@ async function createInTransaction(
       'La hora real de registro solo se puede fijar al registrar a nombre de otra persona',
     )
   }
-  const { teamId } = await validateCreateInputs(tx, resolved)
+  const { teamId } = await validateCreateInputs(
+    tx,
+    resolved,
+    requester.dependency_id,
+  )
   const ticket = await insertTicket({
     tx,
     actor,

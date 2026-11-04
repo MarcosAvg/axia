@@ -16,6 +16,7 @@ export type RequesterRow = {
   id: string
   full_name: string
   contact: string | null
+  dependency_id: string | null
   user_id: string | null
 }
 export type ResolvedTeam = {
@@ -55,7 +56,7 @@ export async function loadRequester(
   requesterId: string,
 ): Promise<RequesterRow> {
   const result = await tx.execute(sql`
-    select id, full_name, contact, user_id
+    select id, full_name, contact, dependency_id, user_id
     from public.requesters
     where id = ${requesterId} and active
     limit 1
@@ -138,9 +139,13 @@ export type ResolvedCreateInput = CreateTicketInput & {
 export async function validateCreateInputs(
   tx: DbExecutor,
   input: ResolvedCreateInput,
+  requesterDependencyId: string | null = null,
 ): Promise<ResolvedTeam> {
   await requireActive(tx, 'buildings', input.buildingId, 'Edificio')
   await requireActive(tx, 'dependencies', input.dependencyId, 'Dependencia')
+  if (requesterDependencyId && input.dependencyId !== requesterDependencyId) {
+    throw invalid('La dependencia no corresponde al solicitante')
+  }
   await assertPair(tx, input.dependencyId, input.locationId)
   await requireActive(
     tx,
