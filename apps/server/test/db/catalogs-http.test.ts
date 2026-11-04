@@ -14,6 +14,7 @@ let context: TicketHttpContext
 let buildingA1: string
 let buildingB1: string
 let categoryA: string
+let dependencyOnlyA1: string
 
 async function get(path: string, cookie?: string) {
   return context.app.inject({
@@ -37,6 +38,18 @@ beforeAll(async () => {
     sql`select id from public.categories where name = 'Categoría A'`,
   )
   categoryA = (category.rows[0] as { id: string }).id
+  const dependency = await context.db.execute(sql`
+    insert into public.dependencies (name)
+    values ('Dependencia solo A1') returning id
+  `)
+  dependencyOnlyA1 = (dependency.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    insert into public.dependency_locations (dependency_id, location_id)
+    values (
+      ${dependencyOnlyA1},
+      (select id from public.locations where name = 'Sala A1')
+    )
+  `)
 }, 60_000)
 
 afterAll(async () => {
@@ -78,31 +91,20 @@ describe('catalog reads', () => {
 })
 
 describe('dependent catalogs', () => {
-  it('limits buildings and locations to the dependency links', async () => {
-    const inserted = await context.db.execute(sql`
-      insert into public.dependencies (name)
-      values ('Dependencia solo A1') returning id
-    `)
-    const dependencyId = (inserted.rows[0] as { id: string }).id
-    await context.db.execute(sql`
-      insert into public.dependency_locations (dependency_id, location_id)
-      values (
-        ${dependencyId},
-        (select id from public.locations where name = 'Sala A1')
-      )
-    `)
-
+  it('lists only buildings with locations linked to the dependency', async () => {
     const buildings = await get(
-      `/api/catalogs/buildings?dependencyId=${dependencyId}`,
+      `/api/catalogs/buildings?dependencyId=${dependencyOnlyA1}`,
       context.cookies.requester,
     )
     expect(buildings.statusCode).toBe(200)
     expect(
       (buildings.json() as ItemsBody).items.map((item) => item.name),
     ).toEqual(['Edificio A1'])
+  })
 
+  it('lists only locations linked to the dependency inside the building', async () => {
     const locations = await get(
-      `/api/catalogs/locations?buildingId=${buildingA1}&dependencyId=${dependencyId}`,
+      `/api/catalogs/locations?buildingId=${buildingA1}&dependencyId=${dependencyOnlyA1}`,
       context.cookies.requester,
     )
     expect(locations.statusCode).toBe(200)
@@ -111,7 +113,7 @@ describe('dependent catalogs', () => {
     ).toEqual(['Sala A1'])
 
     const otherBuilding = await get(
-      `/api/catalogs/locations?buildingId=${buildingB1}&dependencyId=${dependencyId}`,
+      `/api/catalogs/locations?buildingId=${buildingB1}&dependencyId=${dependencyOnlyA1}`,
       context.cookies.requester,
     )
     expect(otherBuilding.statusCode).toBe(200)
