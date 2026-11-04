@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-04
+
 ### Corregido
 
 - Validar, calificar, reclamar o cancelar a nombre del solicitante exige elegirlo explícitamente en
