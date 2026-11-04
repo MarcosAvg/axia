@@ -53,12 +53,14 @@ function ScorePicker({
 
 function RatingForm({
   ticketId,
+  subjectRequesterId,
   onClose,
 }: {
   ticketId: string
+  subjectRequesterId?: string
   onClose: () => void
 }) {
-  const rate = useRateTicket(ticketId)
+  const rate = useRateTicket(ticketId, subjectRequesterId)
   const [score, setScore] = useState(0)
   const [comment, setComment] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -109,9 +111,11 @@ function RatingForm({
 
 function RatingContent({
   ticketId,
+  subjectRequesterId,
   onClose,
 }: {
   ticketId: string
+  subjectRequesterId?: string
   onClose: () => void
 }) {
   const rating = useTicketRating(ticketId)
@@ -138,22 +142,37 @@ function RatingContent({
     )
   }
 
-  return <RatingForm ticketId={ticketId} onClose={onClose} />
+  return (
+    <RatingForm
+      ticketId={ticketId}
+      subjectRequesterId={subjectRequesterId}
+      onClose={onClose}
+    />
+  )
 }
 
 /** Calificación de satisfacción en modal (hoja inferior en móvil). */
 export function TicketRatingDialog({
   ticketId,
+  subjectRequesterId,
   open,
   onOpenChange,
 }: {
   ticketId: string
+  subjectRequesterId?: string
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const close = () => onOpenChange(false)
-  const body = <RatingContent ticketId={ticketId} onClose={close} />
+  const body = (
+    <RatingContent
+      ticketId={ticketId}
+      subjectRequesterId={subjectRequesterId}
+      onClose={close}
+    />
+  )
+  const description = subjectRequesterId ? t.proxyNote : t.prompt
 
   if (isDesktop) {
     return (
@@ -161,7 +180,7 @@ export function TicketRatingDialog({
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t.title}</DialogTitle>
-            <DialogDescription>{t.prompt}</DialogDescription>
+            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           {body}
         </DialogContent>
@@ -177,7 +196,7 @@ export function TicketRatingDialog({
       >
         <SheetHeader className="p-0 pr-8">
           <SheetTitle>{t.title}</SheetTitle>
-          <SheetDescription>{t.prompt}</SheetDescription>
+          <SheetDescription>{description}</SheetDescription>
         </SheetHeader>
         {body}
       </SheetContent>

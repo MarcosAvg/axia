@@ -115,6 +115,32 @@ async function assertSubject({
 }
 
 /**
+ * Actuar a nombre del solicitante exige elegirlo de forma explícita y tener el
+ * permiso específico. Sin sujeto la acción es propia del actor.
+ */
+export function assertRequesterProxy(input: {
+  actor: Actor
+  access: TicketAccess
+  requesterId: string
+  subjectRequesterId?: string | null
+  permission: string
+}): boolean {
+  const { actor, access, requesterId, subjectRequesterId, permission } = input
+  if (!subjectRequesterId) return false
+  if (subjectRequesterId !== requesterId) {
+    throw new AppError(
+      400,
+      'validation',
+      'El solicitante no corresponde al tiquet',
+    )
+  }
+  if (!can(actor, permission, access)) {
+    throw forbidden('No tienes permiso para actuar a nombre del solicitante')
+  }
+  return true
+}
+
+/**
  * Comprueba la acción del técnico: con sujeto valida el proxy; sin sujeto exige
  * el permiso directo de la acción.
  */

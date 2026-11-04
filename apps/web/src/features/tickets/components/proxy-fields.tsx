@@ -1,30 +1,21 @@
 import { SelectField } from '@/components/shared/form-fields'
-import type { TicketParticipant } from '../domain/types'
 import { ticketMessages } from '../i18n'
 
 export function ProxySelector({
-  participants,
+  options,
   value,
   onChange,
 }: {
-  participants: TicketParticipant[]
+  options: { value: string; label: string }[]
   value: string
   onChange: (value: string) => void
 }) {
-  const seen = new Set<string>()
-  const options = participants
-    .filter((item) => {
-      if (seen.has(item.technicianId)) return false
-      seen.add(item.technicianId)
-      return true
-    })
-    .map((item) => ({ value: item.technicianId, label: item.technicianName }))
   if (options.length === 0) return null
 
   return (
     <div className="flex flex-col gap-1">
       <SelectField
-        id="proxy-technician"
+        id="proxy-subject"
         label={ticketMessages.proxy.label}
         placeholder={ticketMessages.proxy.none}
         options={options}

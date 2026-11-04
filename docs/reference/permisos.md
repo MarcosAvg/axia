@@ -40,7 +40,7 @@ no adquieren alcance propio sobre un tiquet por el mero hecho de configurar `own
 
 | Grupo | Permisos |
 |---|---|
-| Tiquets | `ticket.create`, `ticket.create_on_behalf`, `ticket.view`, `ticket.take_offer`, `ticket.assign_supervisor`, `ticket.assign_technician`, `ticket.add_auxiliary`, `ticket.recapture`, `ticket.start`, `ticket.attend`, `ticket.pause`, `ticket.resume`, `ticket.validate`, `ticket.validate_on_behalf`, `ticket.open_claim`, `ticket.resolve_claim`, `ticket.reject`, `ticket.cancel`, `ticket.mark_duplicate`, `ticket.reactivate`, `ticket.prioritize`, `ticket.rate`, `ticket.rate_on_behalf`, `ticket.record_progress` |
+| Tiquets | `ticket.create`, `ticket.create_on_behalf`, `ticket.view`, `ticket.take_offer`, `ticket.assign_supervisor`, `ticket.assign_technician`, `ticket.add_auxiliary`, `ticket.recapture`, `ticket.start`, `ticket.attend`, `ticket.pause`, `ticket.resume`, `ticket.validate`, `ticket.validate_on_behalf`, `ticket.open_claim`, `ticket.open_claim_on_behalf`, `ticket.resolve_claim`, `ticket.reject`, `ticket.cancel`, `ticket.cancel_on_behalf`, `ticket.mark_duplicate`, `ticket.reactivate`, `ticket.prioritize`, `ticket.rate`, `ticket.rate_on_behalf`, `ticket.record_progress` |
 | Tiempo | `time.record_manual` (ajustar la hora de las acciones y fijar la hora al actuar por proxy) |
 | Evidencia | `evidence.attach` |
 | Métricas | `metrics.view` |
@@ -61,9 +61,15 @@ aplica a la evidencia de trabajo y es quien recibe el tiempo atribuido; el actor
 auditoría.
 
 Sin sujeto se comprueba el permiso directo de la acción. `time.record_manual` no sustituye estos
-controles: se exige además para fijar o ajustar la hora. Validar o calificar por el solicitante
-usa los permisos específicos `ticket.validate_on_behalf` y `ticket.rate_on_behalf`; no basta con
-`act_on_behalf`.
+controles: se exige además para fijar o ajustar la hora.
+
+Para el **solicitante** el proxy también es explícito. El cuerpo de `validate`, `rate`, `open_claim`
+y `cancel` acepta `subjectRequesterId`; debe ser el solicitante del tiquet y exige
+`ticket.validate_on_behalf`, `ticket.rate_on_behalf`, `ticket.open_claim_on_behalf` o
+`ticket.cancel_on_behalf`, respectivamente. Sin ese campo la acción es propia del actor: validar
+registra el lado del supervisor, calificar solo lo puede hacer el solicitante y reclamar o cancelar
+se atribuyen a quien ejecuta. El selector «Actuar a nombre de» de la interfaz incluye al solicitante
+y a los técnicos participantes.
 
 ## Evidencia por tipo
 
@@ -74,7 +80,7 @@ habilita cualquier tipo para quien lo tenga en el ámbito del tiquet.
 |---|---|
 | `request` | El solicitante o quien registró el tiquet, con `ticket.create` o `ticket.create_on_behalf`; o `evidence.attach` |
 | `before`, `during`, `after` | `ticket.record_progress` sobre el tiquet; o `evidence.attach` |
-| `claim` | `ticket.open_claim` sobre el tiquet; o `evidence.attach` |
+| `claim` | `ticket.open_claim` o `ticket.open_claim_on_behalf` sobre el tiquet; o `evidence.attach` |
 | `other` | `evidence.attach` |
 
 El solicitante puede adjuntar la foto de su solicitud y la evidencia de una reclamación sin recibir

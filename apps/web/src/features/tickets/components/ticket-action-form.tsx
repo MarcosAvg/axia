@@ -5,21 +5,15 @@ import { ButtonGrid } from '@/components/shared/button-grid'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { FileField } from '@/components/shared/file-field'
 import { TextField } from '@/components/shared/form-fields'
-import {
-  usePriorities,
-  useReasons,
-  useServiceTypes,
-  useTechnicians,
-} from '@/features/catalogs'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
 import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
-import type { ActionKey } from '../domain/actions'
+import type { ActionKey, ProxySubject } from '../domain/actions'
 import { isProxyAction } from '../domain/actions'
-import { assignmentState, listTechnicians } from '../domain/assignment-form'
 import { toTicketError } from '../domain/errors'
 import type { EvidenceType, TicketDetail } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
+import { useActionCatalogs } from '../hooks/use-action-catalogs'
 import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
@@ -188,7 +182,7 @@ interface TicketActionFormProps {
   ticketId: string
   cycle: number
   action: ActionKey
-  subjectTechnicianId?: string
+  subject: ProxySubject
   excludeIds?: string[]
   onClose: () => void
 }
@@ -208,28 +202,25 @@ function useTicketActionForm({
   ticketId,
   cycle,
   action,
-  subjectTechnicianId,
+  subject,
   excludeIds,
   onClose,
 }: TicketActionFormProps) {
+  const subjectTechnicianId =
+    subject?.kind === 'technician' ? subject.technicianId : undefined
   const time = useActionTime(
     isProxyAction(action) && Boolean(subjectTechnicianId),
   )
-  const actions = useTicketActions(ticketId, subjectTechnicianId, time.iso)
-  const technicians = useTechnicians()
-  const priorities = usePriorities()
-  const serviceTypes = useServiceTypes()
+  const actions = useTicketActions(ticketId, subject, time.iso)
   const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
-  const available = listTechnicians(technicians.data, action, excludeIds)
-  const assignment = assignmentState({
+  const catalogs = useActionCatalogs({
     action,
+    reasonUse: reasonUseFor(action),
     ticket,
-    technicians: available,
-    technicianId: values.technicianId,
-    fallbackReasonUse: reasonUseFor(action),
+    values,
+    excludeIds,
   })
-  const reasons = useReasons(assignment.reasonUse)
   const submission = useActionSubmission({
     actions,
     values,
@@ -238,7 +229,7 @@ function useTicketActionForm({
     cycle,
     occurredAt: time.iso,
     subjectTechnicianId,
-    reasonRequired: assignment.reasonRequired,
+    reasonRequired: catalogs.reasonRequired,
     onClose,
   })
   const onChange = makeOnChange(submission.clearValidation, setValues)
@@ -254,12 +245,12 @@ function useTicketActionForm({
     occurredAt: time.value,
     showOccurredAt: time.show,
     onOccurredAtChange: time.setValue,
-    technicians: available,
-    reasons: reasons.data ?? [],
-    priorities: priorities.data ?? [],
-    serviceTypes: serviceTypes.data ?? [],
+    technicians: catalogs.technicians,
+    reasons: catalogs.reasons,
+    priorities: catalogs.priorities,
+    serviceTypes: catalogs.serviceTypes,
     motiveReasonId,
-    reasonRequired: assignment.reasonRequired,
+    reasonRequired: catalogs.reasonRequired,
   }
 }
 

@@ -56,6 +56,9 @@ for (const width of [320, 390, 1440]) {
   test(`las rutas autenticadas no desbordan a ${width} px`, async ({
     page,
   }) => {
+    // La matriz no depende de eventos en vivo. Cortar el SSE evita acumular
+    // conexiones por cada navegación y el límite del proxy de desarrollo.
+    await page.route('**/api/events', (route) => route.abort())
     await page.setViewportSize({ width, height: 1000 })
     await signIn(page)
 

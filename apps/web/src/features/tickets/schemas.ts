@@ -47,9 +47,11 @@ export const ticketDetailResponseSchema = z.object({
     requesterContact: nullableText,
     duplicateOfId: nullableText,
     duplicateOfFolio: nullableText,
+    requesterId: z.string(),
     isRequester: z.boolean(),
     requesterValidated: z.boolean(),
     hasTaken: z.boolean(),
+    validationPolicy: z.enum(['requester', 'supervisor', 'both']),
     cycleTimes: z.object({
       total: z.number(),
       response: z.number(),

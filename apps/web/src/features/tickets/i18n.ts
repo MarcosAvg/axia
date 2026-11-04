@@ -1,6 +1,7 @@
 // Textos del feature de tiquets (es-MX).
 
 import type { EvidenceType, EventType } from './domain/types'
+import { proxyMessages } from './proxy-i18n'
 
 export { statusLabels } from './status-i18n'
 
@@ -263,12 +264,7 @@ export const ticketMessages = {
     dismissed: 'Improcedente (cerrar)',
     new_ticket: 'Requiere tiquet nuevo',
   },
-  proxy: {
-    label: 'Actuar a nombre de',
-    none: 'Nadie (acción propia)',
-    help: 'Selecciona un técnico para registrar sus acciones a su nombre.',
-    required: 'Selecciona a nombre de qué técnico.',
-  },
+  proxy: proxyMessages,
   evidence: {
     addTitle: 'Agregar evidencia',
     type: 'Tipo de evidencia',
@@ -281,6 +277,7 @@ export const ticketMessages = {
   rating: {
     title: 'Calificación',
     prompt: '¿Cómo calificas la atención recibida?',
+    proxyNote: 'La calificación se registra a nombre del solicitante.',
     comment: 'Comentario (opcional)',
     submit: 'Enviar calificación',
     saving: 'Guardando…',

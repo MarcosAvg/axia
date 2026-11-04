@@ -11,7 +11,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { useMediaQuery } from '@/lib/use-media-query'
-import type { ActionKey } from '../domain/actions'
+import type { ActionKey, ProxySubject } from '../domain/actions'
 import type { TicketDetail } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { AssignSupervisorForm } from './assign-supervisor-form'
@@ -23,7 +23,7 @@ import { DEDICATED } from './ticket-action-handlers'
 interface ActionFormsProps {
   ticket: TicketDetail
   formAction: ActionKey | null
-  subject: string | undefined
+  subject: ProxySubject
   excludeIds?: string[]
   onClose: () => void
 }
@@ -39,7 +39,9 @@ function ActionForms({
     return (
       <RecaptureForm
         ticket={ticket}
-        subjectTechnicianId={subject}
+        subjectTechnicianId={
+          subject?.kind === 'technician' ? subject.technicianId : undefined
+        }
         onClose={onClose}
       />
     )
@@ -57,7 +59,7 @@ function ActionForms({
         ticketId={ticket.id}
         cycle={ticket.cycle}
         action={formAction}
-        subjectTechnicianId={subject}
+        subject={subject}
         excludeIds={excludeIds}
         onClose={onClose}
       />

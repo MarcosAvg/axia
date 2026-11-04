@@ -35,6 +35,11 @@ cambiar prioridad o marcar duplicado. En el detalle puedes abrir **Más** para o
 motivo y demás campos que pida cada formulario. Si actúas a nombre de un técnico o solicitante, el
 tiempo y la evidencia se atribuyen a esa persona, no a ti.
 
+El selector **Actuar a nombre de** incluye al solicitante y a los técnicos participantes. Sin
+sujeto, la acción es tuya. En validación `both`, elige **Solicitante** para validar su lado y
+después **Nadie (acción propia)** para validar el tuyo; el tiquet se cierra al completar ambos.
+Calificar, reclamar o cancelar a nombre del solicitante también exige elegirlo en el selector.
+
 Para corregir datos usa **Recapturar** sobre el mismo tiquet. Para un registro repetido usa
 **Marcar duplicado** y busca el original por folio. No registres otro tiquet para corregir una
 captura.
@@ -60,7 +65,8 @@ debe quedar entre las acciones vecinas y el ajuste conserva auditoría.
 ## Validar o reclamar
 
 Cuando esté atendido, abre el detalle y usa **Validar** si te corresponde según la política de
-la instancia. Si la política exige a ambos, el solicitante valida primero y el supervisor después.
+la instancia. Si la política exige a ambos, el solicitante valida primero y el supervisor después;
+un supervisor solo puede validar el lado del solicitante eligiéndolo en **Actuar a nombre de**.
 La calificación de satisfacción es opcional: se abre en un modal al validar y, si la cierras sin
 enviarla, puedes usar **Calificar** después. Una vez validado, el solicitante no puede
 editar el tiquet mientras siga atendido o en reclamación; la reclamación sigue disponible. La
@@ -68,7 +74,8 @@ calificación ya enviada no se modifica.
 
 Si hay una inconformidad y todavía no validaste, usa **Abrir reclamación**, indica motivo y
 descripción, y adjunta la evidencia. Una vez validado, el solicitante ya no puede abrir una
-reclamación, ni siquiera después del cierre; un supervisor sí puede hacerlo a nombre del solicitante.
+reclamación, ni siquiera después del cierre; un supervisor sí puede hacerlo a nombre del solicitante
+eligiéndolo en el selector.
 Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta los
 [estados y sus condiciones](../reference/estados-y-transiciones.md) para saber qué efecto tiene.
 

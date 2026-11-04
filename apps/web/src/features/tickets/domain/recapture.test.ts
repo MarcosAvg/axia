@@ -15,6 +15,7 @@ const ticket = {
   closedAt: null,
   description: 'No enciende',
   requesterName: 'Ana',
+  requesterId: 'r1',
   possibleDuplicate: false,
   buildingName: null,
   categoryName: null,
@@ -42,6 +43,7 @@ const ticket = {
   isRequester: false,
   requesterValidated: false,
   hasTaken: false,
+  validationPolicy: 'both',
 } satisfies TicketDetail
 
 describe('initialRecaptureValues', () => {

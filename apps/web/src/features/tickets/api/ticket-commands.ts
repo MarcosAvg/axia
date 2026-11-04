@@ -10,6 +10,7 @@ const optionalText = z
   .transform((value) => value ?? undefined)
   .optional()
 const proxy = { subjectTechnicianId: optionalText }
+const requesterProxy = { subjectRequesterId: optionalText }
 const reason = { reasonId: id, note: optionalText }
 const pause = z.object({ ...reason, ...proxy, estimatedDate: optionalText })
 const changes = z
@@ -62,9 +63,15 @@ export const ticketCommandSchema = z.discriminatedUnion('operation', [
       ...proxy,
     }),
   }),
-  z.object({ operation: z.literal('validate'), args: z.object({}) }),
+  z.object({
+    operation: z.literal('validate'),
+    args: z.object(requesterProxy),
+  }),
   z.object({ operation: z.literal('reject'), args: z.object(reason) }),
-  z.object({ operation: z.literal('cancel'), args: z.object(reason) }),
+  z.object({
+    operation: z.literal('cancel'),
+    args: z.object({ ...reason, ...requesterProxy }),
+  }),
   z.object({
     operation: z.literal('change_priority'),
     args: z.object({ priorityId: id }),
@@ -84,7 +91,11 @@ export const ticketCommandSchema = z.discriminatedUnion('operation', [
   }),
   z.object({
     operation: z.literal('open_claim'),
-    args: z.object({ reasonId: id, description: z.string().min(5) }),
+    args: z.object({
+      reasonId: id,
+      description: z.string().min(5),
+      ...requesterProxy,
+    }),
   }),
   z.object({
     operation: z.literal('resolve_claim'),
@@ -107,6 +118,7 @@ export const ticketCommandSchema = z.discriminatedUnion('operation', [
     args: z.object({
       score: z.number().int().min(1).max(5),
       comment: optionalText,
+      ...requesterProxy,
     }),
   }),
 ])

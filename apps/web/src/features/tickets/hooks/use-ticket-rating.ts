@@ -15,7 +15,7 @@ export function useTicketRating(ticketId: string | undefined) {
 }
 
 /** Envía (o actualiza) la calificación del tiquet. */
-export function useRateTicket(ticketId: string) {
+export function useRateTicket(ticketId: string, subjectRequesterId?: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (variables: { input: RatingInput; clientRequestId: string }) =>
@@ -23,7 +23,10 @@ export function useRateTicket(ticketId: string) {
         ticketId,
         clientRequestId: variables.clientRequestId,
         operation: 'rate',
-        args: variables.input,
+        args: {
+          ...variables.input,
+          ...(subjectRequesterId ? { subjectRequesterId } : {}),
+        },
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })

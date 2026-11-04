@@ -25,6 +25,7 @@ export type TicketDetail = {
   closedAt: string | null
   description: string
   requesterName: string
+  requesterId: string
   possibleDuplicate: boolean
   buildingName: string | null
   categoryName: string | null
@@ -53,6 +54,7 @@ export type TicketDetail = {
   isRequester: boolean
   requesterValidated: boolean
   hasTaken: boolean
+  validationPolicy: 'requester' | 'supervisor' | 'both'
 }
 
 type DetailRow = {
@@ -63,6 +65,7 @@ type DetailRow = {
   closed_at: Date | string | null
   description: string
   requester_name: string
+  requester_id: string
   possible_duplicate: boolean
   building_name: string | null
   category_name: string | null
@@ -98,6 +101,7 @@ type DetailRow = {
   duplicate_of_folio: string | null
   is_requester: boolean
   requester_validated: boolean
+  validation_policy: 'requester' | 'supervisor' | 'both'
 }
 
 function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
@@ -109,6 +113,7 @@ function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
     closedAt: optionalIso(row.closed_at),
     description: row.description,
     requesterName: row.requester_name,
+    requesterId: row.requester_id,
     possibleDuplicate: row.possible_duplicate,
     buildingName: row.building_name,
     categoryName: row.category_name,
@@ -147,6 +152,7 @@ function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
     isRequester: row.is_requester,
     requesterValidated: row.requester_validated,
     hasTaken,
+    validationPolicy: row.validation_policy,
   }
 }
 
@@ -154,7 +160,7 @@ function detailQuery(ticketId: string, actorId: string) {
   return sql`
     select
       t.id, t.folio, t.status, t.reported_at, t.closed_at, t.description,
-      t.requester_name, t.possible_duplicate,
+      t.requester_name, t.requester_id, t.possible_duplicate,
       t.cycle, t.building_id, t.location_id, t.dependency_id, t.category_id,
       t.subcategory_id, t.problem_id, t.service_type_id, t.priority_id,
       t.requester_contact, t.duplicate_of_id, dup.folio as duplicate_of_folio,
@@ -167,6 +173,7 @@ function detailQuery(ticketId: string, actorId: string) {
         where v.ticket_id = t.id and v.cycle = t.cycle
           and v.validator_role = 'requester'
       ) as requester_validated,
+      (select validation_policy from public.instance_settings limit 1) as validation_policy,
       b.name as building_name,
       l.name as location_name,
       d.name as dependency_name,

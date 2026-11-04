@@ -5,6 +5,16 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Validar, calificar, reclamar o cancelar a nombre del solicitante exige elegirlo explícitamente en
+  «Actuar a nombre de»; el permiso `*_on_behalf` ya no sustituye al solicitante por sí solo. Sin
+  proxy, el supervisor valida su propio lado y la calificación queda reservada al solicitante. La
+  migración 0022 reañade `ticket.open_claim_on_behalf` y `ticket.cancel_on_behalf`. Decisión en el
+  [ADR 0111](docs/decisions/0111-proxy-explicito-solicitante.md).
+- La reclamación y la cancelación sin proxy se atribuyen al actor, no al solicitante; con proxy
+  conservan el sujeto solicitante. Las acciones offline conservan el sujeto elegido.
+
 ## [0.8.0] - 2026-11-03
 
 ### Cambiado

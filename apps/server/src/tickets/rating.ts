@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
-import { canAct } from './access.js'
+import { AppError } from '../http/errors.js'
 import {
   conflict,
   lockTicket,
@@ -12,13 +12,16 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import type { TicketAccess } from './access.js'
 
 export type RateInput = {
   ticketId: string
   score: number
   comment: string | null
   clientRequestId: string
+  subjectRequesterId?: string | null
 }
 
 async function hasRequesterValidation(
@@ -67,6 +70,7 @@ async function insertRating(
 async function rateInTransaction(
   tx: DbExecutor,
   actor: Actor,
+  access: TicketAccess,
   input: RateInput,
 ): Promise<ActionResult> {
   const before = validateHandled(
@@ -84,6 +88,13 @@ async function rateInTransaction(
     'rate',
   )
   if (after) return after
+  assertRequesterProxy({
+    actor,
+    access,
+    requesterId: ticket.requester_id,
+    subjectRequesterId: input.subjectRequesterId,
+    permission: 'ticket.rate_on_behalf',
+  })
   const requesterValidated = await hasRequesterValidation(
     tx,
     input.ticketId,
@@ -116,11 +127,17 @@ export async function rateTicket(
 ): Promise<ActionResult> {
   const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
-  if (
-    !canAct(actor, 'ticket.rate', access) &&
-    !canAct(actor, 'ticket.rate_on_behalf', access)
-  ) {
+  if (input.subjectRequesterId) {
+    assertTicketAction(actor, 'ticket.rate_on_behalf', access)
+  } else {
+    if (access.requesterUserId !== actor.id) {
+      throw new AppError(
+        403,
+        'forbidden',
+        'Solo el solicitante puede calificar; actúa a su nombre',
+      )
+    }
     assertTicketAction(actor, 'ticket.rate', access)
   }
-  return db.transaction((tx) => rateInTransaction(tx, actor, input))
+  return db.transaction((tx) => rateInTransaction(tx, actor, access, input))
 }

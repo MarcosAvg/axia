@@ -119,6 +119,7 @@ export function TicketActionBar({
   actions,
   identity,
   participants,
+  proxy,
   onValidated,
 }: TicketActionsPanelProps) {
   const panel = useActionPanel({
@@ -126,24 +127,24 @@ export function TicketActionBar({
     actions,
     identity,
     participants,
+    subject: proxy.subject,
     onValidated,
   })
-  if (panel.visible.length === 0 && !panel.canProxy) return null
+  if (panel.visible.length === 0 && !proxy.canProxy) return null
 
   const primary = pickPrimaryAction(panel.visible)
   const others = panel.visible.filter((action) => action !== primary)
-  const takeOffer = ticket.status === 'registered' && panel.hasOffer
+  const takeOffer =
+    !proxy.subject && ticket.status === 'registered' && panel.hasOffer
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
       <div className="mx-auto flex max-w-[1800px] flex-col gap-2">
-        {panel.canProxy ? (
-          <ProxySelector
-            participants={participants}
-            value={panel.subjectTechnicianId}
-            onChange={panel.setSubject}
-          />
-        ) : null}
+        <ProxySelector
+          options={proxy.options}
+          value={proxy.value}
+          onChange={proxy.setValue}
+        />
         <ProxyRequiredHint show={panel.blocked.length > 0} />
         <div className="flex items-center gap-2">
           <BarPrimary panel={panel} takeOffer={takeOffer} primary={primary} />

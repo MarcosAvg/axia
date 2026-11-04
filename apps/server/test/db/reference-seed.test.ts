@@ -63,7 +63,7 @@ describe('reference seed catalogs', () => {
     await expectReferenceCounts()
     expect(
       await scalar('select count(*)::text as value from public.permissions'),
-    ).toBe(32)
+    ).toBe(34)
     expect(
       await scalar('select count(*)::text as value from public.roles'),
     ).toBe(4)
@@ -88,8 +88,6 @@ describe('reference seed catalogs', () => {
         select count(*)::text as value
         from public.permissions
         where id in (
-          'ticket.open_claim_on_behalf',
-          'ticket.cancel_on_behalf',
           'ticket.reopen',
           'data.import'
         )

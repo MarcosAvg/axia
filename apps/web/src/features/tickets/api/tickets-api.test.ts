@@ -46,6 +46,8 @@ const detail = {
   isRequester: false,
   requesterValidated: false,
   hasTaken: false,
+  requesterId: 'r1',
+  validationPolicy: 'both',
   cycleTimes: {
     total: 20,
     response: 1,

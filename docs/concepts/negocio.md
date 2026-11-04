@@ -212,16 +212,19 @@ puede, precondiciones y efectos.
   registrarse antes del cierre una vez validado su lado. La calificación es única, opcional y no se
   modifica después del primer envío. Mientras el tiquet siga `attended` o en reclamación, el
   solicitante que ya validó no puede editar el tiquet ni abrir una reclamación; tampoco puede
-  reclamar después del cierre. Cuando un solicitante no tiene cuenta, o quien valida actúa con
-  `ticket.validate_on_behalf`, la validación llena primero el lado del solicitante y después el del
-  supervisor. La satisfacción a nombre del solicitante exige `ticket.rate_on_behalf`.
+  reclamar después del cierre. Validar, calificar, reclamar o cancelar **a nombre del solicitante**
+  exige elegirlo explícitamente como sujeto proxy y tener el permiso `*_on_behalf` correspondiente;
+  la cuenta del solicitante es indiferente. Sin proxy, el supervisor valida su propio lado y en la
+  política `both` espera la validación del solicitante. La satisfacción a nombre del solicitante
+  exige `ticket.rate_on_behalf`.
 - **RN-16 Reclamación.** La pueden abrir el solicitante, un supervisor o un administrador, **nunca el
   técnico**, mientras el tiquet esté `attended` o dentro de la ventana configurable posterior a
   `closed` (**en la semilla, 1 día**). Requiere motivo (catálogo), descripción y evidencia `claim`. Pasa
   a `under_claim` y notifica al supervisor. Al abrirla se cierra el tramo de trabajo o la pausa y
   se terminan las participaciones abiertas; la asignación de técnico se conserva para reabrir al
   mismo líder. Excepción: el solicitante que ya validó su lado en el ciclo no puede abrir la
-  reclamación; un supervisor sí puede hacerlo a nombre del solicitante.
+  reclamación; un supervisor sí puede hacerlo a nombre del solicitante eligiéndolo como sujeto
+  proxy y con `ticket.open_claim_on_behalf`.
 - **RN-17 Evaluación de la reclamación.** La resuelve un supervisor o un administrador, con notas
   internas y un resultado del catálogo, y al hacerlo deja el tiquet **bien capturado** (RN-11):
   - **Procedente:** se reabre (RN-18).

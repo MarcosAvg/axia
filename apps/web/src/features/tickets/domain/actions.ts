@@ -23,11 +23,51 @@ export type ActionKey =
   | 'mark_duplicate'
   | 'reactivate'
 
+/** Sujeto de una acción ejecutada a nombre de otra persona. */
+export type ProxySubject =
+  | { kind: 'requester'; requesterId: string }
+  | { kind: 'technician'; technicianId: string }
+  | null
+
+/** Permisos que habilitan actuar a nombre del solicitante. */
+const REQUESTER_PROXY_PERMISSIONS = [
+  'ticket.validate_on_behalf',
+  'ticket.rate_on_behalf',
+  'ticket.open_claim_on_behalf',
+  'ticket.cancel_on_behalf',
+] as const
+
+/** Acciones del solicitante que se pueden ejecutar por proxy. */
+const REQUESTER_PROXY_ACTIONS: ActionKey[] = [
+  'validate',
+  'open_claim',
+  'cancel',
+]
+
+/** Indica si la acción admite un sujeto solicitante. */
+export function isRequesterProxyAction(action: ActionKey): boolean {
+  return REQUESTER_PROXY_ACTIONS.includes(action)
+}
+
+/** Sujeto técnico a partir de un id opcional. */
+export function technicianSubject(
+  technicianId: string | undefined,
+): ProxySubject {
+  return technicianId ? { kind: 'technician', technicianId } : null
+}
+
 /** Verdadero para un supervisor que no es administrador. */
 export function isSupervisorIdentity(identity: Identity | null): boolean {
   return Boolean(
     identity?.roles.includes('supervisor') &&
     !identity.roles.includes('administrator'),
+  )
+}
+
+/** Verdadero si puede actuar a nombre del solicitante en alguna acción. */
+export function canRequesterProxy(identity: Identity | null): boolean {
+  return REQUESTER_PROXY_PERMISSIONS.some((permission) =>
+    can(identity, permission),
   )
 }
 

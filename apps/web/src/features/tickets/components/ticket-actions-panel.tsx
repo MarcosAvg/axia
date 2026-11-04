@@ -7,6 +7,7 @@ import type { ActionKey } from '../domain/actions'
 import { pickPrimaryAction } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useActionPanel } from '../hooks/use-action-panel'
+import type { TicketProxy } from '../hooks/use-ticket-proxy'
 import { ticketMessages } from '../i18n'
 import { ActionContainer } from './action-container'
 import { ProxyRequiredHint, ProxySelector } from './proxy-fields'
@@ -124,6 +125,7 @@ export interface TicketActionsPanelProps {
   actions: ActionKey[]
   identity: Identity | null
   participants: TicketParticipant[]
+  proxy: TicketProxy
   onValidated?: () => void
 }
 
@@ -133,6 +135,7 @@ export function TicketActionsPanel({
   actions,
   identity,
   participants,
+  proxy,
   onValidated,
 }: TicketActionsPanelProps) {
   const panel = useActionPanel({
@@ -140,24 +143,30 @@ export function TicketActionsPanel({
     actions,
     identity,
     participants,
+    subject: proxy.subject,
     onValidated,
   })
-  if (panel.visible.length === 0 && !panel.canProxy) return null
+  if (panel.visible.length === 0 && !proxy.canProxy) return null
 
   return (
     <div className="flex flex-col gap-4">
-      {ticket.status === 'registered' && panel.hasOffer ? (
+      {!proxy.subject && ticket.status === 'registered' && panel.hasOffer ? (
         <TakeOfferBanner
           pending={panel.mutations.take.isPending}
           onTake={() => panel.mutations.take.mutate({})}
         />
       ) : null}
-      {panel.canProxy ? (
-        <ProxySelector
-          participants={participants}
-          value={panel.subjectTechnicianId}
-          onChange={panel.setSubject}
-        />
+      <ProxySelector
+        options={proxy.options}
+        value={proxy.value}
+        onChange={proxy.setValue}
+      />
+      {panel.validateBlocked ? (
+        <p role="status" className="text-sm text-muted-foreground">
+          {panel.validateBlocked === 'waiting'
+            ? ticketMessages.proxy.waitingRequester
+            : ticketMessages.proxy.requesterOnly}
+        </p>
       ) : null}
       <ActionControls
         visible={panel.visible}

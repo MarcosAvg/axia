@@ -286,7 +286,7 @@ describe('migration runner', () => {
     const result = await owner.query(
       'select checksum from axia_migrations.schema_migrations',
     )
-    expect(result.rows).toHaveLength(22)
+    expect(result.rows).toHaveLength(23)
     expect(
       result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
     ).toBe(true)
@@ -299,7 +299,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(22)
+    ).toBe(23)
   })
 
   it('enforces username normalization and uniqueness', async () => {

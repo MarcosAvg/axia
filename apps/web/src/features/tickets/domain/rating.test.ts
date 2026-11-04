@@ -1,5 +1,7 @@
 import type { Identity } from '@/features/auth'
+import type { ProxySubject } from './actions'
 import { canRateTicket } from './rating'
+import type { TicketStatus } from './types'
 
 function identityWith(permissions: string[]): Identity {
   return {
@@ -21,25 +23,51 @@ function identityWith(permissions: string[]): Identity {
 const requester = identityWith(['ticket.rate'])
 const supervisor = identityWith(['ticket.rate_on_behalf'])
 
+const own = {
+  isRequester: true,
+  subject: null,
+} as const
+const asRequester = {
+  isRequester: false,
+  subject: { kind: 'requester', requesterId: 'r1' } as const,
+}
+
+function rate(
+  identity: Identity,
+  status: TicketStatus,
+  requesterValidated: boolean,
+  options: { isRequester: boolean; subject: ProxySubject } = own,
+) {
+  return canRateTicket({
+    identity,
+    status,
+    requesterValidated,
+    ...options,
+  })
+}
+
 describe('canRateTicket', () => {
   it('permite calificar al solicitante que ya validó aunque siga atendido', () => {
-    expect(canRateTicket(requester, 'attended', true)).toBe(true)
+    expect(rate(requester, 'attended', true)).toBe(true)
   })
 
   it('no permite calificar antes de validar ni fuera de los estados válidos', () => {
-    expect(canRateTicket(requester, 'attended', false)).toBe(false)
-    expect(canRateTicket(requester, 'in_progress', true)).toBe(false)
+    expect(rate(requester, 'attended', false)).toBe(false)
+    expect(rate(requester, 'in_progress', true)).toBe(false)
   })
 
   it('conserva la calificación de un tiquet cerrado', () => {
-    expect(canRateTicket(requester, 'closed', false)).toBe(true)
+    expect(rate(requester, 'closed', false)).toBe(true)
   })
 
-  it('permite calificar a nombre del solicitante con su permiso', () => {
-    expect(canRateTicket(supervisor, 'attended', true)).toBe(true)
+  it('permite calificar a nombre del solicitante solo con el sujeto explícito', () => {
+    expect(rate(supervisor, 'attended', true, asRequester)).toBe(true)
+    expect(
+      rate(supervisor, 'attended', true, { isRequester: false, subject: null }),
+    ).toBe(false)
   })
 
   it('no permite calificar sin permiso', () => {
-    expect(canRateTicket(identityWith([]), 'closed', false)).toBe(false)
+    expect(rate(identityWith([]), 'closed', false)).toBe(false)
   })
 })

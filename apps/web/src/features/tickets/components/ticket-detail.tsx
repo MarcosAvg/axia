@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
 import { useDocumentTitle } from '@/lib/use-document-title'
 import { allowedActions, isSupervisorIdentity } from '../domain/actions'
-import { canRateTicket } from '../domain/rating'
 import {
   useTicket,
   useTicketParticipants,
@@ -106,11 +105,6 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
         identity={identity}
         actions={actions}
         timeline={timeline.data ?? []}
-        canRate={canRateTicket(
-          identity,
-          ticket.data.status,
-          ticket.data.requesterValidated,
-        )}
         canAttachEvidence={can(identity, 'evidence.attach')}
       />
     </div>

@@ -94,7 +94,7 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
   await expect(page.getByRole('dialog')).toHaveCount(0)
 
   // Con técnico sujeto la acción sí permite fijar la hora.
-  await page.locator('#proxy-technician').selectOption({ label: 'Luis Gómez' })
+  await page.locator('#proxy-subject').selectOption({ label: 'Luis Gómez' })
   await clickAction(page, 'Iniciar')
   const startedAt = new Date(assignedAt.getTime() + 60 * 60_000)
   await expect(page.locator('#action-occurred-at')).toBeVisible()

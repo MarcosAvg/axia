@@ -18,6 +18,7 @@ import {
   recaptureChanges,
 } from '../domain/recapture'
 import type { TicketDetail } from '../domain/types'
+import { technicianSubject } from '../domain/actions'
 import { useActionTime } from './use-action-time'
 import { useTicketActions } from './use-ticket-actions'
 
@@ -29,6 +30,37 @@ function optional(value: string): string | undefined {
   return value ? value : undefined
 }
 
+function useRecaptureCatalogs({
+  buildingId,
+  categoryId,
+  subcategoryId,
+}: {
+  buildingId: string
+  categoryId: string
+  subcategoryId: string
+}) {
+  const buildings = useBuildings()
+  const locations = useLocations(optional(buildingId))
+  const dependencies = useDependencies()
+  const categories = useCategories()
+  const subcategories = useSubcategories(optional(categoryId))
+  const problems = useProblems(optional(subcategoryId))
+  const serviceTypes = useServiceTypes()
+  const priorities = usePriorities()
+  const reasons = useReasons('recapture')
+  return {
+    buildings: dataOf(buildings),
+    locations: dataOf(locations),
+    dependencies: dataOf(dependencies),
+    categories: dataOf(categories),
+    subcategories: dataOf(subcategories),
+    problems: dataOf(problems),
+    serviceTypes: dataOf(serviceTypes),
+    priorities: dataOf(priorities),
+    reasons: dataOf(reasons),
+  }
+}
+
 /** Estado y catálogos de la recaptura. */
 export function useRecaptureForm(
   ticket: TicketDetail,
@@ -36,20 +68,18 @@ export function useRecaptureForm(
   onClose: () => void,
 ) {
   const time = useActionTime(Boolean(subjectTechnicianId))
-  const actions = useTicketActions(ticket.id, subjectTechnicianId, time.iso)
+  const actions = useTicketActions(
+    ticket.id,
+    technicianSubject(subjectTechnicianId),
+    time.iso,
+  )
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)
-
-  const buildings = useBuildings()
-  const locations = useLocations(optional(values.buildingId))
-  const dependencies = useDependencies()
-  const categories = useCategories()
-  const subcategories = useSubcategories(optional(values.categoryId))
-  const problems = useProblems(optional(values.subcategoryId))
-  const serviceTypes = useServiceTypes()
-  const priorities = usePriorities()
-  const reasons = useReasons('recapture')
-
+  const catalogs = useRecaptureCatalogs({
+    buildingId: values.buildingId,
+    categoryId: values.categoryId,
+    subcategoryId: values.subcategoryId,
+  })
   function change(name: keyof typeof values, value: string) {
     setValues((current) => applyRecaptureChange(current, name, value))
   }
@@ -78,16 +108,6 @@ export function useRecaptureForm(
     hasError,
     isPending: actions.recapture.isPending,
     mutationError: actions.recapture.error,
-    catalogs: {
-      buildings: dataOf(buildings),
-      locations: dataOf(locations),
-      dependencies: dataOf(dependencies),
-      categories: dataOf(categories),
-      subcategories: dataOf(subcategories),
-      problems: dataOf(problems),
-      serviceTypes: dataOf(serviceTypes),
-      priorities: dataOf(priorities),
-      reasons: dataOf(reasons),
-    },
+    catalogs,
   }
 }

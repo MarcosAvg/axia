@@ -15,7 +15,6 @@ import {
   takeTicket,
   type WriteRefs,
 } from './tickets-write-helpers.js'
-
 let context: TicketHttpContext
 let refs: WriteRefs
 let secondSupervisorUserId: string
@@ -293,7 +292,6 @@ describe('claim reopening', () => {
     ).not.toBeNull()
 
     await addEvidence(ticketId, 'claim')
-    // El solicitante ya validó; el supervisor abre la reclamación a su nombre.
     const open = await action(context.cookies.supervisor, ticketId, {
       action: 'open_claim',
       reasonId: claimReason,

@@ -22,9 +22,11 @@ function RatingSummary({ rating }: { rating: TicketRating }) {
 /** Resumen de la calificación o acceso al modal para calificar. */
 export function TicketRatingPanel({
   ticketId,
+  subjectRequesterId,
   onOpen,
 }: {
   ticketId: string
+  subjectRequesterId?: string
   onOpen: () => void
 }) {
   const rating = useTicketRating(ticketId)
@@ -33,7 +35,9 @@ export function TicketRatingPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">{t.prompt}</p>
+      <p className="text-sm text-muted-foreground">
+        {subjectRequesterId ? t.proxyNote : t.prompt}
+      </p>
       <Button type="button" className="min-h-11 self-start" onClick={onOpen}>
         {t.open}
       </Button>

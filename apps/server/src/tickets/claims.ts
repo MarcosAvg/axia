@@ -3,9 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import {
-  assertRequesterCanOpenClaim,
   conflict,
-  hasEvidence,
   lockTicket,
   notFound,
   requireReason,
@@ -15,20 +13,12 @@ import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { copyDerivedTicket } from './claim-derived.js'
 import {
-  closeOpenWorkPhase,
   endOpenParticipants,
   endTechnicianAssignments,
   reopenLeaderParticipation,
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
-
-type OpenClaimInput = {
-  ticketId: string
-  reasonId: string
-  description: string
-  clientRequestId: string
-}
 
 type ResolveClaimInput = {
   ticketId: string
@@ -66,7 +56,7 @@ type ClaimRow = {
   prior_status: string
 }
 
-async function lockClaimTicket(
+export async function lockClaimTicket(
   tx: DbExecutor,
   ticketId: string,
 ): Promise<TicketForClaim> {
@@ -90,74 +80,6 @@ async function lockClaimTicket(
   const row = result.rows[0] as TicketForClaim | undefined
   if (!row) throw notFound()
   return row
-}
-
-async function openClaimInTransaction(
-  tx: DbExecutor,
-  actor: Actor,
-  input: OpenClaimInput,
-): Promise<ActionResult> {
-  const existing = await findHandledEvent(tx, input.clientRequestId)
-  if (existing) {
-    if (
-      existing.type !== 'claim_opened' ||
-      existing.ticketId !== input.ticketId
-    ) {
-      throw conflict('La clave de idempotencia ya se usó para otra acción')
-    }
-    return { ticketId: input.ticketId, action: 'open_claim', replayed: true }
-  }
-  const ticket = await lockClaimTicket(tx, input.ticketId)
-  await assertRequesterCanOpenClaim(tx, actor, ticket)
-  if (!ticket.claim_window_ok) {
-    throw conflict('El tiquet no admite una reclamación en su estado')
-  }
-  await requireReason(tx, input.reasonId, 'claim', 'Motivo')
-  if (!(await hasEvidence(tx, input.ticketId, ticket.cycle, 'claim'))) {
-    throw conflict('Falta la evidencia de la reclamación')
-  }
-  const open = await tx.execute(sql`
-    select 1 from public.ticket_claims
-    where ticket_id = ${input.ticketId} and status = 'open'
-    limit 1
-  `)
-  if (open.rows[0]) throw conflict('El tiquet ya tiene una reclamación abierta')
-
-  await closeOpenWorkPhase(tx, input.ticketId)
-  await endOpenParticipants(tx, input.ticketId)
-  await tx.execute(sql`
-    insert into public.ticket_claims (
-      ticket_id, cycle, opened_by, reason_id, description, prior_status,
-      client_request_id
-    ) values (
-      ${input.ticketId}, ${ticket.cycle}, ${actor.id}, ${input.reasonId},
-      ${input.description}, ${ticket.status}, ${input.clientRequestId}
-    )
-  `)
-  await tx.execute(sql`
-    update public.tickets set status = 'under_claim' where id = ${input.ticketId}
-  `)
-  await writeEvent(tx, {
-    ticketId: input.ticketId,
-    type: 'claim_opened',
-    actorId: actor.id,
-    clientRequestId: input.clientRequestId,
-    reasonId: input.reasonId,
-    subjectRequesterId: ticket.requester_id,
-    payload: { description: input.description },
-  })
-  return { ticketId: input.ticketId, action: 'open_claim', replayed: false }
-}
-
-export async function openClaim(
-  db: Database,
-  actor: Actor,
-  input: OpenClaimInput,
-): Promise<ActionResult> {
-  const access = await findVisibleTicket(db, actor, input.ticketId)
-  if (!access) throw notFound()
-  assertTicketAction(actor, 'ticket.open_claim', access)
-  return db.transaction((tx) => openClaimInTransaction(tx, actor, input))
 }
 
 async function openClaimRow(

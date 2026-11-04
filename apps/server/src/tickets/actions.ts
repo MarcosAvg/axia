@@ -5,7 +5,8 @@ import type { ActionResult } from './action-shared.js'
 import { assignTechnician } from './assign.js'
 import { addAuxiliary } from './auxiliary.js'
 import { changePriority, commentTicket } from './annotation.js'
-import { openClaim, resolveClaim } from './claims.js'
+import { openClaim } from './claims-open.js'
+import { resolveClaim } from './claims.js'
 import { cancelTicket, reactivateTicket, rejectTicket } from './disposition.js'
 import { markDuplicate } from './mark-duplicate.js'
 import { advancePause, pauseTicket, resumeTicket } from './pause.js'
@@ -43,6 +44,7 @@ async function runDispositionAction(
         reasonId: input.reasonId,
         note: input.note ?? null,
         clientRequestId: input.clientRequestId,
+        subjectRequesterId: input.subjectRequesterId,
       })
     case 'mark_duplicate':
       return markDuplicate(db, actor, {
@@ -144,6 +146,7 @@ async function runClaimAction(
         reasonId: input.reasonId,
         description: input.description,
         clientRequestId: input.clientRequestId,
+        subjectRequesterId: input.subjectRequesterId,
       })
     case 'resolve_claim':
       return resolveClaim(db, actor, {
@@ -213,6 +216,7 @@ async function runRemainingAction(
       score: input.score,
       comment: input.comment ?? null,
       clientRequestId: input.clientRequestId,
+      subjectRequesterId: input.subjectRequesterId,
     })
   }
   return runClaimAction(db, actor, ticketId, input)
@@ -252,7 +256,11 @@ async function runTicketActionNow(
     })
   }
   if (input.action === 'validate') {
-    return validateTicket(db, actor, ticketId, input.clientRequestId)
+    return validateTicket(db, actor, {
+      ticketId,
+      clientRequestId: input.clientRequestId,
+      subjectRequesterId: input.subjectRequesterId,
+    })
   }
   return runRemainingAction(db, actor, ticketId, input)
 }

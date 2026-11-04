@@ -5,6 +5,33 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-03
 
+## Tarea en rama: proxy explícito del solicitante
+
+- Validar, calificar, reclamar y cancelar a nombre del solicitante exige `subjectRequesterId` y el
+  permiso `*_on_behalf` correspondiente. Sin proxy la acción es propia: la validación registra el
+  lado del supervisor (y en `both` espera al solicitante), la calificación queda reservada al
+  solicitante y la reclamación/cancelación se atribuyen al actor.
+- Selector único «Actuar a nombre de» con «Nadie», el solicitante y los técnicos participantes. La
+  interfaz explica el lado pendiente y comparte el sujeto con la calificación.
+- Migración 0022 reañade `ticket.open_claim_on_behalf` y `ticket.cancel_on_behalf`; el detalle
+  expone `requesterId` y `validationPolicy`. Decisión en el
+  [ADR 0111](../decisions/0111-proxy-explicito-solicitante.md).
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check:fast`: código 0; lint, tipos, 64 pruebas de servidor y 354 de
+  web.
+- `pnpm db:test`: 46 archivos, 320/320.
+- `AXIA_ENV_FILE=/dev/null pnpm test:e2e:smoke`: 18/18, incluida la validación proxy en dos pasos.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos y knip, 64 + 354 unitarias, 320 de
+  PostgreSQL, 59 de navegador y build. Persiste el aviso previo de chunks >500 kB.
+- Documentación: 45 archivos, 0 enlaces rotos. `pnpm check:agnostic`: 828 archivos, 0
+  coincidencias; fronteras y knip en verde.
+- La matriz `ui-quality` corta el SSE durante sus navegaciones: el servidor de desarrollo acumulaba
+  conexiones y bloqueaba rutas tardías. La aserción de desbordamiento no cambia.
+- Pendiente: integrar a `main` y preparar la release. Es un cambio de comportamiento en producción:
+  las acciones offline encoladas antes del cambio se interpretan como propias.
+
 ## v0.8.0 publicada
 
 - Etiqueta `v0.8.0` creada desde `main` en `7e8a299254ff39398dc445feaf78e7c5501d66e8`.

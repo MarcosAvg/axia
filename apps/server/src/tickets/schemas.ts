@@ -82,6 +82,10 @@ const proxyBase = {
   subjectTechnicianId: z.string().uuid().optional(),
 }
 
+const requesterProxyBase = {
+  subjectRequesterId: z.string().uuid().optional(),
+}
+
 export const ticketActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('take'),
@@ -107,6 +111,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
   }),
   z.object({
     action: z.literal('validate'),
+    ...requesterProxyBase,
     ...actionBase,
   }),
   z.object({
@@ -119,6 +124,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
     action: z.literal('cancel'),
     reasonId: z.string().uuid(),
     note: z.string().trim().max(2000).optional(),
+    ...requesterProxyBase,
     ...actionBase,
   }),
   z.object({
@@ -191,6 +197,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
     action: z.literal('open_claim'),
     reasonId: z.string().uuid(),
     description: z.string().trim().min(5).max(4000),
+    ...requesterProxyBase,
     ...actionBase,
   }),
   z.object({
@@ -219,6 +226,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
     action: z.literal('rate'),
     score: z.number().int().min(1).max(5),
     comment: z.string().trim().max(1000).optional(),
+    ...requesterProxyBase,
     ...actionBase,
   }),
 ])

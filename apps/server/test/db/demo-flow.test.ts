@@ -247,7 +247,17 @@ it('advances the in-progress demo through every pause root, attendance and both 
         clientRequestId: randomUUID(),
       }),
     ).resolves.toMatchObject({ replayed: false })
-    await validateTicket(db, supervisor, ticketId, randomUUID())
+    const requesterRow = await owner.query<{ requester_id: string }>(
+      'select requester_id from public.tickets where id = $1',
+      [ticketId],
+    )
+    const requesterId = requesterRow.rows[0]?.requester_id
+    if (!requesterId) throw new Error('Demo requester not found')
+    await validateTicket(db, supervisor, {
+      ticketId,
+      clientRequestId: randomUUID(),
+      subjectRequesterId: requesterId,
+    })
     expect(
       (
         await owner.query('select status from public.tickets where id = $1', [
@@ -255,7 +265,10 @@ it('advances the in-progress demo through every pause root, attendance and both 
         ])
       ).rows,
     ).toEqual([{ status: 'attended' }])
-    await validateTicket(db, supervisor, ticketId, randomUUID())
+    await validateTicket(db, supervisor, {
+      ticketId,
+      clientRequestId: randomUUID(),
+    })
     expect(
       (
         await owner.query('select status from public.tickets where id = $1', [

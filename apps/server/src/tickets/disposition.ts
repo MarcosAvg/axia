@@ -21,7 +21,8 @@ import {
   reopenLeaderParticipation,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
-import { assertTicketHolder } from './access.js'
+import { assertTicketHolder, type TicketAccess } from './access.js'
+import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
 type DiscardInput = {
@@ -34,33 +35,20 @@ type DiscardInput = {
   status: 'rejected' | 'cancelled'
   eventType: 'rejected' | 'cancelled'
   action: string
+  subjectRequesterId?: string | null
 }
 
-async function discardInTransaction(
+async function applyDiscard(
   tx: DbExecutor,
-  actor: Actor,
-  input: DiscardInput,
-): Promise<ActionResult> {
-  const before = validateHandled(
-    await findHandledEvent(tx, input.clientRequestId),
-    input.ticketId,
-    input.eventType,
-    input.action,
-  )
-  if (before) return before
-  const ticket = await lockTicket(tx, input.ticketId)
-  const after = validateHandled(
-    await findHandledEvent(tx, input.clientRequestId),
-    input.ticketId,
-    input.eventType,
-    input.action,
-  )
-  if (after) return after
-  await assertValidatedRequesterCanAct(tx, actor, ticket, input.action)
-  if (isFinalStatus(ticket.status)) {
-    throw conflict('El tiquet ya está cerrado o descartado')
-  }
-  await requireReason(tx, input.reasonId, input.reasonUse, 'Motivo')
+  context: {
+    actor: Actor
+    access: TicketAccess
+    ticket: LockedTicket
+    input: DiscardInput
+    onBehalf: boolean
+  },
+): Promise<void> {
+  const { actor, access, ticket, input, onBehalf } = context
   await tx.execute(sql`
     update public.tickets
     set
@@ -82,9 +70,47 @@ async function discardInTransaction(
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
-    subjectRequesterId: ticket.requester_id,
+    ...(onBehalf || access.requesterUserId === actor.id
+      ? { subjectRequesterId: ticket.requester_id }
+      : { subjectUserId: actor.id }),
     payload: { note: input.note },
   })
+}
+
+async function discardInTransaction(
+  tx: DbExecutor,
+  actor: Actor,
+  access: TicketAccess,
+  input: DiscardInput,
+): Promise<ActionResult> {
+  const before = validateHandled(
+    await findHandledEvent(tx, input.clientRequestId),
+    input.ticketId,
+    input.eventType,
+    input.action,
+  )
+  if (before) return before
+  const ticket = await lockTicket(tx, input.ticketId)
+  const after = validateHandled(
+    await findHandledEvent(tx, input.clientRequestId),
+    input.ticketId,
+    input.eventType,
+    input.action,
+  )
+  if (after) return after
+  const onBehalf = assertRequesterProxy({
+    actor,
+    access,
+    requesterId: ticket.requester_id,
+    subjectRequesterId: input.subjectRequesterId,
+    permission: 'ticket.cancel_on_behalf',
+  })
+  await assertValidatedRequesterCanAct(tx, actor, ticket, input.action)
+  if (isFinalStatus(ticket.status)) {
+    throw conflict('El tiquet ya está cerrado o descartado')
+  }
+  await requireReason(tx, input.reasonId, input.reasonUse, 'Motivo')
+  await applyDiscard(tx, { actor, access, ticket, input, onBehalf })
   return {
     ticketId: input.ticketId,
     action: input.action,
@@ -101,7 +127,7 @@ async function discard(
   if (!access) throw notFound()
   assertTicketAction(actor, input.permission, access)
   assertTicketHolder(actor, access, input.permission)
-  return db.transaction((tx) => discardInTransaction(tx, actor, input))
+  return db.transaction((tx) => discardInTransaction(tx, actor, access, input))
 }
 
 export type ReasonActionInput = {
@@ -109,6 +135,7 @@ export type ReasonActionInput = {
   reasonId: string
   note: string | null
   clientRequestId: string
+  subjectRequesterId?: string | null
 }
 
 export function rejectTicket(
@@ -118,6 +145,7 @@ export function rejectTicket(
 ) {
   return discard(db, actor, {
     ...input,
+    subjectRequesterId: null,
     permission: 'ticket.reject',
     reasonUse: 'rejection',
     status: 'rejected',
@@ -133,7 +161,9 @@ export function cancelTicket(
 ) {
   return discard(db, actor, {
     ...input,
-    permission: 'ticket.cancel',
+    permission: input.subjectRequesterId
+      ? 'ticket.cancel_on_behalf'
+      : 'ticket.cancel',
     reasonUse: 'cancellation',
     status: 'cancelled',
     eventType: 'cancelled',

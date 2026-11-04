@@ -156,6 +156,43 @@ describe('validation policy', () => {
   })
 })
 
+describe('validation order', () => {
+  it('requiere el lado del solicitante antes de validar como supervisor', async () => {
+    const ticketId = await createTicket()
+    await takeAndAssign(ticketId)
+    await addEvidence(ticketId, 'before')
+    await action(context.cookies.technician, ticketId, {
+      action: 'start',
+      clientRequestId: randomUUID(),
+    })
+    await addEvidence(ticketId, 'after')
+    await action(context.cookies.technician, ticketId, {
+      action: 'attend',
+      workDescription: 'Trabajo terminado',
+      clientRequestId: randomUUID(),
+    })
+
+    const tooSoon = await action(context.cookies.supervisor, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+    expect(tooSoon.statusCode).toBe(409)
+
+    const proxy = await action(context.cookies.supervisor, ticketId, {
+      action: 'validate',
+      subjectRequesterId: refs.requesterId,
+      clientRequestId: randomUUID(),
+    })
+    expect(proxy.statusCode).toBe(200)
+
+    const own = await action(context.cookies.supervisor, ticketId, {
+      action: 'validate',
+      clientRequestId: randomUUID(),
+    })
+    expect(own.statusCode).toBe(200)
+  })
+})
+
 describe('validation without an account', () => {
   it('fills the requester side for a requester without an account', async () => {
     const ticketId = await unlinkedTicket()
@@ -172,8 +209,14 @@ describe('validation without an account', () => {
       clientRequestId: randomUUID(),
     })
 
+    const requesterRow = await context.db.execute(sql`
+      select requester_id from public.tickets where id = ${ticketId}
+    `)
+    const requesterId = (requesterRow.rows[0] as { requester_id: string })
+      .requester_id
     const requesterSide = await action(context.cookies.supervisor, ticketId, {
       action: 'validate',
+      subjectRequesterId: requesterId,
       clientRequestId: randomUUID(),
     })
     expect(requesterSide.statusCode).toBe(200)

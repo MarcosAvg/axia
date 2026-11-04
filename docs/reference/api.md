@@ -64,11 +64,17 @@ Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-t
 Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
 evidencia del ciclo. La API no permite escribir directamente el estado.
 
-El detalle del tiquet incluye `isRequester`, `requesterValidated` y `hasTaken` para que la interfaz
-ajuste las acciones y la calificación. `rate` acepta un tiquet `closed` o uno `attended` con
-validación del solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos veces
-el mismo rol en el ciclo también responde 409. `open_claim` responde 409 cuando lo intenta el
-solicitante que ya validó su lado, incluso después del cierre.
+El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `requesterId` y
+`validationPolicy` para que la interfaz ajuste las acciones y la calificación. `rate` acepta un
+tiquet `closed` o uno `attended` con validación del solicitante; una segunda calificación del mismo
+tiquet responde 409. Validar dos veces el mismo rol en el ciclo también responde 409. `open_claim`
+responde 409 cuando lo intenta el solicitante que ya validó su lado, incluso después del cierre.
+
+`validate`, `rate`, `open_claim` y `cancel` aceptan `subjectRequesterId`. Si viene, debe ser el
+solicitante del tiquet y exige el permiso `*_on_behalf` correspondiente; la acción se registra a su
+nombre. Si falta, la acción es propia: validar registra el lado del supervisor y exige que el
+solicitante ya haya validado en política `both` (409 si no), calificar solo lo puede hacer el propio
+solicitante (403 para un supervisor sin proxy) y reclamar o cancelar se atribuyen al actor.
 
 Un supervisor sin asignación abierta como titular no puede asignar, reasignar, recapturar, rechazar,
 cancelar, cambiar prioridad ni marcar duplicado sobre un tiquet `registered`; primero debe enviar
@@ -76,7 +82,9 @@ cancelar, cambiar prioridad ni marcar duplicado sobre un tiquet `registered`; pr
 
 La línea de tiempo expone `subjectUserName`, `subjectTechnicianName` y `subjectRequesterName`. El
 actor es quien ejecuta; el sujeto es la persona a la que se atribuye la acción y el tiempo. En
-validación `both`, el solicitante valida primero y el supervisor después.
+validación `both`, el solicitante valida primero y el supervisor después. Un supervisor sin proxy
+que intenta validar antes de ese lado recibe 409; con `subjectRequesterId` registra el lado del
+solicitante. Reclamar o cancelar sin proxy se atribuye al actor, no al solicitante.
 
 El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
 hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de

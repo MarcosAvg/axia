@@ -81,6 +81,7 @@ describe('satisfaction', () => {
     const rated = await action(context.cookies.supervisor, ticketId, {
       action: 'rate',
       score: 5,
+      subjectRequesterId: refs.requesterId,
       clientRequestId: randomUUID(),
     })
     expect(rated.statusCode).toBe(200)
@@ -90,6 +91,16 @@ describe('satisfaction', () => {
       where ticket_id = ${ticketId}
     `)
     expect(rating.rows[0]).toMatchObject({ score: 5 })
+  })
+
+  it('rejects a supervisor rating without an explicit proxy subject', async () => {
+    const ticketId = await closedTicket()
+    const rated = await action(context.cookies.supervisor, ticketId, {
+      action: 'rate',
+      score: 5,
+      clientRequestId: randomUUID(),
+    })
+    expect(rated.statusCode).toBe(403)
   })
 
   it('rates after the requester validates, before the supervisor closes', async () => {
@@ -138,10 +149,11 @@ describe('satisfaction rules', () => {
 })
 
 describe('validation order', () => {
-  it('fills the requester side first when a supervisor validates', async () => {
+  it('fills the requester side first when a supervisor acts as proxy', async () => {
     const ticketId = await attendedTicket()
     const first = await action(context.cookies.supervisor, ticketId, {
       action: 'validate',
+      subjectRequesterId: refs.requesterId,
       clientRequestId: randomUUID(),
     })
     expect(first.statusCode).toBe(200)

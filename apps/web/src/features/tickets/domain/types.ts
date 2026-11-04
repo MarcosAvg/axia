@@ -106,9 +106,11 @@ export interface TicketDetail extends TicketListItem {
   requesterContact: string | null
   duplicateOfId: string | null
   duplicateOfFolio: string | null
+  requesterId: string
   isRequester: boolean
   requesterValidated: boolean
   hasTaken: boolean
+  validationPolicy: 'requester' | 'supervisor' | 'both'
 }
 
 /** Tiempos del ciclo de un tiquet, en minutos. */

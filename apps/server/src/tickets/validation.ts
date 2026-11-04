@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
-import { can as hasPermission } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
@@ -13,7 +12,9 @@ import {
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { endOpenParticipants } from './flow-state.js'
+import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import type { TicketAccess } from './access.js'
 
 type LockedValidationTicket = {
   id: string
@@ -76,29 +77,32 @@ async function hasRoleValidation(
 }
 
 /**
- * El solicitante sin cuenta no puede validar: quien tiene `validate_on_behalf`
- * llena primero el lado del solicitante y después el del supervisor.
+ * Decide qué lado valida el actor. Actuar a nombre del solicitante es explícito;
+ * sin proxy, el supervisor valida su propio lado y respeta el orden de la
+ * política `both`.
  */
 async function validationRole(
   tx: DbExecutor,
   actor: Actor,
   ticket: LockedValidationTicket,
-  policy: string,
+  options: { policy: string; onBehalf: boolean },
 ): Promise<'requester' | 'supervisor'> {
+  if (options.onBehalf) return 'requester'
   const userId = await requesterUserId(tx, ticket.requester_id)
   if (userId !== null && userId === actor.id) return 'requester'
-  if (hasPermission(actor, 'ticket.validate_on_behalf')) {
-    if (policy === 'supervisor') return 'supervisor'
-    if (!(await hasRoleValidation(tx, ticket.id, ticket.cycle, 'requester'))) {
-      return 'requester'
-    }
-    return 'supervisor'
-  }
-  if (userId !== null || policy !== 'supervisor') {
+  if (options.policy === 'requester') {
     throw new AppError(
       403,
       'forbidden',
-      'No tienes permiso para validar a nombre del solicitante',
+      'Esta instancia valida solo por el solicitante',
+    )
+  }
+  if (
+    options.policy === 'both' &&
+    !(await hasRoleValidation(tx, ticket.id, ticket.cycle, 'requester'))
+  ) {
+    throw conflict(
+      'Falta la validación del solicitante; actúa a su nombre para registrarla',
     )
   }
   return 'supervisor'
@@ -153,12 +157,36 @@ async function recordValidation(
   }
 }
 
+type ValidateInput = {
+  ticketId: string
+  clientRequestId: string
+  subjectRequesterId?: string | null
+}
+
+async function closeIfDone(
+  tx: DbExecutor,
+  ticketId: string,
+  cycle: number,
+  policy: string,
+): Promise<boolean> {
+  const close = await shouldClose(tx, ticketId, cycle, policy)
+  if (!close) return false
+  await tx.execute(sql`
+    update public.tickets
+    set status = 'closed', closed_at = now()
+    where id = ${ticketId}
+  `)
+  await endOpenParticipants(tx, ticketId)
+  return true
+}
+
 async function validateInTransaction(
   tx: DbExecutor,
   actor: Actor,
-  ticketId: string,
-  clientRequestId: string,
+  access: TicketAccess,
+  input: ValidateInput,
 ): Promise<ActionResult> {
+  const { ticketId, clientRequestId, subjectRequesterId } = input
   const before = validateHandled(
     await findHandledEvent(tx, clientRequestId),
     ticketId,
@@ -178,8 +206,15 @@ async function validateInTransaction(
     throw conflict('El tiquet no está pendiente de validación')
   }
 
+  const onBehalf = assertRequesterProxy({
+    actor,
+    access,
+    requesterId: ticket.requester_id,
+    subjectRequesterId,
+    permission: 'ticket.validate_on_behalf',
+  })
   const policy = await validationPolicy(tx)
-  const role = await validationRole(tx, actor, ticket, policy)
+  const role = await validationRole(tx, actor, ticket, { policy, onBehalf })
   await recordValidation(tx, {
     ticketId,
     cycle: ticket.cycle,
@@ -187,15 +222,7 @@ async function validateInTransaction(
     role,
   })
 
-  const close = await shouldClose(tx, ticketId, ticket.cycle, policy)
-  if (close) {
-    await tx.execute(sql`
-      update public.tickets
-      set status = 'closed', closed_at = now()
-      where id = ${ticketId}
-    `)
-    await endOpenParticipants(tx, ticketId)
-  }
+  const close = await closeIfDone(tx, ticketId, ticket.cycle, policy)
   await writeEvent(tx, {
     ticketId,
     type: 'validated',
@@ -212,13 +239,10 @@ async function validateInTransaction(
 export async function validateTicket(
   db: Database,
   actor: Actor,
-  ticketId: string,
-  clientRequestId: string,
+  input: ValidateInput,
 ): Promise<ActionResult> {
-  const access = await findVisibleTicket(db, actor, ticketId)
+  const access = await findVisibleTicket(db, actor, input.ticketId)
   if (!access) throw notFound()
   assertTicketAction(actor, 'ticket.validate', access)
-  return db.transaction((tx) =>
-    validateInTransaction(tx, actor, ticketId, clientRequestId),
-  )
+  return db.transaction((tx) => validateInTransaction(tx, actor, access, input))
 }
