@@ -17,16 +17,18 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - El detalle expone `requesterDependencyId` y `requesterDependencyName`; el catálogo de solicitantes
   incluye `dependencyName`.
 - La validación de recaptura se separó a `recapture-validation.ts` para respetar el límite de
-  líneas del archivo de alta.
+  líneas del archivo de alta. La revisión final corrigió la validación del par
+  dependencia–ubicación para no ejecutarla cuando el lugar no cambia y añadió cobertura del
+  filtrado y del reinicio al cambiar de solicitante.
 - Decisión en el [ADR 0112](../decisions/0112-dependencia-solicitante-acota-ubicaciones.md).
 
 ### Evidencia de esta tarea
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
-  servidor, 362 de web, 325 de PostgreSQL, 59 de navegador (incluye los 18 `@smoke`) y build.
+  servidor, 364 de web, 327 de PostgreSQL, 60 de navegador (incluye los `@smoke`) y build.
   Persiste el aviso previo de chunks >500 kB.
 - `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 46 archivos, 0 enlaces rotos.
-- `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 833 archivos, 0 coincidencias.
+- `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 834 archivos, 0 coincidencias.
 - Sin migración de esquema: no cambia la base de datos.
 
 ## v0.8.1 publicada
