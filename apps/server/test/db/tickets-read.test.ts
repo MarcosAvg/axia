@@ -42,21 +42,42 @@ describe('ticket detail', () => {
   it('returns the time of each cycle phase in minutes', async () => {
     const { db, actors, ids } = fixtures
     await db.execute(sql`
-      update public.tickets set reported_at = now() - interval '3 hours'
+      update public.tickets set reported_at = '2026-01-01T00:00:00Z'
       where id = ${ids.ticketA1}
     `)
     await db.execute(sql`
-      insert into public.time_spans (ticket_id, cycle, kind, started_at, ended_at)
-      values (
-        ${ids.ticketA1}, 1, 'active_work',
-        now() - interval '90 minutes', now() - interval '30 minutes'
-      )
+      select public.rebuild_ticket_time_spans(${ids.ticketA1})
+    `)
+    await db.execute(sql`
+      insert into public.ticket_events (
+        ticket_id, cycle, type, actor_id, payload, occurred_at
+      ) values
+        (${ids.ticketA1}, 1, 'taken', ${actors.admin.id},
+          '{}'::jsonb, '2026-01-01T01:00:00Z'),
+        (${ids.ticketA1}, 1, 'assigned_technician', ${actors.admin.id},
+          '{}'::jsonb, '2026-01-01T01:30:00Z'),
+        (${ids.ticketA1}, 1, 'started', ${actors.admin.id},
+          '{}'::jsonb, '2026-01-01T01:30:00Z'),
+        (${ids.ticketA1}, 1, 'attended', ${actors.admin.id},
+          '{}'::jsonb, '2026-01-01T02:30:00Z'),
+        (${ids.ticketA1}, 1, 'validated', ${actors.admin.id},
+          '{}'::jsonb, '2026-01-01T03:00:00Z')
+    `)
+    await db.execute(sql`
+      update public.tickets
+      set status = 'closed', closed_at = '2026-01-01T03:00:00Z'
+      where id = ${ids.ticketA1}
+    `)
+    await db.execute(sql`
+      select public.rebuild_ticket_time_spans(${ids.ticketA1})
     `)
 
     const ticket = await getTicketDetail(db, actors.admin, ids.ticketA1)
 
     expect(ticket?.cycleTimes.active).toBeCloseTo(60, 0)
-    expect(ticket?.cycleTimes.response).toBe(0)
+    expect(ticket?.cycleTimes.response).toBeCloseTo(60, 0)
+    expect(ticket?.cycleTimes.assignment).toBeCloseTo(30, 0)
+    expect(ticket?.cycleTimes.validation).toBeCloseTo(30, 0)
     expect(ticket?.cycleTimes.total).toBeCloseTo(180, 0)
   })
 
@@ -103,7 +124,7 @@ describe('ticket list fields', () => {
       page: 1,
       pageSize: 20,
     })
-    const item = page.items.find((ticket) => ticket.id === ids.ticketA1)
+    const item = page.items.find((ticket) => ticket.id === ids.ticketA2)
     expect(item).toBeDefined()
     expect(item?.closedAt).toBeNull()
   })
