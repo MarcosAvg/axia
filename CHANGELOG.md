@@ -5,6 +5,22 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-04
+
+### Añadido
+
+- La dependencia del solicitante acota el alta: solo se ofrecen los edificios con ubicaciones
+  vinculadas a ella y esas ubicaciones; si no tiene dependencia, se mantiene el catálogo completo.
+  La regla se valida en el servidor y también en la recaptura, que conserva las correcciones de
+  texto de capturas históricas. El detalle expone la dependencia del solicitante y los catálogos
+  aceptan `dependencyId`. Decisión en el
+  [ADR 0112](docs/decisions/0112-dependencia-solicitante-acota-ubicaciones.md).
+
+### Cambiado
+
+- El alta muestra primero al solicitante; cuando tiene dependencia, la dependencia queda fija y los
+  campos de edificio y ubicación se limitan a su ámbito.
+
 ## [0.8.1] - 2026-11-04
 
 ### Corregido
