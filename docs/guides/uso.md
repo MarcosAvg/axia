@@ -84,15 +84,20 @@ Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta lo
 ## Trabajar sin conexión
 
 Las acciones y fotos admitidas se guardan en este dispositivo y se envían al recuperar conexión.
-Abre previamente los tiquets que necesitarás: el modo sin conexión no garantiza que puedas abrir
-información que nunca cargaste. El registro de un tiquet nuevo requiere conexión.
+Puedes **reabrir la app sin red** si validaste la sesión en los últimos 7 días; se muestran los
+tiquets y catálogos que ya cargaste. El modo sin conexión no inventa información que nunca se
+descargó. El registro de un tiquet nuevo requiere conexión.
 
-Revisa el indicador de pendientes y errores. La aplicación reintenta los fallos temporales; si
-un envío queda en error, abre el aviso, revisa su mensaje y elige **Reintentar** o **Descartar**.
-Descartar retira ese envío de la cola local; no deshace una acción ya aceptada en el servidor.
-Un error detiene los siguientes envíos del mismo tiquet hasta resolverlo; los otros pueden seguir.
-No borres los datos del navegador mientras tengas pendientes: las fotos y acciones aún no enviadas
-están guardadas allí.
+Revisa el indicador de pendientes y errores. La aplicación reintenta los fallos temporales cada
+30 segundos mientras la pestaña está visible y hay conexión; también puedes pulsar **Sincronizar
+ahora**. Si un envío queda en error, abre el aviso, revisa su mensaje y elige **Reintentar** o
+**Descartar**. Descartar retira ese envío de la cola local; no deshace una acción ya aceptada en el
+servidor. Un error detiene los siguientes envíos del mismo tiquet hasta resolverlo; los otros pueden
+seguir. No borres los datos del navegador mientras tengas pendientes: las fotos y acciones aún no
+enviadas están guardadas allí.
+
+La copia local de sesión y datos caduca a los 7 días. Al cerrar sesión se borra; no compartas el
+dispositivo con otra persona si tienes trabajo pendiente.
 
 ## Si una acción no se acepta
 

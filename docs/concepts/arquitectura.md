@@ -138,8 +138,18 @@ siguen [pendientes](../guides/notificaciones.md); no se presentan como servicios
 ## Trabajo sin conexión
 
 Dexie guarda en IndexedDB acciones y fotos con propietario y UUID del cliente. Permite conservar
-blobs y trabajo pendiente; la sincronización se dispara al abrir, recuperar red y volver al
-primer plano, sin depender del Background Sync del navegador.
+blobs y trabajo pendiente; la sincronización se dispara al abrir, recuperar red, volver al primer
+plano y con un reintento periódico mientras la pestaña está visible y hay conexión, sin depender del
+Background Sync del navegador. El indicador de pendientes permite forzar «Sincronizar ahora».
+
+La última sesión validada y su identidad se guardan en el dispositivo con caducidad de 7 días para
+abrir la PWA sin red. Se borran al cerrar sesión y ante un 401; la interfaz las marca como «Sesión
+sin conexión». El servidor sigue siendo la autoridad y revalida permisos, estado y reglas en cada
+sincronización.
+
+El caché de React Query se persiste en Dexie con el mismo plazo y solo incluye tiquets, catálogos e
+identidad. Notificaciones, métricas, administración y URLs de evidencia quedan fuera. El service
+worker solo precachea el shell; no se cachean respuestas `/api`.
 
 La cola une evidencia y acciones por ID de tiquet. Un error o envío anterior bloquea sus pasos
 posteriores incluso entre procesamientos; los otros tiquets avanzan. Las filas antiguas sin clave
@@ -152,6 +162,10 @@ La sincronización reutiliza `runTicketAction`: revalida permisos, estado y hora
 confía en el estado local. Cada resultado distingue aplicado, duplicado, rechazo, conflicto o
 bloqueo. El reenvío conserva el UUID; una clave usada para otra acción se rechaza. Los conflictos
 no sobrescriben el estado vigente ni se descartan silenciosamente.
+
+El alta de tiquets requiere conexión: un borrador local necesita folio provisional, mapeo de ID
+local a servidor, resolución de evidencias y acciones, y una política de duplicados y hora de
+captura. Queda fuera de esta fase ([ADR 0113](../decisions/0113-arranque-lectura-offline.md)).
 
 ## Entornos y operación
 

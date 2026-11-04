@@ -21,6 +21,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0110](0110-latest-y-migracion-en-arranque.md) | Canal `latest` y migración en el arranque de la app |
 | [0111](0111-proxy-explicito-solicitante.md) | Proxy explícito del solicitante para validar, calificar, reclamar y cancelar |
 | [0112](0112-dependencia-solicitante-acota-ubicaciones.md) | La dependencia del solicitante acota edificios y ubicaciones |
+| [0113](0113-arranque-lectura-offline.md) | Arranque y lectura offline con caché de 7 días |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

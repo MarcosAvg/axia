@@ -5,6 +5,29 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## Tarea integrada: arranque y lectura offline
+
+- La última sesión validada y su identidad se guardan en el dispositivo con caducidad de 7 días;
+  permiten abrir la PWA sin red y se borran al cerrar sesión/401.
+- El caché de React Query se persiste en Dexie con el persister oficial y el mismo plazo; solo
+  incluye tiquets, catálogos e identidad. Se marca con el usuario dueño y se descarta si falta o no
+  coincide.
+- La cola reintenta cada 30 segundos mientras la pestaña está visible/en línea y el indicador
+  permite “Sincronizar ahora”.
+- El cambio de contraseña limpia la identidad cacheada para no volver a la pantalla de cambio.
+- El alta de tiquets sigue requiriendo conexión; se deja para una fase separada.
+- Decisión en el [ADR 0113](../decisions/0113-arranque-lectura-offline.md).
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 385 de web, 327 de PostgreSQL, 60 de navegador y build. Persiste el aviso previo de
+  chunks >500 kB.
+- `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 47 archivos, 0 enlaces rotos.
+- `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 844 archivos, 0 coincidencias.
+- Sin migración de esquema: el cambio es de cliente.
+- Integrada a `main` por fast-forward; no se publicó ni se desplegó.
+
 ## v0.9.0 publicada
 
 - Etiqueta `v0.9.0` creada desde `main` en `46dacce`. Workflow

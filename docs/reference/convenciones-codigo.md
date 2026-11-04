@@ -95,6 +95,10 @@ tiquet y no envía con la sesión de otra persona. Los conflictos definitivos se
 revisión; no se descartan silenciosamente. El detalle del mecanismo y sus límites está en
 [arquitectura](../concepts/arquitectura.md).
 
+La sesión y el caché de consultas se guardan en el dispositivo con caducidad de 7 días y se borran
+al cerrar sesión o ante un 401. Solo se persisten tiquets, catálogos e identidad; no se cachean
+respuestas `/api` en el service worker. El alta de tiquets no es offline en esta fase.
+
 Las fotos se comprimen, se guardan como Blob y se cargan con TUS. Los archivos son privados y
 requieren autorización, también al descargarse. Las actualizaciones PWA se confirman y el service
 worker se entrega sin caché; no depender de Background Sync para conservar trabajo.

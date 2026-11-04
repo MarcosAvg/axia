@@ -5,6 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La PWA puede abrirse sin red con la última sesión e identidad validadas, con caducidad de 7 días,
+  y conserva los tiquets y catálogos ya cargados para consultarlos offline. La copia local se borra
+  al cerrar sesión y ante un 401. Decisión en el
+  [ADR 0113](docs/decisions/0113-arranque-lectura-offline.md).
+- La cola offline reintenta cada 30 segundos mientras la pestaña está visible y hay conexión; el
+  indicador de pendientes permite **Sincronizar ahora**.
+
 ## [0.9.0] - 2026-11-04
 
 ### Añadido
