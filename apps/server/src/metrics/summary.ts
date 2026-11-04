@@ -24,6 +24,7 @@ type AggregateRow = {
   reopened: number
   closed: number
   first_fix: number
+  closed_or_reopened: number
   flow_tickets: number
   rejected: number
   cancelled: number
@@ -36,6 +37,7 @@ type AggregateRow = {
   avg_active_extra: number
   avg_response: number
   avg_assignment: number
+  avg_pending_take: number
   avg_reassignment: number
   avg_wait: number
   avg_pause: number
@@ -50,6 +52,7 @@ type AggregateRow = {
   sum_active_extra: number
   sum_response: number
   sum_assignment: number
+  sum_pending_take: number
   sum_reassignment: number
   sum_wait: number
   sum_pause: number
@@ -72,6 +75,7 @@ const EMPTY_AGGREGATE: AggregateRow = {
   reopened: 0,
   closed: 0,
   first_fix: 0,
+  closed_or_reopened: 0,
   flow_tickets: 0,
   rejected: 0,
   cancelled: 0,
@@ -84,6 +88,7 @@ const EMPTY_AGGREGATE: AggregateRow = {
   avg_active_extra: 0,
   avg_response: 0,
   avg_assignment: 0,
+  avg_pending_take: 0,
   avg_reassignment: 0,
   avg_wait: 0,
   avg_pause: 0,
@@ -98,6 +103,7 @@ const EMPTY_AGGREGATE: AggregateRow = {
   sum_active_extra: 0,
   sum_response: 0,
   sum_assignment: 0,
+  sum_pending_take: 0,
   sum_reassignment: 0,
   sum_wait: 0,
   sum_pause: 0,
@@ -132,7 +138,7 @@ function toSummary(row: AggregateRow | undefined) {
       tickets,
     ),
     recaptureRate: rate(Number(data.recaptured), tickets),
-    reopenRate: rate(Number(data.reopened), Number(data.closed)),
+    reopenRate: rate(Number(data.reopened), Number(data.closed_or_reopened)),
     firstTimeFixRate: rate(Number(data.first_fix), Number(data.closed)),
     avgTotal: Number(data.avg_total),
     avgResolution: Number(data.avg_resolution),
@@ -142,6 +148,7 @@ function toSummary(row: AggregateRow | undefined) {
     avgActiveExtra: Number(data.avg_active_extra),
     avgResponse: Number(data.avg_response),
     avgAssignment: Number(data.avg_assignment),
+    avgPendingTake: Number(data.avg_pending_take),
     avgReassignment: Number(data.avg_reassignment),
     avgWait: Number(data.avg_wait),
     avgPause: Number(data.avg_pause),
@@ -156,6 +163,7 @@ function toSummary(row: AggregateRow | undefined) {
     sumActiveExtra: Number(data.sum_active_extra),
     sumResponse: Number(data.sum_response),
     sumAssignment: Number(data.sum_assignment),
+    sumPendingTake: Number(data.sum_pending_take),
     sumReassignment: Number(data.sum_reassignment),
     sumWait: Number(data.sum_wait),
     sumPause: Number(data.sum_pause),
@@ -182,6 +190,7 @@ function toGroup(row: AggregateRow) {
       avgActiveExtra: Number(row.avg_active_extra),
       avgResponse: Number(row.avg_response),
       avgAssignment: Number(row.avg_assignment),
+      avgPendingTake: Number(row.avg_pending_take),
       avgReassignment: Number(row.avg_reassignment),
       avgWait: Number(row.avg_wait),
       avgPause: Number(row.avg_pause),
@@ -194,6 +203,7 @@ function toGroup(row: AggregateRow) {
       sumActiveExtra: Number(row.sum_active_extra),
       sumResponse: Number(row.sum_response),
       sumAssignment: Number(row.sum_assignment),
+      sumPendingTake: Number(row.sum_pending_take),
       sumReassignment: Number(row.sum_reassignment),
       sumWait: Number(row.sum_wait),
       sumPause: Number(row.sum_pause),
@@ -203,7 +213,7 @@ function toGroup(row: AggregateRow) {
       sumNetLabor: Number(row.sum_net_labor),
       reassignmentRate: rate(Number(row.reassigned), tickets),
       recaptureRate: rate(Number(row.recaptured), tickets),
-      reopenRate: rate(Number(row.reopened), closed),
+      reopenRate: rate(Number(row.reopened), Number(row.closed_or_reopened)),
       firstFixRate: rate(Number(row.first_fix), closed),
       reopened: Number(row.reopened),
       closed,

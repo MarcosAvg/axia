@@ -31,6 +31,22 @@ async function event(
   `)
 }
 
+async function createTicketCopy(sourceId: string) {
+  const result = await fixtures.db.execute(sql`
+    insert into public.tickets (
+      team_id, building_id, location_id, dependency_id, category_id,
+      service_type_id, priority_id, channel_id, description,
+      requester_id, requester_name
+    )
+    select team_id, building_id, location_id, dependency_id, category_id,
+      service_type_id, priority_id, channel_id, 'Cobertura',
+      requester_id, requester_name
+    from public.tickets where id = ${sourceId}
+    returning id
+  `)
+  return (result.rows[0] as { id: string }).id
+}
+
 async function coverage(ticketId: string) {
   const result = await fixtures.db.execute(sql`
     select total_time, phase_time, delta
@@ -154,23 +170,20 @@ it('covers a recapture that returns the ticket to routing', async () => {
 
 it('forbids two open primary phases on the same ticket', async () => {
   const { db, ids } = fixtures
-  const created = await db.execute(sql`
-    insert into public.tickets (
-      team_id, building_id, location_id, dependency_id, category_id,
-      service_type_id, priority_id, channel_id, description,
-      requester_id, requester_name
-    )
-    select team_id, building_id, location_id, dependency_id, category_id,
-      service_type_id, priority_id, channel_id, 'Cobertura',
-      requester_id, requester_name
-    from public.tickets where id = ${ids.ticketA1}
-    returning id
-  `)
-  const ticketId = (created.rows[0] as { id: string }).id
+  const ticketId = await createTicketCopy(ids.ticketA1)
   await expect(
     db.execute(sql`
         insert into public.time_spans (ticket_id, cycle, kind, started_at)
         values (${ticketId}, 1, 'active_work', now())
       `),
   ).rejects.toThrow()
+})
+
+it('keeps every fixture ticket covered', async () => {
+  const result = await fixtures.db.execute(sql`
+    select id, delta from public.v_ticket_phase_coverage
+  `)
+  for (const row of result.rows as Array<{ id: string; delta: string }>) {
+    expect(row.delta, row.id).toBe('00:00:00')
+  }
 })

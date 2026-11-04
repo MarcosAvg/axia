@@ -10,7 +10,7 @@ import type {
 } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
-import { metricsMessages } from '../i18n'
+import { dimensionValueLabel, metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
 import { DimensionPicker } from './dimension-picker'
@@ -23,6 +23,7 @@ const MEASURES = [
   { key: 'avgTotal', label: k.total },
   { key: 'avgResponse', label: t.phases.response },
   { key: 'avgAssignment', label: t.phases.assignment },
+  { key: 'avgPendingTake', label: t.phases.pending_take },
   { key: 'avgValidation', label: t.phases.validation },
   { key: 'avgPause', label: t.phases.pause },
   { key: 'avgWait', label: t.phases.wait },
@@ -40,17 +41,25 @@ function measureValue(
     : Number(row[measure])
 }
 
-function timeColumns(
-  measure: Measure,
-  max: number,
-  aggregation: 'average' | 'total',
-  label: string,
-): DataTableColumn<DimensionRow>[] {
+function timeColumns({
+  dimension,
+  measure,
+  max,
+  aggregation,
+  label,
+}: {
+  dimension: Dimension
+  measure: Measure
+  max: number
+  aggregation: 'average' | 'total'
+  label: string
+}): DataTableColumn<DimensionRow>[] {
   return [
     {
       id: 'name',
       header: metricsMessages.table.name,
-      cell: (row) => row.name || 'Sin dato',
+      cell: (row) =>
+        dimensionValueLabel(dimension, row.id, row.name) || 'Sin dato',
     },
     {
       id: 'tickets',
@@ -130,7 +139,13 @@ export function TimesDimensionTable({ groups }: { groups: DimensionGroup[] }) {
         </div>
         <div className="max-h-80 overflow-auto">
           <DataTable
-            columns={timeColumns(measure, max, aggregation, measureLabel)}
+            columns={timeColumns({
+              dimension,
+              measure,
+              max,
+              aggregation,
+              label: measureLabel,
+            })}
             rows={rows}
             getRowId={(row) => `${dimension}:${row.id}`}
           />

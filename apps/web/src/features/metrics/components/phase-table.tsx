@@ -28,7 +28,7 @@ function phaseRows(
   const average = cyclePhases({
     response: summary.avgResponse,
     assignment: summary.avgAssignment,
-    reassignment: summary.avgReassignment,
+    pendingTake: summary.avgPendingTake,
     wait: summary.avgWait,
     active: summary.avgActive,
     pause: summary.avgPause,
@@ -39,7 +39,7 @@ function phaseRows(
   const accumulated = cyclePhases({
     response: summary.sumResponse,
     assignment: summary.sumAssignment,
-    reassignment: summary.sumReassignment,
+    pendingTake: summary.sumPendingTake,
     wait: summary.sumWait,
     active: summary.sumActive,
     pause: summary.sumPause,

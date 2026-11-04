@@ -12,7 +12,7 @@ import { metricsMessages } from '../i18n'
 const COLORS: Record<CyclePhase, string> = {
   response: 'var(--chart-1)',
   assignment: 'var(--chart-2)',
-  reassignment: 'var(--chart-3)',
+  pending_take: 'var(--chart-3)',
   wait: 'var(--warning)',
   active: 'var(--success)',
   pause: 'var(--destructive)',
@@ -121,7 +121,7 @@ export function CycleBar({ summary }: { summary: MetricsSummary }) {
   const slices: PhaseView[] = cyclePhases({
     response: minutes(summary.avgResponse, summary.sumResponse),
     assignment: minutes(summary.avgAssignment, summary.sumAssignment),
-    reassignment: minutes(summary.avgReassignment, summary.sumReassignment),
+    pendingTake: minutes(summary.avgPendingTake, summary.sumPendingTake),
     wait: minutes(summary.avgWait, summary.sumWait),
     active: minutes(summary.avgActive, summary.sumActive),
     pause: minutes(summary.avgPause, summary.sumPause),

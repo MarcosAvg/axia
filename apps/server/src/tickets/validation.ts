@@ -11,7 +11,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { endOpenParticipants } from './flow-state.js'
+import { actionTimestamp, endOpenParticipants } from './flow-state.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import type { TicketAccess } from './access.js'
@@ -173,7 +173,7 @@ async function closeIfDone(
   if (!close) return false
   await tx.execute(sql`
     update public.tickets
-    set status = 'closed', closed_at = now()
+    set status = 'closed', closed_at = ${actionTimestamp()}
     where id = ${ticketId}
   `)
   await endOpenParticipants(tx, ticketId)

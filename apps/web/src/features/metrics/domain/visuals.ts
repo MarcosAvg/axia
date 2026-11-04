@@ -5,7 +5,7 @@ import type { RejectCancelRow } from './indicators'
 export type CyclePhase =
   | 'response'
   | 'assignment'
-  | 'reassignment'
+  | 'pending_take'
   | 'wait'
   | 'active'
   | 'pause'
@@ -15,7 +15,7 @@ export type CyclePhase =
 export interface CycleInput {
   response: number
   assignment: number
-  reassignment: number
+  pendingTake: number
   wait: number
   active: number
   pause: number
@@ -34,7 +34,7 @@ export function cyclePhases(input: CycleInput): CycleSlice[] {
   return [
     { phase: 'response', minutes: Math.max(0, input.response) },
     { phase: 'assignment', minutes: Math.max(0, input.assignment) },
-    { phase: 'reassignment', minutes: Math.max(0, input.reassignment) },
+    { phase: 'pending_take', minutes: Math.max(0, input.pendingTake) },
     { phase: 'wait', minutes: Math.max(0, input.wait) },
     { phase: 'active', minutes: Math.max(0, input.active) },
     { phase: 'pause', minutes: Math.max(0, input.pause) },

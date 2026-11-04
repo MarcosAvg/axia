@@ -9,6 +9,7 @@ type TicketCycleTimes = {
   total: number
   response: number
   assignment: number
+  pendingTake: number
   reassignment: number
   wait: number
   active: number
@@ -80,6 +81,7 @@ type DetailRow = {
   total_minutes: number | string
   response_minutes: number | string
   assignment_minutes: number | string
+  pending_take_minutes: number | string
   reassignment_minutes: number | string
   wait_minutes: number | string
   active_minutes: number | string
@@ -131,6 +133,7 @@ function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
       total: Number(row.total_minutes),
       response: Number(row.response_minutes),
       assignment: Number(row.assignment_minutes),
+      pendingTake: Number(row.pending_take_minutes),
       reassignment: Number(row.reassignment_minutes),
       wait: Number(row.wait_minutes),
       active: Number(row.active_minutes),
@@ -196,6 +199,7 @@ function detailQuery(ticketId: string, actorId: string) {
       extract(epoch from (coalesce(t.closed_at, now()) - t.reported_at)) / 60 as total_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'supervisor_response'::public.time_span_kind)) / 60 as response_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'technician_assignment'::public.time_span_kind)) / 60 as assignment_minutes,
+      extract(epoch from public.ticket_time_by_kind(t.id, 'pending_take'::public.time_span_kind)) / 60 as pending_take_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'reassignment'::public.time_span_kind)) / 60 as reassignment_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'wait_start'::public.time_span_kind)) / 60 as wait_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'active_work'::public.time_span_kind)) / 60 as active_minutes,

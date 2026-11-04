@@ -54,6 +54,7 @@ const detail = {
     total: 20,
     response: 1,
     assignment: 2,
+    pendingTake: 0,
     reassignment: 0,
     wait: 3,
     active: 14,

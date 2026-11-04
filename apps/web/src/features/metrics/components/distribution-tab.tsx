@@ -18,7 +18,7 @@ import type {
 } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
-import { dimensionLabels, metricsMessages } from '../i18n'
+import { dimensionLabels, dimensionValueLabel, metricsMessages } from '../i18n'
 import { DimensionPicker } from './dimension-picker'
 import { DistributionChart, HIERARCHY } from './distribution-chart'
 
@@ -33,7 +33,7 @@ function rowName(row: DimensionRow, dimension: Dimension) {
   if (!row.id || !row.name) {
     return `Sin ${dimensionLabels[dimension].toLowerCase()}`
   }
-  return row.name
+  return dimensionValueLabel(dimension, row.id, row.name)
 }
 
 function identityColumns(

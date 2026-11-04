@@ -90,6 +90,7 @@ export interface MetricsSummary {
   avgActiveExtra: number
   avgResponse: number
   avgAssignment: number
+  avgPendingTake: number
   avgReassignment: number
   avgWait: number
   avgPause: number
@@ -104,6 +105,7 @@ export interface MetricsSummary {
   sumActiveExtra: number
   sumResponse: number
   sumAssignment: number
+  sumPendingTake: number
   sumReassignment: number
   sumWait: number
   sumPause: number
@@ -138,6 +140,7 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   avgActiveExtra: 0,
   avgResponse: 0,
   avgAssignment: 0,
+  avgPendingTake: 0,
   avgReassignment: 0,
   avgWait: 0,
   avgPause: 0,
@@ -152,6 +155,7 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   sumActiveExtra: 0,
   sumResponse: 0,
   sumAssignment: 0,
+  sumPendingTake: 0,
   sumReassignment: 0,
   sumWait: 0,
   sumPause: 0,

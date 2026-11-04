@@ -28,10 +28,8 @@ type Item = Record<string, unknown>
 let context: TicketHttpContext
 let baseUrl: string
 
-async function get(path: string) {
-  return fetch(`${baseUrl}${path}`, {
-    headers: { Cookie: context.cookies.admin },
-  })
+async function get(path: string, cookie = context.cookies.admin) {
+  return fetch(`${baseUrl}${path}`, { headers: { Cookie: cookie } })
 }
 
 async function summary(query = '') {
@@ -124,6 +122,28 @@ describe('outcome metrics', () => {
   it('keeps outcomes out of SLA compliance', async () => {
     const rows = await items('sla')
     expect(rows).toEqual([expect.objectContaining({ with_target: 1, met: 1 })])
+  })
+
+  it('intersects the outcome filter with scope and dates', async () => {
+    const team = await context.db.execute(sql`
+      select id from public.teams where name = 'Equipo B'
+    `)
+    const teamB = String(team.rows[0]?.id)
+    const byTeam = await get(
+      `/api/metrics/summary?outcome=closed&teamId=${teamB}`,
+    )
+    expect(((await byTeam.json()) as SummaryResponse).summary.tickets).toBe(0)
+
+    const scoped = await get(
+      '/api/metrics/summary?outcome=duplicate',
+      context.cookies.supervisor,
+    )
+    expect(((await scoped.json()) as SummaryResponse).summary.tickets).toBe(0)
+
+    const byDate = await get(
+      '/api/metrics/summary?outcome=closed&from=2026-01-05',
+    )
+    expect(((await byDate.json()) as SummaryResponse).summary.tickets).toBe(0)
   })
 
   it('keeps duplicates in volume and duplicate indicators', async () => {

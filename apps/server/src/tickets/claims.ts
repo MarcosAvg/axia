@@ -13,6 +13,7 @@ import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { copyDerivedTicket } from './claim-derived.js'
 import {
+  actionTimestamp,
   endOpenParticipants,
   endTechnicianAssignments,
   reopenLeaderParticipation,
@@ -130,7 +131,8 @@ async function resolveDismissed(
   input: ResolveClaimInput,
 ): Promise<ActionResult> {
   await tx.execute(sql`
-    update public.tickets set status = 'closed', closed_at = now()
+    update public.tickets
+    set status = 'closed', closed_at = ${actionTimestamp()}
     where id = ${input.ticketId}
   `)
   await endOpenParticipants(tx, input.ticketId)
@@ -157,7 +159,12 @@ async function resolveWithNewTicket(
 ): Promise<ActionResult & { derivedTicketId: string }> {
   const ticket = await lockClaimTicket(tx, input.ticketId)
   await tx.execute(sql`
-    update public.tickets set status = ${claim.prior_status}
+    update public.tickets
+    set status = ${claim.prior_status},
+        closed_at = case
+          when ${claim.prior_status} = 'closed' then ${actionTimestamp()}
+          else closed_at
+        end
     where id = ${input.ticketId}
   `)
   const derivedTicketId = await copyDerivedTicket(tx, actor, ticket)

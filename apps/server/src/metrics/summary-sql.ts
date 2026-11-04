@@ -145,6 +145,7 @@ function aggregateColumns() {
     count(*) filter (where v.reopened)::int as reopened,
     count(*) filter (where v.status = 'closed')::int as closed,
     count(*) filter (where v.status = 'closed' and not v.reopened)::int as first_fix,
+    count(*) filter (where v.status = 'closed' or v.reopened)::int as closed_or_reopened,
     count(*) filter (where v.status not in ('rejected', 'cancelled', 'duplicate'))::int as flow_tickets,
     count(*) filter (where v.status = 'rejected')::int as rejected,
     count(*) filter (where v.status = 'cancelled')::int as cancelled,
@@ -157,6 +158,7 @@ function aggregateColumns() {
     coalesce(avg(extract(epoch from v.active_work_time_extra) / 60), 0) as avg_active_extra,
     coalesce(avg(extract(epoch from v.response_time) / 60), 0) as avg_response,
     coalesce(avg(extract(epoch from v.assignment_time) / 60), 0) as avg_assignment,
+    coalesce(avg(extract(epoch from v.pending_take_time) / 60), 0) as avg_pending_take,
     coalesce(avg(extract(epoch from v.reassignment_time) / 60), 0) as avg_reassignment,
     coalesce(avg(extract(epoch from v.wait_start_time) / 60), 0) as avg_wait,
     coalesce(avg(extract(epoch from v.pause_time) / 60), 0) as avg_pause,
@@ -171,6 +173,7 @@ function aggregateColumns() {
     coalesce(sum(extract(epoch from v.active_work_time_extra) / 60), 0) as sum_active_extra,
     coalesce(sum(extract(epoch from v.response_time) / 60), 0) as sum_response,
     coalesce(sum(extract(epoch from v.assignment_time) / 60), 0) as sum_assignment,
+    coalesce(sum(extract(epoch from v.pending_take_time) / 60), 0) as sum_pending_take,
     coalesce(sum(extract(epoch from v.reassignment_time) / 60), 0) as sum_reassignment,
     coalesce(sum(extract(epoch from v.wait_start_time) / 60), 0) as sum_wait,
     coalesce(sum(extract(epoch from v.pause_time) / 60), 0) as sum_pause,
@@ -244,6 +247,7 @@ export function metricsRatings() {
     select tr.score, count(*)::int as ratings
     from base v
     join public.ticket_ratings tr on tr.ticket_id = v.id
+    where v.status not in ('rejected', 'cancelled', 'duplicate')
     group by tr.score
   `
 }

@@ -54,6 +54,7 @@ function TopCategories({ groups }: { groups: DimensionGroup[] }) {
 function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
   const t = metricsMessages.outcomes
   const rows = rowsByDimension(groups, 'outcome')
+  const total = rows.reduce((sum, row) => sum + row.tickets, 0)
   if (rows.length === 0) return null
   return (
     <ChartCard title={t.title} hint={metricsMessages.chartHints.outcomes}>
@@ -67,13 +68,11 @@ function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
               {t[row.id as keyof typeof t] ?? row.name}
             </span>
             <span className="tabular-nums">
-              {row.tickets} · {formatMinutes(row.avgTotal)}
+              {row.tickets} · {formatPercent(shareOf(row.tickets, total))} ·{' '}
+              {formatMinutes(row.avgTotal)}
             </span>
           </div>
         ))}
-        <p className="pt-1 text-xs text-muted-foreground">
-          {t.tickets} y {t.average.toLowerCase()}.
-        </p>
       </div>
     </ChartCard>
   )

@@ -120,6 +120,7 @@ interface TicketCycleTimes {
   total: number
   response: number
   assignment: number
+  pendingTake: number
   reassignment: number
   wait: number
   active: number

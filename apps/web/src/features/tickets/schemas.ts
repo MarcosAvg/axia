@@ -58,6 +58,7 @@ export const ticketDetailResponseSchema = z.object({
       total: z.number(),
       response: z.number(),
       assignment: z.number(),
+      pendingTake: z.number(),
       reassignment: z.number(),
       wait: z.number(),
       active: z.number(),

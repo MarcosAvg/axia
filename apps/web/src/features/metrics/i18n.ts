@@ -2,7 +2,7 @@
 
 import { outcomeMessages } from './dimension-labels'
 
-export { dimensionLabels } from './dimension-labels'
+export { dimensionLabels, dimensionValueLabel } from './dimension-labels'
 
 export const metricsMessages = {
   title: 'Métricas',
@@ -55,9 +55,6 @@ export const metricsMessages = {
     activeExtra: 'Fuera de horario',
     total: 'Tiempo total',
     net: 'Tiempo neto',
-    response: 'Respuesta',
-    assignment: 'Asignación',
-    validation: 'Validación',
     reassignment: 'Reasignación',
     recapture: 'Recaptura',
     reopen: 'Reapertura',
@@ -74,7 +71,7 @@ export const metricsMessages = {
     phases: {
       response: 'Respuesta',
       assignment: 'Asignación',
-      reassignment: 'Reasignación',
+      pending_take: 'Pendiente de toma',
       wait: 'Espera',
       active: 'Trabajo activo',
       pause: 'Pausa',

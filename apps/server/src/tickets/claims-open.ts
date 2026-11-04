@@ -79,7 +79,9 @@ async function recordOpened(
     )
   `)
   await tx.execute(sql`
-    update public.tickets set status = 'under_claim' where id = ${input.ticketId}
+    update public.tickets
+    set status = 'under_claim', closed_at = null
+    where id = ${input.ticketId}
   `)
   await writeEvent(tx, {
     ticketId: input.ticketId,

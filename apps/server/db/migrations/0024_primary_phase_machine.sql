@@ -43,11 +43,33 @@ $$;
 comment on function public.close_primary_phase(uuid, timestamptz) is
   'Cierra la fase primaria abierta; no toca anotaciones.';
 
+create or replace function public.previous_phase_end(p_ticket_id uuid)
+returns timestamptz
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select max(ts.ended_at)
+  from public.time_spans ts
+  where ts.ticket_id = p_ticket_id
+    and ts.voided_at is null
+    and ts.ended_at is not null
+    and ts.kind in (
+      'supervisor_response', 'pending_take', 'technician_assignment',
+      'wait_start', 'active_work', 'pause', 'validation', 'claim'
+    );
+$$;
+
+comment on function public.previous_phase_end(uuid) is
+  'Último instante cubierto por una fase primaria cerrada.';
+
 create or replace function public.open_phase_for_status(
   p_ticket_id uuid,
   p_status public.ticket_status,
   p_at timestamptz,
-  p_reason_id uuid default null
+  p_reason_id uuid default null,
+  p_cycle integer default null
 ) returns void
 language plpgsql
 security definer
@@ -70,6 +92,7 @@ begin
   select t.cycle, t.requester_id into v_cycle, v_requester
   from public.tickets t where t.id = p_ticket_id;
   if not found then return; end if;
+  v_cycle := coalesce(p_cycle, v_cycle);
 
   v_kind := public.phase_kind_for_status(p_status);
   if v_kind is null then
@@ -146,8 +169,8 @@ begin
 end;
 $$;
 
-comment on function public.open_phase_for_status(uuid, public.ticket_status, timestamptz, uuid) is
-  'Abre la fase primaria que corresponde a un estado, resolviendo sujeto y motivo.';
+comment on function public.open_phase_for_status(uuid, public.ticket_status, timestamptz, uuid, integer) is
+  'Abre la fase primaria que corresponde a un estado, resolviendo ciclo, sujeto y motivo.';
 
 create or replace function public.record_event_span(
   p_event public.ticket_events
@@ -166,7 +189,10 @@ declare
   v_role text;
   v_clock public.clock_class;
   v_open_subject uuid;
+  v_open_id uuid;
   v_open_kind public.time_span_kind;
+  v_open_exists boolean;
+  v_start timestamptz;
   v_prev timestamptz;
   v_status public.ticket_status;
   v_reason uuid;
@@ -225,7 +251,7 @@ begin
     );
 
   elsif p_event.type in ('assigned_technician', 'reassigned_technician') then
-    select ts.started_at into v_prev
+    select ts.id, ts.kind into v_open_id, v_open_kind
     from public.time_spans ts
     where ts.ticket_id = p_event.ticket_id
       and ts.ended_at is null
@@ -237,34 +263,25 @@ begin
     order by ts.started_at desc
     limit 1;
 
-    if exists (
-      select 1 from public.time_spans ts
-      where ts.ticket_id = p_event.ticket_id
-        and ts.kind = 'technician_assignment'
-        and ts.ended_at is null
-    ) then
+    if v_open_kind = 'technician_assignment' then
       update public.time_spans
       set subject_user_id = null,
           subject_technician_id = v_technician,
           ended_at = greatest(p_event.occurred_at, started_at)
-      where ticket_id = p_event.ticket_id
-        and kind = 'technician_assignment'
-        and ended_at is null;
-    elsif p_event.type = 'assigned_technician' and v_prev is not null then
+      where id = v_open_id;
+    elsif p_event.type = 'assigned_technician' and v_open_id is not null then
+      update public.time_spans
+      set kind = 'technician_assignment',
+          subject_user_id = null,
+          subject_technician_id = v_technician,
+          ended_at = greatest(p_event.occurred_at, started_at)
+      where id = v_open_id;
+    else
       perform public.close_primary_phase(
         p_event.ticket_id, p_event.occurred_at
       );
-      insert into public.time_spans (
-        ticket_id, cycle, kind, subject_technician_id, started_at, ended_at
-      ) values (
-        p_event.ticket_id, p_event.cycle, 'technician_assignment',
-        v_technician, v_prev, greatest(p_event.occurred_at, v_prev)
-      );
     end if;
 
-    perform public.close_primary_phase(
-      p_event.ticket_id, p_event.occurred_at
-    );
     insert into public.time_spans (
       ticket_id, cycle, kind, subject_technician_id, started_at
     ) values (
@@ -298,6 +315,16 @@ begin
     );
 
   elsif p_event.type = 'resumed' then
+    if p_event.reason_id is not null then
+      select r.clock_class into v_clock
+      from public.reasons r where r.id = p_event.reason_id;
+      update public.time_spans
+      set ref_id = p_event.reason_id,
+          clock_class = coalesce(v_clock, 'counted')
+      where ticket_id = p_event.ticket_id
+        and kind = 'pause'
+        and ended_at is null;
+    end if;
     perform public.close_primary_phase(
       p_event.ticket_id, p_event.occurred_at
     );
@@ -372,9 +399,26 @@ begin
     end if;
 
   elsif p_event.type = 'claim_opened' then
+    select exists (
+      select 1 from public.time_spans ts
+      where ts.ticket_id = p_event.ticket_id
+        and ts.ended_at is null
+        and ts.voided_at is null
+        and ts.kind in (
+          'supervisor_response', 'pending_take', 'technician_assignment',
+          'wait_start', 'active_work', 'pause', 'validation', 'claim'
+        )
+    ) into v_open_exists;
     perform public.close_primary_phase(
       p_event.ticket_id, p_event.occurred_at
     );
+    v_start := case
+      when v_open_exists then p_event.occurred_at
+      else coalesce(
+        public.previous_phase_end(p_event.ticket_id),
+        p_event.occurred_at
+      )
+    end;
     insert into public.time_spans (
       ticket_id, cycle, kind, subject_requester_id, subject_user_id,
       started_at
@@ -384,7 +428,7 @@ begin
         when p_event.subject_user_id is null
           then coalesce(p_event.subject_requester_id, v_requester)
       end,
-      p_event.subject_user_id, p_event.occurred_at
+      p_event.subject_user_id, v_start
     );
 
   elsif p_event.type in ('claim_resolved', 'reopened') then
@@ -411,7 +455,9 @@ begin
           ),
           v_status
         ),
-        p_event.occurred_at
+        p_event.occurred_at,
+        null,
+        p_event.cycle
       );
     end if;
 
@@ -472,7 +518,12 @@ begin
         (p_event.payload->>'to')::public.ticket_status,
         v_status
       ),
-      p_event.occurred_at
+      coalesce(
+        public.previous_phase_end(p_event.ticket_id),
+        p_event.occurred_at
+      ),
+      null,
+      p_event.cycle
     );
 
   elsif p_event.type = 'capture_recaptured' then
@@ -481,7 +532,8 @@ begin
         p_event.ticket_id, p_event.occurred_at
       );
       perform public.open_phase_for_status(
-        p_event.ticket_id, 'registered', p_event.occurred_at
+        p_event.ticket_id, 'registered', p_event.occurred_at,
+        null, p_event.cycle
       );
     elsif p_event.payload ? 'categoryId' then
       select ts.kind into v_open_kind
@@ -509,7 +561,9 @@ begin
           when 'claim' then 'under_claim'::public.ticket_status
           else 'registered'::public.ticket_status
         end,
-        p_event.occurred_at
+        p_event.occurred_at,
+        null,
+        p_event.cycle
       );
     end if;
 
@@ -579,7 +633,7 @@ begin
 
   insert into public.time_spans (ticket_id, cycle, kind, started_at)
   values (
-    p_ticket_id, v_ticket.cycle, 'supervisor_response', v_ticket.reported_at
+    p_ticket_id, 1, 'supervisor_response', v_ticket.reported_at
   );
 
   for v_event in
@@ -593,12 +647,21 @@ begin
   if v_ticket.status in ('closed', 'rejected', 'cancelled', 'duplicate') then
     update public.time_spans
     set ended_at = coalesce(v_ticket.closed_at, now())
-    where ticket_id = p_ticket_id
-      and ended_at is null
-      and origin = 'system'
-      and kind in (
-        'supervisor_response', 'pending_take', 'technician_assignment',
-        'wait_start', 'active_work', 'pause', 'validation', 'claim'
+    where id = (
+      select ts.id
+      from public.time_spans ts
+      where ts.ticket_id = p_ticket_id
+        and ts.origin = 'system'
+        and ts.kind in (
+          'supervisor_response', 'pending_take', 'technician_assignment',
+          'wait_start', 'active_work', 'pause', 'validation', 'claim'
+        )
+      order by ts.started_at desc, ts.id desc
+      limit 1
+    )
+      and (
+        ended_at is null
+        or ended_at < coalesce(v_ticket.closed_at, now())
       );
   end if;
 end;

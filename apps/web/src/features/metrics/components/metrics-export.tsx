@@ -12,7 +12,7 @@ import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
 import type { TimeAggregation } from '@/lib/time-aggregation'
 import type { DimensionGroup } from '../domain/dimensions'
 import { formatMinutes, formatPercent, toCsv } from '../domain/metrics'
-import { dimensionLabels, metricsMessages } from '../i18n'
+import { dimensionLabels, dimensionValueLabel, metricsMessages } from '../i18n'
 
 const t = metricsMessages.table
 
@@ -47,7 +47,7 @@ function rowValues(
   const { row } = group
   return [
     dimensionLabels[group.dimension],
-    row.name || row.id,
+    dimensionValueLabel(group.dimension, row.id, row.name),
     row.tickets,
     formatMinutes(timeValue(aggregation, row.avgActive, row.sumActive)),
     formatMinutes(timeValue(aggregation, row.avgTotal, row.sumTotal)),

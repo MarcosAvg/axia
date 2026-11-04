@@ -7,7 +7,7 @@ describe('cyclePhases', () => {
       cyclePhases({
         response: 5,
         assignment: 5,
-        reassignment: 2,
+        pendingTake: 2,
         wait: 3,
         active: 40,
         pause: 10,
@@ -18,7 +18,7 @@ describe('cyclePhases', () => {
     ).toEqual([
       { phase: 'response', minutes: 5 },
       { phase: 'assignment', minutes: 5 },
-      { phase: 'reassignment', minutes: 2 },
+      { phase: 'pending_take', minutes: 2 },
       { phase: 'wait', minutes: 3 },
       { phase: 'active', minutes: 40 },
       { phase: 'pause', minutes: 10 },
@@ -27,12 +27,27 @@ describe('cyclePhases', () => {
     ])
   })
 
+  it('no suma más que el total con fases exclusivas', () => {
+    const slices = cyclePhases({
+      response: 10,
+      assignment: 10,
+      pendingTake: 10,
+      wait: 10,
+      active: 10,
+      pause: 10,
+      validation: 10,
+      claim: 10,
+      total: 100,
+    })
+    expect(slices.reduce((sum, slice) => sum + slice.minutes, 0)).toBe(80)
+  })
+
   it('no inventa tiempo negativo en una fase', () => {
     expect(
       cyclePhases({
         response: -5,
         assignment: 5,
-        reassignment: 5,
+        pendingTake: 5,
         wait: 5,
         active: 5,
         pause: 5,

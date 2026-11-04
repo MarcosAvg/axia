@@ -79,7 +79,9 @@ with (security_invoker = 'true') as
       WHEN status = ANY (ARRAY['closed'::public.ticket_status, 'rejected'::public.ticket_status, 'cancelled'::public.ticket_status, 'duplicate'::public.ticket_status])
         THEN status::text
       ELSE 'open'::text
-    END AS outcome
+    END AS outcome,
+    public.ticket_time_by_kind(id, 'pending_take'::public.time_span_kind) AS pending_take_time,
+    public.ticket_time_by_kind_laboral(id, 'pending_take'::public.time_span_kind) AS pending_take_time_labor
    FROM public.tickets t;
 
 comment on view public.v_ticket_metrics_base is

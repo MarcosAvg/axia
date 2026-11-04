@@ -15,6 +15,7 @@ export interface DimensionRow {
   avgActiveExtra: number
   avgResponse: number
   avgAssignment: number
+  avgPendingTake: number
   avgReassignment: number
   avgWait: number
   avgPause: number
@@ -27,6 +28,7 @@ export interface DimensionRow {
   sumActiveExtra: number
   sumResponse: number
   sumAssignment: number
+  sumPendingTake: number
   sumReassignment: number
   sumWait: number
   sumPause: number
