@@ -5,7 +5,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
-## Tarea completada en rama: ruteo de supervisor sin limbo
+## Tarea integrada: ruteo de supervisor sin limbo
 
 - Cada ruteo abre una ronda de ofertas (`ticket_offers.offer_round`) y conserva las anteriores; volver
   al equipo previo en el mismo ciclo ya no deja el tiquet sin ofertas. `take` consume solo la oferta
@@ -33,8 +33,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   compatible con ofertas existentes: reciben `offer_round = 1`.
 - Pruebas nuevas: `tickets-routing-http` (equipo sin candidatos, visibilidad, reoferta al mismo
   supervisor, destino sin permisos, recaptura y desactivación) y `actions-admin`.
-- Pendiente: integrar la rama `fix/ruteo-supervisor-sin-limbo` a `main` y publicar la versión cuando
-  la persona lo autorice.
+- Integrada a `main` por fast-forward en `4575393`. **No publicada**: etiqueta, imagen y release
+  quedan pendientes de autorización.
 
 ## v0.11.0 publicada
 
