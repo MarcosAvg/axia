@@ -5,6 +5,23 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## v0.9.0 publicada
+
+- Etiqueta `v0.9.0` creada desde `main` en `46dacce`. Workflow
+  [41860346525](https://github.com/MarcosAvg/axia/actions/runs/41860346525): `verify/check` y
+  `verify/docker` en `success`; los pasos de `publish` completaron en `success` y crearon la
+  release. La API del run conserva `in_progress` por un retraso de GitHub, pero el artefacto y la
+  release están verificados abajo.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.9.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:46dacce5432a5f318e84e8bcd4c9751ab7e0d79a`, digest
+  `sha256:d5574f5c127e094636ee2550c7f287b45ba745e69e54316e4f8150cad761080c`.
+- [Release v0.9.0](https://github.com/MarcosAvg/axia/releases/tag/v0.9.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `114c292394afe37a209f22159b9238d6c9acd0abd7416d70e4629ab89aa19545`)
+  y su `.sha256`.
+- La imagen contiene la compuerta completa: 64 pruebas de servidor, 364 de web, 327 de PostgreSQL y
+  60 de navegador.
+
 ## Tarea integrada: dependencia del solicitante acota ubicaciones
 
 - El solicitante efectivo (propio o elegido a nombre de otro) fija la dependencia del alta. Si no
@@ -30,7 +47,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 46 archivos, 0 enlaces rotos.
 - `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 834 archivos, 0 coincidencias.
 - Sin migración de esquema: no cambia la base de datos.
-- Integrada a `main` por fast-forward; no se publicó ni se desplegó.
+- Integrada a `main` por fast-forward y publicada como `v0.9.0`; el despliegue de instancias queda
+  a cargo del operador.
 
 ## v0.8.1 publicada
 
