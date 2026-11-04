@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import type { UseFormReturn } from 'react-hook-form'
 import { can, useAuth } from '@/features/auth'
@@ -96,6 +96,7 @@ function usePlaceEffects(
 ) {
   const { ownRequester, selectedRequesterId, fixedDependencyId } = selection
   const { buildingId, locationId } = place
+  const previousRequesterId = useRef<string | undefined>(undefined)
 
   useEffect(() => {
     if (ownRequester && !form.getValues('requesterId')) {
@@ -104,10 +105,19 @@ function usePlaceEffects(
   }, [ownRequester, form])
 
   useEffect(() => {
-    form.setValue('buildingId', '')
-    form.setValue('locationId', '')
     form.setValue('dependencyId', fixedDependencyId)
-  }, [selectedRequesterId, fixedDependencyId, form])
+  }, [fixedDependencyId, form])
+
+  useEffect(() => {
+    if (
+      previousRequesterId.current !== undefined &&
+      previousRequesterId.current !== selectedRequesterId
+    ) {
+      form.setValue('buildingId', '')
+      form.setValue('locationId', '')
+    }
+    previousRequesterId.current = selectedRequesterId
+  }, [selectedRequesterId, form])
 
   useEffect(() => {
     form.setValue('locationId', '')
