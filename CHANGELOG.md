@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-04
+
 ### Añadido
 
 - El ruteo de supervisor abre una ronda de ofertas por cada reasignación o recaptura y conserva las
