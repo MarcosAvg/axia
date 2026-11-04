@@ -90,12 +90,65 @@ function OutboxErrors({ items }: { items: OutboxItem[] }) {
   )
 }
 
+function OfflineStatus({
+  online,
+  pending,
+  isOfflineSession,
+  onSync,
+}: {
+  online: boolean
+  pending: number
+  isOfflineSession: boolean
+  onSync: () => void
+}) {
+  const offline = !online || isOfflineSession
+  const label = online
+    ? pending > 0
+      ? messages.offline.pending(pending)
+      : messages.offline.session
+    : messages.offline.disconnected
+  const className =
+    'inline-flex min-h-11 items-center gap-1 text-xs text-warning-foreground dark:text-warning'
+  const content = (
+    <>
+      {offline ? (
+        <CloudOffIcon className="size-3.5 shrink-0" aria-hidden />
+      ) : (
+        <RefreshCwIcon className="size-3.5 shrink-0" aria-hidden />
+      )}
+      <span className="hidden sm:inline">{label}</span>
+      {offline ? null : (
+        <span className="tabular-nums sm:hidden">{pending}</span>
+      )}
+    </>
+  )
+
+  if (online && pending > 0) {
+    return (
+      <button
+        type="button"
+        onClick={onSync}
+        aria-label={`${messages.offline.syncNow}: ${label}`}
+        className={className}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <span role="status" aria-label={label} className={className}>
+      {content}
+    </span>
+  )
+}
+
 /** Aviso de "sin conexión", de elementos pendientes y de errores definitivos. */
 export function OfflineIndicator() {
   const [online, setOnline] = useState(
     typeof navigator === 'undefined' ? true : navigator.onLine,
   )
-  const { session } = useAuth()
+  const { session, isOfflineSession } = useAuth()
   const userId = session?.user.id
   const pending = useLiveQuery(() => pendingForCurrentUser(), [userId], 0)
   const failed = useLiveQuery(() => errorsForCurrentUser(), [userId], [])
@@ -112,27 +165,14 @@ export function OfflineIndicator() {
   }, [])
 
   if (failed.length > 0) return <OutboxErrors items={failed} />
-  if (online && pending === 0) return null
-
-  const label = online
-    ? messages.offline.pending(pending)
-    : messages.offline.disconnected
+  if (online && pending === 0 && !isOfflineSession) return null
 
   return (
-    <span
-      role="status"
-      aria-label={label}
-      className="inline-flex items-center gap-1 text-xs text-warning-foreground dark:text-warning"
-    >
-      {online ? (
-        <RefreshCwIcon className="size-3.5 shrink-0" aria-hidden />
-      ) : (
-        <CloudOffIcon className="size-3.5 shrink-0" aria-hidden />
-      )}
-      <span className="hidden sm:inline">{label}</span>
-      {online ? (
-        <span className="tabular-nums sm:hidden">{pending}</span>
-      ) : null}
-    </span>
+    <OfflineStatus
+      online={online}
+      pending={pending}
+      isOfflineSession={isOfflineSession}
+      onSync={() => void processOutbox()}
+    />
   )
 }

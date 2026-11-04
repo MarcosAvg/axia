@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useDocumentTitle } from '@/lib/use-document-title'
 import { authMessages } from '../i18n'
+import { clearCachedAuth } from '../offline-session'
 import { ChangePasswordForm } from './change-password-form'
 
 export function ChangePasswordScreen() {
@@ -15,6 +16,7 @@ export function ChangePasswordScreen() {
         <CardContent>
           <ChangePasswordForm
             onSuccess={() => {
+              clearCachedAuth()
               window.location.assign('/')
             }}
           />

@@ -24,6 +24,7 @@ function makeAuthValue(
     session: null,
     identity: null,
     isIdentityLoading: false,
+    isOfflineSession: false,
     signIn: noopAsync,
     signOut: noopAsync,
     refreshIdentity: noopAsync,

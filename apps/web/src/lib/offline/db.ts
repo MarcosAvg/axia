@@ -46,12 +46,25 @@ export interface Evidence {
   createdAt: number
 }
 
+/** Caché serializada de React Query para abrir datos ya vistos sin conexión. */
+export interface QueryCacheEntry {
+  key: string
+  value: unknown
+}
+
 export const db = new Dexie('axia') as Dexie & {
   outbox: EntityTable<OutboxItem, 'id'>
   evidences: EntityTable<Evidence, 'id'>
+  queryCache: EntityTable<QueryCacheEntry, 'key'>
 }
 
 db.version(1).stores({
   outbox: 'id, type, state, createdAt',
   evidences: 'id, ticketId, state',
+})
+
+db.version(2).stores({
+  outbox: 'id, type, state, createdAt',
+  evidences: 'id, ticketId, state',
+  queryCache: 'key',
 })

@@ -15,6 +15,7 @@ function makeAuth(status: AuthContextValue['status']): AuthContextValue {
     session: null,
     identity: null,
     isIdentityLoading: false,
+    isOfflineSession: false,
     signIn: noopAsync,
     signOut: noopAsync,
     refreshIdentity: noopAsync,

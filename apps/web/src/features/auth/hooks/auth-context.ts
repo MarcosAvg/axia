@@ -9,6 +9,8 @@ export interface AuthContextValue {
   session: AuthSession | null
   identity: Identity | null
   isIdentityLoading: boolean
+  /** La sesión se restauró del dispositivo y aún no se validó contra el servidor. */
+  isOfflineSession: boolean
   signIn: (username: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   refreshIdentity: () => Promise<void>

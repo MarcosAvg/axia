@@ -1,14 +1,21 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { setDisplayTimezone } from '@/lib/format'
+import { clearPersistedQueries, queryCacheOwner } from '@/app/query-persister'
 import {
   fetchIdentity,
   signInWithPassword,
   signOut as signOutRequest,
 } from '../api/auth-api'
+import type { AuthSession } from '../api/auth-api'
+import {
+  clearCachedAuth,
+  readCachedIdentity,
+  writeCachedAuth,
+} from '../offline-session'
 import { AuthContext } from './auth-context'
-import type { AuthContextValue } from './auth-context'
+import type { AuthContextValue, AuthStatus } from './auth-context'
 import { useAuthSession } from './use-auth-session'
 
 const identityQueryKey = (userId: string | undefined) =>
@@ -20,6 +27,7 @@ function useUnauthorizedHandler(refresh: () => Promise<unknown>) {
     function onUnauthorized() {
       void refresh()
       queryClient.clear()
+      void clearPersistedQueries()
     }
     window.addEventListener('axia:unauthorized', onUnauthorized)
     return () => {
@@ -28,25 +36,78 @@ function useUnauthorizedHandler(refresh: () => Promise<unknown>) {
   }, [queryClient, refresh])
 }
 
+function useCacheOwnerGuard(session: AuthSession | null) {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (!session) return
+    const owner = queryCacheOwner()
+    if (owner && owner !== session.user.id) {
+      queryClient.clear()
+      clearCachedAuth()
+      void clearPersistedQueries()
+    }
+  }, [queryClient, session])
+}
+
+function useSessionCacheCleanup(session: AuthSession | null) {
+  const queryClient = useQueryClient()
+  const hadSession = useRef(false)
+  useEffect(() => {
+    if (session) {
+      hadSession.current = true
+      return
+    }
+    if (!hadSession.current) return
+    hadSession.current = false
+    queryClient.clear()
+    void clearPersistedQueries()
+  }, [queryClient, session])
+}
+
+function useAuthIdentity(
+  status: AuthStatus,
+  session: AuthSession | null,
+  isOfflineSession: boolean,
+) {
+  const userId = session?.user.id
+  const cachedIdentity = useMemo(
+    () => (userId ? readCachedIdentity(userId) : null),
+    [userId],
+  )
+  const query = useQuery({
+    queryKey: identityQueryKey(userId),
+    queryFn: fetchIdentity,
+    enabled: status === 'signed-in' && Boolean(userId),
+    staleTime: 0,
+    initialData: cachedIdentity ?? undefined,
+  })
+
+  useEffect(() => {
+    if (!isOfflineSession && session && query.data) {
+      writeCachedAuth(session, query.data)
+    }
+  }, [isOfflineSession, query.data, session])
+
+  return query
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
-  const { status, session, refresh } = useAuthSession()
-  const userId = session?.user.id
+  const { status, session, isOfflineSession, refresh } = useAuthSession()
+
+  useCacheOwnerGuard(session)
+  useSessionCacheCleanup(session)
 
   const {
     data: identity,
     isLoading: isIdentityLoading,
     refetch,
-  } = useQuery({
-    queryKey: identityQueryKey(userId),
-    queryFn: fetchIdentity,
-    enabled: status === 'signed-in' && Boolean(userId),
-    staleTime: 5 * 60 * 1000,
-  })
+  } = useAuthIdentity(status, session, isOfflineSession)
 
   useEffect(() => {
     setDisplayTimezone(identity?.timezone)
   }, [identity?.timezone])
+
   useUnauthorizedHandler(refresh)
 
   const signIn = useCallback(
@@ -62,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOutRequest()
     await refresh()
     queryClient.clear()
+    await clearPersistedQueries()
   }, [queryClient, refresh])
 
   const refreshIdentity = useCallback(async () => {
@@ -74,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       identity: identity ?? null,
       isIdentityLoading,
+      isOfflineSession,
       signIn,
       signOut,
       refreshIdentity,
@@ -83,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       identity,
       isIdentityLoading,
+      isOfflineSession,
       signIn,
       signOut,
       refreshIdentity,

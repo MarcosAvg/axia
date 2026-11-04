@@ -21,6 +21,7 @@ export const messages = {
   },
   offline: {
     disconnected: 'Sin conexión',
+    session: 'Sesión sin conexión',
     pending: (count: number) => `${count} por sincronizar`,
     failed: (count: number) => `${count} sin enviar`,
     failedTitle: 'Cambios sin enviar',
@@ -28,6 +29,7 @@ export const messages = {
       'Estos cambios no se pudieron guardar en el servidor. Revisa el mensaje y decide si reintentar o descartar.',
     retry: 'Reintentar',
     discard: 'Descartar',
+    syncNow: 'Sincronizar ahora',
     action: 'Acción del tiquet',
     evidence: 'Evidencia',
   },
