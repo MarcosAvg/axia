@@ -5,6 +5,37 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## Tarea completada en rama: ruteo de supervisor sin limbo
+
+- Cada ruteo abre una ronda de ofertas (`ticket_offers.offer_round`) y conserva las anteriores; volver
+  al equipo previo en el mismo ciclo ya no deja el tiquet sin ofertas. `take` consume solo la oferta
+  del ciclo vigente.
+- `routeTicket` informa cuántas ofertas creó. Sin candidatos escribe `unrouted`, avisa a
+  administración y la lista/detalle exponen `isUnrouted` a quien coordina. Solo se oferta a
+  supervisores activos con ámbito, `ticket.view` y `ticket.take_offer`.
+- El administrador puede reasignar desde `registered`; la reasignación directa exige que el destino
+  pueda ver y continuar el tiquet.
+- Desactivar o archivar una cuenta cierra sus asignaciones y ofertas abiertas; los tiquets sin
+  trabajo iniciado vuelven a ruteo.
+- Decisiones en el [ADR 0115](../decisions/0115-rondas-de-oferta-y-sin-ruteo.md).
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 388 de web, 60 de navegador, 351 de PostgreSQL y build. Persiste el aviso previo de
+  chunks >500 kB.
+- `pnpm test:affected`: 51 archivos de PostgreSQL en verde; el smoke de navegador falló una vez por
+  un timeout de navegación y el caso dirigido pasó al reintentarse. La compuerta completa también
+  falló una vez en un timeout de navegación y pasó en el siguiente intento.
+- Documentación: 50 archivos, 0 enlaces rotos. `pnpm check:agnostic`: 864 archivos, 0
+  coincidencias; fronteras y knip en verde.
+- Migraciones 0026 (rondas y evento `unrouted`) y 0027 (regla de notificación). La migración es
+  compatible con ofertas existentes: reciben `offer_round = 1`.
+- Pruebas nuevas: `tickets-routing-http` (equipo sin candidatos, visibilidad, reoferta al mismo
+  supervisor, destino sin permisos, recaptura y desactivación) y `actions-admin`.
+- Pendiente: integrar la rama `fix/ruteo-supervisor-sin-limbo` a `main` y publicar la versión cuando
+  la persona lo autorice.
+
 ## v0.11.0 publicada
 
 - Etiqueta `v0.11.0` creada desde `main` en `2869c5f`. Workflow

@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
+import { releaseSupervision } from '../tickets/supervision-release.js'
 import {
   ADMIN_LOCK_KEY,
   assertAnotherAdmin,
@@ -18,7 +19,7 @@ function isForeignKeyViolation(error: unknown): boolean {
   return cause ? isForeignKeyViolation(cause) : false
 }
 
-async function softDeleteUser(tx: AdminTx, targetId: string) {
+async function softDeleteUser(tx: AdminTx, targetId: string, actorId: string) {
   await tx.execute(sql`
     update public.users
     set
@@ -27,6 +28,7 @@ async function softDeleteUser(tx: AdminTx, targetId: string) {
       username = ${`deleted-${targetId}`}
     where id = ${targetId}
   `)
+  await releaseSupervision(tx, targetId, actorId)
   await tx.execute(sql`
     delete from public.user_roles where user_id = ${targetId}
   `)
@@ -88,7 +90,7 @@ export async function deleteUser(
     } catch (error) {
       if (!isForeignKeyViolation(error)) throw error
       await tx.execute(sql.raw('rollback to savepoint axia_delete_user'))
-      await softDeleteUser(tx, targetId)
+      await softDeleteUser(tx, targetId, actor.id)
       return 'archived'
     }
   })

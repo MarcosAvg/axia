@@ -48,6 +48,7 @@ function assignmentConditions(filters: TicketFilters): SQL[] {
       select 1
       from public.ticket_offers o
       where o.ticket_id = t.id
+        and o.cycle = t.cycle
         and o.supervisor_user_id = ${filters.offerSupervisorUserId}
         and o.status = 'offered'
     )`)

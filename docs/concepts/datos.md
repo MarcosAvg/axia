@@ -45,6 +45,13 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
   `rejected`, `cancelled`, `duplicate`). Los indicadores de desempeño eligen su denominador: SLA,
   resolución y primera resolución solo usan cerrados; volumen y esfuerzo incluyen los demás
   desenlaces, salvo duplicados en carga.
+- `ticket_offers.offer_round` distingue cada ruteo dentro del ciclo. Reasignar o recapturar agrega
+  una ronda nueva sin reescribir las ofertas anteriores; `take` solo consume la oferta más reciente
+  del ciclo vigente. Si un ruteo no produce candidatos, el evento `unrouted` deja constancia y la
+  regla de notificación avisa a administración (RN-03).
+- Un tiquet `registered` sin ofertas activas en su ciclo se expone como `isUnrouted` a quien puede
+  coordinarlo. Un supervisor desactivado libera sus asignaciones y ofertas; si el trabajo aún no
+  empezó, el tiquet vuelve a ruteo.
 
 ## Reglas
 

@@ -64,6 +64,11 @@ export function isSupervisorIdentity(identity: Identity | null): boolean {
   )
 }
 
+/** Verdadero para una identidad con el rol de administrador. */
+function isAdministratorIdentity(identity: Identity | null): boolean {
+  return Boolean(identity?.roles.includes('administrator'))
+}
+
 /** Verdadero si puede actuar a nombre del solicitante en alguna acción. */
 export function canRequesterProxy(identity: Identity | null): boolean {
   return REQUESTER_PROXY_PERMISSIONS.some((permission) =>
@@ -169,7 +174,9 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   assign_technician: (c) =>
     ASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_technician'),
   assign_supervisor: (c) =>
-    REASSIGNABLE.includes(c.status) && has(c, 'ticket.assign_supervisor'),
+    (REASSIGNABLE.includes(c.status) ||
+      (c.status === 'registered' && isAdministratorIdentity(c.identity))) &&
+    has(c, 'ticket.assign_supervisor'),
   add_auxiliary: (c) =>
     AUXILIARY_STATUSES.includes(c.status) && has(c, 'ticket.add_auxiliary'),
   start: (c) => c.status === 'assigned' && technicianAction(c, 'ticket.start'),

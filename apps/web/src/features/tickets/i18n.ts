@@ -34,6 +34,7 @@ export const eventLabels: Record<EventType, string> = {
   event_time_corrected: 'Hora de la acción ajustada',
   rated: 'Calificación',
   imported: 'Importado',
+  unrouted: 'Sin ruteo',
 }
 
 export const evidenceTypeLabels: Record<EvidenceType, string> = {

@@ -18,6 +18,7 @@ const ticketListItemSchema = z.object({
   priorityName: nullableText,
   priorityPosition: z.number().nullable(),
   teamName: nullableText,
+  isUnrouted: z.boolean(),
 })
 export const ticketItemsResponseSchema = z.object({
   items: z.array(ticketListItemSchema),

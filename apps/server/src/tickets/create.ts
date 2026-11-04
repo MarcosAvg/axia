@@ -21,6 +21,7 @@ import type { DbExecutor } from './db.js'
 import { detectAndStoreDuplicates } from './duplicates.js'
 import { withOccurredAt } from './event-context.js'
 import { findHandledEvent, isUniqueViolation, writeEvent } from './events.js'
+import { routeTicket } from './routing.js'
 
 type RequesterContext = {
   requester: RequesterRow
@@ -47,44 +48,6 @@ async function authorizeRequester(
     )
   }
   return { requester, onBehalf }
-}
-
-export type RouteInput = {
-  tx: DbExecutor
-  ticketId: string
-  cycle: number
-  teamId: string
-  buildingId: string
-  actorId?: string | null
-}
-
-export async function routeTicket({
-  tx,
-  ticketId,
-  cycle,
-  teamId,
-  buildingId,
-  actorId = null,
-}: RouteInput) {
-  const inserted = await tx.execute(sql`
-    insert into public.ticket_offers (ticket_id, cycle, supervisor_user_id)
-    select ${ticketId}, ${cycle}, ss.user_id
-    from public.supervisor_scopes ss
-    join public.supervisor_scope_buildings ssb on ssb.scope_id = ss.id
-    join public.users u on u.id = ss.user_id and u.active
-    where ss.team_id = ${teamId}
-      and ssb.building_id = ${buildingId}
-      and ss.active
-    on conflict do nothing
-    returning id
-  `)
-  if (inserted.rows[0]) {
-    await writeEvent(tx, {
-      ticketId,
-      type: 'offered',
-      actorId,
-    })
-  }
 }
 
 async function replayedCreate(

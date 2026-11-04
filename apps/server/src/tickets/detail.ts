@@ -1,9 +1,10 @@
 import { sql } from 'drizzle-orm'
 
-import type { Actor } from '../auth/authorization.js'
+import { can as hasPermission, type Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { iso, optionalIso } from './format.js'
 import { findVisibleTicket } from './repository.js'
+import { isUnroutedSql } from './routing-sql.js'
 
 type TicketCycleTimes = {
   total: number
@@ -57,6 +58,7 @@ export type TicketDetail = {
   isRequester: boolean
   requesterValidated: boolean
   hasTaken: boolean
+  isUnrouted: boolean
   validationPolicy: 'requester' | 'supervisor' | 'both'
 }
 
@@ -107,10 +109,15 @@ type DetailRow = {
   duplicate_of_folio: string | null
   is_requester: boolean
   requester_validated: boolean
+  is_unrouted: boolean
   validation_policy: 'requester' | 'supervisor' | 'both'
 }
 
-function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
+function toDetail(
+  row: DetailRow,
+  hasTaken: boolean,
+  canSeeRouting: boolean,
+): TicketDetail {
   return {
     id: row.id,
     folio: row.folio,
@@ -161,6 +168,7 @@ function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
     isRequester: row.is_requester,
     requesterValidated: row.requester_validated,
     hasTaken,
+    isUnrouted: canSeeRouting && row.is_unrouted,
     validationPolicy: row.validation_policy,
   }
 }
@@ -181,9 +189,9 @@ function detailQuery(ticketId: string, actorId: string) {
       ) as is_requester,
       exists (
         select 1 from public.ticket_validations v
-        where v.ticket_id = t.id and v.cycle = t.cycle
-          and v.validator_role = 'requester'
+        where v.ticket_id = t.id and v.cycle = t.cycle and v.validator_role = 'requester'
       ) as requester_validated,
+      ${isUnroutedSql()} as is_unrouted,
       (select validation_policy from public.instance_settings limit 1) as validation_policy,
       b.name as building_name,
       l.name as location_name,
@@ -236,5 +244,6 @@ export async function getTicketDetail(
 
   const result = await db.execute(detailQuery(ticketId, actor.id))
   const row = result.rows[0] as DetailRow | undefined
-  return row ? toDetail(row, access.isSupervisor) : null
+  const canSeeRouting = hasPermission(actor, 'ticket.assign_supervisor')
+  return row ? toDetail(row, access.isSupervisor, canSeeRouting) : null
 }

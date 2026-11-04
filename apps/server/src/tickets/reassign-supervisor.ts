@@ -12,7 +12,7 @@ import {
   type ActionResult,
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
-import { routeTicket } from './create.js'
+import { routeTicket } from './routing.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import {
   closeOpenWorkPhase,
@@ -65,13 +65,27 @@ async function requireActiveSupervisor(
       and u.active
       and ss.team_id = t.team_id
       and ssb.building_id = t.building_id
+      and exists (
+        select 1
+        from public.user_roles ur
+        join public.roles r on r.id = ur.role_id and r.active
+        join public.role_permissions rp on rp.role_id = r.id
+        where ur.user_id = u.id and rp.permission_id = 'ticket.view'
+      )
+      and exists (
+        select 1
+        from public.user_roles ur
+        join public.roles r on r.id = ur.role_id and r.active
+        join public.role_permissions rp on rp.role_id = r.id
+        where ur.user_id = u.id and rp.permission_id = 'ticket.assign_technician'
+      )
     limit 1
   `)
   if (!result.rows[0]) {
     throw new AppError(
       400,
       'validation_error',
-      'El supervisor no tiene alcance para este tiquet',
+      'El supervisor no tiene alcance o no puede continuar este tiquet',
     )
   }
 }
@@ -179,11 +193,13 @@ async function reassignInTransaction(
     'assign_supervisor',
   )
   if (after) return after
-  if (
-    !['with_supervisor', 'assigned', 'paused', 'in_progress'].includes(
-      ticket.status,
-    )
-  ) {
+  const isAdministrator =
+    getPermissionScope(actor, 'ticket.assign_supervisor') === 'all'
+  const allowed = ['with_supervisor', 'assigned', 'paused', 'in_progress']
+  // La cola de administración incluye los tiquets registrados que quedaron sin
+  // ofertas; el administrador puede devolverlos a ruteo (RN-03).
+  if (isAdministrator) allowed.push('registered')
+  if (!allowed.includes(ticket.status)) {
     throw conflict('El tiquet no admite reasignación de supervisor')
   }
   await assertHolder(tx, actor, input.ticketId)

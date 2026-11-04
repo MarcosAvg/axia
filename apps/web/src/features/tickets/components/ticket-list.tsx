@@ -5,6 +5,7 @@ import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
+import { UnroutedBadge } from './unrouted-badge'
 
 /** Lista de tiquets con enlace al detalle. */
 export function TicketList({
@@ -53,6 +54,7 @@ export function TicketList({
                   </span>
                 ) : null}
                 {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
+                {ticket.isUnrouted ? <UnroutedBadge /> : null}
               </span>
             </div>
           </Link>

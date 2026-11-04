@@ -35,7 +35,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | Registrar | — | Captura válida; crea `registered` y ofertas a supervisores candidatos |
 | `take` | `registered` | Oferta activa; pasa a `with_supervisor` y retira otras ofertas |
 | `assign_technician` | `registered` solo administrador; `with_supervisor`, `assigned` con toma previa | Técnico activo; pasa a `assigned`; reasignar exige motivo |
-| `assign_supervisor` | `with_supervisor`, `assigned`, `in_progress`, `paused` | Titular o permiso de alcance global; motivo y destino; a un equipo pasa a `registered`, a un supervisor a `with_supervisor` |
+| `assign_supervisor` | `with_supervisor`, `assigned`, `in_progress`, `paused`; `registered` solo administrador | Titular o permiso de alcance global; motivo y destino; a un equipo pasa a `registered` y abre una nueva ronda de ofertas, a un supervisor a `with_supervisor` y exige que el destino pueda continuar el tiquet |
 | `add_auxiliary` | `assigned`, `in_progress`, `paused` | Técnico y motivo; el supervisor debe haber tomado; agrega participación sin cambiar estado |
 | `start` | `assigned` | Evidencia `before` del ciclo; pasa a `in_progress` |
 | `pause` | `in_progress` | Motivo raíz activo con al menos un subestado activo; pasa a `paused` |
@@ -73,6 +73,12 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   misma regla de sujeto explícito.
 - La reasignación directa a un supervisor termina en `with_supervisor`; RN-06 describe el regreso
   a `registered`. Esta diferencia no modifica la especificación aprobada.
+- Cada ruteo abre una ronda de ofertas y no reescribe las anteriores; así, volver al equipo previo
+  dentro del mismo ciclo no deja el tiquet sin ofertas. Si no hay candidatos que puedan tomar, se
+  registra `unrouted`, se avisa a administración y el detalle expone `isUnrouted` a quien coordina.
+- Al desactivar una cuenta se cierran sus asignaciones y ofertas abiertas. Si el trabajo aún no
+  empezó, el tiquet vuelve a ruteo; si ya hay técnico asignado, el administrador conserva la
+  coordinación.
 - La validación automática tras N días es configurable, pero no hay un proceso que la ejecute.
   El cierre actual requiere las acciones de validación o resolución correspondientes.
 - El solicitante que ya validó no puede editar mientras el tiquet siga `attended` o `under_claim`:
@@ -83,8 +89,8 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   participación y ventana de reclamación. Un botón visible no garantiza que la acción se acepte.
 - Un supervisor debe tener una asignación abierta como titular antes de asignar, reasignar,
   recapturar, rechazar, cancelar, cambiar prioridad o marcar duplicado. La toma implícita al asignar
-  se retiró. El administrador conserva la cola de tiquets sin ruteo y el solicitante sus acciones
-  propias.
+  se retiró. El administrador conserva la cola de tiquets sin ruteo, puede reasignar desde
+  `registered` para devolverlos a ruteo y el solicitante mantiene sus acciones propias.
 - El tiempo y la evidencia se atribuyen al sujeto de la acción, no al actor. En validación `both`,
   el tramo hasta la validación del solicitante es del solicitante y el resto del supervisor. Los
   reportes por técnico y solicitante usan esa atribución; la participación de asignación se conserva

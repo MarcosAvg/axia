@@ -5,6 +5,22 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- El ruteo de supervisor abre una ronda de ofertas por cada reasignación o recaptura y conserva las
+  anteriores. Si no hay candidatos que puedan tomar, registra `unrouted`, avisa a administración y
+  el detalle y la lista exponen `isUnrouted` a quien coordina (RN-03). Decisión en el
+  [ADR 0115](docs/decisions/0115-rondas-de-oferta-y-sin-ruteo.md).
+- El administrador puede reasignar tiquets `registered` sin ruteo para devolverlos a la cola de
+  supervisores. La reasignación directa valida que el supervisor destino pueda continuar el tiquet.
+
+### Corregido
+
+- Reasignar un tiquet a un equipo sin candidatos, o volver al equipo anterior en el mismo ciclo, ya
+  no lo deja en `registered` sin ofertas ni bloquea la toma.
+- Desactivar o eliminar una cuenta cierra sus asignaciones y ofertas abiertas; los tiquets sin
+  trabajo iniciado vuelven a ruteo.
+
 ## [0.11.0] - 2026-11-04
 
 ### Añadido

@@ -64,6 +64,7 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
   event_time_corrected: ClockIcon,
   rated: StarIcon,
   imported: DownloadIcon,
+  unrouted: AlertTriangleIcon,
 }
 
 function FeedItem({

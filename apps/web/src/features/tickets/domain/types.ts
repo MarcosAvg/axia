@@ -55,6 +55,7 @@ export const EVENT_TYPES = [
   'event_time_corrected',
   'rated',
   'imported',
+  'unrouted',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 
@@ -85,6 +86,7 @@ export interface TicketListItem {
   priorityName: string | null
   priorityPosition: number | null
   teamName: string | null
+  isUnrouted: boolean
 }
 
 export interface TicketDetail extends TicketListItem {

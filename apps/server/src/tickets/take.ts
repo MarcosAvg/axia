@@ -15,12 +15,18 @@ import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { findVisibleTicket } from './repository.js'
 
-async function assertOffer(tx: DbExecutor, ticketId: string, actorId: string) {
+async function assertOffer(
+  tx: DbExecutor,
+  ticketId: string,
+  actorId: string,
+  cycle: number,
+) {
   const result = await tx.execute(sql`
     select 1
     from public.ticket_offers
     where ticket_id = ${ticketId}
       and supervisor_user_id = ${actorId}
+      and cycle = ${cycle}
       and status = 'offered'
     limit 1
   `)
@@ -51,7 +57,7 @@ async function markTaken(
         else 'withdrawn'::public.offer_status
       end,
       resolved_at = now()
-    where ticket_id = ${ticketId} and status = 'offered'
+    where ticket_id = ${ticketId} and cycle = ${cycle} and status = 'offered'
   `)
   await tx.execute(sql`
     insert into public.ticket_assignments (
@@ -86,7 +92,7 @@ async function takeInTransaction(
     throw conflict('El tiquet ya no está registrado')
   }
 
-  await assertOffer(tx, ticketId, actor.id)
+  await assertOffer(tx, ticketId, actor.id, ticket.cycle)
   await markTaken(tx, ticketId, actor.id, ticket.cycle)
   await writeEvent(tx, {
     ticketId,

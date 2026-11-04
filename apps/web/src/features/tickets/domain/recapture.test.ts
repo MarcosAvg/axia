@@ -19,6 +19,7 @@ const ticket = {
   requesterDependencyId: 'd-requester',
   requesterDependencyName: 'Dependencia del solicitante',
   possibleDuplicate: false,
+  isUnrouted: false,
   buildingName: null,
   categoryName: null,
   priorityName: null,

@@ -2,6 +2,7 @@ import { sql, type SQL } from 'drizzle-orm'
 
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
+import { releaseSupervision } from '../tickets/supervision-release.js'
 import { can, type Actor } from './authorization.js'
 import {
   ADMIN_LOCK_KEY,
@@ -217,6 +218,7 @@ export async function updateUser(
     if (input.roleIds) await replaceRoles(tx, targetId, input.roleIds)
 
     if (input.active === false) {
+      await releaseSupervision(tx, targetId, actor.id)
       await tx.execute(sql`
         update public.sessions
         set revoked_at = now()

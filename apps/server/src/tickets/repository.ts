@@ -1,28 +1,14 @@
 import { sql } from 'drizzle-orm'
 
-import type { Actor } from '../auth/authorization.js'
+import { can as hasPermission, type Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { filterConditions, type TicketFilters } from './filters.js'
-import { iso, optionalIso } from './format.js'
+import { iso } from './format.js'
 import { AppError } from '../http/errors.js'
 import { can, canAct, type TicketAccess } from './access.js'
+import { toListItem, type ListRow, type TicketListItem } from './list-item.js'
+import { isUnroutedSql } from './routing-sql.js'
 import { scopePredicate } from './scope.js'
-
-type TicketListItem = {
-  id: string
-  folio: string
-  status: string
-  reportedAt: string
-  closedAt: string | null
-  description: string
-  requesterName: string
-  possibleDuplicate: boolean
-  buildingName: string | null
-  categoryName: string | null
-  priorityName: string | null
-  priorityPosition: number | null
-  teamName: string | null
-}
 
 export type TicketPage = {
   items: TicketListItem[]
@@ -61,23 +47,6 @@ type AccessRow = {
   is_technician: boolean
   is_participant: boolean
   is_supervisor: boolean
-}
-
-type ListRow = {
-  id: string
-  folio: string
-  status: string
-  reported_at: Date | string
-  closed_at: Date | string | null
-  description: string
-  requester_name: string
-  possible_duplicate: boolean
-  building_name: string | null
-  category_name: string | null
-  priority_name: string | null
-  priority_position: number | null
-  team_name: string | null
-  total: number
 }
 
 type TimelineRow = {
@@ -190,24 +159,6 @@ export type ListTicketsOptions = {
   pageSize: number
 }
 
-function toListItem(row: ListRow): TicketListItem {
-  return {
-    id: row.id,
-    folio: row.folio,
-    status: row.status,
-    reportedAt: iso(row.reported_at),
-    closedAt: optionalIso(row.closed_at),
-    description: row.description,
-    requesterName: row.requester_name,
-    possibleDuplicate: row.possible_duplicate,
-    buildingName: row.building_name,
-    categoryName: row.category_name,
-    priorityName: row.priority_name,
-    priorityPosition: row.priority_position,
-    teamName: row.team_name,
-  }
-}
-
 export async function listTickets(
   db: Database,
   actor: Actor,
@@ -228,6 +179,7 @@ export async function listTickets(
       p.name as priority_name,
       p.position as priority_position,
       tm.name as team_name,
+      ${isUnroutedSql()} as is_unrouted,
       count(*) over()::int as total
     from public.tickets t
     join public.requesters r on r.id = t.requester_id
@@ -252,8 +204,9 @@ export async function listTickets(
     total = (count.rows[0] as { total: number } | undefined)?.total ?? 0
   }
 
+  const canSeeRouting = hasPermission(actor, 'ticket.assign_supervisor')
   return {
-    items: rows.map(toListItem),
+    items: rows.map((row) => toListItem(row, canSeeRouting)),
     total,
     page,
     pageSize,

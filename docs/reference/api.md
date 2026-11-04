@@ -64,9 +64,11 @@ Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-t
 Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
 evidencia del ciclo. La API no permite escribir directamente el estado.
 
-El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `requesterId`,
-`requesterDependencyId`, `requesterDependencyName` y `validationPolicy` para que la interfaz ajuste
-las acciones, la calificación y la recaptura. `rate` acepta un tiquet `closed` o uno `attended` con
+El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `isUnrouted`,
+`requesterId`, `requesterDependencyId`, `requesterDependencyName` y `validationPolicy` para que la
+interfaz ajuste las acciones, la calificación y la recaptura. `isUnrouted` solo llega verdadero a
+quien tiene `ticket.assign_supervisor`: indica un tiquet `registered` sin ofertas activas en el
+ciclo. La lista devuelve el mismo campo. `rate` acepta un tiquet `closed` o uno `attended` con
 validación del solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos
 veces el mismo rol en el ciclo también responde 409. `open_claim` responde 409 cuando lo intenta el
 solicitante que ya validó su lado, incluso después del cierre.
@@ -79,7 +81,11 @@ solicitante (403 para un supervisor sin proxy) y reclamar o cancelar se atribuye
 
 Un supervisor sin asignación abierta como titular no puede asignar, reasignar, recapturar, rechazar,
 cancelar, cambiar prioridad ni marcar duplicado sobre un tiquet `registered`; primero debe enviar
-`take`. El administrador conserva la cola de tiquets sin ruteo y puede asignar desde `registered`.
+`take`. El administrador conserva la cola de tiquets sin ruteo, puede asignar y reasignar desde
+`registered`. Reasignar a un equipo abre una nueva ronda de ofertas; si no hay supervisores
+candidatos que puedan tomar, la acción responde 200, registra el evento `unrouted`, avisa a
+administración y deja `isUnrouted` en verdadero. La reasignación directa a un supervisor responde
+400 si el destino no puede ver y continuar el tiquet.
 
 La línea de tiempo expone `subjectUserName`, `subjectTechnicianName` y `subjectRequesterName`. El
 actor es quien ejecuta; el sujeto es la persona a la que se atribuye la acción y el tiempo. En

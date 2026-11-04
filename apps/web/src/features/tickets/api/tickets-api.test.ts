@@ -17,6 +17,7 @@ const item = {
   description: 'No enciende la luz',
   requesterName: 'Ana',
   possibleDuplicate: false,
+  isUnrouted: false,
   buildingName: 'A',
   categoryName: null,
   priorityName: null,

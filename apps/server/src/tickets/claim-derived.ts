@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { DbExecutor } from './db.js'
-import { routeTicket } from './create.js'
+import { routeTicket } from './routing.js'
 import { writeEvent } from './events.js'
 import type { TicketForClaim } from './claims.js'
 

@@ -45,7 +45,7 @@ async function expectReferenceCounts() {
     await scalar(
       'select count(*)::text as value from public.notification_rules',
     ),
-  ).toBe(9)
+  ).toBe(10)
 }
 
 beforeAll(async () => {
