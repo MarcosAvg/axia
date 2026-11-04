@@ -5,7 +5,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
-## Tarea completada en rama: proyección de acciones offline
+## Tarea integrada: proyección de acciones offline
 
 - El detalle y las listas proyectan el estado de las acciones que siguen en la cola de Dexie. El
   técnico ve «En proceso» y las acciones siguientes sin esperar a recuperar la red; una insignia
@@ -18,6 +18,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   limita al encabezado.
 - Decisión en el [ADR 0116](../decisions/0116-proyeccion-local-acciones-offline.md). Sin migración
   de base de datos.
+- Integrada a `main` por fast-forward en `2fb5f77`; sin push ni publicación.
 
 ### Evidencia de esta tarea
 
