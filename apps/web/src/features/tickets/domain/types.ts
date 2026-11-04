@@ -76,6 +76,8 @@ export interface TicketListItem {
   id: string
   folio: string
   status: TicketStatus
+  /** El estado refleja acciones locales aún no confirmadas por el servidor. */
+  pendingSync?: boolean
   reportedAt: string
   closedAt: string | null
   description: string

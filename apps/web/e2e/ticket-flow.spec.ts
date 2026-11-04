@@ -25,12 +25,13 @@ async function signOut(page: Page) {
 }
 
 async function clickAndWait(page: Page, name: string, action: string) {
-  void action
-  const done = page.waitForResponse(
-    (response) =>
-      response.request().method() === 'POST' &&
-      response.url().includes('/api/tickets/'),
-  )
+  const expected = action.replace(/^ticket_/, '')
+  const done = page.waitForResponse((response) => {
+    if (response.request().method() !== 'POST') return false
+    if (!response.url().includes('/api/tickets/')) return false
+    const body = response.request().postDataJSON() as { action?: string } | null
+    return body?.action === expected
+  })
   await page.getByRole('button', { name }).click()
   await done
 }

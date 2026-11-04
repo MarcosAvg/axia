@@ -158,6 +158,13 @@ Se procesa solo el propietario autenticado y se interrumpe el resto al cambiar d
 La serialización es de la pestaña actual: no coordina varias pestañas y necesita idempotencia
 en el servidor. Subir una foto y ejecutar una acción no constituye una transacción conjunta.
 
+Mientras una acción sigue en la cola, la interfaz deriva un estado proyectado del tiquet y lo marca
+como «Sin sincronizar». La proyección es de presentación, se calcula en orden de envío, cubre solo
+transiciones deterministas y se detiene ante una acción ambigua o un error de la cola. El servidor
+sigue siendo la autoridad: al sincronizar se refresca su estado y, si rechaza el comando, la
+proyección se retira y el error queda visible. Decisión en el
+[ADR 0116](../decisions/0116-proyeccion-local-acciones-offline.md).
+
 La sincronización reutiliza `runTicketAction`: revalida permisos, estado y hora funcional; no
 confía en el estado local. Cada resultado distingue aplicado, duplicado, rechazo, conflicto o
 bloqueo. El reenvío conserva el UUID; una clave usada para otra acción se rechaza. Los conflictos

@@ -24,6 +24,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0113](0113-arranque-lectura-offline.md) | Arranque y lectura offline con caché de 7 días |
 | [0114](0114-fases-exclusivas-y-desenlaces.md) | Fases exclusivas y desenlaces propios en las métricas |
 | [0115](0115-rondas-de-oferta-y-sin-ruteo.md) | Rondas de oferta y aviso de ruteo sin salida |
+| [0116](0116-proyeccion-local-acciones-offline.md) | Proyección local del estado con acciones offline pendientes |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

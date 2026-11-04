@@ -1,10 +1,17 @@
 import type { TicketDetail } from '../domain/types'
+import { PendingSyncBadge } from './pending-sync-badge'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 import { UnroutedBadge } from './unrouted-badge'
 
 /** Encabezado del detalle: folio, estado, prioridad y descripción. */
-export function TicketHeader({ ticket }: { ticket: TicketDetail }) {
+export function TicketHeader({
+  ticket,
+  pendingSync = false,
+}: {
+  ticket: TicketDetail
+  pendingSync?: boolean
+}) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-3">
@@ -12,6 +19,7 @@ export function TicketHeader({ ticket }: { ticket: TicketDetail }) {
           {ticket.folio}
         </h1>
         <StatusBadge status={ticket.status} />
+        {pendingSync ? <PendingSyncBadge /> : null}
         {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
         {ticket.isUnrouted ? <UnroutedBadge /> : null}
         {ticket.priorityName ? (

@@ -16,6 +16,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- El detalle y las listas de tiquets avanzan de inmediato el estado de las acciones encoladas sin
+  conexión y lo marcan como «Sin sincronizar». La proyección es solo de presentación, se detiene
+  ante acciones ambiguas o errores y el servidor sigue siendo la autoridad. Decisión en el
+  [ADR 0116](docs/decisions/0116-proyeccion-local-acciones-offline.md).
 - Reasignar un tiquet a un equipo sin candidatos, o volver al equipo anterior en el mismo ciclo, ya
   no lo deja en `registered` sin ofertas ni bloquea la toma.
 - Desactivar o eliminar una cuenta cierra sus asignaciones y ofertas abiertas; los tiquets sin

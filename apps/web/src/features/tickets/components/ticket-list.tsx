@@ -3,6 +3,7 @@ import { ClockIcon } from 'lucide-react'
 import { formatDateTime, formatElapsed } from '@/lib/format'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { PendingSyncBadge } from './pending-sync-badge'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 import { UnroutedBadge } from './unrouted-badge'
@@ -26,7 +27,10 @@ export function TicketList({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">{ticket.folio}</span>
-              <StatusBadge status={ticket.status} />
+              <span className="flex items-center gap-1.5">
+                <StatusBadge status={ticket.status} />
+                {ticket.pendingSync ? <PendingSyncBadge /> : null}
+              </span>
             </div>
             <p className="line-clamp-2 text-sm text-muted-foreground">
               {ticket.description}

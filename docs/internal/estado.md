@@ -5,6 +5,32 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## Tarea completada en rama: proyección de acciones offline
+
+- El detalle y las listas proyectan el estado de las acciones que siguen en la cola de Dexie. El
+  técnico ve «En proceso» y las acciones siguientes sin esperar a recuperar la red; una insignia
+  «Sin sincronizar» y un aviso enumeran los cambios pendientes.
+- La proyección es solo de presentación: se calcula en orden de `seq`, cubre transiciones
+  deterministas y se detiene ante acciones ambiguas, comandos inválidos o errores de la cola. El
+  servidor sigue siendo la autoridad y la sincronización corrige cualquier divergencia.
+- Se actualizaron el detalle, las listas, el resumen y el E2E offline. Los ayudantes E2E de acciones
+  esperan ahora la respuesta de la acción concreta, no cualquier `POST`, y la aserción de estado se
+  limita al encabezado.
+- Decisión en el [ADR 0116](../decisions/0116-proyeccion-local-acciones-offline.md). Sin migración
+  de base de datos.
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 410 de web, 351 de PostgreSQL, 60 de navegador y build. Persiste el aviso previo de
+  chunks >500 kB.
+- `pnpm check:fast`: código 0; 64 pruebas de servidor y 410 de web.
+- `pnpm test:e2e:smoke`: 19/19 en verde.
+- `pnpm check:docs`: 51 archivos, 0 enlaces rotos. `pnpm check:agnostic`: 874 archivos, 0
+  coincidencias; fronteras y knip en verde.
+- Pruebas nuevas: proyección de dominio, hook de cola, lista, `PendingActions` y el flujo E2E de
+  inicio sin conexión con estado proyectado en detalle y lista.
+
 ## Tarea integrada: ruteo de supervisor sin limbo
 
 - Cada ruteo abre una ronda de ofertas (`ticket_offers.offer_round`) y conserva las anteriores; volver

@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import {
   adjustEventTime,
   checkDuplicates,
@@ -23,6 +24,8 @@ import {
   searchTicketsByFolio,
 } from '../api/tickets-api'
 import type { DuplicateCheckInput, TicketFilters } from '../api/tickets-api'
+import { projectPendingList } from '../domain/pending-actions'
+import { usePendingActions } from './use-pending-actions'
 import type { CreateTicketInput } from '../schemas'
 
 const ticketKeys = {
@@ -40,11 +43,20 @@ const ticketKeys = {
 }
 
 export function useTicketsList(filters: TicketFilters, page: number) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ticketKeys.list(filters, page),
     queryFn: () => fetchTickets(filters, page),
     placeholderData: keepPreviousData,
   })
+  const pending = usePendingActions()
+  const data = useMemo(() => {
+    if (!query.data) return query.data
+    return {
+      ...query.data,
+      items: projectPendingList(query.data.items, pending),
+    }
+  }, [pending, query.data])
+  return { ...query, data }
 }
 
 export function useTicket(id: string | undefined) {
@@ -139,11 +151,17 @@ export function useDismissDuplicateAlerts(ticketId: string) {
 }
 
 export function useMyWork(userId: string | undefined, enabled = true) {
-  return useQuery({
+  const query = useQuery({
     queryKey: ticketKeys.myWork(userId ?? ''),
     queryFn: () => (userId ? fetchMyWork(userId) : Promise.resolve([])),
     enabled: Boolean(userId) && enabled,
   })
+  const pending = usePendingActions()
+  const data = useMemo(
+    () => (query.data ? projectPendingList(query.data, pending) : query.data),
+    [pending, query.data],
+  )
+  return { ...query, data }
 }
 
 export function useMyOffers(userId: string | undefined, enabled = true) {

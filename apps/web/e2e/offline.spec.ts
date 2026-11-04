@@ -19,12 +19,13 @@ async function signIn(page: Page, email: string) {
 }
 
 async function clickAndWait(page: Page, name: string, action: string) {
-  void action
-  const done = page.waitForResponse(
-    (response) =>
-      response.request().method() === 'POST' &&
-      response.url().includes('/api/tickets/'),
-  )
+  const expected = action.replace(/^ticket_/, '')
+  const done = page.waitForResponse((response) => {
+    if (response.request().method() !== 'POST') return false
+    if (!response.url().includes('/api/tickets/')) return false
+    const body = response.request().postDataJSON() as { action?: string } | null
+    return body?.action === expected
+  })
   await page.getByRole('button', { name }).click()
   await done
 }
@@ -99,15 +100,31 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   })
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByText('Pendiente de subir')).toBeVisible()
+  // La vista avanza con el estado proyectado, no espera a recuperar la red.
   await expect(
-    page.getByText('Asignado', { exact: true }).first(),
+    page.getByText('En proceso', { exact: true }).first(),
   ).toBeVisible()
+  await expect(page.getByText('Sin sincronizar')).toBeVisible()
+  await expect(
+    page.getByText('Cambios pendientes de sincronizar'),
+  ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Iniciar' })).toHaveCount(0)
   // Una sola acción en la cola (sin doble envío).
   await expect.poll(() => ticketActionCount(page)).toBe(1)
 
+  // La lista también refleja el estado proyectado y su marca de pendiente.
+  await page.getByRole('link', { name: 'Mi trabajo' }).first().click()
+  const card = page.getByRole('listitem').filter({ hasText: description })
+  await expect(card.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(card.getByText('Sin sincronizar')).toBeVisible()
+
   // Vuelve la conexión: el evento 'online' sincroniza la evidencia y el inicio.
   await page.context().setOffline(false)
-  await expect(page.getByText('En proceso', { exact: true })).toBeVisible({
+  await expect(card.getByText('En proceso', { exact: true })).toBeVisible({
     timeout: 20000,
   })
+  await expect(card.getByText('Sin sincronizar')).toHaveCount(0, {
+    timeout: 20000,
+  })
+  await expect.poll(() => ticketActionCount(page)).toBe(0)
 })

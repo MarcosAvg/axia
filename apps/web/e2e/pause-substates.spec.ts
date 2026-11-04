@@ -25,12 +25,13 @@ async function signOut(page: Page) {
 }
 
 async function clickAndWait(page: Page, name: string, action: string) {
-  void action
-  const done = page.waitForResponse(
-    (response) =>
-      response.request().method() === 'POST' &&
-      response.url().includes('/api/tickets/'),
-  )
+  const expected = action.replace(/^ticket_/, '')
+  const done = page.waitForResponse((response) => {
+    if (response.request().method() !== 'POST') return false
+    if (!response.url().includes('/api/tickets/')) return false
+    const body = response.request().postDataJSON() as { action?: string } | null
+    return body?.action === expected
+  })
   await page.getByRole('button', { name }).click()
   await done
 }
@@ -73,7 +74,8 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
     buffer: testImage,
   })
   await clickAndWait(page, 'Confirmar', 'ticket_start')
-  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
+  const header = page.locator('h1').locator('..')
+  await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
 
   // Pausa con un motivo (nodo raíz).
   await page.getByRole('button', { name: 'Pausar' }).click()
@@ -102,5 +104,5 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
     .getByLabel('Subestado · Por solicitar')
     .selectOption({ label: 'Sin proveedor' })
   await clickAndWait(page, 'Confirmar', 'ticket_resume')
-  await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
 })

@@ -6,6 +6,7 @@ import { formatDateTime, formatElapsed } from '@/lib/format'
 import { toneForId } from '@/lib/tones'
 import type { TicketListItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
+import { PendingSyncBadge } from './pending-sync-badge'
 import { PriorityBadge } from './priority-badge'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
@@ -43,6 +44,7 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     cell: (ticket) => (
       <div className="flex items-center gap-2">
         <StatusBadge status={ticket.status} />
+        {ticket.pendingSync ? <PendingSyncBadge /> : null}
         {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
         {ticket.isUnrouted ? <UnroutedBadge /> : null}
       </div>

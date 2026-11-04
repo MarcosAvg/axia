@@ -1,41 +1,10 @@
 // Textos del feature de tiquets (es-MX).
 
-import type { EvidenceType, EventType } from './domain/types'
+import type { EvidenceType } from './domain/types'
 import { proxyMessages } from './proxy-i18n'
 
 export { statusLabels } from './status-i18n'
-
-export const eventLabels: Record<EventType, string> = {
-  created: 'Registro',
-  offered: 'Ofrecido a supervisor',
-  taken: 'Tomado por supervisor',
-  reassigned_supervisor: 'Reasignado de supervisor',
-  assigned_technician: 'Técnico asignado',
-  reassigned_technician: 'Técnico reasignado',
-  auxiliary_added: 'Apoyo auxiliar',
-  capture_recaptured: 'Recaptura',
-  started: 'Trabajo iniciado',
-  paused: 'Pausado',
-  pause_advanced: 'Subestado de la pausa',
-  resumed: 'Reanudado',
-  attended: 'Atendido',
-  validated: 'Validado',
-  claim_opened: 'Reclamación abierta',
-  claim_resolved: 'Reclamación resuelta',
-  reopened: 'Reabierto',
-  rejected: 'Rechazado',
-  cancelled: 'Cancelado',
-  duplicate_marked: 'Marcado como duplicado',
-  reactivated: 'Reactivado',
-  priority_changed: 'Prioridad ajustada',
-  comment: 'Comentario',
-  evidence_added: 'Evidencia agregada',
-  manual_time_recorded: 'Tiempo manual',
-  event_time_corrected: 'Hora de la acción ajustada',
-  rated: 'Calificación',
-  imported: 'Importado',
-  unrouted: 'Sin ruteo',
-}
+export { eventLabels } from './events-i18n'
 
 export const evidenceTypeLabels: Record<EvidenceType, string> = {
   request: 'Solicitud',
@@ -48,6 +17,11 @@ export const evidenceTypeLabels: Record<EvidenceType, string> = {
 
 export const ticketMessages = {
   loading: 'Cargando…',
+  pending: {
+    title: 'Cambios pendientes de sincronizar',
+    sync: 'Sin sincronizar',
+    help: 'Se enviarán automáticamente cuando recuperes la conexión.',
+  },
   list: {
     title: 'Tiquets',
     subtitle: 'Todos los tiquets que puedes ver.',
