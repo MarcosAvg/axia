@@ -5,6 +5,25 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-04
+
+### Añadido
+
+- El tiempo por fase cubre todo el ciclo del tiquet con una única fase primaria abierta. Se añade
+  `pending_take` para las esperas posteriores a una reasignación, la cobertura se verifica con
+  `v_ticket_phase_coverage` y la interfaz deja de mostrar “Sin clasificar”. Decisión en el
+  [ADR 0114](docs/decisions/0114-fases-exclusivas-y-desenlaces.md).
+- Rechazados, cancelados y duplicados se miden como desenlaces propios, con filtro y dimensión
+  `outcome`, tiempo hasta el desenlace y tarjeta de resumen. SLA, resolución y primera resolución
+  solo cuentan cerrados; los duplicados quedan fuera de carga.
+
+### Corregido
+
+- La reconstrucción histórica cubre asignaciones directas sin toma, reactivaciones, reclamaciones
+  desde cerrado y cierres cuyo `closed_at` es posterior al último evento.
+- La tasa de reapertura usa como denominador los tiquets que alguna vez cerraron. Reanudar una
+  pausa vuelve a aplicar la clasificación de reloj del motivo de reanudación.
+
 ## [0.10.0] - 2026-11-04
 
 ### Añadido
