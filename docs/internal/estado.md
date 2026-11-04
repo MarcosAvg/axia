@@ -5,16 +5,18 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
-## Tarea en curso: fases exclusivas y desenlaces
+## v0.11.0 publicada
 
-- Una sola fase primaria abierta por tiquet; `pending_take` cubre esperas posteriores a
-  reasignación y las anotaciones no suman en la barra.
-- `v_ticket_metrics_base` incluye todos los estados y expone `outcome`; rechazados, cancelados y
-  duplicados se segmentan, no se excluyen de volumen ni motivos.
-- SLA, resolución y primera resolución solo usan cerrados; duplicados quedan fuera de carga.
-- Decisión en el [ADR 0114](../decisions/0114-fases-exclusivas-y-desenlaces.md).
-- La rama `feat/fases-exclusivas-desenlaces` quedó con la compuerta completa en verde; falta
-  integrarla a `main` cuando la persona lo indique.
+- Etiqueta `v0.11.0` creada desde `main` en `2869c5f`. Workflow
+  [41890688737](https://github.com/MarcosAvg/axia/actions/runs/41890688737): verificación y
+  publicación terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.11.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:2869c5fa8ad1d6f22a102ea2b2e14b051b5f2f3c`, digest
+  `sha256:29375bbf1ef94f1536750dfbcac34be276a828581217c21f035005df746da4b1`.
+- [Release v0.11.0](https://github.com/MarcosAvg/axia/releases/tag/v0.11.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `33f2580d74a8850808b0d9be271596b40c1fb5e4beee34556307a058ca1c073c`)
+  y su `.sha256`.
 
 ### Evidencia de esta tarea
 
@@ -29,6 +31,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - La revisión final corrigió asignación directa sin toma, huecos de reactivación y reclamación desde
   cerrado, extensión al `closed_at` posterior al último evento, clasificación de pausa al reanudar y
   la composición de la barra: `pending_take` entra y `reassignment` queda fuera.
+- El despliegue de instancias queda a cargo del operador.
 
 ## v0.10.0 publicada
 
