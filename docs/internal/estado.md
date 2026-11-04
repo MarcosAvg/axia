@@ -3,9 +3,24 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-11-03
+**Última actualización:** 2026-11-04
 
-## Tarea en rama: proxy explícito del solicitante
+## v0.8.1 publicada
+
+- Etiqueta `v0.8.1` creada desde `main` en `a87a041`. [Flujo 41847524513](https://github.com/MarcosAvg/axia/actions/runs/41847524513)
+  (verify, docker y publish) y [CI 41847513058](https://github.com/MarcosAvg/axia/actions/runs/41847513058)
+  terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.8.1`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:a87a041`, digest
+  `sha256:79eb1c5aa627fa7862037013d5331d30f3cfc89e97357216edcb6cc7ecbc0812`.
+- [Release v0.8.1](https://github.com/MarcosAvg/axia/releases/tag/v0.8.1) con
+  `axia-self-hosted.tar.gz` (SHA-256 `aec5cd89dcc11f3bd96fd74afe807b4d46db0813716ac3be86c25abb75b27936`)
+  y su `.sha256`. Actualizar la instancia aplica la migración 0022 al arrancar.
+- Las acciones offline encoladas antes del cambio se interpretan como propias; una validación sin
+  sujeto puede responder 409 si falta el lado del solicitante.
+
+## Tarea publicada: proxy explícito del solicitante
 
 - Validar, calificar, reclamar y cancelar a nombre del solicitante exige `subjectRequesterId` y el
   permiso `*_on_behalf` correspondiente. Sin proxy la acción es propia: la validación registra el
@@ -29,8 +44,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   coincidencias; fronteras y knip en verde.
 - La matriz `ui-quality` corta el SSE durante sus navegaciones: el servidor de desarrollo acumulaba
   conexiones y bloqueaba rutas tardías. La aserción de desbordamiento no cambia.
-- Pendiente: integrar a `main` y preparar la release. Es un cambio de comportamiento en producción:
-  las acciones offline encoladas antes del cambio se interpretan como propias.
+- Integrada a `main` y publicada como `v0.8.1`; evidencia en la sección superior.
 
 ## v0.8.0 publicada
 
