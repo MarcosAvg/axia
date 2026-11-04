@@ -30,6 +30,8 @@ describe('ticket detail', () => {
       description: 'Fuga en el baño',
       locationName: 'Sala A1',
       dependencyName: 'Dependencia',
+      requesterDependencyId: null,
+      requesterDependencyName: null,
       categoryName: 'Categoría A',
       priorityName: 'Media',
       priorityPosition: 3,
