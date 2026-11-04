@@ -138,7 +138,10 @@ export async function validateCreateInputs(
 ): Promise<ResolvedTeam> {
   await requireActive(tx, 'buildings', input.buildingId, 'Edificio')
   await requireActive(tx, 'dependencies', input.dependencyId, 'Dependencia')
-  if (requesterDependencyId && input.dependencyId !== requesterDependencyId) {
+  if (
+    requesterDependencyId &&
+    input.dependencyId.toLowerCase() !== requesterDependencyId.toLowerCase()
+  ) {
     throw invalid('La dependencia no corresponde al solicitante')
   }
   await assertPair(tx, input.dependencyId, input.locationId)

@@ -124,7 +124,7 @@ function validateRecaptureRequesterDependency({
     changed(changes.dependencyId, current.dependencyId)
   if (!placeChanged) return
   const dependencyId = changes.dependencyId ?? current.dependencyId
-  if (dependencyId !== requesterDependencyId) {
+  if (dependencyId.toLowerCase() !== requesterDependencyId.toLowerCase()) {
     throw invalid('La dependencia no corresponde al solicitante')
   }
 }
