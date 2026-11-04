@@ -19,13 +19,16 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 ### Evidencia de esta tarea
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
-  servidor, 386 de web, 60 de navegador, 336 de PostgreSQL y build. Persiste el aviso previo de
+  servidor, 387 de web, 60 de navegador, 344 de PostgreSQL y build. Persiste el aviso previo de
   chunks >500 kB.
 - `pnpm test:e2e:smoke`: 19 pruebas `@smoke` en verde.
-- `pnpm check:docs`: 49 archivos, 0 enlaces rotos; `pnpm check:agnostic`: 851 archivos, 0
+- `pnpm check:docs`: 49 archivos, 0 enlaces rotos; `pnpm check:agnostic`: 853 archivos, 0
   coincidencias.
 - Migraciones 0023 (fase `pending_take`), 0024 (fase primaria, cobertura y reconstrucción) y 0025
   (base de métricas con `outcome` y SLA solo para cerrados).
+- La revisión final corrigió asignación directa sin toma, huecos de reactivación y reclamación desde
+  cerrado, extensión al `closed_at` posterior al último evento, clasificación de pausa al reanudar y
+  la composición de la barra: `pending_take` entra y `reassignment` queda fuera.
 
 ## v0.10.0 publicada
 

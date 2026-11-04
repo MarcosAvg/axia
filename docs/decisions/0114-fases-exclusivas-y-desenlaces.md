@@ -39,6 +39,10 @@ impedir dos fases primarias abiertas y consultas con denominadores explícitos. 
 no puede reconstruirse por falta de eventos, la fase abierta cubre el hueco hasta el siguiente
 evento; la vista `v_ticket_phase_coverage` debe quedar en cero para todos los tiquets.
 
-La cobertura se verifica con pruebas de integración por recorrido: registrado, asignado, en proceso,
-pausado, atendido, reclamación, reapertura, reasignación, validación `both`, rechazo, cancelación,
-duplicado y reactivación.
+El tiempo entre un cierre terminal y una reapertura o una reclamación abierta después del cierre se
+atribuye a la fase que se abre, para que la cobertura no tenga huecos; el `closed_at` y el evento
+terminal usan la misma hora de acción.
+
+La cobertura se verifica con pruebas de integración por recorrido: registrado, asignado directo,
+en proceso, pausado, atendido, reclamación desde cerrado, reapertura, reasignación, validación
+`both`, rechazo, cancelación, duplicado, reactivación y `closed_at` posterior al último evento.

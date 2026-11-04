@@ -360,6 +360,7 @@ Tramos que deben poder distinguirse:
 | Tramo | De qué a qué |
 |---|---|
 | Respuesta del supervisor | Registro → tomado |
+| Pendiente de toma | Tras una reasignación a equipo o supervisor, hasta que se toma de nuevo |
 | Reasignación | Tiempo con un supervisor equivocado hasta que reasigna (**aparte**) |
 | Asignación de técnico | Tomado → técnico asignado |
 | Recaptura | Cambio propuesto → aplicado |
