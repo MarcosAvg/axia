@@ -10,11 +10,14 @@ const OPEN_STATUSES = sql`(
   'attended', 'under_claim'
 )`
 
+export type MetricsScope = 'flow' | 'workload' | 'all'
+
 /** Base visible y filtrada; cada llamador conserva el permiso de su endpoint. */
 export function visibleTickets(
   actor: Actor,
   filters: MetricsFilters,
   permission: string,
+  scope: MetricsScope = 'flow',
 ) {
   const p = filterParams(filters)
   return sql`
@@ -29,6 +32,14 @@ export function visibleTickets(
       and (${p.p_team}::uuid is null or t.team_id = ${p.p_team}::uuid)
       and (${p.p_category}::uuid is null or t.category_id = ${p.p_category}::uuid)
       and (${p.p_dependency}::uuid is null or t.dependency_id = ${p.p_dependency}::uuid)
+      and (${p.p_outcome}::text is null
+        or (${p.p_outcome}::text = 'open'
+          and t.status not in ('closed', 'rejected', 'cancelled', 'duplicate'))
+        or t.status::text = ${p.p_outcome}::text)
+      and (${scope}::text = 'all'
+        or (${scope}::text = 'workload' and t.status <> 'duplicate')
+        or (${scope}::text = 'flow'
+          and t.status not in ('rejected', 'cancelled', 'duplicate')))
   `
 }
 
@@ -37,12 +48,13 @@ export function metricsBase(
   actor: Actor,
   filters: MetricsFilters,
   permission = 'ticket.view',
+  scope: MetricsScope = 'flow',
 ) {
   return sql`
     select v.*, t.subcategory_id, t.problem_id, t.location_id,
       t.channel_id, t.service_type_id
     from public.v_ticket_metrics_base v
-    join (${visibleTickets(actor, filters, permission)}) t on t.id = v.id
+    join (${visibleTickets(actor, filters, permission, scope)}) t on t.id = v.id
   `
 }
 
@@ -56,6 +68,7 @@ function dimensionCase() {
     when grouping(v.problem_id) = 0 then 'problem'
     when grouping(v.dependency_id) = 0 then 'dependency'
     when grouping(v.requester_id) = 0 then 'requester'
+    when grouping(v.outcome) = 0 then 'outcome'
     when grouping(v.status) = 0 then 'status'
     when grouping(v.priority_id) = 0 then 'priority'
     when grouping(v.channel_id) = 0 then 'channel'
@@ -74,6 +87,7 @@ function dimensionIdCase() {
     when grouping(v.problem_id) = 0 then v.problem_id::text
     when grouping(v.dependency_id) = 0 then v.dependency_id::text
     when grouping(v.requester_id) = 0 then v.requester_id::text
+    when grouping(v.outcome) = 0 then v.outcome
     when grouping(v.status) = 0 then v.status::text
     when grouping(v.priority_id) = 0 then v.priority_id::text
     when grouping(v.channel_id) = 0 then v.channel_id::text
@@ -91,6 +105,7 @@ function dimensionNameCase() {
     when grouping(v.problem_id) = 0 then max(prob.name)
     when grouping(v.dependency_id) = 0 then max(dep.name)
     when grouping(v.requester_id) = 0 then max(req.full_name)
+    when grouping(v.outcome) = 0 then max(v.outcome)
     when grouping(v.status) = 0 then max(v.status::text)
     when grouping(v.priority_id) = 0 then max(pri.name)
     when grouping(v.channel_id) = 0 then max(ch.name)
@@ -130,7 +145,12 @@ function aggregateColumns() {
     count(*) filter (where v.reopened)::int as reopened,
     count(*) filter (where v.status = 'closed')::int as closed,
     count(*) filter (where v.status = 'closed' and not v.reopened)::int as first_fix,
+    count(*) filter (where v.status not in ('rejected', 'cancelled', 'duplicate'))::int as flow_tickets,
+    count(*) filter (where v.status = 'rejected')::int as rejected,
+    count(*) filter (where v.status = 'cancelled')::int as cancelled,
+    count(*) filter (where v.status = 'duplicate')::int as duplicate,
     coalesce(avg(extract(epoch from v.total_time) / 60), 0) as avg_total,
+    coalesce(avg(extract(epoch from v.total_time) / 60) filter (where v.status = 'closed'), 0) as avg_resolution,
     coalesce(avg(extract(epoch from v.net_time) / 60), 0) as avg_net,
     coalesce(avg(extract(epoch from v.active_work_time) / 60), 0) as avg_active,
     coalesce(avg(extract(epoch from v.active_work_time_labor) / 60), 0) as avg_active_labor,
@@ -145,6 +165,7 @@ function aggregateColumns() {
     coalesce(avg(extract(epoch from v.total_time_labor) / 60), 0) as avg_total_labor,
     coalesce(avg(extract(epoch from v.net_time_labor) / 60), 0) as avg_net_labor,
     coalesce(sum(extract(epoch from v.total_time) / 60), 0) as sum_total,
+    coalesce(sum(extract(epoch from v.total_time) / 60) filter (where v.status = 'closed'), 0) as sum_resolution,
     coalesce(sum(extract(epoch from v.net_time) / 60), 0) as sum_net,
     coalesce(sum(extract(epoch from v.active_work_time) / 60), 0) as sum_active,
     coalesce(sum(extract(epoch from v.active_work_time_extra) / 60), 0) as sum_active_extra,
@@ -180,7 +201,7 @@ function groupingSets() {
   return sql`grouping sets (
     (v.team_id), (v.building_id), (v.location_id), (v.category_id),
     (v.subcategory_id), (v.problem_id), (v.dependency_id),
-    (v.requester_id), (v.status), (v.priority_id), (v.channel_id),
+    (v.requester_id), (v.outcome), (v.status), (v.priority_id), (v.channel_id),
     (v.service_type_id), ()
   )`
 }

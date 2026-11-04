@@ -84,6 +84,16 @@ function normalizeRates(row: MetricsRow, normalized: MetricsRow) {
   return normalized
 }
 
+const METRIC_SCOPES: Partial<Record<Metric, 'flow' | 'workload' | 'all'>> = {
+  metrics_by_technician: 'workload',
+  metrics_pauses_by_reason: 'workload',
+  metrics_routing: 'workload',
+  metrics_duplicate_alerts: 'all',
+  metrics_duplicate_tickets: 'all',
+  metrics_duplicates_by_dimension: 'all',
+  metrics_reject_cancel_by_reason: 'all',
+}
+
 async function scopedRows(
   db: Database,
   actor: Actor,
@@ -92,7 +102,7 @@ async function scopedRows(
 ): Promise<MetricsRow[]> {
   const result = await db.execute(sql`
     with visible_tickets as materialized (
-      ${visibleTickets(actor, filters, 'metrics.view')}
+      ${visibleTickets(actor, filters, 'metrics.view', METRIC_SCOPES[name] ?? 'flow')}
     )
     ${queries[name]}
   `)

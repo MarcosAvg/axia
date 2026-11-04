@@ -1,3 +1,6 @@
+export type MetricsOutcome =
+  'open' | 'closed' | 'rejected' | 'cancelled' | 'duplicate'
+
 export type MetricsFilters = {
   from?: string
   to?: string
@@ -5,6 +8,7 @@ export type MetricsFilters = {
   teamId?: string
   categoryId?: string
   dependencyId?: string
+  outcome?: MetricsOutcome
 }
 
 export function filterParams(filters: MetricsFilters) {
@@ -15,5 +19,6 @@ export function filterParams(filters: MetricsFilters) {
     p_team: filters.teamId || null,
     p_category: filters.categoryId || null,
     p_dependency: filters.dependencyId || null,
+    p_outcome: filters.outcome || null,
   }
 }

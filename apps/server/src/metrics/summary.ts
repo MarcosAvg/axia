@@ -24,7 +24,12 @@ type AggregateRow = {
   reopened: number
   closed: number
   first_fix: number
+  flow_tickets: number
+  rejected: number
+  cancelled: number
+  duplicate: number
   avg_total: number
+  avg_resolution: number
   avg_net: number
   avg_active: number
   avg_active_labor: number
@@ -39,6 +44,7 @@ type AggregateRow = {
   avg_total_labor: number
   avg_net_labor: number
   sum_total: number
+  sum_resolution: number
   sum_net: number
   sum_active: number
   sum_active_extra: number
@@ -66,7 +72,12 @@ const EMPTY_AGGREGATE: AggregateRow = {
   reopened: 0,
   closed: 0,
   first_fix: 0,
+  flow_tickets: 0,
+  rejected: 0,
+  cancelled: 0,
+  duplicate: 0,
   avg_total: 0,
+  avg_resolution: 0,
   avg_net: 0,
   avg_active: 0,
   avg_active_labor: 0,
@@ -81,6 +92,7 @@ const EMPTY_AGGREGATE: AggregateRow = {
   avg_total_labor: 0,
   avg_net_labor: 0,
   sum_total: 0,
+  sum_resolution: 0,
   sum_net: 0,
   sum_active: 0,
   sum_active_extra: 0,
@@ -110,15 +122,20 @@ function toSummary(row: AggregateRow | undefined) {
     recaptured: Number(data.recaptured),
     reopened: Number(data.reopened),
     closed: Number(data.closed),
+    flowTickets: Number(data.flow_tickets),
+    rejected: Number(data.rejected),
+    cancelled: Number(data.cancelled),
+    duplicate: Number(data.duplicate),
     reassignmentRate: rate(Number(data.reassigned), tickets),
     technicianReassignmentRate: rate(
       Number(data.reassigned_technician),
       tickets,
     ),
     recaptureRate: rate(Number(data.recaptured), tickets),
-    reopenRate: rate(Number(data.reopened), tickets),
+    reopenRate: rate(Number(data.reopened), Number(data.closed)),
     firstTimeFixRate: rate(Number(data.first_fix), Number(data.closed)),
     avgTotal: Number(data.avg_total),
+    avgResolution: Number(data.avg_resolution),
     avgNet: Number(data.avg_net),
     avgActive: Number(data.avg_active),
     avgActiveLabor: Number(data.avg_active_labor),
@@ -133,6 +150,7 @@ function toSummary(row: AggregateRow | undefined) {
     avgTotalLabor: Number(data.avg_total_labor),
     avgNetLabor: Number(data.avg_net_labor),
     sumTotal: Number(data.sum_total),
+    sumResolution: Number(data.sum_resolution),
     sumNet: Number(data.sum_net),
     sumActive: Number(data.sum_active),
     sumActiveExtra: Number(data.sum_active_extra),
@@ -185,7 +203,7 @@ function toGroup(row: AggregateRow) {
       sumNetLabor: Number(row.sum_net_labor),
       reassignmentRate: rate(Number(row.reassigned), tickets),
       recaptureRate: rate(Number(row.recaptured), tickets),
-      reopenRate: rate(Number(row.reopened), tickets),
+      reopenRate: rate(Number(row.reopened), closed),
       firstFixRate: rate(Number(row.first_fix), closed),
       reopened: Number(row.reopened),
       closed,
@@ -237,7 +255,7 @@ export async function metricsSummary(
   compact = false,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters)}),
+    with base as materialized (${metricsBase(actor, filters, 'ticket.view', 'all')}),
     grouped as (${metricsGroups(compact)}),
     volume as (${metricsVolume()}),
     aging as (${metricsAging()}),

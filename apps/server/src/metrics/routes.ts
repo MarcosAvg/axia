@@ -49,6 +49,10 @@ const filterSchema = z.object({
   teamId: z.string().uuid().optional().or(z.literal('')),
   categoryId: z.string().uuid().optional().or(z.literal('')),
   dependencyId: z.string().uuid().optional().or(z.literal('')),
+  outcome: z
+    .enum(['open', 'closed', 'rejected', 'cancelled', 'duplicate'])
+    .optional()
+    .or(z.literal('')),
 })
 
 function filtersOf(query: unknown): MetricsFilters {
@@ -60,6 +64,7 @@ function filtersOf(query: unknown): MetricsFilters {
     teamId: parsed.teamId || undefined,
     categoryId: parsed.categoryId || undefined,
     dependencyId: parsed.dependencyId || undefined,
+    outcome: parsed.outcome || undefined,
   }
 }
 

@@ -12,7 +12,7 @@ export async function technicianTimes(
   filters: MetricsFilters,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view', 'workload')})
     select
       tech.id as technician_id,
       tech.full_name as technician_name,
@@ -39,7 +39,7 @@ export async function subjectTechnicianTimes(
   filters: MetricsFilters,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view', 'workload')})
     select
       tech.id as technician_id,
       tech.full_name as technician_name,
@@ -90,7 +90,7 @@ export async function requesterTimes(
   filters: MetricsFilters,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view', 'workload')})
     select
       r.id as requester_id,
       r.full_name as requester_name,
@@ -132,7 +132,7 @@ export async function supervisors(
   filters: MetricsFilters,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'metrics.view')}),
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view', 'workload')}),
     offers as (
       select
         o.supervisor_user_id,
@@ -192,7 +192,7 @@ export async function pauseSubstates(
   filters: MetricsFilters,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'metrics.view')})
+    with base as materialized (${metricsBase(actor, filters, 'metrics.view', 'workload')})
     select
       r.name as substate_name,
       count(distinct p.id)::int as pauses,
