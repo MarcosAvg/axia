@@ -89,3 +89,8 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   el tramo hasta la validación del solicitante es del solicitante y el resto del supervisor. Los
   reportes por técnico y solicitante usan esa atribución; la participación de asignación se conserva
   por separado.
+- Cada tiquet tiene una sola fase primaria abierta. Los estados finales (`closed`, `rejected`,
+  `cancelled`, `duplicate`) cierran la fase en `closed_at`; `reactivated` la reabre según el estado
+  restaurado. La reasignación y la revisión de duplicado son anotaciones, no fases de la barra.
+- Rechazados, cancelados y duplicados no cuentan como cerrados. Se miden hasta su `closed_at` y se
+  segmentan por `outcome`; solo los duplicados quedan fuera de SLA, resolución y carga.

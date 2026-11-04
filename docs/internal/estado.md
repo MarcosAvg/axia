@@ -5,6 +5,28 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## Tarea en curso: fases exclusivas y desenlaces
+
+- Una sola fase primaria abierta por tiquet; `pending_take` cubre esperas posteriores a
+  reasignación y las anotaciones no suman en la barra.
+- `v_ticket_metrics_base` incluye todos los estados y expone `outcome`; rechazados, cancelados y
+  duplicados se segmentan, no se excluyen de volumen ni motivos.
+- SLA, resolución y primera resolución solo usan cerrados; duplicados quedan fuera de carga.
+- Decisión en el [ADR 0114](../decisions/0114-fases-exclusivas-y-desenlaces.md).
+- La rama `feat/fases-exclusivas-desenlaces` quedó con la compuerta completa en verde; falta
+  integrarla a `main` cuando la persona lo indique.
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 386 de web, 60 de navegador, 336 de PostgreSQL y build. Persiste el aviso previo de
+  chunks >500 kB.
+- `pnpm test:e2e:smoke`: 19 pruebas `@smoke` en verde.
+- `pnpm check:docs`: 49 archivos, 0 enlaces rotos; `pnpm check:agnostic`: 851 archivos, 0
+  coincidencias.
+- Migraciones 0023 (fase `pending_take`), 0024 (fase primaria, cobertura y reconstrucción) y 0025
+  (base de métricas con `outcome` y SLA solo para cerrados).
+
 ## v0.10.0 publicada
 
 - Etiqueta `v0.10.0` creada desde `main` en `c63d11e`. Workflow

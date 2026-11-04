@@ -375,7 +375,13 @@ recapturas, pausas, reclamaciones y reaperturas. Debe poder obtenerse también e
 (excluyendo lo que se clasifique como no contable) y cada tramo por separado, en versión calendario y
 en versión laboral. Los tiempos objetivo por prioridad y tipo de servicio se definen sobre el modo de
 reloj que se elija. **Los duplicados quedan fuera de los indicadores de desempeño.** **Nada de esto se
-almacena como cifras sueltas**: se calcula desde el historial. Documenta con ejemplos numéricos
+almacena como cifras sueltas**: se calcula desde el historial.
+
+Rechazar, cancelar o marcar duplicado **no convierte el tiquet en cerrado**: son desenlaces propios
+(`rejected`, `cancelled`, `duplicate`) y se miden desde el registro hasta su `closed_at`. El volumen,
+los motivos y el esfuerzo invertido se conservan; SLA, tiempo de resolución y primera resolución solo
+cuentan tiquets `closed`. Los duplicados, además, quedan fuera de la carga de trabajo. Cada indicador
+declara su universo y las fases primarias cubren todo el ciclo, sin un cajón de “sin clasificar”. Documenta con ejemplos numéricos
 resueltos al menos: caso simple, reasignación, recaptura, pausa con cambio de subestado, reclamación
 con reapertura y duplicado.
 
@@ -413,7 +419,8 @@ obligatoria; semilla: recomendada) y la lista de eventos visibles al solicitante
 
 ## 11. Indicadores que la base debe poder calcular
 
-Con vistas o funciones (calendario y laboral; **excluyendo duplicados** de los de desempeño): tiempo de
+Con vistas o funciones (calendario y laboral; **excluyendo duplicados** de los de desempeño y
+segmentando por desenlace cuando el indicador lo requiera): tiempo de
 respuesta del supervisor; tiempo de asignación; tiempo perdido por reasignación; tasa de reasignación y
 de recaptura (por solicitante, dependencia, equipo y categoría: calidad de la captura); tiempo hasta
 inicio; tiempo de trabajo activo frente a pausado; pausas por motivo y subestado; tiempo total y neto;

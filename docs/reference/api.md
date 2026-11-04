@@ -199,8 +199,15 @@ acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
 
 Resumen y actividad requieren `ticket.view`; las demás métricas requieren `metrics.view` y usan
 su alcance. Los filtros de métricas son `from` y `to` (`YYYY-MM-DD`), `buildingId`, `teamId`,
-`categoryId` y `dependencyId`; un filtro nunca amplía el alcance. Resumen admite `compact=0|1`;
-actividad admite `limit` (1–50, por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
+`categoryId`, `dependencyId` y `outcome` (`open`, `closed`, `rejected`, `cancelled`, `duplicate`);
+un filtro nunca amplía el alcance. Resumen admite `compact=0|1`; actividad admite `limit` (1–50,
+por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
+
+El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
+`closed`, `rejected`, `cancelled`, `duplicate`, `avgResolution` (solo cerrados) y `avgTotal` (todos
+los tiquets del filtro). `outcome` también está disponible como dimensión de agrupación. SLA,
+resolución y primera resolución excluyen rechazados, cancelados y duplicados; el volumen, los
+motivos y la carga de trabajo los conservan según el indicador.
 
 Los contratos ejecutables están junto a las rutas y en `apps/server/src/**/schemas.ts`;
 las pruebas de integración verifican formas, permisos y casos de error. Esta referencia no es un

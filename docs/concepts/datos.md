@@ -37,6 +37,14 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - Cada cambio de estado genera un evento con actor, sujeto, motivo y hora. El sujeto puede ser
   usuario, técnico o solicitante; los tramos de `time_spans` guardan el mismo sujeto para atribuir
   el tiempo a la persona y no a quien ejecuta la acción.
+- `time_spans` mantiene una sola fase primaria abierta por tiquet (`supervisor_response`,
+  `pending_take`, `technician_assignment`, `wait_start`, `active_work`, `pause`, `validation` o
+  `claim`). `reassignment` y `duplicate_review` son anotaciones y no suman en la cobertura.
+  `v_ticket_phase_coverage` verifica que la suma de fases iguala el tiempo total.
+- `v_ticket_metrics_base` incluye todos los estados y expone `outcome` (`open`, `closed`,
+  `rejected`, `cancelled`, `duplicate`). Los indicadores de desempeño eligen su denominador: SLA,
+  resolución y primera resolución solo usan cerrados; volumen y esfuerzo incluyen los demás
+  desenlaces, salvo duplicados en carga.
 
 ## Reglas
 
