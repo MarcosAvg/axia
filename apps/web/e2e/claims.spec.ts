@@ -51,9 +51,6 @@ test('un solicitante registra un tiquet con foto', async ({ page }) => {
   await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
   await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
   await page
-    .getByLabel('Dependencia solicitante')
-    .selectOption({ label: 'Sistemas' })
-  await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
   await selectDefaultClassification(page)

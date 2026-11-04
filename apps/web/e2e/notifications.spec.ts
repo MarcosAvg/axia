@@ -47,9 +47,6 @@ test('@smoke un solicitante recibe un aviso en vivo por SSE', async ({
       .selectOption({ label: 'Edificio Central' })
     await admin.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
     await admin
-      .getByLabel('Dependencia solicitante')
-      .selectOption({ label: 'Sistemas' })
-    await admin
       .getByLabel('Categoría', { exact: true })
       .selectOption({ label: 'Eléctrico' })
     await selectDefaultClassification(admin)

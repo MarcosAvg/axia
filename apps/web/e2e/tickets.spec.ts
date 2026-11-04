@@ -23,9 +23,8 @@ test('@smoke un solicitante registra un tiquet y lo ve en la lista y el detalle'
   await page.goto('/tickets/nuevo')
   await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
   await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
-  await page
-    .getByLabel('Dependencia solicitante')
-    .selectOption({ label: 'Sistemas' })
+  await expect(page.getByLabel('Dependencia solicitante')).toHaveCount(0)
+  await expect(page.getByText('Sistemas').first()).toBeVisible()
   await page
     .getByLabel('Categoría', { exact: true })
     .selectOption({ label: 'Eléctrico' })
