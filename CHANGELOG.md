@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-04
+
 ### Añadido
 
 - La PWA puede abrirse sin red con la última sesión e identidad validadas, con caducidad de 7 días,
