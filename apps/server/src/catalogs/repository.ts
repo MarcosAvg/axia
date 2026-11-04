@@ -92,6 +92,7 @@ async function listLocations(
       select distinct l.id, l.name, l.building_id as "buildingId"
       from public.locations l
       join public.dependency_locations dl on dl.location_id = l.id
+      join public.dependencies d on d.id = dl.dependency_id and d.active
       where l.active
         and l.building_id = ${buildingId}
         and dl.dependency_id = ${dependencyId}
@@ -118,6 +119,7 @@ async function listBuildings(
     from public.buildings b
     join public.locations l on l.building_id = b.id and l.active
     join public.dependency_locations dl on dl.location_id = l.id
+    join public.dependencies d on d.id = dl.dependency_id and d.active
     where b.active and dl.dependency_id = ${dependencyId}
     order by b.name
   `)
