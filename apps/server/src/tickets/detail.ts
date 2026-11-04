@@ -26,6 +26,8 @@ export type TicketDetail = {
   description: string
   requesterName: string
   requesterId: string
+  requesterDependencyId: string | null
+  requesterDependencyName: string | null
   possibleDuplicate: boolean
   buildingName: string | null
   categoryName: string | null
@@ -66,6 +68,8 @@ type DetailRow = {
   description: string
   requester_name: string
   requester_id: string
+  requester_dependency_id: string | null
+  requester_dependency_name: string | null
   possible_duplicate: boolean
   building_name: string | null
   category_name: string | null
@@ -114,6 +118,8 @@ function toDetail(row: DetailRow, hasTaken: boolean): TicketDetail {
     description: row.description,
     requesterName: row.requester_name,
     requesterId: row.requester_id,
+    requesterDependencyId: row.requester_dependency_id,
+    requesterDependencyName: row.requester_dependency_name,
     possibleDuplicate: row.possible_duplicate,
     buildingName: row.building_name,
     categoryName: row.category_name,
@@ -161,6 +167,8 @@ function detailQuery(ticketId: string, actorId: string) {
     select
       t.id, t.folio, t.status, t.reported_at, t.closed_at, t.description,
       t.requester_name, t.requester_id, t.possible_duplicate,
+      requesting.dependency_id as requester_dependency_id,
+      requesting_dependency.name as requester_dependency_name,
       t.cycle, t.building_id, t.location_id, t.dependency_id, t.category_id,
       t.subcategory_id, t.problem_id, t.service_type_id, t.priority_id,
       t.requester_contact, t.duplicate_of_id, dup.folio as duplicate_of_folio,
@@ -196,6 +204,9 @@ function detailQuery(ticketId: string, actorId: string) {
       extract(epoch from public.ticket_time_by_kind(t.id, 'claim'::public.time_span_kind)) / 60 as claim_minutes
     from public.tickets t
     left join public.tickets dup on dup.id = t.duplicate_of_id
+    left join public.requesters requesting on requesting.id = t.requester_id
+    left join public.dependencies requesting_dependency
+      on requesting_dependency.id = requesting.dependency_id
     left join public.buildings b on b.id = t.building_id
     left join public.locations l on l.id = t.location_id
     left join public.dependencies d on d.id = t.dependency_id

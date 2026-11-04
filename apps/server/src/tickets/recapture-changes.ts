@@ -33,6 +33,7 @@ export type RecaptureTicket = {
   building_id: string
   location_id: string
   dependency_id: string
+  requester_dependency_id: string | null
   subcategory_id: string | null
   problem_id: string | null
   service_type_id: string | null
@@ -186,6 +187,7 @@ export async function applyChanges(
       priorityId: ticket.priority_id,
     },
     changes,
+    requesterDependencyId: ticket.requester_dependency_id,
   })
   await updateFields(tx, ticket, changes)
 

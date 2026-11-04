@@ -316,6 +316,23 @@ async function validateRecaptureReferences(
   }
 }
 
+function validateRecaptureRequesterDependency({
+  current,
+  changes,
+  requesterDependencyId,
+}: RecaptureValidationInput): void {
+  if (!requesterDependencyId) return
+  const placeChanged =
+    changed(changes.buildingId, current.buildingId) ||
+    changed(changes.locationId, current.locationId) ||
+    changed(changes.dependencyId, current.dependencyId)
+  if (!placeChanged) return
+  const dependencyId = changes.dependencyId ?? current.dependencyId
+  if (dependencyId !== requesterDependencyId) {
+    throw invalid('La dependencia no corresponde al solicitante')
+  }
+}
+
 /**
  * La recaptura valida solo lo que cambia (o de lo que depende) para no bloquear
  * correcciones de textos en tiquets antiguos con catálogos desactivados.
@@ -327,5 +344,6 @@ export async function validateRecaptureInputs(
   await validateRecapturePlace(tx, input)
   await validateRecaptureClassification(tx, input)
   await validateRecaptureReferences(tx, input)
+  validateRecaptureRequesterDependency(input)
   await assertRecapturePair(tx, input)
 }

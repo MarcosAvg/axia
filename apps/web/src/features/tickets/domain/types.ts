@@ -107,6 +107,8 @@ export interface TicketDetail extends TicketListItem {
   duplicateOfId: string | null
   duplicateOfFolio: string | null
   requesterId: string
+  requesterDependencyId: string | null
+  requesterDependencyName: string | null
   isRequester: boolean
   requesterValidated: boolean
   hasTaken: boolean

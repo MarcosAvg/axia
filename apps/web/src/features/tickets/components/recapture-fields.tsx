@@ -20,6 +20,8 @@ interface RecaptureCatalogs {
   serviceTypes: Option[]
   priorities: Option[]
   reasons: ReasonOption[]
+  fixedDependencyId?: string | null
+  fixedDependencyName?: string | null
 }
 
 interface RecaptureFieldsProps extends RecaptureCatalogs {
@@ -30,33 +32,43 @@ interface RecaptureFieldsProps extends RecaptureCatalogs {
 const toOptions = (items: Option[]): SelectOption[] =>
   items.map((item) => ({ value: item.id, label: item.name }))
 
-function RecaptureSelects({
-  values,
-  onChange,
-  buildings,
-  locations,
-  dependencies,
-  categories,
-  subcategories,
-  problems,
-  serviceTypes,
-  priorities,
-  reasons,
-}: RecaptureFieldsProps) {
-  const { create, actionFields } = ticketMessages
-  const field = create.fields
-  const selects: {
-    id: keyof RecaptureValues
-    label: string
-    options: SelectOption[]
-  }[] = [
+type RecaptureSelectData = {
+  id: keyof RecaptureValues
+  label: string
+  options: SelectOption[]
+}
+
+function placeSelectData(
+  { buildings, locations }: Pick<RecaptureCatalogs, 'buildings' | 'locations'>,
+  field: typeof ticketMessages.create.fields,
+): RecaptureSelectData[] {
+  return [
     { id: 'buildingId', label: field.building, options: toOptions(buildings) },
     { id: 'locationId', label: field.location, options: toOptions(locations) },
-    {
-      id: 'dependencyId',
-      label: field.dependency,
-      options: toOptions(dependencies),
-    },
+  ]
+}
+
+function classificationSelectData(
+  {
+    categories,
+    subcategories,
+    problems,
+    serviceTypes,
+    priorities,
+    reasons,
+  }: Pick<
+    RecaptureCatalogs,
+    | 'categories'
+    | 'subcategories'
+    | 'problems'
+    | 'serviceTypes'
+    | 'priorities'
+    | 'reasons'
+  >,
+  field: typeof ticketMessages.create.fields,
+  reasonLabel: string,
+): RecaptureSelectData[] {
+  return [
     { id: 'categoryId', label: field.category, options: toOptions(categories) },
     {
       id: 'subcategoryId',
@@ -70,22 +82,50 @@ function RecaptureSelects({
       options: toOptions(serviceTypes),
     },
     { id: 'priorityId', label: field.priority, options: toOptions(priorities) },
-    { id: 'reasonId', label: actionFields.reason, options: toOptions(reasons) },
+    { id: 'reasonId', label: reasonLabel, options: toOptions(reasons) },
   ]
+}
 
+function FixedDependency({ name }: { name: string | null | undefined }) {
+  const { fields } = ticketMessages.create
+  return (
+    <div className="flex flex-col gap-1 text-sm">
+      <span className="font-medium">{fields.dependency}</span>
+      <span className="text-muted-foreground">{name ?? '—'}</span>
+      <span className="text-xs text-muted-foreground">
+        {fields.dependencyFromRequester}
+      </span>
+    </div>
+  )
+}
+
+function RecaptureSelects(props: RecaptureFieldsProps) {
+  const { create, actionFields } = ticketMessages
+  const field = create.fields
+  const render = (select: RecaptureSelectData) => (
+    <SelectField
+      key={select.id}
+      id={`recapture-${select.id}`}
+      label={select.label}
+      placeholder={field.selectPlaceholder}
+      options={select.options}
+      value={props.values[select.id]}
+      onChange={(event) => props.onChange(select.id, event.target.value)}
+    />
+  )
   return (
     <>
-      {selects.map((select) => (
-        <SelectField
-          key={select.id}
-          id={`recapture-${select.id}`}
-          label={select.label}
-          placeholder={field.selectPlaceholder}
-          options={select.options}
-          value={values[select.id]}
-          onChange={(event) => onChange(select.id, event.target.value)}
-        />
-      ))}
+      {placeSelectData(props, field).map(render)}
+      {props.fixedDependencyId ? (
+        <FixedDependency name={props.fixedDependencyName} />
+      ) : (
+        render({
+          id: 'dependencyId',
+          label: field.dependency,
+          options: toOptions(props.dependencies),
+        })
+      )}
+      {classificationSelectData(props, field, actionFields.reason).map(render)}
     </>
   )
 }

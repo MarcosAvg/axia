@@ -35,6 +35,7 @@ export function applyRecaptureChange(
   current: RecaptureValues,
   name: keyof RecaptureValues,
   value: string,
+  fixedDependencyId?: string | null,
 ): RecaptureValues {
   const next = { ...current, [name]: value }
   if (name === 'buildingId') next.locationId = ''
@@ -43,6 +44,9 @@ export function applyRecaptureChange(
     next.problemId = ''
   }
   if (name === 'subcategoryId') next.problemId = ''
+  if (fixedDependencyId && (name === 'buildingId' || name === 'locationId')) {
+    next.dependencyId = fixedDependencyId
+  }
   return next
 }
 

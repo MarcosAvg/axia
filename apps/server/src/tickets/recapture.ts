@@ -39,9 +39,11 @@ async function lockRecaptureTicket(
   ticketId: string,
 ): Promise<RecaptureTicket> {
   const result = await tx.execute(sql`
-    select * from public.tickets
-    where id = ${ticketId}
-    for update
+    select t.*, r.dependency_id as requester_dependency_id
+    from public.tickets t
+    left join public.requesters r on r.id = t.requester_id
+    where t.id = ${ticketId}
+    for update of t
   `)
   const row = result.rows[0] as RecaptureTicket | undefined
   if (!row) throw notFound()

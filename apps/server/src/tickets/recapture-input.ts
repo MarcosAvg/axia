@@ -13,6 +13,7 @@ type RecaptureCurrent = {
 export type RecaptureValidationInput = {
   current: RecaptureCurrent
   changes: Partial<RecaptureCurrent>
+  requesterDependencyId?: string | null
 }
 
 /** La web envía todos los campos; solo se valida lo que de verdad cambió. */

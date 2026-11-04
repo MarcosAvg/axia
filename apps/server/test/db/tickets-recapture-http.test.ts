@@ -66,6 +66,21 @@ async function takenTicket() {
   return ticketId
 }
 
+async function insertDependency(
+  name: string,
+  locationId: string,
+): Promise<string> {
+  const inserted = await context.db.execute(sql`
+    insert into public.dependencies (name) values (${name}) returning id
+  `)
+  const dependencyId = (inserted.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    insert into public.dependency_locations (dependency_id, location_id)
+    values (${dependencyId}, ${locationId})
+  `)
+  return dependencyId
+}
+
 beforeAll(async () => {
   context = await buildTicketHttpApp()
   refs = await loadWriteRefs(context)
@@ -74,10 +89,65 @@ beforeAll(async () => {
     values ('recapture', 'Recaptura de prueba') returning id
   `)
   recaptureReason = (reason.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    update public.requesters
+    set dependency_id = ${refs.dependencyId}
+    where id = ${refs.requesterId}
+  `)
 }, 60_000)
 
 afterAll(async () => {
   await closeTicketHttpApp(context)
+})
+
+describe('recapture requester dependency', () => {
+  it('rejects a place change outside the requester dependency', async () => {
+    const ticketId = await takenTicket()
+    const place = await context.db.execute(sql`
+      select
+        (select id from public.locations where name = 'Sala A2') as location_id,
+        (select id from public.buildings where name = 'Edificio A2') as building_id
+    `)
+    const row = place.rows[0] as { location_id: string; building_id: string }
+    const dependencyId = await insertDependency(
+      'Dependencia alterna de recaptura',
+      row.location_id,
+    )
+
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'recapture',
+      changes: {
+        buildingId: row.building_id,
+        locationId: row.location_id,
+        dependencyId,
+        description: 'Lugar fuera de la dependencia del solicitante',
+      },
+      reasonId: recaptureReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(400)
+  })
+
+  it('allows text-only recapture when the stored dependency differs', async () => {
+    const ticketId = await takenTicket()
+    const dependencyId = await insertDependency(
+      'Dependencia histórica',
+      refs.locationId,
+    )
+    await context.db.execute(sql`
+      update public.tickets
+      set dependency_id = ${dependencyId}
+      where id = ${ticketId}
+    `)
+
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'recapture',
+      changes: { description: 'Corrección de texto sin mover el lugar' },
+      reasonId: recaptureReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(200)
+  })
 })
 
 describe('recapture classification', () => {

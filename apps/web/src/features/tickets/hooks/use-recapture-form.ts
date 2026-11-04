@@ -31,16 +31,19 @@ function optional(value: string): string | undefined {
 }
 
 function useRecaptureCatalogs({
+  requesterDependencyId,
   buildingId,
   categoryId,
   subcategoryId,
 }: {
+  requesterDependencyId: string | null
   buildingId: string
   categoryId: string
   subcategoryId: string
 }) {
-  const buildings = useBuildings()
-  const locations = useLocations(optional(buildingId))
+  const dependencyId = requesterDependencyId ?? undefined
+  const buildings = useBuildings(dependencyId)
+  const locations = useLocations(optional(buildingId), dependencyId)
   const dependencies = useDependencies()
   const categories = useCategories()
   const subcategories = useSubcategories(optional(categoryId))
@@ -75,13 +78,17 @@ export function useRecaptureForm(
   )
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)
+  const requesterDependencyId = ticket.requesterDependencyId
   const catalogs = useRecaptureCatalogs({
+    requesterDependencyId,
     buildingId: values.buildingId,
     categoryId: values.categoryId,
     subcategoryId: values.subcategoryId,
   })
   function change(name: keyof typeof values, value: string) {
-    setValues((current) => applyRecaptureChange(current, name, value))
+    setValues((current) =>
+      applyRecaptureChange(current, name, value, requesterDependencyId),
+    )
   }
 
   function submit(event: FormEvent) {
@@ -108,6 +115,10 @@ export function useRecaptureForm(
     hasError,
     isPending: actions.recapture.isPending,
     mutationError: actions.recapture.error,
-    catalogs,
+    catalogs: {
+      ...catalogs,
+      fixedDependencyId: requesterDependencyId,
+      fixedDependencyName: ticket.requesterDependencyName,
+    },
   }
 }

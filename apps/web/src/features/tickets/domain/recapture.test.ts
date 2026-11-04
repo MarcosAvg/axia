@@ -16,6 +16,8 @@ const ticket = {
   description: 'No enciende',
   requesterName: 'Ana',
   requesterId: 'r1',
+  requesterDependencyId: 'd-requester',
+  requesterDependencyName: 'Dependencia del solicitante',
   possibleDuplicate: false,
   buildingName: null,
   categoryName: null,
@@ -83,6 +85,27 @@ describe('applyRecaptureChange', () => {
     )
     expect(values.subcategoryId).toBe('')
     expect(values.problemId).toBe('')
+  })
+
+  it('ajusta la dependencia fija al cambiar de lugar', () => {
+    const values = applyRecaptureChange(
+      initialRecaptureValues(ticket),
+      'locationId',
+      'l2',
+      'd-requester',
+    )
+    expect(values.dependencyId).toBe('d-requester')
+  })
+
+  it('mantiene la dependencia al cambiar de edificio con dependencia fija', () => {
+    const values = applyRecaptureChange(
+      initialRecaptureValues(ticket),
+      'buildingId',
+      'b2',
+      'd-requester',
+    )
+    expect(values.locationId).toBe('')
+    expect(values.dependencyId).toBe('d-requester')
   })
 })
 

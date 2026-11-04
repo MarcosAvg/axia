@@ -47,6 +47,8 @@ const detail = {
   requesterValidated: false,
   hasTaken: false,
   requesterId: 'r1',
+  requesterDependencyId: 'rd1',
+  requesterDependencyName: 'Dependencia del solicitante',
   validationPolicy: 'both',
   cycleTimes: {
     total: 20,
