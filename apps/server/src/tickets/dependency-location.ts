@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from './db.js'
+import { changed } from './recapture-input.js'
 
 /** Una dependencia con vínculos solo se acepta en sus ubicaciones; sin vínculos, en todas. */
 export async function assertRecapturePair(
@@ -17,9 +18,8 @@ export async function assertRecapturePair(
 ) {
   const { changes, current } = input
   if (
-    changes.buildingId === undefined &&
-    changes.locationId === undefined &&
-    changes.dependencyId === undefined
+    !changed(changes.locationId, current.locationId) &&
+    !changed(changes.dependencyId, current.dependencyId)
   ) {
     return
   }

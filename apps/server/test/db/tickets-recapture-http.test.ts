@@ -128,6 +128,31 @@ describe('recapture requester dependency', () => {
     expect(response.statusCode).toBe(400)
   })
 
+  it('accepts a place change inside the requester dependency', async () => {
+    const ticketId = await takenTicket()
+    const place = await context.db.execute(sql`
+      select
+        (select id from public.locations where name = 'Sala A2') as location_id,
+        (select id from public.buildings where name = 'Edificio A2') as building_id
+    `)
+    const row = place.rows[0] as { location_id: string; building_id: string }
+
+    const response = await action(context.cookies.supervisor, ticketId, {
+      action: 'recapture',
+      changes: {
+        buildingId: row.building_id,
+        locationId: row.location_id,
+        dependencyId: refs.dependencyId,
+        description: 'Cambio de lugar dentro de la dependencia',
+      },
+      reasonId: recaptureReason,
+      clientRequestId: randomUUID(),
+    })
+    expect(response.statusCode).toBe(200)
+  })
+})
+
+describe('recapture historical captures', () => {
   it('allows text-only recapture when the stored dependency differs', async () => {
     const ticketId = await takenTicket()
     const dependencyId = await insertDependency(
@@ -147,6 +172,35 @@ describe('recapture requester dependency', () => {
       clientRequestId: randomUUID(),
     })
     expect(response.statusCode).toBe(200)
+  })
+
+  it('allows text-only recapture when the stored pair is no longer linked', async () => {
+    const ticketId = await takenTicket()
+    await context.db.execute(sql`
+      delete from public.dependency_locations
+      where dependency_id = ${refs.dependencyId}
+        and location_id = ${refs.locationId}
+    `)
+    try {
+      const response = await action(context.cookies.supervisor, ticketId, {
+        action: 'recapture',
+        changes: {
+          buildingId: refs.buildingId,
+          locationId: refs.locationId,
+          dependencyId: refs.dependencyId,
+          description: 'Corrección de texto con el lugar sin cambios',
+        },
+        reasonId: recaptureReason,
+        clientRequestId: randomUUID(),
+      })
+      expect(response.statusCode).toBe(200)
+    } finally {
+      await context.db.execute(sql`
+        insert into public.dependency_locations (dependency_id, location_id)
+        values (${refs.dependencyId}, ${refs.locationId})
+        on conflict do nothing
+      `)
+    }
   })
 })
 
