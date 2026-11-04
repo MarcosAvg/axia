@@ -3,7 +3,7 @@ import { sql, type SQL } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import { AppError } from '../http/errors.js'
 import { routeTicket } from './create.js'
-import { validateRecaptureInputs } from './create-validation.js'
+import { validateRecaptureInputs } from './recapture-validation.js'
 import type { DbExecutor } from './db.js'
 import {
   actionTimestamp,
