@@ -5,6 +5,30 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-04
 
+## Tarea completada en rama: dependencia del solicitante acota ubicaciones
+
+- El solicitante efectivo (propio o elegido a nombre de otro) fija la dependencia del alta. Si no
+  tiene dependencia, se conserva el flujo anterior sin restricción.
+- `GET /api/catalogs/buildings?dependencyId=…` y
+  `GET /api/catalogs/locations?buildingId=…&dependencyId=…` filtran por los vínculos de
+  `dependency_locations`.
+- El alta rechaza una dependencia distinta a la del solicitante y una ubicación fuera de ella. La
+  recaptura usa la dependencia del solicitante del tiquet y solo valida al cambiar el lugar.
+- El detalle expone `requesterDependencyId` y `requesterDependencyName`; el catálogo de solicitantes
+  incluye `dependencyName`.
+- La validación de recaptura se separó a `recapture-validation.ts` para respetar el límite de
+  líneas del archivo de alta.
+- Decisión en el [ADR 0112](../decisions/0112-dependencia-solicitante-acota-ubicaciones.md).
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 362 de web, 325 de PostgreSQL, 59 de navegador (incluye los 18 `@smoke`) y build.
+  Persiste el aviso previo de chunks >500 kB.
+- `AXIA_ENV_FILE=/dev/null pnpm check:docs`: 46 archivos, 0 enlaces rotos.
+- `AXIA_ENV_FILE=/dev/null pnpm check:agnostic`: 833 archivos, 0 coincidencias.
+- Sin migración de esquema: no cambia la base de datos.
+
 ## v0.8.1 publicada
 
 - Etiqueta `v0.8.1` creada desde `main` en `a87a041`. [Flujo 41847524513](https://github.com/MarcosAvg/axia/actions/runs/41847524513)

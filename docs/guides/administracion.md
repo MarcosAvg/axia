@@ -40,7 +40,9 @@ técnicos y motivos.
 
 - Los catálogos se desactivan; no se borran.
 - En **Dependencias**, el formulario de alta/edición incluye las ubicaciones. Hay que marcar al
-  menos una; la dependencia solo aparece en esas ubicaciones del alta de tiquets.
+  menos una; la dependencia solo aparece en esas ubicaciones del alta de tiquets. Si el solicitante
+  tiene dependencia, el alta se limita a sus edificios y ubicaciones; si no tiene, no hay
+  restricción.
 - **Exportar** descarga `catalogos.xlsx` con una hoja por catálogo, referencias por nombre y las
   filas activas e inactivas. Ese mismo archivo se puede **Importar** en otra instancia o en la
   misma: inserta lo nuevo y actualiza lo existente sin duplicar, sin borrar y sin tocar las celdas

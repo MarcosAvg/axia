@@ -6,8 +6,10 @@ El menú muestra las secciones disponibles para tus permisos y perfil.
 ## Registrar una solicitud
 
 1. Abre **Tiquets → Nuevo tiquet**.
-2. Selecciona edificio, ubicación y dependencia. Las dependencias disponibles dependen de la
-   ubicación. Elige categoría, subcategoría y problema; el problema determina el equipo que atiende.
+2. Revisa el solicitante. Si tiene dependencia, la dependencia queda fija y solo aparecen los
+   edificios y ubicaciones vinculados a ella. Si no tiene, selecciona edificio, ubicación y
+   dependencia; las dependencias disponibles dependen de la ubicación. Elige categoría,
+   subcategoría y problema; el problema determina el equipo que atiende.
 3. Revisa el solicitante y su contacto. Con permiso puedes elegir **A nombre de otra persona**
    y un solicitante del catálogo, aunque no tenga cuenta.
 4. Describe el problema y adjunta, si puedes, una **Foto de la solicitud**.

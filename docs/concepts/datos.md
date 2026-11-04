@@ -26,7 +26,8 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - El problema pertenece a un equipo (`problems.team_id`); la categoría ya no tiene equipo.
 - Una dependencia se vincula a una o varias ubicaciones (`dependency_locations`); una ubicación
   puede tener varias dependencias. El vínculo es obligatorio: una dependencia sin ubicación no es
-  válida.
+  válida. Si el solicitante tiene dependencia, el alta solo ofrece los edificios y ubicaciones
+  vinculados a ella y el servidor rechaza una combinación fuera de ese ámbito (RN-31).
 - La API actual permite omitir el tipo de servicio; subcategoría y problema son obligatorios al
   registrar. Esto no cambia RN-01 de [Negocio](negocio.md), que exige tipo de servicio. La interfaz
   lo exige al marcar atendido; esa condición aún no es obligatoria en el contrato del servidor.

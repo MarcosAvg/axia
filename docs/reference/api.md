@@ -64,11 +64,12 @@ Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-t
 Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
 evidencia del ciclo. La API no permite escribir directamente el estado.
 
-El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `requesterId` y
-`validationPolicy` para que la interfaz ajuste las acciones y la calificación. `rate` acepta un
-tiquet `closed` o uno `attended` con validación del solicitante; una segunda calificación del mismo
-tiquet responde 409. Validar dos veces el mismo rol en el ciclo también responde 409. `open_claim`
-responde 409 cuando lo intenta el solicitante que ya validó su lado, incluso después del cierre.
+El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `requesterId`,
+`requesterDependencyId`, `requesterDependencyName` y `validationPolicy` para que la interfaz ajuste
+las acciones, la calificación y la recaptura. `rate` acepta un tiquet `closed` o uno `attended` con
+validación del solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos
+veces el mismo rol en el ciclo también responde 409. `open_claim` responde 409 cuando lo intenta el
+solicitante que ya validó su lado, incluso después del cierre.
 
 `validate`, `rate`, `open_claim` y `cancel` aceptan `subjectRequesterId`. Si viene, debe ser el
 solicitante del tiquet y exige el permiso `*_on_behalf` correspondiente; la acción se registra a su
@@ -94,11 +95,19 @@ evento valida que la nueva hora quede entre el evento anterior y el siguiente, d
 reconstruye los tramos del tiquet. En la sincronización offline, `manualTime: true` exige permiso
 para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
 
+Si el solicitante del alta tiene dependencia, `dependencyId` debe ser esa dependencia y la
+`locationId` debe estar vinculada a ella; si no coincide, la API responde 400. En `recapture` la
+misma regla se aplica a la dependencia del solicitante del tiquet cuando el cambio incluye
+edificio, ubicación o dependencia; los cambios solo de texto siguen permitidos para tiquets
+históricos.
+
 ## Catálogos y evidencias
 
 | Método | Ruta | Uso |
 |---|---|---|
 | `GET` | `/api/catalogs/:catalog` | Catálogos de lectura |
+| `GET` | `/api/catalogs/buildings?dependencyId=…` | Edificios con ubicaciones de la dependencia |
+| `GET` | `/api/catalogs/locations?buildingId=…&dependencyId=…` | Ubicaciones del edificio vinculadas a la dependencia |
 | `GET` | `/api/catalogs/dependencies?locationId=…` | Dependencias vinculadas a la ubicación |
 | `POST` | `/api/tickets/:id/evidence` | Reservar evidencia y obtener URL TUS |
 | `GET` | `/api/tickets/:id/evidence` | Listar evidencias |

@@ -290,6 +290,12 @@ puede, precondiciones y efectos.
 - **RN-30 Reactivación.** Un administrador puede reactivar un tiquet en estado final de descarte
   (`rejected`, `cancelled` o `duplicate`), con motivo; queda en el historial y se evalúa cómo se tratan
   sus tiempos.
+- **RN-31 Ámbito de ubicaciones por dependencia.** Si el solicitante tiene dependencia, el alta solo
+  ofrece los edificios con ubicaciones vinculadas a esa dependencia y solo esas ubicaciones; la
+  dependencia queda fija y el servidor rechaza una combinación fuera de ella. Si el solicitante no
+  tiene dependencia, no se aplica restricción. En la recaptura se usa la dependencia del solicitante
+  del tiquet y la restricción solo valida cuando cambia el lugar, para no impedir correcciones de
+  texto en capturas históricas.
 
 ## 6. Catálogos configurables
 
