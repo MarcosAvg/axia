@@ -21,7 +21,8 @@ const staleTime = 5 * 60 * 1000
 const catalogKeys = {
   teams: ['catalogs', 'teams'] as const,
   technicians: ['catalogs', 'technicians'] as const,
-  buildings: ['catalogs', 'buildings'] as const,
+  buildings: (dependencyId: string) =>
+    ['catalogs', 'buildings', dependencyId] as const,
   dependencies: (locationId: string) =>
     ['catalogs', 'dependencies', locationId] as const,
   serviceTypes: ['catalogs', 'serviceTypes'] as const,
@@ -29,8 +30,8 @@ const catalogKeys = {
   priorities: ['catalogs', 'priorities'] as const,
   categories: ['catalogs', 'categories'] as const,
   requesters: ['catalogs', 'requesters'] as const,
-  locations: (buildingId: string) =>
-    ['catalogs', 'locations', buildingId] as const,
+  locations: (buildingId: string, dependencyId: string) =>
+    ['catalogs', 'locations', buildingId, dependencyId] as const,
   subcategories: (categoryId: string) =>
     ['catalogs', 'subcategories', categoryId] as const,
   problems: (subcategoryId: string) =>
@@ -62,10 +63,10 @@ export function useReasons(use: ReasonUse) {
   })
 }
 
-export function useBuildings() {
+export function useBuildings(dependencyId?: string) {
   return useQuery({
-    queryKey: catalogKeys.buildings,
-    queryFn: fetchBuildings,
+    queryKey: catalogKeys.buildings(dependencyId ?? ''),
+    queryFn: () => fetchBuildings(dependencyId),
     staleTime,
   })
 }
@@ -118,11 +119,16 @@ export function useRequesters() {
   })
 }
 
-export function useLocations(buildingId: string | undefined) {
+export function useLocations(
+  buildingId: string | undefined,
+  dependencyId?: string,
+) {
   return useQuery({
-    queryKey: catalogKeys.locations(buildingId ?? ''),
+    queryKey: catalogKeys.locations(buildingId ?? '', dependencyId ?? ''),
     queryFn: () =>
-      buildingId ? fetchLocations(buildingId) : Promise.resolve([]),
+      buildingId
+        ? fetchLocations(buildingId, dependencyId)
+        : Promise.resolve([]),
     enabled: Boolean(buildingId),
     staleTime,
   })

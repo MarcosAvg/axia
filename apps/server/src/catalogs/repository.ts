@@ -14,6 +14,7 @@ type RequesterOption = {
   fullName: string
   contact: string | null
   dependencyId: string | null
+  dependencyName: string | null
   userId: string | null
 }
 type TechnicianOption = {
@@ -84,7 +85,20 @@ async function listPriorities(db: Database): Promise<PriorityOption[]> {
 async function listLocations(
   db: Database,
   buildingId: string,
+  dependencyId?: string,
 ): Promise<LocationOption[]> {
+  if (dependencyId) {
+    const result = await db.execute(sql`
+      select distinct l.id, l.name, l.building_id as "buildingId"
+      from public.locations l
+      join public.dependency_locations dl on dl.location_id = l.id
+      where l.active
+        and l.building_id = ${buildingId}
+        and dl.dependency_id = ${dependencyId}
+      order by l.name
+    `)
+    return result.rows as LocationOption[]
+  }
   const result = await db.execute(sql`
     select id, name, building_id as "buildingId"
     from public.locations
@@ -92,6 +106,22 @@ async function listLocations(
     order by name
   `)
   return result.rows as LocationOption[]
+}
+
+async function listBuildings(
+  db: Database,
+  dependencyId?: string,
+): Promise<SimpleOption[]> {
+  if (!dependencyId) return listOptions(db, 'buildings')
+  const result = await db.execute(sql`
+    select distinct b.id, b.name
+    from public.buildings b
+    join public.locations l on l.building_id = b.id and l.active
+    join public.dependency_locations dl on dl.location_id = l.id
+    where b.active and dl.dependency_id = ${dependencyId}
+    order by b.name
+  `)
+  return result.rows as SimpleOption[]
 }
 
 async function listCategories(db: Database): Promise<CategoryOption[]> {
@@ -133,14 +163,16 @@ async function listProblems(
 async function listRequesters(db: Database): Promise<RequesterOption[]> {
   const result = await db.execute(sql`
     select
-      id,
-      full_name as "fullName",
-      contact,
-      dependency_id as "dependencyId",
-      user_id as "userId"
-    from public.requesters
-    where active
-    order by full_name
+      r.id,
+      r.full_name as "fullName",
+      r.contact,
+      r.dependency_id as "dependencyId",
+      d.name as "dependencyName",
+      r.user_id as "userId"
+    from public.requesters r
+    left join public.dependencies d on d.id = r.dependency_id
+    where r.active
+    order by r.full_name
   `)
   return result.rows as RequesterOption[]
 }
@@ -176,7 +208,6 @@ async function listReasons(db: Database, use: string): Promise<ReasonOption[]> {
 
 const SIMPLE_TABLES: Partial<Record<CatalogName, OptionTable>> = {
   teams: 'teams',
-  buildings: 'buildings',
   'service-types': 'service_types',
   channels: 'channels',
 }
@@ -198,7 +229,9 @@ async function listScopedCatalog(
   query: CatalogQuery,
 ): Promise<CatalogItem[] | null> {
   if (name === 'locations') {
-    return query.buildingId ? listLocations(db, query.buildingId) : []
+    return query.buildingId
+      ? listLocations(db, query.buildingId, query.dependencyId)
+      : []
   }
   if (name === 'subcategories') {
     return query.categoryId ? listSubcategories(db, query.categoryId) : []
@@ -217,6 +250,7 @@ export async function listCatalog(
   name: CatalogName,
   query: CatalogQuery,
 ): Promise<CatalogItem[]> {
+  if (name === 'buildings') return listBuildings(db, query.dependencyId)
   if (name === 'dependencies') return listDependencies(db, query.locationId)
   const table = SIMPLE_TABLES[name]
   if (table) return listOptions(db, table)

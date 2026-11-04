@@ -22,6 +22,7 @@ export interface RequesterOption {
   fullName: string
   contact: string | null
   dependencyId: string | null
+  dependencyName: string | null
   userId: string | null
 }
 

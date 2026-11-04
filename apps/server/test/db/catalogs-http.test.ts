@@ -12,6 +12,7 @@ type ItemsBody = { items: Array<Record<string, unknown>> }
 
 let context: TicketHttpContext
 let buildingA1: string
+let buildingB1: string
 let categoryA: string
 
 async function get(path: string, cookie?: string) {
@@ -28,6 +29,10 @@ beforeAll(async () => {
     sql`select id from public.buildings where name = 'Edificio A1'`,
   )
   buildingA1 = (building.rows[0] as { id: string }).id
+  const otherBuilding = await context.db.execute(
+    sql`select id from public.buildings where name = 'Edificio B1'`,
+  )
+  buildingB1 = (otherBuilding.rows[0] as { id: string }).id
   const category = await context.db.execute(
     sql`select id from public.categories where name = 'Categoría A'`,
   )
@@ -73,6 +78,46 @@ describe('catalog reads', () => {
 })
 
 describe('dependent catalogs', () => {
+  it('limits buildings and locations to the dependency links', async () => {
+    const inserted = await context.db.execute(sql`
+      insert into public.dependencies (name)
+      values ('Dependencia solo A1') returning id
+    `)
+    const dependencyId = (inserted.rows[0] as { id: string }).id
+    await context.db.execute(sql`
+      insert into public.dependency_locations (dependency_id, location_id)
+      values (
+        ${dependencyId},
+        (select id from public.locations where name = 'Sala A1')
+      )
+    `)
+
+    const buildings = await get(
+      `/api/catalogs/buildings?dependencyId=${dependencyId}`,
+      context.cookies.requester,
+    )
+    expect(buildings.statusCode).toBe(200)
+    expect(
+      (buildings.json() as ItemsBody).items.map((item) => item.name),
+    ).toEqual(['Edificio A1'])
+
+    const locations = await get(
+      `/api/catalogs/locations?buildingId=${buildingA1}&dependencyId=${dependencyId}`,
+      context.cookies.requester,
+    )
+    expect(locations.statusCode).toBe(200)
+    expect(
+      (locations.json() as ItemsBody).items.map((item) => item.name),
+    ).toEqual(['Sala A1'])
+
+    const otherBuilding = await get(
+      `/api/catalogs/locations?buildingId=${buildingB1}&dependencyId=${dependencyId}`,
+      context.cookies.requester,
+    )
+    expect(otherBuilding.statusCode).toBe(200)
+    expect((otherBuilding.json() as ItemsBody).items).toEqual([])
+  })
+
   it('returns dependent catalogs and requires their parent', async () => {
     const { cookies } = context
     const locations = await get(

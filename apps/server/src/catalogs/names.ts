@@ -36,5 +36,6 @@ export type CatalogQuery = {
   categoryId?: string
   subcategoryId?: string
   locationId?: string
+  dependencyId?: string
   use?: ReasonUse
 }

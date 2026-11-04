@@ -17,8 +17,12 @@ async function fetchCatalog<T>(path: string): Promise<T[]> {
 }
 
 export const fetchTeams = () => fetchCatalog<Option>('/api/catalogs/teams')
-export const fetchBuildings = () =>
-  fetchCatalog<Option>('/api/catalogs/buildings')
+export function fetchBuildings(dependencyId?: string) {
+  const query = dependencyId
+    ? `?dependencyId=${encodeURIComponent(dependencyId)}`
+    : ''
+  return fetchCatalog<Option>(`/api/catalogs/buildings${query}`)
+}
 export function fetchDependencies(locationId?: string) {
   const query = locationId
     ? `?locationId=${encodeURIComponent(locationId)}`
@@ -38,9 +42,12 @@ export const fetchRequesters = () =>
 export const fetchTechnicians = () =>
   fetchCatalog<TechnicianOption>('/api/catalogs/technicians')
 
-export function fetchLocations(buildingId: string) {
+export function fetchLocations(buildingId: string, dependencyId?: string) {
+  const dependency = dependencyId
+    ? `&dependencyId=${encodeURIComponent(dependencyId)}`
+    : ''
   return fetchCatalog<LocationOption>(
-    `/api/catalogs/locations?buildingId=${encodeURIComponent(buildingId)}`,
+    `/api/catalogs/locations?buildingId=${encodeURIComponent(buildingId)}${dependency}`,
   )
 }
 
