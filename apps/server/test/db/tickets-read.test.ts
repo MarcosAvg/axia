@@ -38,7 +38,9 @@ describe('ticket detail', () => {
       teamName: 'Equipo A',
     })
   })
+})
 
+describe('ticket detail cycle times', () => {
   it('returns the time of each cycle phase in minutes', async () => {
     const { db, actors, ids } = fixtures
     await db.execute(sql`
@@ -80,7 +82,9 @@ describe('ticket detail', () => {
     expect(ticket?.cycleTimes.validation).toBeCloseTo(30, 0)
     expect(ticket?.cycleTimes.total).toBeCloseTo(180, 0)
   })
+})
 
+describe('ticket detail scope', () => {
   it('returns null when the ticket is outside the actor scope', async () => {
     const { db, actors, ids } = fixtures
     expect(

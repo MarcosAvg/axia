@@ -2,7 +2,7 @@
 
 import { outcomeMessages } from './dimension-labels'
 
-export { dimensionLabels, outcomeMessages } from './dimension-labels'
+export { dimensionLabels } from './dimension-labels'
 
 export const metricsMessages = {
   title: 'Métricas',

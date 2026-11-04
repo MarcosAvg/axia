@@ -166,6 +166,7 @@ declare
   v_role text;
   v_clock public.clock_class;
   v_open_subject uuid;
+  v_open_kind public.time_span_kind;
   v_prev timestamptz;
   v_status public.ticket_status;
   v_reason uuid;
@@ -475,18 +476,42 @@ begin
     );
 
   elsif p_event.type = 'capture_recaptured' then
-    perform public.close_primary_phase(
-      p_event.ticket_id, p_event.occurred_at
-    );
-    perform public.open_phase_for_status(
-      p_event.ticket_id,
-      case
-        when p_event.payload ? 'teamId' or p_event.payload ? 'buildingId'
-          then 'registered'::public.ticket_status
-        else v_status
-      end,
-      p_event.occurred_at
-    );
+    if p_event.payload ? 'teamId' or p_event.payload ? 'buildingId' then
+      perform public.close_primary_phase(
+        p_event.ticket_id, p_event.occurred_at
+      );
+      perform public.open_phase_for_status(
+        p_event.ticket_id, 'registered', p_event.occurred_at
+      );
+    elsif p_event.payload ? 'categoryId' then
+      select ts.kind into v_open_kind
+      from public.time_spans ts
+      where ts.ticket_id = p_event.ticket_id
+        and ts.ended_at is null
+        and ts.voided_at is null
+        and ts.kind in (
+          'supervisor_response', 'pending_take', 'technician_assignment',
+          'wait_start', 'active_work', 'pause', 'validation', 'claim'
+        )
+      order by ts.started_at desc
+      limit 1;
+      perform public.close_primary_phase(
+        p_event.ticket_id, p_event.occurred_at
+      );
+      perform public.open_phase_for_status(
+        p_event.ticket_id,
+        case v_open_kind
+          when 'technician_assignment' then 'with_supervisor'::public.ticket_status
+          when 'wait_start' then 'assigned'::public.ticket_status
+          when 'active_work' then 'in_progress'::public.ticket_status
+          when 'pause' then 'paused'::public.ticket_status
+          when 'validation' then 'attended'::public.ticket_status
+          when 'claim' then 'under_claim'::public.ticket_status
+          else 'registered'::public.ticket_status
+        end,
+        p_event.occurred_at
+      );
+    end if;
 
   elsif p_event.type = 'evidence_added'
     and (p_event.payload->>'type') in ('before', 'during', 'after')

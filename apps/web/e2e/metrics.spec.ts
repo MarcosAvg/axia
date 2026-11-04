@@ -62,6 +62,16 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await expect(
     page.getByRole('button', { name: 'Quitar Edificio Central' }),
   ).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page
+    .getByRole('combobox', { name: 'Desenlace' })
+    .selectOption({ label: 'Cancelados' })
+  await page.keyboard.press('Escape')
+  await expect(
+    page.getByRole('button', { name: 'Quitar Cancelados' }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Quitar Cancelados' }).click()
 })
 
 test('alterna la vista de tiempos entre promedio y acumulado', async ({
@@ -77,6 +87,7 @@ test('alterna la vista de tiempos entre promedio y acumulado', async ({
   await expect(
     page.getByText('Trabajo activo', { exact: true }).first(),
   ).toBeVisible()
+  await expect(page.getByText('Sin clasificar')).toHaveCount(0)
   await page.getByRole('button', { name: 'Acumulado' }).click()
   await expect(
     page.getByText('Trabajo activo (acumulado)').first(),

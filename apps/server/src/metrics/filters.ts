@@ -1,5 +1,4 @@
-export type MetricsOutcome =
-  'open' | 'closed' | 'rejected' | 'cancelled' | 'duplicate'
+type MetricsOutcome = 'open' | 'closed' | 'rejected' | 'cancelled' | 'duplicate'
 
 export type MetricsFilters = {
   from?: string
