@@ -5,6 +5,29 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## Tarea integrada: avisos diversos y badges de bandeja
+
+- El catálogo de avisos suma 15 reglas para eventos existentes: reasignación de supervisor y técnico,
+  apoyo auxiliar, recaptura, prioridad, atendido pendiente de validación, validación, reclamación
+  resuelta, reapertura, reactivación y calificación. `notify_event()` no avisa al actor de su propia
+  acción. La migración 0029 añade la regla `subject_technician` y reemplaza la función.
+- `GET /api/notifications` enriquece cada aviso con autor, motivo y contexto del tiquet. El texto se
+  compone en el dominio web (`notificationCopy`) y la lista muestra título y detalle.
+- `GET /api/tickets/attention` devuelve ofertas pendientes y trabajo activo; sidebar y barra móvil
+  muestran el badge con el conteo y una etiqueta accesible. Decisión en el
+  [ADR 0120](../decisions/0120-avisos-diversos-y-badges.md).
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: lint y tipos en verde; 64 pruebas de servidor y 420 de web.
+- `pnpm db:test`: 53 archivos y 369 pruebas en verde, incluida la migración 0029.
+- `pnpm test:e2e:smoke`: 19/19 en verde; el smoke de toma de oferta comprueba el badge de Bandeja.
+- `CI=1 AXIA_ENV_FILE=/dev/null pnpm check`: código 0; estáticos, unitarias, 60 pruebas de navegador
+  (3 reintentos por timeouts de inicio de sesión), compilador, PostgreSQL y build. Persiste el aviso
+  previo de chunks >500 kB.
+- Documentación: 57 archivos, 0 enlaces rotos; agnóstico 887 archivos, 0 coincidencias; fronteras y
+  knip en verde.
+
 ## v0.14.1 publicada
 
 - Etiqueta `v0.14.1` creada desde `main` en `830da9b`. Workflow

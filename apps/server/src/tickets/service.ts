@@ -1,4 +1,4 @@
-import type { Actor } from '../auth/authorization.js'
+import { can as hasPermission, type Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { runTicketAction } from './actions.js'
 import { createTicket } from './create.js'
@@ -17,6 +17,7 @@ import {
   type DuplicateCheckInput,
 } from './duplicates.js'
 import {
+  countTickets,
   getTimeline,
   listTickets,
   type ListTicketsOptions,
@@ -27,6 +28,21 @@ import { listSupervisors } from './supervisors.js'
 
 function emptyPage(page: number, pageSize: number): TicketPage {
   return { items: [], total: 0, page, pageSize }
+}
+
+async function attentionCounts(db: Database, actor: Actor) {
+  const [offers, myWork] = await Promise.all([
+    hasPermission(actor, 'ticket.take_offer')
+      ? countTickets(db, actor, { offerSupervisorUserId: actor.id })
+      : Promise.resolve(0),
+    actor.technicianId
+      ? countTickets(db, actor, {
+          assigneeTechnicianId: actor.technicianId,
+          excludeFinal: true,
+        })
+      : Promise.resolve(0),
+  ])
+  return { offers, myWork }
 }
 
 export function createTicketService(db: Database) {
@@ -73,6 +89,7 @@ export function createTicketService(db: Database) {
         page,
         pageSize,
       }),
+    attention: (actor: Actor) => attentionCounts(db, actor),
     supervisors: (actor: Actor) => listSupervisors(db, actor),
     create: (actor: Actor, input: CreateTicketInput) =>
       createTicket(db, actor, input),

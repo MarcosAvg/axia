@@ -213,6 +213,25 @@ export async function listTickets(
   }
 }
 
+/** Conteo con los mismos filtros y alcance que las listas. */
+export async function countTickets(
+  db: Database,
+  actor: Actor,
+  filters: TicketFilters,
+): Promise<number> {
+  const where = sql.join(
+    [scopePredicate(actor, 'ticket.view'), ...filterConditions(filters)],
+    sql` and `,
+  )
+  const result = await db.execute(sql`
+    select count(*)::int as total
+    from public.tickets t
+    join public.requesters r on r.id = t.requester_id
+    where ${where}
+  `)
+  return (result.rows[0] as { total: number } | undefined)?.total ?? 0
+}
+
 export async function getTimeline(
   db: Database,
   actor: Actor,

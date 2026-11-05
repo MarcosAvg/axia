@@ -83,6 +83,12 @@ function registerWorklistRoutes(
   guards: TicketGuards,
 ) {
   app.get(
+    '/api/tickets/attention',
+    { preHandler: guards.canView },
+    async (request) => tickets.attention(currentActor(request)),
+  )
+
+  app.get(
     '/api/tickets/mine',
     { preHandler: guards.canView },
     async (request) => {

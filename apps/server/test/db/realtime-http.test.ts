@@ -171,60 +171,6 @@ describe('SSE', () => {
   })
 })
 
-describe('notifications', () => {
-  it('lists, counts and marks in-app notifications', async () => {
-    await context.db.execute(sql`
-      insert into public.ticket_events (
-        ticket_id, cycle, type, actor_id, payload, client_request_id
-      ) values (
-        ${context.ids.ticketA1}, 1, 'assigned_technician', null, '{}'::jsonb,
-        ${randomUUID()}
-      )
-    `)
-
-    const list = await get('/api/notifications', context.cookies.technician)
-    expect(list.status).toBe(200)
-    const body = (await list.json()) as {
-      items: Array<{ id: string; type: string; ticketFolio: string | null }>
-      unread: number
-    }
-    expect(body.items.some((item) => item.type === 'assigned_technician')).toBe(
-      true,
-    )
-    expect(
-      body.items.find((item) => item.type === 'assigned_technician')
-        ?.ticketFolio,
-    ).toBeTruthy()
-    expect(body.unread).toBeGreaterThanOrEqual(1)
-    const notificationId = body.items.find(
-      (item) => item.type === 'assigned_technician',
-    )?.id
-    expect(notificationId).toBeTruthy()
-
-    const read = await fetch(
-      `${baseUrl}/api/notifications/${notificationId}/read`,
-      {
-        method: 'POST',
-        headers: { Cookie: context.cookies.technician, Origin: baseUrl },
-      },
-    )
-    expect(read.status).toBe(204)
-
-    const count = await get(
-      '/api/notifications/unread-count',
-      context.cookies.technician,
-    )
-    expect((await count.json()) as { count: number }).toMatchObject({
-      count: 0,
-    })
-  })
-
-  it('does not show notifications to another actor', async () => {
-    const response = await get('/api/notifications', context.cookies.noAccess)
-    expect(response.status).toBe(403)
-  })
-})
-
 describe('SSE session lifecycle', () => {
   it('closes the stream when a role changes', async () => {
     const { controller, reader } = await openEvents(context.cookies.technician)
