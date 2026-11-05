@@ -32,7 +32,7 @@
 ### Task 1: Función SQL portable y permisos
 
 **Files:**
-- Create: `apps/server/db/migrations/0028_orden_natural_nombres.sql`
+- Create: `apps/server/db/migrations/0028_natural_sort_key.sql`
 - Modify: `apps/server/test/db/migration.test.ts`
 
 **Interfaces:**
@@ -113,7 +113,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/server/db/migrations/0028_orden_natural_nombres.sql apps/server/test/db/migration.test.ts
+git add apps/server/db/migrations/0028_natural_sort_key.sql apps/server/test/db/migration.test.ts
 git commit -m "feat(db): add portable natural sort key"
 ```
 

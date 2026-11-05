@@ -1,4 +1,5 @@
 -- Orden natural portable: los tramos numéricos se comparan como números.
+-- El relleno cubre hasta 20 dígitos; los tramos mayores no son nombres de catálogo.
 create function public.natural_sort_key(value text)
 returns text
 language sql

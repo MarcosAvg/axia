@@ -31,5 +31,9 @@ El coste es que la expresión de orden no puede usar un índice sobre el nombre 
 en memoria. Los catálogos son pequeños y la comodidad de una regla única pesa más. Si en el futuro
 una lista crece hasta necesitar índice, se puede añadir un índice de expresión sobre la función.
 
+El relleno normaliza tramos de hasta 20 dígitos, suficiente para nombres de catálogo. Un tramo
+mayor se compara por su longitud literal y queda fuera del caso de uso; si alguna vez aparece, la
+función puede ampliarse con una clave prefijada por longitud.
+
 Para revertir el cambio basta con retirar las llamadas a `natural_sort_key` de las consultas y
 eliminar la migración en una instancia nueva; no se modifica ningún dato.
