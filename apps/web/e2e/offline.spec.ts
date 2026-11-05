@@ -113,7 +113,10 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   await expect.poll(() => ticketActionCount(page)).toBe(1)
 
   // La lista también refleja el estado proyectado y su marca de pendiente.
-  await page.getByRole('link', { name: 'Mi trabajo' }).first().click()
+  await page
+    .getByRole('link', { name: /^Mi trabajo/ })
+    .first()
+    .click()
   const card = page.getByRole('listitem').filter({ hasText: description })
   await expect(card.getByText('En proceso', { exact: true })).toBeVisible()
   await expect(card.getByText('Sin sincronizar')).toBeVisible()

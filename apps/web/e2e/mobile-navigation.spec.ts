@@ -21,11 +21,11 @@ test('la barra inferior navega y deja el resto en Más', async ({ page }) => {
   const tabbar = page.getByRole('navigation', { name: 'Navegación inferior' })
   await expect(tabbar).toBeVisible()
   await expect(tabbar.getByRole('link')).toHaveCount(3)
-  await expect(tabbar.getByRole('link', { name: 'Mi trabajo' })).toBeVisible()
+  await expect(tabbar.getByRole('link', { name: /^Mi trabajo/ })).toBeVisible()
 
-  await tabbar.getByRole('link', { name: 'Tiquets' }).click()
+  await tabbar.getByRole('link', { name: /^Tiquets/ }).click()
   await expect(page).toHaveURL(/\/tickets/)
-  await expect(tabbar.getByRole('link', { name: 'Tiquets' })).toHaveAttribute(
+  await expect(tabbar.getByRole('link', { name: /^Tiquets/ })).toHaveAttribute(
     'aria-current',
     'page',
   )
@@ -43,8 +43,8 @@ test('el administrador cambia Mi trabajo por Métricas', async ({ page }) => {
   await signIn(page, 'demo.admin')
 
   const tabbar = page.getByRole('navigation', { name: 'Navegación inferior' })
-  await expect(tabbar.getByRole('link', { name: 'Métricas' })).toBeVisible()
-  await expect(tabbar.getByRole('link', { name: 'Mi trabajo' })).toHaveCount(0)
+  await expect(tabbar.getByRole('link', { name: /^Métricas/ })).toBeVisible()
+  await expect(tabbar.getByRole('link', { name: /^Mi trabajo/ })).toHaveCount(0)
 })
 
 test('el detalle cambia la barra inferior por la acción fija', async ({

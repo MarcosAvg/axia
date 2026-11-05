@@ -10,6 +10,7 @@ import {
   checkDuplicates,
   createTicket,
   dismissDuplicateAlerts,
+  fetchAttentionCounts,
   fetchDuplicateAlerts,
   fetchEvidence,
   fetchMyOffers,
@@ -33,6 +34,7 @@ const ticketKeys = {
     ['tickets', 'list', filters, page] as const,
   myWork: (userId: string) => ['tickets', 'my-work', userId] as const,
   myOffers: (userId: string) => ['tickets', 'my-offers', userId] as const,
+  attention: ['tickets', 'attention'] as const,
   detail: (id: string) => ['tickets', 'detail', id] as const,
   timeline: (id: string) => ['tickets', 'timeline', id] as const,
   participants: (id: string) => ['tickets', 'participants', id] as const,
@@ -169,6 +171,15 @@ export function useMyOffers(userId: string | undefined, enabled = true) {
     queryKey: ticketKeys.myOffers(userId ?? ''),
     queryFn: () => (userId ? fetchMyOffers(userId) : Promise.resolve([])),
     enabled: Boolean(userId) && enabled,
+  })
+}
+
+export function useAttentionCounts(enabled = true) {
+  return useQuery({
+    queryKey: ticketKeys.attention,
+    queryFn: fetchAttentionCounts,
+    enabled,
+    staleTime: 30 * 1000,
   })
 }
 

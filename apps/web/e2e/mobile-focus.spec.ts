@@ -20,7 +20,7 @@ test('el panel móvil del técnico prioriza su trabajo y oculta análisis', asyn
   await signIn(page, 'demo.technician')
 
   await expect(
-    page.getByRole('link', { name: 'Mi trabajo' }).first(),
+    page.getByRole('link', { name: /^Mi trabajo/ }).first(),
   ).toBeVisible()
   await expect(page.getByText('Tiquets por mes')).toHaveCount(0)
 })

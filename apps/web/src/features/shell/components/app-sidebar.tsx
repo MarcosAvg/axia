@@ -11,15 +11,18 @@ import { ToneDot } from '@/components/shared/tone'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { messages } from '@/lib/i18n'
 import { toneForId } from '@/lib/tones'
-import { useAuth } from '@/features/auth'
+import { can, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
+import { useAttentionCounts } from '@/features/tickets'
 import { shellMessages } from '../i18n'
+import { NavBadge, navBadgeCount, navBadgeLabel } from './nav-badge'
 import { NavDestination } from './nav-destination'
 import { isNavItemVisible, NAV_SECTIONS } from './nav-items'
 import type { NavItem, NavSection } from './nav-items'
 
 interface NavLinkProps {
   item: NavItem
+  badge: number
   collapsed: boolean
   onNavigate?: () => void
 }
@@ -30,18 +33,29 @@ const expandedClass =
 const collapsedClass =
   'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[current=page]:bg-sidebar-accent aria-[current=page]:text-sidebar-accent-foreground'
 
-function NavLink({ item, collapsed, onNavigate }: NavLinkProps) {
+function NavLink({ item, badge, collapsed, onNavigate }: NavLinkProps) {
   const Icon: LucideIcon = item.icon
   const className = collapsed ? collapsedClass : expandedClass
   const content = (
     <>
-      <Icon className="size-4 shrink-0" />
+      <span className="relative flex shrink-0 items-center justify-center">
+        <Icon className="size-4 shrink-0" />
+        {collapsed ? (
+          <NavBadge count={badge} className="absolute -top-1.5 -right-2" />
+        ) : null}
+      </span>
       <span className={collapsed ? 'sr-only' : 'truncate'}>{item.label}</span>
+      {collapsed ? null : <NavBadge count={badge} className="ml-auto" />}
     </>
   )
 
   const link = (
-    <NavDestination item={item} className={className} onNavigate={onNavigate}>
+    <NavDestination
+      item={item}
+      className={className}
+      onNavigate={onNavigate}
+      ariaLabel={navBadgeLabel(item.label, badge) ?? undefined}
+    >
       {content}
     </NavDestination>
   )
@@ -61,12 +75,14 @@ function SectionLinks({
   collapsed,
   identity,
   mobile,
+  badgeFor,
   onNavigate,
 }: {
   section: NavSection
   collapsed: boolean
   identity: Identity | null
   mobile: boolean
+  badgeFor: (id: string) => number
   onNavigate?: () => void
 }) {
   const items = section.items.filter((item) =>
@@ -89,6 +105,7 @@ function SectionLinks({
         <NavLink
           key={item.id}
           item={item}
+          badge={badgeFor(item.id)}
           collapsed={collapsed}
           onNavigate={onNavigate}
         />
@@ -105,6 +122,44 @@ interface AppSidebarProps {
   mobile?: boolean
 }
 
+function SidebarHeader({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean
+  onToggle?: () => void
+}) {
+  return (
+    <div
+      className={cn(
+        'flex h-14 items-center border-b border-sidebar-border px-3',
+        collapsed ? 'justify-center' : 'justify-between',
+      )}
+    >
+      {!collapsed ? (
+        <span className="px-1 text-lg font-semibold tracking-tight">
+          {shellMessages.brand}
+        </span>
+      ) : null}
+      {onToggle ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={
+            collapsed
+              ? shellMessages.sidebar.expand
+              : shellMessages.sidebar.collapse
+          }
+          onClick={onToggle}
+        >
+          <PanelLeftIcon />
+        </Button>
+      ) : null}
+    </div>
+  )
+}
+
 /** Navegación lateral por áreas. Colapsable en escritorio, embebible en un cajón. */
 export function AppSidebar({
   collapsed = false,
@@ -113,36 +168,12 @@ export function AppSidebar({
   mobile = false,
 }: AppSidebarProps) {
   const { identity } = useAuth()
+  const { data: attention } = useAttentionCounts(can(identity, 'ticket.view'))
+  const badgeFor = (id: string) => navBadgeCount(id, attention)
 
   return (
     <div className="flex h-full flex-col gap-1 border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <div
-        className={cn(
-          'flex h-14 items-center border-b border-sidebar-border px-3',
-          collapsed ? 'justify-center' : 'justify-between',
-        )}
-      >
-        {!collapsed ? (
-          <span className="px-1 text-lg font-semibold tracking-tight">
-            {shellMessages.brand}
-          </span>
-        ) : null}
-        {onToggle ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={
-              collapsed
-                ? shellMessages.sidebar.expand
-                : shellMessages.sidebar.collapse
-            }
-            onClick={onToggle}
-          >
-            <PanelLeftIcon />
-          </Button>
-        ) : null}
-      </div>
+      <SidebarHeader collapsed={collapsed} onToggle={onToggle} />
       <nav
         aria-label={shellMessages.nav.label}
         className="flex-1 overflow-y-auto px-2 pb-4"
@@ -154,6 +185,7 @@ export function AppSidebar({
             collapsed={collapsed}
             identity={identity}
             mobile={mobile}
+            badgeFor={badgeFor}
             onNavigate={onNavigate}
           />
         ))}

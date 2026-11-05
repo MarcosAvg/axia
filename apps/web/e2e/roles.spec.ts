@@ -46,7 +46,12 @@ test.describe('vistas por rol', () => {
 
       const labels = await page
         .locator('nav[aria-label="Navegación principal"] a')
-        .allInnerTexts()
+        .evaluateAll((links) =>
+          links.map((link) => {
+            const label = link.getAttribute('aria-label')
+            return label ? label.split(',')[0] : (link.textContent ?? '').trim()
+          }),
+        )
       expect(labels).toEqual(EXPECTED_NAV[username])
 
       await page.waitForTimeout(800)

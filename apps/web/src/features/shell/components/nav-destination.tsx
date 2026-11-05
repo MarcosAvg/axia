@@ -6,6 +6,7 @@ interface NavDestinationProps {
   item: NavItem
   className?: string
   onNavigate?: () => void
+  ariaLabel?: string
   children: ReactNode
 }
 
@@ -14,11 +15,13 @@ export function NavDestination({
   item,
   className,
   onNavigate,
+  ariaLabel,
   children,
 }: NavDestinationProps) {
   const shared = {
     className,
     onClick: onNavigate,
+    'aria-label': ariaLabel,
   }
 
   if (item.kind === 'tickets') {

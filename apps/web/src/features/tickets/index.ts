@@ -7,11 +7,13 @@ export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
 export { TicketStatusSummary } from './components/ticket-status-summary'
 export {
+  useAttentionCounts,
   useMyOffers,
   useMyWork,
   useTicketSearchByFolio,
   useTicketsList,
 } from './hooks/use-tickets'
+export type { AttentionCounts } from './api/tickets-api'
 export type { TicketListItem } from './domain/types'
 export { ticketMessages, statusLabels, eventLabels } from './i18n'
 export { EVENT_TYPES } from './domain/types'

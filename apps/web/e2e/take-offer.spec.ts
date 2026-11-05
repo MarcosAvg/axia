@@ -41,6 +41,12 @@ test('@smoke el supervisor toma la oferta al pulsar Tomar tiquet', async ({
 
   await signOut(page)
   await signIn(page, 'demo.supervisor')
+
+  // El aviso de la oferta se refleja en el badge de Bandeja.
+  await expect(
+    page.getByRole('link', { name: /^Bandeja, \d+ pendiente/ }).first(),
+  ).toBeVisible()
+
   await page.goto(ticketUrl)
 
   // La oferta se muestra como una acción explícita; no se toma al abrir.

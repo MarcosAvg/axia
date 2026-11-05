@@ -221,6 +221,15 @@ export async function dismissDuplicateAlerts(ticketId: string): Promise<void> {
   })
 }
 
+export interface AttentionCounts {
+  offers: number
+  myWork: number
+}
+
+export async function fetchAttentionCounts(): Promise<AttentionCounts> {
+  return apiFetch<AttentionCounts>('/api/tickets/attention')
+}
+
 export async function fetchMyWork(_userId: string): Promise<TicketListItem[]> {
   void _userId
   const body = ticketItemsResponseSchema.parse(

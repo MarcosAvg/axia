@@ -3,20 +3,24 @@ import { CheckIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
 import type { NotificationItem } from '../domain/notification'
-import { notificationLabel } from '../domain/notification'
+import { notificationCopy, notificationLabel } from '../domain/notification'
 import { notificationMessages } from '../i18n'
 
 function NotificationBody({ item }: { item: NotificationItem }) {
+  const copy = notificationCopy(item)
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-        <span className="font-medium">{notificationLabel(item.type)}</span>
+        <span className="font-medium">{copy.title}</span>
         {item.ticketFolio ? (
           <span className="text-sm text-muted-foreground">
             {item.ticketFolio}
           </span>
         ) : null}
       </div>
+      {copy.detail ? (
+        <span className="text-sm text-muted-foreground">{copy.detail}</span>
+      ) : null}
       <span className="text-xs text-muted-foreground">
         {formatDateTime(item.createdAt)}
       </span>
