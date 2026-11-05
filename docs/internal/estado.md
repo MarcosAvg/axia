@@ -5,6 +5,20 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## v0.15.0 publicada
+
+- Etiqueta `v0.15.0` creada desde `main` en `f32af20`. Workflow
+  [42125937640](https://github.com/MarcosAvg/axia/actions/runs/42125937640): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.15.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:f32af2087b606924ba439e8cbb66aed5394d98f7`, digest
+  `sha256:1540d03cb60815f24362e0a583db0736b3164b3a2d5c4de6792e25685f02974e`.
+- [Release v0.15.0](https://github.com/MarcosAvg/axia/releases/tag/v0.15.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `989c1fd25417c37c1a77a6e1c42826384fffc47477bf7415a1d0e446c896cb58`)
+  y su `.sha256`.
+- Incluye los avisos diversos, el texto enriquecido y los badges de bandeja (ADR 0120).
+
 ## Tarea integrada: avisos diversos y badges de bandeja
 
 - El catálogo de avisos suma 15 reglas para eventos existentes: reasignación de supervisor y técnico,
@@ -16,7 +30,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `GET /api/tickets/attention` devuelve ofertas pendientes y trabajo activo; sidebar y barra móvil
   muestran el badge con el conteo y una etiqueta accesible. Decisión en el
   [ADR 0120](../decisions/0120-avisos-diversos-y-badges.md).
-- Integrada a `main` por fast-forward en `3ad2528`.
+- Integrada a `main` por fast-forward en `3ad2528` y publicada en `v0.15.0`.
 
 ### Evidencia de esta tarea
 
