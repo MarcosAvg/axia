@@ -5,6 +5,20 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## v0.14.1 publicada
+
+- Etiqueta `v0.14.1` creada desde `main` en `830da9b`. Workflow
+  [42094338682](https://github.com/MarcosAvg/axia/actions/runs/42094338682): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.14.1`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:830da9b4a6fb3e8e042625ae5328959b51f5f53f`, digest
+  `sha256:f0bbafde9306270a2f9f0c4d7f5c610170c810e1eb82848b58baeccda3e73dbd`.
+- [Release v0.14.1](https://github.com/MarcosAvg/axia/releases/tag/v0.14.1) con
+  `axia-self-hosted.tar.gz` (SHA-256 `ec6709eb2a3ebe42624841f06eed534eb5d0ab9d60d5ebb5e50b8f972b440e58`)
+  y su `.sha256`.
+- Incluye la configuración guardable en la build compilada (ADR 0119).
+
 ## Tarea integrada: configuración guardable en la build
 
 - El botón Guardar de `/admin/configuracion` permanecía deshabilitado en la build publicada porque
@@ -15,7 +29,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión en el [ADR 0119](../decisions/0119-react-compiler-y-formularios.md). Se añadió
   `pnpm test:compiler`, que corre las pruebas del formulario con `AXIA_REACT_COMPILER=1` y forma
   parte de `pnpm check`.
-- Integrada a `main` por fast-forward en `a5d59d4`.
+- Integrada a `main` por fast-forward en `a5d59d4`. Publicada en `v0.14.1`; la etiqueta, imagen y
+  release se detallan arriba.
 
 ### Evidencia de esta tarea
 
