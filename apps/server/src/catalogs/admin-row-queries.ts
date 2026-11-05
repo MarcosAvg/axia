@@ -55,11 +55,14 @@ export const SELECTS: Record<AdminCatalogTable, SQL> = {
         join public.locations l on l.id = dl.location_id
         where dl.dependency_id = d.id) as buildings_count,
       coalesce((
-        select string_agg(distinct b.name, ', ' order by b.name)
-        from public.dependency_locations dl
-        join public.locations l on l.id = dl.location_id
-        join public.buildings b on b.id = l.building_id
-        where dl.dependency_id = d.id
+        select string_agg(name, ', ' order by public.natural_sort_key(name))
+        from (
+          select distinct b.name
+          from public.dependency_locations dl
+          join public.locations l on l.id = dl.location_id
+          join public.buildings b on b.id = l.building_id
+          where dl.dependency_id = d.id
+        ) names
       ), '') as building_names
     from public.dependencies d
   `,
@@ -158,7 +161,7 @@ export const SELECTS: Record<AdminCatalogTable, SQL> = {
       (select count(*)::int from public.technician_categories tc
         where tc.technician_id = t.id) as categories_count,
       coalesce((
-        select string_agg(c.name, ', ' order by c.name)
+        select string_agg(c.name, ', ' order by public.natural_sort_key(c.name))
         from public.technician_categories tc
         join public.categories c on c.id = tc.category_id
         where tc.technician_id = t.id

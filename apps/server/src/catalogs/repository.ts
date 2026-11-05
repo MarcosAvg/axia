@@ -52,7 +52,7 @@ async function listOptions(
     select id, name
     from ${sql.raw(`public.${table}`)}
     where active
-    order by name
+    order by public.natural_sort_key(name)
   `)
   return result.rows as SimpleOption[]
 }
@@ -67,7 +67,7 @@ async function listDependencies(
     from public.dependencies d
     join public.dependency_locations dl on dl.dependency_id = d.id
     where d.active and dl.location_id = ${locationId}
-    order by d.name
+    order by public.natural_sort_key(d.name)
   `)
   return result.rows as SimpleOption[]
 }
@@ -77,7 +77,7 @@ async function listPriorities(db: Database): Promise<PriorityOption[]> {
     select id, name, position
     from public.priorities
     where active
-    order by position, name
+    order by position, public.natural_sort_key(name)
   `)
   return result.rows as PriorityOption[]
 }
@@ -89,14 +89,17 @@ async function listLocations(
 ): Promise<LocationOption[]> {
   if (dependencyId) {
     const result = await db.execute(sql`
-      select distinct l.id, l.name, l.building_id as "buildingId"
-      from public.locations l
-      join public.dependency_locations dl on dl.location_id = l.id
-      join public.dependencies d on d.id = dl.dependency_id and d.active
-      where l.active
-        and l.building_id = ${buildingId}
-        and dl.dependency_id = ${dependencyId}
-      order by l.name
+      select id, name, "buildingId"
+      from (
+        select distinct l.id, l.name, l.building_id as "buildingId"
+        from public.locations l
+        join public.dependency_locations dl on dl.location_id = l.id
+        join public.dependencies d on d.id = dl.dependency_id and d.active
+        where l.active
+          and l.building_id = ${buildingId}
+          and dl.dependency_id = ${dependencyId}
+      ) filtered
+      order by public.natural_sort_key(name)
     `)
     return result.rows as LocationOption[]
   }
@@ -104,7 +107,7 @@ async function listLocations(
     select id, name, building_id as "buildingId"
     from public.locations
     where active and building_id = ${buildingId}
-    order by name
+    order by public.natural_sort_key(name)
   `)
   return result.rows as LocationOption[]
 }
@@ -115,13 +118,16 @@ async function listBuildings(
 ): Promise<SimpleOption[]> {
   if (!dependencyId) return listOptions(db, 'buildings')
   const result = await db.execute(sql`
-    select distinct b.id, b.name
-    from public.buildings b
-    join public.locations l on l.building_id = b.id and l.active
-    join public.dependency_locations dl on dl.location_id = l.id
-    join public.dependencies d on d.id = dl.dependency_id and d.active
-    where b.active and dl.dependency_id = ${dependencyId}
-    order by b.name
+    select id, name
+    from (
+      select distinct b.id, b.name
+      from public.buildings b
+      join public.locations l on l.building_id = b.id and l.active
+      join public.dependency_locations dl on dl.location_id = l.id
+      join public.dependencies d on d.id = dl.dependency_id and d.active
+      where b.active and dl.dependency_id = ${dependencyId}
+    ) filtered
+    order by public.natural_sort_key(name)
   `)
   return result.rows as SimpleOption[]
 }
@@ -131,7 +137,7 @@ async function listCategories(db: Database): Promise<CategoryOption[]> {
     select id, name
     from public.categories
     where active
-    order by name
+    order by public.natural_sort_key(name)
   `)
   return result.rows as CategoryOption[]
 }
@@ -144,7 +150,7 @@ async function listSubcategories(
     select id, name, category_id as "categoryId"
     from public.subcategories
     where active and category_id = ${categoryId}
-    order by name
+    order by public.natural_sort_key(name)
   `)
   return result.rows as SubcategoryOption[]
 }
@@ -157,7 +163,7 @@ async function listProblems(
     select id, name, subcategory_id as "subcategoryId"
     from public.problems
     where active and subcategory_id = ${subcategoryId}
-    order by name
+    order by public.natural_sort_key(name)
   `)
   return result.rows as ProblemOption[]
 }
@@ -174,7 +180,7 @@ async function listRequesters(db: Database): Promise<RequesterOption[]> {
     from public.requesters r
     left join public.dependencies d on d.id = r.dependency_id
     where r.active
-    order by r.full_name
+    order by public.natural_sort_key(r.full_name)
   `)
   return result.rows as RequesterOption[]
 }
@@ -193,7 +199,7 @@ async function listTechnicians(db: Database): Promise<TechnicianOption[]> {
     left join public.technician_categories tc on tc.technician_id = t.id
     where t.active
     group by t.id, t.full_name, t.team_id
-    order by t.full_name
+    order by public.natural_sort_key(t.full_name)
   `)
   return result.rows as TechnicianOption[]
 }
@@ -203,7 +209,7 @@ async function listReasons(db: Database, use: string): Promise<ReasonOption[]> {
     select id, name, use, parent_id as "parentId"
     from public.reasons
     where active and use = ${use}
-    order by position, name
+    order by position, public.natural_sort_key(name)
   `)
   return result.rows as ReasonOption[]
 }

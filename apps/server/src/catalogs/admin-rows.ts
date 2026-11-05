@@ -23,10 +23,29 @@ const DEFAULT_ORDER: Record<AdminCatalogTable, string> = {
   work_calendars: 'name',
 }
 
+const NATURAL_ORDER_COLUMNS = new Set([
+  'name',
+  'full_name',
+  'contact',
+  'building_names',
+  'category_name',
+  'category_names',
+  'user_label',
+  'path',
+  'timezone',
+  'use',
+])
+
 function assertOrderColumn(table: AdminCatalogTable, column: string) {
   if (!READ_COLUMNS[table].includes(column)) {
     throw new AppError(400, 'validation_error', `Columna no válida: ${column}`)
   }
+}
+
+function orderExpression(column: string) {
+  return NATURAL_ORDER_COLUMNS.has(column)
+    ? sql`public.natural_sort_key(${sql.identifier(column)}::text)`
+    : sql`${sql.identifier(column)}`
 }
 
 /** Filas de un catálogo con sus datos derivados, ordenadas por la columna pedida. */
@@ -38,8 +57,8 @@ export async function listAdminRows(
   const column = orderBy ?? DEFAULT_ORDER[table]
   assertOrderColumn(table, column)
   const result = await db.execute(sql`
-    ${SELECTS[table]}
-    order by ${sql.identifier(column)}, id
+    select * from (${SELECTS[table]}) ordered
+    order by ${orderExpression(column)}, id
   `)
   return result.rows
 }

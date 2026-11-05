@@ -134,7 +134,9 @@ export async function listDependencyLocations(
     join public.dependency_locations dl on dl.dependency_id = d.id
     join public.locations l on l.id = dl.location_id
     join public.buildings b on b.id = l.building_id
-    order by d.name, b.name, l.name
+    order by public.natural_sort_key(d.name),
+      public.natural_sort_key(b.name),
+      public.natural_sort_key(l.name)
   `)
   return result.rows as DependencyLocationLink[]
 }

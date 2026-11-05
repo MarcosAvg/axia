@@ -56,6 +56,32 @@ afterAll(async () => {
   await closeTicketHttpApp(context)
 })
 
+describe('catalog ordering', () => {
+  it('orders locations by the number inside the name', async () => {
+    const building = await context.db.execute(sql`
+      insert into public.buildings (name)
+      values ('Edificio orden natural') returning id
+    `)
+    const buildingId = (building.rows[0] as { id: string }).id
+    for (const name of ['Piso 10', 'Piso 2', 'Piso 1']) {
+      await context.db.execute(sql`
+        insert into public.locations (building_id, name)
+        values (${buildingId}, ${name})
+      `)
+    }
+
+    const response = await get(
+      `/api/catalogs/locations?buildingId=${buildingId}`,
+      context.cookies.requester,
+    )
+
+    expect(response.statusCode).toBe(200)
+    expect(
+      (response.json() as ItemsBody).items.map((item) => item.name),
+    ).toEqual(['Piso 1', 'Piso 2', 'Piso 10'])
+  })
+})
+
 describe('catalog reads', () => {
   it('returns simple and priority options', async () => {
     const { cookies } = context

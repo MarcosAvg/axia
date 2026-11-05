@@ -132,6 +132,30 @@ describe('datos derivados de motivos y clasificación', () => {
   })
 })
 
+describe('orden natural del admin', () => {
+  it('ordena las ubicaciones por el número dentro del nombre', async () => {
+    const building = await context.db.execute(sql`
+      insert into public.buildings (name)
+      values ('Edificio admin orden natural') returning id
+    `)
+    const buildingId = (building.rows[0] as { id: string }).id
+    for (const name of ['Piso 10', 'Piso 2', 'Piso 1']) {
+      await context.db.execute(sql`
+        insert into public.locations (building_id, name)
+        values (${buildingId}, ${name})
+      `)
+    }
+    const expected = ['Piso 1', 'Piso 2', 'Piso 10']
+    const names = (rows: Row[]) =>
+      rows
+        .filter((row) => row.building_id === buildingId)
+        .map((row) => String(row.name))
+
+    expect(names(await list('locations'))).toEqual(expected)
+    expect(names(await list('locations', '?orderBy=name'))).toEqual(expected)
+  })
+})
+
 describe('orden y permisos de lectura', () => {
   it('ordena por columnas derivadas y rechaza columnas desconocidas', async () => {
     expect(await list('problems', '?orderBy=category_name')).not.toHaveLength(0)
