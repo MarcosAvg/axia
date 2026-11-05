@@ -5,6 +5,20 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## v0.14.0 publicada
+
+- Etiqueta `v0.14.0` creada desde `main` en `129dd45`. Workflow
+  [42086494519](https://github.com/MarcosAvg/axia/actions/runs/42086494519): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.14.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:129dd456e05f892ef8c51fbf154f4951fe26ac6a`, digest
+  `sha256:c8f48c59c54b8ea95d55faffecc461d7f0d03988ef102ac87e5c844024a4558b`.
+- [Release v0.14.0](https://github.com/MarcosAvg/axia/releases/tag/v0.14.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `c4f384f63426e789f7ed5f9522fa993d8199eb9fdc4734e7098bf9e3a2d08392`)
+  y su `.sha256`.
+- Incluye el ámbito de detección de duplicados por edificio, ubicación y dependencia (ADR 0118).
+
 ## Tarea integrada: ámbito de detección de duplicados
 
 - La detección acota los candidatos al mismo edificio, ubicación y dependencia; la vista previa exige
@@ -14,7 +28,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión en el [ADR 0118](../decisions/0118-ambito-deteccion-duplicados.md); RN-29, la API y la
   guía de administración quedaron actualizadas. Las alertas abiertas se recalculan con
   `pnpm db:duplicates`.
-- Integrada a `main` por fast-forward en `840c564`, sin publicar etiqueta.
+- Integrada a `main` por fast-forward en `840c564`. Publicada en `v0.14.0`; la etiqueta, imagen y
+  release se detallan arriba.
 
 ### Evidencia de esta tarea
 
