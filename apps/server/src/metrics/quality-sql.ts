@@ -40,7 +40,7 @@ export const qualityQueries = {
         join visible_tickets t on t.id = s.id
         join public.priorities pr on pr.id = s.priority_id
         group by pr.id, pr.name
-        order by pr.name
+        order by public.natural_sort_key(pr.name)
     )
     select * from metric
   `,

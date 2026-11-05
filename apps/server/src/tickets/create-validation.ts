@@ -172,7 +172,7 @@ async function firstActive(
   const result = await tx.execute(sql`
     select id from ${sql.raw(`public.${table}`)}
     where active
-    order by (name = ${preferredName ?? ''}) desc, name
+    order by (name = ${preferredName ?? ''}) desc, public.natural_sort_key(name)
     limit 1
   `)
   return (result.rows[0] as DefaultRow | undefined)?.id ?? null

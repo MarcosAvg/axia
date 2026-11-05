@@ -27,7 +27,7 @@ export async function technicianTimes(
       on p.ticket_id = b.id and p.participation_type = 'leader'
     join public.technicians tech on tech.id = p.technician_id
     group by tech.id, tech.full_name
-    order by count(distinct p.ticket_id) desc, tech.full_name
+    order by count(distinct p.ticket_id) desc, public.natural_sort_key(tech.full_name)
   `)
   return result.rows
 }
@@ -78,7 +78,7 @@ export async function subjectTechnicianTimes(
     join public.technicians tech on tech.id = ts.subject_technician_id
     where ts.voided_at is null
     group by tech.id, tech.full_name
-    order by active_time desc, tech.full_name
+    order by active_time desc, public.natural_sort_key(tech.full_name)
   `)
   return result.rows
 }
@@ -120,7 +120,7 @@ export async function requesterTimes(
     join public.requesters r on r.id = ts.subject_requester_id
     where ts.voided_at is null
     group by r.id, r.full_name
-    order by validation_time desc, r.full_name
+    order by validation_time desc, public.natural_sort_key(r.full_name)
   `)
   return result.rows
 }
@@ -180,7 +180,7 @@ export async function supervisors(
     join public.users u on u.id = o.supervisor_user_id
     left join reassignments r on r.supervisor_user_id = u.id
     left join validations v on v.supervisor_user_id = u.id
-    order by o.offers desc, u.full_name
+    order by o.offers desc, public.natural_sort_key(u.full_name)
   `)
   return result.rows
 }

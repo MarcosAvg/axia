@@ -16,21 +16,21 @@ async function listAccessRows(db: Database) {
     technicianCategories,
   ] = await Promise.all([
     db.execute(
-      sql`select id, name, label, active from public.roles order by name`,
+      sql`select id, name, label, active from public.roles order by public.natural_sort_key(name)`,
     ),
     db.execute(sql`select id, description from public.permissions order by id`),
     db.execute(
       sql`select role_id, permission_id, scope from public.role_permissions`,
     ),
     db.execute(
-      sql`select id, full_name, phone, active from public.users where deleted_at is null order by full_name`,
+      sql`select id, full_name, phone, active from public.users where deleted_at is null order by public.natural_sort_key(full_name)`,
     ),
     db.execute(sql`select user_id, role_id from public.user_roles`),
     db.execute(
-      sql`select id, full_name, user_id from public.requesters order by full_name`,
+      sql`select id, full_name, user_id from public.requesters order by public.natural_sort_key(full_name)`,
     ),
     db.execute(
-      sql`select id, full_name, user_id from public.technicians order by full_name`,
+      sql`select id, full_name, user_id from public.technicians order by public.natural_sort_key(full_name)`,
     ),
     db.execute(
       sql`select id, user_id, team_id, active from public.supervisor_scopes`,

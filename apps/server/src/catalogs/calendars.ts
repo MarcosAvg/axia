@@ -40,7 +40,7 @@ type HolidayRow = {
 export async function listCalendars(db: Database) {
   const [calendars, intervals, holidays] = await Promise.all([
     db.execute(sql`
-      select id, name, timezone, active from public.work_calendars order by name
+      select id, name, timezone, active from public.work_calendars order by public.natural_sort_key(name)
     `),
     db.execute(sql`
       select id, calendar_id, weekday, start_time, end_time

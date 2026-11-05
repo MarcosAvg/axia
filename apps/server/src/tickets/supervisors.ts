@@ -47,7 +47,7 @@ export async function listSupervisors(
     join visible_scopes vs on vs.user_id = u.id
     where u.active
     group by u.id, u.full_name
-    order by u.full_name, u.id
+    order by public.natural_sort_key(u.full_name), u.id
   `)
 
   return (result.rows as SupervisorRow[]).map((row) => ({

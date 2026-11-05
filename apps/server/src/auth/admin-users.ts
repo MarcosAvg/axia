@@ -68,7 +68,7 @@ export async function listRoles(db: Database): Promise<RoleView[]> {
     select id, name, label
     from public.roles
     where active
-    order by label
+    order by public.natural_sort_key(label)
   `)
   return result.rows as RoleView[]
 }

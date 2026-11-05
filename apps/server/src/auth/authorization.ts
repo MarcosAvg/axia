@@ -76,7 +76,7 @@ async function loadActorRow(
       coalesce((
         select json_agg(
           json_build_object('id', r.id, 'name', r.name, 'label', r.label)
-          order by r.name
+          order by public.natural_sort_key(r.name)
         )
         from public.user_roles ur
         join public.roles r on r.id = ur.role_id
