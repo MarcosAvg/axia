@@ -15,6 +15,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión en el [ADR 0119](../decisions/0119-react-compiler-y-formularios.md). Se añadió
   `pnpm test:compiler`, que corre las pruebas del formulario con `AXIA_REACT_COMPILER=1` y forma
   parte de `pnpm check`.
+- Integrada a `main` por fast-forward en `a5d59d4`.
 
 ### Evidencia de esta tarea
 

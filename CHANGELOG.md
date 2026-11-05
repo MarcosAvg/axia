@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-11-05
+
 ### Corregido
 
 - La configuración de la instancia vuelve a poder guardarse en la build publicada: el React
