@@ -16,6 +16,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - `GET /api/tickets/attention` devuelve ofertas pendientes y trabajo activo; sidebar y barra móvil
   muestran el badge con el conteo y una etiqueta accesible. Decisión en el
   [ADR 0120](../decisions/0120-avisos-diversos-y-badges.md).
+- Integrada a `main` por fast-forward en `3ad2528`.
 
 ### Evidencia de esta tarea
 
