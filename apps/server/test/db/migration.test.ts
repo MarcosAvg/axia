@@ -48,7 +48,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'",
       ),
-    ).toBe(30)
+    ).toBe(31)
     expect(
       await scalar(
         owner,
@@ -286,7 +286,7 @@ describe('migration runner', () => {
     const result = await owner.query(
       'select checksum from axia_migrations.schema_migrations',
     )
-    expect(result.rows).toHaveLength(28)
+    expect(result.rows).toHaveLength(29)
     expect(
       result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
     ).toBe(true)
@@ -299,7 +299,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(28)
+    ).toBe(29)
   })
 
   it('enforces username normalization and uniqueness', async () => {
@@ -318,5 +318,31 @@ describe('migration runner', () => {
       ),
     ).rejects.toMatchObject({ code: '23505' })
     await owner.query("delete from public.users where username = 'test.user'")
+  })
+})
+
+describe('natural name ordering', () => {
+  it('sorts numeric runs as numbers', async () => {
+    const result = await owner.query<{ value: string }>(`
+      select value
+      from (values ('Piso 10'), ('Piso 1'), ('Piso 2'), ('Torre 2 Piso 10'), ('Torre 2 Piso 2')) v(value)
+      order by public.natural_sort_key(value)
+    `)
+
+    expect(result.rows.map((row) => row.value)).toEqual([
+      'Piso 1',
+      'Piso 2',
+      'Piso 10',
+      'Torre 2 Piso 2',
+      'Torre 2 Piso 10',
+    ])
+  })
+
+  it('is executable by the application role', async () => {
+    const result = await app.query<{ value: boolean }>(
+      "select public.natural_sort_key('Piso 2') < public.natural_sort_key('Piso 10') as value",
+    )
+
+    expect(result.rows[0]?.value).toBe(true)
   })
 })
