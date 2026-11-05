@@ -5,6 +5,19 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-05
+
+### Añadido
+
+- Los avisos in-app cubren reasignación de supervisor y técnico, apoyo auxiliar, recaptura, cambio de
+  prioridad, atendido pendiente de validación, validación, reclamación resuelta, reapertura,
+  reactivación y calificación. Quien realiza una acción no recibe el aviso de esa misma acción.
+  Decisión en el [ADR 0120](docs/decisions/0120-avisos-diversos-y-badges.md).
+- La bandeja describe cada aviso con autor, motivo y contexto del tiquet, en lugar de mostrar solo el
+  nombre del evento.
+- Bandeja y Mi trabajo muestran un badge con ofertas pendientes y tiquets activos, respectivamente,
+  mediante `GET /api/tickets/attention`.
+
 ## [0.14.1] - 2026-11-05
 
 ### Corregido
