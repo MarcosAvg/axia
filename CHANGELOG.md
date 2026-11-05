@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-05
+
 ### Cambiado
 
 - La detección de posibles duplicados acota la búsqueda al mismo edificio, ubicación y dependencia, en
