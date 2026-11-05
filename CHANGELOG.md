@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-11-05
+
 ### Añadido
 
 - Los catálogos, desplegables y listados de nombres ordenan los tramos numéricos como números:
