@@ -14,6 +14,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Decisión en el [ADR 0118](../decisions/0118-ambito-deteccion-duplicados.md); RN-29, la API y la
   guía de administración quedaron actualizadas. Las alertas abiertas se recalculan con
   `pnpm db:duplicates`.
+- Integrada a `main` por fast-forward en `840c564`, sin publicar etiqueta.
 
 ### Evidencia de esta tarea
 
