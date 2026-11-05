@@ -14,6 +14,7 @@ contiene los scripts ejecutables; esta referencia explica sus efectos.
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript del monorepo |
 | `pnpm format` | Formatea fuentes; Markdown escrito a mano se conserva |
 | `pnpm test:unit` | Vitest de servidor y web, sin integración DB ni navegador |
+| `pnpm test:compiler` | Pruebas del formulario de configuración con React Compiler activo |
 | `pnpm test` | Vitest y Playwright; no incluye por sí solo `db:test` |
 | `pnpm test:affected` | Selecciona pruebas desde cambios Git; usa compuerta completa si hay borrados de código, infraestructura o dudas |
 | `pnpm test:e2e:smoke` / `pnpm test:e2e` | Flujos críticos / todos los flujos de navegador |

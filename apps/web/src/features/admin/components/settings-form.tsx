@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { z } from 'zod'
@@ -123,16 +122,11 @@ export function SettingsForm({
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors, isDirty },
   } = useForm<SettingsValues>({
     resolver: zodResolver(schema),
     defaultValues: toFormValues(settings),
   })
-
-  useEffect(() => {
-    reset(toFormValues(settings))
-  }, [settings, reset])
 
   useUnsavedChangesGuard(isDirty, adminMessages.settings.unsaved)
 

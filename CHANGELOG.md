@@ -5,6 +5,14 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- La configuración de la instancia vuelve a poder guardarse en la build publicada: el React
+  Compiler memoizaba los `ref` de React Hook Form y `reset` dejaba los campos sin registrar. El
+  calendario y la prioridad por defecto también muestran el valor guardado cuando sus opciones
+  llegan después del montaje. Decisión en el
+  [ADR 0119](docs/decisions/0119-react-compiler-y-formularios.md).
+
 ## [0.14.0] - 2026-11-05
 
 ### Cambiado

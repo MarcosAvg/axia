@@ -111,6 +111,9 @@ export function ValidationFields({ register, errors }: SettingsFieldsProps) {
       />
       <SelectField
         id="settings-default-priority"
+        // Las opciones llegan después del montaje: al remontar, RHF aplica el
+        // valor guardado que el navegador descartó cuando no existía la opción.
+        key={priorities.data ? 'priority-ready' : 'priority-loading'}
         label={settings.defaultPriority}
         placeholder={adminMessages.actions.selectPlaceholder}
         options={priorityOptions}
@@ -132,6 +135,9 @@ export function TimeFields({ register, errors }: SettingsFieldsProps) {
     <div className="grid gap-4 sm:grid-cols-2">
       <SelectField
         id="settings-default-calendar"
+        // Mismo caso que la prioridad: el remonte aplica el valor guardado
+        // cuando las opciones ya están disponibles.
+        key={calendars.data ? 'calendar-ready' : 'calendar-loading'}
         label={settings.defaultCalendar}
         placeholder={adminMessages.actions.selectPlaceholder}
         options={options}

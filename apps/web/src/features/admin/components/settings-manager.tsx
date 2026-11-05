@@ -12,6 +12,11 @@ export function SettingsManager() {
   const settings = useInstanceSettings()
   const update = useUpdateInstanceSettings()
   const { list } = adminMessages
+  // Remontar el formulario cuando cambian los ajustes guardados evita usar
+  // `reset`: el React Compiler memoiza los refs de RHF y `reset` dejaría los
+  // campos sin registrar en la build. Al remontar, `useForm` arranca con los
+  // valores nuevos y el estado queda limpio.
+  const formKey = settings.data ? JSON.stringify(settings.data) : ''
 
   return (
     <div className="flex flex-col gap-4">
@@ -19,6 +24,7 @@ export function SettingsManager() {
       {settings.isError ? <ErrorAlert message={list.error} /> : null}
       {settings.data ? (
         <SettingsForm
+          key={formKey}
           settings={settings.data}
           isSaving={update.isPending}
           onSave={(values) =>

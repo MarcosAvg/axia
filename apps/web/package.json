@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "vitest run && playwright test",
+    "test:compiler": "AXIA_REACT_COMPILER=1 vitest run src/features/admin/components/settings-form.test.tsx",
     "test:visual": "playwright test --config playwright.visual.config.ts",
     "preview": "vite preview",
     "test:unit": "vitest run"

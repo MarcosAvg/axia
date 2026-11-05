@@ -5,6 +5,28 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## Tarea integrada: configuración guardable en la build
+
+- El botón Guardar de `/admin/configuracion` permanecía deshabilitado en la build publicada porque
+  React Compiler memoiza los `ref` de React Hook Form y `reset` vaciaba el registro de campos.
+  Ahora el formulario se remonta cuando cambian los ajustes guardados y no usa `reset`.
+- El calendario y la prioridad por defecto remontan el `<select>` cuando sus opciones están
+  disponibles, para mostrar el valor guardado y no confundirlo con “Selecciona…”.
+- Decisión en el [ADR 0119](../decisions/0119-react-compiler-y-formularios.md). Se añadió
+  `pnpm test:compiler`, que corre las pruebas del formulario con `AXIA_REACT_COMPILER=1` y forma
+  parte de `pnpm check`.
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: 64 pruebas de servidor y 412 de web en verde.
+- `pnpm test:compiler`: 2/2 en verde.
+- `pnpm check`: código 0; 64 unitarias de servidor, 412 de web, 363 de PostgreSQL (52 archivos),
+  60 de navegador y build. Persiste el aviso de chunks >500 kB.
+- Verificación manual de la build compilada servida con `vite preview`: calendario y prioridad
+  muestran el UUID del servidor; texto, desplegables y checkboxes habilitan Guardar; revertir los
+  deshabilita; guardar limpia el estado; editar después de guardar vuelve a habilitar; recargar
+  conserva los valores.
+
 ## v0.14.0 publicada
 
 - Etiqueta `v0.14.0` creada desde `main` en `129dd45`. Workflow
