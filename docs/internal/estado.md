@@ -5,16 +5,30 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
-## Tarea en curso: orden natural de nombres
+## v0.13.0 publicada
+
+- Etiqueta `v0.13.0` creada desde `main` en `2db9f57`. Workflow
+  [42074510998](https://github.com/MarcosAvg/axia/actions/runs/42074510998): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.13.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:2db9f574e5c88a2516092c7a71494603a122cdc3`, digest
+  `sha256:9aaae5381797014c5768fb539d780aa21f68dc0253e88194433dcbd97c73d5aa`.
+- [Release v0.13.0](https://github.com/MarcosAvg/axia/releases/tag/v0.13.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `425b67f63ca97f84cfb0d9eaa13c723b74fdb6cacaf2b9aa57a501465dac4a58`)
+  y su `.sha256`.
+- Incluye el orden natural de nombres (migración 0028 y ADR 0117).
+
+## Tarea integrada: orden natural de nombres
 
 - Los catálogos, desplegables y listados de nombres usan `public.natural_sort_key(...)` para que
-  `Piso 2` quede antes que `Piso 10`. La función es portable, conserva la colación actual y no
-  depende de ICU.
+  `Piso 2` quede antes que `Piso 10`. La función es portable, conserva la colación actual, no
+  depende de ICU y deja los nulos al final.
 - La migración 0028 crea la función y concede su ejecución a `axia_app`. Las columnas no textuales
   del admin conservan su orden nativo y prioridades/motivos mantienen `position` como criterio
   principal.
 - Decisión en el [ADR 0117](../decisions/0117-orden-natural-portable.md).
-- Lista para integrar; la compuerta completa y el smoke están en verde.
+- Integrada a `main` por fast-forward en `2db9f57` y publicada en `v0.13.0`.
 
 ### Evidencia de esta tarea
 
