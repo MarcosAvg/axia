@@ -152,10 +152,8 @@ export const ticketMessages = {
       requester_contact: 'Contacto',
     } as Record<string, string>,
     duplicateReasons: {
-      location: 'misma ubicación',
       problem: 'mismo problema',
       subcategory: 'misma subcategoría',
-      dependency: 'misma dependencia',
     } as Record<string, string>,
     created: 'El tiquet se registró correctamente.',
     fields: {

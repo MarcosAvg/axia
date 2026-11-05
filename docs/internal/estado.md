@@ -5,6 +5,24 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-05
 
+## Tarea integrada: ámbito de detección de duplicados
+
+- La detección acota los candidatos al mismo edificio, ubicación y dependencia; la vista previa exige
+  `locationId` y `dependencyId` y responde `400` si faltan.
+- El puntaje se reparte en `0.50` texto, `0.40` problema y `0.10` subcategoría; los motivos quedan en
+  `problem` y `subcategory`. Los tiquets con ubicación o dependencia nula no son candidatos.
+- Decisión en el [ADR 0118](../decisions/0118-ambito-deteccion-duplicados.md); RN-29, la API y la
+  guía de administración quedaron actualizadas. Las alertas abiertas se recalculan con
+  `pnpm db:duplicates`.
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: lint y tipos en verde; 64 pruebas de servidor y 410 de web.
+- `pnpm test:affected`: 284 pruebas de servidor y 32 de web.
+- `pnpm check:static`: documentación, agnóstico, fronteras y knip en verde.
+- `CI=1 pnpm check`: código 0; 64 + 410 unitarias, 363 de PostgreSQL (52 archivos), 60 de navegador
+  (2 reintentos) y build. Persiste el aviso de chunks >500 kB.
+
 ## v0.13.0 publicada
 
 - Etiqueta `v0.13.0` creada desde `main` en `2db9f57`. Workflow

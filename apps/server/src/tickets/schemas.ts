@@ -46,11 +46,11 @@ export const ticketIdParamsSchema = z.object({
 
 export const duplicateCheckSchema = z.object({
   buildingId: z.string().uuid(),
-  locationId: z.string().uuid().optional(),
+  locationId: z.string().uuid(),
   categoryId: z.string().uuid(),
   subcategoryId: z.string().uuid().optional(),
   problemId: z.string().uuid().optional(),
-  dependencyId: z.string().uuid().optional(),
+  dependencyId: z.string().uuid(),
   description: z.string().trim().min(5).max(4000),
 })
 

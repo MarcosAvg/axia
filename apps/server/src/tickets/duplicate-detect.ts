@@ -11,11 +11,11 @@ export type DuplicateSettings = {
 
 export type DuplicateInput = {
   buildingId: string
-  locationId?: string | null
+  locationId: string
   categoryId: string
   subcategoryId?: string | null
   problemId?: string | null
-  dependencyId?: string | null
+  dependencyId: string
   description: string
   reportedAt: string
   excludeTicketId?: string | null
@@ -55,18 +55,14 @@ type ScoredRow = {
   requester_contact: string | null
   similarity: string | number
   score: string | number
-  same_location: boolean
   same_problem: boolean
   same_subcategory: boolean
-  same_dependency: boolean
 }
 
 function toCandidate(row: ScoredRow): ScoredCandidate {
   const reasons: string[] = []
-  if (row.same_location) reasons.push('location')
   if (row.same_problem) reasons.push('problem')
   if (row.same_subcategory) reasons.push('subcategory')
-  if (row.same_dependency) reasons.push('dependency')
   return {
     id: row.id,
     folio: row.folio,
@@ -85,16 +81,16 @@ function toCandidate(row: ScoredRow): ScoredCandidate {
 }
 
 /**
- * Busca candidatos en tiquets no finales del mismo edificio y de la ventana
- * configurada. El puntaje combina texto normalizado y coincidencias exactas de
- * ubicación, problema, subcategoría y dependencia.
+ * Busca candidatos en tiquets no finales del mismo edificio, ubicación y
+ * dependencia dentro de la ventana configurada. El puntaje combina el texto
+ * normalizado con las coincidencias exactas de problema y subcategoría.
  */
 function candidateIds(input: DuplicateInput) {
   return {
-    locationId: input.locationId ?? null,
+    locationId: input.locationId,
     problemId: input.problemId ?? null,
     subcategoryId: input.subcategoryId ?? null,
-    dependencyId: input.dependencyId ?? null,
+    dependencyId: input.dependencyId,
     excludeId: input.excludeTicketId ?? null,
   }
 }
@@ -116,14 +112,10 @@ export async function findDuplicateCandidates(
           lower(translate(coalesce(t.description, ''), 'áéíóúü', 'aeiouu')),
           lower(translate(${input.description}, 'áéíóúü', 'aeiouu'))
         ) as similarity,
-        (${locationId}::uuid is not null
-          and t.location_id = ${locationId}) as same_location,
         (${problemId}::uuid is not null
           and t.problem_id = ${problemId}) as same_problem,
         (${subcategoryId}::uuid is not null
-          and t.subcategory_id = ${subcategoryId}) as same_subcategory,
-        (${dependencyId}::uuid is not null
-          and t.dependency_id = ${dependencyId}) as same_dependency
+          and t.subcategory_id = ${subcategoryId}) as same_subcategory
       from public.tickets t
       left join public.buildings b on b.id = t.building_id
       left join public.locations l on l.id = t.location_id
@@ -133,6 +125,8 @@ export async function findDuplicateCandidates(
       where (${excludeId}::uuid is null or t.id <> ${excludeId})
         and t.status not in ('closed', 'rejected', 'cancelled', 'duplicate')
         and t.building_id = ${input.buildingId}
+        and t.location_id = ${locationId}
+        and t.dependency_id = ${dependencyId}
         and (t.problem_id is not distinct from ${problemId}
           or t.category_id = ${input.categoryId})
         and t.reported_at between ${input.reportedAt}::timestamptz
@@ -144,15 +138,13 @@ export async function findDuplicateCandidates(
       select
         scored.*,
         round((
-          0.35 * scored.similarity
-          + case when scored.same_location then 0.25 else 0 end
-          + case when scored.same_problem then 0.3 else 0 end
-          + case when scored.same_subcategory then 0.05 else 0 end
-          + case when scored.same_dependency then 0.05 else 0 end
+          0.5 * scored.similarity
+          + case when scored.same_problem then 0.4 else 0 end
+          + case when scored.same_subcategory then 0.1 else 0 end
         )::numeric, 3) as score
       from scored
     ) candidate
-    where (candidate.same_location and candidate.same_problem)
+    where candidate.same_problem
       or candidate.similarity >= ${settings.similarity}
     order by candidate.score desc, candidate.reported_at desc
     limit ${limit}

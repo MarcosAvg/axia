@@ -12,7 +12,10 @@ import {
   dismissDuplicateAlerts,
   listDuplicateAlerts,
 } from './duplicate-alerts.js'
-import { checkDuplicateCandidates } from './duplicates.js'
+import {
+  checkDuplicateCandidates,
+  type DuplicateCheckInput,
+} from './duplicates.js'
 import {
   getTimeline,
   listTickets,
@@ -47,15 +50,8 @@ export function createTicketService(db: Database) {
       eventId: number,
       occurredAt: string,
     ) => adjustEventTime(db, actor, { ticketId, eventId, occurredAt }),
-    duplicateCandidates: (input: {
-      buildingId: string
-      locationId?: string | null
-      categoryId: string
-      subcategoryId?: string | null
-      problemId?: string | null
-      dependencyId?: string | null
-      description: string
-    }) => checkDuplicateCandidates(db, input),
+    duplicateCandidates: (input: DuplicateCheckInput) =>
+      checkDuplicateCandidates(db, input),
     duplicateAlerts: (actor: Actor, ticketId: string) =>
       listDuplicateAlerts(db, actor, ticketId),
     dismissDuplicateAlerts: (actor: Actor, ticketId: string) =>

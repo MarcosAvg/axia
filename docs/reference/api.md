@@ -44,7 +44,7 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 |---|---|---|
 | `GET` | `/api/tickets` | Lista paginada con filtros |
 | `POST` | `/api/tickets` | Alta idempotente |
-| `POST` | `/api/tickets/duplicates` | Aviso previo de posibles duplicados |
+| `POST` | `/api/tickets/duplicates` | Aviso previo de posibles duplicados (`buildingId`, `locationId`, `dependencyId` y `categoryId` obligatorios) |
 | `GET` | `/api/tickets/:id/duplicate-alerts` | Alertas de duplicado con su decisión |
 | `POST` | `/api/tickets/:id/duplicate-alerts/dismiss` | Descartar las alertas pendientes |
 | `GET` | `/api/tickets/mine` | Bandeja del técnico |

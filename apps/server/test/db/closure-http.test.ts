@@ -175,6 +175,8 @@ describe('duplicate check', () => {
       detail.json() as {
         ticket: {
           buildingId: string
+          locationId: string
+          dependencyId: string
           categoryId: string
           problemId: string | null
           description: string
@@ -187,8 +189,10 @@ describe('duplicate check', () => {
       context.cookies.admin,
       {
         buildingId: ticket.buildingId,
+        locationId: ticket.locationId,
         categoryId: ticket.categoryId,
         problemId: ticket.problemId ?? undefined,
+        dependencyId: ticket.dependencyId,
         description: ticket.description,
       },
     )

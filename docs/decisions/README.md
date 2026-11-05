@@ -26,6 +26,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0115](0115-rondas-de-oferta-y-sin-ruteo.md) | Rondas de oferta y aviso de ruteo sin salida |
 | [0116](0116-proyeccion-local-acciones-offline.md) | Proyección local del estado con acciones offline pendientes |
 | [0117](0117-orden-natural-portable.md) | Orden natural portable de listados de nombres |
+| [0118](0118-ambito-deteccion-duplicados.md) | Ámbito de detección de duplicados por edificio, ubicación y dependencia |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

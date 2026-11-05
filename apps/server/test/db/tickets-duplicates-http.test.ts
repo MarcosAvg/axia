@@ -9,11 +9,17 @@ import {
   closeTicketHttpApp,
   type TicketHttpContext,
 } from './tickets-http-helpers.js'
-import { loadWriteRefs, type WriteRefs } from './tickets-write-helpers.js'
+import {
+  loadWriteRefs,
+  addDuplicateScopeRefs,
+  type WriteRefs,
+} from './tickets-write-helpers.js'
 import { backfillDuplicateAlerts } from '../../src/tickets/duplicate-alerts.js'
 
 let context: TicketHttpContext
 let refs: WriteRefs
+let otherLocationId: string
+let otherDependencyId: string
 
 function ticketBody(
   description: string,
@@ -56,6 +62,7 @@ async function createTicket(
 
 async function checkDuplicates(
   text: string,
+  overrides: Record<string, unknown> = {},
   cookie = context.cookies.requester,
 ) {
   const response = await context.app.inject({
@@ -70,6 +77,7 @@ async function checkDuplicates(
       problemId: refs.problemId,
       dependencyId: refs.dependencyId,
       description: text,
+      ...overrides,
     },
   })
   expect(response.statusCode).toBe(200)
@@ -109,6 +117,9 @@ async function candidateRow(ticketId: string, candidateId: string) {
 beforeAll(async () => {
   context = await buildTicketHttpApp()
   refs = await loadWriteRefs(context)
+  const scope = await addDuplicateScopeRefs(context, refs)
+  otherLocationId = scope.locationId
+  otherDependencyId = scope.dependencyId
 }, 60_000)
 
 afterAll(async () => {
@@ -127,22 +138,62 @@ describe('aviso previo de duplicados', () => {
     })
     expect(Number(match?.score)).toBeGreaterThanOrEqual(0.3)
     expect(match?.reasons).toEqual(
-      expect.arrayContaining(['location', 'problem', 'subcategory']),
+      expect.arrayContaining(['problem', 'subcategory']),
     )
     expect(match).not.toHaveProperty('location')
   })
 
-  it('avisa por misma ubicación y problema aunque el texto sea distinto', async () => {
+  it('avisa por mismo problema aunque el texto sea distinto', async () => {
     const firstId = await createTicket(`Texto distinto ${randomUUID()}`)
     const items = await checkDuplicates(`Otra redacción ${randomUUID()}`)
     const match = items.find((item) => item.id === firstId)
     expect(match).toBeDefined()
-    expect(match?.reasons).toEqual(
-      expect.arrayContaining(['location', 'problem']),
-    )
-    expect(Number(match?.score)).toBeGreaterThanOrEqual(0.5)
+    expect(match?.reasons).toEqual(expect.arrayContaining(['problem']))
+    expect(Number(match?.score)).toBeGreaterThanOrEqual(0.4)
+  })
+})
+
+describe('ámbito del aviso', () => {
+  it('no avisa por el mismo problema en otra ubicación', async () => {
+    const firstId = await createTicket(description())
+    const items = await checkDuplicates(description(), {
+      locationId: otherLocationId,
+    })
+    expect(items.find((item) => item.id === firstId)).toBeUndefined()
   })
 
+  it('no avisa por el mismo problema en otra dependencia', async () => {
+    const firstId = await createTicket(description())
+    const items = await checkDuplicates(description(), {
+      dependencyId: otherDependencyId,
+    })
+    expect(items.find((item) => item.id === firstId)).toBeUndefined()
+  })
+
+  it('exige ubicación y dependencia en la vista previa', async () => {
+    for (const missing of ['locationId', 'dependencyId']) {
+      const payload: Record<string, unknown> = {
+        buildingId: refs.buildingId,
+        locationId: refs.locationId,
+        categoryId: refs.categoryId,
+        subcategoryId: refs.subcategoryId,
+        problemId: refs.problemId,
+        dependencyId: refs.dependencyId,
+        description: description(),
+      }
+      delete payload[missing]
+      const response = await context.app.inject({
+        method: 'POST',
+        url: '/api/tickets/duplicates',
+        headers: authHeaders(context.cookies.requester),
+        payload,
+      })
+      expect(response.statusCode).toBe(400)
+    }
+  })
+})
+
+describe('registro de candidatos', () => {
   it('marca como ignorados los candidatos que se mostraron al registrar', async () => {
     const text = description()
     const firstId = await createTicket(text)

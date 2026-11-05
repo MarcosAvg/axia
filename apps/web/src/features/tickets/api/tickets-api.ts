@@ -179,11 +179,11 @@ export async function createTicket(
 
 export interface DuplicateCheckInput {
   buildingId: string
-  locationId?: string
+  locationId: string
   categoryId: string
   subcategoryId?: string
   problemId?: string
-  dependencyId?: string
+  dependencyId: string
   description: string
 }
 
@@ -194,11 +194,11 @@ export async function checkDuplicates(
     method: 'POST',
     body: JSON.stringify({
       buildingId: input.buildingId,
-      locationId: input.locationId || undefined,
+      locationId: input.locationId,
       categoryId: input.categoryId,
       subcategoryId: input.subcategoryId || undefined,
       problemId: input.problemId || undefined,
-      dependencyId: input.dependencyId || undefined,
+      dependencyId: input.dependencyId,
       description: input.description,
     }),
   })

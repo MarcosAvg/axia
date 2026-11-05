@@ -5,6 +5,14 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- La detección de posibles duplicados acota la búsqueda al mismo edificio, ubicación y dependencia, en
+  lugar de todo el edificio. La vista previa exige ubicación y dependencia, y el puntaje se reparte
+  entre texto, problema y subcategoría. Decisión en el
+  [ADR 0118](docs/decisions/0118-ambito-deteccion-duplicados.md). Las alertas existentes se pueden
+  recalcular con `pnpm db:duplicates`.
+
 ## [0.13.0] - 2026-11-05
 
 ### Añadido

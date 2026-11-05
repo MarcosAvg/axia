@@ -265,10 +265,10 @@ puede, precondiciones y efectos.
   con historial.
 - **RN-29 Duplicados.**
   - **Detección al registrar:** antes de confirmar, el sistema busca posibles duplicados entre tiquets
-    no finales del mismo edificio y de una ventana configurable. Son candidatos los que coinciden en
-    **ubicación y problema**, o los que superan el umbral de parecido del texto normalizado. El
-    puntaje de coincidencia, que ordena los candidatos, también considera subcategoría y dependencia.
-    Si encuentra candidatos, **avisa y muestra** los datos permitidos
+    no finales del **mismo edificio, ubicación y dependencia** y de una ventana configurable. Son
+    candidatos los que coinciden en **el problema**, o los que superan el umbral de parecido del texto
+    normalizado. El puntaje de coincidencia, que ordena los candidatos, también considera la
+    subcategoría. Si encuentra candidatos, **avisa y muestra** los datos permitidos
     del otro tiquet para que la persona hable con quien lo registró o recuerde que ya lo había hecho
     (puede ser ella misma). **No bloquea**: puede registrarlo igualmente. Se guarda qué candidatos se
     mostraron y qué decidió la persona (ignorado, enlazado o descartado, con quién y cuándo), y el

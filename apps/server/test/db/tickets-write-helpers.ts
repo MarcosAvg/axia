@@ -98,6 +98,30 @@ export async function loadWriteRefs(
   }
 }
 
+/** Crea una ubicación y una dependencia alternas para probar el ámbito. */
+export async function addDuplicateScopeRefs(
+  context: TicketHttpContext,
+  refs: WriteRefs,
+): Promise<{ locationId: string; dependencyId: string }> {
+  const location = await context.db.execute(sql`
+    insert into public.locations (building_id, name)
+    values (${refs.buildingId}, 'Sala A1 bis') returning id
+  `)
+  const dependency = await context.db.execute(sql`
+    insert into public.dependencies (name)
+    values ('Dependencia bis') returning id
+  `)
+  const locationId = (location.rows[0] as { id: string }).id
+  const dependencyId = (dependency.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    insert into public.dependency_locations (dependency_id, location_id)
+    values
+      (${refs.dependencyId}, ${locationId}),
+      (${dependencyId}, ${refs.locationId})
+  `)
+  return { locationId, dependencyId }
+}
+
 export async function addSecondSupervisor(
   context: TicketHttpContext,
   refs: WriteRefs,
