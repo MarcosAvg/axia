@@ -48,3 +48,59 @@ describe('natural name ordering', () => {
     expect(result.rows[0]?.value).toBe(true)
   })
 })
+
+describe('natural name ordering edge cases', () => {
+  it('keeps nulls last', async () => {
+    const result = await owner.query<{ value: string | null }>(`
+      select value from (values ('b'), (null), ('a')) v(value)
+      order by public.natural_sort_key(value)
+    `)
+
+    expect(result.rows.map((row) => row.value)).toEqual(['a', 'b', null])
+  })
+
+  it('treats leading zeros as the same number', async () => {
+    const result = await owner.query<{ same: boolean; before: boolean }>(`
+      select
+        public.natural_sort_key('Piso 2') = public.natural_sort_key('Piso 02') as same,
+        public.natural_sort_key('Piso 02') < public.natural_sort_key('Piso 10') as before
+    `)
+
+    expect(result.rows[0]).toEqual({ same: true, before: true })
+  })
+
+  it('preserves the collation for alphabetic runs', async () => {
+    const result = await owner.query<{ same: boolean }>(`
+      select
+        (select array_agg(value order by public.natural_sort_key(value))
+         from (values ('Ático'), ('Anexo'), ('Ñandú'), ('Naranja'), ('bodega')) v(value))
+        =
+        (select array_agg(value order by value)
+         from (values ('Ático'), ('Anexo'), ('Ñandú'), ('Naranja'), ('bodega')) v(value))
+        as same
+    `)
+
+    expect(result.rows[0]?.same).toBe(true)
+  })
+
+  it('orders runs at the twenty-digit boundary', async () => {
+    const result = await owner.query<{ value: string }>(`
+      select value
+      from (values ('Piso 10000000000000000000'), ('Piso 9999999999999999999')) v(value)
+      order by public.natural_sort_key(value)
+    `)
+
+    expect(result.rows.map((row) => row.value)).toEqual([
+      'Piso 9999999999999999999',
+      'Piso 10000000000000000000',
+    ])
+  })
+
+  it('does not allow public execution', async () => {
+    const result = await owner.query<{ allowed: boolean }>(
+      "select has_function_privilege('public', 'public.natural_sort_key(text)', 'execute') as allowed",
+    )
+
+    expect(result.rows[0]?.allowed).toBe(false)
+  })
+})

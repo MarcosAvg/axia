@@ -19,10 +19,11 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 ### Evidencia de esta tarea
 
 - `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
-  servidor, 410 de web, 355 de PostgreSQL (52 archivos), 60 de navegador y build. Persiste el aviso
+  servidor, 410 de web, 360 de PostgreSQL (52 archivos), 60 de navegador y build. Persiste el aviso
   previo de chunks >500 kB.
 - `pnpm test:e2e:smoke`: 19/19 en verde.
-- Pruebas nuevas: orden natural de la función, de `/api/catalogs/locations` y de la API del admin.
+- Pruebas nuevas: orden natural de la función y sus casos límite, de `/api/catalogs/locations`
+  (incluida la rama con dependencia) y de la API del admin.
 
 ## v0.12.0 publicada
 

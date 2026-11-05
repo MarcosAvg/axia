@@ -63,10 +63,24 @@ describe('catalog ordering', () => {
       values ('Edificio orden natural') returning id
     `)
     const buildingId = (building.rows[0] as { id: string }).id
+    const locationIds: string[] = []
     for (const name of ['Piso 10', 'Piso 2', 'Piso 1']) {
-      await context.db.execute(sql`
+      const location = await context.db.execute(sql`
         insert into public.locations (building_id, name)
         values (${buildingId}, ${name})
+        returning id
+      `)
+      locationIds.push((location.rows[0] as { id: string }).id)
+    }
+    const dependency = await context.db.execute(sql`
+      insert into public.dependencies (name)
+      values ('Dependencia orden natural') returning id
+    `)
+    const dependencyId = (dependency.rows[0] as { id: string }).id
+    for (const locationId of locationIds) {
+      await context.db.execute(sql`
+        insert into public.dependency_locations (dependency_id, location_id)
+        values (${dependencyId}, ${locationId})
       `)
     }
 
@@ -74,11 +88,19 @@ describe('catalog ordering', () => {
       `/api/catalogs/locations?buildingId=${buildingId}`,
       context.cookies.requester,
     )
+    const scoped = await get(
+      `/api/catalogs/locations?buildingId=${buildingId}&dependencyId=${dependencyId}`,
+      context.cookies.requester,
+    )
 
     expect(response.statusCode).toBe(200)
     expect(
       (response.json() as ItemsBody).items.map((item) => item.name),
     ).toEqual(['Piso 1', 'Piso 2', 'Piso 10'])
+    expect(scoped.statusCode).toBe(200)
+    expect((scoped.json() as ItemsBody).items.map((item) => item.name)).toEqual(
+      ['Piso 1', 'Piso 2', 'Piso 10'],
+    )
   })
 })
 

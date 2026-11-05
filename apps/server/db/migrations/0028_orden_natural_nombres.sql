@@ -3,6 +3,7 @@ create function public.natural_sort_key(value text)
 returns text
 language sql
 immutable
+strict
 parallel safe
 as $$
   select coalesce(

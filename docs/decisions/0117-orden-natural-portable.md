@@ -14,9 +14,9 @@ Los `ORDER BY` de nombres usan `public.natural_sort_key(...)`. Cuando existe un 
 más fuerte, como `position` en prioridades y motivos, se conserva como primer criterio y el orden
 natural solo desempata. Las columnas no textuales del administrador mantienen su orden nativo.
 
-La función es inmutable y paralela segura, no usa ICU ni extensiones y conserva la colación de cada
-instalación para las partes alfabéticas. La migración concede su ejecución a `axia_app` porque la
-migración `0001` revoca la ejecución pública de funciones nuevas.
+La función es inmutable, estricta y paralela segura: no usa ICU ni extensiones, conserva la
+colación de cada instalación para las partes alfabéticas y deja los valores nulos al final, como el
+orden anterior. La migración concede su ejecución a `axia_app` y revoca el permiso público.
 
 ## Alternativas y consecuencias
 
