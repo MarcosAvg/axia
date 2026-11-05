@@ -111,6 +111,8 @@ worker se entrega sin caché; no depender de Background Sync para conservar trab
   columnas `snake_case`, claves `id` / `<singular>_id` e índices descriptivos.
 - Fechas `timestamptz`, zona configurable; indicadores derivados de eventos/tramos, sin copiar
   cifras calculadas a columnas ni fijar una zona en el código.
+- Los listados de nombres ordenan con `public.natural_sort_key(...)` para que los tramos numéricos
+  se comparen como números. Un criterio de negocio (`position`, fecha, conteo) siempre va primero.
 - Toda consulta de tiquets incorpora alcance autorizado. No hay RLS ni metadatos editables como
   fuente de permisos; roles y ámbitos son datos controlados del servidor.
 - El cambio de estado y su evento se escriben en la misma transacción. La bitácora es de solo

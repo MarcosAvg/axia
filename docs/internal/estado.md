@@ -3,7 +3,26 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-11-04
+**Última actualización:** 2026-11-05
+
+## Tarea en curso: orden natural de nombres
+
+- Los catálogos, desplegables y listados de nombres usan `public.natural_sort_key(...)` para que
+  `Piso 2` quede antes que `Piso 10`. La función es portable, conserva la colación actual y no
+  depende de ICU.
+- La migración 0028 crea la función y concede su ejecución a `axia_app`. Las columnas no textuales
+  del admin conservan su orden nativo y prioridades/motivos mantienen `position` como criterio
+  principal.
+- Decisión en el [ADR 0117](../decisions/0117-orden-natural-portable.md).
+- Lista para integrar; la compuerta completa y el smoke están en verde.
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; lint, tipos, estáticos y knip; 64 pruebas de
+  servidor, 410 de web, 355 de PostgreSQL (52 archivos), 60 de navegador y build. Persiste el aviso
+  previo de chunks >500 kB.
+- `pnpm test:e2e:smoke`: 19/19 en verde.
+- Pruebas nuevas: orden natural de la función, de `/api/catalogs/locations` y de la API del admin.
 
 ## v0.12.0 publicada
 

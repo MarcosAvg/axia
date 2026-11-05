@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Los catálogos, desplegables y listados de nombres ordenan los tramos numéricos como números:
+  `Piso 2` queda antes que `Piso 10`. La regla es portable y no requiere ICU; decisión en el
+  [ADR 0117](docs/decisions/0117-orden-natural-portable.md).
+
 ## [0.12.0] - 2026-11-04
 
 ### Añadido
