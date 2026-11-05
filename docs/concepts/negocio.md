@@ -406,7 +406,7 @@ construye después. Debe soportar: notificaciones por destinatario con lectura, 
 los avisos que menciona la especificación (oferta a supervisores, reasignación, recaptura propuesta,
 posible duplicado y duplicado marcado, atendido pendiente de validación, reclamación, reapertura,
 rechazo, cancelación, tiquet sin tomar). Debe ser posible consultar no leídas y suscribirse a cambios
-en tiempo real.
+en tiempo real. Quien realiza una acción no recibe el aviso de esa misma acción.
 
 ## 10. Configuración de la instancia
 

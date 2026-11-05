@@ -49,6 +49,7 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | `POST` | `/api/tickets/:id/duplicate-alerts/dismiss` | Descartar las alertas pendientes |
 | `GET` | `/api/tickets/mine` | Bandeja del técnico |
 | `GET` | `/api/tickets/offers` | Ofertas del supervisor |
+| `GET` | `/api/tickets/attention` | Conteos de ofertas pendientes y trabajo activo del actor |
 | `GET` | `/api/supervisors` | Supervisores con ámbito |
 | `GET` | `/api/tickets/:id` | Detalle |
 | `GET` | `/api/tickets/:id/timeline` | Historial |
@@ -58,6 +59,10 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | `GET` | `/api/tickets/:id/rating` | Calificación |
 | `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
+
+`GET /api/tickets/attention` devuelve `{ offers, myWork }`: ofertas vigentes para el actor y tiquets
+no finales asignados a su perfil de técnico. Reutiliza el alcance de `ticket.view`; `offers` queda en
+cero sin `ticket.take_offer` y `myWork` en cero sin perfil de técnico.
 
 El cuerpo de una acción contiene `action`, `clientRequestId` y los campos específicos del comando.
 Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-transiciones.md).
@@ -139,8 +144,15 @@ de tamaño, tipo y cuota, y procesa imágenes antes de dejarlas disponibles.
 | `POST` | `/api/notifications/read-all` | Marcar todas |
 | `POST` | `/api/sync/actions` | Lote de acciones offline |
 
-`GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`
-y `createdAt`.
+`GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`,
+`createdAt`, `actorName`, `reasonName` y `context` (`teamName`, `buildingName`, `categoryName`,
+`priorityName`, `duplicateFolio`, `derivedFolio`, `fromPriorityName`, `toPriorityName`). El cliente
+compone el texto legible; el servidor no envía el aviso al actor de la acción.
+
+Las reglas cubren oferta, toma, asignación y reasignación de técnico, reasignación de supervisor,
+apoyo auxiliar, recaptura, prioridad, atendido pendiente de validación, validación, reclamación
+abierta y resuelta, reapertura, reactivación, rechazo, cancelación, duplicado marcado, sin ruteo y
+calificación.
 
 `GET /api/events/changes` recibe `since` (ID numérico del último evento, por defecto 0) y `limit`
 (1–200, por defecto 100); devuelve `{ items }` en orden por ID. SSE y recuperación respetan alcance
