@@ -6,6 +6,7 @@ import type { Database } from '../db/client.js'
 import { authGuards, requirePermission, type Guard } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
+import { isAttachmentMimeType } from '../attachments/types.js'
 import { saveAdminReason } from './admin-reasons.js'
 import {
   adminTable,
@@ -29,8 +30,30 @@ const dependencyBody = z.object({
 })
 const bodySchema = z.record(
   z.string().min(1).max(64),
-  z.union([z.string(), z.number(), z.boolean(), z.null()]),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(z.string().trim().min(1).max(160)).max(10),
+  ]),
 )
+
+function assertProblemAttachmentTypes(
+  table: string,
+  body: Record<string, unknown>,
+) {
+  if (table !== 'problems') return
+  const value = body.attachment_required_types
+  if (value === undefined) return
+  if (!Array.isArray(value)) {
+    throw new AppError(400, 'validation_error', 'Tipos de adjunto no válidos')
+  }
+  const invalid = value.some((item) => !isAttachmentMimeType(String(item)))
+  if (invalid || new Set(value.map(String)).size !== value.length) {
+    throw new AppError(400, 'validation_error', 'Tipos de adjunto no válidos')
+  }
+}
 
 function valuesOf(body: Record<string, unknown>): AdminValues {
   return body as AdminValues
@@ -117,11 +140,9 @@ function registerGenericCatalogRoutes(
         const id = await saveAdminReason(db, request.body)
         return reply.status(201).send({ id })
       }
-      const id = await insertAdminRow(
-        db,
-        adminTable(table),
-        valuesOf(bodySchema.parse(request.body)),
-      )
+      const body = bodySchema.parse(request.body)
+      assertProblemAttachmentTypes(table, body)
+      const id = await insertAdminRow(db, adminTable(table), valuesOf(body))
       return reply.status(201).send({ id })
     },
   )
@@ -135,11 +156,13 @@ function registerGenericCatalogRoutes(
         await saveAdminReason(db, request.body, params.id)
         return reply.status(204).send()
       }
+      const body = bodySchema.parse(request.body)
+      assertProblemAttachmentTypes(params.table, body)
       await updateAdminRow(
         db,
         adminTable(params.table),
         params.id,
-        valuesOf(bodySchema.parse(request.body)),
+        valuesOf(body),
       )
       return reply.status(204).send()
     },

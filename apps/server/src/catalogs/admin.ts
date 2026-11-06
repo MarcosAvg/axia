@@ -32,6 +32,8 @@ const COLUMNS: Record<AdminCatalogTable, readonly string[]> = {
     'active',
     'default_priority_id',
     'team_id',
+    'attachment_required_types',
+    'attachment_instructions',
   ],
   service_types: ['name', 'active', 'target_minutes'],
   priorities: ['name', 'position', 'target_minutes', 'active'],
@@ -70,19 +72,30 @@ function assertColumn(table: AdminCatalogTable, column: string) {
 
 export type AdminValues = Record<
   string,
-  string | number | boolean | null | undefined
+  string | number | boolean | null | string[] | undefined
 >
+
+function valueParam(value: Exclude<AdminValues[string], undefined>): SQL {
+  if (Array.isArray(value)) {
+    return sql`array[${sql.join(
+      value.map((item) => sql`${item}`),
+      sql`, `,
+    )}]::text[]`
+  }
+  return sql`${value}`
+}
 
 function valueList(table: AdminCatalogTable, values: AdminValues): SQL[] {
   const entries = Object.entries(values).filter(
-    ([, value]) => value !== undefined,
+    (entry): entry is [string, string | number | boolean | null | string[]] =>
+      entry[1] !== undefined,
   )
   if (entries.length === 0) {
     throw new AppError(400, 'validation_error', 'No hay valores para guardar')
   }
   return entries.map(([column, value]) => {
     assertColumn(table, column)
-    return sql`${sql.identifier(column)} = ${value}`
+    return sql`${sql.identifier(column)} = ${valueParam(value)}`
   })
 }
 
@@ -92,7 +105,8 @@ export async function insertAdminRow(
   values: AdminValues,
 ) {
   const entries = Object.entries(values).filter(
-    ([, value]) => value !== undefined,
+    (entry): entry is [string, string | number | boolean | null | string[]] =>
+      entry[1] !== undefined,
   )
   if (entries.length === 0) {
     throw new AppError(400, 'validation_error', 'No hay valores para guardar')
@@ -101,7 +115,7 @@ export async function insertAdminRow(
     assertColumn(table, column)
     return sql.identifier(column)
   })
-  const params = entries.map(([, value]) => sql`${value}`)
+  const params = entries.map(([, value]) => valueParam(value))
   const result = await db.execute(sql`
     insert into ${sql.identifier(table)} (${sql.join(columns, sql`, `)})
     values (${sql.join(params, sql`, `)})

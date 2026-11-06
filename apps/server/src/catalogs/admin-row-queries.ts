@@ -99,6 +99,8 @@ export const SELECTS: Record<AdminCatalogTable, SQL> = {
       p.subcategory_id,
       p.team_id,
       p.default_priority_id,
+      p.attachment_required_types,
+      p.attachment_instructions,
       p.updated_at,
       s.category_id,
       c.name as category_name

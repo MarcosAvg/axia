@@ -226,3 +226,26 @@ describe('catalog validation and access', () => {
     expect(forbidden.statusCode).toBe(403)
   })
 })
+
+describe('catálogo de problemas con adjuntos', () => {
+  it('expone los tipos exigidos y la instrucción', async () => {
+    await context.db.execute(sql`
+      update public.problems
+      set attachment_required_types = array['application/pdf']::text[],
+          attachment_instructions = 'Adjunta la cotización'
+      where id = ${context.catalog.problemA.id}
+    `)
+    const response = await get(
+      `/api/catalogs/problems?subcategoryId=${context.catalog.subcategoryA.id}`,
+      context.cookies.requester,
+    )
+    expect(response.statusCode).toBe(200)
+    const item = (response.json() as ItemsBody).items.find(
+      (row) => row.id === context.catalog.problemA.id,
+    )
+    expect(item).toMatchObject({
+      requiredAttachmentTypes: ['application/pdf'],
+      attachmentInstructions: 'Adjunta la cotización',
+    })
+  })
+})

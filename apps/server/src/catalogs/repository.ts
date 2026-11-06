@@ -8,7 +8,11 @@ type PriorityOption = SimpleOption & { position: number }
 type LocationOption = SimpleOption & { buildingId: string }
 type CategoryOption = SimpleOption
 type SubcategoryOption = SimpleOption & { categoryId: string }
-type ProblemOption = SimpleOption & { subcategoryId: string }
+type ProblemOption = SimpleOption & {
+  subcategoryId: string
+  requiredAttachmentTypes: string[]
+  attachmentInstructions: string | null
+}
 type RequesterOption = {
   id: string
   fullName: string
@@ -160,7 +164,11 @@ async function listProblems(
   subcategoryId: string,
 ): Promise<ProblemOption[]> {
   const result = await db.execute(sql`
-    select id, name, subcategory_id as "subcategoryId"
+    select
+      id, name,
+      subcategory_id as "subcategoryId",
+      attachment_required_types as "requiredAttachmentTypes",
+      attachment_instructions as "attachmentInstructions"
     from public.problems
     where active and subcategory_id = ${subcategoryId}
     order by public.natural_sort_key(name)

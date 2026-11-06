@@ -58,6 +58,21 @@ async function insertDependency(
   return id
 }
 
+function postProblem(payload: Record<string, unknown>) {
+  return context.app.inject({
+    method: 'POST',
+    url: '/api/admin/catalogs/problems',
+    headers: authHeaders(context.cookies.admin),
+    payload: {
+      subcategory_id: refs.subcategoryId,
+      team_id: refs.teamId,
+      name: `Problema ${Math.random().toString(36).slice(2)}`,
+      active: true,
+      ...payload,
+    },
+  })
+}
+
 beforeAll(async () => {
   context = await buildTicketHttpApp()
   refs = await loadWriteRefs(context)
@@ -175,5 +190,33 @@ describe('orden y permisos de lectura', () => {
       headers: authHeaders(context.cookies.requester),
     })
     expect(response.statusCode).toBe(403)
+  })
+})
+
+describe('adjuntos en el catálogo de problemas', () => {
+  it('guarda los tipos y la instrucción del problema', async () => {
+    const response = await postProblem({
+      name: 'Problema con cotización',
+      attachment_required_types: ['application/pdf'],
+      attachment_instructions: 'Adjunta la cotización',
+    })
+    expect(response.statusCode).toBe(201)
+    const id = (response.json() as { id: string }).id
+    const rows = await list('problems')
+    expect(rows.find((row) => row.id === id)).toMatchObject({
+      attachment_required_types: ['application/pdf'],
+      attachment_instructions: 'Adjunta la cotización',
+    })
+  })
+
+  it('rechaza tipos desconocidos y duplicados', async () => {
+    const unknown = await postProblem({
+      attachment_required_types: ['text/html'],
+    })
+    expect(unknown.statusCode).toBe(400)
+    const duplicate = await postProblem({
+      attachment_required_types: ['application/pdf', 'application/pdf'],
+    })
+    expect(duplicate.statusCode).toBe(400)
   })
 })

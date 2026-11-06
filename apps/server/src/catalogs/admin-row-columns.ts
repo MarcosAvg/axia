@@ -58,6 +58,8 @@ export const READ_COLUMNS: Record<AdminCatalogTable, readonly string[]> = {
     'subcategory_id',
     'team_id',
     'default_priority_id',
+    'attachment_required_types',
+    'attachment_instructions',
     'updated_at',
     'category_id',
     'category_name',
