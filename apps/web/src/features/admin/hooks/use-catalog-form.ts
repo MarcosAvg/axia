@@ -3,7 +3,7 @@ import type { FormEvent } from 'react'
 import type { AdminTable } from '../api/admin-api'
 import type { AdminField } from '../domain/catalogs'
 import { initialValues, toAdminValues } from '../domain/form-values'
-import type { RawValues } from '../domain/form-values'
+import type { RawValue, RawValues } from '../domain/form-values'
 import { reasonParentOptions } from '../domain/reason-parents'
 import type { AdminOption } from './use-admin-catalog'
 
@@ -30,7 +30,7 @@ export function useCatalogForm({
     setInvalid(errors)
     if (errors.length === 0) onSave(values)
   }
-  function onChange(name: string, value: string | number | boolean) {
+  function onChange(name: string, value: RawValue) {
     setRaw((current) => ({
       ...current,
       [name]: value,

@@ -1,7 +1,13 @@
 import type { AdminTable } from '../api/admin-api'
 
 type AdminFieldKind =
-  'text' | 'number' | 'minutes' | 'boolean' | 'select-table' | 'select-fixed'
+  | 'text'
+  | 'number'
+  | 'minutes'
+  | 'boolean'
+  | 'select-table'
+  | 'select-fixed'
+  | 'multiselect-fixed'
 
 export interface AdminField {
   name: string

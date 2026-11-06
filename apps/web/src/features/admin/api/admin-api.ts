@@ -17,7 +17,10 @@ export type AdminTable =
   | 'work_calendars'
 
 export type AdminRow = Record<string, unknown>
-export type AdminValues = Record<string, string | number | boolean | null>
+export type AdminValues = Record<
+  string,
+  string | number | boolean | null | string[]
+>
 
 export async function adminList(
   table: AdminTable,

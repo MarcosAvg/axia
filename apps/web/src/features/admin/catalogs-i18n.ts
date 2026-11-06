@@ -36,6 +36,8 @@ export const catalogMessages = {
     clock_class: 'Clasificación de reloj',
     work_calendar_id: 'Calendario laboral',
     default_priority_id: 'Prioridad por defecto',
+    attachment_required_types: 'Adjuntos obligatorios',
+    attachment_instructions: 'Instrucción del adjunto',
     is_platform: 'Canal de la plataforma',
     updated_at: 'Actualizado',
     user_label: 'Cuenta',

@@ -1,5 +1,6 @@
 import type { AdminTable } from '../api/admin-api'
 import type { AdminField } from '../domain/catalogs'
+import type { RawValues } from '../domain/form-values'
 import type { AdminOption } from '../hooks/use-admin-catalog'
 import { useCatalogForm } from '../hooks/use-catalog-form'
 import { adminMessages } from '../i18n'
@@ -12,7 +13,7 @@ interface CatalogFormProps {
   row?: Record<string, unknown>
   optionsFor: (table: AdminTable) => AdminOption[]
   isSaving: boolean
-  onSave: (values: Record<string, string | number | boolean | null>) => void
+  onSave: (values: RawValues) => void
   onCancel: () => void
 }
 

@@ -40,6 +40,7 @@ const FORMATTERS: Record<
 function plainText(column: AdminColumn, value: unknown): string {
   if (column.format) return FORMATTERS[column.format](value)
   if (typeof value === 'boolean') return value ? 'Sí' : 'No'
+  if (Array.isArray(value)) return value.map(String).join(', ')
   if (isBlank(value)) return ''
   return String(value)
 }
@@ -55,6 +56,11 @@ export function cellText(
     return relationLabel(optionsFor(column.optionsTable), value) ?? ''
   }
   if (column.options) {
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => fixedOptionLabel(column.options!, item))
+        .join(', ')
+    }
     return isBlank(value) ? '' : fixedOptionLabel(column.options, value)
   }
   return plainText(column, value)
@@ -74,6 +80,11 @@ export function cellSortValue(
     return relationLabel(optionsFor(column.optionsTable), value)
   }
   if (column.options) {
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => fixedOptionLabel(column.options!, item))
+        .join(', ')
+    }
     return isBlank(value) ? null : fixedOptionLabel(column.options, value)
   }
   return isBlank(value) ? null : value

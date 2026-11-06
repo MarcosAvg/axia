@@ -17,9 +17,10 @@ export type CatalogKey =
   | 'technicians'
   | 'reasons'
 
-export type CellValue = string | number | boolean | null
+export type CellValue = string | number | boolean | null | string[]
 
-type ColumnKind = 'text' | 'number' | 'boolean' | 'reference' | 'fixed'
+type ColumnKind =
+  'text' | 'number' | 'boolean' | 'reference' | 'fixed' | 'mime-list'
 
 export interface ImportColumn {
   key: string
@@ -74,6 +75,27 @@ const text = (key: string, header: string, required = false): ImportColumn => ({
   header,
   kind: 'text',
   required,
+})
+const attachmentTypeOptions = [
+  { value: 'application/pdf', label: 'PDF' },
+  { value: 'image/jpeg', label: 'JPEG' },
+  { value: 'image/png', label: 'PNG' },
+  { value: 'image/webp', label: 'WebP' },
+  {
+    value:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    label: 'DOCX',
+  },
+  {
+    value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    label: 'XLSX',
+  },
+]
+const mimeList = (key: string, header: string): ImportColumn => ({
+  key,
+  header,
+  kind: 'mime-list',
+  options: attachmentTypeOptions,
 })
 const number = (key: string, header: string): ImportColumn => ({
   key,
@@ -184,6 +206,8 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
       text('name', 'Problema', true),
       reference('team_id', 'Equipo', 'teams', true),
       reference('default_priority_id', 'Prioridad por defecto', 'priorities'),
+      mimeList('attachment_required_types', 'Adjuntos obligatorios'),
+      text('attachment_instructions', 'Instrucción del adjunto'),
       active,
     ],
     ['subcategory_id', 'name'],

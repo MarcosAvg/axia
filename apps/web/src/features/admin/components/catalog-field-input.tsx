@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { SelectField, TextField } from '@/components/shared/form-fields'
 import type { AdminField } from '../domain/catalogs'
+import type { RawValue } from '../domain/form-values'
 import {
   TARGET_UNITS,
   amountFor,
@@ -14,10 +15,10 @@ import { adminMessages } from '../i18n'
 
 interface CatalogFieldInputProps {
   field: AdminField
-  value: string | number | boolean | null
+  value: RawValue
   options: AdminOption[]
   error?: string
-  onChange: (value: string | number | boolean) => void
+  onChange: (value: RawValue) => void
 }
 
 const unitLabels = adminMessages.targetUnits
@@ -129,10 +130,50 @@ function PlainInput({ field, value, error, onChange }: CatalogFieldInputProps) {
   )
 }
 
+function MultiSelectInput({
+  field,
+  value,
+  error,
+  onChange,
+}: CatalogFieldInputProps) {
+  const selected = Array.isArray(value) ? value : []
+  const options = field.options ?? []
+  function toggle(option: string) {
+    onChange(
+      selected.includes(option)
+        ? selected.filter((item) => item !== option)
+        : [...selected, option],
+    )
+  }
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="text-sm font-medium">{field.label}</legend>
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {options.map((option) => (
+          <label
+            key={option.value}
+            className="flex min-h-11 items-center gap-2 text-sm"
+          >
+            <Checkbox
+              checked={selected.includes(option.value)}
+              onCheckedChange={() => toggle(option.value)}
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+    </fieldset>
+  )
+}
+
 /** Campo de un formulario de catálogo, según el tipo declarado en la configuración. */
 export function CatalogFieldInput(props: CatalogFieldInputProps) {
   if (props.field.kind === 'boolean') return <BooleanField {...props} />
   if (props.field.kind === 'minutes') return <MinutesField {...props} />
+  if (props.field.kind === 'multiselect-fixed') {
+    return <MultiSelectInput {...props} />
+  }
   if (
     props.field.kind === 'select-table' ||
     props.field.kind === 'select-fixed'

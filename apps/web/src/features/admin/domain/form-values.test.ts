@@ -19,6 +19,19 @@ const fieldsWithDefaults: AdminField[] = [
   { name: 'position', label: 'Orden', kind: 'number', defaultValue: 0 },
 ]
 
+const multiField: AdminField[] = [
+  {
+    name: 'attachment_required_types',
+    label: 'Tipos',
+    kind: 'multiselect-fixed',
+    required: true,
+    options: [
+      { value: 'application/pdf', label: 'PDF' },
+      { value: 'image/jpeg', label: 'JPEG' },
+    ],
+  },
+]
+
 describe('initialValues', () => {
   it('deja los textos vacíos y los booleanos en falso', () => {
     const values = initialValues(fields)
@@ -42,6 +55,16 @@ describe('initialValues', () => {
     expect(values.active).toBe(true)
     expect(values.position).toBe(3)
     expect(values.team_id).toBe('t1')
+  })
+
+  it('precarga los arreglos de un multiselect', () => {
+    const values = initialValues(multiField, {
+      attachment_required_types: ['application/pdf', 'image/jpeg'],
+    })
+    expect(values.attachment_required_types).toEqual([
+      'application/pdf',
+      'image/jpeg',
+    ])
   })
 })
 
@@ -86,6 +109,20 @@ describe('toAdminValues', () => {
     expect(result.values.position).toBe(5)
     expect(result.values.team_id).toBeNull()
     expect(result.values.active).toBe(true)
+  })
+
+  it('convierte el multiselect en un arreglo y exige al menos uno', () => {
+    expect(
+      toAdminValues(multiField, {
+        attachment_required_types: ['application/pdf'],
+      }),
+    ).toMatchObject({
+      errors: [],
+      values: { attachment_required_types: ['application/pdf'] },
+    })
+    expect(
+      toAdminValues(multiField, { attachment_required_types: [] }).errors,
+    ).toEqual(['attachment_required_types'])
   })
 })
 

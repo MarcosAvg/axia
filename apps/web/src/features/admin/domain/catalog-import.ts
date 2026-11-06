@@ -123,6 +123,20 @@ function parseReferenceColumn(
     : { issue: `Sin coincidencia: ${column.header} «${label}»` }
 }
 
+function parseMimeList(column: ImportColumn, rawValue: unknown): Parsed {
+  const text = String(rawValue ?? '').trim()
+  if (text === '') return { value: [] }
+  const values = text
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => findFixed(column, part))
+  if (values.some((value) => value === null)) {
+    return { issue: `${column.header} tiene un tipo no válido` }
+  }
+  return { value: values as string[] }
+}
+
 function columnValue(
   column: ImportColumn,
   rawValue: unknown,
@@ -147,6 +161,7 @@ function columnValue(
       ? { issue: `${column.header} no es válido` }
       : { value: parsed }
   }
+  if (column.kind === 'mime-list') return parseMimeList(column, rawValue)
   return parseReferenceColumn(column, rawValue, context)
 }
 

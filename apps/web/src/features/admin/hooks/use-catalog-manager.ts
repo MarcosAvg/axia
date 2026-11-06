@@ -4,6 +4,7 @@ import { ApiError } from '@/lib/api-client'
 import type { AdminTable } from '../api/admin-api'
 import { optionSourcesFor } from '../domain/catalog-options'
 import type { AdminCatalogConfig } from '../domain/catalogs'
+import type { RawValues } from '../domain/form-values'
 import { adminMessages } from '../i18n'
 import {
   useAdminDelete,
@@ -15,7 +16,7 @@ import type { AdminOption } from './use-admin-catalog'
 import { useCatalogList } from './use-catalog-list'
 
 type Editing = Record<string, unknown> | 'new' | null
-type Values = Record<string, string | number | boolean | null>
+type Values = RawValues
 
 function actionErrorMessage(error: unknown): string {
   return error instanceof ApiError &&

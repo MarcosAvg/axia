@@ -10,6 +10,22 @@ import {
 
 const { titles, fields } = adminMessages
 
+const ATTACHMENT_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'application/pdf', label: 'PDF' },
+  { value: 'image/jpeg', label: 'JPEG' },
+  { value: 'image/png', label: 'PNG' },
+  { value: 'image/webp', label: 'WebP' },
+  {
+    value:
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    label: 'Word (DOCX)',
+  },
+  {
+    value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    label: 'Excel (XLSX)',
+  },
+]
+
 export const categoriesCatalog: AdminCatalogConfig = {
   key: 'categories',
   table: 'categories',
@@ -73,6 +89,12 @@ export const problemsCatalog: AdminCatalogConfig = {
       optionsTable: 'priorities',
       hideBelow: 'xl',
     },
+    {
+      key: 'attachment_required_types',
+      label: fields.attachment_required_types,
+      options: ATTACHMENT_TYPE_OPTIONS,
+      hideBelow: 'xl',
+    },
     activeColumn,
   ],
   fields: [
@@ -96,6 +118,17 @@ export const problemsCatalog: AdminCatalogConfig = {
       label: fields.default_priority_id,
       kind: 'select-table',
       optionsTable: 'priorities',
+    },
+    {
+      name: 'attachment_required_types',
+      label: fields.attachment_required_types,
+      kind: 'multiselect-fixed',
+      options: ATTACHMENT_TYPE_OPTIONS,
+    },
+    {
+      name: 'attachment_instructions',
+      label: fields.attachment_instructions,
+      kind: 'text',
     },
     activeField,
   ],

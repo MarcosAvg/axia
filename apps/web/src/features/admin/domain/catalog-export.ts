@@ -97,6 +97,11 @@ function numberCell(value: unknown): ExportCell {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function mimeListCell(value: unknown): ExportCell {
+  if (Array.isArray(value)) return value.join(', ') || null
+  return value === null || value === undefined ? null : String(value)
+}
+
 function cellValue(
   column: ImportColumn,
   value: unknown,
@@ -111,6 +116,8 @@ function cellValue(
       return referenceLabel(column, value, references)
     case 'number':
       return numberCell(value)
+    case 'mime-list':
+      return mimeListCell(value)
     default:
       return value === null || value === undefined ? null : String(value)
   }

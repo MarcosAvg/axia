@@ -129,12 +129,39 @@ describe('problemas', () => {
       Problema: 'Falla',
       Equipo: 'Mantenimiento',
       'Prioridad por defecto': null,
+      'Adjuntos obligatorios': null,
+      'Instrucción del adjunto': null,
       Activo: 'Sí',
     })
     const prepared = prepareRow(spec, exported, 2, references)
     expect(prepared.issues).toEqual([])
     expect(prepared.data.subcategory_id).toBe('sub-1')
     expect(prepared.data.team_id).toBe('team-1')
+  })
+
+  it('exporta e importa los tipos de adjunto como lista', () => {
+    const problemRows = rows({
+      ...categoryRows,
+      problems: [
+        {
+          ...categoryRows.problems[0],
+          attachment_required_types: ['application/pdf', 'image/png'],
+          attachment_instructions: 'Adjunta la cotización',
+        },
+      ],
+    })
+    const references = toReferences(problemRows)
+    const spec = specByKey('problems')
+    const exported = first(
+      toExportRows(spec, problemRows.problems ?? [], references),
+    )
+    expect(exported['Adjuntos obligatorios']).toBe('application/pdf, image/png')
+    const prepared = prepareRow(spec, exported, 2, references)
+    expect(prepared.issues).toEqual([])
+    expect(prepared.data.attachment_required_types).toEqual([
+      'application/pdf',
+      'image/png',
+    ])
   })
 })
 
