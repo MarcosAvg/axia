@@ -9,6 +9,7 @@ import type {
 } from '@/features/catalogs'
 import type { RecaptureValues } from '../domain/recapture'
 import { ticketMessages } from '../i18n'
+import { RequiredAttachmentField } from './required-attachment-field'
 
 interface RecaptureCatalogs {
   buildings: Option[]
@@ -27,6 +28,13 @@ interface RecaptureCatalogs {
 interface RecaptureFieldsProps extends RecaptureCatalogs {
   values: RecaptureValues
   onChange: (name: keyof RecaptureValues, value: string) => void
+  attachmentTypes: string[]
+  attachment: File | null
+  onAttachmentChange: (file: File | null) => void
+  attachmentError?: string | null
+  attachmentInstructions?: string | null
+  isUploadingAttachment: boolean
+  attachmentProgress: number
 }
 
 const toOptions = (items: Option[]): SelectOption[] =>
@@ -152,6 +160,21 @@ export function RecaptureFields(props: RecaptureFieldsProps) {
         onChange={(event) => props.onChange('note', event.target.value)}
         className="sm:col-span-2"
       />
+      <div className="sm:col-span-2">
+        <RequiredAttachmentField
+          types={props.attachmentTypes}
+          file={props.attachment}
+          error={props.attachmentError ?? undefined}
+          hint={props.attachmentInstructions}
+          onChange={props.onAttachmentChange}
+        />
+        {props.isUploadingAttachment ? (
+          <p className="text-sm text-muted-foreground" role="status">
+            {ticketMessages.create.attachmentUploading}{' '}
+            {props.attachmentProgress}%
+          </p>
+        ) : null}
+      </div>
     </div>
   )
 }

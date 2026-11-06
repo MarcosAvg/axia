@@ -32,6 +32,13 @@ export function RecaptureForm({
         values={form.values}
         onChange={form.change}
         {...form.catalogs}
+        attachmentTypes={form.attachmentTypes}
+        attachment={form.attachment}
+        onAttachmentChange={form.setAttachment}
+        attachmentError={form.attachmentError}
+        attachmentInstructions={form.attachmentInstructions}
+        isUploadingAttachment={form.isUploadingAttachment}
+        attachmentProgress={form.attachmentProgress}
       />
       {form.hasError ? (
         <ErrorAlert message={ticketMessages.actionFields.required} />
@@ -40,7 +47,11 @@ export function RecaptureForm({
         <ErrorAlert message={toTicketError(form.mutationError).message} />
       ) : null}
       <ButtonGrid>
-        <Button type="submit" disabled={form.isPending} className="min-h-11">
+        <Button
+          type="submit"
+          disabled={form.isPending || form.isUploadingAttachment}
+          className="min-h-11"
+        >
           {ticketMessages.actionFields.submit}
         </Button>
         <Button

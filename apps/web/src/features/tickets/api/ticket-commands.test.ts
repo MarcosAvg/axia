@@ -106,6 +106,24 @@ it('normaliza opcionales nulos heredados sin inventar argumentos requeridos', ()
   })
 })
 
+it('conserva el adjunto que viaja con la recaptura', () => {
+  expect(
+    ticketCommandSchema.parse({
+      operation: 'recapture',
+      args: { changes: { problemId: 'p2' }, attachmentId: 'a1' },
+    }),
+  ).toEqual({
+    operation: 'recapture',
+    args: {
+      changes: { problemId: 'p2' },
+      attachmentId: 'a1',
+      reasonId: undefined,
+      note: undefined,
+      subjectTechnicianId: undefined,
+    },
+  })
+})
+
 it('mantiene la correlación entre operación, argumentos y mutaciones', () => {
   expectTypeOf<{
     operation: 'assign_technician'

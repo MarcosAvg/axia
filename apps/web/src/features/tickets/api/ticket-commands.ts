@@ -86,6 +86,7 @@ export const ticketCommandSchema = z.discriminatedUnion('operation', [
       changes,
       reasonId: optionalText,
       note: optionalText,
+      attachmentId: optionalText,
       ...proxy,
     }),
   }),
