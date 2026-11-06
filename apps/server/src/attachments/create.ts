@@ -82,20 +82,11 @@ function replay(
   }
 }
 
-export async function createAttachment(
-  context: CreateAttachmentContext,
-  actor: Actor,
+async function validateReservation(
+  db: Database,
   input: CreateAttachmentInput,
-): Promise<CreateAttachmentResult> {
-  const { db, config } = context
-  await context.ready
-  await assertCanReserveAttachment(db, actor, input)
-
-  const existing = await existingAttachment(db, actor, input)
-  if (existing) {
-    return replay(config, existing.id, await quotaUsed(db, actor.id))
-  }
-
+  config: AppConfig,
+) {
   const rule = await loadProblemAttachmentRule(db, input.problemId)
   if (rule.types.length === 0) {
     throw new AppError(
@@ -121,16 +112,13 @@ export async function createAttachment(
       'El archivo supera el tamaño máximo',
     )
   }
+}
 
-  const used = await quotaUsed(db, actor.id)
-  if (used >= config.ATTACHMENT_QUOTA_BYTES) {
-    throw new AppError(
-      413,
-      'quota_exceeded',
-      'Has alcanzado tu cuota de adjuntos',
-    )
-  }
-
+async function insertReservation(
+  db: Database,
+  actor: Actor,
+  input: CreateAttachmentInput,
+): Promise<string> {
   const inserted = await db.execute(sql`
     insert into public.ticket_attachments (
       problem_id, client_request_id, uploaded_by, original_name,
@@ -141,7 +129,35 @@ export async function createAttachment(
     )
     returning id
   `)
-  const attachmentId = (inserted.rows[0] as { id: string }).id
+  return (inserted.rows[0] as { id: string }).id
+}
+
+export async function createAttachment(
+  context: CreateAttachmentContext,
+  actor: Actor,
+  input: CreateAttachmentInput,
+): Promise<CreateAttachmentResult> {
+  const { db, config } = context
+  await context.ready
+  await assertCanReserveAttachment(db, actor, input)
+
+  const existing = await existingAttachment(db, actor, input)
+  if (existing) {
+    return replay(config, existing.id, await quotaUsed(db, actor.id))
+  }
+
+  await validateReservation(db, input, config)
+
+  const used = await quotaUsed(db, actor.id)
+  if (used >= config.ATTACHMENT_QUOTA_BYTES) {
+    throw new AppError(
+      413,
+      'quota_exceeded',
+      'Has alcanzado tu cuota de adjuntos',
+    )
+  }
+
+  const attachmentId = await insertReservation(db, actor, input)
   return {
     attachmentId,
     uploadUrl: '/api/attachment-uploads',

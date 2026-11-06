@@ -10,6 +10,7 @@ import { registerAuthRoutes } from './auth/routes.js'
 import type { AuthService } from './auth/service.js'
 import { registerAttachmentRoutes } from './attachments/routes.js'
 import type { AttachmentService } from './attachments/service.js'
+import { createAttachmentTusServer } from './attachments/tus.js'
 import { registerAdminCatalogRoutes } from './catalogs/admin-routes.js'
 import { registerAdminCalendarRoutes } from './catalogs/calendar-routes.js'
 import { registerAdminSettingsRoutes } from './catalogs/settings-routes.js'
@@ -103,6 +104,7 @@ async function registerExtraRoutes(
   }
   if (auth && attachments) {
     registerAttachmentRoutes(app, { auth, config, attachments })
+    createAttachmentTusServer(app, auth, config, attachments)
   }
   if (auth && realtime) {
     registerRealtimeRoutes(app, { auth, config, ...realtime })

@@ -1,13 +1,14 @@
-import { mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
-
 import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
-import { ensureStorage, storagePaths } from '../evidence/paths.js'
 import { createAttachment } from './create.js'
+import {
+  attachmentPaths,
+  ensureAttachmentStorage,
+  type AttachmentStoragePaths,
+} from './paths.js'
 import type { CreateAttachmentInput } from './schemas.js'
 
 export type AttachmentRow = {
@@ -38,17 +39,8 @@ export type CompleteAttachmentData = {
 type Context = {
   db: Database
   config: AppConfig
-  paths: ReturnType<typeof attachmentPaths>
+  paths: AttachmentStoragePaths
   ready: Promise<void>
-}
-
-function attachmentPaths(root: string) {
-  const base = storagePaths(root)
-  return {
-    root: base.root,
-    uploads: join(base.uploads, 'attachments'),
-    files: join(base.files, 'attachments'),
-  }
 }
 
 async function findForTus(
@@ -108,11 +100,7 @@ async function quotaForUploader(
 
 export function createAttachmentService(db: Database, config: AppConfig) {
   const paths = attachmentPaths(config.STORAGE_DIR)
-  const ready = (async () => {
-    await ensureStorage(storagePaths(config.STORAGE_DIR))
-    await mkdir(paths.uploads, { recursive: true })
-    await mkdir(paths.files, { recursive: true })
-  })()
+  const ready = ensureAttachmentStorage(paths)
   const context: Context = { db, config, paths, ready }
   return {
     paths,
