@@ -107,9 +107,10 @@ export function MobileFilterFields({
   buildings,
   categories,
   onApply,
+  showStatus = true,
 }: FilterFieldsProps) {
   const [open, setOpen] = useState(false)
-  const selects = buildFilterSelects(value, buildings, categories)
+  const selects = buildFilterSelects(value, buildings, categories, showStatus)
   const active = selects.filter((select) => select.value !== '').length
 
   return (

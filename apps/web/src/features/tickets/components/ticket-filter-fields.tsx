@@ -24,20 +24,26 @@ export interface FilterFieldsProps {
   buildings: Option[]
   categories: CategoryOption[]
   onApply: (patch: Partial<TicketListSearch>) => void
+  /** El tablero expresa el estado en columnas y no necesita el filtro. */
+  showStatus?: boolean
 }
 
 export function buildFilterSelects(
   value: TicketListSearch,
   buildings: Option[],
   categories: CategoryOption[],
+  showStatus = true,
 ): FilterSelect[] {
-  return [
-    {
+  const selects: FilterSelect[] = []
+  if (showStatus) {
+    selects.push({
       id: 'filter-status',
       label: list.filters.status,
       options: statusOptions,
       value: value.status ?? '',
-    },
+    })
+  }
+  selects.push(
     {
       id: 'filter-building',
       label: list.filters.building,
@@ -50,7 +56,8 @@ export function buildFilterSelects(
       options: categories.map((item) => ({ value: item.id, label: item.name })),
       value: value.categoryId ?? '',
     },
-  ]
+  )
+  return selects
 }
 
 export function readFilterValues(form: FormData): Partial<TicketListSearch> {

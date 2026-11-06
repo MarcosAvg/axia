@@ -111,6 +111,21 @@ describe('DTO HTTP de tiquets', () => {
     respond({ items: [item], total: '1', page: 1, pageSize: 20 })
     await expect(fetchTickets({}, 1)).rejects.toThrow()
   })
+  it('envía el tamaño de página que pide el tablero', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ items: [], total: 0, page: 1, pageSize: 100 }),
+          { status: 200 },
+        ),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await fetchTickets({ statuses: ['registered'] }, 1, 100)
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('pageSize=100')
+  })
 })
 
 describe('DTO HTTP de timeline', () => {

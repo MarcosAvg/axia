@@ -62,8 +62,9 @@ function DesktopFilterFields({
   buildings,
   categories,
   onApply,
+  showStatus = true,
 }: FilterFieldsProps) {
-  const selects = buildFilterSelects(value, buildings, categories)
+  const selects = buildFilterSelects(value, buildings, categories, showStatus)
 
   return (
     <form
@@ -106,6 +107,7 @@ interface TicketFiltersProps {
   onChange: (next: TicketListSearch) => void
   buildings: Option[]
   categories: CategoryOption[]
+  showStatus?: boolean
 }
 
 export function TicketFilters({
@@ -113,6 +115,7 @@ export function TicketFilters({
   onChange,
   buildings,
   categories,
+  showStatus,
 }: TicketFiltersProps) {
   function apply(patch: Partial<TicketListSearch>) {
     onChange({ ...value, ...patch, page: 1 })
@@ -127,6 +130,7 @@ export function TicketFilters({
         buildings={buildings}
         categories={categories}
         onApply={apply}
+        showStatus={showStatus}
       />
       <FilterChips
         items={chips}

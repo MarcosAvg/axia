@@ -23,7 +23,7 @@ import {
 } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
-const TICKETS_PAGE_SIZE = 20
+export const TICKETS_PAGE_SIZE = 20
 
 export interface TicketFilters {
   status?: TicketStatus
@@ -51,6 +51,7 @@ function queryString(params: Record<string, string | number | undefined>) {
 export async function fetchTickets(
   filters: TicketFilters,
   page: number,
+  pageSize = TICKETS_PAGE_SIZE,
 ): Promise<TicketPage> {
   const query = queryString({
     status: filters.status,
@@ -59,7 +60,7 @@ export async function fetchTickets(
     categoryId: filters.categoryId,
     search: filters.search,
     page,
-    pageSize: TICKETS_PAGE_SIZE,
+    pageSize,
   })
   return ticketPageResponseSchema.parse(
     await apiFetch<unknown>(`/api/tickets?${query}`),

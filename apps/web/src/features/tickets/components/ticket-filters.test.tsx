@@ -62,6 +62,24 @@ describe('TicketFilters', () => {
     })
   })
 
+  it('oculta el filtro de estado cuando el tablero lo pide', () => {
+    mockMatchMedia(true)
+    const onChange = vi.fn<(next: TicketListSearch) => void>()
+    render(
+      <TicketFilters
+        value={{ page: 1 }}
+        onChange={onChange}
+        buildings={[{ id: 'b1', name: 'Edificio Central' }]}
+        categories={[{ id: 'c1', name: 'Eléctrico' }]}
+        showStatus={false}
+      />,
+    )
+
+    expect(screen.queryByLabelText('Estado')).toBeNull()
+    expect(screen.getByLabelText('Edificio')).toBeInTheDocument()
+    expect(screen.getByLabelText('Categoría')).toBeInTheDocument()
+  })
+
   it('en móvil abre los filtros en una hoja y los aplica', () => {
     mockMatchMedia(false)
     const onChange = vi.fn<(next: TicketListSearch) => void>()

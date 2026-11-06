@@ -21,6 +21,7 @@ import {
   fetchTicket,
   fetchTickets,
   fetchTimeline,
+  TICKETS_PAGE_SIZE,
   fetchSupervisors,
   searchTicketsByFolio,
 } from '../api/tickets-api'
@@ -30,8 +31,8 @@ import { usePendingActions } from './use-pending-actions'
 import type { CreateTicketInput } from '../schemas'
 
 const ticketKeys = {
-  list: (filters: TicketFilters, page: number) =>
-    ['tickets', 'list', filters, page] as const,
+  list: (filters: TicketFilters, page: number, pageSize: number) =>
+    ['tickets', 'list', filters, page, pageSize] as const,
   myWork: (userId: string) => ['tickets', 'my-work', userId] as const,
   myOffers: (userId: string) => ['tickets', 'my-offers', userId] as const,
   attention: ['tickets', 'attention'] as const,
@@ -44,10 +45,14 @@ const ticketKeys = {
   duplicateAlerts: (id: string) => ['tickets', 'duplicate-alerts', id] as const,
 }
 
-export function useTicketsList(filters: TicketFilters, page: number) {
+export function useTicketsList(
+  filters: TicketFilters,
+  page: number,
+  pageSize = TICKETS_PAGE_SIZE,
+) {
   const query = useQuery({
-    queryKey: ticketKeys.list(filters, page),
-    queryFn: () => fetchTickets(filters, page),
+    queryKey: ticketKeys.list(filters, page, pageSize),
+    queryFn: () => fetchTickets(filters, page, pageSize),
     placeholderData: keepPreviousData,
   })
   const pending = usePendingActions()
