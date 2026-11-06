@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-06
+
 ### Añadido
 
 - Ciertos problemas pueden exigir un adjunto (PDF, JPEG, PNG, WebP, DOCX o XLSX) al registrar el
