@@ -5,6 +5,20 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-06
 
+## v0.17.0 publicada
+
+- Etiqueta `v0.17.0` creada desde `main` en `d80d9ca`. Workflow
+  [42265994255](https://github.com/MarcosAvg/axia/actions/runs/42265994255): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.17.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:d80d9ca6105f6f41a8124617e9fa86cfb6260b76`, digest
+  `sha256:3ea4114f67bd028f8e86e3fa89ef7b12861d4d05ccaf464c296c60b61e16477b`.
+- [Release v0.17.0](https://github.com/MarcosAvg/axia/releases/tag/v0.17.0) con
+  `axia-self-hosted.tar.gz` (SHA-256 `6ed71d9753ee3a86f2cf261956605af7a3c43cd49fa85fec4e38439bffc20b00`)
+  y su `.sha256`.
+- Incluye los adjuntos obligatorios por problema (ADR 0122).
+
 ## Tarea integrada: adjuntos obligatorios por problema
 
 - Ciertos problemas exigen un adjunto al registrar el tiquet. Los tipos (PDF, JPEG, PNG, WebP,
