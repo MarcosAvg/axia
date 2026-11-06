@@ -1,8 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
 import { saveAndUploadEvidence } from '../api/offline-evidence'
+import { uploadErrorMessage } from '../domain/attachments'
 import { toTicketError } from '../domain/errors'
 import { ticketMessages } from '../i18n'
 import type { DuplicateCandidate } from '../domain/types'
@@ -67,6 +68,11 @@ function useRequiredAttachmentUploader(
   const upload = useUploadAttachment()
   const [progress, setProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
+  const uploadState = useRef<{
+    key: string
+    clientRequestId: string
+    attachmentId?: string
+  } | null>(null)
 
   async function uploadFor(problemId: string): Promise<UploadResult> {
     if (requiredTypes.length === 0) return {}
@@ -76,17 +82,30 @@ function useRequiredAttachmentUploader(
     if (isOffline()) {
       return { error: ticketMessages.create.attachmentOffline }
     }
+    const key = `${problemId}:${attachment.name}:${attachment.size}:${attachment.lastModified}`
+    if (!uploadState.current || uploadState.current.key !== key) {
+      uploadState.current = { key, clientRequestId: crypto.randomUUID() }
+    }
+    if (uploadState.current.attachmentId) {
+      return { attachmentId: uploadState.current.attachmentId }
+    }
     try {
       setIsUploading(true)
       setProgress(0)
       const attachmentId = await upload.mutateAsync({
         problemId,
         file: attachment,
+        clientRequestId: uploadState.current.clientRequestId,
         onProgress: setProgress,
       })
+      uploadState.current.attachmentId = attachmentId
       return { attachmentId }
-    } catch {
-      return { error: ticketMessages.create.attachmentError }
+    } catch (error) {
+      uploadState.current = null
+      return {
+        error:
+          uploadErrorMessage(error) ?? ticketMessages.create.attachmentError,
+      }
     } finally {
       setIsUploading(false)
     }
@@ -115,6 +134,7 @@ function useCreateTicketAction({
   setAllowLeave,
   setSubmitError,
 }: CreateActionContext) {
+  const clientRequestId = useRef(crypto.randomUUID()).current
   return async function createWith(
     input: CreateTicketInput,
     shownCandidateIds?: string[],
@@ -129,7 +149,7 @@ function useCreateTicketAction({
     createMutation.mutate(
       {
         input,
-        clientRequestId: crypto.randomUUID(),
+        clientRequestId,
         shownCandidateIds,
         attachmentId: uploaded.attachmentId,
       },

@@ -18,7 +18,11 @@ import {
   recaptureChanges,
 } from '../domain/recapture'
 import type { RecaptureValues } from '../domain/recapture'
-import { needsRecaptureAttachment } from '../domain/recapture-attachment'
+import {
+  needsRecaptureAttachment,
+  recaptureAttachmentTypes,
+} from '../domain/recapture-attachment'
+import { uploadErrorMessage } from '../domain/attachments'
 import { requiredTypesForProblem } from '../domain/attachments'
 import type { TicketDetail } from '../domain/types'
 import { technicianSubject } from '../domain/actions'
@@ -129,8 +133,10 @@ async function uploadRequiredAttachment({
       onProgress: setProgress,
     })
     return { attachmentId }
-  } catch {
-    return { error: ticketMessages.create.attachmentError }
+  } catch (error) {
+    return {
+      error: uploadErrorMessage(error) ?? ticketMessages.create.attachmentError,
+    }
   } finally {
     setIsUploading(false)
   }
@@ -176,7 +182,7 @@ function useRecaptureAttachment(
   return {
     attachment,
     setAttachment,
-    attachmentTypes: requiredTypes,
+    attachmentTypes: recaptureAttachmentTypes(needsFile, requiredTypes),
     attachmentInstructions: problem?.attachmentInstructions ?? null,
     attachmentError: error,
     setAttachmentError: setError,

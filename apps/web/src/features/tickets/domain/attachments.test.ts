@@ -5,6 +5,7 @@ import {
   acceptFor,
   attachmentTypeLabel,
   requiredTypesForProblem,
+  uploadErrorMessage,
 } from './attachments'
 
 function problem(overrides: Partial<ProblemOption> = {}): ProblemOption {
@@ -42,5 +43,18 @@ describe('adjuntos del problema', () => {
   it('etiqueta los tipos conocidos', () => {
     expect(attachmentTypeLabel('application/pdf')).toBe('PDF')
     expect(attachmentTypeLabel('application/pdf')).not.toBe('application/pdf')
+  })
+
+  it('prefiere el mensaje del servidor y de TUS', () => {
+    const apiError = new Error('Cuota excedida')
+    apiError.name = 'ApiError'
+    expect(uploadErrorMessage(apiError)).toBe('Cuota excedida')
+    expect(
+      uploadErrorMessage({
+        originalResponse: { getBody: () => 'El contenido no corresponde' },
+      }),
+    ).toBe('El contenido no corresponde')
+    expect(uploadErrorMessage(new Error('Failed to fetch'))).toBeNull()
+    expect(uploadErrorMessage(null)).toBeNull()
   })
 })

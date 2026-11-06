@@ -38,3 +38,19 @@ export function attachmentTypeLabel(mime: string): string {
     mime
   )
 }
+
+/** Mensaje útil de un fallo de reserva o de TUS; `null` si no hay uno. */
+export function uploadErrorMessage(error: unknown): string | null {
+  const response = (
+    error as { originalResponse?: { getBody?: () => string | null } }
+  )?.originalResponse
+  const body = response?.getBody?.()
+  if (body) return body
+  if (
+    error instanceof Error &&
+    (error as { name?: string }).name === 'ApiError'
+  ) {
+    return error.message
+  }
+  return null
+}

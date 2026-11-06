@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { needsRecaptureAttachment } from './recapture-attachment'
+import {
+  needsRecaptureAttachment,
+  recaptureAttachmentTypes,
+} from './recapture-attachment'
 
 describe('adjunto en la recaptura', () => {
   it('no exige archivo si el problema no cambia', () => {
@@ -41,5 +44,12 @@ describe('adjunto en la recaptura', () => {
         attachedTypes: ['application/pdf'],
       }),
     ).toBe(false)
+  })
+
+  it('no muestra el campo si no hace falta un archivo nuevo', () => {
+    expect(recaptureAttachmentTypes(false, ['application/pdf'])).toEqual([])
+    expect(recaptureAttachmentTypes(true, ['application/pdf'])).toEqual([
+      'application/pdf',
+    ])
   })
 })

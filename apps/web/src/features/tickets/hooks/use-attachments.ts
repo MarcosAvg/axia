@@ -14,6 +14,7 @@ export interface UploadAttachmentInput {
   problemId: string
   ticketId?: string
   file: File
+  clientRequestId?: string
   onProgress?: (percentage: number) => void
 }
 
@@ -25,10 +26,11 @@ export function useUploadAttachment() {
       problemId,
       ticketId,
       file,
+      clientRequestId,
       onProgress,
     }: UploadAttachmentInput) => {
       const reservation = await reserveAttachment({
-        clientRequestId: crypto.randomUUID(),
+        clientRequestId: clientRequestId ?? crypto.randomUUID(),
         problemId,
         ticketId,
         fileName: file.name,

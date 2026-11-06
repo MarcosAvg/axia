@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { UseFormReturn } from 'react-hook-form'
 
 import { ticketMessages } from '../i18n'
@@ -52,6 +52,10 @@ function fakeForm(): UseFormReturn<CreateTicketInput> {
       handler(values),
   } as unknown as UseFormReturn<CreateTicketInput>
 }
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
 
 describe('alta con adjunto obligatorio', () => {
   it('no crea el tiquet si falta el archivo requerido', async () => {
@@ -110,5 +114,54 @@ describe('alta con adjunto obligatorio', () => {
       ),
     )
     expect(createMutate).not.toHaveBeenCalled()
+  })
+})
+
+describe('reintentos del alta con adjunto', () => {
+  it('reutiliza la reserva y la clave al reintentar el alta', async () => {
+    checkMutate.mockResolvedValue([])
+    uploadMutate.mockResolvedValue('attachment-1')
+    const file = new File(['%PDF-1.4'], 'cotizacion.pdf', {
+      type: 'application/pdf',
+    })
+    const { result } = renderHook(() =>
+      useCreateTicketSubmission(fakeForm(), null, file, ['application/pdf']),
+    )
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    expect(uploadMutate).toHaveBeenCalledTimes(1)
+    const first = createMutate.mock.calls[0]?.[0] as {
+      clientRequestId: string
+      attachmentId: string
+    }
+    const second = createMutate.mock.calls[1]?.[0] as {
+      clientRequestId: string
+      attachmentId: string
+    }
+    expect(second.clientRequestId).toBe(first.clientRequestId)
+    expect(second.attachmentId).toBe('attachment-1')
+  })
+
+  it('muestra el mensaje del servidor cuando rechaza la subida', async () => {
+    checkMutate.mockResolvedValue([])
+    const rejection = new Error('Cuota de adjuntos excedida')
+    rejection.name = 'ApiError'
+    uploadMutate.mockRejectedValue(rejection)
+    const file = new File(['%PDF-1.4'], 'cotizacion.pdf', {
+      type: 'application/pdf',
+    })
+    const { result } = renderHook(() =>
+      useCreateTicketSubmission(fakeForm(), null, file, ['application/pdf']),
+    )
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    await waitFor(() =>
+      expect(result.current.submitError).toBe('Cuota de adjuntos excedida'),
+    )
   })
 })
