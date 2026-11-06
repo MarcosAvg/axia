@@ -30,7 +30,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
   cambio; la prueba pasó sola y la compuerta completa pasó al reintentarse.
 - Pruebas nuevas: agrupamiento del tablero, componente del tablero, filtro sin estado, tamaño de
   página y E2E de ambos tableros y sus permisos.
-- Integrada a `main` por fast-forward.
+- Integrada a `main` por fast-forward en `4b3c08b`. La rama `feat/tableros-bandeja` se retiró del
+  checkout local.
 
 ## v0.15.0 publicada
 
