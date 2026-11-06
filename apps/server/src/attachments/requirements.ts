@@ -14,7 +14,7 @@ export type ProblemAttachmentRule = {
   instructions: string | null
 }
 
-export function normalizeAttachmentTypes(value: unknown): AttachmentMimeType[] {
+function normalizeAttachmentTypes(value: unknown): AttachmentMimeType[] {
   if (!Array.isArray(value)) return []
   return value.filter(
     (item): item is AttachmentMimeType =>

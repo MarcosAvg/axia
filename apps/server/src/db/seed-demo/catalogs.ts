@@ -101,15 +101,31 @@ async function ensureProblem(
   client: Client,
   subcategoryId: string,
   teamId: string,
-  name: string,
+  problem: {
+    name: string
+    attachmentTypes?: string[]
+    instructions?: string | null
+  },
 ) {
   return one(
     client,
-    `insert into public.problems (subcategory_id, team_id, name) values ($1, $2, $3)
+    `insert into public.problems (
+       subcategory_id, team_id, name,
+       attachment_required_types, attachment_instructions
+     ) values ($1, $2, $3, $4, $5)
      on conflict (subcategory_id, name) do update set
-       name = excluded.name, team_id = excluded.team_id
+       name = excluded.name,
+       team_id = excluded.team_id,
+       attachment_required_types = excluded.attachment_required_types,
+       attachment_instructions = excluded.attachment_instructions
      returning id`,
-    [subcategoryId, teamId, name],
+    [
+      subcategoryId,
+      teamId,
+      problem.name,
+      problem.attachmentTypes ?? [],
+      problem.instructions ?? null,
+    ],
   )
 }
 
@@ -181,12 +197,27 @@ async function ensureClassification(
     drainage,
     air,
     doors,
-    spark: await ensureProblem(client, contact, maintenance, 'Chispa o corto'),
-    lamp: await ensureProblem(client, lighting, maintenance, 'Lámpara fundida'),
-    drip: await ensureProblem(client, leak, maintenance, 'Goteo'),
-    clog: await ensureProblem(client, drainage, maintenance, 'Taponamiento'),
-    noCooling: await ensureProblem(client, air, maintenance, 'No enfría'),
-    noClose: await ensureProblem(client, doors, security, 'No cierra'),
+    spark: await ensureProblem(client, contact, maintenance, {
+      name: 'Chispa o corto',
+    }),
+    quoted: await ensureProblem(client, contact, maintenance, {
+      name: 'Cotización requerida',
+      attachmentTypes: ['application/pdf'],
+      instructions: 'Adjunta la cotización del trabajo',
+    }),
+    lamp: await ensureProblem(client, lighting, maintenance, {
+      name: 'Lámpara fundida',
+    }),
+    drip: await ensureProblem(client, leak, maintenance, { name: 'Goteo' }),
+    clog: await ensureProblem(client, drainage, maintenance, {
+      name: 'Taponamiento',
+    }),
+    noCooling: await ensureProblem(client, air, maintenance, {
+      name: 'No enfría',
+    }),
+    noClose: await ensureProblem(client, doors, security, {
+      name: 'No cierra',
+    }),
   }
 }
 
@@ -216,6 +247,7 @@ export async function buildDemoCatalogs(client: Client): Promise<{
   air: string
   doors: string
   spark: string
+  quoted: string
   lamp: string
   drip: string
   clog: string

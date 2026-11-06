@@ -12,7 +12,7 @@ Las [reglas de negocio](negocio.md), el [modelo de datos](datos.md), los
 | `apps/web` | SPA/PWA con Vite, React y TypeScript; no necesita SSR ni SEO detrás del acceso |
 | `apps/server` | Fastify 5: API, sesiones, autorización, acciones, archivos y tiempo real |
 | PostgreSQL 17 | Datos, sesiones, bitácora, restricciones, tramos y avisos |
-| Volumen de evidencias | Imágenes normalizadas y miniaturas; no es un directorio público |
+| Volumen de evidencias | Imágenes normalizadas, miniaturas y documentos adjuntos; no es un directorio público |
 | Compose | Base y app; la app aplica las migraciones pendientes antes de arrancar |
 
 La web habla solo con `/api` del mismo origen. Los componentes usan `features/*/api`; cada feature

@@ -1,11 +1,11 @@
 import type { ProblemOption } from '@/features/catalogs'
 
-export type AttachmentTypeOption = {
+type AttachmentTypeOption = {
   mime: string
   label: string
 }
 
-export const ATTACHMENT_TYPE_OPTIONS: AttachmentTypeOption[] = [
+const ATTACHMENT_TYPE_OPTIONS: AttachmentTypeOption[] = [
   { mime: 'application/pdf', label: 'PDF' },
   { mime: 'image/jpeg', label: 'JPEG' },
   { mime: 'image/png', label: 'PNG' },

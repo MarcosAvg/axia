@@ -28,10 +28,11 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
 
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
   const headings = await page.locator('main h2').allInnerTexts()
-  expect(headings.slice(0, 5)).toEqual([
+  expect(headings.slice(0, 6)).toEqual([
     'Tiempo por fase',
     'Captura',
     'Línea de tiempo',
+    'Adjuntos',
     'Evidencias',
     'Participantes',
   ])

@@ -35,6 +35,7 @@ contiene los scripts ejecutables; esta referencia explica sus efectos.
 | `pnpm db:indexes` | Auditoría de índices; el script carga `.env` automáticamente, ver [limitación](rendimiento-postgres.md) |
 | `pnpm db:cleanup` | Retención de sesiones, intentos y avisos |
 | `pnpm db:cleanup-evidence` | Limpia subidas abandonadas, sin borrar evidencia lista |
+| `pnpm db:cleanup-attachments` | Limpia preparaciones de adjuntos sin ligar |
 | `pnpm db:duplicates` | Recalcula las alertas de posible duplicado de los tiquets abiertos |
 
 `check`, `db:test` y las suites de navegador requieren el PostgreSQL de pruebas iniciado. Usan

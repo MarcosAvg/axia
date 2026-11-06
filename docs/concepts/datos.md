@@ -15,6 +15,7 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 | Flujo | `ticket_pauses`, `ticket_pause_steps`, `ticket_captures`, `ticket_claims`, `ticket_links`, `ticket_ratings`, `ticket_validations` |
 | Tiempo | `time_spans`, `work_calendars`, `work_calendar_intervals`, `work_calendar_holidays` |
 | Evidencia | `evidence` y el volumen privado de archivos |
+| Adjuntos | `ticket_attachments` (documentos obligatorios de ciertos problemas) |
 | Notificaciones | `notification_rules`, `notifications`, `notification_deliveries`, `push_subscriptions` |
 | Referencias externas | `external_systems`, `ticket_external_refs`; sin adaptadores publicados |
 | Configuración | `instance_settings`, `reasons`, `escalation_rules` |

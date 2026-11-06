@@ -398,6 +398,21 @@ con reapertura y duplicado.
 - Cada evidencia cuelga del evento que la originó, con autor, fecha y metadatos. Almacenamiento
   privado, con límites de tipo y tamaño configurables. Nunca se borran.
 
+### 8.1 Adjuntos obligatorios por problema
+
+- Un problema puede exigir uno o más tipos de archivo (PDF, JPEG, PNG, WebP, DOCX o XLSX) y una
+  instrucción para quien registra.
+- Si el problema elegido exige adjunto, el alta **no se completa** sin un archivo válido de alguno
+  de esos tipos. La regla se valida en el servidor, no solo en la interfaz.
+- El adjunto **no es evidencia**: no satisface `before`, `after` ni `claim`, no cuenta en los
+  indicadores de evidencia y se guarda en una tabla propia.
+- Se guarda el archivo original, con su nombre, tipo verificado, tamaño y hash. La descarga exige
+  sesión y acceso al tiquet y se sirve como descarga forzada.
+- La regla también se aplica al recapturar a un problema que la exige. Los tiquets históricos no se
+  bloquean retroactivamente y los tiquets derivados de una reclamación quedan exentos.
+- Los adjuntos ligados no se borran; las preparaciones abandonadas se limpian por separado de las
+  evidencias.
+
 ## 9. Notificaciones
 
 Son obligatorias. En esta fase solo se diseña y registra la base de datos; el envío (push, correo) se

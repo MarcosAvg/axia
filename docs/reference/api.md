@@ -125,12 +125,23 @@ históricos.
 | `GET` | `/api/evidence/:id/file` | Archivo autenticado |
 | `GET` | `/api/evidence/:id/thumbnail` | Miniatura autenticada |
 | `POST` | `/api/uploads` | Subida TUS |
+| `POST` | `/api/attachments` | Reservar adjunto en preparación |
+| `POST` | `/api/attachment-uploads` | Subida TUS de adjuntos |
+| `GET` | `/api/tickets/:id/attachments` | Listar adjuntos ligados |
+| `GET` | `/api/attachments/:id/file` | Descargar adjunto autenticado |
 
 Los archivos y miniaturas requieren sesión y acceso al tiquet en cada lectura: sus rutas son
 autenticadas, no URLs firmadas públicas. La reserva devuelve
 `{ evidence: { id }, uploadUrl, maxSize, quotaRemaining, replayed }`. El cliente sube al `uploadUrl`
 con el protocolo TUS; reservar por sí solo no completa la evidencia. El servidor aplica límites
 de tamaño, tipo y cuota, y procesa imágenes antes de dejarlas disponibles.
+
+Los **adjuntos** son documentos de ciertos problemas y no cuentan como evidencia. El alta envía
+`attachmentId` cuando el problema lo exige; el servidor liga el archivo en la misma transacción y
+responde `422` si falta, no está listo o su tipo no corresponde. La descarga usa
+`Content-Disposition: attachment` y `X-Content-Type-Options: nosniff`; el tipo se verifica por
+contenido con `file-type`. La recaptura acepta `attachmentId` cuando cambia a un problema que lo
+exige.
 
 ## Tiempo real y sincronización
 

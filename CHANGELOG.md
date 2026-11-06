@@ -5,6 +5,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Ciertos problemas pueden exigir un adjunto (PDF, JPEG, PNG, WebP, DOCX o XLSX) al registrar el
+  tiquet. El archivo se guarda aparte de las evidencias, se verifica por contenido y se exige
+  también al recapturar a un problema con regla. Decisión en el
+  [ADR 0122](docs/decisions/0122-adjuntos-obligatorios-por-problema.md).
+
 ## [0.16.0] - 2026-11-06
 
 ### Añadido

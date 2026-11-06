@@ -167,18 +167,20 @@ function TicketFormActions({ isSubmitting }: { isSubmitting: boolean }) {
 }
 
 function attachmentErrorOf(create: CreateTicketFormState): string | undefined {
-  if (
-    create.requiredAttachmentTypes.length > 0 &&
-    !create.attachment &&
-    create.submitError === ticketMessages.create.attachmentRequired
-  ) {
-    return create.submitError
-  }
-  return undefined
+  if (create.requiredAttachmentTypes.length === 0) return undefined
+  const attachmentMessages: string[] = [
+    ticketMessages.create.attachmentRequired,
+    ticketMessages.create.attachmentError,
+    ticketMessages.create.attachmentOffline,
+  ]
+  return attachmentMessages.includes(create.submitError ?? '')
+    ? (create.submitError ?? undefined)
+    : undefined
 }
 
 function TicketFormContent({ create }: { create: CreateTicketFormState }) {
   const { register, formState } = create.form
+  const attachmentError = attachmentErrorOf(create)
   return (
     <form onSubmit={create.onSubmit} noValidate className="flex flex-col gap-6">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -201,10 +203,10 @@ function TicketFormContent({ create }: { create: CreateTicketFormState }) {
           attachmentInstructions={create.attachmentInstructions}
           isUploadingAttachment={create.isUploadingAttachment}
           attachmentProgress={create.attachmentProgress}
-          attachmentError={attachmentErrorOf(create)}
+          attachmentError={attachmentError}
         />
         <TicketFormAside
-          submitError={create.submitError}
+          submitError={attachmentError ? null : create.submitError}
           createError={create.createError}
           candidates={create.candidates}
           isSubmitting={create.isSubmitting}

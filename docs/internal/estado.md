@@ -5,6 +5,33 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-06
 
+## Tarea integrada: adjuntos obligatorios por problema
+
+- Ciertos problemas exigen un adjunto al registrar el tiquet. Los tipos (PDF, JPEG, PNG, WebP,
+  DOCX, XLSX) y una instrucción se configuran por problema; el archivo se guarda en
+  `ticket_attachments`, separado de `evidence`.
+- La subida usa un TUS propio con preparación; el alta liga el archivo en su transacción y falla
+  con `422` si falta, no está listo o no corresponde. La recaptura aplica la misma regla al cambiar
+  de problema; los tiquets históricos y los derivados de una reclamación no se bloquean.
+- El contenido se verifica con `file-type`; la descarga es autenticada, forzada y con `nosniff`.
+  Decisión en el [ADR 0122](../decisions/0122-adjuntos-obligatorios-por-problema.md).
+- Migraciones 0029 (tabla y configuración) y 0030 (evento `attachment_added`). Nueva dependencia
+  `file-type` (MIT). Variables `ATTACHMENT_MAX_BYTES`, `ATTACHMENT_QUOTA_BYTES` y
+  `ATTACHMENT_CLEANUP_HOURS`.
+- Documentación: negocio, datos, arquitectura, API, configuración, comandos y changelog.
+
+### Evidencia de esta tarea
+
+- `AXIA_ENV_FILE=/dev/null pnpm check`: compuerta completa en verde; 85 archivos de web (449
+  pruebas), 13 de servidor (66), 59 de PostgreSQL (400), 64 de Playwright y build correcto.
+  Persiste el aviso de chunks >500 kB.
+- `pnpm test:e2e:smoke`: 23/23, incluido el alta con adjunto obligatorio y su descarga.
+- `pnpm check:static`: documentación (63 archivos, 0 enlaces rotos), agnóstico (935 archivos),
+  fronteras y knip en verde.
+- `pnpm check:fast`: lint, tipos y 449 + 66 pruebas unitarias.
+- Pruebas nuevas: reserva, subida TUS, PDF/DOCX/XLSX, descarga, limpieza, alta, recaptura,
+  tiquets derivados, catálogo/admin, formulario y detalle.
+
 ## v0.16.0 publicada
 
 - Etiqueta `v0.16.0` creada desde `main` en `c73a595`. Workflow
