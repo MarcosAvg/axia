@@ -5,6 +5,20 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-06
 
+## v0.16.0 publicada
+
+- Etiqueta `v0.16.0` creada desde `main` en `c73a595`. Workflow
+  [42237416755](https://github.com/MarcosAvg/axia/actions/runs/42237416755): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.16.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:c73a595ca7dddb424c3fd1d2998b942a6ef7ea1d`, digest
+  `sha256:27240cfc4d50696ab72bf744914343619cbfaa832d0576be43d290afde1962e8`.
+- [Release v0.16.0](https://github.com/MarcosAvg/axia/releases/tag/v0.16.0) con
+  `axia-self-hosted.tar.gz` (SHA-256
+  `a3a4b0a7f38c88fedcb11038e856e692797ab6355b814d9ddb1c4fd4cbd87ea7`) y su `.sha256`.
+- Incluye los tableros de solo lectura de Bandeja y Mi trabajo (ADR 0121).
+
 ## Tarea integrada: tableros de bandeja
 
 - Bandeja y Mi trabajo ofrecen «Ver tablero» (`/inbox/tablero` y `/mi-trabajo/tablero`), una vista
