@@ -67,9 +67,13 @@ describe('PersistQueryClientProvider', () => {
     )
 
     expect(await screen.findByText('Fuga guardada')).toBeVisible()
-    await waitFor(async () => {
-      expect(await queryPersister.restoreClient()).toBeDefined()
-    })
+    await waitFor(
+      async () => {
+        expect(await db.queryCache.count()).toBeGreaterThan(0)
+        expect(await queryPersister.restoreClient()).toBeDefined()
+      },
+      { timeout: 5_000 },
+    )
     unmount()
 
     const second = new QueryClient()
