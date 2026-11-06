@@ -51,6 +51,7 @@ export const EVENT_TYPES = [
   'priority_changed',
   'comment',
   'evidence_added',
+  'attachment_added',
   'manual_time_recorded',
   'event_time_corrected',
   'rated',

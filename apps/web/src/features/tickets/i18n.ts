@@ -73,8 +73,11 @@ export const ticketMessages = {
     timeline: 'Línea de tiempo',
     participants: 'Participantes',
     evidence: 'Evidencias',
+    attachments: 'Adjuntos',
     noParticipants: 'Sin participantes todavía.',
     noEvidence: 'Sin evidencias todavía.',
+    noAttachments: 'Sin adjuntos todavía.',
+    download: 'Descargar',
     noTimeline: 'Sin movimientos todavía.',
     possibleDuplicates: 'Posibles duplicados',
     possibleDuplicatesHelp:

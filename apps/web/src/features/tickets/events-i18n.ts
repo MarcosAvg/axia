@@ -25,6 +25,7 @@ export const eventLabels: Record<EventType, string> = {
   priority_changed: 'Prioridad ajustada',
   comment: 'Comentario',
   evidence_added: 'Evidencia agregada',
+  attachment_added: 'Adjunto agregado',
   manual_time_recorded: 'Tiempo manual',
   event_time_corrected: 'Hora de la acción ajustada',
   rated: 'Calificación',

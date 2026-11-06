@@ -11,12 +11,14 @@ import type {
   TicketTimelineItem,
 } from '../domain/types'
 import { detailSectionHints } from '../detail-hints'
+import { useTicketAttachments } from '../hooks/use-attachments'
 import { useTicketEvidence } from '../hooks/use-tickets'
 import type { TicketProxy } from '../hooks/use-ticket-proxy'
 import { ticketMessages } from '../i18n'
 import { EvidenceUploader } from './evidence-uploader'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
+import { TicketAttachmentsList } from './ticket-attachments-list'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketRatingPanel } from './ticket-rating-panel'
 import { TicketTimeline } from './ticket-timeline'
@@ -50,6 +52,18 @@ export function Section({
         {children}
       </CardContent>
     </Card>
+  )
+}
+
+export function AttachmentsSection({ ticketId }: { ticketId: string }) {
+  const attachments = useTicketAttachments(ticketId)
+  return (
+    <Section
+      title={ticketMessages.detail.attachments}
+      hint={detailSectionHints.attachments}
+    >
+      <TicketAttachmentsList items={attachments.data ?? []} />
+    </Section>
   )
 }
 

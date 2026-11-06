@@ -17,6 +17,7 @@ import { PausePanel } from './pause-panel'
 import { TicketActionBar } from './ticket-action-bar'
 import {
   ActionsSection,
+  AttachmentsSection,
   CycleTimesSection,
   EvidenceSection,
   Section,
@@ -82,6 +83,7 @@ function TicketContentColumns({
       </div>
       <TicketActivity ticketId={ticketId} timeline={timeline} />
       <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+        <AttachmentsSection ticketId={ticketId} />
         <EvidenceSection
           ticketId={ticketId}
           cycle={ticket.cycle}

@@ -8,6 +8,8 @@ export const detailSectionHints = {
     'Tiempo transcurrido en cada fase de este tiquet. Lo que no cae en una fase medida se muestra como sin clasificar.',
   evidence:
     'Fotos o archivos del ciclo de atención: solicitud, antes, avance, después y reclamación.',
+  attachments:
+    'Documentos obligatorios del problema, guardados aparte de las evidencias.',
   participants: 'Técnicos que participan en la atención: líder y auxiliares.',
   times:
     'Tiempos registrados a mano, con la persona y el momento en que se capturaron.',
