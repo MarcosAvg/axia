@@ -28,6 +28,11 @@ En el detalle verás **Captura**, **Participantes**, **Línea de tiempo**, **Tie
 **Mi trabajo** muestra lo asignado a tu perfil de técnico. **Bandeja** reúne ofertas y tiquets
 para su seguimiento. La campana abre los [avisos](notificaciones.md).
 
+**Bandeja** y **Mi trabajo** ofrecen **Ver tablero**: una vista de solo lectura con columnas por
+estado. Pulsa una tarjeta para abrir el tiquet; **Ver lista** vuelve a la bandeja. El tablero no
+cambia estados ni reemplaza las acciones del detalle. Si tu equipo tiene más de 100 tiquets
+activos, el tablero muestra los más recientes y te avisa para consultar el resto en la lista.
+
 ## Coordinar la atención
 
 Desde una oferta, usa **Tomar tiquet**; después, **Asignar técnico**. Hasta que tomes el tiquet, las

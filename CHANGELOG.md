@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Bandeja y Mi trabajo ofrecen una vista de tablero de solo lectura con columnas por estado. Las
+  tarjetas abren el detalle y las bandejas conservan su lista; no se arrastran ni cambian estados.
+  Decisión en el [ADR 0121](docs/decisions/0121-tableros-bandeja.md).
+
 ## [0.15.0] - 2026-11-05
 
 ### Añadido

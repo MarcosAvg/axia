@@ -29,6 +29,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0118](0118-ambito-deteccion-duplicados.md) | Ámbito de detección de duplicados por edificio, ubicación y dependencia |
 | [0119](0119-react-compiler-y-formularios.md) | React Compiler y el registro de campos de React Hook Form |
 | [0120](0120-avisos-diversos-y-badges.md) | Avisos diversos, texto enriquecido y badges de bandeja |
+| [0121](0121-tableros-bandeja.md) | Tableros de solo lectura por bandeja |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

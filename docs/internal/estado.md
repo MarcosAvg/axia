@@ -3,7 +3,34 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-11-05
+**Última actualización:** 2026-11-06
+
+## Tarea integrada: tableros de bandeja
+
+- Bandeja y Mi trabajo ofrecen «Ver tablero» (`/inbox/tablero` y `/mi-trabajo/tablero`), una vista
+  de solo lectura con columnas por los siete estados activos. Las tarjetas abren el detalle y
+  «Ver lista» vuelve a la bandeja; las bandejas conservan su diseño.
+- El tablero de Bandeja reutiliza la consulta del equipo, los filtros de búsqueda, edificio y
+  categoría, y marca las ofertas con «Oferta para ti» sin duplicar tarjetas. Mi trabajo muestra lo
+  asignado al técnico, sin filtros.
+- El agrupamiento es una función pura (`domain/board.ts`); se piden hasta 100 tiquets y se avisa si
+  el total es mayor. Sin cambios de API, base ni dependencias.
+- Decisión en el [ADR 0121](../decisions/0121-tableros-bandeja.md). Diseño en
+  `docs/superpowers/specs/2026-11-06-tableros-bandeja-design.md` y plan en
+  `docs/superpowers/plans/2026-11-06-tableros-bandeja.md`.
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: 64 pruebas de servidor y 432 de web.
+- `pnpm check:static`: scripts, docs (60 archivos), agnóstico (898 archivos), fronteras y knip en
+  verde.
+- `AXIA_ENV_FILE=/dev/null pnpm check`: código 0; 64 unitarias de servidor, 432 de web, 369 de
+  PostgreSQL (53 archivos), 63 de navegador y build. Persiste el aviso de chunks >500 kB.
+- El primer intento de la compuerta falló en `query-persister.integration.test.tsx`, ajena a este
+  cambio; la prueba pasó sola y la compuerta completa pasó al reintentarse.
+- Pruebas nuevas: agrupamiento del tablero, componente del tablero, filtro sin estado, tamaño de
+  página y E2E de ambos tableros y sus permisos.
+- Integrada a `main` por fast-forward.
 
 ## v0.15.0 publicada
 
