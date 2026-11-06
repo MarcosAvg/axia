@@ -7,6 +7,7 @@ import { toTicketError } from '../domain/errors'
 import { ticketMessages } from '../i18n'
 import type { DuplicateCandidate } from '../domain/types'
 import type { CreateTicketInput } from '../schemas'
+import { useUploadAttachment } from './use-attachments'
 import { useCheckDuplicates, useCreateTicket } from './use-tickets'
 
 interface PendingDuplicates {
@@ -15,6 +16,8 @@ interface PendingDuplicates {
 }
 
 type DuplicateCheck = ReturnType<typeof useCheckDuplicates>
+
+type UploadResult = { attachmentId?: string; error?: string }
 
 async function findDuplicates(
   check: DuplicateCheck,
@@ -53,22 +56,83 @@ async function uploadRequestPhoto(
   }
 }
 
-/** Registro del tiquet con pre-chequeo de duplicados y confirmación. */
-export function useCreateTicketSubmission(
-  form: UseFormReturn<CreateTicketInput>,
-  photo: File | null,
-) {
-  const navigate = useNavigate()
-  const [pending, setPending] = useState<PendingDuplicates | null>(null)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [allowLeave, setAllowLeave] = useState(false)
-  const createMutation = useCreateTicket()
-  const checkMutation = useCheckDuplicates()
+function isOffline(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false
+}
 
-  function createWith(input: CreateTicketInput, shownCandidateIds?: string[]) {
+function useRequiredAttachmentUploader(
+  attachment: File | null,
+  requiredTypes: string[],
+) {
+  const upload = useUploadAttachment()
+  const [progress, setProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+
+  async function uploadFor(problemId: string): Promise<UploadResult> {
+    if (requiredTypes.length === 0) return {}
+    if (!attachment) {
+      return { error: ticketMessages.create.attachmentRequired }
+    }
+    if (isOffline()) {
+      return { error: ticketMessages.create.attachmentOffline }
+    }
+    try {
+      setIsUploading(true)
+      setProgress(0)
+      const attachmentId = await upload.mutateAsync({
+        problemId,
+        file: attachment,
+        onProgress: setProgress,
+      })
+      return { attachmentId }
+    } catch {
+      return { error: ticketMessages.create.attachmentError }
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return { uploadFor, isUploading, progress }
+}
+
+type CreateMutation = ReturnType<typeof useCreateTicket>
+type Navigate = ReturnType<typeof useNavigate>
+
+type CreateActionContext = {
+  navigate: Navigate
+  photo: File | null
+  uploader: ReturnType<typeof useRequiredAttachmentUploader>
+  createMutation: CreateMutation
+  setAllowLeave: (value: boolean) => void
+  setSubmitError: (value: string | null) => void
+}
+
+function useCreateTicketAction({
+  navigate,
+  photo,
+  uploader,
+  createMutation,
+  setAllowLeave,
+  setSubmitError,
+}: CreateActionContext) {
+  return async function createWith(
+    input: CreateTicketInput,
+    shownCandidateIds?: string[],
+  ) {
+    setSubmitError(null)
+    const uploaded = await uploader.uploadFor(input.problemId)
+    if (uploaded.error) {
+      setSubmitError(uploaded.error)
+      return
+    }
     setAllowLeave(true)
     createMutation.mutate(
-      { input, clientRequestId: crypto.randomUUID(), shownCandidateIds },
+      {
+        input,
+        clientRequestId: crypto.randomUUID(),
+        shownCandidateIds,
+        attachmentId: uploaded.attachmentId,
+      },
       {
         onSuccess: async (ticketId) => {
           await uploadRequestPhoto(ticketId, photo, input)
@@ -77,43 +141,80 @@ export function useCreateTicketSubmission(
       },
     )
   }
+}
+
+type CreateWith = (
+  input: CreateTicketInput,
+  shownCandidateIds?: string[],
+) => Promise<void>
+
+function usePendingDuplicates(createWith: CreateWith) {
+  const [pending, setPending] = useState<PendingDuplicates | null>(null)
+  function confirmDuplicate() {
+    if (!pending) return
+    const current = pending
+    setPending(null)
+    void createWith(
+      current.input,
+      current.candidates.map((candidate) => candidate.id),
+    )
+  }
+  function cancelDuplicate() {
+    setPending(null)
+  }
+  return { pending, setPending, confirmDuplicate, cancelDuplicate }
+}
+
+/** Registro del tiquet con pre-chequeo de duplicados, adjunto y confirmación. */
+export function useCreateTicketSubmission(
+  form: UseFormReturn<CreateTicketInput>,
+  photo: File | null,
+  attachment: File | null,
+  requiredTypes: string[],
+) {
+  const navigate = useNavigate()
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [allowLeave, setAllowLeave] = useState(false)
+  const createMutation = useCreateTicket()
+  const checkMutation = useCheckDuplicates()
+  const uploader = useRequiredAttachmentUploader(attachment, requiredTypes)
+  const createWith = useCreateTicketAction({
+    navigate,
+    photo,
+    uploader,
+    createMutation,
+    setAllowLeave,
+    setSubmitError,
+  })
+  const duplicates = usePendingDuplicates(createWith)
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null)
     try {
       const found = await findDuplicates(checkMutation, values)
       if (found.length > 0) {
-        setPending({ input: values, candidates: found })
+        duplicates.setPending({ input: values, candidates: found })
       } else {
-        createWith(values)
+        await createWith(values)
       }
     } catch (error) {
       setSubmitError(toTicketError(error).message)
     }
   })
 
-  function confirmDuplicate() {
-    if (pending) {
-      createWith(
-        pending.input,
-        pending.candidates.map((candidate) => candidate.id),
-      )
-    }
-    setPending(null)
-  }
-
-  function cancelDuplicate() {
-    setPending(null)
-  }
-
   return {
-    candidates: pending?.candidates ?? [],
+    candidates: duplicates.pending?.candidates ?? [],
     onSubmit,
-    confirmDuplicate,
-    cancelDuplicate,
+    confirmDuplicate: duplicates.confirmDuplicate,
+    cancelDuplicate: duplicates.cancelDuplicate,
     submitError,
     allowLeave,
-    isSubmitting: createMutation.isPending || checkMutation.isPending,
+    isUploadingAttachment: uploader.isUploading,
+    attachmentProgress: uploader.progress,
+    isSubmitting:
+      createMutation.isPending ||
+      checkMutation.isPending ||
+      uploader.isUploading,
     createError: createMutation.error
       ? toTicketError(createMutation.error)
       : null,

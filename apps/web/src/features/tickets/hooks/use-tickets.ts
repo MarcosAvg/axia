@@ -121,11 +121,13 @@ export function useCreateTicket() {
       input: CreateTicketInput
       clientRequestId: string
       shownCandidateIds?: string[]
+      attachmentId?: string
     }) =>
       createTicket(
         variables.input,
         variables.clientRequestId,
         variables.shownCandidateIds,
+        variables.attachmentId,
       ),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })

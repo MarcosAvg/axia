@@ -7,9 +7,13 @@ import type { Identity } from '@/features/auth'
 import { useRequesters } from '@/features/catalogs'
 import type { RequesterOption } from '@/features/catalogs'
 import { effectiveRequester } from '../domain/place'
+import { requiredTypesForProblem } from '../domain/attachments'
 import { createTicketSchema } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
-import { useCreateTicketCatalogs } from './use-create-ticket-catalogs'
+import {
+  useCreateTicketCatalogs,
+  type CreateTicketCatalogs,
+} from './use-create-ticket-catalogs'
 import { useCreateTicketSubmission } from './use-create-ticket-submission'
 
 const defaultValues: CreateTicketInput = {
@@ -129,6 +133,29 @@ function usePlaceEffects(
   }, [locationId, fixedDependencyId, form])
 }
 
+/** Estado del adjunto obligatorio, descartado al cambiar de problema. */
+function useCreateAttachmentState(
+  catalogs: CreateTicketCatalogs,
+  problemId: string,
+) {
+  const [state, setState] = useState<{
+    problemId: string
+    file: File | null
+  }>({ problemId: '', file: null })
+  const problem = catalogs.problems.find((item) => item.id === problemId)
+  const requiredAttachmentTypes = requiredTypesForProblem(problem)
+  const attachment = state.problemId === problemId ? state.file : null
+  const setAttachment = (file: File | null) => {
+    setState({ problemId, file })
+  }
+  return {
+    attachment,
+    setAttachment,
+    requiredAttachmentTypes,
+    attachmentInstructions: problem?.attachmentInstructions ?? null,
+  }
+}
+
 /** Lógica del alta de tiquet: formulario, catálogos y registro. */
 export function useCreateTicketForm() {
   const { identity } = useAuth()
@@ -144,6 +171,7 @@ export function useCreateTicketForm() {
     name: 'subcategoryId',
   })
   const requesterId = useWatch({ control: form.control, name: 'requesterId' })
+  const problemId = useWatch({ control: form.control, name: 'problemId' })
 
   const requestersQuery = useRequesters()
   const selection = usePlaceSelection(identity, requesterId, requestersQuery)
@@ -171,7 +199,13 @@ export function useCreateTicketForm() {
   }, [showOccurredAt, form])
 
   const [photo, setPhoto] = useState<File | null>(null)
-  const submission = useCreateTicketSubmission(form, photo)
+  const attachmentState = useCreateAttachmentState(catalogs, problemId)
+  const submission = useCreateTicketSubmission(
+    form,
+    photo,
+    attachmentState.attachment,
+    attachmentState.requiredAttachmentTypes,
+  )
 
   return {
     form,
@@ -180,6 +214,9 @@ export function useCreateTicketForm() {
     showOccurredAt,
     photo,
     setPhoto,
+    ...attachmentState,
     ...submission,
   }
 }
+
+export type CreateTicketFormState = ReturnType<typeof useCreateTicketForm>

@@ -134,6 +134,12 @@ export const ticketMessages = {
       'El nombre y el contacto se toman del catálogo de solicitantes.',
     photo: 'Foto de la solicitud (opcional)',
     photoError: 'El tiquet se registró, pero no se pudo subir la foto.',
+    attachment: 'Adjunto obligatorio',
+    attachmentRequired: 'Este problema exige adjuntar un archivo.',
+    attachmentHint: 'El archivo no cuenta como evidencia.',
+    attachmentUploading: 'Subiendo archivo…',
+    attachmentError: 'No se pudo subir el adjunto.',
+    attachmentOffline: 'Necesitas conexión para adjuntar el archivo.',
     duplicateTitle: 'Posibles duplicados',
     duplicateHelp:
       'Encontramos tiquets parecidos. Revisa si ya está registrado antes de continuar.',

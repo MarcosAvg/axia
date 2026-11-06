@@ -155,6 +155,7 @@ export async function createTicket(
   input: CreateTicketInput,
   clientRequestId: string,
   shownCandidateIds?: string[],
+  attachmentId?: string,
 ): Promise<string> {
   const body = await apiFetch<{ ticket: { id: string } }>('/api/tickets', {
     method: 'POST',
@@ -173,6 +174,7 @@ export async function createTicket(
         : undefined,
       clientRequestId,
       shownCandidateIds,
+      attachmentId,
     }),
   })
   return body.ticket.id
