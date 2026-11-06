@@ -139,6 +139,7 @@ async function runClaimAction(
         note: input.note ?? null,
         clientRequestId: input.clientRequestId,
         subjectTechnicianId: subjectOf(input),
+        attachmentId: input.attachmentId ?? null,
       })
     case 'open_claim':
       return openClaim(db, actor, {

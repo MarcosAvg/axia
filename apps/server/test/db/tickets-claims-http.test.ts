@@ -178,3 +178,37 @@ describe('claims', () => {
     expect(assignments.rows).toEqual([])
   })
 })
+
+describe('derived tickets', () => {
+  it('creates the derived ticket although the problem requires an attachment', async () => {
+    const ticketId = await createTicket()
+    await attendTicket(ticketId)
+    await openClaim(ticketId)
+    await context.db.execute(sql`
+      update public.problems
+      set attachment_required_types = array['application/pdf']::text[]
+      where id = ${refs.problemId}
+    `)
+    try {
+      const resolve = await action(context.cookies.supervisor, ticketId, {
+        action: 'resolve_claim',
+        resolution: 'new_ticket',
+        note: 'Se genera un tiquet nuevo',
+        clientRequestId: randomUUID(),
+      })
+      expect(resolve.statusCode).toBe(200)
+      const derivedId = (resolve.json() as { derivedTicketId: string })
+        .derivedTicketId
+      const derived = await context.db.execute(sql`
+        select problem_id from public.tickets where id = ${derivedId}
+      `)
+      expect(derived.rows[0]).toMatchObject({ problem_id: refs.problemId })
+    } finally {
+      await context.db.execute(sql`
+        update public.problems
+        set attachment_required_types = '{}'
+        where id = ${refs.problemId}
+      `)
+    }
+  })
+})

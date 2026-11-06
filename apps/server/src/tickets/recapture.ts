@@ -4,6 +4,13 @@ import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
+  findSatisfyingAttachment,
+  linkAttachment,
+  writeAttachmentEvent,
+  type LinkedAttachment,
+} from '../attachments/link.js'
+import { problemAttachmentTypes } from '../attachments/requirements.js'
+import {
   conflict,
   notFound,
   requireReason,
@@ -29,6 +36,7 @@ export type RecaptureInput = {
   note: string | null
   clientRequestId: string
   subjectTechnicianId?: string | null
+  attachmentId?: string | null
 }
 
 // La recaptura corrige la captura antes de iniciar el trabajo (RN-10).
@@ -48,6 +56,65 @@ async function lockRecaptureTicket(
   const row = result.rows[0] as RecaptureTicket | undefined
   if (!row) throw notFound()
   return row
+}
+
+async function ensureRecaptureAttachment(
+  tx: DbExecutor,
+  actor: Actor,
+  ticket: RecaptureTicket,
+  input: RecaptureInput,
+): Promise<LinkedAttachment | null> {
+  const problemChanged =
+    input.changes.problemId !== undefined &&
+    input.changes.problemId !== ticket.problem_id
+  if (!problemChanged) {
+    if (input.attachmentId) {
+      throw new AppError(
+        422,
+        'attachment_not_required',
+        'El adjunto no aplica si el problema no cambia',
+      )
+    }
+    return null
+  }
+  const required = await problemAttachmentTypes(
+    tx,
+    input.changes.problemId ?? null,
+  )
+  if (required.length === 0) {
+    if (input.attachmentId) {
+      throw new AppError(
+        422,
+        'attachment_not_required',
+        'El problema destino no exige adjunto',
+      )
+    }
+    return null
+  }
+  if (await findSatisfyingAttachment(tx, ticket.id, required)) {
+    if (input.attachmentId) {
+      throw new AppError(
+        422,
+        'attachment_not_required',
+        'El tiquet ya tiene un adjunto compatible',
+      )
+    }
+    return null
+  }
+  if (!input.attachmentId) {
+    throw new AppError(
+      422,
+      'attachment_required',
+      'El problema destino exige adjuntar un archivo',
+    )
+  }
+  return linkAttachment({
+    tx,
+    actor,
+    ticketId: ticket.id,
+    attachmentId: input.attachmentId,
+    allowed: required,
+  })
 }
 
 async function recaptureInTransaction(
@@ -79,6 +146,12 @@ async function recaptureInTransaction(
   if (input.reasonId) {
     await requireReason(tx, input.reasonId, 'recapture', 'Motivo')
   }
+  const linkedAttachment = await ensureRecaptureAttachment(
+    tx,
+    actor,
+    ticket,
+    input,
+  )
   await tx.execute(sql`
     insert into public.ticket_captures (
       ticket_id, cycle, changed_by, reason_id, changes
@@ -98,6 +171,9 @@ async function recaptureInTransaction(
     subjectTechnicianId: input.subjectTechnicianId ?? null,
     payload: { ...input.changes, note: input.note ?? null },
   })
+  if (linkedAttachment) {
+    await writeAttachmentEvent(tx, actor, input.ticketId, linkedAttachment)
+  }
   return { ticketId: input.ticketId, action: 'recapture', replayed: false }
 }
 

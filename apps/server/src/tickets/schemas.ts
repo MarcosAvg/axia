@@ -191,6 +191,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
       }),
     reasonId: z.string().uuid().optional(),
     note: z.string().trim().max(2000).optional(),
+    attachmentId: z.string().uuid().optional(),
     ...proxyBase,
     ...actionBase,
   }),
