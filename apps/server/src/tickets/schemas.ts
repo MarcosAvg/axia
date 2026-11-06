@@ -70,6 +70,7 @@ export const createTicketSchema = z.object({
   requesterContact: z.string().trim().min(1).max(120).optional(),
   occurredAt: z.string().datetime().optional(),
   clientRequestId: z.string().uuid(),
+  attachmentId: z.string().uuid().optional(),
   shownCandidateIds: z.array(z.string().uuid()).max(20).optional(),
 })
 
