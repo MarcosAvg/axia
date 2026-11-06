@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
+import { resolveStored, storagePaths } from '../evidence/paths.js'
+import { findVisibleTicket } from '../tickets/repository.js'
 import { createAttachment } from './create.js'
 import {
   attachmentPaths,
@@ -41,6 +43,89 @@ type Context = {
   config: AppConfig
   paths: AttachmentStoragePaths
   ready: Promise<void>
+}
+
+export type AttachmentItem = {
+  id: string
+  fileName: string
+  mimeType: string
+  sizeBytes: number
+  uploadedByName: string
+  createdAt: string
+}
+
+type ListRow = {
+  id: string
+  original_name: string
+  mime_type: string
+  size_bytes: string | number
+  uploaded_by_name: string
+  created_at: Date | string
+}
+
+async function listForTicket(
+  db: Database,
+  actor: Actor,
+  ticketId: string,
+): Promise<AttachmentItem[] | null> {
+  if (!(await findVisibleTicket(db, actor, ticketId))) return null
+  const result = await db.execute(sql`
+    select
+      a.id, a.original_name, a.mime_type, a.size_bytes,
+      u.full_name as uploaded_by_name, a.created_at
+    from public.ticket_attachments a
+    join public.users u on u.id = a.uploaded_by
+    where a.ticket_id = ${ticketId} and a.processing_state = 'ready'
+    order by a.created_at, a.id
+  `)
+  return (result.rows as ListRow[]).map((row) => ({
+    id: row.id,
+    fileName: row.original_name,
+    mimeType: row.mime_type,
+    sizeBytes: Number(row.size_bytes),
+    uploadedByName: row.uploaded_by_name,
+    createdAt: new Date(row.created_at).toISOString(),
+  }))
+}
+
+type FileRow = {
+  ticket_id: string | null
+  storage_path: string | null
+  mime_type: string | null
+  original_name: string
+  processing_state: string
+}
+
+async function fileForTicket(
+  context: Context,
+  actor: Actor,
+  attachmentId: string,
+): Promise<{ path: string; mimeType: string; fileName: string } | null> {
+  const result = await context.db.execute(sql`
+    select ticket_id, storage_path, mime_type, original_name, processing_state
+    from public.ticket_attachments
+    where id = ${attachmentId}
+    limit 1
+  `)
+  const row = result.rows[0] as FileRow | undefined
+  if (
+    !row ||
+    row.processing_state !== 'ready' ||
+    !row.ticket_id ||
+    !row.storage_path
+  ) {
+    return null
+  }
+  if (!(await findVisibleTicket(context.db, actor, row.ticket_id))) return null
+  try {
+    return {
+      path: resolveStored(storagePaths(context.paths.root), row.storage_path),
+      mimeType: row.mime_type ?? 'application/octet-stream',
+      fileName: row.original_name,
+    }
+  } catch {
+    return null
+  }
 }
 
 async function findForTus(
@@ -114,6 +199,10 @@ export function createAttachmentService(db: Database, config: AppConfig) {
       complete(db, attachmentId, data),
     quotaForUploader: (actorId: string, excludeId: string) =>
       quotaForUploader(db, actorId, excludeId),
+    listForTicket: (actor: Actor, ticketId: string) =>
+      listForTicket(db, actor, ticketId),
+    fileForTicket: (actor: Actor, attachmentId: string) =>
+      fileForTicket(context, actor, attachmentId),
   }
 }
 
