@@ -4,6 +4,7 @@ import type { Pool } from 'pg'
 
 import { buildApp } from '../../src/app.js'
 import { createAuthService } from '../../src/auth/service.js'
+import { createAttachmentService } from '../../src/attachments/service.js'
 import { createCatalogService } from '../../src/catalogs/service.js'
 import { createEvidenceService } from '../../src/evidence/service.js'
 import { createEventHub, type EventHub } from '../../src/realtime/hub.js'
@@ -14,7 +15,11 @@ import { checkDatabase } from '../../src/db/health.js'
 import { createTicketService } from '../../src/tickets/service.js'
 import { cookieFrom, headers, login } from '../db/auth-helpers.js'
 import { ownerConnectionString, prepareTestDatabase } from '../db/helpers.js'
-import { createCatalog, insertOne } from '../db/tickets-fixture-catalog.js'
+import {
+  createCatalog,
+  insertOne,
+  type Catalog,
+} from '../db/tickets-fixture-catalog.js'
 import { createPeople } from '../db/tickets-fixture-people.js'
 import {
   createTicketActivity,
@@ -40,6 +45,7 @@ export type TicketHttpContext = {
   pool: Pool
   runtimePool: Pool
   ids: TicketFixtureIds
+  catalog: Catalog
   cookies: TicketHttpCookies
   events: EventHub
 }
@@ -107,6 +113,7 @@ export async function buildTicketHttpApp(
   const tickets = createTicketService(runtime.db)
   const catalogs = createCatalogService(runtime.db)
   const evidence = createEvidenceService(runtime.db, testConfig)
+  const attachments = createAttachmentService(runtime.db, testConfig)
   const events = createEventHub(runtime.db)
   const app = await buildApp({
     config: testConfig,
@@ -115,6 +122,7 @@ export async function buildTicketHttpApp(
     tickets,
     catalogs,
     evidence,
+    attachments,
     realtime: { db: runtime.db, events },
     sync: { db: runtime.db },
     readiness: () => checkDatabase(runtime.pool),
@@ -136,6 +144,7 @@ export async function buildTicketHttpApp(
     pool: created.pool,
     runtimePool: runtime.pool,
     ids,
+    catalog,
     cookies,
     events,
   }

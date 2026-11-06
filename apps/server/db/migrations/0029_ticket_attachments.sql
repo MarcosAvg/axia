@@ -3,6 +3,7 @@
 create table public.ticket_attachments (
   id uuid primary key default gen_random_uuid(),
   ticket_id uuid references public.tickets(id),
+  problem_id uuid not null references public.problems(id),
   client_request_id uuid not null unique,
   uploaded_by uuid not null references public.users(id),
   original_name text not null,

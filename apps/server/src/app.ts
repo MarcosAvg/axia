@@ -8,6 +8,8 @@ import Fastify, {
 import { registerAdminAccessRoutes } from './auth/access-routes.js'
 import { registerAuthRoutes } from './auth/routes.js'
 import type { AuthService } from './auth/service.js'
+import { registerAttachmentRoutes } from './attachments/routes.js'
+import type { AttachmentService } from './attachments/service.js'
 import { registerAdminCatalogRoutes } from './catalogs/admin-routes.js'
 import { registerAdminCalendarRoutes } from './catalogs/calendar-routes.js'
 import { registerAdminSettingsRoutes } from './catalogs/settings-routes.js'
@@ -38,6 +40,7 @@ export type BuildAppOptions = {
   tickets?: TicketService
   catalogs?: CatalogService
   evidence?: EvidenceService
+  attachments?: AttachmentService
   realtime?: { db: Database; events: EventHub }
   sync?: { db: Database }
   logger?: FastifyServerOptions['logger']
@@ -67,6 +70,7 @@ type OptionalServices = {
   tickets?: TicketService
   catalogs?: CatalogService
   evidence?: EvidenceService
+  attachments?: AttachmentService
   realtime?: { db: Database; events: EventHub }
   sync?: { db: Database }
 }
@@ -91,11 +95,14 @@ async function registerCoreRoutes(
 async function registerExtraRoutes(
   app: FastifyInstance,
   config: AppConfig,
-  { auth, evidence, realtime, sync }: OptionalServices,
+  { auth, evidence, attachments, realtime, sync }: OptionalServices,
 ) {
   if (auth && evidence) {
     registerEvidenceRoutes(app, { auth, config, evidence })
     createTusServer(app, auth, config, evidence)
+  }
+  if (auth && attachments) {
+    registerAttachmentRoutes(app, { auth, config, attachments })
   }
   if (auth && realtime) {
     registerRealtimeRoutes(app, { auth, config, ...realtime })
@@ -123,6 +130,7 @@ export async function buildApp({
   tickets,
   catalogs,
   evidence,
+  attachments,
   realtime,
   sync,
   logger,
@@ -149,6 +157,7 @@ export async function buildApp({
     tickets,
     catalogs,
     evidence,
+    attachments,
     realtime,
     sync,
   })

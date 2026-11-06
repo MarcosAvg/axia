@@ -5,6 +5,7 @@ import type { Pool } from 'pg'
 
 import { buildApp } from './app.js'
 import { createAuthService } from './auth/service.js'
+import { createAttachmentService } from './attachments/service.js'
 import { createCatalogService } from './catalogs/service.js'
 import { createEvidenceService } from './evidence/service.js'
 import { createEventBridge } from './realtime/bridge.js'
@@ -68,6 +69,7 @@ async function main() {
   const tickets = createTicketService(db)
   const catalogs = createCatalogService(db)
   const evidence = createEvidenceService(db, config)
+  const attachments = createAttachmentService(db, config)
   const events = createEventHub(db)
   const app = await buildApp({
     config,
@@ -76,6 +78,7 @@ async function main() {
     tickets,
     catalogs,
     evidence,
+    attachments,
     realtime: { db, events },
     sync: { db },
     readiness: () => checkDatabase(pool, config.HEALTH_TIMEOUT_MS),
