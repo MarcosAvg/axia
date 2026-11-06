@@ -275,4 +275,15 @@ export const ticketMessages = {
     team: 'Tiquets del equipo',
     empty: 'No hay tiquets en tu bandeja.',
   },
+  board: {
+    title: 'Tablero',
+    open: 'Ver tablero',
+    backToList: 'Ver lista',
+    inboxSubtitle: 'Tiquets de tu equipo por estado.',
+    myWorkSubtitle: 'Tus tiquets por estado.',
+    emptyColumn: 'Sin tiquets',
+    offer: 'Oferta para ti',
+    truncated: (shown: number, total: number) =>
+      `Se muestran ${shown} de ${total} tiquets. Usa la lista para ver el resto.`,
+  },
 } as const
