@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminIntegracionesRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedInboxTableroRouteImport } from './routes/_authenticated/inbox_.tablero'
+import { Route as AuthenticatedMiTrabajoTableroRouteImport } from './routes/_authenticated/mi-trabajo_.tablero'
 import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets/index'
 import { Route as AuthenticatedTicketsTicketIdRouteImport } from './routes/_authenticated/tickets/$ticketId'
 import { Route as AuthenticatedTicketsNuevoRouteImport } from './routes/_authenticated/tickets/nuevo'
@@ -127,6 +128,12 @@ const AuthenticatedInboxTableroRoute =
     path: '/inbox/tablero',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedMiTrabajoTableroRoute =
+  AuthenticatedMiTrabajoTableroRouteImport.update({
+    id: '/mi-trabajo_/tablero',
+    path: '/mi-trabajo/tablero',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedTicketsIndexRoute =
   AuthenticatedTicketsIndexRouteImport.update({
     id: '/tickets/',
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/inbox/tablero': typeof AuthenticatedInboxTableroRoute
+  '/mi-trabajo/tablero': typeof AuthenticatedMiTrabajoTableroRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -184,6 +192,7 @@ export interface FileRoutesByTo {
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/inbox/tablero': typeof AuthenticatedInboxTableroRoute
+  '/mi-trabajo/tablero': typeof AuthenticatedMiTrabajoTableroRoute
   '/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -208,6 +217,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/inbox_/tablero': typeof AuthenticatedInboxTableroRoute
+  '/_authenticated/mi-trabajo_/tablero': typeof AuthenticatedMiTrabajoTableroRoute
   '/_authenticated/tickets/$ticketId': typeof AuthenticatedTicketsTicketIdRoute
   '/_authenticated/tickets/nuevo': typeof AuthenticatedTicketsNuevoRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/admin/roles'
     | '/admin/usuarios'
     | '/inbox/tablero'
+    | '/mi-trabajo/tablero'
     | '/tickets/$ticketId'
     | '/tickets/nuevo'
     | '/admin/'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/admin/roles'
     | '/admin/usuarios'
     | '/inbox/tablero'
+    | '/mi-trabajo/tablero'
     | '/tickets/$ticketId'
     | '/tickets/nuevo'
     | '/admin'
@@ -276,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/inbox_/tablero'
+    | '/_authenticated/mi-trabajo_/tablero'
     | '/_authenticated/tickets/$ticketId'
     | '/_authenticated/tickets/nuevo'
     | '/_authenticated/admin/'
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInboxTableroRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/mi-trabajo_/tablero': {
+      id: '/_authenticated/mi-trabajo_/tablero'
+      path: '/mi-trabajo/tablero'
+      fullPath: '/mi-trabajo/tablero'
+      preLoaderRoute: typeof AuthenticatedMiTrabajoTableroRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/tickets/': {
       id: '/_authenticated/tickets/'
       path: '/tickets'
@@ -473,6 +493,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedInboxTableroRoute: typeof AuthenticatedInboxTableroRoute
+  AuthenticatedMiTrabajoTableroRoute: typeof AuthenticatedMiTrabajoTableroRoute
   AuthenticatedTicketsTicketIdRoute: typeof AuthenticatedTicketsTicketIdRoute
   AuthenticatedTicketsNuevoRoute: typeof AuthenticatedTicketsNuevoRoute
   AuthenticatedTicketsIndexRoute: typeof AuthenticatedTicketsIndexRoute
@@ -487,6 +508,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedInboxTableroRoute: AuthenticatedInboxTableroRoute,
+  AuthenticatedMiTrabajoTableroRoute: AuthenticatedMiTrabajoTableroRoute,
   AuthenticatedTicketsTicketIdRoute: AuthenticatedTicketsTicketIdRoute,
   AuthenticatedTicketsNuevoRoute: AuthenticatedTicketsNuevoRoute,
   AuthenticatedTicketsIndexRoute: AuthenticatedTicketsIndexRoute,
