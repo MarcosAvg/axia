@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-06
+
 ### Añadido
 
 - Bandeja y Mi trabajo ofrecen una vista de tablero de solo lectura con columnas por estado. Las
