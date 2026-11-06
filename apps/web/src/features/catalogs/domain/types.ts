@@ -15,6 +15,8 @@ export interface SubcategoryOption extends Option {
 
 export interface ProblemOption extends Option {
   subcategoryId: string
+  requiredAttachmentTypes: string[]
+  attachmentInstructions: string | null
 }
 
 export interface RequesterOption {

@@ -186,6 +186,15 @@ export interface TicketEvidenceItem {
   occurredAt: string
 }
 
+export interface TicketAttachment {
+  id: string
+  fileName: string
+  mimeType: string
+  sizeBytes: number
+  uploadedByName: string
+  createdAt: string
+}
+
 export interface DuplicateCandidate {
   id: string
   score: number
