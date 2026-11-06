@@ -1,8 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { InboxIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
+import { Button } from '@/components/ui/button'
 import { RequirePermission, useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
@@ -33,7 +34,17 @@ function InboxContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={inbox.title} description={inbox.subtitle} />
+      <PageHeader
+        title={inbox.title}
+        description={inbox.subtitle}
+        actions={
+          <Button variant="outline" asChild className="min-h-11">
+            <Link to="/inbox/tablero" search={{ page: 1 }}>
+              {ticketMessages.board.open}
+            </Link>
+          </Button>
+        }
+      />
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">{inbox.offers}</h2>
         {offers.data && offers.data.length > 0 ? (

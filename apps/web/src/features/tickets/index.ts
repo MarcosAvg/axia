@@ -1,6 +1,6 @@
 // Punto de entrada público del feature de tiquets.
 
-export { TicketBoard } from './components/ticket-board'
+export { TicketBoardPanel } from './components/ticket-board-panel'
 export { TicketForm } from './components/ticket-form'
 export { TicketDetailView } from './components/ticket-detail'
 export { TicketFilters } from './components/ticket-filters'
