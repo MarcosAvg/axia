@@ -47,6 +47,17 @@ const environmentSchema = z.object({
     .int()
     .positive()
     .default(500 * 1024 * 1024),
+  ATTACHMENT_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(25 * 1024 * 1024),
+  ATTACHMENT_QUOTA_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(500 * 1024 * 1024),
+  ATTACHMENT_CLEANUP_HOURS: z.coerce.number().int().min(1).default(24),
   SSE_HEARTBEAT_MS: z.coerce
     .number()
     .int()

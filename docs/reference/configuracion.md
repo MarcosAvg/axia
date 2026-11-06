@@ -112,6 +112,17 @@ puerto interno de producción.
 | `EVIDENCE_THUMBNAIL_SIZE` | `320` |
 | `EVIDENCE_QUOTA_BYTES` | `524288000` (500 MiB) |
 
+## Adjuntos
+
+Los adjuntos son documentos obligatorios de ciertos problemas. Comparten `STORAGE_DIR` con las
+evidencias, pero se guardan y se cuentan aparte.
+
+| Variable | Valor por defecto |
+|---|---|
+| `ATTACHMENT_MAX_BYTES` | `26214400` (25 MiB) |
+| `ATTACHMENT_QUOTA_BYTES` | `524288000` (500 MiB) |
+| `ATTACHMENT_CLEANUP_HOURS` | `24` |
+
 ## Tiempo real y sincronización
 
 | Variable | Valor por defecto |
