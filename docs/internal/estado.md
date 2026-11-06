@@ -22,13 +22,13 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 ### Evidencia de esta tarea
 
-- `AXIA_ENV_FILE=/dev/null pnpm check`: compuerta completa en verde; 85 archivos de web (449
-  pruebas), 13 de servidor (66), 59 de PostgreSQL (400), 64 de Playwright y build correcto.
-  Persiste el aviso de chunks >500 kB.
+- `CI=1 AXIA_ENV_FILE=/dev/null pnpm check`: compuerta completa en código 0; 85 archivos de web
+  (453 pruebas), 13 de servidor (66), 59 de PostgreSQL (400), 64 de Playwright (2 con reintento) y
+  build correcto. Persiste el aviso de chunks >500 kB.
 - `pnpm test:e2e:smoke`: 23/23, incluido el alta con adjunto obligatorio y su descarga.
 - `pnpm check:static`: documentación (63 archivos, 0 enlaces rotos), agnóstico (935 archivos),
   fronteras y knip en verde.
-- `pnpm check:fast`: lint, tipos y 449 + 66 pruebas unitarias.
+- `pnpm check:fast`: lint, tipos y 453 + 66 pruebas unitarias.
 - Pruebas nuevas: reserva, subida TUS, PDF/DOCX/XLSX, descarga, limpieza, alta, recaptura,
   tiquets derivados, catálogo/admin, formulario y detalle.
 
