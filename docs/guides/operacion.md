@@ -29,10 +29,11 @@ otro destino vacío si corresponde. Cambiar solo la etiqueta no revierte una mig
 ### Si una migración se detiene
 
 Mantener app parada y revisar el error completo; no borrar datos ni editar el historial de
-migraciones para forzar el arranque. La migración `0017_remove_retired_objects.sql` retira objetos
-históricos sin consumidores: si alguna tabla contiene filas, conserva el estado anterior y aborta.
-Conservar el conjunto de respaldo previo y exportar/revisar esas filas con el operador antes de
-autorizar su vaciado y reintentar. Una dependencia SQL inesperada o un bloqueo ocupado también aborta la
+migraciones para forzar el arranque. Las migraciones de retirada
+`0017_remove_retired_objects.sql` y `0031_remove_external_refs.sql` retiran objetos históricos sin
+consumidores: si alguna tabla contiene filas, conservan el estado anterior y abortan. Conservar el
+conjunto de respaldo previo y exportar/revisar esas filas con el operador antes de autorizar su
+vaciado y reintentar. Una dependencia SQL inesperada o un bloqueo ocupado también aborta la
 migración sin aplicarla. Véase [Datos](../concepts/datos.md).
 
 ## Respaldos y recuperación

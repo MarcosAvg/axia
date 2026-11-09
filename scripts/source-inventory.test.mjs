@@ -12,6 +12,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { test } from 'node:test'
 
+import { listSourceFiles } from './source-inventory.mjs'
+
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'axia-sources-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
@@ -74,6 +76,8 @@ test('excluye secretos, datos privados y salidas incluso versionados accidentalm
   execFileSync('git', ['add', '--', ...excluded], { cwd: root })
   const result = run(root, 'check-docs.mjs', excluded)
   assert.equal(result.status, 0, result.stderr)
+  const files = listSourceFiles(root)
+  for (const file of excluded) assert.ok(!files.includes(file), file)
 })
 
 test('solo revisa fuentes nuevas no ignoradas y conserva plantillas dotenv', async (t) => {
@@ -117,8 +121,7 @@ test('docs revisa historia fuente, pero no documentación ignorada o generada', 
   assert.match(broken.stderr, /docs\/history\/current\.md/)
 })
 
-test('inventario elimina duplicados, borrados y symlinks intermedios sin abrir contenidos', async () => {
-  const { listSourceFiles } = await import('./source-inventory.mjs')
+test('inventario elimina duplicados, borrados y symlinks intermedios sin abrir contenidos', () => {
   const visited = []
   const git = (command, args) => {
     assert.equal(command, 'git')
@@ -183,6 +186,20 @@ test('no abre credenciales JSON versionadas ni directorios de claves y conserva 
   const source = run(root, 'check-docs.mjs', excluded)
   assert.equal(source.status, 1)
   assert.match(source.stderr, /apps\/server\/src\/secrets\.md/)
+  const files = listSourceFiles(root)
+  for (const file of [
+    'credentials.json',
+    'config/service-account.json',
+    'config/private-key.json',
+    'id_rsa',
+    '.ssh/config',
+    '.gnupg/options.conf',
+    'secrets/development.json',
+    'credentials/local.json',
+    'keys/local.json',
+  ]) {
+    assert.ok(!files.includes(file), file)
+  }
 })
 
 test('no abre archivos ignorados aunque estén forzados al índice de Git', (t) => {
@@ -194,4 +211,6 @@ test('no abre archivos ignorados aunque estén forzados al índice de Git', (t) 
   execFileSync('git', ['add', '-f', '--', ...excluded], { cwd: root })
   const result = run(root, 'check-docs.mjs', excluded)
   assert.equal(result.status, 0, result.stderr)
+  const files = listSourceFiles(root)
+  for (const file of excluded) assert.ok(!files.includes(file), file)
 })

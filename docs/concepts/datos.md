@@ -62,8 +62,8 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - Las claves foráneas protegen la integridad; los índices se añaden después de medir.
 - Las vistas de métricas no aplican autorización por sí mismas: la API aplica el alcance.
 
-La migración `0017_remove_retired_objects.sql` retiró objetos sin consumidores; se conservaron las
-referencias externas genéricas y sus claves. `push_subscriptions` y
+Las migraciones `0017_remove_retired_objects.sql` y `0031_remove_external_refs.sql` retiraron
+objetos sin consumidores; ya no se conservan referencias externas genéricas. `push_subscriptions` y
 `escalation_rules` siguen reservadas para funciones futuras; su presencia no implica Web Push ni
 planificador activos.
 

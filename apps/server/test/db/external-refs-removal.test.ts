@@ -75,6 +75,7 @@ it('rechaza dependencias SQL inesperadas sin borrarlas ni registrar el retiro', 
       /cannot drop table external_systems.*depend/i,
     )
     expect(await tableExists(client, 'external_systems')).toBe(true)
+    expect(await tableExists(client, 'ticket_external_refs')).toBe(true)
     const view = await client.query<{ name: string }>(
       "select to_regclass('public.fixture_external_view') as name",
     )
