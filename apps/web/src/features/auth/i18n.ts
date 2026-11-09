@@ -90,11 +90,6 @@ export const authMessages = {
     description: 'No tienes permiso para ver esta sección.',
     action: 'Volver al panel',
   },
-  admin: {
-    title: 'Administración',
-    description:
-      'Aquí irán los catálogos, los usuarios y los roles. Llegan en la Fase 3.',
-  },
 } as const
 
 /** Etiquetas en español de los roles semilla; un rol desconocido se muestra tal cual. */

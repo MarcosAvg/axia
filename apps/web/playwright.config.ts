@@ -3,7 +3,6 @@ import { defineConfig, devices } from '@playwright/test'
 const apiUrl = 'http://127.0.0.1:3101'
 
 // Pruebas de extremo a extremo: pocas y bien elegidas (convenciones, §13).
-// El flujo del técnico sin conexión llega en la Fase 5.
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
