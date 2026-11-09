@@ -112,6 +112,7 @@ export const ticketActionSchema = z.discriminatedUnion('action', [
   }),
   z.object({
     action: z.literal('validate'),
+    role: z.enum(['requester', 'supervisor']).optional(),
     ...requesterProxyBase,
     ...actionBase,
   }),

@@ -261,6 +261,7 @@ async function runTicketActionNow(
       ticketId,
       clientRequestId: input.clientRequestId,
       subjectRequesterId: input.subjectRequesterId,
+      role: input.role,
     })
   }
   return runRemainingAction(db, actor, ticketId, input)
