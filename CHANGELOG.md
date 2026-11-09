@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-09
+
 ### Añadido
 
 - La lista de tiquets muestra ubicación, solicitante y técnico asignado, y la descripción incluye la
