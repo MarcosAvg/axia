@@ -5,6 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-09
+
+### Añadido
+
+- Una cuenta que es solicitante y supervisora del mismo tiquet puede validar ambos lados en dos
+  pasos, con `role` en la acción `validate`. El detalle expone el estado de cada lado y la interfaz
+  muestra una acción por lado; la proyección offline conserva los dos pasos. Decisión en el
+  [ADR 0123](docs/decisions/0123-validacion-dos-lados-misma-cuenta.md).
+
 ## [0.17.1] - 2026-11-09
 
 ### Corregido
