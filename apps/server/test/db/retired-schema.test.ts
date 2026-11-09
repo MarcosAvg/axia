@@ -24,14 +24,21 @@ import {
 import { retiredFixtures, retiredTables } from './retired-schema-fixtures.js'
 
 const migration = '0017_remove_retired_objects.sql'
+const externalMigration = '0031_remove_external_refs.sql'
 const source = fileURLToPath(new URL('../../db/migrations', import.meta.url))
 let previous: string
+let upgrade: string
 let owner: Client
 
 beforeAll(() => {
   previous = mkdtempSync(join(tmpdir(), 'axia-previous-schema-'))
   cpSync(source, previous, { recursive: true })
   rmSync(join(previous, migration), { force: true })
+  // La retirada de referencias externas se prueba en external-refs-removal.test.ts.
+  rmSync(join(previous, externalMigration), { force: true })
+  upgrade = mkdtempSync(join(tmpdir(), 'axia-upgrade-schema-'))
+  cpSync(source, upgrade, { recursive: true })
+  rmSync(join(upgrade, externalMigration), { force: true })
 })
 
 beforeEach(async () => {
@@ -52,7 +59,10 @@ beforeEach(async () => {
 }, 60_000)
 
 afterEach(async () => owner?.end())
-afterAll(() => rmSync(previous, { recursive: true, force: true }))
+afterAll(() => {
+  rmSync(previous, { recursive: true, force: true })
+  rmSync(upgrade, { recursive: true, force: true })
+})
 
 async function objects() {
   const result = await owner.query<{ name: string }>(`
@@ -75,7 +85,7 @@ async function snapshot() {
 
 it('actualiza 0016 sin alterar cuentas, tiquets, eventos, referencias ni huellas existentes', async () => {
   const before = await snapshot()
-  await runMigrations(owner)
+  await runMigrations(owner, upgrade)
   const after = await snapshot()
   expect(after).toMatchObject({
     ...before,
@@ -90,7 +100,7 @@ it('actualiza 0016 sin alterar cuentas, tiquets, eventos, referencias ni huellas
     where n.nspname = 'public' and proname like 'metrics_%'
   `)
   expect(functions.rows).toEqual([{ proname: 'metrics_date_in' }])
-  await runMigrations(owner)
+  await runMigrations(owner, upgrade)
   expect(await snapshot()).toEqual(after)
 })
 
@@ -99,7 +109,7 @@ it.each(retiredFixtures)(
   async ({ table, insert }) => {
     await owner.query(insert)
     const before = await snapshot()
-    await expect(runMigrations(owner)).rejects.toThrow(
+    await expect(runMigrations(owner, upgrade)).rejects.toThrow(
       /tablas históricas.*datos/i,
     )
     expect(await snapshot()).toEqual(before)
@@ -118,7 +128,7 @@ it('rechaza dependencias SQL inesperadas sin borrarlas ni registrar el retiro', 
     'create view public.fixture_import_view as select id from public.import_batches',
   )
   const before = await snapshot()
-  await expect(runMigrations(owner)).rejects.toThrow(
+  await expect(runMigrations(owner, upgrade)).rejects.toThrow(
     /cannot drop table import_batches.*depend/i,
   )
   expect(await snapshot()).toEqual(before)
@@ -139,7 +149,7 @@ it('conserva una fila confirmada mientras la migración espera un escritor concu
   try {
     await writer.query('begin')
     await writer.query(retiredFixtures[0]!.insert)
-    attempt = runMigrations(owner).then(
+    attempt = runMigrations(owner, upgrade).then(
       () => null,
       (error: unknown) => error,
     )
@@ -172,7 +182,7 @@ it('conserva una fila confirmada mientras la migración espera un escritor concu
 })
 
 it('conserva referencias externas y límites de escritura del rol de aplicación', async () => {
-  await runMigrations(owner)
+  await runMigrations(owner, upgrade)
   const app = new Client({ connectionString: appConnectionString() })
   await app.connect()
   try {

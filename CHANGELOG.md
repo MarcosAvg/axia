@@ -5,6 +5,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Eliminado
+
+- Se retiraron la página de administración de integraciones, la referencia histórica de plataformas
+  externas, el verificador `check:agnostic` y las tablas genéricas `external_systems` y
+  `ticket_external_refs`. El núcleo no depende de plataformas externas. Decisión en el
+  [ADR 0124](docs/decisions/0124-retirada-referencias-externas.md).
+
 ## [0.18.0] - 2026-11-09
 
 ### Añadido
