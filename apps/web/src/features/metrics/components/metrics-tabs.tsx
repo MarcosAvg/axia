@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
   PauseSubstateRow,
@@ -64,14 +64,15 @@ const TAB_VALUES = [
   'team',
 ] as const
 
-function MetricsTabList() {
+/** Selector de pestañas del tablero; se muestra junto a los filtros. */
+export function MetricsTabList() {
   return (
     <TabsList className="h-auto flex-wrap justify-start">
       {TAB_VALUES.map((value) => (
         <TabsTrigger
           key={value}
           value={value}
-          className="min-h-11 lg:min-h-9 lg:px-4"
+          className="min-h-11 px-1 lg:min-h-9 lg:px-4"
         >
           {metricsMessages.tabs[value]}
         </TabsTrigger>
@@ -80,11 +81,10 @@ function MetricsTabList() {
   )
 }
 
-/** Pestañas del tablero por tema. */
+/** Paneles del tablero por tema. */
 export function MetricsTabs(props: MetricsTabsProps) {
   return (
-    <Tabs defaultValue="summary" className="flex flex-col gap-4">
-      <MetricsTabList />
+    <>
       <TabsContent value="summary">
         <SummaryTab
           volume={props.volume}
@@ -130,6 +130,6 @@ export function MetricsTabs(props: MetricsTabsProps) {
           technicians={props.technicians}
         />
       </TabsContent>
-    </Tabs>
+    </>
   )
 }

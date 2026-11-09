@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   CalendarIcon,
   ChevronDownIcon,
@@ -266,13 +267,15 @@ interface MetricsToolbarProps {
   filters: MetricsFilters
   catalogs: FilterCatalogs
   onFiltersChange: (filters: MetricsFilters) => void
+  tabs?: ReactNode
 }
 
-/** Contexto del tablero: periodo, filtros y chips activos en una sola fila. */
+/** Contexto del tablero: periodo, filtros, pestañas y chips en una sola fila. */
 export function MetricsToolbar({
   filters,
   catalogs,
   onFiltersChange,
+  tabs,
 }: MetricsToolbarProps) {
   const onRange = (days: number | null) => {
     if (days === null) {
@@ -294,6 +297,7 @@ export function MetricsToolbar({
         catalogs={catalogs}
         onFiltersChange={onFiltersChange}
       />
+      {tabs}
       <div className="min-w-0 flex-1">
         <FilterChips
           items={buildChips(filters, catalogs, onFiltersChange)}

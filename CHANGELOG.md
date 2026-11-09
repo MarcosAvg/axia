@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- Las pestañas de métricas comparten fila con el periodo y los filtros; el botón Exportar permanece
+  en el encabezado.
+
 ## [0.19.0] - 2026-11-09
 
 ### Eliminado
