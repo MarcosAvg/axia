@@ -53,6 +53,9 @@ export const ticketDetailResponseSchema = z.object({
     requesterDependencyName: nullableText,
     isRequester: z.boolean(),
     requesterValidated: z.boolean(),
+    supervisorValidated: z.boolean(),
+    canValidateRequester: z.boolean(),
+    canValidateSupervisor: z.boolean(),
     hasTaken: z.boolean(),
     validationPolicy: z.enum(['requester', 'supervisor', 'both']),
     cycleTimes: z.object({

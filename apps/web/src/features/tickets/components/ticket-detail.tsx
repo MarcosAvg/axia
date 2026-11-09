@@ -82,6 +82,10 @@ function TicketDetailContent({
     status: projection.ticket.status,
     isRequester: projection.ticket.isRequester,
     requesterValidated: projection.ticket.requesterValidated,
+    supervisorValidated: projection.ticket.supervisorValidated,
+    canValidateRequester: projection.ticket.canValidateRequester,
+    canValidateSupervisor: projection.ticket.canValidateSupervisor,
+    validationPolicy: projection.ticket.validationPolicy,
     isSupervisorRole: isSupervisorIdentity(identity),
     hasTaken: projection.ticket.hasTaken,
   })

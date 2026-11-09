@@ -45,6 +45,9 @@ const ticket = {
   duplicateOfFolio: null,
   isRequester: false,
   requesterValidated: false,
+  supervisorValidated: false,
+  canValidateRequester: false,
+  canValidateSupervisor: false,
   hasTaken: false,
   validationPolicy: 'both',
 } satisfies TicketDetail

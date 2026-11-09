@@ -6,14 +6,13 @@ import {
   actionsRequiringSubject,
   isProxyAction,
   isRequesterProxyAction,
-  isSupervisorIdentity,
 } from '../domain/actions'
 import type { TicketDetail, TicketParticipant } from '../domain/types'
 import { useMyOffers } from '../hooks/use-tickets'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { DEDICATED } from '../components/ticket-action-handlers'
 
-const ONE_CLICK: ActionKey[] = ['validate']
+const ONE_CLICK: ActionKey[] = ['validate_requester', 'validate_supervisor']
 const FORM_ACTIONS: ActionKey[] = [
   'start',
   'record_progress',
@@ -43,12 +42,18 @@ type ActionPanelInput = {
 
 function validateBlockFor(
   ticket: TicketDetail,
-  identity: Identity | null,
   subject: ProxySubject,
 ): 'waiting' | 'requester_only' | null {
-  if (subject || !isSupervisorIdentity(identity)) return null
-  if (ticket.validationPolicy === 'requester') return 'requester_only'
-  if (ticket.validationPolicy === 'both' && !ticket.requesterValidated) {
+  if (subject) return null
+  if (ticket.validationPolicy === 'requester' && !ticket.canValidateRequester) {
+    return 'requester_only'
+  }
+  if (
+    ticket.validationPolicy === 'both' &&
+    !ticket.requesterValidated &&
+    ticket.canValidateSupervisor &&
+    !ticket.isRequester
+  ) {
     return 'waiting'
   }
   return null
@@ -68,6 +73,31 @@ function isAllowedAction(action: ActionKey): boolean {
   )
 }
 
+type ValidateMutation = ReturnType<typeof useTicketActions>['validate']
+
+function validateControls(
+  validate: ValidateMutation,
+  onValidated?: () => void,
+): {
+  oneClick: Partial<Record<ActionKey, () => void>>
+  pending: Partial<Record<ActionKey, boolean>>
+} {
+  return {
+    oneClick: {
+      validate_requester: () =>
+        validate.mutate(
+          { role: 'requester' },
+          { onSuccess: () => onValidated?.() },
+        ),
+      validate_supervisor: () => validate.mutate({ role: 'supervisor' }),
+    },
+    pending: {
+      validate_requester: validate.isPending,
+      validate_supervisor: validate.isPending,
+    },
+  }
+}
+
 /** Estado compartido por el panel de acciones y su barra móvil. */
 export function useActionPanel({
   ticket,
@@ -85,21 +115,23 @@ export function useActionPanel({
     can(identity, 'ticket.take_offer'),
   )
   const hasOffer = Boolean(offers.data?.some((offer) => offer.id === ticket.id))
-  const oneClick: Partial<Record<ActionKey, () => void>> = {
-    validate: () =>
-      mutations.validate.mutate({}, { onSuccess: () => onValidated?.() }),
-  }
-  const pending: Partial<Record<ActionKey, boolean>> = {
-    validate: mutations.validate.isPending,
-  }
-  const validateBlocked = validateBlockFor(ticket, identity, subject)
+  const { oneClick, pending } = validateControls(
+    mutations.validate,
+    onValidated,
+  )
+  const validateBlocked = validateBlockFor(ticket, subject)
   const proxyValidateDone =
     subject?.kind === 'requester' && ticket.requesterValidated
   const visible = actions
     .filter(
       (action) =>
         isVisibleFor(action, subject) &&
-        !(action === 'validate' && (validateBlocked || proxyValidateDone)),
+        !(
+          action === 'validate_requester' &&
+          (validateBlocked ||
+            proxyValidateDone ||
+            (!subject && !ticket.isRequester))
+        ),
     )
     .filter(isAllowedAction)
   const blocked = actionsRequiringSubject(

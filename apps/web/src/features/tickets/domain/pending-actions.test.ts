@@ -41,6 +41,9 @@ function ticket(overrides: Partial<TicketDetail> = {}): TicketDetail {
     requesterDependencyName: null,
     isRequester: false,
     requesterValidated: false,
+    supervisorValidated: false,
+    canValidateRequester: true,
+    canValidateSupervisor: true,
     hasTaken: false,
     isUnrouted: false,
     validationPolicy: 'supervisor',
@@ -157,6 +160,38 @@ describe('projectPendingTicket · validación y desenlaces', () => {
 
     expect(result.ticket.status).toBe('attended')
     expect(result.complete).toBe(false)
+  })
+
+  it('proyecta los dos pasos de la misma cuenta en política both', () => {
+    const requester = projectPendingTicket(
+      ticket({ status: 'attended', validationPolicy: 'both' }),
+      [action('validate', 1, { role: 'requester' })],
+    )
+    expect(requester.ticket.requesterValidated).toBe(true)
+    expect(requester.ticket.status).toBe('attended')
+
+    const supervisor = projectPendingTicket(requester.ticket, [
+      action('validate', 2, { role: 'supervisor' }),
+    ])
+    expect(supervisor.ticket.supervisorValidated).toBe(true)
+    expect(supervisor.ticket.status).toBe('closed')
+  })
+
+  it('en política supervisor el primer paso cierra', () => {
+    const result = projectPendingTicket(
+      ticket({ status: 'attended', validationPolicy: 'supervisor' }),
+      [action('validate', 1, { role: 'supervisor' })],
+    )
+    expect(result.ticket.supervisorValidated).toBe(true)
+    expect(result.ticket.status).toBe('closed')
+  })
+
+  it('sin role conserva la derivación anterior', () => {
+    const result = projectPendingTicket(
+      ticket({ status: 'attended', validationPolicy: 'both' }),
+      [action('validate', 1, { subjectRequesterId: 'requester-1' })],
+    )
+    expect(result.ticket.requesterValidated).toBe(true)
   })
 })
 

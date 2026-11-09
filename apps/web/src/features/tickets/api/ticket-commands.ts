@@ -65,7 +65,10 @@ export const ticketCommandSchema = z.discriminatedUnion('operation', [
   }),
   z.object({
     operation: z.literal('validate'),
-    args: z.object(requesterProxy),
+    args: z.object({
+      ...requesterProxy,
+      role: z.enum(['requester', 'supervisor']).optional(),
+    }),
   }),
   z.object({ operation: z.literal('reject'), args: z.object(reason) }),
   z.object({

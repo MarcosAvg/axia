@@ -45,6 +45,7 @@ export interface PendingTicketProjection<
 interface ProjectionState {
   status: TicketStatus
   requesterValidated: boolean
+  supervisorValidated: boolean
   hasTaken: boolean
   cycle: number
 }
@@ -93,15 +94,25 @@ function assignSupervisorTransition(state: ProjectionState): Transition {
     : 'stop'
 }
 
+function validationSide(
+  action: PendingTicketAction,
+  context: ProjectionContext,
+): 'requester' | 'supervisor' {
+  const role = action.args.role
+  if (role === 'requester' || role === 'supervisor') return role
+  return context.isRequester || Boolean(action.args.subjectRequesterId)
+    ? 'requester'
+    : 'supervisor'
+}
+
 function validateTransition(
   state: ProjectionState,
   action: PendingTicketAction,
   context: ProjectionContext,
 ): Transition {
   if (state.status !== 'attended') return 'stop'
-  const requesterSide =
-    context.isRequester || Boolean(action.args.subjectRequesterId)
-  if (requesterSide) {
+  const side = validationSide(action, context)
+  if (side === 'requester') {
     if (state.requesterValidated) return 'stop'
     const validated = { ...state, requesterValidated: true }
     return context.validationPolicy === 'requester'
@@ -112,7 +123,8 @@ function validateTransition(
   if (context.validationPolicy === 'both' && !state.requesterValidated) {
     return 'stop'
   }
-  return { ...state, status: 'closed' }
+  if (state.supervisorValidated) return 'stop'
+  return { ...state, supervisorValidated: true, status: 'closed' }
 }
 
 function claimTransition(
@@ -194,6 +206,7 @@ export function projectPendingTicket<T extends TicketDetail>(
     {
       status: ticket.status,
       requesterValidated: ticket.requesterValidated,
+      supervisorValidated: ticket.supervisorValidated,
       hasTaken: ticket.hasTaken,
       cycle: ticket.cycle,
     },
@@ -208,6 +221,7 @@ export function projectPendingTicket<T extends TicketDetail>(
       ...ticket,
       status: state.status,
       requesterValidated: state.requesterValidated,
+      supervisorValidated: state.supervisorValidated,
       hasTaken: state.hasTaken,
       cycle: state.cycle,
     },
@@ -228,6 +242,7 @@ export function projectPendingStatus(
     {
       status,
       requesterValidated: false,
+      supervisorValidated: false,
       hasTaken: false,
       cycle: 1,
     },
