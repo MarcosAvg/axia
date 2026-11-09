@@ -21,15 +21,18 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 ### Evidencia de esta tarea
 
-- `pnpm check:fast`: lint y tipos en verde; 66 pruebas de servidor y 463 de web.
+- `pnpm check:fast`: lint y tipos en verde; 66 pruebas de servidor y 464 de web.
 - `pnpm test:affected`: 23/23 flujos smoke de Playwright.
-- `pnpm check`: código 0; 50 pruebas de scripts, 66 + 463 unitarias, 65 de Playwright, 2 del
+- `pnpm check`: código 0; 50 pruebas de scripts, 66 + 464 unitarias, 65 de Playwright, 2 del
   compilador, 411 de PostgreSQL (61 archivos) y build correcto. Persiste el aviso de chunks >500 kB.
 - `pnpm check:static`: 66 archivos de documentación, 945 archivos de agnóstico, fronteras y knip en
   verde.
 - Pruebas nuevas: lados y políticas, título del detalle/capacidades, eventos y sujetos, idempotencia,
   acciones web por lado y proyección offline de dos pasos. La prueba de integración se dividió en
   `tickets-validation-sides-http.test.ts`, `tickets-validation-detail-http.test.ts` y sus helpers.
+- Revisión independiente: aprobada tras corregir la etiqueta de la validación pendiente (`validate`
+  mostraba el nombre crudo) y añadir su prueba de componente. Quedan mejoras menores registradas en
+  la revisión, sin efecto en el flujo.
 - Pendiente: integrar la rama a `main` y publicar; ambas acciones requieren confirmación.
 
 ## Revisión pendiente: bloqueos con varias cuentas con múltiples roles
