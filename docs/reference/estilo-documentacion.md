@@ -11,7 +11,8 @@ tema; un documento nuevo debe resolver una necesidad que los existentes no cubra
   como autoridad normativa y no se reescribe para ajustarla a limitaciones del código.
 - Se enlaza una regla existente en lugar de copiarla. Los detalles actuales se contrastan con
   código, scripts, plantillas o pruebas; el historial no certifica el comportamiento disponible.
-- Una capacidad futura o una discrepancia conocida se identifica como tal y se registra en estado.
+- Una capacidad futura o una discrepancia conocida se identifica como tal y se registra en
+  [límites y pendientes](limitaciones.md).
 - Los diseños y planes concluidos se recuperan desde Git. Los ADR nuevos explican decisiones con
   alternativas y consecuencias duraderas; no son notas de cada corrección o pantalla.
 
@@ -35,4 +36,5 @@ No afirmar que una opción, default o límite de un proveedor externo permanece 
 Comprobar enlaces con `pnpm check:docs` y ejemplos con sus consumidores reales cuando sea seguro.
 La documentación del paquete operativo debe seguir disponible en el paquete; no convertir sus
 instrucciones esenciales en enlaces que requieran el checkout. No añadir pruebas que comparen
-texto por texto la prosa. Registrar límites y comprobaciones reales en la memoria de trabajo.
+texto por texto la prosa. Registrar los límites reales en [límites y pendientes](limitaciones.md)
+y los cambios en el CHANGELOG.

@@ -5,8 +5,8 @@ Preparar el entorno siguiendo [desarrollo](docs/start/desarrollo.md). Las reglas
 
 ## Entregar un cambio
 
-1. Revisar el [estado del proyecto](docs/internal/estado.md) y crear una rama corta desde `main`
-   (`feat/`, `fix/`, `docs/`, `refactor/` o `chore/`; los agentes usan su prefijo de sesión).
+1. Revisar el [CHANGELOG](CHANGELOG.md) y las [limitaciones](docs/reference/limitaciones.md), y
+   crear una rama corta desde `main` (`feat/`, `fix/`, `docs/`, `refactor/` o `chore/`).
 2. Hacer cambios pequeños con pruebas del comportamiento afectado. Un bug corregido debe tener
    una regresión; no se debilitan pruebas, lint o tipos para conseguir un resultado verde.
 3. Ejecutar `pnpm check:fast` y `pnpm test:affected` durante el trabajo. El selector puede ampliar

@@ -41,11 +41,13 @@ las variables y las reglas no se repiten en varios manuales.
 | Acciones y estados | [Transiciones](reference/estados-y-transiciones.md) |
 | Autorización | [Permisos](reference/permisos.md) |
 | Rutas y contratos HTTP | [API](reference/api.md) |
+| Límites conocidos y trabajo pendiente | [Limitaciones](reference/limitaciones.md) |
 
 ## Mantenimiento de la documentación
 
 La especificación expresa las reglas aprobadas; las guías describen la implementación disponible.
 Una diferencia se registra como pendiente, sin alterar la regla ni afirmar que ya está resuelta.
-El [estado](internal/estado.md) reúne trabajo actual y límites conocidos. Las [decisiones recientes](decisions/README.md)
-explican consolidaciones vigentes; el [historial en Git](history/README.md) permite recuperar diseños
-anteriores sin presentarlos como instrucciones actuales.
+Las [limitaciones](reference/limitaciones.md) reúnen los límites y pendientes vigentes. Las
+[decisiones recientes](decisions/README.md) explican consolidaciones vigentes; el
+[historial en Git](history/README.md) permite recuperar diseños anteriores sin presentarlos como
+instrucciones actuales.

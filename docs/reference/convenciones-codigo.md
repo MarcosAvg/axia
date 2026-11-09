@@ -166,7 +166,7 @@ completa y el smoke de imagen. Para preparar el entorno se sigue [desarrollo](..
 
 ## 15. Terminado
 
-Un cambio queda terminado con pruebas apropiadas, documentación y estado actualizados, sin secretos
+Un cambio queda terminado con pruebas apropiadas, documentación y CHANGELOG actualizados, sin secretos
 ni código comentado o pendientes ocultos. Usar `check:fast` y `test:affected` en el ciclo; antes de
 integrar a `main`, `pnpm check` completo en verde y evidencia real. Para migraciones, verificar
 instalación limpia en pruebas y toda la integración PostgreSQL. No reiniciar una base con datos

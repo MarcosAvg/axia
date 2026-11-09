@@ -77,7 +77,8 @@ Las pruebas deben cubrir cambios reales; no se añaden pruebas de texto para doc
 
 ## Retomar o actualizar
 
-1. Revisar `git status`, rama y [estado de trabajo](../internal/estado.md).
+1. Revisar `git status`, la rama y el [CHANGELOG](../../CHANGELOG.md); los límites vigentes están
+   en [límites y pendientes](../reference/limitaciones.md).
 2. Actualizar el checkout sin sobrescribir trabajo local e instalar el bloqueo de dependencias
    con `pnpm install --frozen-lockfile`.
 3. Leer la especificación si se toca negocio y ejecutar `pnpm check:fast`.

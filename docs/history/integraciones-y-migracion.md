@@ -9,8 +9,8 @@ Describir la migración de datos hacia Axia y la convivencia con el sistema de o
 trabajo para importadores e integraciones.
 
 > **Advertencia:** este es el único documento (junto con el código de los adaptadores,
-> `docs/internal/estado.md` y `docs/decisions/`) donde pueden aparecer nombres de plataformas de terceros. El
-> núcleo de Axia no debe depender de nada de lo que sigue.
+> `docs/decisions/` y `scripts/agnostic-names.json`) donde pueden aparecer nombres de plataformas
+> de terceros. El núcleo de Axia no debe depender de nada de lo que sigue.
 
 ## Contenido
 
@@ -154,7 +154,7 @@ Supuestos provisionales (reversibles; se registra un ADR):
    reporte → asignación; "intervalo de trabajo" = asignación → finalización.
 2. La autorización es la asignación del supervisor al técnico.
 
-Preguntas para la persona (se registran en `docs/internal/estado.md` cuando la tarea dependa de ellas):
+Preguntas abiertas (se resolverán al construir el adaptador):
 
 1. **Valores distintos de la columna ESTATUS** de la hoja (solo se conoce `EN PROCESO`).
 2. ¿La plataforma de origen permite exportar (CSV/Excel), tiene API o envía correos al crear o

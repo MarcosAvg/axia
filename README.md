@@ -26,7 +26,7 @@ interfaz web para escritorio y móvil y trabajo sin conexión para técnicos.
 - Panel, indicadores, notificaciones dentro de la aplicación y catálogos XLSX.
 
 Web Push, escalamiento automático e integraciones externas no están implementados. Los límites
-conocidos y el trabajo pendiente se registran en el [estado del proyecto](docs/internal/estado.md).
+conocidos y el trabajo pendiente están en [límites y pendientes](docs/reference/limitaciones.md).
 
 ## Cómo se aloja
 

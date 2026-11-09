@@ -17,7 +17,7 @@ necesita hacer. Cada tema tiene un documento canónico y el resto enlaza a él.
 | Consultar reglas aprobadas | `docs/concepts/negocio.md`, sin cambios de contenido |
 | Entender términos, componentes y datos | Dominio/glosario, arquitectura y datos |
 | Consultar contratos | Referencias de API, permisos, estados, comandos y configuración |
-| Contribuir y mantener calidad | CONTRIBUTING y convenciones; AGENTS añade instrucciones del agente |
+| Contribuir y mantener calidad | CONTRIBUTING y convenciones; AGENTS y opencode orientan a asistentes |
 
 Se fusionan instalación local y continuidad en desarrollo; la instalación de producción tiene
 una sola secuencia en `deploy/README.md`. Los documentos mantienen sus rutas salvo esas fusiones.
@@ -42,6 +42,6 @@ No se modifican negocio, autorización, comandos, configuración ni garantías p
 Un cambio de comportamiento actualiza su referencia en el mismo commit. Antes de añadir un
 documento se comprueba si corresponde ampliar uno existente. Las decisiones nuevas requieren
 una alternativa técnica relevante y consecuencias duraderas; correcciones, recuentos de pruebas
-y detalles de interfaz se registran en CHANGELOG o en la memoria de trabajo, no en otro ADR.
-Los planes concluidos se consultan en Git. Estado contiene solo trabajo actual, comprobación
-reciente, límites y pendientes; no duplica un historial cronológico.
+y detalles de interfaz se registran en CHANGELOG, no en otro ADR. Los planes concluidos se
+consultan en Git. La referencia de límites contiene solo límites y pendientes vigentes; no
+duplica un historial cronológico.
