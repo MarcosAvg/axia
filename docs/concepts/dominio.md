@@ -2,7 +2,7 @@
 
 Axia sigue solicitudes de mantenimiento desde su registro hasta el cierre. El tiquet conserva
 su captura, responsables, evidencias e historial; cuando se detiene, registra el motivo y su
-avance. Funciona por sí misma, sin depender de otra plataforma.
+avance. Funciona por sí misma.
 
 Las reglas aprobadas están en [Negocio](negocio.md). Para operar, consulta [Uso](../guides/uso.md);
 para códigos y precondiciones, [Estados y transiciones](../reference/estados-y-transiciones.md).

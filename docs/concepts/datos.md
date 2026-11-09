@@ -17,7 +17,6 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 | Evidencia | `evidence` y el volumen privado de archivos |
 | Adjuntos | `ticket_attachments` (documentos obligatorios de ciertos problemas) |
 | Notificaciones | `notification_rules`, `notifications`, `notification_deliveries`, `push_subscriptions` |
-| Referencias externas | `external_systems`, `ticket_external_refs`; sin adaptadores publicados |
 | Configuración | `instance_settings`, `reasons`, `escalation_rules` |
 
 ## Relaciones clave

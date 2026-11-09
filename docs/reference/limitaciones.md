@@ -29,9 +29,6 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 - El tipo de servicio es opcional en la API de alta y atención; la interfaz lo exige al atender.
 - La demo conserva una supervisora con dos equipos. RN-04 limita a uno y esa restricción todavía no
   se impone; no impide el ruteo, pero requiere una revisión específica.
-- La importación y los adaptadores externos están deshabilitados. El documento de
-  [integraciones y migración](../history/integraciones-y-migracion.md) es solo una referencia
-  histórica.
 
 ## Pendientes operativos
 

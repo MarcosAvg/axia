@@ -9,25 +9,11 @@ Este archivo orienta a asistentes que trabajan en el repositorio. No define regl
 autoridad es [la especificación](docs/concepts/negocio.md) y el estilo está en
 [las convenciones](docs/reference/convenciones-codigo.md).
 
-## 1. Principio de independencia: Axia es agnóstica
+## 1. Independencia del núcleo
 
 - El **núcleo** de Axia funciona completo por sí solo: los tiquets se crean, asignan, ejecutan,
   pausan, resuelven y miden dentro de Axia.
-- **Ninguna plataforma externa es requisito, fuente de verdad ni parte del diseño del núcleo.**
-  Otros sistemas donde hoy viven los datos (plataformas de reporte, hojas de cálculo) son solo
-  **referencia** o **fuentes opcionales** de datos.
-- Todo lo que toque un sistema externo vive detrás de **adaptadores aislados**. En esta versión
-  no se publican adaptadores externos; si se añaden, no modifican el núcleo.
-- En el núcleo (esquema SQL, enums, interfaz, lógica, textos) **no aparecen nombres, campos,
-  estados ni reglas de otra plataforma**. Los identificadores externos se guardan solo en la
-  tabla genérica `ticket_external_refs(system, external_id)`, y el núcleo no conoce sus valores.
-- Los nombres de plataformas de terceros solo pueden aparecer en el código de los adaptadores,
-  `docs/history/integraciones-y-migracion.md`, `docs/decisions/` y `scripts/` (la lista vive en
-  `scripts/agnostic-names.json`). Lo verifica `pnpm check:agnostic`.
-- Prueba de fuego ante la duda: *¿Axia funcionaría igual si esa plataforma dejara de existir?*
-  Si no, está mal ubicado.
-- Las integraciones son opcionales y, por defecto, de **entrada** (importar). Nada en Axia
-  debe quedar esperando a que otro sistema se actualice.
+- No depende de plataformas externas, servicios de terceros ni una segunda fuente de verdad.
 - Infraestructura: PostgreSQL 17 autoalojado y un único servidor Fastify. La web habla solo con
   `/api`; el modelo de datos es Postgres estándar.
 
@@ -65,12 +51,11 @@ Si algún script no existe, créalo durante el arranque.
 | `pnpm test:affected` | Pruebas Vitest relacionadas con los archivos cambiados |
 | `pnpm test:e2e:smoke` | Flujos críticos de Playwright (`@smoke`) |
 | `pnpm check:docs` | Enlaces relativos de la documentación |
-| `pnpm check:agnostic` | Verifica que el núcleo no mencione plataformas de terceros |
 | `pnpm db:start` / `pnpm db:reset` | PostgreSQL local / reconstruir base local |
 | `pnpm db:test` | Integración del servidor contra PostgreSQL real |
 | `pnpm db:demo -- --demo` | Semilla demo explícita, solo local |
 | **`pnpm check:fast`** | **Ciclo local**: lint + typecheck + unitarias |
-| `pnpm check:static` | Scripts, docs, agnóstico, fronteras y knip |
+| `pnpm check:static` | Scripts, docs, fronteras y knip |
 | **`pnpm check`** | **Compuerta completa**: estáticos + unitarias + Playwright + PostgreSQL + build |
 
 ## 5. Reglas de oro (no negociables)
@@ -86,8 +71,7 @@ Si algún script no existe, créalo durante el arranque.
 6. Los componentes no llaman a `/api` directamente: usan `features/*/api`. Un feature solo importa
    el `index.ts` de otro.
 7. La lógica de negocio va en funciones puras, con pruebas.
-8. Nunca inventes datos. En importaciones, los marcadores de "sin dato" de la fuente se
-   convierten en `NULL` (detalle en `docs/history/integraciones-y-migracion.md`).
+8. Nunca inventes datos. Los valores desconocidos se guardan como `NULL`.
 9. Fechas en `timestamptz`; zona horaria configurable, nunca fija en el código.
 10. Código, tablas y columnas en inglés. Textos de interfaz en español (es-MX).
 11. Actualiza la documentación en el mismo commit que cambia el comportamiento.
@@ -149,6 +133,4 @@ Nunca, sin que quien mantiene el proyecto lo pida claramente en la sesión:
 - `docs/reference/convenciones-codigo.md`: estructura, estilo, pruebas, SQL, git, herramientas.
 - `docs/reference/limitaciones.md`: límites conocidos y pendientes operativos.
 - `deploy/README.md`: instalación de una instancia y primer administrador.
-- `docs/history/integraciones-y-migracion.md`: **solo léelo al trabajar en importadores o
-  integraciones**. Describe el origen histórico de los datos como referencia.
 - `docs/decisions/`: decisiones de arquitectura (ADR).

@@ -468,8 +468,8 @@ posible duplicado ignoradas frente a atendidas, y volumen con y sin duplicados.
 - **Rendimiento:** índices para las consultas previsibles (bandejas por rol, listas por estado,
   antigüedad, métricas y búsqueda de posibles duplicados; es posible apoyarse en extensiones de Postgres
   estándar de PostgreSQL, como `pg_trgm`, justificándolo en un ADR).
-- **Agnóstico:** nada del núcleo menciona plataformas externas. Conserva `ticket_external_refs`
-  genérico para integraciones futuras.
+- **Independencia:** el núcleo funciona sin plataformas externas y no incorpora sus nombres, campos,
+  estados ni reglas.
 - **Pruebas de integración** de: cada transición válida e inválida, cada permiso, ruteo y retiro de ofertas,
   recaptura (con y sin cambio de equipo), pausa con subestados, reclamación (procedente e improcedente
   desde `attended` y desde `closed`) y reapertura, detección y marcado de duplicados y su exclusión de
@@ -481,9 +481,8 @@ posible duplicado ignoradas frente a atendidas, y volumen con y sin duplicados.
 
 Envío real de notificaciones (push o correo); mantenimiento preventivo recurrente; control de
 materiales, inventario y costos (solo importa el estado de lo solicitado, que ya cubren los
-subestados de pausa); equipos o activos; importación de datos y adaptadores de integración. La
-interfaz de usuario y la detección de duplicados ya están implementadas; la detección no bloquea y
-no fusiona tiquets.
+subestados de pausa); equipos o activos. La interfaz de usuario y la detección de duplicados ya
+están implementadas; la detección no bloquea y no fusiona tiquets.
 
 ## 14. Decisiones confirmadas
 

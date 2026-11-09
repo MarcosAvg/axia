@@ -25,8 +25,8 @@ interfaz web para escritorio y móvil y trabajo sin conexión para técnicos.
 - Cola offline de acciones y fotografías, con sincronización al recuperar la conexión.
 - Panel, indicadores, notificaciones dentro de la aplicación y catálogos XLSX.
 
-Web Push, escalamiento automático e integraciones externas no están implementados. Los límites
-conocidos y el trabajo pendiente están en [límites y pendientes](docs/reference/limitaciones.md).
+Web Push y escalamiento automático no están implementados. Los límites conocidos y el trabajo
+pendiente están en [límites y pendientes](docs/reference/limitaciones.md).
 
 ## Cómo se aloja
 
@@ -35,7 +35,7 @@ fotos. Compose separa base y aplicación; la app aplica las migraciones pendient
 arrancar. La instalación usa `latest` por defecto o una versión fijada, y un proxy HTTPS del
 operador; no requiere Node.js ni compilar en el servidor.
 
-El núcleo funciona de forma autónoma, sin plataformas externas. La [arquitectura](docs/concepts/arquitectura.md)
+El núcleo funciona de forma autónoma. La [arquitectura](docs/concepts/arquitectura.md)
 explica el stack, la autorización y las decisiones técnicas.
 
 ## Contribuir

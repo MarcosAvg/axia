@@ -36,11 +36,6 @@ Las migraciones SQL viven en `apps/server/db/migrations/`.
 - Solo `features/*/api` y `lib/` usan el cliente HTTP. Componentes, rutas y hooks de interfaz no
   llaman directamente a `/api`.
 - `domain/` es TypeScript puro: no importa React, HTTP, TanStack ni Dexie. No hay ciclos.
-- Los adaptadores externos quedan aislados; no añaden nombres, reglas o columnas de otro sistema
-  al núcleo. Las referencias externas usan `ticket_external_refs` y `external_systems`.
-- El verificador de independencia admite nombres externos únicamente en las excepciones
-  históricas/internas, decisiones y scripts que define `scripts/check-agnostic.mjs`. Su lista de
-  nombres está en `scripts/agnostic-names.json`; no se amplían excepciones para ocultar infracciones.
 
 ## 5. Límites de tamaño y complejidad
 
@@ -117,8 +112,6 @@ worker se entrega sin caché; no depender de Background Sync para conservar trab
   fuente de permisos; roles y ámbitos son datos controlados del servidor.
 - El cambio de estado y su evento se escriben en la misma transacción. La bitácora es de solo
   agregar; separar acciones y validar permiso, precondiciones e idempotencia.
-- Las integraciones futuras definen almacenamiento aislado, sin dependencias desde el núcleo.
-  No asumir la existencia de tablas retiradas de importación.
 - Referencia en migraciones, demo explícita local; nunca datos reales en semillas o pruebas.
 - Añadir índices según filtros/claves y medición; no introducir particiones o cachés sin evidencia.
 
@@ -152,12 +145,12 @@ Todo bug corregido tiene una regresión. Dominios nuevos llevan pruebas de regla
 nuevas, permisos y alcance positivos y negativos. Las acciones cubren éxito, permiso incorrecto,
 transición inválida e idempotencia. Usar datos ficticios, reloj controlado cuando sea relevante y
 sin dependencia de orden ni red externa. Nombrar las pruebas por comportamiento en español.
-El núcleo se prueba sin cargar adaptadores. No debilitar, omitir o borrar pruebas para pasar.
+No debilitar, omitir o borrar pruebas para pasar.
 
 ## 14. Verificación automática
 
 TypeScript, ESLint y dependency-cruiser verifican tipos, límites y fronteras. Knip detecta código
-sin uso; los scripts de documentos/independencia revisan fuentes pertinentes de Git. Prettier,
+sin uso; los scripts de documentación revisan fuentes pertinentes de Git. Prettier,
 lint-staged y commitlint verifican formato y commits. Las configuraciones ejecutables son la
 referencia de las reglas aplicadas; no se copia aquí otra configuración divergente.
 
@@ -191,12 +184,10 @@ explícita antes de ejecutarlas en infraestructura real.
 
 Reutilizar lo existente cuando resuelva el problema. Antes de añadir una dependencia, verificar
 registro, origen oficial, mantenimiento y licencia MIT, Apache-2.0, BSD o ISC; justificarla en el
-commit. Confirmar el bloqueo de pnpm y retirar dependencias sin uso. Los SDK de sistemas externos
-pertenecen a su adaptador, no al núcleo.
+commit. Confirmar el bloqueo de pnpm y retirar dependencias sin uso.
 
 ## 19. Cambios que requieren cuidado
 
 No ejecutar operaciones destructivas de Git, borrar datos fuera del proyecto, instalar globalmente,
 leer secretos o actuar en producción sin autorización. No sustituir una regla de negocio por una
-suposición técnica ni hacer que el núcleo dependa de un sistema externo. Los límites específicos
-para agentes permanecen en [AGENTS.md](../../AGENTS.md).
+suposición técnica. Los límites específicos para asistentes permanecen en [AGENTS.md](../../AGENTS.md).

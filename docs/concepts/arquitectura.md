@@ -27,10 +27,8 @@ Las primitivas vendorizadas tienen excepciones de estilo limitadas a `components
 propia mantiene los límites de las [convenciones](../reference/convenciones-codigo.md).
 React Compiler se aplica al build; el desarrollo normal evita su coste en cada transformación.
 
-No existe una plataforma externa necesaria ni una segunda fuente de verdad. Las referencias
-externas son pares genéricos en `ticket_external_refs`; no incorporan reglas de otros sistemas.
-No se publican adaptadores externos en esta versión. Si se añaden, serán aislados, opcionales y
-por defecto de entrada; el flujo del núcleo seguirá completo aunque desaparezca su origen.
+Axia no requiere plataformas externas ni una segunda fuente de verdad. El flujo del núcleo
+funciona completo sin servicios de terceros.
 
 ## Petición, sesión y autorización
 

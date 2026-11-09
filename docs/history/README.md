@@ -23,6 +23,4 @@ el historial del remoto antes de consultarlos (`git fetch --unshallow`). La hist
 reemplaza un respaldo de los datos de una instancia; los números de ADR retirados no se reutilizan.
 
 Los [ADR 0099–0102](../decisions/README.md) justifican las consolidaciones actuales; el
-[índice de decisiones](../decisions/README.md) reúne las posteriores. Se conserva
-[integraciones y migración](integraciones-y-migracion.md) como referencia de origen y normalización
-exigida por las instrucciones del proyecto; no implica adaptadores externos disponibles.
+[índice de decisiones](../decisions/README.md) reúne las posteriores.
