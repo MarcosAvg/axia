@@ -116,6 +116,9 @@ export interface TicketDetail extends TicketListItem {
   requesterDependencyName: string | null
   isRequester: boolean
   requesterValidated: boolean
+  supervisorValidated: boolean
+  canValidateRequester: boolean
+  canValidateSupervisor: boolean
   hasTaken: boolean
   validationPolicy: 'requester' | 'supervisor' | 'both'
 }

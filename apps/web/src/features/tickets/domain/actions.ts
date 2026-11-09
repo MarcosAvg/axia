@@ -12,7 +12,8 @@ export type ActionKey =
   | 'resume'
   | 'record_progress'
   | 'attend'
-  | 'validate'
+  | 'validate_requester'
+  | 'validate_supervisor'
   | 'reject'
   | 'cancel'
   | 'change_priority'
@@ -39,7 +40,7 @@ const REQUESTER_PROXY_PERMISSIONS = [
 
 /** Acciones del solicitante que se pueden ejecutar por proxy. */
 const REQUESTER_PROXY_ACTIONS: ActionKey[] = [
-  'validate',
+  'validate_requester',
   'open_claim',
   'cancel',
 ]
@@ -83,6 +84,14 @@ export interface ActionContext {
   isRequester: boolean
   /** El lado del solicitante ya validó en el ciclo actual. */
   requesterValidated: boolean
+  /** El lado del supervisor ya validó en el ciclo actual. */
+  supervisorValidated: boolean
+  /** La cuenta puede registrar el lado del solicitante. */
+  canValidateRequester: boolean
+  /** La cuenta puede registrar el lado del supervisor. */
+  canValidateSupervisor: boolean
+  /** Política de validación de la instancia. */
+  validationPolicy: 'requester' | 'supervisor' | 'both'
   /** El actor tiene rol de supervisor y no es administrador. */
   isSupervisorRole: boolean
   /** El actor ya tiene una asignación abierta como supervisor del tiquet. */
@@ -190,7 +199,13 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   resume: (c) => c.status === 'paused' && technicianAction(c, 'ticket.resume'),
   attend: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.attend'),
-  validate: (c) => c.status === 'attended' && has(c, 'ticket.validate'),
+  validate_requester: (c) =>
+    c.status === 'attended' && c.canValidateRequester && !c.requesterValidated,
+  validate_supervisor: (c) =>
+    c.status === 'attended' &&
+    c.canValidateSupervisor &&
+    !c.supervisorValidated &&
+    (c.validationPolicy !== 'both' || c.requesterValidated),
   reject: (c) => ADVANCEABLE.includes(c.status) && has(c, 'ticket.reject'),
   cancel: (c) => ADVANCEABLE.includes(c.status) && has(c, 'ticket.cancel'),
   change_priority: (c) =>
@@ -226,9 +241,11 @@ export function allowedActions(context: ActionContext): ActionKey[] {
   )
   if (context.isRequester && context.requesterValidated) {
     if (context.status === 'attended' || context.status === 'under_claim') {
-      return []
+      return actions.filter((action) => action === 'validate_supervisor')
     }
-    return actions.filter((action) => action !== 'open_claim')
+    return actions.filter(
+      (action) => action !== 'open_claim' && action !== 'validate_requester',
+    )
   }
   if (context.isSupervisorRole && !context.hasTaken && !context.isRequester) {
     return actions.filter(
@@ -240,7 +257,8 @@ export function allowedActions(context: ActionContext): ActionKey[] {
 
 /** Orden de preferencia del "siguiente paso" que se destaca en el detalle. */
 const PRIMARY_ORDER: ActionKey[] = [
-  'validate',
+  'validate_requester',
+  'validate_supervisor',
   'resolve_claim',
   'start',
   'resume',

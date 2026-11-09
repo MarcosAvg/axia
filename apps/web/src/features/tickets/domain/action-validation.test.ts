@@ -50,8 +50,8 @@ describe('missingActionFields', () => {
     expect(
       missingActionFields('resolve_claim', EMPTY_ACTION_VALUES, false),
     ).toEqual([])
-    expect(missingActionFields('validate', EMPTY_ACTION_VALUES, false)).toEqual(
-      [],
-    )
+    expect(
+      missingActionFields('validate_requester', EMPTY_ACTION_VALUES, false),
+    ).toEqual([])
   })
 })

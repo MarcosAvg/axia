@@ -1,45 +1,10 @@
-import type { Identity } from '@/features/auth'
 import {
   actionsRequiringSubject,
   allowedActions,
   isProxyAction,
   pickPrimaryAction,
 } from './actions'
-import type { ActionContext } from './actions'
-import type { TicketStatus } from './types'
-
-function identityWith(permissions: string[]): Identity {
-  return {
-    userId: 'u1',
-    fullName: 'Prueba',
-    phone: null,
-    active: true,
-    roles: [],
-    permissions: permissions.map((permission) => ({
-      permission,
-      scope: 'all' as const,
-    })),
-    technicianId: null,
-    timezone: 'America/Mexico_City',
-    mustChangePassword: false,
-  }
-}
-
-function context(
-  permissions: string[],
-  status: TicketStatus,
-  overrides: Partial<ActionContext> = {},
-): ActionContext {
-  return {
-    identity: identityWith(permissions),
-    status,
-    isRequester: false,
-    requesterValidated: false,
-    isSupervisorRole: false,
-    hasTaken: false,
-    ...overrides,
-  }
-}
+import { context, identityWith } from './actions-test-helpers'
 
 describe('allowedActions', () => {
   it('sin identidad no hay acciones', () => {
@@ -49,6 +14,10 @@ describe('allowedActions', () => {
         status: 'in_progress',
         isRequester: false,
         requesterValidated: false,
+        supervisorValidated: false,
+        canValidateRequester: false,
+        canValidateSupervisor: false,
+        validationPolicy: 'both',
         isSupervisorRole: false,
         hasTaken: false,
       }),
@@ -86,17 +55,23 @@ describe('allowedActions', () => {
     expect(actions).toContain('advance_pause')
     expect(actions).toContain('resume')
   })
+})
 
+describe('validación y proxy', () => {
   it('el solicitante valida un tiquet atendido', () => {
-    expect(allowedActions(context(['ticket.validate'], 'attended'))).toContain(
-      'validate',
-    )
+    expect(
+      allowedActions(
+        context(['ticket.validate'], 'attended', {
+          isRequester: true,
+        }),
+      ),
+    ).toContain('validate_requester')
   })
 
   it('no ofrece acciones cuyo estado no aplica', () => {
     expect(
       allowedActions(context(['ticket.validate'], 'in_progress')),
-    ).not.toContain('validate')
+    ).not.toContain('validate_requester')
   })
 
   it('habilita las acciones del técnico con act_on_behalf (proxy)', () => {
@@ -106,59 +81,6 @@ describe('allowedActions', () => {
     expect(allowedActions(context(['act_on_behalf'], 'in_progress'))).toContain(
       'attend',
     )
-  })
-})
-
-describe('allowedActions after requester validation', () => {
-  it('no deja acciones al solicitante que ya validó', () => {
-    const actions = allowedActions(
-      context(
-        [
-          'ticket.validate',
-          'ticket.open_claim',
-          'ticket.cancel',
-          'ticket.mark_duplicate',
-          'ticket.view',
-        ],
-        'attended',
-        { isRequester: true, requesterValidated: true },
-      ),
-    )
-    expect(actions).toEqual([])
-  })
-
-  it('quita la reclamación al solicitante validado en un tiquet cerrado', () => {
-    const actions = allowedActions(
-      context(['ticket.open_claim', 'ticket.view'], 'closed', {
-        isRequester: true,
-        requesterValidated: true,
-      }),
-    )
-    expect(actions).not.toContain('open_claim')
-    expect(actions).toContain('comment')
-  })
-
-  it('conserva las acciones del supervisor que validó a nombre del solicitante', () => {
-    const actions = allowedActions(
-      context(
-        ['ticket.validate', 'ticket.validate_on_behalf', 'ticket.open_claim'],
-        'attended',
-        { isRequester: false, requesterValidated: true },
-      ),
-    )
-    expect(actions).toContain('validate')
-    expect(actions).toContain('open_claim')
-  })
-
-  it('no oculta acciones al solicitante antes de validar', () => {
-    const actions = allowedActions(
-      context(['ticket.validate', 'ticket.cancel'], 'attended', {
-        isRequester: true,
-        requesterValidated: false,
-      }),
-    )
-    expect(actions).toContain('validate')
-    expect(actions).toContain('cancel')
   })
 })
 
@@ -301,14 +223,15 @@ describe('isProxyAction', () => {
     expect(isProxyAction('recapture')).toBe(true)
     expect(isProxyAction('record_progress')).toBe(true)
     expect(isProxyAction('comment')).toBe(false)
-    expect(isProxyAction('validate')).toBe(false)
+    expect(isProxyAction('validate_requester')).toBe(false)
+    expect(isProxyAction('validate_supervisor')).toBe(false)
   })
 })
 
 describe('pickPrimaryAction', () => {
   it('prefiere validar cuando hay varias acciones', () => {
-    expect(pickPrimaryAction(['comment', 'validate', 'reject'])).toBe(
-      'validate',
+    expect(pickPrimaryAction(['comment', 'validate_requester', 'reject'])).toBe(
+      'validate_requester',
     )
   })
 

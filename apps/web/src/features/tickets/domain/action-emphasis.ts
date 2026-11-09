@@ -14,7 +14,8 @@ export type ActionEmphasis =
 // - danger: descarta o marca (rechazar, cancelar, duplicado).
 // - neutral: comunicación o corrección (comentario, reclamación, recaptura).
 const EMPHASIS: Record<ActionKey, ActionEmphasis> = {
-  validate: 'success',
+  validate_requester: 'success',
+  validate_supervisor: 'success',
   resolve_claim: 'success',
   reactivate: 'success',
   start: 'info',

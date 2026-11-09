@@ -12,7 +12,8 @@ const ALL_ACTIONS: ActionKey[] = [
   'resume',
   'record_progress',
   'attend',
-  'validate',
+  'validate_requester',
+  'validate_supervisor',
   'reject',
   'cancel',
   'change_priority',
@@ -33,7 +34,8 @@ describe('actionEmphasis', () => {
 
   it('clasifica por lo que hace la acción', () => {
     const expected: Partial<Record<ActionKey, ActionEmphasis>> = {
-      validate: 'success',
+      validate_requester: 'success',
+      validate_supervisor: 'success',
       resolve_claim: 'success',
       reactivate: 'success',
       start: 'info',

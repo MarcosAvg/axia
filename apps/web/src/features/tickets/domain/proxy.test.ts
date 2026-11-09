@@ -24,7 +24,8 @@ function identityWith(permissions: string[]): Identity {
 
 describe('requester proxy', () => {
   it('reconoce las acciones que sustituyen al solicitante', () => {
-    expect(isRequesterProxyAction('validate')).toBe(true)
+    expect(isRequesterProxyAction('validate_requester')).toBe(true)
+    expect(isRequesterProxyAction('validate_supervisor')).toBe(false)
     expect(isRequesterProxyAction('open_claim')).toBe(true)
     expect(isRequesterProxyAction('cancel')).toBe(true)
     expect(isRequesterProxyAction('start')).toBe(false)
