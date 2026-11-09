@@ -9,8 +9,8 @@ Describir la migración de datos hacia Axia y la convivencia con el sistema de o
 trabajo para importadores e integraciones.
 
 > **Advertencia:** este es el único documento (junto con el código de los adaptadores,
-> `docs/decisions/` y `scripts/agnostic-names.json`) donde pueden aparecer nombres de plataformas
-> de terceros. El núcleo de Axia no debe depender de nada de lo que sigue.
+> `docs/decisions/` y `scripts/`) donde pueden aparecer nombres de plataformas de terceros. El
+> núcleo de Axia no debe depender de nada de lo que sigue.
 
 ## Contenido
 

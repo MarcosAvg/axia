@@ -21,10 +21,11 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
   automáticamente.
 - Web Push y el escalamiento automático no están implementados. Las notificaciones actuales se
   consultan dentro de la aplicación.
-- Los botones de la interfaz se calculan con el permiso, sin ámbito ni relación `own`; el servidor
-  rechaza las acciones que no corresponden.
+- La interfaz calcula los botones con el permiso; el servidor aplica además ámbito, participación y
+  ventana de reclamación. Por eso puede mostrar una acción que luego rechaza.
 - La recaptura se limita a los estados registrado, con supervisor y asignado, y no exige motivo.
-  La reasignación directa a un supervisor termina en `with_supervisor`.
+  Tampoco está disponible mientras el tiquet está en reclamación; primero se resuelve la
+  reclamación. La reasignación directa a un supervisor termina en `with_supervisor`.
 - El tipo de servicio es opcional en la API de alta y atención; la interfaz lo exige al atender.
 - La demo conserva una supervisora con dos equipos. RN-04 limita a uno y esa restricción todavía no
   se impone; no impide el ruteo, pero requiere una revisión específica.

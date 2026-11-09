@@ -40,8 +40,8 @@ identidad y reintentar automáticamente: mantiene el `409` actual y no aclara qu
 
 No hay migración: `ticket_validations` ya admite una fila por rol y ciclo. El coste es una acción
 más en la interfaz y una derivación de compatibilidad que debe probarse. El lado del supervisor sigue
-sujeto al ámbito vigente; la sombra de ámbito, la titularidad y la reclamación de un supervisor que
-también es solicitante son hallazgos separados y no se modifican aquí.
+sujeto al ámbito vigente; el ámbito, la titularidad y la reclamación de un supervisor que también es
+solicitante se rigen por sus propias reglas y no cambian con esta decisión.
 
 ## Reversión
 

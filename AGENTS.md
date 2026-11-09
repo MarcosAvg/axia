@@ -22,8 +22,8 @@ autoridad es [la especificación](docs/concepts/negocio.md) y el estilo está en
   estados ni reglas de otra plataforma**. Los identificadores externos se guardan solo en la
   tabla genérica `ticket_external_refs(system, external_id)`, y el núcleo no conoce sus valores.
 - Los nombres de plataformas de terceros solo pueden aparecer en el código de los adaptadores,
-  `docs/history/integraciones-y-migracion.md`, `docs/decisions/` y `scripts/agnostic-names.json`.
-  Lo verifica `pnpm check:agnostic`.
+  `docs/history/integraciones-y-migracion.md`, `docs/decisions/` y `scripts/` (la lista vive en
+  `scripts/agnostic-names.json`). Lo verifica `pnpm check:agnostic`.
 - Prueba de fuego ante la duda: *¿Axia funcionaría igual si esa plataforma dejara de existir?*
   Si no, está mal ubicado.
 - Las integraciones son opcionales y, por defecto, de **entrada** (importar). Nada en Axia
@@ -134,8 +134,8 @@ Nunca, sin que quien mantiene el proyecto lo pida claramente en la sesión:
    para el ciclo y `pnpm test:affected` para el subconjunto relacionado.
 4. Antes de integrar, corre `pnpm check` completo una vez. Integra a `main` solo con la compuerta
    en verde.
-5. Actualiza el `CHANGELOG.md` y, si cambió un límite o un pendiente, la referencia de
-   [límites y pendientes](docs/reference/limitaciones.md).
+5. Actualiza el `CHANGELOG.md` cuando cambie el comportamiento visible y, si cambió un límite o un
+   pendiente, la referencia de [límites y pendientes](docs/reference/limitaciones.md).
 
 ## 9. Documentos del proyecto
 

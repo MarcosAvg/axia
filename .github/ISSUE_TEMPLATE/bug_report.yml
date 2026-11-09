@@ -33,7 +33,7 @@ body:
     id: version
     attributes:
       label: Versión o commit
-      placeholder: '0.0.0 o el hash del commit'
+      placeholder: 'vX.Y.Z o el hash del commit'
     validations:
       required: true
   - type: textarea

@@ -9,7 +9,7 @@
 Estas decisiones precisan el modelo y prevalecen sobre las descripciones generales que aparecen más
 abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
 
-1. **Solicitante mixto** (sustituye el supuesto 4 de §14 y la línea "todos tienen cuenta" de §2).
+1. **Solicitante mixto** (sustituye el antiguo supuesto de que todos los solicitantes tienen cuenta).
    Un tiquet puede registrarse **a nombre de un solicitante sin cuenta** por un administrador (o
    quien tenga el permiso). El solicitante es un registro del **catálogo de solicitantes**
    (nombre, contacto, dependencia) con **vínculo opcional** a una cuenta; el tiquet guarda además
@@ -34,10 +34,10 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
    del solicitante sin cuenta.
 6. **Notificaciones a contactos sin cuenta.** La notificación queda "para el contacto"; su
    entrega es externa o la realiza quien lleva el seguimiento (no hay bandeja en la app).
-7. **Recaptura sin aprobación** (sustituye RN-11 y el supuesto 1 de §14). La recaptura se
-   **aplica** sobre el mismo tiquet conservando el original y cada versión; se **avisa** al
-   solicitante y al supervisor, y **no hay aprobaciones**. Quien no esté de acuerdo **abre una
-   reclamación** (RN-16).
+7. **Recaptura sin aprobación** (sustituye RN-11 y el antiguo supuesto de aprobación de la
+   recaptura). La recaptura se **aplica** sobre el mismo tiquet conservando el original y cada
+   versión; se **avisa** al solicitante y al supervisor, y **no hay aprobaciones**. Quien no esté de
+   acuerdo **abre una reclamación** (RN-16).
 8. **Concurrencia y acciones tardías** (RN-27). "La primera es verdad": gana la primera acción.
    Una acción que llega tarde (sin conexión) sobre un estado ya resuelto se **registra** pero
    **no surte efecto**, y se informa a quien la envió.
@@ -77,7 +77,7 @@ políticas y hasta los nombres con que se muestran los conceptos.
 | Edificio / Ubicación | Dónde ocurre el problema; la ubicación pertenece a un edificio |
 | Categoría → Subcategoría → Problema | Clasificación jerárquica de tres niveles |
 | **Captura** | Lo que registra quien crea el tiquet. **Mala captura**: captura incorrecta. **Recaptura**: corrección de la captura sobre el mismo tiquet, conservando lo original |
-| Solicitante | Quien registra el tiquet; puede tener cuenta o existir solo en el catálogo |
+| Solicitante | Quien solicita el tiquet; puede tener cuenta o existir solo en el catálogo |
 | Supervisor | Pertenece a **un solo equipo** (por ahora) y cubre **uno o varios edificios** |
 | Técnico | Pertenece a un equipo y está **designado** a ciertas categorías |
 | Auxiliar | Cualquier técnico o supervisor que apoya en un tiquet |
