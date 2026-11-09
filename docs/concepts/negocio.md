@@ -90,8 +90,8 @@ Los **permisos son un conjunto fijo definido por el sistema** (capacidades como 
 iniciar, pausar, validar, reclamar, reabrir, rechazar, cancelar, marcar duplicado, ver por ámbito,
 administrar catálogos, usuarios y roles), y los roles se arman asignándoles permisos y un ámbito
 (propios, equipo, edificios, todos). Roles semilla: solicitante, supervisor, técnico y administrador.
-Diseña la matriz de permisos y propónmela. Por ahora, "alguien superior a un técnico" es quien puede
-validar, reclamar y reabrir.
+La matriz vigente de permisos, ámbitos y actuación en nombre de otra persona está en
+[Permisos](../reference/permisos.md).
 
 ## 3. Flujo de negocio paso a paso
 
@@ -431,10 +431,10 @@ en tiempo real. Quien realiza una acción no recibe el aviso de esa misma acció
 
 Tabla de configuración con, al menos: etiquetas de terminología (cómo se llama "equipo"), política de
 validación (solicitante, supervisor o ambos), días de validación automática (apagado por defecto),
-ventana de reclamación (semilla: 1 día), política de aprobación de recaptura, umbrales de
+ventana de reclamación (semilla: 1 día), umbrales de
 escalamiento, parámetros de detección de duplicados (ventana de tiempo, umbral de similitud y qué datos
-del otro tiquet se muestran), patrón de folio, zona horaria, calendario laboral por defecto, si la
-calificación es obligatoria, la política de evidencia al registrar (opcional, recomendada u
+del otro tiquet se muestran), patrón de folio, zona horaria, calendario laboral por defecto, la
+política de evidencia al registrar (opcional, recomendada u
 obligatoria; semilla: recomendada) y la lista de eventos visibles al solicitante.
 
 ## 11. Indicadores que la base debe poder calcular
@@ -450,8 +450,7 @@ apoyo auxiliar por persona y categoría**; antigüedad de pendientes (*aging*); 
 (sin reapertura); satisfacción promedio; tiquets sin tomar o sin ruteo; porcentaje de tiquets registrados sin evidencia de solicitud y su
 relación con recapturas, reasignaciones y tiempos. **De duplicados:** tasa de
 duplicados (por solicitante, dependencia, ubicación y equipo), tiempo hasta marcarse, alertas de
-posible duplicado ignoradas frente a atendidas, y volumen con y sin duplicados. Propón los que falten
-y los índices necesarios.
+posible duplicado ignoradas frente a atendidas, y volumen con y sin duplicados.
 
 ## 12. Requisitos transversales
 
@@ -463,7 +462,7 @@ y los índices necesarios.
   (evidencias requeridas, motivos, etc.) y escriban el historial en la misma transacción.
   Idempotentes.
 - **Concurrencia:** dos supervisores que toman a la vez; dos validaciones simultáneas; acciones
-  tardías sin conexión. Define y prueba el comportamiento.
+  tardías sin conexión. El comportamiento está definido y cubierto por pruebas de integración.
 - **Integridad:** restricciones de base de datos para todo lo que pueda garantizarse ahí.
 - **Auditoría:** historial inmutable; ningún borrado físico en datos de negocio.
 - **Rendimiento:** índices para las consultas previsibles (bandejas por rol, listas por estado,
@@ -478,17 +477,15 @@ y los índices necesarios.
   válidos e idempotentes.
 - **Datos:** todos los de ejemplo son ficticios.
 
-## 13. Fuera de alcance en esta fase
+## 13. Fuera de alcance actual
 
-Interfaz de usuario; envío real de notificaciones; mantenimiento preventivo recurrente; control de
-materiales, inventario y costos (solo importa el estado de lo solicitado, que ya cubren los subestados
-de pausa); equipos o activos; importación de datos y adaptadores de integración (fase de
-integraciones). La detección de duplicados **sí** entra, como alerta que no bloquea; no se
-fusionan tiquets.
+Envío real de notificaciones (push o correo); mantenimiento preventivo recurrente; control de
+materiales, inventario y costos (solo importa el estado de lo solicitado, que ya cubren los
+subestados de pausa); equipos o activos; importación de datos y adaptadores de integración. La
+interfaz de usuario y la detección de duplicados ya están implementadas; la detección no bloquea y
+no fusiona tiquets.
 
-## 14. Decisiones confirmadas y supuestos
-
-**Ya confirmadas por mí (no las cuestiones, salvo que veas un riesgo):**
+## 14. Decisiones confirmadas
 
 1. La reapertura devuelve el tiquet al mismo técnico, salvo que el supervisor lo cambie al revisar la
    reclamación.
@@ -500,18 +497,15 @@ fusionan tiquets.
    dentro del flujo del tiquet; quedan cerrados, enlazados y fuera de los indicadores de desempeño.
 7. Evidencias obligatorias: `before` y `after` por ciclo, y `claim` en la reclamación.
 8. La foto al registrar el tiquet es opcional pero muy recomendada.
-
-**Supuestos tuyos por confirmar (márcalos o cuestiónalos en las preguntas):**
-
-1. La recaptura del técnico requiere aceptación de supervisor **y** solicitante, configurable; si
-   alguien la rechaza, decide el supervisor.
-2. El calendario laboral se asigna por equipo por defecto, con posibilidad de calendario propio por
+9. El calendario laboral se asigna por equipo por defecto, con posibilidad de calendario propio por
    persona o turno.
-3. El técnico pertenece a un equipo y está designado a categorías.
-4. Todos los usuarios que registran tiquets tienen cuenta.
-5. Los tiquets importados o históricos quedan fuera de esta fase.
-6. Un administrador puede reactivar un tiquet descartado (RN-30).
-7. Una reclamación improcedente sobre un tiquet que venía de `attended` lo cierra sin pedir otra
-   validación.
-8. En la alerta de duplicados se muestran por defecto folio, estado, fecha, ubicación, problema y
-   contacto de quien lo registró (configurable).
+10. El técnico pertenece a un equipo y está designado a categorías.
+11. Los tiquets importados o históricos quedan fuera de esta fase.
+12. Un administrador puede reactivar un tiquet descartado (RN-30).
+13. Una reclamación improcedente sobre un tiquet que venía de `attended` lo cierra sin pedir otra
+    validación.
+14. En la alerta de duplicados se muestran por defecto folio, estado, fecha, ubicación, problema y
+    contacto de quien lo registró (configurable).
+
+Los supuestos iniciales de recaptura con aprobación y de que todos los solicitantes tienen cuenta
+quedaron sustituidos por las decisiones de alcance 7 y 1, respectivamente.
