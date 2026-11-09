@@ -24,6 +24,7 @@
     "db:indexes": "pnpm --filter @axia/server db:indexes",
     "db:cleanup": "pnpm --filter @axia/server db:cleanup",
     "db:cleanup-evidence": "pnpm --filter @axia/server db:cleanup-evidence",
+    "db:cleanup-attachments": "pnpm --filter @axia/server db:cleanup-attachments",
     "db:duplicates": "pnpm --filter @axia/server db:duplicates",
     "prepare": "husky",
     "check:docs": "node scripts/check-docs.mjs",

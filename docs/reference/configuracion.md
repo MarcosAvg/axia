@@ -33,9 +33,11 @@ usar solo hexadecimal evita que caracteres como `/`, `#`, `?` o `%` rompan la ca
 
 El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
 `.env` solo cuando se necesita cambiar el comportamiento. El paquete usa `latest` por defecto y
-`release.json` conserva el digest de la release. Para producción reproducible, fijar `AXIA_IMAGE`
-con una etiqueta `vX.Y.Z` o el digest; `latest` es el canal de actualización continua. El rol
-interno `axia_app` es fijo; `AXIA_APP_USER` no es una opción de despliegue.
+`release.json` conserva el digest de la release. La versión publicada se identifica por el tag de
+Git (`vX.Y.Z`); el campo `version` de `package.json` es un marcador de desarrollo. Para producción
+reproducible, fijar `AXIA_IMAGE` con una etiqueta `vX.Y.Z` o el digest; `latest` es el canal de
+actualización continua. El rol interno `axia_app` es fijo; `AXIA_APP_USER` no es una opción de
+despliegue.
 
 ## Base de datos
 

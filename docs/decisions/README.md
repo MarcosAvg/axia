@@ -10,7 +10,6 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0100](0100-consolidacion-interna.md) | Contratos, alcance SQL y dependencias offline |
 | [0101](0101-retirada-historica.md) | Retirada segura de objetos y documentación sin vigencia |
 | [0102](0102-documentacion-por-tareas.md) | Documentación canónica organizada por tareas |
-
 | [0103](0103-catalogos-operables-y-demo-coherente.md) | Catálogos sin pausas sin salida y demo con relaciones coherentes |
 | [0104](0104-borrado-catalogos-sin-uso.md) | Borrado de catálogos solo cuando no tienen uso |
 | [0105](0105-deteccion-revision-duplicados.md) | Detección ponderada y revisión de duplicados |
@@ -31,6 +30,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0120](0120-avisos-diversos-y-badges.md) | Avisos diversos, texto enriquecido y badges de bandeja |
 | [0121](0121-tableros-bandeja.md) | Tableros de solo lectura por bandeja |
 | [0122](0122-adjuntos-obligatorios-por-problema.md) | Adjuntos obligatorios por problema |
+| [0123](0123-validacion-dos-lados-misma-cuenta.md) | Validación de ambos lados por la misma cuenta |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles
