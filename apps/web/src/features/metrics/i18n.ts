@@ -123,7 +123,7 @@ export const metricsMessages = {
     byDimension: 'Calidad por dimensión',
     risk: 'Riesgo de retrabajo',
     riskHint:
-      'Tiquets frente a la tasa de reapertura. Más a la derecha, más volumen; más arriba, más retrabajo.',
+      'Cada punto es una categoría: tiquets frente a la tasa de reapertura. Más a la derecha, más volumen; más arriba, más retrabajo.',
     firstFix: 'Primera resolución',
   },
   team: {

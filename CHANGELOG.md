@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- La gráfica «Riesgo de retrabajo» identifica cada categoría: el tooltip muestra el nombre y sus
+  valores legibles, y el detalle bajo la gráfica lista tiquets, reapertura y trabajo activo de cada
+  categoría.
+
 ## [0.17.0] - 2026-11-06
 
 ### Añadido

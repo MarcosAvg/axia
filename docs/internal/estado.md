@@ -3,7 +3,28 @@
 Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones técnicas en
 [arquitectura](../concepts/arquitectura.md) y [ADR](../decisions/README.md).
 
-**Última actualización:** 2026-11-06
+**Última actualización:** 2026-11-09
+
+## Tarea integrada: nombres en la gráfica de riesgo de retrabajo
+
+- Causa: el tooltip tomaba los nombres de los ejes («Tiquets», «Reapertura», «active») y el punto
+  no exponía el nombre de la categoría; además, el trabajo activo salía en minutos sin formato.
+- Ahora el tooltip abre con la categoría y muestra tiquets, reapertura y trabajo activo legibles.
+  Debajo de la gráfica hay un detalle con la misma información para leer cada punto sin depender
+  del cursor; las etiquetas sobre los puntos se descartaron porque se encimaban cuando dos
+  categorías comparten tiquets y tasa. El eje de tiquets usa enteros.
+- Pruebas: unitarias de la gráfica y del tooltip, y E2E de Métricas con hover sobre un punto.
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: lint, tipos y 456 pruebas de web + 66 de servidor en verde.
+- `pnpm --filter @axia/web exec playwright test e2e/metrics.spec.ts`: 7/7 en verde, incluidos el
+  nombre en el detalle y el tooltip al pasar el cursor.
+- `pnpm check:static`: 50 pruebas de scripts, 63 archivos de documentación, 936 archivos de
+  agnóstico, fronteras y knip en verde.
+- `CI=1 AXIA_ENV_FILE=/dev/null pnpm check`: código 0; 65 pruebas de Playwright (2.5 min), 400 de
+  PostgreSQL (59 archivos), 2 del compilador, 456 + 66 unitarias y build correcto. Persiste el
+  aviso previo de chunks >500 kB.
 
 ## v0.17.0 publicada
 

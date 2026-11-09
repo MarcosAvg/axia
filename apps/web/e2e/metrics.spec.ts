@@ -24,6 +24,35 @@ test('el administrador abre las métricas', async ({ page }) => {
   ).toHaveCount(0)
 })
 
+test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Calidad' }).click()
+
+  const risk = page
+    .locator('[data-slot="card"]')
+    .filter({ hasText: 'Riesgo de retrabajo' })
+  await expect(
+    risk.getByRole('heading', { name: 'Riesgo de retrabajo' }),
+  ).toBeVisible()
+  await expect(risk.getByText('Eléctrico', { exact: true })).toBeVisible()
+
+  await risk.scrollIntoViewIfNeeded()
+  const symbol = risk.locator('path.recharts-symbols').last()
+  const name = await symbol.getAttribute('name')
+  const box = await symbol.boundingBox()
+  if (!name || !box) {
+    throw new Error('El punto de la gráfica no tiene nombre o posición.')
+  }
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await expect(
+    risk.locator('.recharts-tooltip-wrapper').getByText(name, { exact: true }),
+  ).toBeVisible()
+})
+
 test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await page
