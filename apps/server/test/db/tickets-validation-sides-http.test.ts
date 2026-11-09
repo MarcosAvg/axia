@@ -186,6 +186,19 @@ async function attendedTicket(input: {
   return ticketId
 }
 
+async function ticketDetail(
+  cookie: string,
+  ticketId: string,
+): Promise<Record<string, unknown>> {
+  const response = await context.app.inject({
+    method: 'GET',
+    url: `/api/tickets/${ticketId}`,
+    headers: authHeaders(cookie),
+  })
+  expect(response.statusCode).toBe(200)
+  return (response.json() as { ticket: Record<string, unknown> }).ticket
+}
+
 async function ticketStatus(ticketId: string): Promise<string> {
   const result = await context.db.execute(sql`
     select status from public.tickets where id = ${ticketId}
@@ -417,6 +430,66 @@ describe('validación por lado', () => {
         subject_user_id: account.userId,
       },
     ])
+  })
+
+  it('el detalle expone el estado de cada lado y las capacidades', async () => {
+    const account = await ownAccount()
+    const ticketId = await ownAttended(account)
+
+    const before = await ticketDetail(account.cookie, ticketId)
+    expect(before).toMatchObject({
+      status: 'attended',
+      requesterValidated: false,
+      supervisorValidated: false,
+      canValidateRequester: true,
+      canValidateSupervisor: true,
+    })
+
+    await action(account.cookie, ticketId, {
+      action: 'validate',
+      role: 'requester',
+      clientRequestId: randomUUID(),
+    })
+    const partial = await ticketDetail(account.cookie, ticketId)
+    expect(partial).toMatchObject({
+      status: 'attended',
+      requesterValidated: true,
+      supervisorValidated: false,
+      canValidateSupervisor: true,
+    })
+
+    await action(account.cookie, ticketId, {
+      action: 'validate',
+      role: 'supervisor',
+      clientRequestId: randomUUID(),
+    })
+    const closed = await ticketDetail(account.cookie, ticketId)
+    expect(closed).toMatchObject({
+      status: 'closed',
+      supervisorValidated: true,
+    })
+  })
+
+  it('una cuenta solo solicitante no recibe la capacidad del supervisor', async () => {
+    const requester = await createAccount({
+      username: `requester-${randomUUID()}`,
+      roles: ['requester'],
+      requester: true,
+    })
+    if (!requester.requesterId) throw new Error('Missing requester')
+    const ticketId = await attendedTicket({
+      creatorCookie: requester.cookie,
+      requesterId: requester.requesterId,
+      supervisorCookie: context.cookies.supervisor,
+      technicianId: refs.technicianId,
+      workerCookie: context.cookies.technician,
+    })
+
+    const detail = await ticketDetail(requester.cookie, ticketId)
+    expect(detail).toMatchObject({
+      canValidateRequester: true,
+      canValidateSupervisor: false,
+    })
   })
 
   it('repetir la misma petición es idempotente', async () => {

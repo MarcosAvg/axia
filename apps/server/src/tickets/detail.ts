@@ -5,6 +5,7 @@ import type { Database } from '../db/client.js'
 import { iso, optionalIso } from './format.js'
 import { findVisibleTicket } from './repository.js'
 import { isUnroutedSql } from './routing-sql.js'
+import { validationCapabilities } from './validation.js'
 
 type TicketCycleTimes = {
   total: number
@@ -57,6 +58,9 @@ export type TicketDetail = {
   duplicateOfFolio: string | null
   isRequester: boolean
   requesterValidated: boolean
+  supervisorValidated: boolean
+  canValidateRequester: boolean
+  canValidateSupervisor: boolean
   hasTaken: boolean
   isUnrouted: boolean
   validationPolicy: 'requester' | 'supervisor' | 'both'
@@ -109,14 +113,21 @@ type DetailRow = {
   duplicate_of_folio: string | null
   is_requester: boolean
   requester_validated: boolean
+  supervisor_validated: boolean
   is_unrouted: boolean
   validation_policy: 'requester' | 'supervisor' | 'both'
+}
+
+type ValidationCapabilities = {
+  canValidateRequester: boolean
+  canValidateSupervisor: boolean
 }
 
 function toDetail(
   row: DetailRow,
   hasTaken: boolean,
   canSeeRouting: boolean,
+  capabilities: ValidationCapabilities,
 ): TicketDetail {
   return {
     id: row.id,
@@ -167,6 +178,9 @@ function toDetail(
     duplicateOfFolio: row.duplicate_of_folio,
     isRequester: row.is_requester,
     requesterValidated: row.requester_validated,
+    supervisorValidated: row.supervisor_validated,
+    canValidateRequester: capabilities.canValidateRequester,
+    canValidateSupervisor: capabilities.canValidateSupervisor,
     hasTaken,
     isUnrouted: canSeeRouting && row.is_unrouted,
     validationPolicy: row.validation_policy,
@@ -191,6 +205,10 @@ function detailQuery(ticketId: string, actorId: string) {
         select 1 from public.ticket_validations v
         where v.ticket_id = t.id and v.cycle = t.cycle and v.validator_role = 'requester'
       ) as requester_validated,
+      exists (
+        select 1 from public.ticket_validations v
+        where v.ticket_id = t.id and v.cycle = t.cycle and v.validator_role = 'supervisor'
+      ) as supervisor_validated,
       ${isUnroutedSql()} as is_unrouted,
       (select validation_policy from public.instance_settings limit 1) as validation_policy,
       b.name as building_name,
@@ -245,5 +263,11 @@ export async function getTicketDetail(
   const result = await db.execute(detailQuery(ticketId, actor.id))
   const row = result.rows[0] as DetailRow | undefined
   const canSeeRouting = hasPermission(actor, 'ticket.assign_supervisor')
-  return row ? toDetail(row, access.isSupervisor, canSeeRouting) : null
+  if (!row) return null
+  const capabilities = validationCapabilities(
+    actor,
+    access,
+    row.validation_policy,
+  )
+  return toDetail(row, access.isSupervisor, canSeeRouting, capabilities)
 }
