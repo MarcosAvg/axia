@@ -67,6 +67,33 @@ test('@smoke limita edificios y ubicaciones a la dependencia del solicitante', a
   await expect(page.getByLabel('Ubicación')).toHaveValue('')
 })
 
+test('la lista muestra datos relevantes y filtra desde Más filtros', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page.goto('/tickets')
+
+  await expect(
+    page.getByRole('columnheader', { name: 'Ubicación' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('columnheader', { name: 'Solicitante' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('columnheader', { name: 'Técnico' }),
+  ).toBeVisible()
+
+  await page.getByRole('button', { name: /Más filtros/ }).click()
+  await page.getByLabel('Equipo').selectOption({ label: 'Mantenimiento' })
+  await page.getByRole('button', { name: 'Aplicar' }).click()
+
+  await expect(page).toHaveURL(/teamId=/)
+  await expect(page.getByRole('dialog', { name: 'Más filtros' })).toBeHidden()
+  await expect(
+    page.getByRole('button', { name: 'Limpiar filtros' }),
+  ).toBeVisible()
+})
+
 test('@smoke un solicitante registra un tiquet y lo ve en la lista y el detalle', async ({
   page,
 }) => {

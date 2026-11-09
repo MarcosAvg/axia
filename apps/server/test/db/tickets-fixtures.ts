@@ -5,8 +5,8 @@ import { loadActor } from '../../src/auth/authorization.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
 import { ownerConnectionString, prepareTestDatabase } from './helpers.js'
-import { createCatalog } from './tickets-fixture-catalog.js'
-import { createPeople } from './tickets-fixture-people.js'
+import { createCatalog, type Catalog } from './tickets-fixture-catalog.js'
+import { createPeople, type People } from './tickets-fixture-people.js'
 import {
   createTicketActivity,
   createTickets,
@@ -26,6 +26,8 @@ export type TicketFixtures = {
   pool: Pool
   actors: TicketFixtureActors
   ids: TicketFixtureIds
+  catalog: Catalog
+  people: People
 }
 
 export async function buildTicketFixtures(): Promise<TicketFixtures> {
@@ -53,5 +55,5 @@ export async function buildTicketFixtures(): Promise<TicketFixtures> {
     throw new Error('Inactive actor should not load')
   }
 
-  return { db: created.db, pool: created.pool, actors, ids }
+  return { db: created.db, pool: created.pool, actors, ids, catalog, people }
 }

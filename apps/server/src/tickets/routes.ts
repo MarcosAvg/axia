@@ -12,6 +12,7 @@ import {
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
 import { eventTimeSchema } from './action-time.js'
+import { toTicketFilters } from './list-query.js'
 import {
   createTicketSchema,
   duplicateCheckSchema,
@@ -64,13 +65,7 @@ function registerListRoute(
   app.get('/api/tickets', { preHandler: canView }, async (request) => {
     const query = listTicketsQuerySchema.parse(request.query)
     return tickets.list(currentActor(request), {
-      filters: {
-        status: query.status,
-        statuses: query.statuses,
-        buildingId: query.buildingId,
-        categoryId: query.categoryId,
-        search: query.search || undefined,
-      },
+      filters: toTicketFilters(query),
       page: query.page,
       pageSize: query.pageSize,
     })

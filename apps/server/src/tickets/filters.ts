@@ -1,35 +1,114 @@
 import { sql, type SQL } from 'drizzle-orm'
 
+import { isUnroutedSql } from './routing-sql.js'
+
 export type TicketFilters = {
   status?: string
   statuses?: string[]
   buildingId?: string
+  dependencyId?: string
+  teamId?: string
   categoryId?: string
+  priorityId?: string
+  requesterId?: string
+  technicianId?: string
+  serviceTypeId?: string
+  from?: string
+  to?: string
+  unrouted?: boolean
+  possibleDuplicate?: boolean
   search?: string
   assigneeTechnicianId?: string
   offerSupervisorUserId?: string
   excludeFinal?: boolean
 }
 
-function baseConditions(filters: TicketFilters): SQL[] {
+function statusConditions(filters: TicketFilters): SQL[] {
   const conditions: SQL[] = []
   if (filters.status) conditions.push(sql`t.status = ${filters.status}`)
   if (filters.statuses?.length) {
     const statuses = filters.statuses.map((status) => sql`${status}`)
     conditions.push(sql`t.status in (${sql.join(statuses, sql`, `)})`)
   }
+  return conditions
+}
+
+function placeConditions(filters: TicketFilters): SQL[] {
+  const conditions: SQL[] = []
   if (filters.buildingId) {
     conditions.push(sql`t.building_id = ${filters.buildingId}`)
   }
+  if (filters.dependencyId) {
+    conditions.push(sql`t.dependency_id = ${filters.dependencyId}`)
+  }
+  return conditions
+}
+
+function classificationConditions(filters: TicketFilters): SQL[] {
+  const conditions: SQL[] = []
+  if (filters.teamId) conditions.push(sql`t.team_id = ${filters.teamId}`)
   if (filters.categoryId) {
     conditions.push(sql`t.category_id = ${filters.categoryId}`)
   }
-  const search = filters.search?.replace(/[\\%_(),]/g, '').trim()
-  if (search) {
-    const term = `%${search}%`
-    conditions.push(sql`(t.folio ilike ${term} or t.description ilike ${term})`)
+  if (filters.priorityId) {
+    conditions.push(sql`t.priority_id = ${filters.priorityId}`)
+  }
+  if (filters.requesterId) {
+    conditions.push(sql`t.requester_id = ${filters.requesterId}`)
+  }
+  if (filters.serviceTypeId) {
+    conditions.push(sql`t.service_type_id = ${filters.serviceTypeId}`)
   }
   return conditions
+}
+
+function technicianCondition(filters: TicketFilters): SQL[] {
+  if (!filters.technicianId) return []
+  return [
+    sql`(
+      select a.assignee_technician_id
+      from public.ticket_assignments a
+      where a.ticket_id = t.id
+        and a.cycle = t.cycle
+        and a.stage = 'technician'
+      order by a.assigned_at desc
+      limit 1
+    ) = ${filters.technicianId}`,
+  ]
+}
+
+function rangeAndFlagConditions(filters: TicketFilters): SQL[] {
+  const conditions: SQL[] = []
+  if (filters.from || filters.to) {
+    conditions.push(
+      sql`public.metrics_date_in(
+        t.reported_at, ${filters.from ?? null}::date, ${filters.to ?? null}::date
+      )`,
+    )
+  }
+  if (filters.unrouted) conditions.push(isUnroutedSql())
+  if (filters.possibleDuplicate) {
+    conditions.push(sql`t.possible_duplicate`)
+  }
+  return conditions
+}
+
+function searchConditions(filters: TicketFilters): SQL[] {
+  const search = filters.search?.replace(/[\\%_(),]/g, '').trim()
+  if (!search) return []
+  const term = `%${search}%`
+  return [sql`(t.folio ilike ${term} or t.description ilike ${term})`]
+}
+
+function baseConditions(filters: TicketFilters): SQL[] {
+  return [
+    ...statusConditions(filters),
+    ...placeConditions(filters),
+    ...classificationConditions(filters),
+    ...technicianCondition(filters),
+    ...rangeAndFlagConditions(filters),
+    ...searchConditions(filters),
+  ]
 }
 
 function assignmentConditions(filters: TicketFilters): SQL[] {

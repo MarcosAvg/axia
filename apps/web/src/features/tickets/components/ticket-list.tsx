@@ -8,6 +8,75 @@ import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
 import { UnroutedBadge } from './unrouted-badge'
 
+function TicketMeta({
+  ticket,
+  showElapsed,
+}: {
+  ticket: TicketListItem
+  showElapsed: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+      <p className="truncate">
+        {[
+          ticket.buildingName,
+          ticket.locationName,
+          ticket.categoryName,
+          ticket.requesterName,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+      </p>
+      <span className="flex shrink-0 items-center gap-2">
+        <span>{formatDateTime(ticket.reportedAt)}</span>
+        {showElapsed ? (
+          <span
+            data-elapsed
+            className="inline-flex items-center gap-1"
+            title={ticketMessages.list.elapsed}
+          >
+            <ClockIcon className="size-3" aria-hidden />
+            {formatElapsed(ticket.reportedAt)}
+          </span>
+        ) : null}
+        {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
+        {ticket.isUnrouted ? <UnroutedBadge /> : null}
+      </span>
+    </div>
+  )
+}
+
+function TicketCard({
+  ticket,
+  showElapsed,
+}: {
+  ticket: TicketListItem
+  showElapsed: boolean
+}) {
+  return (
+    <Link
+      to="/tickets/$ticketId"
+      params={{ ticketId: ticket.id }}
+      className="flex flex-col gap-1 p-4 hover:bg-muted/50"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-medium">{ticket.folio}</span>
+        <span className="flex items-center gap-1.5">
+          <StatusBadge status={ticket.status} />
+          {ticket.pendingSync ? <PendingSyncBadge /> : null}
+        </span>
+      </div>
+      <p className="line-clamp-2 text-sm text-muted-foreground">
+        {ticket.description}
+      </p>
+      <p className="truncate text-xs text-muted-foreground">
+        {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
+      </p>
+      <TicketMeta ticket={ticket} showElapsed={showElapsed} />
+    </Link>
+  )
+}
+
 /** Lista de tiquets con enlace al detalle. */
 export function TicketList({
   items,
@@ -20,48 +89,7 @@ export function TicketList({
     <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
       {items.map((ticket) => (
         <li key={ticket.id}>
-          <Link
-            to="/tickets/$ticketId"
-            params={{ ticketId: ticket.id }}
-            className="flex flex-col gap-1 p-4 hover:bg-muted/50"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-medium">{ticket.folio}</span>
-              <span className="flex items-center gap-1.5">
-                <StatusBadge status={ticket.status} />
-                {ticket.pendingSync ? <PendingSyncBadge /> : null}
-              </span>
-            </div>
-            <p className="line-clamp-2 text-sm text-muted-foreground">
-              {ticket.description}
-            </p>
-            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-              <p className="truncate">
-                {[
-                  ticket.buildingName,
-                  ticket.categoryName,
-                  ticket.requesterName,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-              <span className="flex shrink-0 items-center gap-2">
-                <span>{formatDateTime(ticket.reportedAt)}</span>
-                {showElapsed ? (
-                  <span
-                    data-elapsed
-                    className="inline-flex items-center gap-1"
-                    title={ticketMessages.list.elapsed}
-                  >
-                    <ClockIcon className="size-3" aria-hidden />
-                    {formatElapsed(ticket.reportedAt)}
-                  </span>
-                ) : null}
-                {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
-                {ticket.isUnrouted ? <UnroutedBadge /> : null}
-              </span>
-            </div>
-          </Link>
+          <TicketCard ticket={ticket} showElapsed={showElapsed} />
         </li>
       ))}
     </ul>

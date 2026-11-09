@@ -30,11 +30,32 @@ const paginationSchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
 
+const optionalDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .optional()
+
+const optionalBoolean = z.preprocess((value) => {
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return value
+}, z.boolean().optional())
+
 export const listTicketsQuerySchema = paginationSchema.extend({
   status: z.enum(TICKET_STATUSES).optional(),
   statuses: statusListSchema,
   buildingId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
+  teamId: z.string().uuid().optional(),
+  priorityId: z.string().uuid().optional(),
+  requesterId: z.string().uuid().optional(),
+  technicianId: z.string().uuid().optional(),
+  dependencyId: z.string().uuid().optional(),
+  serviceTypeId: z.string().uuid().optional(),
+  from: optionalDate,
+  to: optionalDate,
+  unrouted: optionalBoolean,
+  possibleDuplicate: optionalBoolean,
   search: z.string().trim().max(100).optional(),
 })
 

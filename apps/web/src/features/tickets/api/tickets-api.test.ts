@@ -19,10 +19,12 @@ const item = {
   possibleDuplicate: false,
   isUnrouted: false,
   buildingName: 'A',
+  locationName: 'Sala',
   categoryName: null,
   priorityName: null,
   priorityPosition: null,
   teamName: null,
+  technicianName: 'Luis',
 }
 const detail = {
   ...item,

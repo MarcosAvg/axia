@@ -123,7 +123,58 @@ describe('ticket list scope', () => {
     expect(past).toMatchObject({ total: 4, page: 99, pageSize: 1 })
     expect(past.items).toEqual([])
   })
+})
 
+describe('ticket list filters', () => {
+  it('applies the extended filters', async () => {
+    const { ids, cookies, catalog, people } = context
+    const today = new Date().toISOString().slice(0, 10)
+
+    const team = await pageBody(
+      `/api/tickets?teamId=${catalog.teamB.id}`,
+      cookies.admin,
+    )
+    expect(team.items.map((item) => item.id)).toEqual([ids.ticketB1])
+
+    const requester = await pageBody(
+      `/api/tickets?requesterId=${people.requesterRow.id}`,
+      cookies.admin,
+    )
+    expect(requester.items.map((item) => item.id).sort()).toEqual(
+      [ids.ticketA1, ids.ticketA2].sort(),
+    )
+
+    const technician = await pageBody(
+      `/api/tickets?technicianId=${people.technicianRow.id}`,
+      cookies.admin,
+    )
+    expect(technician.items.map((item) => item.id)).toEqual([ids.ticketA1])
+
+    for (const filter of [
+      `priorityId=${catalog.priority.id}`,
+      `serviceTypeId=${catalog.serviceType.id}`,
+      `dependencyId=${catalog.dependency.id}`,
+      `from=2000-01-01&to=${today}`,
+    ]) {
+      expect(
+        (await pageBody(`/api/tickets?${filter}`, cookies.admin)).total,
+      ).toBe(4)
+    }
+
+    expect(
+      (await pageBody('/api/tickets?from=2099-01-01', cookies.admin)).total,
+    ).toBe(0)
+    expect(
+      (await pageBody('/api/tickets?unrouted=true', cookies.admin)).total,
+    ).toBe(3)
+    expect(
+      (await pageBody('/api/tickets?possibleDuplicate=true', cookies.admin))
+        .total,
+    ).toBe(0)
+  })
+})
+
+describe('ticket list validation', () => {
   it('rejects invalid filters', async () => {
     const { cookies } = context
     for (const path of [
@@ -131,6 +182,9 @@ describe('ticket list scope', () => {
       '/api/tickets?status=invalid',
       '/api/tickets?buildingId=not-a-uuid',
       '/api/tickets?statuses=',
+      '/api/tickets?teamId=not-a-uuid',
+      '/api/tickets?from=not-a-date',
+      '/api/tickets?unrouted=not-a-boolean',
     ]) {
       const response = await get(path, cookies.admin)
       expect(response.statusCode).toBe(400)

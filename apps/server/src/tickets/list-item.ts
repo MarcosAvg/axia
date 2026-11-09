@@ -10,10 +10,12 @@ export type TicketListItem = {
   requesterName: string
   possibleDuplicate: boolean
   buildingName: string | null
+  locationName: string | null
   categoryName: string | null
   priorityName: string | null
   priorityPosition: number | null
   teamName: string | null
+  technicianName: string | null
   isUnrouted: boolean
 }
 
@@ -27,10 +29,12 @@ export type ListRow = {
   requester_name: string
   possible_duplicate: boolean
   building_name: string | null
+  location_name: string | null
   category_name: string | null
   priority_name: string | null
   priority_position: number | null
   team_name: string | null
+  technician_name: string | null
   is_unrouted: boolean
   total: number
 }
@@ -49,10 +53,12 @@ export function toListItem(
     requesterName: row.requester_name,
     possibleDuplicate: row.possible_duplicate,
     buildingName: row.building_name,
+    locationName: row.location_name,
     categoryName: row.category_name,
     priorityName: row.priority_name,
     priorityPosition: row.priority_position,
     teamName: row.team_name,
+    technicianName: row.technician_name,
     isUnrouted: canSeeRouting && row.is_unrouted,
   }
 }

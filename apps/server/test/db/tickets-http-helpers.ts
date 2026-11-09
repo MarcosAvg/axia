@@ -21,6 +21,7 @@ import {
   type Catalog,
 } from '../db/tickets-fixture-catalog.js'
 import { createPeople } from '../db/tickets-fixture-people.js'
+import type { People } from '../db/tickets-fixture-people.js'
 import {
   createTicketActivity,
   createTickets,
@@ -46,6 +47,7 @@ export type TicketHttpContext = {
   runtimePool: Pool
   ids: TicketFixtureIds
   catalog: Catalog
+  people: People
   cookies: TicketHttpCookies
   events: EventHub
 }
@@ -145,6 +147,7 @@ export async function buildTicketHttpApp(
     runtimePool: runtime.pool,
     ids,
     catalog,
+    people,
     cookies,
     events,
   }

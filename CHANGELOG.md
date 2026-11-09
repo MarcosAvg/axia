@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La lista de tiquets muestra ubicación, solicitante y técnico asignado, y la descripción incluye la
+  categoría. Los filtros nuevos cubren equipo, prioridad, solicitante, técnico, dependencia, tipo de
+  servicio, rango de fechas, tiquets sin ruteo y posibles duplicados.
+
 ### Cambiado
 
 - Las pestañas de métricas comparten fila con el periodo y los filtros; el botón Exportar permanece

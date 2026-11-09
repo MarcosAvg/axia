@@ -35,7 +35,12 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     id: 'description',
     header: columns.description,
     cell: (ticket) => (
-      <span className="block max-w-56 truncate">{ticket.description}</span>
+      <span className="flex max-w-64 flex-col">
+        <span className="truncate">{ticket.description}</span>
+        <span className="truncate text-xs text-muted-foreground">
+          {ticket.categoryName ?? placeholder}
+        </span>
+      </span>
     ),
   },
   {
@@ -62,23 +67,44 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     ),
   },
   {
-    id: 'building',
-    header: columns.building,
+    id: 'location',
+    header: columns.location,
     hideBelow: 'lg',
-    cell: (ticket) =>
-      ticket.buildingName ? (
+    cell: (ticket) => (
+      <span className="flex flex-col">
         <span className="inline-flex items-center gap-2">
-          <ToneDot tone={toneForId(ticket.buildingName)} />
-          {ticket.buildingName}
+          {ticket.buildingName ? (
+            <ToneDot tone={toneForId(ticket.buildingName)} />
+          ) : null}
+          {ticket.buildingName ?? placeholder}
         </span>
-      ) : (
-        placeholder
+        <span className="text-xs text-muted-foreground">
+          {ticket.locationName ?? placeholder}
+        </span>
+      </span>
+    ),
+  },
+  {
+    id: 'requester',
+    header: columns.requester,
+    hideBelow: 'xl',
+    cell: (ticket) => ticket.requesterName,
+  },
+  {
+    id: 'technician',
+    header: columns.technician,
+    hideBelow: 'xl',
+    cell: (ticket) =>
+      ticket.technicianName ?? (
+        <span className="text-muted-foreground">
+          {ticketMessages.list.unassignedTechnician}
+        </span>
       ),
   },
   {
     id: 'team',
     header: columns.team,
-    hideBelow: 'lg',
+    hideBelow: '2xl',
     cell: (ticket) =>
       ticket.teamName ? (
         <span className="inline-flex items-center gap-2">
@@ -99,7 +125,7 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
   {
     id: 'reported',
     header: columns.reported,
-    hideBelow: 'lg',
+    hideBelow: 'xl',
     cell: (ticket) => formatDateTime(ticket.reportedAt),
   },
 ]

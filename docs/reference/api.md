@@ -60,6 +60,11 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
 
+`GET /api/tickets` acepta `status`, `statuses`, `search`, `buildingId`, `categoryId`, `teamId`,
+`priorityId`, `requesterId`, `technicianId`, `dependencyId`, `serviceTypeId`, `from` y `to`
+(`YYYY-MM-DD`, sobre la fecha de registro), `unrouted` y `possibleDuplicate` (`true`). Cada elemento
+incluye la ubicación y el técnico asignado del ciclo actual. Los filtros nunca amplían el alcance.
+
 `GET /api/tickets/attention` devuelve `{ offers, myWork }`: ofertas vigentes para el actor y tiquets
 no finales asignados a su perfil de técnico. Reutiliza el alcance de `ticket.view`; `offers` queda en
 cero sin `ticket.take_offer` y `myWork` en cero sin perfil de técnico.

@@ -132,6 +132,93 @@ describe('ticket list fields', () => {
     expect(item).toBeDefined()
     expect(item?.closedAt).toBeNull()
   })
+
+  it('includes the requester, location and assigned technician', async () => {
+    const { db, actors, ids } = fixtures
+    const page = await listTickets(db, actors.admin, {
+      filters: {},
+      page: 1,
+      pageSize: 20,
+    })
+    const item = page.items.find((ticket) => ticket.id === ids.ticketA1)
+    expect(item).toMatchObject({
+      requesterName: 'Solicitante',
+      categoryName: 'Categoría A',
+      locationName: 'Sala A1',
+      technicianName: 'Técnico A',
+    })
+  })
+})
+
+async function listIds(filters: Parameters<typeof listTickets>[2]['filters']) {
+  const page = await listTickets(fixtures.db, fixtures.actors.admin, {
+    filters,
+    page: 1,
+    pageSize: 20,
+  })
+  return page.items.map((ticket) => ticket.id).sort()
+}
+
+describe('ticket list filters', () => {
+  it('filtra por equipo, solicitante, técnico y dependencia', async () => {
+    const { ids } = fixtures
+    expect(await listIds({ teamId: fixtures.catalog.teamA.id })).toEqual(
+      [ids.ticketA1, ids.ticketA2, ids.ticketAux].sort(),
+    )
+    expect(
+      await listIds({ requesterId: fixtures.people.requesterRow.id }),
+    ).toEqual([ids.ticketA1, ids.ticketA2].sort())
+    expect(
+      await listIds({ technicianId: fixtures.people.technicianRow.id }),
+    ).toEqual([ids.ticketA1])
+    expect(
+      await listIds({ dependencyId: fixtures.catalog.dependency.id }),
+    ).toHaveLength(4)
+    expect(await listIds({ dependencyId: crypto.randomUUID() })).toEqual([])
+  })
+
+  it('filtra por categoría, prioridad y tipo de servicio', async () => {
+    const { ids } = fixtures
+    expect(
+      await listIds({ categoryId: fixtures.catalog.categoryB.id }),
+    ).toEqual([ids.ticketB1])
+    expect(
+      await listIds({ priorityId: fixtures.catalog.priority.id }),
+    ).toHaveLength(4)
+    expect(await listIds({ priorityId: crypto.randomUUID() })).toEqual([])
+    expect(
+      await listIds({ serviceTypeId: fixtures.catalog.serviceType.id }),
+    ).toHaveLength(4)
+    expect(await listIds({ serviceTypeId: crypto.randomUUID() })).toEqual([])
+  })
+})
+
+describe('ticket list filter flags', () => {
+  it('filtra por rango de fechas de registro', async () => {
+    const today = new Date().toISOString().slice(0, 10)
+    expect(await listIds({ from: '2000-01-01', to: today })).toHaveLength(4)
+    expect(await listIds({ from: '2099-01-01' })).toEqual([])
+  })
+
+  it('filtra por tiquets sin ruteo y posibles duplicados', async () => {
+    const { db, ids } = fixtures
+    expect(await listIds({ unrouted: true })).toEqual(
+      [ids.ticketA2, ids.ticketB1].sort(),
+    )
+
+    await db.execute(sql`
+      update public.tickets set possible_duplicate = true
+      where id = ${ids.ticketA2}
+    `)
+    try {
+      expect(await listIds({ possibleDuplicate: true })).toEqual([ids.ticketA2])
+    } finally {
+      await db.execute(sql`
+        update public.tickets set possible_duplicate = false
+        where id = ${ids.ticketA2}
+      `)
+    }
+  })
 })
 
 describe('ticket participants', () => {

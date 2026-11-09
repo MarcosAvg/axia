@@ -3,13 +3,14 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { RequirePermission, useAuth } from '@/features/auth'
-import { useBuildings, useCategories } from '@/features/catalogs'
 import {
   ACTIVE_STATUSES,
   TicketBoardPanel,
   TicketFilters,
+  ticketFiltersFromSearch,
   ticketMessages,
   useMyOffers,
+  useTicketFilterCatalogs,
   useTicketsList,
 } from '@/features/tickets'
 import type { TicketListSearch } from '@/features/tickets/schemas'
@@ -36,16 +37,10 @@ function InboxBoardContent() {
   const { identity } = useAuth()
   const search = Route.useSearch()
   const navigate = useNavigate()
-  const buildings = useBuildings()
-  const categories = useCategories()
+  const catalogs = useTicketFilterCatalogs()
   const offers = useMyOffers(identity?.userId)
   const team = useTicketsList(
-    {
-      statuses: ACTIVE_STATUSES,
-      buildingId: search.buildingId,
-      categoryId: search.categoryId,
-      search: search.search,
-    },
+    { statuses: ACTIVE_STATUSES, ...ticketFiltersFromSearch(search) },
     1,
     BOARD_PAGE_SIZE,
   )
@@ -70,8 +65,7 @@ function InboxBoardContent() {
         onChange={(next: TicketListSearch) => {
           void navigate({ to: '/inbox/tablero', search: next })
         }}
-        buildings={buildings.data ?? []}
-        categories={categories.data ?? []}
+        catalogs={catalogs}
         showStatus={false}
       />
       <TicketBoardPanel

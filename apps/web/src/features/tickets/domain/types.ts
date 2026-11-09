@@ -85,10 +85,12 @@ export interface TicketListItem {
   requesterName: string
   possibleDuplicate: boolean
   buildingName: string | null
+  locationName?: string | null
   categoryName: string | null
   priorityName: string | null
   priorityPosition: number | null
   teamName: string | null
+  technicianName?: string | null
   isUnrouted: boolean
 }
 

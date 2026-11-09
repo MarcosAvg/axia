@@ -2,12 +2,13 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { can, RequirePermission, useAuth } from '@/features/auth'
-import { useBuildings, useCategories } from '@/features/catalogs'
 import {
   TicketFilters,
   TicketListPanel,
+  ticketFiltersFromSearch,
   ticketMessages,
   ticketPageInfo,
+  useTicketFilterCatalogs,
   useTicketsList,
 } from '@/features/tickets'
 // El esquema se importa directo: `validateSearch` vive en el módulo de la ruta,
@@ -26,17 +27,8 @@ function TicketsPage() {
   const { identity } = useAuth()
   const search = Route.useSearch()
   const navigate = useNavigate()
-  const buildings = useBuildings()
-  const categories = useCategories()
-  const query = useTicketsList(
-    {
-      status: search.status,
-      buildingId: search.buildingId,
-      categoryId: search.categoryId,
-      search: search.search,
-    },
-    search.page,
-  )
+  const catalogs = useTicketFilterCatalogs()
+  const query = useTicketsList(ticketFiltersFromSearch(search), search.page)
   const page = ticketPageInfo(query.data)
   const applySearch = (next: TicketListSearch) => {
     void navigate({ to: '/tickets', search: next })
@@ -59,8 +51,7 @@ function TicketsPage() {
         <TicketFilters
           value={search}
           onChange={applySearch}
-          buildings={buildings.data ?? []}
-          categories={categories.data ?? []}
+          catalogs={catalogs}
         />
         {query.data ? (
           <p className="text-sm text-muted-foreground">

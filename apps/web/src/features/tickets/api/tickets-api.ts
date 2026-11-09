@@ -30,6 +30,16 @@ export interface TicketFilters {
   statuses?: TicketStatus[]
   buildingId?: string
   categoryId?: string
+  teamId?: string
+  priorityId?: string
+  requesterId?: string
+  technicianId?: string
+  dependencyId?: string
+  serviceTypeId?: string
+  from?: string
+  to?: string
+  unrouted?: boolean
+  possibleDuplicate?: boolean
   search?: string
 }
 
@@ -40,7 +50,9 @@ export interface TicketPage {
   pageSize: number
 }
 
-function queryString(params: Record<string, string | number | undefined>) {
+function queryString(
+  params: Record<string, string | number | boolean | undefined>,
+) {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') search.set(key, String(value))
@@ -58,6 +70,16 @@ export async function fetchTickets(
     statuses: filters.statuses?.join(','),
     buildingId: filters.buildingId,
     categoryId: filters.categoryId,
+    teamId: filters.teamId,
+    priorityId: filters.priorityId,
+    requesterId: filters.requesterId,
+    technicianId: filters.technicianId,
+    dependencyId: filters.dependencyId,
+    serviceTypeId: filters.serviceTypeId,
+    from: filters.from,
+    to: filters.to,
+    unrouted: filters.unrouted ? true : undefined,
+    possibleDuplicate: filters.possibleDuplicate ? true : undefined,
     search: filters.search,
     page,
     pageSize,

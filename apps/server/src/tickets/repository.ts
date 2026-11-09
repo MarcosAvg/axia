@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 
 import { can as hasPermission, type Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
@@ -159,48 +159,68 @@ export type ListTicketsOptions = {
   pageSize: number
 }
 
-export async function listTickets(
-  db: Database,
-  actor: Actor,
-  { filters, page, pageSize }: ListTicketsOptions,
-): Promise<TicketPage> {
-  const conditions = [
-    scopePredicate(actor, 'ticket.view'),
-    ...filterConditions(filters),
-  ]
-  const where = sql.join(conditions, sql` and `)
-  const offset = (page - 1) * pageSize
-  const result = await db.execute(sql`
+function listQuery(where: SQL, pageSize: number, offset: number) {
+  return sql`
     select
       t.id, t.folio, t.status, t.reported_at, t.closed_at, t.description,
       t.requester_name, t.possible_duplicate,
       b.name as building_name,
+      l.name as location_name,
       c.name as category_name,
       p.name as priority_name,
       p.position as priority_position,
       tm.name as team_name,
+      tech.technician_name,
       ${isUnroutedSql()} as is_unrouted,
       count(*) over()::int as total
     from public.tickets t
     join public.requesters r on r.id = t.requester_id
     left join public.buildings b on b.id = t.building_id
+    left join public.locations l on l.id = t.location_id
     left join public.categories c on c.id = t.category_id
     left join public.priorities p on p.id = t.priority_id
     left join public.teams tm on tm.id = t.team_id
+    left join lateral (
+      select te.full_name as technician_name
+      from public.ticket_assignments a
+      join public.technicians te on te.id = a.assignee_technician_id
+      where a.ticket_id = t.id
+        and a.cycle = t.cycle
+        and a.stage = 'technician'
+      order by a.assigned_at desc
+      limit 1
+    ) tech on true
     where ${where}
     order by t.reported_at desc, t.id
     limit ${pageSize} offset ${offset}
-  `)
+  `
+}
+
+function countQuery(where: SQL) {
+  return sql`
+    select count(*)::int as total
+    from public.tickets t
+    join public.requesters r on r.id = t.requester_id
+    where ${where}
+  `
+}
+
+export async function listTickets(
+  db: Database,
+  actor: Actor,
+  { filters, page, pageSize }: ListTicketsOptions,
+): Promise<TicketPage> {
+  const where = sql.join(
+    [scopePredicate(actor, 'ticket.view'), ...filterConditions(filters)],
+    sql` and `,
+  )
+  const offset = (page - 1) * pageSize
+  const result = await db.execute(listQuery(where, pageSize, offset))
 
   const rows = result.rows as ListRow[]
   let total = rows[0]?.total ?? 0
   if (rows.length === 0 && page > 1) {
-    const count = await db.execute(sql`
-      select count(*)::int as total
-      from public.tickets t
-      join public.requesters r on r.id = t.requester_id
-      where ${where}
-    `)
+    const count = await db.execute(countQuery(where))
     total = (count.rows[0] as { total: number } | undefined)?.total ?? 0
   }
 

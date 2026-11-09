@@ -14,10 +14,12 @@ const ticketListItemSchema = z.object({
   requesterName: z.string(),
   possibleDuplicate: z.boolean(),
   buildingName: nullableText,
+  locationName: nullableText,
   categoryName: nullableText,
   priorityName: nullableText,
   priorityPosition: z.number().nullable(),
   teamName: nullableText,
+  technicianName: nullableText.optional(),
   isUnrouted: z.boolean(),
 })
 export const ticketItemsResponseSchema = z.object({
@@ -125,11 +127,31 @@ export const createTicketSchema = z.object({
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 
 const optionalSearchString = z.string().optional().catch(undefined)
+const optionalSearchDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .optional()
+  .catch(undefined)
+const optionalSearchBoolean = z.preprocess((value) => {
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return value
+}, z.boolean().optional().catch(undefined))
 
 export const ticketListSearchSchema = z.object({
   status: ticketStatusSchema.optional().catch(undefined),
   buildingId: optionalSearchString,
   categoryId: optionalSearchString,
+  teamId: optionalSearchString,
+  priorityId: optionalSearchString,
+  requesterId: optionalSearchString,
+  technicianId: optionalSearchString,
+  dependencyId: optionalSearchString,
+  serviceTypeId: optionalSearchString,
+  from: optionalSearchDate,
+  to: optionalSearchDate,
+  unrouted: optionalSearchBoolean,
+  possibleDuplicate: optionalSearchBoolean,
   search: optionalSearchString,
   page: z.coerce.number().int().min(1).catch(1),
 })

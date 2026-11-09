@@ -1,6 +1,7 @@
 // Textos del feature de tiquets (es-MX).
 
 import type { EvidenceType } from './domain/types'
+import { listMessages } from './list-i18n'
 import { proxyMessages } from './proxy-i18n'
 
 export { statusLabels } from './status-i18n'
@@ -23,39 +24,7 @@ export const ticketMessages = {
     help: 'Se enviarán automáticamente cuando recuperes la conexión.',
     validate: 'Validar',
   },
-  list: {
-    title: 'Tiquets',
-    subtitle: 'Todos los tiquets que puedes ver.',
-    newAction: 'Nuevo tiquet',
-    filters: {
-      search: 'Buscar',
-      searchPlaceholder: 'Folio o descripción',
-      status: 'Estado',
-      building: 'Edificio',
-      category: 'Categoría',
-      all: 'Todos',
-      more: 'Filtros',
-      clear: 'Limpiar filtros',
-      apply: 'Aplicar',
-      remove: 'Quitar',
-    },
-    count: (count: number) => (count === 1 ? '1 tiquet' : `${count} tiquets`),
-    empty: 'No hay tiquets con estos filtros.',
-    previous: 'Anterior',
-    next: 'Siguiente',
-    page: (page: number) => `Página ${page}`,
-    duplicateMark: 'Posible duplicado',
-    elapsed: 'Tiempo transcurrido',
-    columns: {
-      folio: 'Folio',
-      description: 'Descripción',
-      status: 'Estado',
-      priority: 'Prioridad',
-      building: 'Edificio',
-      team: 'Equipo',
-      reported: 'Registrado',
-    },
-  },
+  list: listMessages,
   eventTime: {
     adjust: 'Ajustar hora',
     title: 'Ajustar hora de la acción',

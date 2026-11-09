@@ -3,6 +3,7 @@ import {
   parseDuplicateCandidates,
   ratingSchema,
   ticketListSearchSchema,
+  ticketPageResponseSchema,
 } from './schemas'
 
 describe('parseDuplicateCandidates', () => {
@@ -67,6 +68,67 @@ describe('ticketListSearchSchema', () => {
     const parsed = ticketListSearchSchema.parse({ status: 'nope', page: 'x' })
     expect(parsed.status).toBeUndefined()
     expect(parsed.page).toBe(1)
+  })
+
+  it('acepta los filtros ampliados y normaliza los indicadores', () => {
+    const parsed = ticketListSearchSchema.parse({
+      teamId: 'team-1',
+      priorityId: 'priority-1',
+      requesterId: 'requester-1',
+      technicianId: 'technician-1',
+      dependencyId: 'dependency-1',
+      serviceTypeId: 'service-1',
+      from: '2026-01-01',
+      to: '2026-01-31',
+      unrouted: 'true',
+      possibleDuplicate: 'false',
+    })
+    expect(parsed).toMatchObject({
+      teamId: 'team-1',
+      priorityId: 'priority-1',
+      requesterId: 'requester-1',
+      technicianId: 'technician-1',
+      dependencyId: 'dependency-1',
+      serviceTypeId: 'service-1',
+      from: '2026-01-01',
+      to: '2026-01-31',
+      unrouted: true,
+      possibleDuplicate: false,
+    })
+  })
+})
+
+describe('ticketPageResponseSchema', () => {
+  it('conserva la ubicación y el técnico del listado', () => {
+    const parsed = ticketPageResponseSchema.parse({
+      items: [
+        {
+          id: 't1',
+          folio: 'A-1',
+          status: 'registered',
+          reportedAt: '2026-01-01T00:00:00Z',
+          closedAt: null,
+          description: 'Fuga',
+          requesterName: 'Ana',
+          possibleDuplicate: false,
+          buildingName: 'Edificio',
+          locationName: 'Sala',
+          categoryName: 'Eléctrico',
+          priorityName: 'Alta',
+          priorityPosition: 1,
+          teamName: 'Mantenimiento',
+          technicianName: 'Luis',
+          isUnrouted: false,
+        },
+      ],
+      total: 1,
+      page: 1,
+      pageSize: 20,
+    })
+    expect(parsed.items[0]).toMatchObject({
+      locationName: 'Sala',
+      technicianName: 'Luis',
+    })
   })
 })
 
