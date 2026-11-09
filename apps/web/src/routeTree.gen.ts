@@ -23,7 +23,6 @@ import { Route as AuthenticatedAdminAmbitosRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCalendariosRouteImport } from './routes/_authenticated/admin/calendarios'
 import { Route as AuthenticatedAdminCatalogosRouteImport } from './routes/_authenticated/admin/catalogos'
 import { Route as AuthenticatedAdminConfiguracionRouteImport } from './routes/_authenticated/admin/configuracion'
-import { Route as AuthenticatedAdminIntegracionesRouteImport } from './routes/_authenticated/admin/integraciones'
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedInboxTableroRouteImport } from './routes/_authenticated/inbox_.tablero'
@@ -105,12 +104,6 @@ const AuthenticatedAdminConfiguracionRoute =
     path: '/configuracion',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminIntegracionesRoute =
-  AuthenticatedAdminIntegracionesRouteImport.update({
-    id: '/integraciones',
-    path: '/integraciones',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
 const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
   id: '/roles',
   path: '/roles',
@@ -166,7 +159,6 @@ export interface FileRoutesByFullPath {
   '/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
-  '/admin/integraciones': typeof AuthenticatedAdminIntegracionesRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/inbox/tablero': typeof AuthenticatedInboxTableroRoute
@@ -188,7 +180,6 @@ export interface FileRoutesByTo {
   '/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
-  '/admin/integraciones': typeof AuthenticatedAdminIntegracionesRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/inbox/tablero': typeof AuthenticatedInboxTableroRoute
@@ -213,7 +204,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/calendarios': typeof AuthenticatedAdminCalendariosRoute
   '/_authenticated/admin/catalogos': typeof AuthenticatedAdminCatalogosRoute
   '/_authenticated/admin/configuracion': typeof AuthenticatedAdminConfiguracionRoute
-  '/_authenticated/admin/integraciones': typeof AuthenticatedAdminIntegracionesRoute
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/inbox_/tablero': typeof AuthenticatedInboxTableroRoute
@@ -238,7 +228,6 @@ export interface FileRouteTypes {
     | '/admin/calendarios'
     | '/admin/catalogos'
     | '/admin/configuracion'
-    | '/admin/integraciones'
     | '/admin/roles'
     | '/admin/usuarios'
     | '/inbox/tablero'
@@ -260,7 +249,6 @@ export interface FileRouteTypes {
     | '/admin/calendarios'
     | '/admin/catalogos'
     | '/admin/configuracion'
-    | '/admin/integraciones'
     | '/admin/roles'
     | '/admin/usuarios'
     | '/inbox/tablero'
@@ -284,7 +272,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/calendarios'
     | '/_authenticated/admin/catalogos'
     | '/_authenticated/admin/configuracion'
-    | '/_authenticated/admin/integraciones'
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/inbox_/tablero'
@@ -400,13 +387,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfiguracionRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/integraciones': {
-      id: '/_authenticated/admin/integraciones'
-      path: '/integraciones'
-      fullPath: '/admin/integraciones'
-      preLoaderRoute: typeof AuthenticatedAdminIntegracionesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
     '/_authenticated/admin/roles': {
       id: '/_authenticated/admin/roles'
       path: '/roles'
@@ -464,7 +444,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCalendariosRoute: typeof AuthenticatedAdminCalendariosRoute
   AuthenticatedAdminCatalogosRoute: typeof AuthenticatedAdminCatalogosRoute
   AuthenticatedAdminConfiguracionRoute: typeof AuthenticatedAdminConfiguracionRoute
-  AuthenticatedAdminIntegracionesRoute: typeof AuthenticatedAdminIntegracionesRoute
   AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -475,7 +454,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminCalendariosRoute: AuthenticatedAdminCalendariosRoute,
   AuthenticatedAdminCatalogosRoute: AuthenticatedAdminCatalogosRoute,
   AuthenticatedAdminConfiguracionRoute: AuthenticatedAdminConfiguracionRoute,
-  AuthenticatedAdminIntegracionesRoute: AuthenticatedAdminIntegracionesRoute,
   AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

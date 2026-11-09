@@ -5,13 +5,11 @@ import {
   Building2Icon,
   CalendarDaysIcon,
   LibraryIcon,
-  PlugIcon,
   SettingsIcon,
   ShieldCheckIcon,
   UsersIcon,
 } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
-import { Badge } from '@/components/ui/badge'
 import { adminMessages } from '@/features/admin'
 import { can, useAuth } from '@/features/auth'
 
@@ -24,7 +22,6 @@ type AdminPath =
   | '/admin/usuarios'
   | '/admin/ambitos'
   | '/admin/calendarios'
-  | '/admin/integraciones'
   | '/admin/configuracion'
 
 interface AdminEntry {
@@ -34,7 +31,6 @@ interface AdminEntry {
   to: AdminPath | '/admin/catalogos'
   permission: string
   search?: { catalog: string }
-  disabled?: boolean
 }
 
 const { nav, descriptions } = adminMessages
@@ -63,14 +59,6 @@ const groups: { label: string; columns: 3 | 4; items: AdminEntry[] }[] = [
         description: descriptions.calendars,
         to: '/admin/calendarios',
         permission: 'catalog.manage',
-      },
-      {
-        icon: PlugIcon,
-        title: nav.integrations,
-        description: descriptions.integrations,
-        to: '/admin/integraciones',
-        permission: 'catalog.manage',
-        disabled: true,
       },
       {
         icon: SettingsIcon,
@@ -120,9 +108,6 @@ function AdminCard({ entry }: { entry: AdminEntry }) {
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="flex flex-wrap items-center gap-2 font-medium">
           {entry.title}
-          {entry.disabled ? (
-            <Badge variant="outline">No disponible</Badge>
-          ) : null}
         </span>
         <span className="text-sm text-muted-foreground">
           {entry.description}
@@ -130,17 +115,6 @@ function AdminCard({ entry }: { entry: AdminEntry }) {
       </span>
     </>
   )
-
-  if (entry.disabled) {
-    return (
-      <div
-        aria-disabled="true"
-        className="flex items-start gap-3 rounded-xl border bg-card p-4 opacity-70"
-      >
-        {content}
-      </div>
-    )
-  }
 
   return (
     <Link

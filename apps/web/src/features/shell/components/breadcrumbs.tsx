@@ -23,7 +23,6 @@ const adminLabels: Record<string, string> = {
   usuarios: shellMessages.nav.users,
   ambitos: shellMessages.nav.scopes,
   calendarios: shellMessages.nav.calendars,
-  integraciones: shellMessages.nav.integrations,
   configuracion: shellMessages.nav.settings,
 }
 

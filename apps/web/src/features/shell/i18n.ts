@@ -23,7 +23,6 @@ export const shellMessages = {
     users: 'Usuarios',
     scopes: 'Ámbitos',
     calendars: 'Calendarios',
-    integrations: 'Integraciones',
     settings: 'Configuración',
     profile: 'Mi perfil',
   },
