@@ -70,6 +70,29 @@ test('operator links use the repository from GITHUB_REPOSITORY', () => {
   }
 })
 
+test('operator links fall back to the default repository without GITHUB_REPOSITORY', () => {
+  const root = mkdtempSync(join(tmpdir(), 'axia-package-test-'))
+  const output = join(root, 'bundle')
+  try {
+    const result = spawnSync(
+      process.execPath,
+      ['scripts/package-release.mjs', output, image, revision, 'v0.1.0'],
+      {
+        encoding: 'utf8',
+        env: { ...process.env, GITHUB_REPOSITORY: '' },
+      },
+    )
+    assert.equal(result.status, 0, result.stderr)
+    const readme = readFileSync(join(output, 'README.md'), 'utf8')
+    assert.ok(
+      readme.includes(`https://github.com/MarcosAvg/axia/blob/${revision}/`),
+      readme,
+    )
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
 test('mutable latest is rejected without creating output', () => {
   const root = mkdtempSync(join(tmpdir(), 'axia-package-test-'))
   const output = join(root, 'bundle')

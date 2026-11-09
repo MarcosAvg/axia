@@ -11,7 +11,8 @@ import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const repository = process.env.GITHUB_REPOSITORY ?? 'MarcosAvg/axia'
+const repository =
+  process.env.GITHUB_REPOSITORY?.trim() || 'MarcosAvg/axia'
 const [outputArg, image, revision, version] = process.argv.slice(2)
 if (
   !outputArg ||
