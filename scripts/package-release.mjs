@@ -11,6 +11,7 @@ import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
+const repository = process.env.GITHUB_REPOSITORY ?? 'MarcosAvg/axia'
 const [outputArg, image, revision, version] = process.argv.slice(2)
 if (
   !outputArg ||
@@ -63,7 +64,7 @@ function operatorDocument(source, destination) {
       const resolved = relative(root, resolve(dirname(sourcePath), target))
       if (resolved === 'docs/guides/operacion.md')
         return `[${label}](OPERATIONS.md)`
-      const url = `https://github.com/MarcosAvg/axia/blob/${revision}/${resolved}`
+      const url = `https://github.com/${repository}/blob/${revision}/${resolved}`
       return `[${label}](${url})`
     },
   )
