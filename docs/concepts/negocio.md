@@ -207,7 +207,11 @@ puede, precondiciones y efectos.
 - **RN-14 Atendido.** El técnico lo marca con descripción del trabajo y evidencia `after` del ciclo.
 - **RN-15 Validación.** Política de la instancia (no por tiquet): solo solicitante, solo supervisor, o
   ambos con el solicitante primero y el supervisor después. Opcionalmente, validación automática tras
-  N días sin respuesta (**apagada por defecto**). Cumplida la política, pasa a `closed`. El solicitante puede dejar calificación de
+  N días sin respuesta (**apagada por defecto**). Cumplida la política, pasa a `closed`. Una misma
+  cuenta que sea solicitante y supervisora del tiquet puede validar **los dos lados en pasos
+  separados**; en `both` primero valida el solicitante y después el supervisor, y cada paso registra
+  su rol, su evento y su tramo. En `supervisor` solo se registra el lado del supervisor y en
+  `requester` solo el del solicitante. El solicitante puede dejar calificación de
   satisfacción (1 a 5) y comentario; se ofrece en un modal al confirmar su validación y también puede
   registrarse antes del cierre una vez validado su lado. La calificación es única, opcional y no se
   modifica después del primer envío. Mientras el tiquet siga `attended` o en reclamación, el

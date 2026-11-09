@@ -66,10 +66,23 @@ controles: se exige además para fijar o ajustar la hora.
 Para el **solicitante** el proxy también es explícito. El cuerpo de `validate`, `rate`, `open_claim`
 y `cancel` acepta `subjectRequesterId`; debe ser el solicitante del tiquet y exige
 `ticket.validate_on_behalf`, `ticket.rate_on_behalf`, `ticket.open_claim_on_behalf` o
-`ticket.cancel_on_behalf`, respectivamente. Sin ese campo la acción es propia del actor: validar
-registra el lado del supervisor, calificar solo lo puede hacer el solicitante y reclamar o cancelar
-se atribuyen a quien ejecuta. El selector «Actuar a nombre de» de la interfaz incluye al solicitante
-y a los técnicos participantes.
+`ticket.cancel_on_behalf`, respectivamente. Sin ese campo la acción es propia del actor: validar usa
+`role` o, si falta, la derivación anterior; calificar solo lo puede hacer el solicitante y reclamar o
+cancelar se atribuyen a quien ejecuta. El selector «Actuar a nombre de» de la interfaz incluye al
+solicitante y a los técnicos participantes.
+
+### Validación por lado
+
+`validate` acepta `role: 'requester' | 'supervisor'`. El lado del solicitante lo registra la cuenta
+vinculada al solicitante o quien actúe con `subjectRequesterId` y `ticket.validate_on_behalf`. El
+lado del supervisor exige `ticket.validate` con ámbito `team`, `buildings` o `all`, o ser el
+supervisor titular; el ámbito `own` no basta. La política manda: `requester` solo admite el primer
+lado, `supervisor` solo el segundo y `both` exige el solicitante primero (409 si falta).
+
+Una misma cuenta con ambos papeles puede registrar los dos lados en pasos separados. El detalle
+expone `requesterValidated`, `supervisorValidated`, `canValidateRequester` y
+`canValidateSupervisor`; la interfaz muestra el botón del lado que corresponde y no adivina el
+ámbito.
 
 ## Evidencia por tipo
 

@@ -5,15 +5,39 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-09
 
+## Tarea completada en rama: validación de ambos lados por la misma cuenta
+
+- `validate` acepta `role: 'requester' | 'supervisor'`; el servidor autoriza cada lado por separado y
+  conserva la derivación anterior cuando falta `role`, para clientes y acciones offline antiguas. En
+  `both` el solicitante valida primero; `supervisor` y `requester` registran solo su lado.
+- El detalle expone `supervisorValidated`, `canValidateRequester` y `canValidateSupervisor`; la web
+  muestra «Validar como solicitante» y «Validar como supervisor», y la proyección offline entiende
+  los dos pasos. El modal de calificación se abre solo tras el lado del solicitante.
+- Sin migración. Diseño en
+  `docs/superpowers/specs/2026-11-09-validacion-dos-lados-misma-cuenta-design.md`, plan en
+  `docs/superpowers/plans/2026-11-09-validacion-dos-lados-misma-cuenta.md` y decisión en el
+  [ADR 0123](../decisions/0123-validacion-dos-lados-misma-cuenta.md). Rama
+  `feat/validacion-dos-lados`.
+
+### Evidencia de esta tarea
+
+- `pnpm check:fast`: lint y tipos en verde; 66 pruebas de servidor y 463 de web.
+- `pnpm test:affected`: 23/23 flujos smoke de Playwright.
+- `pnpm check`: código 0; 50 pruebas de scripts, 66 + 463 unitarias, 65 de Playwright, 2 del
+  compilador, 411 de PostgreSQL (61 archivos) y build correcto. Persiste el aviso de chunks >500 kB.
+- `pnpm check:static`: 66 archivos de documentación, 945 archivos de agnóstico, fronteras y knip en
+  verde.
+- Pruebas nuevas: lados y políticas, título del detalle/capacidades, eventos y sujetos, idempotencia,
+  acciones web por lado y proyección offline de dos pasos. La prueba de integración se dividió en
+  `tickets-validation-sides-http.test.ts`, `tickets-validation-detail-http.test.ts` y sus helpers.
+- Pendiente: integrar la rama a `main` y publicar; ambas acciones requieren confirmación.
+
 ## Revisión pendiente: bloqueos con varias cuentas con múltiples roles
 
-Auditoría de autorización sin cambios de código. Se reprodujeron seis casos con una prueba temporal
-(6/6) que se retiró después. Los hallazgos y las pruebas propuestas están en la respuesta de la
-sesión; el siguiente paso es decidir el alcance y corregirlos en una rama `fix/`.
+Auditoría de autorización. Se reprodujeron seis casos con una prueba temporal (6/6) que se retiró
+después. La validación de ambos lados ya se corrigió en la tarea de arriba; los demás hallazgos
+siguen pendientes y su alcance debe decidirse en una rama `fix/`.
 
-- En validación `both` y `supervisor`, una cuenta que es solicitante y supervisora no puede validar
-  el lado del supervisor de su propio tiquet: `validationRole` la trata siempre como solicitante
-  (`validation.ts`). El tiquet queda en `attended` y el segundo intento responde 409.
 - El ámbito superior sustituye al `own` y no se une (`access.ts`, `scope.ts`). Un técnico que
   también supervisa otro equipo no ve el tiquet que tiene asignado, y un solicitante que también
   supervisa puede perder de vista su propia solicitud.
@@ -25,7 +49,7 @@ sesión; el siguiente paso es decidir el alcance y corregirlos en una rama `fix/
 - La interfaz decide botones con el permiso, sin ámbito ni relación `own`, así que muestra acciones
   que el servidor rechaza.
 
-No se modificaron reglas, pruebas ni código de producción.
+La validación de ambos lados ya está corregida; el resto de los hallazgos no se ha modificado.
 
 ## v0.17.1 publicada
 

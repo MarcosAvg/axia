@@ -69,9 +69,12 @@ Los comandos y sus precondiciones están en [Estados y transiciones](estados-y-t
 Por ejemplo, iniciar envía `{ "action": "start", "clientRequestId": "<uuid>" }` después de subir la
 evidencia del ciclo. La API no permite escribir directamente el estado.
 
-El detalle del tiquet incluye `isRequester`, `requesterValidated`, `hasTaken`, `isUnrouted`,
-`requesterId`, `requesterDependencyId`, `requesterDependencyName` y `validationPolicy` para que la
-interfaz ajuste las acciones, la calificación y la recaptura. `isUnrouted` solo llega verdadero a
+El detalle del tiquet incluye `isRequester`, `requesterValidated`, `supervisorValidated`,
+`canValidateRequester`, `canValidateSupervisor`, `hasTaken`, `isUnrouted`, `requesterId`,
+`requesterDependencyId`, `requesterDependencyName` y `validationPolicy` para que la interfaz ajuste
+las acciones, la calificación y la recaptura. `canValidateRequester` y `canValidateSupervisor`
+indican si la cuenta puede registrar ese lado según la política y su ámbito; no consideran el orden
+ni si ya está registrado. `isUnrouted` solo llega verdadero a
 quien tiene `ticket.assign_supervisor`: indica un tiquet `registered` sin ofertas activas en el
 ciclo. La lista devuelve el mismo campo. `rate` acepta un tiquet `closed` o uno `attended` con
 validación del solicitante; una segunda calificación del mismo tiquet responde 409. Validar dos
@@ -80,9 +83,15 @@ solicitante que ya validó su lado, incluso después del cierre.
 
 `validate`, `rate`, `open_claim` y `cancel` aceptan `subjectRequesterId`. Si viene, debe ser el
 solicitante del tiquet y exige el permiso `*_on_behalf` correspondiente; la acción se registra a su
-nombre. Si falta, la acción es propia: validar registra el lado del supervisor y exige que el
-solicitante ya haya validado en política `both` (409 si no), calificar solo lo puede hacer el propio
-solicitante (403 para un supervisor sin proxy) y reclamar o cancelar se atribuyen al actor.
+nombre. Si falta, la acción es propia: calificar solo lo puede hacer el propio solicitante (403 para
+un supervisor sin proxy) y reclamar o cancelar se atribuyen al actor.
+
+`validate` acepta además `role: 'requester' | 'supervisor'` para registrar un lado concreto; una
+cuenta que es solicitante y supervisora puede hacerlo en dos pasos. Sin `role` se conserva la
+derivación anterior: `subjectRequesterId` registra el lado del solicitante; la política `requester`
+o el solicitante que aún no validó en `both` registran ese lado; en otro caso se registra el lado
+del supervisor. En `both`, el lado del supervisor antes del solicitante responde 409; repetir un
+lado ya registrado también responde 409.
 
 Un supervisor sin asignación abierta como titular no puede asignar, reasignar, recapturar, rechazar,
 cancelar, cambiar prioridad ni marcar duplicado sobre un tiquet `registered`; primero debe enviar

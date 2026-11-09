@@ -42,7 +42,7 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
 | `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
-| `validate` | `attended` | Con `subjectRequesterId` registra el lado del solicitante; sin proxy registra el lado del supervisor y, en política `both`, exige que el solicitante ya haya validado (409). Una sola vez por rol y ciclo; pasa a `closed` al cumplir la política de instancia |
+| `validate` | `attended` | `role` opcional: `requester` (identidad del solicitante o `subjectRequesterId` con `ticket.validate_on_behalf`) o `supervisor` (ámbito no `own` o titularidad). En `both` el solicitante valida primero (409 si falta); `supervisor` solo registra su lado y `requester` solo el suyo. Una vez por rol y ciclo; pasa a `closed` al cumplir la política. Sin `role` se deriva para clientes antiguos |
 | `open_claim` | `attended`, `closed` dentro de ventana; no si el solicitante ya validó su lado | Motivo, descripción y evidencia `claim`; pasa a `under_claim`. Con `subjectRequesterId` y `ticket.open_claim_on_behalf` se atribuye al solicitante; sin proxy al actor |
 | `resolve_claim` | `under_claim` | `upheld`: nuevo ciclo en `assigned`; `dismissed`: `closed`; `new_ticket`: restaura estado anterior y crea derivado |
 | `reject`, `cancel` | No final | Motivo del uso correspondiente; el supervisor debe haber tomado; guarda estado previo y descarta. `cancel` con `subjectRequesterId` y `ticket.cancel_on_behalf` se atribuye al solicitante |
@@ -69,8 +69,10 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   captura al evaluarla. El motivo es opcional en su contrato actual.
 - La validación a nombre del solicitante exige elegir explícitamente al solicitante como sujeto y
   `ticket.validate_on_behalf`. Sin proxy, un supervisor valida su propio lado y en política `both`
-  espera la validación del solicitante. La calificación, la reclamación y la cancelación siguen la
-  misma regla de sujeto explícito.
+  espera la validación del solicitante. Una cuenta que es solicitante y supervisora del mismo tiquet
+  puede validar los dos lados en pasos separados, con `role`; el primer paso registra solo el lado
+  que le corresponde. La calificación, la reclamación y la cancelación siguen la misma regla de
+  sujeto explícito.
 - La reasignación directa a un supervisor termina en `with_supervisor`; RN-06 describe el regreso
   a `registered`. Esta diferencia no modifica la especificación aprobada.
 - Cada ruteo abre una ronda de ofertas y no reescribe las anteriores; así, volver al equipo previo
