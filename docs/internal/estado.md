@@ -5,7 +5,21 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-09
 
-## Tarea completada en rama: validación de ambos lados por la misma cuenta
+## v0.18.0 publicada
+
+- Etiqueta `v0.18.0` creada desde `main` en `c8527f7`. Workflow
+  [42659290050](https://github.com/MarcosAvg/axia/actions/runs/42659290050): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.18.0`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:c8527f7d41773550a89827be7a8445900378af9b`, digest
+  `sha256:dc4a44af67663ee3c77d15e34fd631af5109cd6e82ffe268d44f155c5d9b9800`.
+- [Release v0.18.0](https://github.com/MarcosAvg/axia/releases/tag/v0.18.0) con
+  `axia-self-hosted.tar.gz` (SHA-256
+  `f3ed21e347eaf760ffaf1574d859e06d15705c8a28387e685960ac424ea38cab`) y su `.sha256`.
+- Incluye la validación de ambos lados por la misma cuenta (ADR 0123).
+
+## Tarea integrada: validación de ambos lados por la misma cuenta
 
 - `validate` acepta `role: 'requester' | 'supervisor'`; el servidor autoriza cada lado por separado y
   conserva la derivación anterior cuando falta `role`, para clientes y acciones offline antiguas. En
@@ -16,8 +30,8 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Sin migración. Diseño en
   `docs/superpowers/specs/2026-11-09-validacion-dos-lados-misma-cuenta-design.md`, plan en
   `docs/superpowers/plans/2026-11-09-validacion-dos-lados-misma-cuenta.md` y decisión en el
-  [ADR 0123](../decisions/0123-validacion-dos-lados-misma-cuenta.md). Rama
-  `feat/validacion-dos-lados`.
+  [ADR 0123](../decisions/0123-validacion-dos-lados-misma-cuenta.md). Integrada a `main` por
+  fast-forward en `aa7d5ec`; la rama `feat/validacion-dos-lados` se retiró del checkout local.
 
 ### Evidencia de esta tarea
 
@@ -33,7 +47,7 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 - Revisión independiente: aprobada tras corregir la etiqueta de la validación pendiente (`validate`
   mostraba el nombre crudo) y añadir su prueba de componente. Quedan mejoras menores registradas en
   la revisión, sin efecto en el flujo.
-- Pendiente: integrar la rama a `main` y publicar; ambas acciones requieren confirmación.
+- Integrada a `main` y publicada en `v0.18.0`; evidencia de la etiqueta, imagen y release arriba.
 
 ## Revisión pendiente: bloqueos con varias cuentas con múltiples roles
 
