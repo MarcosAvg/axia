@@ -1,15 +1,22 @@
 import { CloudOffIcon } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
 import type { ActionKey } from '../domain/actions'
-import type {
-  PendingOperation,
-  PendingTicketAction,
-} from '../domain/pending-actions'
+import type { PendingTicketAction } from '../domain/pending-actions'
 import { ticketMessages } from '../i18n'
 
-function operationLabel(operation: PendingOperation): string {
+function operationLabel(action: PendingTicketAction): string {
+  const { operation } = action
   if (operation === 'rate') return ticketMessages.rating.open
   if (operation === 'take') return ticketMessages.detail.takeOffer
+  if (operation === 'validate') {
+    if (action.args.role === 'requester') {
+      return ticketMessages.actions.validate_requester
+    }
+    if (action.args.role === 'supervisor') {
+      return ticketMessages.actions.validate_supervisor
+    }
+    return ticketMessages.pending.validate
+  }
   return ticketMessages.actions[operation as ActionKey] ?? operation
 }
 
@@ -40,7 +47,7 @@ export function PendingActions({
             data-pending-action={action.operation}
             className="flex flex-wrap items-center justify-between gap-x-3"
           >
-            <span>{operationLabel(action.operation)}</span>
+            <span>{operationLabel(action)}</span>
             <span className="text-xs text-muted-foreground">
               {formatDateTime(action.occurredAt)}
             </span>

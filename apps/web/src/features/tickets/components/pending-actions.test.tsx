@@ -6,13 +6,14 @@ import { PendingActions } from './pending-actions'
 function action(
   operation: PendingTicketAction['operation'],
   seq: number,
+  args: Record<string, unknown> = {},
 ): PendingTicketAction {
   return {
     id: `pending-${seq}`,
     ticketId: 'ticket-1',
     seq,
     operation,
-    args: {},
+    args,
     occurredAt: '2026-11-04T10:00:00.000Z',
   }
 }
@@ -28,6 +29,22 @@ describe('PendingActions', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Iniciar')).toBeInTheDocument()
     expect(screen.getByText('Comentar')).toBeInTheDocument()
+  })
+
+  it('etiqueta la validación pendiente por lado', () => {
+    render(
+      <PendingActions
+        actions={[
+          action('validate', 1, { role: 'requester' }),
+          action('validate', 2, { role: 'supervisor' }),
+          action('validate', 3),
+        ]}
+      />,
+    )
+
+    expect(screen.getByText('Validar como solicitante')).toBeInTheDocument()
+    expect(screen.getByText('Validar como supervisor')).toBeInTheDocument()
+    expect(screen.getByText('Validar')).toBeInTheDocument()
   })
 
   it('no renderiza nada sin acciones pendientes', () => {

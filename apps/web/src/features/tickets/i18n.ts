@@ -21,6 +21,7 @@ export const ticketMessages = {
     title: 'Cambios pendientes de sincronizar',
     sync: 'Sin sincronizar',
     help: 'Se enviarán automáticamente cuando recuperes la conexión.',
+    validate: 'Validar',
   },
   list: {
     title: 'Tiquets',
