@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-11-09
+
 ### Corregido
 
 - La gráfica «Riesgo de retrabajo» identifica cada categoría: el tooltip muestra el nombre y sus
