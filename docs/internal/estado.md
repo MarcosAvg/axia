@@ -5,6 +5,42 @@ Memoria de continuidad. Historial en [CHANGELOG](../../CHANGELOG.md), razones t�
 
 **Última actualización:** 2026-11-09
 
+## Revisión pendiente: bloqueos con varias cuentas con múltiples roles
+
+Auditoría de autorización sin cambios de código. Se reprodujeron seis casos con una prueba temporal
+(6/6) que se retiró después. Los hallazgos y las pruebas propuestas están en la respuesta de la
+sesión; el siguiente paso es decidir el alcance y corregirlos en una rama `fix/`.
+
+- En validación `both` y `supervisor`, una cuenta que es solicitante y supervisora no puede validar
+  el lado del supervisor de su propio tiquet: `validationRole` la trata siempre como solicitante
+  (`validation.ts`). El tiquet queda en `attended` y el segundo intento responde 409.
+- El ámbito superior sustituye al `own` y no se une (`access.ts`, `scope.ts`). Un técnico que
+  también supervisa otro equipo no ve el tiquet que tiene asignado, y un solicitante que también
+  supervisa puede perder de vista su propia solicitud.
+- Por la misma sombra de ámbito, `assertTicketHolder` bloquea rechazar, cancelar, recapturar o marcar
+  duplicado en tiquets propios de un técnico o solicitante que además tiene rol de supervisor.
+- `assertRequesterCanOpenClaim` se basa en la identidad del actor y no en el sujeto proxy: quien
+  validó como solicitante y también es supervisor no puede abrir la reclamación ni a nombre del
+  solicitante. La especificación sí lo permite a un supervisor.
+- La interfaz decide botones con el permiso, sin ámbito ni relación `own`, así que muestra acciones
+  que el servidor rechaza.
+
+No se modificaron reglas, pruebas ni código de producción.
+
+## v0.17.1 publicada
+
+- Etiqueta `v0.17.1` creada desde `main` en `c6b65a2`. Workflow
+  [42645061168](https://github.com/MarcosAvg/axia/actions/runs/42645061168): `verify / check`,
+  `verify / docker` y `publish` terminaron en `success`.
+- Imagen pública `ghcr.io/marcosavg/axia/axia-app:v0.17.1`,
+  `ghcr.io/marcosavg/axia/axia-app:latest` y
+  `ghcr.io/marcosavg/axia/axia-app:c6b65a2d19d2a0305fa3e911a87424784ffb04bb`, digest
+  `sha256:2e595b8c3b2b31131072353f70bce84aa3f20d4750cf27f46e516044dd163a2f`.
+- [Release v0.17.1](https://github.com/MarcosAvg/axia/releases/tag/v0.17.1) con
+  `axia-self-hosted.tar.gz` (SHA-256
+  `204594fa0bbf8d690218fe98c9f86ecf4b70d5535121886ac5d0629fcf58c365`) y su `.sha256`.
+- Incluye los nombres de categoría en la gráfica de riesgo de retrabajo.
+
 ## Tarea integrada: nombres en la gráfica de riesgo de retrabajo
 
 - Causa: el tooltip tomaba los nombres de los ejes («Tiquets», «Reapertura», «active») y el punto
