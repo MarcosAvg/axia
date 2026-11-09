@@ -21,14 +21,9 @@ function fixture(t) {
   }
   execFileSync('git', ['init', '-q', root])
   mkdirSync(join(root, 'scripts'))
-  for (const file of [
-    'check-agnostic.mjs',
-    'check-docs.mjs',
-    'source-inventory.mjs',
-  ]) {
+  for (const file of ['check-docs.mjs', 'source-inventory.mjs']) {
     copyFileSync(new URL(file, import.meta.url), join(root, 'scripts', file))
   }
-  write('scripts/agnostic-names.json', '{"names":["ForbiddenService"]}')
   return { root, write }
 }
 
@@ -75,41 +70,35 @@ test('excluye secretos, datos privados y salidas incluso versionados accidentalm
     '.tanstack/output.ts',
     'image.png',
   ]
-  for (const file of excluded) write(file, 'ForbiddenService')
+  for (const file of excluded) write(file, 'Contenido privado')
   execFileSync('git', ['add', '--', ...excluded], { cwd: root })
-  const result = run(root, 'check-agnostic.mjs', excluded)
+  const result = run(root, 'check-docs.mjs', excluded)
   assert.equal(result.status, 0, result.stderr)
 })
 
-test('solo revisa fuentes nuevas no ignoradas y conserva plantillas dotenv', (t) => {
+test('solo revisa fuentes nuevas no ignoradas y conserva plantillas dotenv', async (t) => {
   const { root, write } = fixture(t)
   write('.gitignore', 'private/\n')
-  write('private/ignored.txt', 'ForbiddenService')
-  write('.env.example', 'ForbiddenService')
-  const result = run(root, 'check-agnostic.mjs')
+  write('private/ignored.md', '[roto](missing.md)')
+  write('.env.example', 'plantilla')
+  write('docs/current.md', '[roto](missing.md)')
+  const result = run(root, 'check-docs.mjs')
   assert.equal(result.status, 1)
-  assert.match(result.stderr, /\.env\.example:1/)
+  assert.match(result.stderr, /docs\/current\.md/)
   assert.doesNotMatch(result.stderr, /private\/ignored/)
-})
-
-test('detecta nombres prohibidos en código nuevo y respeta excepciones documentadas', (t) => {
-  const { root, write } = fixture(t)
-  write('docs/history/integraciones-y-migracion.md', 'ForbiddenService')
-  write('docs/decisions/fixture.md', 'ForbiddenService')
-  write('apps/web/src/new.ts', 'ForbiddenService')
-  const result = run(root, 'check-agnostic.mjs')
-  assert.equal(result.status, 1)
-  assert.match(result.stderr, /apps\/web\/src\/new.ts:1/)
-  assert.doesNotMatch(result.stderr, /fixture\.md:1/)
+  const { listSourceFiles } = await import('./source-inventory.mjs')
+  const files = listSourceFiles(root)
+  assert.ok(files.includes('.env.example'))
+  assert.ok(!files.includes('private/ignored.md'))
 })
 
 test('no sigue symlinks de archivos ni de directorios', (t) => {
   const { root, write } = fixture(t)
-  write('private/secret.txt', 'ForbiddenService')
+  write('private/secret.md', '[roto](missing.md)')
   write('.gitignore', 'private/\n')
-  symlinkSync(join(root, 'private/secret.txt'), join(root, 'linked.ts'))
+  symlinkSync(join(root, 'private/secret.md'), join(root, 'linked.md'))
   symlinkSync(join(root, 'private'), join(root, 'linked-dir'))
-  const result = run(root, 'check-agnostic.mjs')
+  const result = run(root, 'check-docs.mjs')
   assert.equal(result.status, 0, result.stderr)
 })
 
@@ -125,7 +114,7 @@ test('docs revisa historia fuente, pero no documentación ignorada o generada', 
   write('docs/history/current.md', '[roto](missing.md)')
   const broken = run(root, 'check-docs.mjs')
   assert.equal(broken.status, 1)
-  assert.match(broken.stderr, /docs\/history\/current.md/)
+  assert.match(broken.stderr, /docs\/history\/current\.md/)
 })
 
 test('inventario elimina duplicados, borrados y symlinks intermedios sin abrir contenidos', async () => {
@@ -173,7 +162,7 @@ test('inventario elimina duplicados, borrados y symlinks intermedios sin abrir c
   )
 })
 
-test('no abre credenciales JSON versionadas ni directorios de claves y conserva código secrets.ts', (t) => {
+test('no abre credenciales JSON versionadas ni directorios de claves y conserva documentos', (t) => {
   const { root, write } = fixture(t)
   const excluded = [
     'credentials.json',
@@ -186,25 +175,23 @@ test('no abre credenciales JSON versionadas ni directorios de claves y conserva 
     'keys/local.json',
     'id_rsa',
   ]
-  for (const file of excluded) write(file, '{"fixture":"ForbiddenService"}')
+  for (const file of excluded) write(file, '{"fixture":"privado"}')
   execFileSync('git', ['add', '--', ...excluded], { cwd: root })
-  const result = run(root, 'check-agnostic.mjs', excluded)
+  const result = run(root, 'check-docs.mjs', excluded)
   assert.equal(result.status, 0, result.stderr)
-  write('apps/server/src/secrets.ts', 'ForbiddenService')
-  const source = run(root, 'check-agnostic.mjs', excluded)
+  write('apps/server/src/secrets.md', '[roto](missing.md)')
+  const source = run(root, 'check-docs.mjs', excluded)
   assert.equal(source.status, 1)
-  assert.match(source.stderr, /apps\/server\/src\/secrets.ts:1/)
+  assert.match(source.stderr, /apps\/server\/src\/secrets\.md/)
 })
 
 test('no abre archivos ignorados aunque estén forzados al índice de Git', (t) => {
   const { root, write } = fixture(t)
   const excluded = ['config/local-settings.json', 'docs/private-notes.md']
   write('.gitignore', excluded.join('\n') + '\n')
-  write(excluded[0], '{"fixture":"ForbiddenService"}')
+  write(excluded[0], '{"fixture":"privado"}')
   write(excluded[1], '[roto](missing.md)')
   execFileSync('git', ['add', '-f', '--', ...excluded], { cwd: root })
-  for (const script of ['check-agnostic.mjs', 'check-docs.mjs']) {
-    const result = run(root, script, excluded)
-    assert.equal(result.status, 0, result.stderr)
-  }
+  const result = run(root, 'check-docs.mjs', excluded)
+  assert.equal(result.status, 0, result.stderr)
 })

@@ -20,7 +20,7 @@ contiene los scripts ejecutables; esta referencia explica sus efectos.
 | `pnpm test:e2e:smoke` / `pnpm test:e2e` | Flujos críticos / todos los flujos de navegador |
 | `pnpm test:visual` | Regresión visual opcional; usa el entorno E2E |
 | `pnpm check:fast` | Lint, tipos y unitarias para el ciclo local |
-| `pnpm check:static` | Scripts, enlaces, independencia, fronteras y knip |
+| `pnpm check:static` | Scripts, enlaces, fronteras y knip |
 | `pnpm check` | Compuerta completa: estáticos, pruebas, PostgreSQL y build |
 
 ## Base local
@@ -47,7 +47,6 @@ no requieren ese contenedor. No ejecutar varias suites que reconstruyan la misma
 | Comando | Verificación |
 |---|---|
 | `pnpm check:docs` | Enlaces relativos en documentación fuente |
-| `pnpm check:agnostic` | Independencia del núcleo |
 | `pnpm check:boundaries` | Fronteras entre capas y ausencia de ciclos |
 | `pnpm knip` | Código y dependencias sin uso |
 | `pnpm test:scripts` | Instalación, entornos, Compose, paquete de release y recuperación simulada |
