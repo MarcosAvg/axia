@@ -6,7 +6,7 @@ Indicar cómo reportar una vulnerabilidad y qué prácticas debe respetar una in
 
 ## Versiones soportadas
 
-El proyecto está en desarrollo pre-1.0. La última release publicada es `v0.18.0`; la versión de
+El proyecto está en desarrollo pre-1.0. La última release publicada es `v0.19.0`; la versión de
 cada release se identifica por el tag de Git. Se atienden los reportes sobre la rama `main`.
 
 | Versión | Soporte |
