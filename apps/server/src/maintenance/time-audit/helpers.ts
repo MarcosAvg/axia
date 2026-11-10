@@ -22,12 +22,12 @@ export function limitOf(options: TimeAuditOptions | undefined): number {
   return Math.min(value, 100)
 }
 
-export async function countOf(db: Database, query: SQL): Promise<number> {
+async function countOf(db: Database, query: SQL): Promise<number> {
   const result = await db.execute(query)
   return Number((result.rows[0] as CountRow | undefined)?.count ?? 0)
 }
 
-export async function samplesOf(
+async function samplesOf(
   db: Database,
   query: SQL,
 ): Promise<Array<Record<string, unknown>>> {
