@@ -201,7 +201,7 @@ function useTicketActionForm({
   const time = useActionTime(
     isProxyAction(action) && Boolean(subjectTechnicianId),
   )
-  const actions = useTicketActions(ticketId, subject, time.iso)
+  const actions = useTicketActions(ticketId, subject, time.local)
   const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
   const catalogs = useActionCatalogs({

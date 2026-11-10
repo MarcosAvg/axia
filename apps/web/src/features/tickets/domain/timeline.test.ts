@@ -17,6 +17,7 @@ function item(
     subjectUserName: null,
     reasonName: null,
     payload,
+    timeConfidence: 'trusted',
   }
 }
 

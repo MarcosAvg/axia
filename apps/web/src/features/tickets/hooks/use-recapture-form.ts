@@ -242,7 +242,7 @@ export function useRecaptureForm(
   const actions = useTicketActions(
     ticket.id,
     technicianSubject(subjectTechnicianId),
-    time.iso,
+    time.local,
   )
   const [values, setValues] = useState(() => initialRecaptureValues(ticket))
   const [hasError, setHasError] = useState(false)
