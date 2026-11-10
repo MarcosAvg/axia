@@ -141,6 +141,7 @@ export const createTicketSchema = z.object({
   occurredLocal: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    .or(z.literal(''))
     .optional(),
 })
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
