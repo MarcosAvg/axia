@@ -14,6 +14,30 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Se añadió `pnpm db:audit:time`, un reporte de solo lectura sobre cobertura de fases, duraciones
   negativas, desfase entre hora de acción y registro, pausas y alertas de tiempo.
 
+### Cambiado
+
+- La corrección manual de la hora de un evento ajusta también sus filas enlazadas (pausas, pasos,
+  asignaciones, participaciones, validaciones, reclamaciones, ofertas y capturas), recalcula el
+  cierre del tiquet y reconstruye los tramos. El ajuste no puede saltar entre ciclos ni mover el
+  alta a otro año.
+- El subestado de salida de una pausa se guarda como motivo de cierre y ya no reetiqueta el
+  intervalo anterior.
+- Los eventos, tramos y participaciones conservan el calendario y la clasificación de reloj con
+  los que se registraron; reconstruir el histórico ya no relee los catálogos actuales.
+- Los filtros por día y el volumen de métricas usan la zona horaria de la instancia. Los
+  calendarios laborales admiten turnos que cruzan medianoche y rechazan solapamientos.
+- Las medias de desempeño excluyen duplicados y tiquets con tiempo no verificado; el volumen y la
+  distribución por desenlace los siguen contando. El resumen separa “Tiempo total (todos)” de
+  “Resolución (cerrados)” y la antigüedad muestra todos los pendientes, sin limitarse al periodo.
+- Reactivar un tiquet descartado restaura la pausa, la asignación del líder y su participación.
+- El tiempo entre un desenlace y una reclamación o reactivación se mide como fase `dormant`
+  (“Fuera de atención”) y queda fuera de los indicadores de desempeño.
+- La evidencia conserva el ciclo en que se capturó aunque se suba tras una reapertura. La captura
+  sin conexión mantiene su hora provisional con confianza y la lista marca “Hora sin verificar”
+  cuando falta corregirla; las subidas en línea usan la hora del servidor.
+- La migración de backfill repara duraciones y cierres demostrables y reconstruye los tramos del
+  histórico, sin reescribir horas ni convertir alertas reales en tiempo confiable.
+
 ## [0.20.0] - 2026-11-09
 
 ### Añadido

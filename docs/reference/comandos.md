@@ -37,7 +37,7 @@ contiene los scripts ejecutables; esta referencia explica sus efectos.
 | `pnpm db:cleanup-evidence` | Limpia subidas abandonadas, sin borrar evidencia lista |
 | `pnpm db:cleanup-attachments` | Limpia preparaciones de adjuntos sin ligar |
 | `pnpm db:duplicates` | Recalcula las alertas de posible duplicado de los tiquets abiertos |
-| `pnpm db:audit:time` | Reporte de solo lectura sobre cobertura, duraciones negativas, desfase y alertas de tiempo |
+| `pnpm db:audit:time` | Reporte de solo lectura sobre cobertura, duraciones negativas, desfase y alertas de tiempo; no corrige datos |
 
 `check`, `db:test` y las suites de navegador requieren el PostgreSQL de pruebas iniciado. Usan
 valores locales ficticios por defecto, sin descubrir dotenv privados. `test:unit` y `check:fast`

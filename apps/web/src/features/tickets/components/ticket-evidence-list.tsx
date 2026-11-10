@@ -69,11 +69,21 @@ function EvidenceItem({ evidence }: { evidence: TicketEvidenceItem }) {
 
   return (
     <li className="flex flex-col gap-2 rounded-lg border p-3">
-      <div className="flex items-center justify-between gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm">
         <span className="font-medium">{evidenceTypeLabels[evidence.type]}</span>
-        <span className="text-xs text-muted-foreground">
-          {formatDateTime(evidence.occurredAt)}
-        </span>
+        <div className="flex items-center gap-2">
+          {evidence.timeConfidence === 'unverified' ? (
+            <span
+              className="rounded bg-warning/15 px-1.5 py-0.5 text-xs text-warning-foreground dark:text-warning"
+              title={ticketMessages.detail.unverifiedTimeHelp}
+            >
+              {ticketMessages.detail.unverifiedTime}
+            </span>
+          ) : null}
+          <span className="text-xs text-muted-foreground">
+            {formatDateTime(evidence.occurredAt)}
+          </span>
+        </div>
       </div>
       {url && isImage ? <EvidenceImage evidence={evidence} url={url} /> : null}
       {url && !isImage ? (

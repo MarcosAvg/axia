@@ -12,6 +12,8 @@ export interface DimensionRow {
   open: number
   avgActive: number
   avgTotal: number
+  avgTotalAll: number
+  avgTotalClosed: number
   avgActiveExtra: number
   avgResponse: number
   avgAssignment: number
@@ -25,6 +27,8 @@ export interface DimensionRow {
   avgNetLabor: number
   sumActive: number
   sumTotal: number
+  sumTotalAll: number
+  sumTotalClosed: number
   sumActiveExtra: number
   sumResponse: number
   sumAssignment: number

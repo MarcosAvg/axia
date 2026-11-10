@@ -16,6 +16,7 @@ import {
   actionTimestamp,
   endOpenParticipants,
   endTechnicianAssignments,
+  reopenLeaderAssignment,
   reopenLeaderParticipation,
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
@@ -113,6 +114,7 @@ async function resolveUpheld(
     where id = ${input.ticketId}
   `)
   await endOpenParticipants(tx, input.ticketId)
+  await reopenLeaderAssignment(tx, input.ticketId, actor.id)
   await reopenLeaderParticipation(tx, input.ticketId, actor.id)
   await writeEvent(tx, {
     ticketId: input.ticketId,

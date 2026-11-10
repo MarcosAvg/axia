@@ -17,9 +17,13 @@ import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
+  closeOpenWorkPhase,
   endOpenParticipants,
   endTechnicianAssignments,
+  hasPauseHistory,
+  reopenLeaderAssignment,
   reopenLeaderParticipation,
+  reopenPauseForReactivation,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
 import { assertTicketHolder, type TicketAccess } from './access.js'
@@ -59,6 +63,7 @@ async function applyDiscard(
       closed_at = ${actionTimestamp()}
     where id = ${input.ticketId}
   `)
+  await closeOpenWorkPhase(tx, input.ticketId)
   await endOpenParticipants(tx, input.ticketId)
   await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
@@ -185,6 +190,29 @@ type ReactivateContext = ReactivateInput & {
   ticket: LockedTicket & { status_before_discard: string | null }
 }
 
+async function reopenAfterReactivation({
+  tx,
+  ticketId,
+  actorId,
+  previous,
+  keepPause,
+}: {
+  tx: DbExecutor
+  ticketId: string
+  actorId: string
+  previous: string
+  keepPause: boolean
+}): Promise<void> {
+  if (previous === 'paused') {
+    if (!keepPause) return
+    await reopenPauseForReactivation(tx, ticketId, actorId)
+  } else if (previous !== 'assigned' && previous !== 'in_progress') {
+    return
+  }
+  await reopenLeaderAssignment(tx, ticketId, actorId)
+  await reopenLeaderParticipation(tx, ticketId, actorId)
+}
+
 async function reactivateInTransaction(
   tx: DbExecutor,
   actor: Actor,
@@ -201,29 +229,39 @@ async function reactivateInTransaction(
   if (!input.ticket.status_before_discard) {
     throw conflict('No hay estado previo al descarte')
   }
+  const previous = input.ticket.status_before_discard
+  const keepPause =
+    previous === 'paused' && (await hasPauseHistory(tx, input.ticket.id))
+  const status =
+    previous === 'paused' && !keepPause ? 'with_supervisor' : previous
   await tx.execute(sql`
     update public.tickets
     set
-      status = ${input.ticket.status_before_discard},
+      status = ${status},
       status_before_discard = null,
       closed_at = null,
       duplicate_of_id = null
     where id = ${input.ticket.id}
   `)
-  if (
-    ['assigned', 'in_progress', 'paused'].includes(
-      input.ticket.status_before_discard,
-    )
-  ) {
-    await reopenLeaderParticipation(tx, input.ticket.id, actor.id)
-  }
+  await reopenAfterReactivation({
+    tx,
+    ticketId: input.ticket.id,
+    actorId: actor.id,
+    previous,
+    keepPause,
+  })
   await writeEvent(tx, {
     ticketId: input.ticket.id,
     type: 'reactivated',
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     reasonId: input.reasonId,
-    payload: { to: input.ticket.status_before_discard },
+    payload: {
+      to: status,
+      ...(previous === 'paused' && !keepPause
+        ? { note: 'Sin pausa histórica: el tiquet vuelve al supervisor' }
+        : {}),
+    },
   })
   return {
     ticketId: input.ticket.id,

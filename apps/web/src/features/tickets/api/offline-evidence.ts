@@ -2,7 +2,7 @@
 // de subirla por TUS. La cola garantiza que la evidencia se registre antes que la acción.
 
 import { apiBaseUrl, apiFetch } from '@/lib/api-client'
-import { db } from '@/lib/offline/db'
+import { db, type Evidence } from '@/lib/offline/db'
 import { isNetworkError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
 import {
@@ -31,6 +31,7 @@ interface EvidenceInput {
 async function saveEvidence(params: EvidenceInput): Promise<string> {
   const id = crypto.randomUUID()
   const blob = await compressImage(params.file)
+  const offline = typeof navigator !== 'undefined' && navigator.onLine === false
   await db.evidences.add({
     id,
     userId: currentOfflineUserId() ?? undefined,
@@ -42,12 +43,31 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
     fileName: params.file.name,
     note: params.note ?? null,
     occurredLocal: params.occurredLocal || undefined,
+    clientCapturedAt: offline ? new Date().toISOString() : undefined,
     subjectTechnicianId: params.subjectTechnicianId,
     state: 'pending',
     progress: 0,
     createdAt: Date.now(),
   })
   return id
+}
+
+/** Cuerpo de reserva de la evidencia; la hora de dispositivo solo viaja si se capturó sin conexión. */
+export function buildEvidenceUploadBody(
+  evidence: Evidence,
+  type: EvidenceType,
+) {
+  return {
+    type,
+    cycle: evidence.cycle,
+    clientRequestId: evidence.id,
+    mimeType: evidence.mimeType,
+    sizeBytes: evidence.blob.size,
+    occurredLocal: evidence.occurredLocal || undefined,
+    subjectTechnicianId: evidence.subjectTechnicianId,
+    clientCapturedAt: evidence.clientCapturedAt,
+    deviceNow: evidence.clientCapturedAt ? new Date().toISOString() : undefined,
+  }
 }
 
 /** Reserva la evidencia y la sube al servidor. */
@@ -69,16 +89,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     `/api/tickets/${evidence.ticketId}/evidence`,
     {
       method: 'POST',
-      body: JSON.stringify({
-        type,
-        clientRequestId: evidence.id,
-        mimeType: evidence.mimeType,
-        sizeBytes: evidence.blob.size,
-        occurredLocal: evidence.occurredLocal || undefined,
-        subjectTechnicianId: evidence.subjectTechnicianId,
-        clientCapturedAt: new Date(evidence.createdAt).toISOString(),
-        deviceNow: new Date().toISOString(),
-      }),
+      body: JSON.stringify(buildEvidenceUploadBody(evidence, type)),
     },
   )
   const serverId = created.evidence.id

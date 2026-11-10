@@ -6,6 +6,7 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from './db.js'
 import {
+  assertFolioYear,
   assertTimePermission,
   lastActionTime,
   parseActionTime,
@@ -15,6 +16,7 @@ import {
 } from './action-time-support.js'
 import { withActionContext } from './event-context.js'
 import { writeEvent } from './events.js'
+import { shiftLinkedRows } from './action-time-linked-rows.js'
 import { INSTANCE_WALL_CLOCK, parseInstanceWallClock } from './instance-time.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
@@ -162,7 +164,7 @@ async function eventRow(
   `)
   const event = result.rows[0] as EventRow | undefined
   if (!event) throw new AppError(404, 'not_found', 'Evento no encontrado')
-  if (event.type === 'event_time_corrected') {
+  if (event.type === 'event_time_corrected' || event.type === 'time_alert') {
     throw new AppError(
       400,
       'validation',
@@ -185,7 +187,6 @@ async function assertNeighbourTime(
       min(occurred_at) filter (where occurred_at > ${current}::timestamptz) as next
     from public.ticket_events
     where ticket_id = ${ticketId}
-      and cycle = ${event.cycle}
       and id <> ${event.id}
       and type not in ('event_time_corrected', 'time_alert')
   `)
@@ -241,6 +242,8 @@ async function applyAdjustment(
       where id = ${ticketId}
     `)
   }
+  await tx.execute(sql`select public.recompute_ticket_closed_at(${ticketId})`)
+  await shiftLinkedRows(tx, event.id, proposed)
   await writeEvent(tx, {
     ticketId,
     type: 'event_time_corrected',
@@ -277,6 +280,9 @@ async function adjustInTransaction(
       'validation',
       'La acción no puede ser anterior al registro del tiquet',
     )
+  }
+  if (event.type === 'created') {
+    await assertFolioYear(tx, ticket.reported_at, proposed)
   }
   await assertNeighbourTime(tx, input.ticketId, event, proposed)
   await applyAdjustment(tx, {

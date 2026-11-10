@@ -9,6 +9,7 @@ export type CyclePhase =
   | 'wait'
   | 'active'
   | 'pause'
+  | 'dormant'
   | 'validation'
   | 'claim'
 
@@ -19,6 +20,7 @@ export interface CycleInput {
   wait: number
   active: number
   pause: number
+  dormant: number
   validation: number
   claim: number
   total: number
@@ -38,6 +40,7 @@ export function cyclePhases(input: CycleInput): CycleSlice[] {
     { phase: 'wait', minutes: Math.max(0, input.wait) },
     { phase: 'active', minutes: Math.max(0, input.active) },
     { phase: 'pause', minutes: Math.max(0, input.pause) },
+    { phase: 'dormant', minutes: Math.max(0, input.dormant) },
     { phase: 'validation', minutes: Math.max(0, input.validation) },
     { phase: 'claim', minutes: Math.max(0, input.claim) },
   ]

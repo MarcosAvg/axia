@@ -40,6 +40,8 @@ export interface Evidence {
   note?: string | null
   /** Hora real de la evidencia, si quien la sube puede ajustarla. */
   occurredLocal?: string
+  /** Hora del dispositivo cuando la captura quedó pendiente sin conexión. */
+  clientCapturedAt?: string
   /** Técnico proxy al que se atribuye la evidencia. */
   subjectTechnicianId?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'

@@ -19,6 +19,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { actionTimestamp } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTechnicianAction } from './proxy.js'
 import {
@@ -154,10 +155,10 @@ async function recaptureInTransaction(
   )
   await tx.execute(sql`
     insert into public.ticket_captures (
-      ticket_id, cycle, changed_by, reason_id, changes
+      ticket_id, cycle, changed_by, changed_at, reason_id, changes
     ) values (
-      ${input.ticketId}, ${ticket.cycle}, ${actor.id}, ${input.reasonId},
-      ${JSON.stringify(input.changes)}::jsonb
+      ${input.ticketId}, ${ticket.cycle}, ${actor.id}, ${actionTimestamp()},
+      ${input.reasonId}, ${JSON.stringify(input.changes)}::jsonb
     )
   `)
   await applyChanges(tx, actor, ticket, input.changes)

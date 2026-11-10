@@ -54,6 +54,9 @@ export const ticketMessages = {
     attachments: 'Adjuntos',
     noParticipants: 'Sin participantes todavía.',
     noEvidence: 'Sin evidencias todavía.',
+    unverifiedTime: 'Hora sin verificar',
+    unverifiedTimeHelp:
+      'La hora se tomó del dispositivo y aún no se ha corregido.',
     noAttachments: 'Sin adjuntos todavía.',
     download: 'Descargar',
     noTimeline: 'Sin movimientos todavía.',

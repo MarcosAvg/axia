@@ -159,7 +159,7 @@ it('extends the last phase when closed_at is later than the last event', async (
   expect((await coverage(ticketId)).delta).toBe('00:00:00')
 })
 
-it('uses the resume reason to classify the pause clock', async () => {
+it('mantiene la clasificación del intervalo al reanudar con otro motivo', async () => {
   const { db, ids } = fixtures
   const counted = await db.execute(sql`
     insert into public.reasons (use, name, clock_class)
@@ -200,5 +200,14 @@ it('uses the resume reason to classify the pause clock', async () => {
   `)
   const row = result.rows[0] as { total: string; net: string }
   expect(Number(row.total)).toBeCloseTo(60, 0)
-  expect(Number(row.net)).toBeCloseTo(50, 0)
+  expect(Number(row.net)).toBeCloseTo(60, 0)
+
+  const pauseSpan = await db.execute(sql`
+    select ref_id, clock_class from public.time_spans
+    where ticket_id = ${ticketId} and kind = 'pause'
+  `)
+  expect(pauseSpan.rows[0]).toMatchObject({
+    ref_id: counted.rows[0]?.id,
+    clock_class: 'counted',
+  })
 })

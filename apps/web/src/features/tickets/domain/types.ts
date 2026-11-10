@@ -138,6 +138,7 @@ interface TicketCycleTimes {
   wait: number
   active: number
   pause: number
+  dormant: number
   validation: number
   claim: number
 }
@@ -179,6 +180,7 @@ export interface TicketPauseStep {
   exitedAt: string | null
   note: string | null
   actorName: string | null
+  closedReasonName: string | null
 }
 
 export interface TicketPauseState {
@@ -200,11 +202,13 @@ export interface TicketParticipant {
 
 export interface TicketEvidenceItem {
   id: string
+  cycle: number
   type: EvidenceType
   storagePath: string | null
   mimeType: string | null
   sizeBytes: number | null
   occurredAt: string
+  timeConfidence: 'trusted' | 'unverified' | 'corrected'
 }
 
 export interface TicketAttachment {

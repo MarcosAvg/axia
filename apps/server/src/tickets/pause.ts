@@ -240,7 +240,7 @@ async function resumeInTransaction(
   `)
   await tx.execute(sql`
     update public.ticket_pauses
-    set closed_at = ${actionTimestamp()}
+    set closed_at = ${actionTimestamp()}, closed_reason_id = ${input.reasonId}
     where id = ${pause.id}
   `)
   await tx.execute(sql`

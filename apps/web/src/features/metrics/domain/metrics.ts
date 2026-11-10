@@ -83,6 +83,8 @@ export interface MetricsSummary {
   reopenRate: number
   firstTimeFixRate: number
   avgTotal: number
+  avgTotalAll: number
+  avgTotalClosed: number
   avgResolution: number
   avgNet: number
   avgActive: number
@@ -99,6 +101,8 @@ export interface MetricsSummary {
   avgTotalLabor: number
   avgNetLabor: number
   sumTotal: number
+  sumTotalAll: number
+  sumTotalClosed: number
   sumResolution: number
   sumNet: number
   sumActive: number
@@ -133,6 +137,8 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   reopenRate: 0,
   firstTimeFixRate: 0,
   avgTotal: 0,
+  avgTotalAll: 0,
+  avgTotalClosed: 0,
   avgResolution: 0,
   avgNet: 0,
   avgActive: 0,
@@ -149,6 +155,8 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   avgTotalLabor: 0,
   avgNetLabor: 0,
   sumTotal: 0,
+  sumTotalAll: 0,
+  sumTotalClosed: 0,
   sumResolution: 0,
   sumNet: 0,
   sumActive: 0,

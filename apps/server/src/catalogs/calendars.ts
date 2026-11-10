@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
+import { assertTimeZone } from '../lib/timezone.js'
 
 export type CalendarInput = {
   name: string
@@ -72,6 +73,7 @@ export async function listCalendars(db: Database) {
 }
 
 export async function createCalendar(db: Database, input: CalendarInput) {
+  assertTimeZone(input.timezone)
   await db.execute(sql`
     insert into public.work_calendars (name, timezone, active)
     values (${input.name}, ${input.timezone}, ${input.active})
@@ -92,18 +94,40 @@ export async function updateCalendar(
     throw new AppError(404, 'not_found', 'Calendario no encontrado')
 }
 
+function databaseCode(error: unknown): string | undefined {
+  let current: unknown = error
+  for (let depth = 0; depth < 4 && current; depth += 1) {
+    if (typeof current === 'object' && current !== null && 'code' in current) {
+      return (current as { code?: string }).code
+    }
+    current = (current as { cause?: unknown }).cause
+  }
+  return undefined
+}
+
 export async function addInterval(
   db: Database,
   calendarId: string,
   input: IntervalInput,
 ) {
-  await db.execute(sql`
-    insert into public.work_calendar_intervals (
-      calendar_id, weekday, start_time, end_time
-    ) values (
-      ${calendarId}, ${input.weekday}, ${input.startTime}::time, ${input.endTime}::time
-    )
-  `)
+  try {
+    await db.execute(sql`
+      insert into public.work_calendar_intervals (
+        calendar_id, weekday, start_time, end_time
+      ) values (
+        ${calendarId}, ${input.weekday}, ${input.startTime}::time, ${input.endTime}::time
+      )
+    `)
+  } catch (error) {
+    if (databaseCode(error) === '23514') {
+      throw new AppError(
+        400,
+        'interval_overlap',
+        'Los intervalos del calendario no pueden solaparse',
+      )
+    }
+    throw error
+  }
 }
 
 export async function removeInterval(db: Database, id: string) {

@@ -18,6 +18,7 @@ import { linkCandidate } from './duplicates.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
+  closeOpenWorkPhase,
   endOpenParticipants,
   endTechnicianAssignments,
   resolveOpenClaimOnDiscard,
@@ -135,6 +136,7 @@ async function applyDuplicate(
   `)
   await linkCandidate(tx, input.ticketId, actor.id, input.originalId)
   await dismissReciprocalCandidates(tx, input.ticketId, actor.id)
+  await closeOpenWorkPhase(tx, input.ticketId)
   await endOpenParticipants(tx, input.ticketId)
   await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(

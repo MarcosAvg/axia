@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 
 import type { DbExecutor } from './db.js'
 import { writeEvent } from './events.js'
+import { actionTimestamp } from './flow-state.js'
 
 export type RouteInput = {
   tx: DbExecutor
@@ -32,9 +33,10 @@ export async function routeTicket({
       where ticket_id = ${ticketId} and cycle = ${cycle}
     )
     insert into public.ticket_offers (
-      ticket_id, cycle, offer_round, supervisor_user_id
+      ticket_id, cycle, offer_round, supervisor_user_id, offered_at
     )
-    select ${ticketId}, ${cycle}, next_round.value, ss.user_id
+    select ${ticketId}, ${cycle}, next_round.value, ss.user_id,
+      ${actionTimestamp()}
     from public.supervisor_scopes ss
     join public.supervisor_scope_buildings ssb on ssb.scope_id = ss.id
     join public.users u on u.id = ss.user_id and u.active

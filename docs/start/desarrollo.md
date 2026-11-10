@@ -97,6 +97,22 @@ pnpm db:reset -- --development
 
 El comando borra los datos de esa base. No se utiliza para actualizar normalmente.
 
+## Auditar tiempos
+
+`pnpm db:audit:time --limit 20` revisa, sin escribir en la base:
+
+- cobertura de fases distinta de cero;
+- duraciones negativas en participaciones, pausas, pasos y asignaciones;
+- eventos fuera de los límites del tiquet y desfase entre acción y registro;
+- pausas cuya suma de tramos no coincide con sus pasos;
+- evidencias con ciclo incoherente;
+- eventos `unverified` y alertas de tiempo abiertas.
+
+Una alerta abierta bloquea `validate`, `reject`, `cancel`, `mark_duplicate` y `resolve_claim`
+hasta que una persona con permiso corrija la hora. La corrección se hace desde el detalle del
+tiquet y queda auditada. Después de corregir, vuelve a ejecutar la auditoría: los desfases
+históricos se reportan, no se ocultan ni se reescriben.
+
 ## Resolver problemas locales
 
 | Síntoma | Acción |
