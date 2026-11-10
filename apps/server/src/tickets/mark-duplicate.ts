@@ -24,6 +24,7 @@ import {
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { scopePredicate } from './scope.js'
+import { assertTimeVerified } from './time-alerts.js'
 
 export type MarkDuplicateInput = {
   ticketId: string
@@ -173,6 +174,7 @@ async function markDuplicateInTransaction(
   if (isFinalStatus(ticket.status)) {
     throw conflict('El tiquet ya está cerrado o descartado')
   }
+  await assertTimeVerified(tx, input.ticketId)
   await applyDuplicate(tx, actor, input, ticket)
   return {
     ticketId: input.ticketId,

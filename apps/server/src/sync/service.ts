@@ -163,6 +163,8 @@ async function executeManualItem(
       clientReportedAt: item.clientReportedAt ?? null,
       timeConfidence: 'corrected',
       clientClockSkewMs: null,
+      timeAlertKind: null,
+      suggestedOccurredAt: null,
     },
     () => runTicketAction(db, actor, item.ticketId, input),
   )
@@ -211,6 +213,8 @@ async function executeDeviceItem(
       clientReportedAt: classified.clientReportedAt,
       timeConfidence: classified.timeConfidence,
       clientClockSkewMs: classified.clientClockSkewMs,
+      timeAlertKind: classified.alertKind,
+      suggestedOccurredAt: classified.suggestedOccurredAt,
     },
     () => runTicketAction(db, actor, item.ticketId, input),
   )

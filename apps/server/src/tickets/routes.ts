@@ -247,6 +247,17 @@ function registerPauseReadRoutes(
       return { item }
     },
   )
+
+  app.get(
+    '/api/tickets/:id/time-alerts',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = ticketIdParamsSchema.parse(request.params)
+      const items = await tickets.timeAlerts(currentActor(request), id)
+      if (!items) throw notFound()
+      return { items }
+    },
+  )
 }
 
 function registerEventTimeRoute(

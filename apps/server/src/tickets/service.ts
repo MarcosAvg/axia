@@ -8,6 +8,7 @@ import { getTicketDetail } from './detail.js'
 import { listParticipants } from './participants.js'
 import { getPauseState, getPauseSteps } from './pause-read.js'
 import { getRating } from './rating-read.js'
+import { listTimeAlerts } from './time-alerts.js'
 import {
   dismissDuplicateAlerts,
   listDuplicateAlerts,
@@ -59,6 +60,8 @@ export function createTicketService(db: Database) {
       getPauseSteps(db, actor, ticketId),
     pauseState: (actor: Actor, ticketId: string) =>
       getPauseState(db, actor, ticketId),
+    timeAlerts: (actor: Actor, ticketId: string) =>
+      listTimeAlerts(db, actor, ticketId),
     rating: (actor: Actor, ticketId: string) => getRating(db, actor, ticketId),
     adjustEventTime: (
       actor: Actor,

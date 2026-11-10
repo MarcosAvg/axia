@@ -150,6 +150,8 @@ export async function withActionTime<T>(
         clientReportedAt: input.clientReportedAt ?? null,
         timeConfidence: 'trusted',
         clientClockSkewMs: input.clientClockSkewMs ?? null,
+        timeAlertKind: null,
+        suggestedOccurredAt: null,
       },
       callback,
     )
@@ -161,6 +163,8 @@ export async function withActionTime<T>(
       clientReportedAt: input.clientReportedAt ?? null,
       timeConfidence: 'corrected',
       clientClockSkewMs: input.clientClockSkewMs ?? null,
+      timeAlertKind: null,
+      suggestedOccurredAt: null,
     },
     callback,
   )

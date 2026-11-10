@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 
 import type { DbExecutor } from './db.js'
-import type { TimeConfidence } from './event-context.js'
+import type { TimeAlertKind, TimeConfidence } from './event-context.js'
 
 type TimeRejectionCode =
   'time_out_of_order' | 'time_future' | 'time_too_old' | 'time_invalid'
@@ -10,8 +10,6 @@ type TimeRejection = {
   code: TimeRejectionCode
   message: string
 }
-
-type TimeAlertKind = 'clock_skew' | 'clock_unknown'
 
 export type TimeClassification = {
   occurredAt: string

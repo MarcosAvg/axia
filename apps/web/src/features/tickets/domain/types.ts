@@ -54,6 +54,7 @@ export const EVENT_TYPES = [
   'attachment_added',
   'manual_time_recorded',
   'event_time_corrected',
+  'time_alert',
   'rated',
   'imported',
   'unrouted',

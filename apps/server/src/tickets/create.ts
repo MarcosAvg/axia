@@ -261,6 +261,8 @@ export async function createTicket(
         clientReportedAt: null,
         timeConfidence: occurredAt ? 'corrected' : 'trusted',
         clientClockSkewMs: null,
+        timeAlertKind: null,
+        suggestedOccurredAt: null,
       },
       () =>
         db.transaction((tx) =>

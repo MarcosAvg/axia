@@ -63,6 +63,8 @@ it('conserva la hora del dispositivo como auditoría y usa now() para la hora of
         clientReportedAt,
         timeConfidence: 'unverified',
         clientClockSkewMs: 7_200_000,
+        timeAlertKind: 'clock_skew',
+        suggestedOccurredAt: null,
       },
       () => writeEvent(tx, { ticketId, type: 'comment' }),
     )

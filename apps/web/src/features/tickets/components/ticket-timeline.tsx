@@ -64,6 +64,7 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
   attachment_added: PaperclipIcon,
   manual_time_recorded: ClockIcon,
   event_time_corrected: ClockIcon,
+  time_alert: AlertTriangleIcon,
   rated: StarIcon,
   imported: DownloadIcon,
   unrouted: AlertTriangleIcon,

@@ -20,6 +20,7 @@ import {
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTimeVerified } from './time-alerts.js'
 
 type ResolveClaimInput = {
   ticketId: string
@@ -206,6 +207,7 @@ async function resolveClaimInTransaction(
   if (ticket.status !== 'under_claim') {
     throw conflict('El tiquet no está en reclamación')
   }
+  await assertTimeVerified(tx, input.ticketId)
   const claim = await openClaimRow(tx, input.ticketId)
   if (input.resultId) {
     await requireReason(tx, input.resultId, 'claim_outcome', 'Resultado')

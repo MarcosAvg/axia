@@ -13,6 +13,7 @@ import { findHandledEvent, writeEvent } from './events.js'
 import { actionTimestamp, endOpenParticipants } from './flow-state.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTimeVerified } from './time-alerts.js'
 import type { TicketAccess } from './access.js'
 import {
   resolveValidationRole,
@@ -168,6 +169,7 @@ async function validateInTransaction(
   if (ticket.status !== 'attended') {
     throw conflict('El tiquet no está pendiente de validación')
   }
+  await assertTimeVerified(tx, ticketId)
 
   const onBehalf = assertRequesterProxy({
     actor,
