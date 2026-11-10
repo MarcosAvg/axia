@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-10
+
 ### Añadido
 
 - Se documentó la política de tiempo autoritativo de la instancia: hora en línea del servidor,
