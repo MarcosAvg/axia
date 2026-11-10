@@ -179,6 +179,7 @@ export interface TicketPauseStep {
   exitedAt: string | null
   note: string | null
   actorName: string | null
+  closedReasonName: string | null
 }
 
 export interface TicketPauseState {

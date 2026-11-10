@@ -13,6 +13,7 @@ export type PauseStepItem = {
   exitedAt: string | null
   note: string | null
   actorName: string | null
+  closedReasonName: string | null
 }
 
 export type PauseStateItem = {
@@ -32,6 +33,7 @@ type StepRow = {
   exited_at: Date | string | null
   note: string | null
   actor_name: string | null
+  closed_reason_name: string | null
 }
 
 type StateRow = {
@@ -52,11 +54,13 @@ export async function getPauseSteps(
   const result = await db.execute(sql`
     select
       ps.pause_id, ps.reason_id, r.name as reason_name,
-      ps.entered_at, ps.exited_at, ps.note, u.full_name as actor_name
+      ps.entered_at, ps.exited_at, ps.note, u.full_name as actor_name,
+      closed.name as closed_reason_name
     from public.ticket_pause_steps ps
     join public.reasons r on r.id = ps.reason_id
     left join public.users u on u.id = ps.actor_id
     join public.ticket_pauses p on p.id = ps.pause_id
+    left join public.reasons closed on closed.id = p.closed_reason_id
     where p.ticket_id = ${ticketId}
     order by ps.entered_at, ps.id
   `)
@@ -68,6 +72,7 @@ export async function getPauseSteps(
     exitedAt: row.exited_at === null ? null : iso(row.exited_at),
     note: row.note,
     actorName: row.actor_name,
+    closedReasonName: row.closed_reason_name,
   }))
 }
 
