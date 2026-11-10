@@ -161,10 +161,12 @@ export async function fetchTimeAlerts(
 
 type EvidenceResponse = {
   id: string
+  cycle: number
   type: TicketEvidenceItem['type']
   mimeType: string | null
   sizeBytes: number | null
   occurredAt: string
+  timeConfidence: TicketEvidenceItem['timeConfidence']
 }
 
 export async function fetchEvidence(
@@ -175,11 +177,13 @@ export async function fetchEvidence(
   )
   return body.items.map((item) => ({
     id: item.id,
+    cycle: item.cycle,
     type: item.type,
     storagePath: null,
     mimeType: item.mimeType,
     sizeBytes: item.sizeBytes,
     occurredAt: item.occurredAt,
+    timeConfidence: item.timeConfidence,
   }))
 }
 

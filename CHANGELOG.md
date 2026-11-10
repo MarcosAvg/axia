@@ -25,6 +25,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Reactivar un tiquet descartado restaura la pausa, la asignación del líder y su participación.
 - El tiempo entre un desenlace y una reclamación o reactivación se mide como fase `dormant`
   (“Fuera de atención”) y queda fuera de los indicadores de desempeño.
+- La evidencia conserva el ciclo en que se capturó aunque se suba tras una reapertura. La captura
+  sin conexión mantiene su hora provisional con confianza y la lista marca “Hora sin verificar”
+  cuando falta corregirla; las subidas en línea usan la hora del servidor.
 
 ## [0.20.0] - 2026-11-09
 

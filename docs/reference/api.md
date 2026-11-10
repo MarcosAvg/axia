@@ -132,6 +132,12 @@ final hasta corregir la hora. Una hora anterior al último evento, futura o dema
 rechaza con `time_out_of_order`, `time_future` o `time_too_old`; la acción queda en la cola para
 corregirla con `occurredLocal` y reintentarla.
 
+La reserva de evidencia acepta `cycle` para conservar el ciclo en que se capturó, aunque se suba
+después de una reapertura. Una captura sin conexión envía `clientCapturedAt` y `deviceNow`; la
+evidencia y su evento `evidence_added` comparten la hora y la confianza, y la lista expone
+`timeConfidence` para marcar las horas no verificadas. Una subida en línea no envía hora del
+dispositivo: se sella con la hora del servidor.
+
 Si el solicitante del alta tiene dependencia, `dependencyId` debe ser esa dependencia y la
 `locationId` debe estar vinculada a ella; si no coincide, la API responde 400. En `recapture` la
 misma regla se aplica a la dependencia del solicitante del tiquet cuando el cambio incluye

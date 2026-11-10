@@ -130,3 +130,49 @@ it('rechaza una evidencia anterior a la última acción', async () => {
     'time_out_of_order',
   )
 })
+
+it('corrige la hora de la evidencia y resuelve la alerta', async () => {
+  const ticketId = await assignedTicket()
+  const past = new Date(Date.now() - 4 * 60 * 60_000).toISOString()
+  await context.db.execute(sql`
+    update public.tickets set reported_at = ${past} where id = ${ticketId}
+  `)
+  await context.db.execute(sql`
+    update public.ticket_events set occurred_at = ${past} where ticket_id = ${ticketId}
+  `)
+  const capturedAt = new Date(Date.now() - 3 * 60 * 60_000).toISOString()
+  const created = await addEvidence(ticketId, {
+    clientCapturedAt: capturedAt,
+    deviceNow: new Date(Date.now() - 2 * 60 * 60_000).toISOString(),
+  })
+  expect(created.statusCode).toBe(201)
+  expect((await evidenceRow(ticketId)).time_confidence).toBe('unverified')
+
+  const event = await context.db.execute(sql`
+    select id from public.ticket_events
+    where ticket_id = ${ticketId} and type = 'evidence_added'
+    limit 1
+  `)
+  const eventId = (event.rows[0] as { id: string | number }).id
+  const proposed = new Date().toISOString()
+  const adjusted = await context.app.inject({
+    method: 'PATCH',
+    url: `/api/tickets/${ticketId}/events/${eventId}/time`,
+    headers: authHeaders(context.cookies.admin),
+    payload: { occurredAt: proposed },
+  })
+  expect(adjusted.statusCode).toBe(204)
+
+  const evidence = await evidenceRow(ticketId)
+  expect(new Date(evidence.occurred_at).toISOString()).toBe(proposed)
+  expect(evidence.time_confidence).toBe('corrected')
+
+  const alerts = await context.db.execute(sql`
+    select status, count(*)::int as count
+    from public.ticket_time_alerts
+    where ticket_id = ${ticketId}
+    group by status
+  `)
+  expect(alerts.rows).toContainEqual({ status: 'resolved', count: 1 })
+  expect(alerts.rows).not.toContainEqual({ status: 'open', count: 1 })
+})

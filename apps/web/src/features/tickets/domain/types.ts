@@ -202,11 +202,13 @@ export interface TicketParticipant {
 
 export interface TicketEvidenceItem {
   id: string
+  cycle: number
   type: EvidenceType
   storagePath: string | null
   mimeType: string | null
   sizeBytes: number | null
   occurredAt: string
+  timeConfidence: 'trusted' | 'unverified' | 'corrected'
 }
 
 export interface TicketAttachment {

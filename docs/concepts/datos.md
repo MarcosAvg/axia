@@ -41,7 +41,8 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
   (`recorded_at`), la hora reportada por el dispositivo (`client_reported_at`, solo auditoría), el
   desfase medido (`client_clock_skew_ms`) y la confianza (`time_confidence`: `trusted`,
   `unverified` o `corrected`). `time_spans` copia la confianza y el calendario laboral del evento.
-  `evidence` guarda `client_captured_at` y `time_confidence` con la misma semántica.
+  `evidence` guarda `client_captured_at` y `time_confidence` con la misma semántica; su `cycle`
+  es el ciclo de captura y no cambia al subirse después de una reapertura.
 - `ticket_time_alerts` registra las alertas de desfase de reloj. Una alerta abierta bloquea los
   desenlaces finales del tiquet (`validate`, `reject`, `cancel`, `mark_duplicate`, `resolve_claim`)
   hasta que una persona con permiso corrija la hora.

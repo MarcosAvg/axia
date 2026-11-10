@@ -24,20 +24,26 @@ export type EvidenceRow = {
 
 type EvidenceListRow = {
   id: string
+  cycle: number
   type: string
   mime_type: string | null
   size_bytes: string | null
   occurred_at: Date | string
+  client_captured_at: Date | string | null
+  time_confidence: string
   processing_state: string
   thumbnail_path: string | null
 }
 
 export type EvidenceItem = {
   id: string
+  cycle: number
   type: string
   mimeType: string | null
   sizeBytes: number | null
   occurredAt: string
+  clientCapturedAt: string | null
+  timeConfidence: string
   processingState: string
   hasThumbnail: boolean
 }
@@ -57,18 +63,24 @@ async function listEvidence(
   if (!(await findVisibleTicket(db, actor, ticketId))) return null
   const result = await db.execute(sql`
     select
-      id, type, mime_type, size_bytes, occurred_at,
-      processing_state, thumbnail_path
+      id, cycle, type, mime_type, size_bytes, occurred_at,
+      client_captured_at, time_confidence, processing_state, thumbnail_path
     from public.evidence
     where ticket_id = ${ticketId}
     order by occurred_at, id
   `)
   return (result.rows as EvidenceListRow[]).map((row) => ({
     id: row.id,
+    cycle: row.cycle,
     type: row.type,
     mimeType: row.mime_type,
     sizeBytes: row.size_bytes === null ? null : Number(row.size_bytes),
     occurredAt: new Date(row.occurred_at).toISOString(),
+    clientCapturedAt:
+      row.client_captured_at === null
+        ? null
+        : new Date(row.client_captured_at).toISOString(),
+    timeConfidence: row.time_confidence,
     processingState: row.processing_state,
     hasThumbnail: row.thumbnail_path !== null,
   }))
