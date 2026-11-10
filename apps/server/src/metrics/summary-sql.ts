@@ -10,7 +10,7 @@ const OPEN_STATUSES = sql`(
   'attended', 'under_claim'
 )`
 
-export type MetricsScope = 'flow' | 'workload' | 'all'
+type MetricsScope = 'flow' | 'workload' | 'all'
 
 /** Base visible y filtrada; cada llamador conserva el permiso de su endpoint. */
 type QueryOptions = { scope?: MetricsScope; ignorePeriod?: boolean }
