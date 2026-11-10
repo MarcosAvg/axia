@@ -43,6 +43,22 @@ async function ticketCycle(db: DbExecutor, ticketId: string): Promise<number> {
   return row.cycle
 }
 
+async function captureCycle(
+  db: DbExecutor,
+  ticketId: string,
+  requested: number | undefined,
+): Promise<number> {
+  const current = await ticketCycle(db, ticketId)
+  if (requested !== undefined && requested > current) {
+    throw new AppError(
+      400,
+      'invalid_cycle',
+      'El ciclo de captura no puede ser mayor al ciclo actual',
+    )
+  }
+  return requested ?? current
+}
+
 async function quotaUsed(db: Database, actorId: string): Promise<number> {
   const result = await db.execute(sql`
     select coalesce(sum(size_bytes), 0)::bigint as used
@@ -121,17 +137,18 @@ async function insertEvidence({
   db,
   actor,
   ticketId,
+  cycle,
   input,
   time,
 }: {
   db: Database
   actor: Actor
   ticketId: string
+  cycle: number
   input: CreateEvidenceInput
   time: EvidenceTime
 }): Promise<string> {
   return db.transaction(async (tx) => {
-    const cycle = await ticketCycle(tx, ticketId)
     const { technicianSubject, requesterSubject } = await evidenceSubjects(
       tx,
       ticketId,
@@ -223,6 +240,7 @@ export async function createEvidence(
     ticketId,
     input,
   })
+  const cycle = await captureCycle(db, ticketId, input.cycle)
   const existing = await existingEvidence(
     db,
     actor,
@@ -245,6 +263,7 @@ export async function createEvidence(
     db,
     actor,
     ticketId,
+    cycle,
     input,
     time,
   })

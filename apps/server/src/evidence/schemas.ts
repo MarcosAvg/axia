@@ -21,6 +21,7 @@ export const createEvidenceSchema = z.object({
   occurredAt: z.string().datetime().optional(),
   clientCapturedAt: z.string().datetime().optional(),
   deviceNow: z.string().datetime().optional(),
+  cycle: z.number().int().positive().optional(),
   subjectTechnicianId: z.string().uuid().optional(),
 })
 
