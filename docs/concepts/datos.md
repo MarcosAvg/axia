@@ -43,6 +43,9 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
   `unverified` o `corrected`). `time_spans` copia la confianza y el calendario laboral del evento.
   `evidence` guarda `client_captured_at` y `time_confidence` con la misma semántica; su `cycle`
   es el ciclo de captura y no cambia al subirse después de una reapertura.
+- Los eventos, tramos y participaciones copian `clock_class` y `work_calendar_id` al registrarse.
+  Reconstruir tramos usa esos valores, no el motivo ni el calendario actuales. Los filtros por
+  día y el volumen de métricas se calculan en la zona de la instancia.
 - `ticket_time_alerts` registra las alertas de desfase de reloj. Una alerta abierta bloquea los
   desenlaces finales del tiquet (`validate`, `reject`, `cancel`, `mark_duplicate`, `resolve_claim`)
   hasta que una persona con permiso corrija la hora.

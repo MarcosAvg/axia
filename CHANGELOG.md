@@ -22,6 +22,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   alta a otro año.
 - El subestado de salida de una pausa se guarda como motivo de cierre y ya no reetiqueta el
   intervalo anterior.
+- Los eventos, tramos y participaciones conservan el calendario y la clasificación de reloj con
+  los que se registraron; reconstruir el histórico ya no relee los catálogos actuales.
+- Los filtros por día y el volumen de métricas usan la zona horaria de la instancia. Los
+  calendarios laborales admiten turnos que cruzan medianoche y rechazan solapamientos.
 - Reactivar un tiquet descartado restaura la pausa, la asignación del líder y su participación.
 - El tiempo entre un desenlace y una reclamación o reactivación se mide como fase `dormant`
   (“Fuera de atención”) y queda fuera de los indicadores de desempeño.
