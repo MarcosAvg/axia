@@ -5,6 +5,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Se documentó la política de tiempo autoritativo de la instancia: hora en línea del servidor,
+  confianza de la hora offline, alertas por desfase, corrección manual obligatoria, rechazo de
+  valores negativos y fase `dormant`. Decisión en el
+  [ADR 0125](docs/decisions/0125-tiempo-autoritativo-instancia.md).
+
 ## [0.20.0] - 2026-11-09
 
 ### Añadido

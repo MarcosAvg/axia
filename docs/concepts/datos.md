@@ -13,7 +13,7 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 | Personas | `requesters`, `technicians`, `technician_categories`, `supervisor_scopes`, `supervisor_scope_buildings` |
 | Tiquets | `tickets`, `ticket_events`, `ticket_assignments`, `ticket_participants`, `ticket_offers` |
 | Flujo | `ticket_pauses`, `ticket_pause_steps`, `ticket_captures`, `ticket_claims`, `ticket_links`, `ticket_ratings`, `ticket_validations` |
-| Tiempo | `time_spans`, `work_calendars`, `work_calendar_intervals`, `work_calendar_holidays` |
+| Tiempo | `time_spans`, `ticket_time_alerts`, `work_calendars`, `work_calendar_intervals`, `work_calendar_holidays` |
 | Evidencia | `evidence` y el volumen privado de archivos |
 | Adjuntos | `ticket_attachments` (documentos obligatorios de ciertos problemas) |
 | Notificaciones | `notification_rules`, `notifications`, `notification_deliveries`, `push_subscriptions` |
@@ -37,10 +37,19 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - Cada cambio de estado genera un evento con actor, sujeto, motivo y hora. El sujeto puede ser
   usuario, técnico o solicitante; los tramos de `time_spans` guardan el mismo sujeto para atribuir
   el tiempo a la persona y no a quien ejecuta la acción.
+- `ticket_events` guarda la hora oficial (`occurred_at`), la hora de registro del servidor
+  (`recorded_at`), la hora reportada por el dispositivo (`client_reported_at`, solo auditoría), el
+  desfase medido (`client_clock_skew_ms`) y la confianza (`time_confidence`: `trusted`,
+  `unverified` o `corrected`). `time_spans` copia la confianza y el calendario laboral del evento.
+  `evidence` guarda `client_captured_at` y `time_confidence` con la misma semántica.
+- `ticket_time_alerts` registra las alertas de desfase de reloj. Una alerta abierta bloquea los
+  desenlaces finales del tiquet (`validate`, `reject`, `cancel`, `mark_duplicate`, `resolve_claim`)
+  hasta que una persona con permiso corrija la hora.
 - `time_spans` mantiene una sola fase primaria abierta por tiquet (`supervisor_response`,
   `pending_take`, `technician_assignment`, `wait_start`, `active_work`, `pause`, `validation` o
-  `claim`). `reassignment` y `duplicate_review` son anotaciones y no suman en la cobertura.
-  `v_ticket_phase_coverage` verifica que la suma de fases iguala el tiempo total.
+  `claim`). `reassignment`, `duplicate_review` y `dormant` son anotaciones: `dormant` cubre el
+  tiempo fuera de atención y no suma en los indicadores de desempeño. `v_ticket_phase_coverage`
+  verifica que la suma de fases primarias y `dormant` iguala el tiempo total.
 - `v_ticket_metrics_base` incluye todos los estados y expone `outcome` (`open`, `closed`,
   `rejected`, `cancelled`, `duplicate`). Los indicadores de desempeño eligen su denominador: SLA,
   resolución y primera resolución solo usan cerrados; volumen y esfuerzo incluyen los demás

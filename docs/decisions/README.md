@@ -32,6 +32,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0122](0122-adjuntos-obligatorios-por-problema.md) | Adjuntos obligatorios por problema |
 | [0123](0123-validacion-dos-lados-misma-cuenta.md) | Validación de ambos lados por la misma cuenta |
 | [0124](0124-retirada-referencias-externas.md) | Retiro de las referencias externas y la integración deshabilitada |
+| [0125](0125-tiempo-autoritativo-instancia.md) | Tiempo de la instancia, confianza offline y corrección manual |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

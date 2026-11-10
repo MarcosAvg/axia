@@ -15,7 +15,16 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 
 - **RN-27.** Una acción offline que llega tarde y es rechazada o entra en conflicto se registra,
   pero todavía no se garantiza el efecto requerido por la regla. El servidor sigue siendo la
-  autoridad y la interfaz informa el conflicto.
+  autoridad y la interfaz informa el conflicto. La política de **confianza de la hora offline**
+  (`trusted`, `unverified`, `corrected`), las alertas por desfase y el bloqueo de los desenlaces
+  finales hasta corregir están aprobadas en el
+  [ADR 0125](../decisions/0125-tiempo-autoritativo-instancia.md) y su implementación está en curso.
+- La hora de una acción offline se toma del dispositivo y es provisional. Si el cliente no envía
+  `deviceNow`, o el desfase supera `time_sync_tolerance`, el evento quedará `unverified` y el
+  tiquet no podrá cerrarse hasta corregir la hora manualmente. Una hora que produciría un valor
+  negativo, futuro o fuera de orden se rechaza.
+- Los eventos históricos no se reescriben. La auditoría de tiempos reporta el desfase y la
+  cobertura; solo se reparan las duraciones y los cierres que pueden demostrarse.
 - El alta de tiquets requiere conexión. La cola offline cubre acciones y evidencias, no el alta.
 - `auto_validation_days` se configura, pero no existe una tarea programada que valide
   automáticamente.
