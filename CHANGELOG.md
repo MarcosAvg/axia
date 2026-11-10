@@ -11,6 +11,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   confianza de la hora offline, alertas por desfase, corrección manual obligatoria, rechazo de
   valores negativos y fase `dormant`. Decisión en el
   [ADR 0125](docs/decisions/0125-tiempo-autoritativo-instancia.md).
+- Se añadió `pnpm db:audit:time`, un reporte de solo lectura sobre cobertura de fases, duraciones
+  negativas, desfase entre hora de acción y registro, pausas y alertas de tiempo.
 
 ## [0.20.0] - 2026-11-09
 
