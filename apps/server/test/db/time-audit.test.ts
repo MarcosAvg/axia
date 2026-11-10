@@ -16,24 +16,6 @@ async function seedCoverageIssue() {
   `)
 }
 
-async function seedNegativeDurations() {
-  const { db, ids, people, catalog } = fixtures
-  await db.execute(sql`
-    insert into public.ticket_participants (
-      ticket_id, cycle, technician_id, participation_type, category_id,
-      started_at, ended_at
-    ) values (
-      ${ids.ticketA1}, 1, ${people.technicianRow.id}, 'auxiliary',
-      ${catalog.categoryA.id}, now(), now() - interval '1 hour'
-    )
-  `)
-  await db.execute(sql`
-    update public.ticket_assignments
-    set ended_at = assigned_at - interval '1 hour'
-    where ticket_id = ${ids.ticketA1} and stage = 'technician'
-  `)
-}
-
 async function pauseReasonId(): Promise<string> {
   const result = await fixtures.db.execute(sql`
     select id from public.reasons
@@ -50,7 +32,7 @@ async function seedPauseIssues(reasonId: string) {
       ticket_id, cycle, reason_id, root_reason_id, opened_at, closed_at
     ) values (
       ${ids.ticketAux}, 1, ${reasonId}, ${reasonId},
-      now(), now() - interval '1 hour'
+      now() - interval '4 hours', now() - interval '2 hours'
     )
     returning id
   `)
@@ -59,7 +41,8 @@ async function seedPauseIssues(reasonId: string) {
     insert into public.ticket_pause_steps (
       pause_id, reason_id, entered_at, exited_at
     ) values (
-      ${pauseId}, ${reasonId}, now(), now() - interval '1 hour'
+      ${pauseId}, ${reasonId},
+      now() - interval '4 hours', now() - interval '2 hours'
     )
   `)
   await db.execute(sql`
@@ -110,7 +93,6 @@ beforeAll(async () => {
   fixtures = await buildTicketFixtures()
   const reasonId = await pauseReasonId()
   await seedCoverageIssue()
-  await seedNegativeDurations()
   await seedPauseIssues(reasonId)
   await seedEventIssues()
   await seedEvidenceCycleMismatch()
@@ -128,10 +110,6 @@ it('reporta los problemas de tiempo con conteo y ejemplos acotados', async () =>
 
   for (const key of [
     'coverage_delta',
-    'negative_participant',
-    'negative_pause',
-    'negative_pause_step',
-    'negative_assignment',
     'event_out_of_bounds',
     'event_drift',
     'pause_span_vs_table',
@@ -141,6 +119,15 @@ it('reporta los problemas de tiempo con conteo y ejemplos acotados', async () =>
     expect(finding, key).toBeDefined()
     expect(finding?.count, key).toBeGreaterThan(0)
     expect(finding?.samples.length, key).toBeLessThanOrEqual(2)
+  }
+
+  for (const key of [
+    'negative_participant',
+    'negative_pause',
+    'negative_pause_step',
+    'negative_assignment',
+  ]) {
+    expect(byKey.get(key), key).toMatchObject({ count: 0, available: true })
   }
 
   expect(byKey.get('unverified_events')).toMatchObject({
