@@ -136,7 +136,8 @@ export async function writeEvent(
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
       subject_requester_id, reason_id, payload, client_request_id, occurred_at,
-      time_confidence, client_reported_at, client_clock_skew_ms
+      time_confidence, client_reported_at, client_clock_skew_ms, clock_class,
+      work_calendar_id
     )
     select
       t.id, t.cycle, ${event.type}, ${event.actorId}, ${event.subjectUserId},
@@ -144,7 +145,11 @@ export async function writeEvent(
       ${event.reasonId}, ${JSON.stringify(event.payload)}::jsonb,
       ${event.clientRequestId}, coalesce(${event.occurredAt}::timestamptz, now()),
       ${event.timeConfidence}::public.time_confidence,
-      ${event.clientReportedAt}::timestamptz, ${event.clientClockSkewMs}
+      ${event.clientReportedAt}::timestamptz, ${event.clientClockSkewMs},
+      coalesce(
+        (select r.clock_class from public.reasons r where r.id = ${event.reasonId}),
+        'counted'
+      ), public.ticket_calendar(t.id)
     from public.tickets t
     where t.id = ${event.ticketId}
     returning id, occurred_at

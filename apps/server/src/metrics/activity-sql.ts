@@ -11,12 +11,12 @@ export const activityQueries = {
           count(*) filter (where p.participation_type = 'auxiliary'),
           sum(coalesce(p.ended_at, now()) - p.started_at),
           sum(public.work_calendar_overlap(
-            public.ticket_calendar(p.ticket_id),
+            p.work_calendar_id,
             p.started_at,
             coalesce(p.ended_at, now()))),
           sum(coalesce(p.ended_at, now()) - p.started_at)
             - sum(public.work_calendar_overlap(
-                public.ticket_calendar(p.ticket_id),
+                p.work_calendar_id,
                 p.started_at,
                 coalesce(p.ended_at, now()))),
           (select count(*)
@@ -111,7 +111,7 @@ export const activityQueries = {
           count(*),
           sum(coalesce(p.closed_at, now()) - p.opened_at),
           sum(public.work_calendar_overlap(
-            public.ticket_calendar(p.ticket_id),
+            p.work_calendar_id,
             p.opened_at,
             coalesce(p.closed_at, now())))
         from public.ticket_pauses p
