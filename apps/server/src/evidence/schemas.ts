@@ -19,6 +19,8 @@ export const createEvidenceSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
     .optional(),
   occurredAt: z.string().datetime().optional(),
+  clientCapturedAt: z.string().datetime().optional(),
+  deviceNow: z.string().datetime().optional(),
   subjectTechnicianId: z.string().uuid().optional(),
 })
 

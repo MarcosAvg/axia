@@ -1,17 +1,15 @@
 import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
-import { can as hasPermission } from '../auth/authorization.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
-import { parseActionTime } from '../tickets/action-time.js'
 import type { DbExecutor } from '../tickets/db.js'
 import { writeEvent } from '../tickets/events.js'
-import { parseInstanceWallClock } from '../tickets/instance-time.js'
 import { assertTechnicianAction } from '../tickets/proxy.js'
 import { findVisibleTicket } from '../tickets/repository.js'
 import { canAttachEvidence } from './access.js'
+import { evidenceTime, type EvidenceTime } from './evidence-time.js'
 import type { CreateEvidenceInput } from './schemas.js'
 
 export type CreateContext = {
@@ -97,39 +95,60 @@ async function ensureQuota(
   return used
 }
 
+async function evidenceSubjects(
+  tx: DbExecutor,
+  ticketId: string,
+  actor: Actor,
+  input: CreateEvidenceInput,
+): Promise<{
+  technicianSubject: string | null
+  requesterSubject: string | null
+}> {
+  const ticket = await tx.execute(sql`
+    select requester_id from public.tickets where id = ${ticketId}
+  `)
+  const requesterId = (ticket.rows[0] as { requester_id: string }).requester_id
+  return {
+    technicianSubject: ['before', 'during', 'after'].includes(input.type)
+      ? (input.subjectTechnicianId ?? actor.technicianId)
+      : null,
+    requesterSubject:
+      input.type === 'claim' || input.type === 'request' ? requesterId : null,
+  }
+}
+
 async function insertEvidence({
   db,
   actor,
   ticketId,
   input,
-  occurredAt,
+  time,
 }: {
   db: Database
   actor: Actor
   ticketId: string
   input: CreateEvidenceInput
-  occurredAt?: string
+  time: EvidenceTime
 }): Promise<string> {
   return db.transaction(async (tx) => {
     const cycle = await ticketCycle(tx, ticketId)
-    const ticket = await tx.execute(sql`
-      select requester_id from public.tickets where id = ${ticketId}
-    `)
-    const requesterId = (ticket.rows[0] as { requester_id: string })
-      .requester_id
-    const technicianSubject = ['before', 'during', 'after'].includes(input.type)
-      ? (input.subjectTechnicianId ?? actor.technicianId)
-      : null
-    const requesterSubject =
-      input.type === 'claim' || input.type === 'request' ? requesterId : null
+    const { technicianSubject, requesterSubject } = await evidenceSubjects(
+      tx,
+      ticketId,
+      actor,
+      input,
+    )
     const inserted = await tx.execute(sql`
       insert into public.evidence (
         ticket_id, cycle, type, captured_by_technician_id,
-        captured_by_user_id, uploaded_by, client_request_id, mime_type, occurred_at
+        captured_by_user_id, uploaded_by, client_request_id, mime_type,
+        occurred_at, client_captured_at, time_confidence
       ) values (
         ${ticketId}, ${cycle}, ${input.type}, ${technicianSubject},
         ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
-        coalesce(${occurredAt ?? null}::timestamptz, now())
+        coalesce(${time.occurredAt ?? null}::timestamptz, now()),
+        ${time.clientCapturedAt ?? null}::timestamptz,
+        ${time.timeConfidence}::public.time_confidence
       )
       returning id
     `)
@@ -142,30 +161,18 @@ async function insertEvidence({
       subjectTechnicianId: technicianSubject,
       subjectRequesterId: requesterSubject,
       payload: { evidenceId, type: input.type },
-      occurredAt,
+      occurredAt: time.occurredAt,
+      timeConfidence: time.timeConfidence,
+      clientReportedAt: time.clientReportedAt,
+      clientClockSkewMs: time.clientClockSkewMs,
+      timeAlertKind: time.timeAlertKind,
+      suggestedOccurredAt: time.suggestedOccurredAt,
     })
     await tx.execute(sql`
       update public.evidence set event_id = ${event.id} where id = ${evidenceId}
     `)
     return evidenceId
   })
-}
-
-async function manualEvidenceTime(
-  db: Database,
-  actor: Actor,
-  input: CreateEvidenceInput,
-): Promise<string | undefined> {
-  if (input.occurredLocal) {
-    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
-    return (await parseInstanceWallClock(db, input.occurredLocal)).toISOString()
-  }
-  if (input.occurredAt) {
-    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
-    parseActionTime(input.occurredAt)
-    return new Date(input.occurredAt).toISOString()
-  }
-  return undefined
 }
 
 async function assertEvidenceSubject(
@@ -209,7 +216,13 @@ export async function createEvidence(
     throw new AppError(404, 'not_found', 'Tiquet no encontrado')
   }
   await assertEvidenceSubject(db, actor, access, input)
-  const occurredAt = await manualEvidenceTime(db, actor, input)
+  const time = await evidenceTime({
+    db,
+    config,
+    actor,
+    ticketId,
+    input,
+  })
   const existing = await existingEvidence(
     db,
     actor,
@@ -233,7 +246,7 @@ export async function createEvidence(
     actor,
     ticketId,
     input,
-    occurredAt,
+    time,
   })
   return {
     evidenceId,

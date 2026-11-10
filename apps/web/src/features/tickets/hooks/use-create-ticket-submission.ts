@@ -47,7 +47,7 @@ async function uploadRequestPhoto(
       cycle: 1,
       type: 'request',
       file: photo,
-      occurredLocal: input.occurredLocal,
+      occurredLocal: input.occurredLocal || undefined,
     })
   } catch (error) {
     console.warn('No se pudo subir la foto de la solicitud', error)
