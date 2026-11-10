@@ -6,7 +6,7 @@ import { can } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from './db.js'
-import { withOccurredAt } from './event-context.js'
+import { withActionContext } from './event-context.js'
 import { writeEvent } from './events.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
@@ -36,6 +36,8 @@ type ActionTimeInput = {
   ticketId: string
   occurredAt: string
   subjectTechnicianId?: string | null
+  clientReportedAt?: string | null
+  clientClockSkewMs?: number | null
 }
 
 type AdjustInput = {
@@ -141,9 +143,27 @@ export async function withActionTime<T>(
   input: ActionTimeInput,
   callback: () => Promise<T>,
 ): Promise<T> {
-  if (!input.occurredAt) return callback()
+  if (!input.occurredAt) {
+    return withActionContext(
+      {
+        occurredAt: null,
+        clientReportedAt: input.clientReportedAt ?? null,
+        timeConfidence: 'trusted',
+        clientClockSkewMs: input.clientClockSkewMs ?? null,
+      },
+      callback,
+    )
+  }
   const proposed = await validateManualActionTime(input)
-  return withOccurredAt(proposed.toISOString(), callback)
+  return withActionContext(
+    {
+      occurredAt: proposed.toISOString(),
+      clientReportedAt: input.clientReportedAt ?? null,
+      timeConfidence: 'corrected',
+      clientClockSkewMs: input.clientClockSkewMs ?? null,
+    },
+    callback,
+  )
 }
 
 /** Valida una hora explícita al crear un tiquet. */

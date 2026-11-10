@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 
 import type { DbExecutor } from './db.js'
-import { currentOccurredAt } from './event-context.js'
+import { currentActionContext, type TimeConfidence } from './event-context.js'
 
 export type HandledEvent = {
   ticketId: string
@@ -18,7 +18,10 @@ export type EventInput = {
   subjectUserId?: string | null
   subjectTechnicianId?: string | null
   subjectRequesterId?: string | null
-  occurredAt?: string
+  occurredAt?: string | null
+  clientReportedAt?: string | null
+  timeConfidence?: TimeConfidence
+  clientClockSkewMs?: number | null
 }
 
 export async function findHandledEvent(
@@ -35,9 +38,15 @@ export async function findHandledEvent(
   return row ? { ticketId: row.ticket_id, type: row.type } : null
 }
 
-function normalizedEvent(input: EventInput) {
+function firstDefined<T>(...values: Array<T | null | undefined>): T | null {
+  for (const value of values) {
+    if (value !== undefined && value !== null) return value
+  }
+  return null
+}
+
+function subjectFields(input: EventInput) {
   return {
-    ...input,
     actorId: input.actorId ?? null,
     clientRequestId: input.clientRequestId ?? null,
     payload: input.payload ?? {},
@@ -45,9 +54,28 @@ function normalizedEvent(input: EventInput) {
     subjectUserId: input.subjectUserId ?? null,
     subjectTechnicianId: input.subjectTechnicianId ?? null,
     subjectRequesterId: input.subjectRequesterId ?? null,
-    occurredAt:
-      input.occurredAt ?? currentOccurredAt() ?? new Date().toISOString(),
   }
+}
+
+function timeFields(input: EventInput) {
+  const context = currentActionContext()
+  return {
+    occurredAt: firstDefined(input.occurredAt, context?.occurredAt),
+    clientReportedAt: firstDefined(
+      input.clientReportedAt,
+      context?.clientReportedAt,
+    ),
+    timeConfidence:
+      firstDefined(input.timeConfidence, context?.timeConfidence) ?? 'trusted',
+    clientClockSkewMs: firstDefined(
+      input.clientClockSkewMs,
+      context?.clientClockSkewMs,
+    ),
+  }
+}
+
+function normalizedEvent(input: EventInput) {
+  return { ...input, ...subjectFields(input), ...timeFields(input) }
 }
 
 export async function writeEvent(
@@ -58,13 +86,16 @@ export async function writeEvent(
   const result = await executor.execute(sql`
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
-      subject_requester_id, reason_id, payload, client_request_id, occurred_at
+      subject_requester_id, reason_id, payload, client_request_id, occurred_at,
+      time_confidence, client_reported_at, client_clock_skew_ms
     )
     select
       t.id, t.cycle, ${event.type}, ${event.actorId}, ${event.subjectUserId},
       ${event.subjectTechnicianId}, ${event.subjectRequesterId},
       ${event.reasonId}, ${JSON.stringify(event.payload)}::jsonb,
-      ${event.clientRequestId}, ${event.occurredAt}::timestamptz
+      ${event.clientRequestId}, coalesce(${event.occurredAt}::timestamptz, now()),
+      ${event.timeConfidence}::public.time_confidence,
+      ${event.clientReportedAt}::timestamptz, ${event.clientClockSkewMs}
     from public.tickets t
     where t.id = ${event.ticketId}
     returning id
