@@ -239,7 +239,12 @@ const LINKS: Record<string, LinkFn[]> = {
   rejected: [participantsEnded, assignmentsEnded],
   cancelled: [participantsEnded, assignmentsEnded],
   duplicate_marked: [participantsEnded, assignmentsEnded],
-  reactivated: [participantsStarted, assignmentsAssigned],
+  reactivated: [
+    participantsStarted,
+    assignmentsAssigned,
+    pausesOpened,
+    stepsEntered,
+  ],
   reassigned_supervisor: [
     assignmentsAssigned,
     assignmentsEnded,

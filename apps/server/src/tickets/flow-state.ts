@@ -145,6 +145,58 @@ export async function reopenLeaderAssignment(
   `)
 }
 
+/** ¿El tiquet tuvo alguna pausa registrada antes del descarte? */
+export async function hasPauseHistory(
+  tx: DbExecutor,
+  ticketId: string,
+): Promise<boolean> {
+  const result = await tx.execute(sql`
+    select 1 from public.ticket_pauses
+    where ticket_id = ${ticketId}
+    limit 1
+  `)
+  return Boolean(result.rows[0])
+}
+
+/**
+ * Reabre la pausa de un tiquet reactivado reutilizando el último motivo
+ * conocido. No inventa un motivo si no hay historial.
+ */
+export async function reopenPauseForReactivation(
+  tx: DbExecutor,
+  ticketId: string,
+  actorId: string | null,
+): Promise<void> {
+  const last = await tx.execute(sql`
+    select p.reason_id, p.root_reason_id, t.cycle
+    from public.ticket_pauses p
+    join public.tickets t on t.id = p.ticket_id
+    where p.ticket_id = ${ticketId}
+    order by p.opened_at desc
+    limit 1
+  `)
+  const row = last.rows[0] as
+    { reason_id: string; root_reason_id: string; cycle: number } | undefined
+  if (!row) return
+
+  const inserted = await tx.execute(sql`
+    insert into public.ticket_pauses (
+      ticket_id, cycle, reason_id, opened_by, recorded_by, root_reason_id,
+      opened_at
+    ) values (
+      ${ticketId}, ${row.cycle}, ${row.reason_id}, ${actorId}, ${actorId},
+      ${row.root_reason_id}, ${actionTimestamp()}
+    )
+    returning id
+  `)
+  const pauseId = (inserted.rows[0] as { id: string }).id
+  await tx.execute(sql`
+    insert into public.ticket_pause_steps (
+      pause_id, reason_id, actor_id, entered_at
+    ) values (${pauseId}, ${row.reason_id}, ${actorId}, ${actionTimestamp()})
+  `)
+}
+
 /**
  * Reabre la participación del técnico asignado cuando un ciclo nuevo vuelve a
  * poner el tiquet en trabajo (reclamación procedente o reactivación).
