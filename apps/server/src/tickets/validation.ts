@@ -10,7 +10,11 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { actionTimestamp, endOpenParticipants } from './flow-state.js'
+import {
+  actionTimestamp,
+  endOpenParticipants,
+  endTechnicianAssignments,
+} from './flow-state.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { assertTimeVerified } from './time-alerts.js'
@@ -124,6 +128,7 @@ async function closeIfDone(
     where id = ${ticketId}
   `)
   await endOpenParticipants(tx, ticketId)
+  await endTechnicianAssignments(tx, ticketId)
   return true
 }
 

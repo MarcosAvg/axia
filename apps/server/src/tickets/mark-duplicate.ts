@@ -19,6 +19,7 @@ import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
   endOpenParticipants,
+  endTechnicianAssignments,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
@@ -135,6 +136,7 @@ async function applyDuplicate(
   await linkCandidate(tx, input.ticketId, actor.id, input.originalId)
   await dismissReciprocalCandidates(tx, input.ticketId, actor.id)
   await endOpenParticipants(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
     tx,
     input.ticketId,

@@ -18,6 +18,7 @@ import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
   endOpenParticipants,
+  endTechnicianAssignments,
   reopenLeaderParticipation,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
@@ -59,6 +60,7 @@ async function applyDiscard(
     where id = ${input.ticketId}
   `)
   await endOpenParticipants(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
     tx,
     input.ticketId,

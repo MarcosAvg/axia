@@ -112,6 +112,7 @@ async function resolveUpheld(
     set status = 'assigned', cycle = ${claim.cycle + 1}, closed_at = null
     where id = ${input.ticketId}
   `)
+  await endOpenParticipants(tx, input.ticketId)
   await reopenLeaderParticipation(tx, input.ticketId, actor.id)
   await writeEvent(tx, {
     ticketId: input.ticketId,
@@ -169,6 +170,9 @@ async function resolveWithNewTicket(
     where id = ${input.ticketId}
   `)
   const derivedTicketId = await copyDerivedTicket(tx, actor, ticket)
+  if (claim.prior_status === 'closed') {
+    await endTechnicianAssignments(tx, input.ticketId)
+  }
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'claim_resolved',
