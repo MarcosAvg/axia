@@ -36,7 +36,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_tables where schemaname = 'public'",
       ),
-    ).toBe(50)
+    ).toBe(51)
     expect(
       await scalar(
         owner,
@@ -48,7 +48,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'",
       ),
-    ).toBe(31)
+    ).toBe(32)
     expect(
       await scalar(
         owner,
@@ -108,7 +108,7 @@ describe('base schema relationships', () => {
         owner,
         "select count(*)::text as value from pg_constraint where contype = 'f' and confrelid = 'public.users'::regclass",
       ),
-    ).toBe(32)
+    ).toBe(33)
     expect(
       await scalar(
         owner,
@@ -133,7 +133,7 @@ describe('base schema relationships', () => {
         owner,
         "select count(*)::text as value from pg_type t join pg_namespace n on n.oid = t.typnamespace where n.nspname = 'public' and t.typtype = 'e'",
       ),
-    ).toBe(17)
+    ).toBe(18)
   })
 })
 
@@ -286,7 +286,7 @@ describe('migration runner', () => {
     const result = await owner.query(
       'select checksum from axia_migrations.schema_migrations',
     )
-    expect(result.rows).toHaveLength(34)
+    expect(result.rows).toHaveLength(38)
     expect(
       result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
     ).toBe(true)
@@ -299,7 +299,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(34)
+    ).toBe(38)
   })
 
   it('enforces username normalization and uniqueness', async () => {

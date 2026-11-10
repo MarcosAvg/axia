@@ -145,11 +145,11 @@ it('reporta los problemas de tiempo con conteo y ejemplos acotados', async () =>
 
   expect(byKey.get('unverified_events')).toMatchObject({
     count: 0,
-    available: false,
+    available: true,
   })
   expect(byKey.get('open_time_alerts')).toMatchObject({
     count: 0,
-    available: false,
+    available: true,
   })
 })
 
