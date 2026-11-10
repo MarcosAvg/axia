@@ -30,6 +30,8 @@ type AggregateRow = {
   cancelled: number
   duplicate: number
   avg_total: number
+  avg_total_all: number
+  avg_total_closed: number
   avg_resolution: number
   avg_net: number
   avg_active: number
@@ -46,6 +48,8 @@ type AggregateRow = {
   avg_total_labor: number
   avg_net_labor: number
   sum_total: number
+  sum_total_all: number
+  sum_total_closed: number
   sum_resolution: number
   sum_net: number
   sum_active: number
@@ -81,6 +85,8 @@ const EMPTY_AGGREGATE: AggregateRow = {
   cancelled: 0,
   duplicate: 0,
   avg_total: 0,
+  avg_total_all: 0,
+  avg_total_closed: 0,
   avg_resolution: 0,
   avg_net: 0,
   avg_active: 0,
@@ -97,6 +103,8 @@ const EMPTY_AGGREGATE: AggregateRow = {
   avg_total_labor: 0,
   avg_net_labor: 0,
   sum_total: 0,
+  sum_total_all: 0,
+  sum_total_closed: 0,
   sum_resolution: 0,
   sum_net: 0,
   sum_active: 0,
@@ -141,6 +149,8 @@ function toSummary(row: AggregateRow | undefined) {
     reopenRate: rate(Number(data.reopened), Number(data.closed_or_reopened)),
     firstTimeFixRate: rate(Number(data.first_fix), Number(data.closed)),
     avgTotal: Number(data.avg_total),
+    avgTotalAll: Number(data.avg_total_all),
+    avgTotalClosed: Number(data.avg_total_closed),
     avgResolution: Number(data.avg_resolution),
     avgNet: Number(data.avg_net),
     avgActive: Number(data.avg_active),
@@ -157,6 +167,8 @@ function toSummary(row: AggregateRow | undefined) {
     avgTotalLabor: Number(data.avg_total_labor),
     avgNetLabor: Number(data.avg_net_labor),
     sumTotal: Number(data.sum_total),
+    sumTotalAll: Number(data.sum_total_all),
+    sumTotalClosed: Number(data.sum_total_closed),
     sumResolution: Number(data.sum_resolution),
     sumNet: Number(data.sum_net),
     sumActive: Number(data.sum_active),
@@ -187,6 +199,8 @@ function toGroup(row: AggregateRow) {
       open: Number(row.open),
       avgActive: Number(row.avg_active),
       avgTotal: Number(row.avg_total),
+      avgTotalAll: Number(row.avg_total_all),
+      avgTotalClosed: Number(row.avg_total_closed),
       avgActiveExtra: Number(row.avg_active_extra),
       avgResponse: Number(row.avg_response),
       avgAssignment: Number(row.avg_assignment),
@@ -200,6 +214,8 @@ function toGroup(row: AggregateRow) {
       avgNetLabor: Number(row.avg_net_labor),
       sumActive: Number(row.sum_active),
       sumTotal: Number(row.sum_total),
+      sumTotalAll: Number(row.sum_total_all),
+      sumTotalClosed: Number(row.sum_total_closed),
       sumActiveExtra: Number(row.sum_active_extra),
       sumResponse: Number(row.sum_response),
       sumAssignment: Number(row.sum_assignment),
@@ -265,7 +281,10 @@ export async function metricsSummary(
   compact = false,
 ) {
   const result = await db.execute(sql`
-    with base as materialized (${metricsBase(actor, filters, 'ticket.view', 'all')}),
+    with base as materialized (${metricsBase(actor, filters, 'ticket.view', { scope: 'all' })}),
+    aging_base as materialized (
+      ${metricsBase(actor, filters, 'ticket.view', { scope: 'all', ignorePeriod: true })}
+    ),
     grouped as (${metricsGroups(compact)}),
     volume as (${metricsVolume(actor.timezone)}),
     aging as (${metricsAging()}),

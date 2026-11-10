@@ -53,7 +53,8 @@ export const metricsMessages = {
     firstFixShort: '1ª resolución',
     slaShort: 'SLA',
     activeExtra: 'Fuera de horario',
-    total: 'Tiempo total',
+    total: 'Tiempo total (todos)',
+    resolution: 'Resolución (cerrados)',
     net: 'Tiempo neto',
     reassignment: 'Reasignación',
     recapture: 'Recaptura',
@@ -147,11 +148,13 @@ export const metricsMessages = {
     tickets: 'Número de tiquets con los filtros y el periodo activos.',
     open: 'Tiquets del periodo que siguen abiertos: registrados, asignados, en proceso, pausados, atendidos o en reclamación.',
     active:
-      'Trabajo activo por tiquet: del inicio a la atención, sin contar pausas.',
+      'Trabajo activo por tiquet: del inicio a la atención, sin contar pausas. Excluye duplicados y tiempo no verificado.',
     activeExtra:
       'Trabajo fuera del horario laboral (noches, fines de semana o festivos).',
     total:
-      'Tiempo total por tiquet: del registro al cierre, incluyendo pausas y esperas.',
+      'Tiempo total por tiquet de todos los desenlaces: del registro al cierre, incluyendo pausas y esperas.',
+    resolution:
+      'Tiempo hasta la resolución de los tiquets cerrados; excluye duplicados y tiempo no verificado.',
     net: 'Tiempo neto: el total menos los tramos clasificados como no contables.',
     response: 'Del registro del tiquet a que el supervisor lo toma.',
     assignment: 'De la toma del supervisor a la asignación del técnico.',
@@ -159,11 +162,9 @@ export const metricsMessages = {
     reassignment:
       'Porcentaje de tiquets en los que cambió el equipo o el supervisor.',
     recapture: 'Porcentaje de tiquets con al menos una recaptura registrada.',
-    reopen:
-      'Porcentaje de tiquets reabiertos (por reclamación procedente o reactivación).',
+    reopen: 'Porcentaje de tiquets reabiertos por una reclamación procedente.',
     firstFix: 'Porcentaje de tiquets cerrados sin reapertura posterior.',
-    satisfaction:
-      'Promedio de las calificaciones del solicitante (escala 1 a 5).',
+    satisfaction: 'Promedio de calificaciones del solicitante (1 a 5).',
     sla: 'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     reassignedTechnician:
       'Porcentaje de tiquets en los que el técnico cambió después de la asignación.',
@@ -180,7 +181,8 @@ export const metricsMessages = {
     pauses: 'Número de pausas por motivo en el periodo.',
     routing:
       'Ofertas a supervisores: pendientes, tomadas y tiempo medio hasta la toma.',
-    aging: 'Tiquets abiertos más antiguos, ordenados por tiempo transcurrido.',
+    aging:
+      'Tiquets abiertos más antiguos, ordenados por tiempo transcurrido; no se limita al periodo.',
     sla: 'Cumplimiento del tiempo objetivo por prioridad.',
     duplicatesByDimension:
       'Tasa de duplicados por agrupación: duplicados entre los tiquets.',

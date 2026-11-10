@@ -20,7 +20,8 @@ const k = metricsMessages.kpi
 
 const MEASURES = [
   { key: 'avgActive', label: k.active },
-  { key: 'avgTotal', label: k.total },
+  { key: 'avgTotalAll', label: k.total },
+  { key: 'avgTotalClosed', label: k.resolution },
   { key: 'avgResponse', label: t.phases.response },
   { key: 'avgAssignment', label: t.phases.assignment },
   { key: 'avgPendingTake', label: t.phases.pending_take },
@@ -36,9 +37,16 @@ function measureValue(
   measure: Measure,
   aggregation: 'average' | 'total',
 ) {
-  return measure === 'avgActive'
-    ? timeValue(aggregation, row.avgActive, row.sumActive)
-    : Number(row[measure])
+  if (measure === 'avgActive') {
+    return timeValue(aggregation, row.avgActive, row.sumActive)
+  }
+  if (measure === 'avgTotalAll') {
+    return timeValue(aggregation, row.avgTotalAll, row.sumTotalAll)
+  }
+  if (measure === 'avgTotalClosed') {
+    return timeValue(aggregation, row.avgTotalClosed, row.sumTotalClosed)
+  }
+  return Number(row[measure])
 }
 
 function timeColumns({

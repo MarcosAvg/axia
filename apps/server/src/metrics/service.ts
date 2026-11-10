@@ -102,7 +102,7 @@ async function scopedRows(
 ): Promise<MetricsRow[]> {
   const result = await db.execute(sql`
     with visible_tickets as materialized (
-      ${visibleTickets(actor, filters, 'metrics.view', METRIC_SCOPES[name] ?? 'flow')}
+      ${visibleTickets(actor, filters, 'metrics.view', { scope: METRIC_SCOPES[name] ?? 'flow' })}
     )
     ${queries[name]}
   `)
