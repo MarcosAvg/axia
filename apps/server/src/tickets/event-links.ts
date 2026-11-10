@@ -235,11 +235,11 @@ const LINKS: Record<string, LinkFn[]> = {
   validated: [validations, participantsEnded, assignmentsEnded],
   claim_opened: [claimsOpened, participantsEnded, pausesClosed, stepsExited],
   claim_resolved: [claimsResolved, participantsEnded, assignmentsEnded],
-  reopened: [claimsResolved, participantsStarted],
+  reopened: [claimsResolved, participantsStarted, assignmentsAssigned],
   rejected: [participantsEnded, assignmentsEnded],
   cancelled: [participantsEnded, assignmentsEnded],
   duplicate_marked: [participantsEnded, assignmentsEnded],
-  reactivated: [participantsStarted],
+  reactivated: [participantsStarted, assignmentsAssigned],
   reassigned_supervisor: [
     assignmentsAssigned,
     assignmentsEnded,

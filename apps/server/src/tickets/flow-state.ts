@@ -104,6 +104,48 @@ export async function isDesignatedForCategory(
 }
 
 /**
+ * Reabre la asignación del líder para un ciclo nuevo. Si la asignación sigue
+ * abierta no hace nada; si el cierre la terminó, crea una nueva para el mismo
+ * técnico con la hora de la acción.
+ */
+export async function reopenLeaderAssignment(
+  tx: DbExecutor,
+  ticketId: string,
+  actorId: string | null,
+): Promise<void> {
+  const open = await tx.execute(sql`
+    select 1 from public.ticket_assignments
+    where ticket_id = ${ticketId}
+      and stage = 'technician'
+      and ended_at is null
+    limit 1
+  `)
+  if (open.rows[0]) return
+
+  const last = await tx.execute(sql`
+    select a.assignee_technician_id, t.cycle
+    from public.ticket_assignments a
+    join public.tickets t on t.id = a.ticket_id
+    where a.ticket_id = ${ticketId}
+      and a.stage = 'technician'
+    order by a.assigned_at desc
+    limit 1
+  `)
+  const row = last.rows[0] as
+    { assignee_technician_id: string; cycle: number } | undefined
+  if (!row) return
+
+  await tx.execute(sql`
+    insert into public.ticket_assignments (
+      ticket_id, cycle, stage, assignee_technician_id, assigned_by, assigned_at
+    ) values (
+      ${ticketId}, ${row.cycle}, 'technician', ${row.assignee_technician_id},
+      ${actorId}, ${actionTimestamp()}
+    )
+  `)
+}
+
+/**
  * Reabre la participación del técnico asignado cuando un ciclo nuevo vuelve a
  * poner el tiquet en trabajo (reclamación procedente o reactivación).
  */
