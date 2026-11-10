@@ -241,6 +241,7 @@ async function applyAdjustment(
       where id = ${ticketId}
     `)
   }
+  await tx.execute(sql`select public.recompute_ticket_closed_at(${ticketId})`)
   await writeEvent(tx, {
     ticketId,
     type: 'event_time_corrected',
