@@ -100,6 +100,16 @@ it('mueve el cierre y el tramo al ajustar el evento terminal', async () => {
       (span.rows[0] as { ended_at: Date | string }).ended_at,
     ).toISOString(),
   ).toBe(proposed)
+
+  const validation = await context.db.execute(sql`
+    select validated_at from public.ticket_validations
+    where ticket_id = ${ticketId} and event_id = ${Number(closing.id)}
+  `)
+  expect(
+    new Date(
+      (validation.rows[0] as { validated_at: Date | string }).validated_at,
+    ).toISOString(),
+  ).toBe(proposed)
 })
 
 it('mueve el cierre al ajustar un rechazo', async () => {

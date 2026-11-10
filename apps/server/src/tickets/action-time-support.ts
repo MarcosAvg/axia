@@ -72,3 +72,28 @@ export async function lastActionTime(
     ?.occurred_at
   return value ? new Date(value) : null
 }
+
+export async function assertFolioYear(
+  tx: DbExecutor,
+  reportedAt: Date | string,
+  proposed: Date,
+): Promise<void> {
+  const result = await tx.execute(sql`
+    select
+      to_char(${reportedAt}::timestamptz at time zone s.timezone, 'YYYY')
+        as current_year,
+      to_char(${proposed}::timestamptz at time zone s.timezone, 'YYYY')
+        as proposed_year
+    from public.instance_settings s
+    limit 1
+  `)
+  const row = result.rows[0] as
+    { current_year: string; proposed_year: string } | undefined
+  if (row && row.current_year !== row.proposed_year) {
+    throw new AppError(
+      409,
+      'folio_year_change',
+      'El folio no cambia de año: ajusta la hora dentro del mismo año',
+    )
+  }
+}
