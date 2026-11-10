@@ -26,7 +26,7 @@ export function visibleTickets(
     join public.requesters r on r.id = t.requester_id
     where ${scopePredicate(actor, permission)}
       and public.metrics_date_in(
-        t.reported_at, ${p.p_from}::date, ${p.p_to}::date
+        t.reported_at, ${p.p_from}::date, ${p.p_to}::date, ${actor.timezone}
       )
       and (${p.p_building}::uuid is null or t.building_id = ${p.p_building}::uuid)
       and (${p.p_team}::uuid is null or t.team_id = ${p.p_team}::uuid)
@@ -220,10 +220,10 @@ export function metricsGroups(compact: boolean) {
   `
 }
 
-export function metricsVolume() {
+export function metricsVolume(tz: string) {
   return sql`
     select
-      to_char(v.reported_at at time zone 'UTC', 'YYYY-MM') as month,
+      to_char(v.reported_at at time zone ${tz}, 'YYYY-MM') as month,
       count(*)::int as tickets
     from base v
     group by 1

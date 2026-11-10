@@ -212,7 +212,10 @@ export async function listTickets(
   { filters, page, pageSize }: ListTicketsOptions,
 ): Promise<TicketPage> {
   const where = sql.join(
-    [scopePredicate(actor, 'ticket.view'), ...filterConditions(filters)],
+    [
+      scopePredicate(actor, 'ticket.view'),
+      ...filterConditions(filters, actor.timezone),
+    ],
     sql` and `,
   )
   const offset = (page - 1) * pageSize
@@ -241,7 +244,10 @@ export async function countTickets(
   filters: TicketFilters,
 ): Promise<number> {
   const where = sql.join(
-    [scopePredicate(actor, 'ticket.view'), ...filterConditions(filters)],
+    [
+      scopePredicate(actor, 'ticket.view'),
+      ...filterConditions(filters, actor.timezone),
+    ],
     sql` and `,
   )
   const result = await db.execute(sql`

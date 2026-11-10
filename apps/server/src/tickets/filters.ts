@@ -77,12 +77,16 @@ function technicianCondition(filters: TicketFilters): SQL[] {
   ]
 }
 
-function rangeAndFlagConditions(filters: TicketFilters): SQL[] {
+function rangeAndFlagConditions(
+  filters: TicketFilters,
+  timezone: string,
+): SQL[] {
   const conditions: SQL[] = []
   if (filters.from || filters.to) {
     conditions.push(
       sql`public.metrics_date_in(
-        t.reported_at, ${filters.from ?? null}::date, ${filters.to ?? null}::date
+        t.reported_at, ${filters.from ?? null}::date,
+        ${filters.to ?? null}::date, ${timezone}
       )`,
     )
   }
@@ -100,13 +104,13 @@ function searchConditions(filters: TicketFilters): SQL[] {
   return [sql`(t.folio ilike ${term} or t.description ilike ${term})`]
 }
 
-function baseConditions(filters: TicketFilters): SQL[] {
+function baseConditions(filters: TicketFilters, timezone: string): SQL[] {
   return [
     ...statusConditions(filters),
     ...placeConditions(filters),
     ...classificationConditions(filters),
     ...technicianCondition(filters),
-    ...rangeAndFlagConditions(filters),
+    ...rangeAndFlagConditions(filters, timezone),
     ...searchConditions(filters),
   ]
 }
@@ -140,6 +144,12 @@ function assignmentConditions(filters: TicketFilters): SQL[] {
   return conditions
 }
 
-export function filterConditions(filters: TicketFilters): SQL[] {
-  return [...baseConditions(filters), ...assignmentConditions(filters)]
+export function filterConditions(
+  filters: TicketFilters,
+  timezone: string,
+): SQL[] {
+  return [
+    ...baseConditions(filters, timezone),
+    ...assignmentConditions(filters),
+  ]
 }

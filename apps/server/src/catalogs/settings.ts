@@ -1,5 +1,7 @@
 import { sql } from 'drizzle-orm'
 
+import { assertTimeZone } from '../lib/timezone.js'
+
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 
@@ -79,6 +81,7 @@ export async function getSettings(db: Database) {
 }
 
 export async function updateSettings(db: Database, input: SettingsInput) {
+  assertTimeZone(input.timezone)
   const days = Number(input.claim_window.match(/\d+/)?.[0] ?? 1)
   await db.execute(sql`
     update public.instance_settings set

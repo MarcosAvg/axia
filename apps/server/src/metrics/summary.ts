@@ -267,7 +267,7 @@ export async function metricsSummary(
   const result = await db.execute(sql`
     with base as materialized (${metricsBase(actor, filters, 'ticket.view', 'all')}),
     grouped as (${metricsGroups(compact)}),
-    volume as (${metricsVolume()}),
+    volume as (${metricsVolume(actor.timezone)}),
     aging as (${metricsAging()}),
     ratings as (${metricsRatings()})
     select
