@@ -218,7 +218,7 @@ async function resolveClaimInTransaction(
       resolution = ${input.resolution},
       result_id = ${input.resultId},
       resolved_by = ${actor.id},
-      resolved_at = now(),
+      resolved_at = ${actionTimestamp()},
       resolution_note = ${input.note}
     where id = ${claim.id}
   `)

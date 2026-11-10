@@ -35,6 +35,8 @@ async function releaseTicket(
   actorId: string,
   ticket: ReleasedTicket,
 ) {
+  // Proceso de mantenimiento: lo dispara la desactivación de una cuenta, no una
+  // acción de usuario, así que no hay instante de acción que propagar.
   await tx.execute(sql`
     update public.ticket_assignments set ended_at = now()
     where ticket_id = ${ticket.id}

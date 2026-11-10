@@ -3,7 +3,11 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
-import { closeOpenWorkPhase, isDesignatedForCategory } from './flow-state.js'
+import {
+  actionTimestamp,
+  closeOpenWorkPhase,
+  isDesignatedForCategory,
+} from './flow-state.js'
 import {
   conflict,
   lockTicket,
@@ -96,18 +100,20 @@ async function recordLeader({
   const reasonId = reassignment ? input.reasonId : null
   await tx.execute(sql`
     insert into public.ticket_assignments (
-      ticket_id, cycle, stage, assignee_technician_id, assigned_by, reason_id
+      ticket_id, cycle, stage, assignee_technician_id, assigned_by, reason_id,
+      assigned_at
     ) values (
       ${input.ticketId}, ${ticket.cycle}, 'technician', ${input.technicianId},
-      ${actor.id}, ${reasonId}
+      ${actor.id}, ${reasonId}, ${actionTimestamp()}
     )
   `)
   await tx.execute(sql`
     insert into public.ticket_participants (
-      ticket_id, cycle, technician_id, participation_type, category_id, recorded_by
+      ticket_id, cycle, technician_id, participation_type, category_id,
+      recorded_by, started_at
     ) values (
       ${input.ticketId}, ${ticket.cycle}, ${input.technicianId}, 'leader',
-      ${ticket.category_id}, ${actor.id}
+      ${ticket.category_id}, ${actor.id}, ${actionTimestamp()}
     )
   `)
   await writeEvent(tx, {
@@ -131,10 +137,11 @@ async function recordAuxiliary({
   await tx.execute(sql`
     insert into public.ticket_participants (
       ticket_id, cycle, technician_id, participation_type, category_id,
-      recorded_by, client_request_id
+      recorded_by, client_request_id, started_at
     ) values (
       ${input.ticketId}, ${ticket.cycle}, ${input.technicianId}, 'auxiliary',
-      ${ticket.category_id}, ${actor.id}, ${input.clientRequestId}
+      ${ticket.category_id}, ${actor.id}, ${input.clientRequestId},
+      ${actionTimestamp()}
     )
   `)
   await writeEvent(tx, {

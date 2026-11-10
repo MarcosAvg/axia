@@ -143,10 +143,12 @@ export async function reopenLeaderParticipation(
   const participationType = designated ? 'leader' : 'auxiliary'
   await tx.execute(sql`
     insert into public.ticket_participants (
-      ticket_id, cycle, technician_id, participation_type, category_id, recorded_by
+      ticket_id, cycle, technician_id, participation_type, category_id,
+      recorded_by, started_at
     ) values (
       ${ticketId}, ${row.cycle}, ${row.assignee_technician_id},
-      ${participationType}, ${row.category_id}, ${actorId}
+      ${participationType}, ${row.category_id}, ${actorId},
+      ${actionTimestamp()}
     )
   `)
 }

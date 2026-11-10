@@ -15,6 +15,7 @@ import type { DbExecutor } from './db.js'
 import { routeTicket } from './routing.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import {
+  actionTimestamp,
   closeOpenWorkPhase,
   endOpenParticipants,
   endTechnicianAssignments,
@@ -114,10 +115,12 @@ async function assignToSupervisor(
   `)
   await tx.execute(sql`
     insert into public.ticket_assignments (
-      ticket_id, cycle, stage, assignee_user_id, assigned_by, reason_id, note
+      ticket_id, cycle, stage, assignee_user_id, assigned_by, reason_id, note,
+      assigned_at
     ) values (
       ${input.ticketId}, ${cycle}, 'supervisor',
-      ${supervisorUserId}, ${actor.id}, ${input.reasonId}, ${input.note}
+      ${supervisorUserId}, ${actor.id}, ${input.reasonId}, ${input.note},
+      ${actionTimestamp()}
     )
   `)
   await writeEvent(tx, {
@@ -207,14 +210,14 @@ async function reassignInTransaction(
 
   await tx.execute(sql`
     update public.ticket_assignments
-    set ended_at = now()
+    set ended_at = ${actionTimestamp()}
     where ticket_id = ${input.ticketId}
       and stage = 'supervisor'
       and ended_at is null
   `)
   await tx.execute(sql`
     update public.ticket_offers
-    set status = 'withdrawn', resolved_at = now()
+    set status = 'withdrawn', resolved_at = ${actionTimestamp()}
     where ticket_id = ${input.ticketId} and status = 'offered'
   `)
 

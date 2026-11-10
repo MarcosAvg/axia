@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
+import { timestamp, eventTime } from './business-times-helpers.js'
 import {
   buildTicketHttpApp,
   closeTicketHttpApp,
@@ -57,10 +58,6 @@ function nextMinute(): { wallClock: string; instant: Date } {
   return { wallClock: wallClockAt(instant), instant }
 }
 
-function timestamp(value: Date | string): string {
-  return new Date(value).toISOString()
-}
-
 async function startWork(): Promise<string> {
   const ticketId = await createTicket(context, refs)
   await takeAndAssign(context, refs, ticketId)
@@ -97,18 +94,6 @@ async function openPauseRow(ticketId: string): Promise<{
   `)
   const row = result.rows[0] as { id: string; opened_at: Date | string }
   return { id: row.id, openedAt: timestamp(row.opened_at) }
-}
-
-async function eventTime(ticketId: string, type: string): Promise<string> {
-  const result = await context.db.execute(sql`
-    select occurred_at from public.ticket_events
-    where ticket_id = ${ticketId} and type = ${type}
-    order by occurred_at desc, id desc
-    limit 1
-  `)
-  return timestamp(
-    (result.rows[0] as { occurred_at: Date | string }).occurred_at,
-  )
 }
 
 async function pauseDescendant(): Promise<string> {
@@ -152,7 +137,7 @@ it('escribe la pausa y sus pasos con la hora manual de la acción', async () => 
   const pause = await openPauseRow(ticketId)
   expect(pause.openedAt).toBe(expected)
   await expectStepTimes(pause.id, expected)
-  expect(await eventTime(ticketId, 'paused')).toBe(expected)
+  expect(await eventTime(context, ticketId, 'paused')).toBe(expected)
 
   const descendantId = await pauseDescendant()
   const advanced = await manualAction(
@@ -177,5 +162,5 @@ it('escribe la pausa y sus pasos con la hora manual de la acción', async () => 
   expect(
     timestamp((closed.rows[0] as { closed_at: Date | string }).closed_at),
   ).toBe(expected)
-  expect(await eventTime(ticketId, 'resumed')).toBe(expected)
+  expect(await eventTime(context, ticketId, 'resumed')).toBe(expected)
 })

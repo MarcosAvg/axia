@@ -13,6 +13,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { actionTimestamp } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
@@ -78,10 +79,11 @@ async function auxiliaryInTransaction(
   await tx.execute(sql`
     insert into public.ticket_participants (
       ticket_id, cycle, technician_id, participation_type, category_id,
-      recorded_by, client_request_id
+      recorded_by, client_request_id, started_at
     ) values (
       ${input.ticketId}, ${cycle}, ${input.technicianId}, 'auxiliary',
-      ${ticket.category_id}, ${actor.id}, ${input.clientRequestId}
+      ${ticket.category_id}, ${actor.id}, ${input.clientRequestId},
+      ${actionTimestamp()}
     )
   `)
   await writeEvent(tx, {

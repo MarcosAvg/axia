@@ -90,9 +90,10 @@ async function recordValidation(
 ): Promise<void> {
   const inserted = await tx.execute(sql`
     insert into public.ticket_validations (
-      ticket_id, cycle, validator_user_id, validator_role
+      ticket_id, cycle, validator_user_id, validator_role, validated_at
     ) values (
-      ${input.ticketId}, ${input.cycle}, ${input.actorId}, ${input.role}
+      ${input.ticketId}, ${input.cycle}, ${input.actorId}, ${input.role},
+      ${actionTimestamp()}
     )
     on conflict (ticket_id, cycle, validator_role) do nothing
     returning id

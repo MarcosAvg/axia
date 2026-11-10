@@ -14,7 +14,11 @@ import {
 import { lockClaimTicket, type TicketForClaim } from './claims.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { closeOpenWorkPhase, endOpenParticipants } from './flow-state.js'
+import {
+  actionTimestamp,
+  closeOpenWorkPhase,
+  endOpenParticipants,
+} from './flow-state.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
@@ -72,10 +76,11 @@ async function recordOpened(
   await tx.execute(sql`
     insert into public.ticket_claims (
       ticket_id, cycle, opened_by, reason_id, description, prior_status,
-      client_request_id
+      client_request_id, opened_at
     ) values (
       ${input.ticketId}, ${ticket.cycle}, ${actor.id}, ${input.reasonId},
-      ${input.description}, ${ticket.status}, ${input.clientRequestId}
+      ${input.description}, ${ticket.status}, ${input.clientRequestId},
+      ${actionTimestamp()}
     )
   `)
   await tx.execute(sql`

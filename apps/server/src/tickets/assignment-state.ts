@@ -76,7 +76,7 @@ export async function closePreviousAssignment(
   await endTechnicianAssignments(tx, ticketId)
   await tx.execute(sql`
     update public.ticket_offers
-    set status = 'withdrawn', resolved_at = now()
+    set status = 'withdrawn', resolved_at = ${actionTimestamp()}
     where ticket_id = ${ticketId} and status = 'offered'
   `)
 }
