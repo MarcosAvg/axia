@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-10
+
 ### Añadido
 
 - El tablero y el detalle de un tiquet muestran los tiempos en tres relojes: **Continuo** (24
