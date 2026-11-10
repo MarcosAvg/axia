@@ -16,6 +16,7 @@ type TicketCycleTimes = {
   wait: number
   active: number
   pause: number
+  dormant: number
   validation: number
   claim: number
 }
@@ -92,6 +93,7 @@ type DetailRow = {
   wait_minutes: number | string
   active_minutes: number | string
   pause_minutes: number | string
+  dormant_minutes: number | string
   validation_minutes: number | string
   claim_minutes: number | string
   building_id: string
@@ -133,6 +135,7 @@ function toCycleTimes(row: DetailRow): TicketCycleTimes {
     wait: Number(row.wait_minutes),
     active: Number(row.active_minutes),
     pause: Number(row.pause_minutes),
+    dormant: Number(row.dormant_minutes),
     validation: Number(row.validation_minutes),
     claim: Number(row.claim_minutes),
   }
@@ -201,6 +204,7 @@ function timingColumns(): SQL {
       extract(epoch from public.ticket_time_by_kind(t.id, 'wait_start'::public.time_span_kind)) / 60 as wait_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'active_work'::public.time_span_kind)) / 60 as active_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'pause'::public.time_span_kind)) / 60 as pause_minutes,
+      extract(epoch from public.ticket_time_by_kind(t.id, 'dormant'::public.time_span_kind)) / 60 as dormant_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'validation'::public.time_span_kind)) / 60 as validation_minutes,
       extract(epoch from public.ticket_time_by_kind(t.id, 'claim'::public.time_span_kind)) / 60 as claim_minutes
   `

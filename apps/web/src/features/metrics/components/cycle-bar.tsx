@@ -16,6 +16,7 @@ const COLORS: Record<CyclePhase, string> = {
   wait: 'var(--warning)',
   active: 'var(--success)',
   pause: 'var(--destructive)',
+  dormant: 'var(--muted-foreground)',
   validation: 'var(--chart-4)',
   claim: 'var(--chart-5)',
 }
@@ -125,6 +126,7 @@ export function CycleBar({ summary }: { summary: MetricsSummary }) {
     wait: minutes(summary.avgWait, summary.sumWait),
     active: minutes(summary.avgActive, summary.sumActive),
     pause: minutes(summary.avgPause, summary.sumPause),
+    dormant: 0,
     validation: minutes(summary.avgValidation, summary.sumValidation),
     claim: minutes(summary.avgClaim, summary.sumClaim),
     total,

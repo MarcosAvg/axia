@@ -65,6 +65,7 @@ const detail = {
     wait: 3,
     active: 14,
     pause: 0,
+    dormant: 0,
     validation: 0,
     claim: 0,
   },

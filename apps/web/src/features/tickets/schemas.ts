@@ -70,6 +70,7 @@ export const ticketDetailResponseSchema = z.object({
       wait: z.number(),
       active: z.number(),
       pause: z.number(),
+      dormant: z.number(),
       validation: z.number(),
       claim: z.number(),
     }),

@@ -138,6 +138,7 @@ interface TicketCycleTimes {
   wait: number
   active: number
   pause: number
+  dormant: number
   validation: number
   claim: number
 }

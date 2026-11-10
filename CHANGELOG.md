@@ -20,6 +20,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   asignaciones, participaciones, validaciones, reclamaciones, ofertas y capturas), recalcula el
   cierre del tiquet y reconstruye los tramos. El ajuste no puede saltar entre ciclos ni mover el
   alta a otro año.
+- El subestado de salida de una pausa se guarda como motivo de cierre y ya no reetiqueta el
+  intervalo anterior.
+- Reactivar un tiquet descartado restaura la pausa, la asignación del líder y su participación.
+- El tiempo entre un desenlace y una reclamación o reactivación se mide como fase `dormant`
+  (“Fuera de atención”) y queda fuera de los indicadores de desempeño.
 
 ## [0.20.0] - 2026-11-09
 

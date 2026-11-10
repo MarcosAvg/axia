@@ -75,6 +75,7 @@ export const metricsMessages = {
       wait: 'Espera',
       active: 'Trabajo activo',
       pause: 'Pausa',
+      dormant: 'Fuera de atención',
       validation: 'Validación',
       claim: 'Reclamación',
     },
