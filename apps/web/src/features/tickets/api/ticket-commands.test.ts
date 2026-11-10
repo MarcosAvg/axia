@@ -72,7 +72,7 @@ it('conserva UUID, hora manual y proxy mediante sincronización', async () => {
     ...context,
     operation: 'start',
     args: { subjectTechnicianId: 'u2' },
-    occurredAt: '2026-10-01T10:00:00Z',
+    occurredLocal: '2026-10-01T10:00',
     manualTime: true,
   })
   const [url, options] = request.mock.calls[0] as [string, { body: string }]
@@ -87,7 +87,7 @@ it('conserva UUID, hora manual y proxy mediante sincronización', async () => {
       clientRequestId: context.clientRequestId,
       type: 'start',
       args: { subjectTechnicianId: 'u2' },
-      occurredAt: '2026-10-01T10:00:00Z',
+      occurredLocal: '2026-10-01T10:00',
       manualTime: true,
     },
   ])

@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { TextField } from '@/components/shared/form-fields'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, toInstanceWallClockInput } from '@/lib/format'
 import { toTicketError } from '../domain/errors'
 import { ticketMessages } from '../i18n'
 import { useAdjustEventTime } from '../hooks/use-tickets'
@@ -22,9 +22,7 @@ type AdjustableEvent = {
 }
 
 function toLocal(iso: string): string {
-  const date = new Date(iso)
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 16)
+  return toInstanceWallClockInput(iso)
 }
 
 function EventTimeActions({
@@ -71,7 +69,7 @@ export function EventTimeDialog({
     event.preventDefault()
     if (!value) return
     adjust.mutate(
-      { eventId: item.id, occurredAt: new Date(value).toISOString() },
+      { eventId: item.id, occurredLocal: value },
       { onSuccess: onClose },
     )
   }

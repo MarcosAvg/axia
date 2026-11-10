@@ -22,7 +22,7 @@ export function useUploadEvidence() {
       type: EvidenceType
       file: File
       note?: string | null
-      occurredAt?: string
+      occurredLocal?: string
       subjectTechnicianId?: string
     }) => saveAndUploadEvidence(variables),
     onSuccess: (_data, variables) => {

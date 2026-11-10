@@ -1,21 +1,15 @@
 import { useState } from 'react'
 import { can, useAuth } from '@/features/auth'
 
-function localNow(): string {
-  const date = new Date()
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16)
-}
-
 /**
  * Hora real de una acción por proxy, disponible solo para quien puede ajustarla.
  * `enabled` indica que el contexto permite hora manual (sujeto seleccionado y
- * acción de técnico).
+ * acción de técnico). El valor es una hora de pared de la instancia; el servidor
+ * la convierte y valida.
  */
 export function useActionTime(enabled = true) {
   const { identity } = useAuth()
-  const [value, setValue] = useState(localNow)
+  const [value, setValue] = useState('')
   const [touched, setTouched] = useState(false)
   const show = enabled && can(identity, 'time.record_manual')
   return {
@@ -25,6 +19,7 @@ export function useActionTime(enabled = true) {
       setValue(next)
     },
     show,
-    iso: show && touched && value ? new Date(value).toISOString() : undefined,
+    timezone: identity?.timezone ?? null,
+    local: show && touched && value ? value : undefined,
   }
 }

@@ -193,6 +193,7 @@ export const ticketMessages = {
     add_auxiliary: 'Agregar auxiliar',
   },
   actionFields: {
+    realTime: (timezone: string) => `Hora real de la acción (${timezone})`,
     evidence: 'Evidencia',
     evidenceRequired: 'Adjunta la evidencia para continuar.',
     progress: 'Avance del trabajo (opcional)',

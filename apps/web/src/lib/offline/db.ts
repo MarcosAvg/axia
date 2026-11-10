@@ -37,7 +37,7 @@ export interface Evidence {
   /** Nota opcional (por ejemplo, el avance al registrar `during`). */
   note?: string | null
   /** Hora real de la evidencia, si quien la sube puede ajustarla. */
-  occurredAt?: string
+  occurredLocal?: string
   /** Técnico proxy al que se atribuye la evidencia. */
   subjectTechnicianId?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'

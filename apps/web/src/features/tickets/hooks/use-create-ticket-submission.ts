@@ -47,9 +47,7 @@ async function uploadRequestPhoto(
       cycle: 1,
       type: 'request',
       file: photo,
-      occurredAt: input.occurredAt
-        ? new Date(input.occurredAt).toISOString()
-        : undefined,
+      occurredLocal: input.occurredLocal,
     })
   } catch (error) {
     console.warn('No se pudo subir la foto de la solicitud', error)

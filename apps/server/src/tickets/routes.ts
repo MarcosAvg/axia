@@ -1,5 +1,4 @@
 import type { FastifyInstance } from 'fastify'
-import { z } from 'zod'
 
 import type { AppConfig } from '../config.js'
 import {
@@ -11,7 +10,7 @@ import {
 } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
-import { eventTimeSchema } from './action-time.js'
+import { registerEventTimeRoute } from './event-time-routes.js'
 import { toTicketFilters } from './list-query.js'
 import {
   createTicketSchema,
@@ -256,33 +255,6 @@ function registerPauseReadRoutes(
       const items = await tickets.timeAlerts(currentActor(request), id)
       if (!items) throw notFound()
       return { items }
-    },
-  )
-}
-
-function registerEventTimeRoute(
-  app: FastifyInstance,
-  tickets: TicketService,
-  canView: Guard[],
-) {
-  app.patch(
-    '/api/tickets/:id/events/:eventId/time',
-    { preHandler: canView },
-    async (request, reply) => {
-      const { id, eventId } = z
-        .object({
-          id: z.string().uuid(),
-          eventId: z.coerce.number().int().positive(),
-        })
-        .parse(request.params)
-      const body = eventTimeSchema.parse(request.body)
-      await tickets.adjustEventTime(
-        currentActor(request),
-        id,
-        eventId,
-        body.occurredAt,
-      )
-      return reply.status(204).send()
     },
   )
 }

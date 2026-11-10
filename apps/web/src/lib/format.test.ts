@@ -6,6 +6,7 @@ import {
   formatDuration,
   formatElapsed,
   setDisplayTimezone,
+  toInstanceWallClockInput,
 } from './format'
 
 afterEach(() => {
@@ -29,6 +30,15 @@ describe('formatDateOnly', () => {
     expect(formatDateOnly('2026-01-01')).toContain('2026')
     expect(formatDateOnly('2026-01-01')).toContain('ene')
     expect(formatDateOnly('no-es-fecha')).toBe('no-es-fecha')
+  })
+})
+
+describe('toInstanceWallClockInput', () => {
+  it('devuelve la hora de pared de la instancia', () => {
+    setDisplayTimezone('America/Mexico_City')
+    expect(toInstanceWallClockInput('2026-11-10T20:30:00Z')).toBe(
+      '2026-11-10T14:30',
+    )
   })
 })
 

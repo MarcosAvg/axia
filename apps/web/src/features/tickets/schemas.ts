@@ -138,7 +138,10 @@ export const createTicketSchema = z.object({
     .min(5, 'Describe el problema con un poco más de detalle.')
     .max(4000),
   requesterId: z.string().min(1, 'Selecciona un solicitante.'),
-  occurredAt: z.string().optional(),
+  occurredLocal: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    .optional(),
 })
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 

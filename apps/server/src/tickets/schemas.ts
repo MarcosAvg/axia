@@ -75,6 +75,11 @@ export const duplicateCheckSchema = z.object({
   description: z.string().trim().min(5).max(4000),
 })
 
+const occurredLocal = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+  .optional()
+
 export const createTicketSchema = z.object({
   buildingId: z.string().uuid(),
   locationId: z.string().uuid(),
@@ -89,6 +94,7 @@ export const createTicketSchema = z.object({
   requesterId: z.string().uuid(),
   requesterName: z.string().trim().min(1).max(120).optional(),
   requesterContact: z.string().trim().min(1).max(120).optional(),
+  occurredLocal,
   occurredAt: z.string().datetime().optional(),
   clientRequestId: z.string().uuid(),
   attachmentId: z.string().uuid().optional(),
@@ -97,6 +103,7 @@ export const createTicketSchema = z.object({
 
 const actionBase = {
   clientRequestId: z.string().uuid(),
+  occurredLocal,
   occurredAt: z.string().datetime().optional(),
 }
 

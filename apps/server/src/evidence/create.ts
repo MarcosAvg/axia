@@ -8,6 +8,7 @@ import { AppError } from '../http/errors.js'
 import { parseActionTime } from '../tickets/action-time.js'
 import type { DbExecutor } from '../tickets/db.js'
 import { writeEvent } from '../tickets/events.js'
+import { parseInstanceWallClock } from '../tickets/instance-time.js'
 import { assertTechnicianAction } from '../tickets/proxy.js'
 import { findVisibleTicket } from '../tickets/repository.js'
 import { canAttachEvidence } from './access.js'
@@ -96,12 +97,19 @@ async function ensureQuota(
   return used
 }
 
-async function insertEvidence(
-  db: Database,
-  actor: Actor,
-  ticketId: string,
-  input: CreateEvidenceInput,
-): Promise<string> {
+async function insertEvidence({
+  db,
+  actor,
+  ticketId,
+  input,
+  occurredAt,
+}: {
+  db: Database
+  actor: Actor
+  ticketId: string
+  input: CreateEvidenceInput
+  occurredAt?: string
+}): Promise<string> {
   return db.transaction(async (tx) => {
     const cycle = await ticketCycle(tx, ticketId)
     const ticket = await tx.execute(sql`
@@ -121,7 +129,7 @@ async function insertEvidence(
       ) values (
         ${ticketId}, ${cycle}, ${input.type}, ${technicianSubject},
         ${actor.id}, ${actor.id}, ${input.clientRequestId}, ${input.mimeType ?? null},
-        ${input.occurredAt ?? new Date().toISOString()}
+        coalesce(${occurredAt ?? null}::timestamptz, now())
       )
       returning id
     `)
@@ -134,13 +142,30 @@ async function insertEvidence(
       subjectTechnicianId: technicianSubject,
       subjectRequesterId: requesterSubject,
       payload: { evidenceId, type: input.type },
-      occurredAt: input.occurredAt,
+      occurredAt,
     })
     await tx.execute(sql`
       update public.evidence set event_id = ${event.id} where id = ${evidenceId}
     `)
     return evidenceId
   })
+}
+
+async function manualEvidenceTime(
+  db: Database,
+  actor: Actor,
+  input: CreateEvidenceInput,
+): Promise<string | undefined> {
+  if (input.occurredLocal) {
+    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
+    return (await parseInstanceWallClock(db, input.occurredLocal)).toISOString()
+  }
+  if (input.occurredAt) {
+    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
+    parseActionTime(input.occurredAt)
+    return new Date(input.occurredAt).toISOString()
+  }
+  return undefined
 }
 
 async function assertEvidenceSubject(
@@ -184,10 +209,7 @@ export async function createEvidence(
     throw new AppError(404, 'not_found', 'Tiquet no encontrado')
   }
   await assertEvidenceSubject(db, actor, access, input)
-  if (input.occurredAt) {
-    if (!hasPermission(actor, 'time.record_manual')) throw forbidden()
-    parseActionTime(input.occurredAt)
-  }
+  const occurredAt = await manualEvidenceTime(db, actor, input)
   const existing = await existingEvidence(
     db,
     actor,
@@ -206,7 +228,13 @@ export async function createEvidence(
       replayed: true,
     }
   }
-  const evidenceId = await insertEvidence(db, actor, ticketId, input)
+  const evidenceId = await insertEvidence({
+    db,
+    actor,
+    ticketId,
+    input,
+    occurredAt,
+  })
   return {
     evidenceId,
     uploadUrl: `/api/uploads/${evidenceId}`,

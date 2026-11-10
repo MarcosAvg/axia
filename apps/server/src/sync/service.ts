@@ -20,6 +20,7 @@ type SyncItem = {
   type: string
   args: Record<string, unknown>
   clientReportedAt?: string
+  occurredLocal?: string
   occurredAt?: string
   manualTime?: boolean
 }
@@ -142,7 +143,7 @@ async function executeManualItem(
   input: TicketActionInput,
 ): Promise<SyncResult> {
   const { item, db, actor } = context
-  if (!item.occurredAt) {
+  if (!item.occurredLocal && !item.occurredAt) {
     return {
       ...rejected(item, 'time_invalid', 'Falta la hora manual de la acción'),
       timeStatus: 'manual_required',
@@ -153,6 +154,7 @@ async function executeManualItem(
     db,
     actor,
     ticketId: item.ticketId,
+    occurredLocal: item.occurredLocal,
     occurredAt: item.occurredAt,
     subjectTechnicianId:
       'subjectTechnicianId' in input ? input.subjectTechnicianId : undefined,

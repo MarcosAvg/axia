@@ -45,7 +45,7 @@ function useTicketMutation<Operation extends TicketOperation>(
   operation: Operation,
   ticketId: string,
   subject: ProxySubject = null,
-  occurredAt?: string,
+  occurredLocal?: string,
 ) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -62,8 +62,8 @@ function useTicketMutation<Operation extends TicketOperation>(
         ...command,
         ticketId,
         clientRequestId,
-        occurredAt,
-        manualTime: Boolean(occurredAt),
+        occurredLocal,
+        manualTime: Boolean(occurredLocal),
       }
       try {
         await sendTicketCommand(input)
@@ -85,72 +85,77 @@ function useTicketMutation<Operation extends TicketOperation>(
 function useTicketBaseActions(
   ticketId: string,
   subject: ProxySubject,
-  occurredAt: string | undefined,
+  occurredLocal: string | undefined,
 ) {
   return {
-    take: useTicketMutation('take', ticketId, null, occurredAt),
+    take: useTicketMutation('take', ticketId, null, occurredLocal),
     assignTechnician: useTicketMutation(
       'assign_technician',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
     assignSupervisor: useTicketMutation(
       'assign_supervisor',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
     addAuxiliary: useTicketMutation(
       'add_auxiliary',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
-    start: useTicketMutation('start', ticketId, subject, occurredAt),
-    pause: useTicketMutation('pause', ticketId, subject, occurredAt),
+    start: useTicketMutation('start', ticketId, subject, occurredLocal),
+    pause: useTicketMutation('pause', ticketId, subject, occurredLocal),
     advancePause: useTicketMutation(
       'advance_pause',
       ticketId,
       subject,
-      occurredAt,
+      occurredLocal,
     ),
-    resume: useTicketMutation('resume', ticketId, subject, occurredAt),
-    attend: useTicketMutation('attend', ticketId, subject, occurredAt),
+    resume: useTicketMutation('resume', ticketId, subject, occurredLocal),
+    attend: useTicketMutation('attend', ticketId, subject, occurredLocal),
   }
 }
 
 function useTicketFlowActions(
   ticketId: string,
   subject: ProxySubject,
-  occurredAt: string | undefined,
+  occurredLocal: string | undefined,
 ) {
   return {
-    validate: useTicketMutation('validate', ticketId, subject, occurredAt),
-    reject: useTicketMutation('reject', ticketId, null, occurredAt),
-    cancel: useTicketMutation('cancel', ticketId, subject, occurredAt),
+    validate: useTicketMutation('validate', ticketId, subject, occurredLocal),
+    reject: useTicketMutation('reject', ticketId, null, occurredLocal),
+    cancel: useTicketMutation('cancel', ticketId, subject, occurredLocal),
     changePriority: useTicketMutation(
       'change_priority',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
-    comment: useTicketMutation('comment', ticketId, null, occurredAt),
-    recapture: useTicketMutation('recapture', ticketId, subject, occurredAt),
-    openClaim: useTicketMutation('open_claim', ticketId, subject, occurredAt),
+    comment: useTicketMutation('comment', ticketId, null, occurredLocal),
+    recapture: useTicketMutation('recapture', ticketId, subject, occurredLocal),
+    openClaim: useTicketMutation(
+      'open_claim',
+      ticketId,
+      subject,
+      occurredLocal,
+    ),
     resolveClaim: useTicketMutation(
       'resolve_claim',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
     markDuplicate: useTicketMutation(
       'mark_duplicate',
       ticketId,
       null,
-      occurredAt,
+      occurredLocal,
     ),
-    reactivate: useTicketMutation('reactivate', ticketId, null, occurredAt),
+    reactivate: useTicketMutation('reactivate', ticketId, null, occurredLocal),
   }
 }
 
@@ -161,10 +166,10 @@ function useTicketFlowActions(
 export function useTicketActions(
   ticketId: string,
   subject: ProxySubject = null,
-  occurredAt?: string,
+  occurredLocal?: string,
 ) {
   return {
-    ...useTicketBaseActions(ticketId, subject, occurredAt),
-    ...useTicketFlowActions(ticketId, subject, occurredAt),
+    ...useTicketBaseActions(ticketId, subject, occurredLocal),
+    ...useTicketFlowActions(ticketId, subject, occurredLocal),
   }
 }

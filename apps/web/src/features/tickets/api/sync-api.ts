@@ -6,6 +6,7 @@ export type SyncItem = {
   type: string
   args: Record<string, unknown>
   clientReportedAt?: string
+  occurredLocal?: string
   occurredAt?: string
   manualTime?: boolean
 }

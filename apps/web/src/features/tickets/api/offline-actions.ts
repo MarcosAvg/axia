@@ -14,7 +14,10 @@ const contextSchema = z.object({
   ticketId: z.string().min(1),
   clientRequestId: z.string().uuid(),
   clientReportedAt: z.string().datetime(),
-  occurredAt: z.string().datetime().optional(),
+  occurredLocal: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    .optional(),
   manualTime: z.boolean().optional(),
 })
 
@@ -51,7 +54,7 @@ export function registerTicketActionHandler() {
           type: data.operation,
           args: data.args,
           clientReportedAt: data.clientReportedAt,
-          occurredAt: data.occurredAt,
+          occurredLocal: data.occurredLocal,
           manualTime: data.manualTime,
         },
       ])

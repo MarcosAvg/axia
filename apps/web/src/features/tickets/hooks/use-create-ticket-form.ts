@@ -26,7 +26,7 @@ const defaultValues: CreateTicketInput = {
   channelId: '',
   description: '',
   requesterId: '',
-  occurredAt: '',
+  occurredLocal: '',
 }
 
 type PlaceSelection = {
@@ -193,8 +193,8 @@ export function useCreateTicketForm() {
   usePlaceEffects(form, selection, { buildingId, locationId })
 
   useEffect(() => {
-    if (!showOccurredAt && form.getValues('occurredAt')) {
-      form.setValue('occurredAt', '')
+    if (!showOccurredAt && form.getValues('occurredLocal')) {
+      form.setValue('occurredLocal', '')
     }
   }, [showOccurredAt, form])
 

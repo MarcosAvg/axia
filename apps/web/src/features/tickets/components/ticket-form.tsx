@@ -85,10 +85,10 @@ function TicketDescriptionFields({
       {showOccurredAt ? (
         <TextField
           id="create-occurred-at"
-          label="Hora real de registro"
+          label="Hora real de registro (zona de la instancia)"
           type="datetime-local"
-          error={errors.occurredAt?.message}
-          {...register('occurredAt')}
+          error={errors.occurredLocal?.message}
+          {...register('occurredLocal')}
         />
       ) : null}
       <FileField

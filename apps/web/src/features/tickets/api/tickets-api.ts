@@ -126,11 +126,11 @@ export async function fetchPauseState(
 export async function adjustEventTime(
   ticketId: string,
   eventId: number,
-  occurredAt: string,
+  occurredLocal: string,
 ): Promise<void> {
   await apiFetch(`/api/tickets/${ticketId}/events/${eventId}/time`, {
     method: 'PATCH',
-    body: JSON.stringify({ occurredAt }),
+    body: JSON.stringify({ occurredLocal }),
   })
 }
 
@@ -201,9 +201,7 @@ export async function createTicket(
       channelId: input.channelId || undefined,
       description: input.description,
       requesterId: input.requesterId,
-      occurredAt: input.occurredAt
-        ? new Date(input.occurredAt).toISOString()
-        : undefined,
+      occurredLocal: input.occurredLocal || undefined,
       clientRequestId,
       shownCandidateIds,
       attachmentId,

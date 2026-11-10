@@ -18,7 +18,7 @@ function item(overrides: Record<string, unknown> = {}) {
     ticketId: context.ids.ticketA1,
     type: 'comment',
     args: { text: 'Comentario offline' },
-    occurredAt: new Date().toISOString(),
+    clientReportedAt: new Date().toISOString(),
     ...overrides,
   }
 }
@@ -28,7 +28,7 @@ async function sync(cookie: string, items: Array<Record<string, unknown>>) {
     method: 'POST',
     url: '/api/sync/actions',
     headers: authHeaders(cookie),
-    payload: { items },
+    payload: { items, deviceNow: new Date().toISOString() },
   })
 }
 
@@ -42,8 +42,8 @@ afterAll(async () => {
 
 describe('offline sync', () => {
   it('applies an action and records the client occurrence time', async () => {
-    const occurredAt = new Date().toISOString()
-    const payload = item({ occurredAt })
+    const clientReportedAt = new Date().toISOString()
+    const payload = item({ clientReportedAt })
     const response = await sync(context.cookies.requester, [payload])
     expect(response.statusCode).toBe(200)
     const body = response.json() as {
@@ -67,7 +67,7 @@ describe('offline sync', () => {
       new Date(
         (event.rows[0] as { occurred_at: Date | string }).occurred_at,
       ).toISOString(),
-    ).toBe(occurredAt)
+    ).toBe(clientReportedAt)
   })
 
   it('reports a repeated key as duplicate', async () => {
@@ -105,24 +105,26 @@ describe('offline sync validation', () => {
     const future = await sync(context.cookies.requester, [
       item({
         ticketId: context.ids.ticketA2,
-        occurredAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+        clientReportedAt: new Date(Date.now() + 10 * 60_000).toISOString(),
       }),
     ])
     expect(
       (future.json() as { results: Array<{ status: string; code: string }> })
         .results[0],
-    ).toMatchObject({ status: 'rejected', code: 'invalid_occurred_at' })
+    ).toMatchObject({ status: 'rejected', code: 'time_future' })
 
     const stale = await sync(context.cookies.requester, [
       item({
         ticketId: context.ids.ticketA2,
-        occurredAt: new Date(Date.now() - 40 * 24 * 60 * 60_000).toISOString(),
+        clientReportedAt: new Date(
+          Date.now() - 40 * 24 * 60 * 60_000,
+        ).toISOString(),
       }),
     ])
     expect(
       (stale.json() as { results: Array<{ status: string; code: string }> })
         .results[0],
-    ).toMatchObject({ status: 'rejected', code: 'invalid_occurred_at' })
+    ).toMatchObject({ status: 'rejected', code: 'time_too_old' })
   })
 
   it('rejects an action outside the actor scope', async () => {

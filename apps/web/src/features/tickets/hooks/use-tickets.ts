@@ -220,8 +220,8 @@ export function useSupervisors() {
 export function useAdjustEventTime(ticketId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (variables: { eventId: number; occurredAt: string }) =>
-      adjustEventTime(ticketId, variables.eventId, variables.occurredAt),
+    mutationFn: (variables: { eventId: number; occurredLocal: string }) =>
+      adjustEventTime(ticketId, variables.eventId, variables.occurredLocal),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })
     },

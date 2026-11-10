@@ -10,6 +10,7 @@ import {
 import type { AuthService } from '../auth/service.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
+import { INSTANCE_WALL_CLOCK } from '../tickets/instance-time.js'
 import { runSync } from './service.js'
 
 const itemSchema = z.object({
@@ -18,6 +19,7 @@ const itemSchema = z.object({
   type: z.string().min(1).max(50),
   args: z.record(z.string(), z.unknown()).default({}),
   clientReportedAt: z.string().datetime().optional(),
+  occurredLocal: z.string().regex(INSTANCE_WALL_CLOCK).optional(),
   occurredAt: z.string().datetime().optional(),
   manualTime: z.boolean().optional(),
 })

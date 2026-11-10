@@ -32,7 +32,7 @@ function ticketAction(
       args,
       ticketId,
       clientRequestId: crypto.randomUUID(),
-      occurredAt: '2026-11-04T10:00:00.000Z',
+      clientReportedAt: '2026-11-04T10:00:00.000Z',
     },
     orderingKey: ticketId,
     state: 'pending',

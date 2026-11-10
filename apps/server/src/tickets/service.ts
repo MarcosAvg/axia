@@ -65,10 +65,13 @@ export function createTicketService(db: Database) {
     rating: (actor: Actor, ticketId: string) => getRating(db, actor, ticketId),
     adjustEventTime: (
       actor: Actor,
-      ticketId: string,
-      eventId: number,
-      occurredAt: string,
-    ) => adjustEventTime(db, actor, { ticketId, eventId, occurredAt }),
+      input: {
+        ticketId: string
+        eventId: number
+        occurredLocal?: string
+        occurredAt?: string
+      },
+    ) => adjustEventTime(db, actor, input),
     duplicateCandidates: (input: DuplicateCheckInput) =>
       checkDuplicateCandidates(db, input),
     duplicateAlerts: (actor: Actor, ticketId: string) =>

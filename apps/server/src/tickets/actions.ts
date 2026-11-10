@@ -282,6 +282,7 @@ export async function runTicketAction(
       db,
       actor,
       ticketId,
+      occurredLocal: input.occurredLocal ?? '',
       occurredAt: input.occurredAt ?? '',
       subjectTechnicianId: subjectOf(input),
     },

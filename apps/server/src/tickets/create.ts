@@ -20,12 +20,13 @@ import type {
   CreateTicketResult,
   TicketSummaryRow,
 } from './create-types.js'
-import { assertCreateTime } from './action-time.js'
+import { assertCreateTime, parseActionTime } from './action-time.js'
 import { linkRequiredAttachment } from './create-attachment.js'
 import type { DbExecutor } from './db.js'
 import { detectAndStoreDuplicates } from './duplicates.js'
 import { withActionContext } from './event-context.js'
 import { findHandledEvent, isUniqueViolation, writeEvent } from './events.js'
+import { parseInstanceWallClock } from './instance-time.js'
 import { routeTicket } from './routing.js'
 
 type RequesterContext = {
@@ -209,7 +210,7 @@ async function createInTransaction(
 
   const resolved = await resolveCreateDefaults(tx, input)
   const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
-  if (input.occurredAt && !onBehalf) {
+  if ((input.occurredLocal || input.occurredAt) && !onBehalf) {
     throw new AppError(
       400,
       'validation',
@@ -252,8 +253,12 @@ export async function createTicket(
   actor: Actor,
   input: CreateTicketInput,
 ): Promise<CreateTicketResult> {
-  assertCreateTime(actor, input.occurredAt)
-  const occurredAt = input.occurredAt ?? null
+  await assertCreateTime(db, actor, input.occurredLocal, input.occurredAt)
+  const occurredAt = input.occurredLocal
+    ? (await parseInstanceWallClock(db, input.occurredLocal)).toISOString()
+    : input.occurredAt
+      ? parseActionTime(input.occurredAt).toISOString()
+      : null
   try {
     return await withActionContext(
       {

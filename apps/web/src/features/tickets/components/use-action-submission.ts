@@ -20,7 +20,7 @@ interface SubmitContext {
   actions: Mutations
   ticketId: string
   cycle: number
-  occurredAt?: string
+  occurredLocal?: string
   subjectTechnicianId?: string
   reasonRequired?: boolean
   onClose: () => void
@@ -46,7 +46,7 @@ async function uploadEvidenceForAction({
   file,
   ticketId,
   cycle,
-  occurredAt,
+  occurredLocal,
   subjectTechnicianId,
   upload,
   setFilePending,
@@ -64,7 +64,7 @@ async function uploadEvidenceForAction({
       type: evidenceType,
       file,
       note: action === 'record_progress' ? values.text.trim() || null : null,
-      occurredAt,
+      occurredLocal,
       subjectTechnicianId,
     })
     return true
@@ -109,7 +109,7 @@ type ActionSubmissionOptions = {
   action: ActionKey
   ticketId: string
   cycle: number
-  occurredAt?: string
+  occurredLocal?: string
   subjectTechnicianId?: string
   reasonRequired?: boolean
   onClose: () => void
@@ -121,7 +121,7 @@ export function useActionSubmission({
   action,
   ticketId,
   cycle,
-  occurredAt,
+  occurredLocal,
   subjectTechnicianId,
   reasonRequired,
   onClose,
@@ -151,7 +151,7 @@ export function useActionSubmission({
       actions,
       ticketId,
       cycle,
-      occurredAt,
+      occurredLocal,
       subjectTechnicianId,
       reasonRequired,
       onClose,
