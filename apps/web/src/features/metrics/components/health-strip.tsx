@@ -1,11 +1,7 @@
 import { cn } from 'cn'
 import { HintIcon } from '@/components/shared/hint'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
-import {
-  aggregationHint,
-  aggregationLabel,
-  timeValue,
-} from '@/lib/time-aggregation'
+import { aggregationHint, aggregationLabel } from '@/lib/time-aggregation'
 import {
   formatMinutes,
   formatPercent,
@@ -17,9 +13,10 @@ import type {
   SatisfactionSummary,
   SlaSummary,
 } from '../domain/metrics'
-import { deltaOf } from '../domain/period'
+import { deltaOf as deltaOfValue } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
+import { modeValue, type TimeMode } from '../domain/time-mode'
 import { DeltaBadge } from './delta-badge'
 
 interface Stat {
@@ -46,11 +43,13 @@ function StatItem({
         !first && 'sm:border-l sm:pl-4',
       )}
     >
-      <span className="flex items-center gap-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+      <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
         <span className="truncate">{stat.label}</span>
         <HintIcon hint={stat.hint} label={stat.label} />
       </span>
-      <span className="text-2xl font-semibold tabular-nums">{stat.value}</span>
+      <span className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
+        {stat.value}
+      </span>
       <span className="min-h-4 text-xs">
         {stat.delta !== undefined ? (
           <DeltaBadge
@@ -64,59 +63,94 @@ function StatItem({
   )
 }
 
-function buildStats({
-  summary,
-  comparison,
-  aggregation,
-  satisfaction,
-  sla,
-}: {
+interface StatInput {
   summary: MetricsSummary
   comparison: Comparison | null
   aggregation: ReturnType<typeof useTimeAggregation>['aggregation']
   satisfaction: SatisfactionSummary
   sla: SlaSummary
-}): Stat[] {
-  const k = metricsMessages.kpi
-  const hints = metricsMessages.kpiHints
-  const change = (pick: (value: MetricsSummary) => number) =>
-    comparison ? deltaOf(pick(summary), pick(comparison.summary)) : undefined
-  const active = (value: MetricsSummary) =>
-    timeValue(aggregation, value.avgActive, value.sumActive)
+  mode: TimeMode
+}
+
+function activeMinutes(input: StatInput, summary: MetricsSummary) {
+  return modeValue(
+    summary as unknown as Record<string, number>,
+    'active',
+    input.mode,
+    input.aggregation,
+  )
+}
+
+function deltaOf(
+  input: StatInput,
+  pick: (summary: MetricsSummary) => number,
+): number | undefined {
+  if (!input.comparison) return undefined
+  return (
+    deltaOfValue(pick(input.summary), pick(input.comparison.summary)) ??
+    undefined
+  )
+}
+
+function ticketStat(input: StatInput): Stat {
+  return {
+    label: metricsMessages.kpi.tickets,
+    value: String(input.summary.tickets),
+    hint: metricsMessages.kpiHints.tickets,
+    delta: deltaOf(input, (summary) => summary.tickets),
+  }
+}
+
+function openStat(input: StatInput): Stat {
+  return {
+    label: metricsMessages.kpi.open,
+    value: String(input.summary.open),
+    hint: metricsMessages.kpiHints.open,
+  }
+}
+
+function activeStat(input: StatInput): Stat {
+  return {
+    label: aggregationLabel(metricsMessages.kpi.activeShort, input.aggregation),
+    value: formatMinutes(activeMinutes(input, input.summary)),
+    hint: aggregationHint(metricsMessages.kpiHints.active, input.aggregation),
+    delta: deltaOf(input, (summary) => activeMinutes(input, summary)),
+    lowerIsBetter: true,
+  }
+}
+
+function slaStat(input: StatInput): Stat {
+  return {
+    label: metricsMessages.kpi.slaShort,
+    value: formatRate(input.sla.complianceRate),
+    hint: metricsMessages.kpiHints.sla,
+  }
+}
+
+function satisfactionStat(input: StatInput): Stat {
+  return {
+    label: metricsMessages.kpi.satisfaction,
+    value: formatScore(input.satisfaction.average),
+    hint: metricsMessages.kpiHints.satisfaction,
+  }
+}
+
+function firstFixStat(input: StatInput): Stat {
+  return {
+    label: metricsMessages.kpi.firstFixShort,
+    value: formatPercent(input.summary.firstTimeFixRate),
+    hint: metricsMessages.kpiHints.firstFix,
+  }
+}
+
+function buildStats(input: StatInput): Stat[] {
   return [
-    {
-      label: k.tickets,
-      value: String(summary.tickets),
-      hint: hints.tickets,
-      delta: change((value) => value.tickets) ?? undefined,
-    },
-    {
-      label: k.open,
-      value: String(summary.open),
-      hint: hints.open,
-    },
-    {
-      label: aggregationLabel(k.activeShort, aggregation),
-      value: formatMinutes(active(summary)),
-      hint: aggregationHint(hints.active, aggregation),
-      delta: change(active) ?? undefined,
-      lowerIsBetter: true,
-    },
-    {
-      label: k.slaShort,
-      value: formatRate(sla.complianceRate),
-      hint: hints.sla,
-    },
-    {
-      label: k.satisfaction,
-      value: formatScore(satisfaction.average),
-      hint: hints.satisfaction,
-    },
-    {
-      label: k.firstFixShort,
-      value: formatPercent(summary.firstTimeFixRate),
-      hint: hints.firstFix,
-    },
+    ticketStat(input),
+    openStat(input),
+    activeStat(input),
+    slaStat(input),
+    satisfactionStat(input),
+    firstFixStat(input),
   ]
 }
 
@@ -126,11 +160,13 @@ export function HealthStrip({
   comparison,
   satisfaction,
   sla,
+  mode,
 }: {
   summary: MetricsSummary
   comparison: Comparison | null
   satisfaction: SatisfactionSummary
   sla: SlaSummary
+  mode: TimeMode
 }) {
   const { aggregation } = useTimeAggregation()
   const stats = buildStats({
@@ -139,11 +175,12 @@ export function HealthStrip({
     aggregation,
     satisfaction,
     sla,
+    mode,
   })
   return (
     <section
       aria-label={metricsMessages.health}
-      className="grid grid-cols-2 gap-x-6 gap-y-4 border-y py-3 sm:grid-cols-3 xl:grid-cols-6"
+      className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-xl bg-card p-4 sm:grid-cols-3 sm:p-5 xl:grid-cols-6"
     >
       {stats.map((stat, index) => (
         <StatItem

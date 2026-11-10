@@ -3,6 +3,7 @@ import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { timeValue } from '@/lib/time-aggregation'
+import { modeValue, type TimeMode } from '../domain/time-mode'
 import type {
   Dimension,
   DimensionGroup,
@@ -36,17 +37,22 @@ function measureValue(
   row: DimensionRow,
   measure: Measure,
   aggregation: 'average' | 'total',
+  mode: TimeMode,
 ) {
-  if (measure === 'avgActive') {
-    return timeValue(aggregation, row.avgActive, row.sumActive)
-  }
   if (measure === 'avgTotalAll') {
     return timeValue(aggregation, row.avgTotalAll, row.sumTotalAll)
   }
   if (measure === 'avgTotalClosed') {
     return timeValue(aggregation, row.avgTotalClosed, row.sumTotalClosed)
   }
-  return Number(row[measure])
+  const key = measure.replace(/^avg/, '')
+  const normalized = key[0]?.toLowerCase() + key.slice(1)
+  return modeValue(
+    row as unknown as Record<string, number>,
+    normalized,
+    mode,
+    aggregation,
+  )
 }
 
 function timeColumns({
@@ -55,12 +61,14 @@ function timeColumns({
   max,
   aggregation,
   label,
+  mode,
 }: {
   dimension: Dimension
   measure: Measure
   max: number
   aggregation: 'average' | 'total'
   label: string
+  mode: TimeMode
 }): DataTableColumn<DimensionRow>[] {
   return [
     {
@@ -78,7 +86,7 @@ function timeColumns({
       id: 'measure',
       header: label,
       cell: (row) => {
-        const value = measureValue(row, measure, aggregation)
+        const value = measureValue(row, measure, aggregation, mode)
         return (
           <BarCell
             value={value}
@@ -104,51 +112,72 @@ function timeColumns({
   ]
 }
 
+function measureLabelOf(measure: Measure, aggregation: 'average' | 'total') {
+  if (measure === 'avgActive') {
+    return aggregation === 'total' ? `${k.active} (acumulado)` : k.active
+  }
+  return MEASURES.find((item) => item.key === measure)?.label ?? measure
+}
+
+function MeasurePicker({
+  measure,
+  onChange,
+}: {
+  measure: Measure
+  onChange: (measure: Measure) => void
+}) {
+  return (
+    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+      <span>{t.measure}</span>
+      <select
+        value={measure}
+        aria-label={t.measure}
+        onChange={(event) => onChange(event.target.value as Measure)}
+        className="h-11 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
+      >
+        {MEASURES.map((item) => (
+          <option key={item.key} value={item.key}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 /** Tabla de tiempos por dimensión con selector de medida. */
-export function TimesDimensionTable({ groups }: { groups: DimensionGroup[] }) {
+export function TimesDimensionTable({
+  groups,
+  mode,
+}: {
+  groups: DimensionGroup[]
+  mode: TimeMode
+}) {
   const [dimension, setDimension] = useState<Dimension>('category')
   const [measure, setMeasure] = useState<Measure>('avgActive')
   const { aggregation } = useTimeAggregation()
   const rows = [...rowsByDimension(groups, dimension)].sort(
     (left, right) =>
-      measureValue(right, measure, aggregation) -
-      measureValue(left, measure, aggregation),
+      measureValue(right, measure, aggregation, mode) -
+      measureValue(left, measure, aggregation, mode),
   )
   const max = Math.max(
     1,
-    ...rows.map((row) => measureValue(row, measure, aggregation)),
+    ...rows.map((row) => measureValue(row, measure, aggregation, mode)),
   )
-  const measureLabel =
-    measure === 'avgActive'
-      ? aggregation === 'total'
-        ? `${k.active} (acumulado)`
-        : k.active
-      : (MEASURES.find((item) => item.key === measure)?.label ?? measure)
+  const measureLabel = measureLabelOf(measure, aggregation)
   return (
     <ChartCard title={t.byDimension}>
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <DimensionPicker value={dimension} onChange={setDimension} />
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{t.measure}</span>
-            <select
-              value={measure}
-              aria-label={t.measure}
-              onChange={(event) => setMeasure(event.target.value as Measure)}
-              className="h-11 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
-            >
-              {MEASURES.map((item) => (
-                <option key={item.key} value={item.key}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <MeasurePicker measure={measure} onChange={setMeasure} />
         </div>
         <div className="max-h-80 overflow-auto">
           <DataTable
             columns={timeColumns({
               dimension,
+              mode,
               measure,
               max,
               aggregation,

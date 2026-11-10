@@ -31,6 +31,20 @@ export const ticketPageResponseSchema = ticketItemsResponseSchema.extend({
   page: z.number().int().positive(),
   pageSize: z.number().int().positive(),
 })
+const cycleTimesSchema = z.object({
+  total: z.number(),
+  response: z.number(),
+  assignment: z.number(),
+  pendingTake: z.number(),
+  reassignment: z.number(),
+  wait: z.number(),
+  active: z.number(),
+  pause: z.number(),
+  dormant: z.number(),
+  validation: z.number(),
+  claim: z.number(),
+})
+
 export const ticketDetailResponseSchema = z.object({
   ticket: ticketListItemSchema.extend({
     cycle: z.number().int().positive(),
@@ -61,19 +75,9 @@ export const ticketDetailResponseSchema = z.object({
     canValidateSupervisor: z.boolean(),
     hasTaken: z.boolean(),
     validationPolicy: z.enum(['requester', 'supervisor', 'both']),
-    cycleTimes: z.object({
-      total: z.number(),
-      response: z.number(),
-      assignment: z.number(),
-      pendingTake: z.number(),
-      reassignment: z.number(),
-      wait: z.number(),
-      active: z.number(),
-      pause: z.number(),
-      dormant: z.number(),
-      validation: z.number(),
-      claim: z.number(),
-    }),
+    cycleTimes: cycleTimesSchema,
+    cycleTimesLabor: cycleTimesSchema,
+    cycleTimesExtra: cycleTimesSchema,
   }),
 })
 export const timelineResponseSchema = z.object({

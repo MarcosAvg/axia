@@ -113,6 +113,7 @@ describe('contrato de endpoints de métricas', () => {
     'pause-substates',
     'reject-cancel',
     'routing',
+    'auxiliary-by-category',
   ])('conserva respuesta y permiso propio en %s', async (metric) => {
     const response = await get(`/api/metrics/${metric}`, context.cookies.admin)
     expect(response.status).toBe(200)

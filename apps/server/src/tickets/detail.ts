@@ -1,25 +1,13 @@
-import { sql, type SQL } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 
 import { can as hasPermission, type Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
+import { cycleTimeColumns, toCycleTimes } from './detail-times.js'
+import type { TicketCycleTimes } from './detail-times.js'
 import { iso, optionalIso } from './format.js'
 import { findVisibleTicket } from './repository.js'
 import { isUnroutedSql } from './routing-sql.js'
 import { validationCapabilities } from './validation.js'
-
-type TicketCycleTimes = {
-  total: number
-  response: number
-  assignment: number
-  pendingTake: number
-  reassignment: number
-  wait: number
-  active: number
-  pause: number
-  dormant: number
-  validation: number
-  claim: number
-}
 
 export type TicketDetail = {
   id: string
@@ -40,6 +28,8 @@ export type TicketDetail = {
   teamName: string | null
   cycle: number
   cycleTimes: TicketCycleTimes
+  cycleTimesLabor: TicketCycleTimes
+  cycleTimesExtra: TicketCycleTimes
   buildingId: string
   locationId: string
   dependencyId: string
@@ -68,6 +58,7 @@ export type TicketDetail = {
 }
 
 type DetailRow = {
+  [key: string]: unknown
   id: string
   folio: string
   status: string
@@ -125,22 +116,6 @@ type ValidationCapabilities = {
   canValidateSupervisor: boolean
 }
 
-function toCycleTimes(row: DetailRow): TicketCycleTimes {
-  return {
-    total: Number(row.total_minutes),
-    response: Number(row.response_minutes),
-    assignment: Number(row.assignment_minutes),
-    pendingTake: Number(row.pending_take_minutes),
-    reassignment: Number(row.reassignment_minutes),
-    wait: Number(row.wait_minutes),
-    active: Number(row.active_minutes),
-    pause: Number(row.pause_minutes),
-    dormant: Number(row.dormant_minutes),
-    validation: Number(row.validation_minutes),
-    claim: Number(row.claim_minutes),
-  }
-}
-
 function toDetail(
   row: DetailRow,
   hasTaken: boolean,
@@ -166,6 +141,8 @@ function toDetail(
     teamName: row.team_name,
     cycle: row.cycle,
     cycleTimes: toCycleTimes(row),
+    cycleTimesLabor: toCycleTimes(row, 'laboral'),
+    cycleTimesExtra: toCycleTimes(row, 'extra'),
     buildingId: row.building_id,
     locationId: row.location_id,
     dependencyId: row.dependency_id,
@@ -192,22 +169,6 @@ function toDetail(
     isUnrouted: canSeeRouting && row.is_unrouted,
     validationPolicy: row.validation_policy,
   }
-}
-
-function timingColumns(): SQL {
-  return sql`
-      extract(epoch from (coalesce(t.closed_at, now()) - t.reported_at)) / 60 as total_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'supervisor_response'::public.time_span_kind)) / 60 as response_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'technician_assignment'::public.time_span_kind)) / 60 as assignment_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'pending_take'::public.time_span_kind)) / 60 as pending_take_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'reassignment'::public.time_span_kind)) / 60 as reassignment_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'wait_start'::public.time_span_kind)) / 60 as wait_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'active_work'::public.time_span_kind)) / 60 as active_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'pause'::public.time_span_kind)) / 60 as pause_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'dormant'::public.time_span_kind)) / 60 as dormant_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'validation'::public.time_span_kind)) / 60 as validation_minutes,
-      extract(epoch from public.ticket_time_by_kind(t.id, 'claim'::public.time_span_kind)) / 60 as claim_minutes
-  `
 }
 
 function detailQuery(ticketId: string, actorId: string) {
@@ -245,7 +206,7 @@ function detailQuery(ticketId: string, actorId: string) {
       p.name as priority_name,
       p.position as priority_position,
       tm.name as team_name,
-      ${timingColumns()}
+      ${cycleTimeColumns()}
     from public.tickets t
     left join public.tickets dup on dup.id = t.duplicate_of_id
     left join public.requesters requesting on requesting.id = t.requester_id

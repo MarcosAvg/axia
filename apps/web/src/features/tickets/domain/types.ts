@@ -145,6 +145,8 @@ interface TicketCycleTimes {
 
 export type TicketDetailWithTimes = TicketDetail & {
   cycleTimes: TicketCycleTimes
+  cycleTimesLabor: TicketCycleTimes
+  cycleTimesExtra: TicketCycleTimes
 }
 
 export interface TicketTimelineItem {

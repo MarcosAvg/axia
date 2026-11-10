@@ -120,6 +120,8 @@ function TicketLayoutContent(props: TicketLayoutContentProps) {
     <div className="flex flex-col gap-6 pb-44 lg:pb-0">
       <CycleTimesSection
         times={props.ticket.cycleTimes}
+        timesLabor={props.ticket.cycleTimesLabor}
+        timesExtra={props.ticket.cycleTimesExtra}
         canSee={Boolean(can(props.identity, 'metrics.view'))}
       />
       <TicketContentColumns {...props} />

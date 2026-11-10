@@ -17,6 +17,7 @@ import type {
 import { formatRangeLabel, previousRange } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import {
+  useAuxiliaryByCategory,
   useByTechnician,
   useDuplicates,
   useMetricsSummary,
@@ -89,6 +90,7 @@ function useMetricsData(filters: MetricsFilters) {
     satisfaction: useSatisfaction(filters),
     sla: useSla(filters),
     technicians: useByTechnician(filters),
+    auxiliaryByCategory: useAuxiliaryByCategory(filters),
     technicianTimes: useTechnicianTimes(filters),
     technicianSubjectTimes: useTechnicianSubjectTimes(filters),
     requesterTimes: useRequesterTimes(filters),
@@ -131,6 +133,7 @@ export function useMetricsBoard() {
     summary: or(data.current.data?.summary, EMPTY_SUMMARY),
     volume: or(data.current.data?.volume, []),
     aging: or(data.current.data?.aging, []),
+    agingBuckets: or(data.current.data?.agingBuckets, []),
     comparison,
     groups: or(data.current.data?.groups, []),
     satisfactionDistribution: or(
@@ -150,6 +153,7 @@ export function useMetricsBoard() {
     sla: or(data.sla.summary.data, EMPTY_SLA),
     slaRows: or(data.sla.byPriority.data, []),
     technicians: or(data.technicians.data, []),
+    auxiliaryByCategory: or(data.auxiliaryByCategory.data, []),
     technicianTimes: or(data.technicianTimes.data, []),
     technicianSubjectTimes: or(data.technicianSubjectTimes.data, []),
     requesterTimes: or(data.requesterTimes.data, []),

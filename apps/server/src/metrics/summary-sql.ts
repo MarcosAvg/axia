@@ -2,14 +2,10 @@ import { sql } from 'drizzle-orm'
 
 import type { Actor } from '../auth/authorization.js'
 import { scopePredicate } from '../tickets/scope.js'
+import { aggregateColumns, OPEN_STATUSES } from './aggregate-columns.js'
 import { filterParams, type MetricsFilters } from './filters.js'
 
 /** Estados que cuentan como trabajo todavía abierto. */
-const OPEN_STATUSES = sql`(
-  'registered', 'with_supervisor', 'assigned', 'in_progress', 'paused',
-  'attended', 'under_claim'
-)`
-
 type MetricsScope = 'flow' | 'workload' | 'all'
 
 /** Base visible y filtrada; cada llamador conserva el permiso de su endpoint. */
@@ -65,7 +61,27 @@ export function metricsBase(
       exists (
         select 1 from public.ticket_events e
         where e.ticket_id = v.id and e.time_confidence = 'unverified'
-      ) as has_unverified_time
+      ) as has_unverified_time,
+      public.ticket_time_by_kind(v.id, 'dormant'::public.time_span_kind)
+        as dormant_time,
+      public.ticket_time_by_kind(v.id, 'duplicate_review'::public.time_span_kind)
+        as duplicate_review_time,
+      public.ticket_time_by_kind_extra(v.id, 'supervisor_response'::public.time_span_kind)
+        as response_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'technician_assignment'::public.time_span_kind)
+        as assignment_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'pending_take'::public.time_span_kind)
+        as pending_take_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'reassignment'::public.time_span_kind)
+        as reassignment_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'wait_start'::public.time_span_kind)
+        as wait_start_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'pause'::public.time_span_kind)
+        as pause_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'validation'::public.time_span_kind)
+        as validation_time_extra,
+      public.ticket_time_by_kind_extra(v.id, 'claim'::public.time_span_kind)
+        as claim_time_extra
     from public.v_ticket_metrics_base v
     join (${visibleTickets(actor, filters, permission, options)}) t
       on t.id = v.id
@@ -149,77 +165,6 @@ function compactSelect() {
     null::text as parent_id,`
 }
 
-function volumeColumns() {
-  return sql`
-    count(*)::int as tickets,
-    count(*) filter (where v.status in ${OPEN_STATUSES})::int as open,
-    count(*) filter (where v.status = 'closed')::int as closed,
-    count(*) filter (where v.status not in ('rejected', 'cancelled', 'duplicate'))::int as flow_tickets,
-    count(*) filter (where v.status = 'rejected')::int as rejected,
-    count(*) filter (where v.status = 'cancelled')::int as cancelled,
-    count(*) filter (where v.status = 'duplicate')::int as duplicate,
-    coalesce(avg(extract(epoch from v.total_time) / 60), 0) as avg_total,
-    coalesce(avg(extract(epoch from v.total_time) / 60), 0) as avg_total_all,
-    coalesce(avg(extract(epoch from v.total_time_labor) / 60), 0) as avg_total_labor,
-    coalesce(sum(extract(epoch from v.total_time) / 60), 0) as sum_total,
-    coalesce(sum(extract(epoch from v.total_time) / 60), 0) as sum_total_all,
-    coalesce(sum(extract(epoch from v.total_time_labor) / 60), 0) as sum_total_labor
-  `
-}
-
-function performanceColumns() {
-  const p = sql`(v.outcome <> 'duplicate' and not v.has_unverified_time)`
-  return sql`
-    count(*) filter (where ${p} and v.reassigned_supervisor)::int as reassigned,
-    count(*) filter (where ${p} and v.reassigned_technician)::int as reassigned_technician,
-    count(*) filter (where ${p} and v.recaptured)::int as recaptured,
-    count(*) filter (where ${p} and v.reopened)::int as reopened,
-    count(*) filter (where ${p} and v.status = 'closed' and not v.reopened)::int as first_fix,
-    count(*) filter (where ${p} and (v.status = 'closed' or v.reopened))::int as closed_or_reopened,
-    coalesce(avg(extract(epoch from v.total_time) / 60) filter (
-      where v.status = 'closed' and ${p}
-    ), 0) as avg_total_closed,
-    coalesce(avg(extract(epoch from v.total_time) / 60) filter (
-      where v.status = 'closed' and ${p}
-    ), 0) as avg_resolution,
-    coalesce(avg(extract(epoch from v.net_time) / 60) filter (where ${p}), 0) as avg_net,
-    coalesce(avg(extract(epoch from v.active_work_time) / 60) filter (where ${p}), 0) as avg_active,
-    coalesce(avg(extract(epoch from v.active_work_time_labor) / 60) filter (where ${p}), 0) as avg_active_labor,
-    coalesce(avg(extract(epoch from v.active_work_time_extra) / 60) filter (where ${p}), 0) as avg_active_extra,
-    coalesce(avg(extract(epoch from v.response_time) / 60) filter (where ${p}), 0) as avg_response,
-    coalesce(avg(extract(epoch from v.assignment_time) / 60) filter (where ${p}), 0) as avg_assignment,
-    coalesce(avg(extract(epoch from v.pending_take_time) / 60) filter (where ${p}), 0) as avg_pending_take,
-    coalesce(avg(extract(epoch from v.reassignment_time) / 60) filter (where ${p}), 0) as avg_reassignment,
-    coalesce(avg(extract(epoch from v.wait_start_time) / 60) filter (where ${p}), 0) as avg_wait,
-    coalesce(avg(extract(epoch from v.pause_time) / 60) filter (where ${p}), 0) as avg_pause,
-    coalesce(avg(extract(epoch from v.validation_time) / 60) filter (where ${p}), 0) as avg_validation,
-    coalesce(avg(extract(epoch from v.claim_time) / 60) filter (where ${p}), 0) as avg_claim,
-    coalesce(avg(extract(epoch from v.net_time_labor) / 60) filter (where ${p}), 0) as avg_net_labor,
-    coalesce(sum(extract(epoch from v.total_time) / 60) filter (
-      where v.status = 'closed' and ${p}
-    ), 0) as sum_total_closed,
-    coalesce(sum(extract(epoch from v.total_time) / 60) filter (
-      where v.status = 'closed' and ${p}
-    ), 0) as sum_resolution,
-    coalesce(sum(extract(epoch from v.net_time) / 60) filter (where ${p}), 0) as sum_net,
-    coalesce(sum(extract(epoch from v.active_work_time) / 60) filter (where ${p}), 0) as sum_active,
-    coalesce(sum(extract(epoch from v.active_work_time_extra) / 60) filter (where ${p}), 0) as sum_active_extra,
-    coalesce(sum(extract(epoch from v.response_time) / 60) filter (where ${p}), 0) as sum_response,
-    coalesce(sum(extract(epoch from v.assignment_time) / 60) filter (where ${p}), 0) as sum_assignment,
-    coalesce(sum(extract(epoch from v.pending_take_time) / 60) filter (where ${p}), 0) as sum_pending_take,
-    coalesce(sum(extract(epoch from v.reassignment_time) / 60) filter (where ${p}), 0) as sum_reassignment,
-    coalesce(sum(extract(epoch from v.wait_start_time) / 60) filter (where ${p}), 0) as sum_wait,
-    coalesce(sum(extract(epoch from v.pause_time) / 60) filter (where ${p}), 0) as sum_pause,
-    coalesce(sum(extract(epoch from v.validation_time) / 60) filter (where ${p}), 0) as sum_validation,
-    coalesce(sum(extract(epoch from v.claim_time) / 60) filter (where ${p}), 0) as sum_claim,
-    coalesce(sum(extract(epoch from v.net_time_labor) / 60) filter (where ${p}), 0) as sum_net_labor
-  `
-}
-
-function aggregateColumns() {
-  return sql`${volumeColumns()}, ${performanceColumns()}`
-}
-
 function catalogJoins() {
   return sql`
     left join public.teams tm on tm.id = v.team_id
@@ -263,6 +208,26 @@ export function metricsVolume(tz: string) {
       count(*)::int as tickets
     from base v
     group by 1
+  `
+}
+
+export function metricsAgingBuckets() {
+  return sql`
+    select bucket, count(*)::int as tickets
+    from (
+      select case
+        when extract(epoch from (now() - v.reported_at)) <= 86400 then '0-1'
+        when extract(epoch from (now() - v.reported_at)) <= 259200 then '2-3'
+        when extract(epoch from (now() - v.reported_at)) <= 604800 then '4-7'
+        when extract(epoch from (now() - v.reported_at)) <= 1209600 then '8-14'
+        when extract(epoch from (now() - v.reported_at)) <= 2592000 then '15-30'
+        else '30+'
+      end as bucket
+      from aging_base v
+      where v.status in ${OPEN_STATUSES}
+    ) a
+    group by bucket
+    order by bucket
   `
 }
 

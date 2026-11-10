@@ -1,7 +1,9 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import type { MetricsFilters } from '../domain/metrics'
 import {
+  fetchAuxiliaryByCategory,
   fetchPauseSubstates,
+  fetchRejectCancel,
   fetchSupervisors,
   fetchTechnicianTimes,
 } from '../api/indicators-api'
@@ -12,7 +14,6 @@ import {
   fetchDuplicatesByDimension,
   fetchMetricsSummary,
   fetchPausesByReason,
-  fetchRejectCancel,
   fetchRequesterTimes,
   fetchRouting,
   fetchSatisfaction,
@@ -38,6 +39,7 @@ const metricsKeys = {
   pauseSubstates: ['metrics', 'pause-substates'] as const,
   rejectCancel: ['metrics', 'reject-cancel'] as const,
   routing: ['metrics', 'routing'] as const,
+  auxiliaryByCategory: ['metrics', 'auxiliary-by-category'] as const,
 }
 
 function useFilteredQuery<T>(
@@ -145,6 +147,14 @@ export function useRequesterTimes(filters: MetricsFilters) {
     metricsKeys.requesterTimes,
     filters,
     fetchRequesterTimes,
+  )
+}
+
+export function useAuxiliaryByCategory(filters: MetricsFilters) {
+  return useFilteredQuery(
+    metricsKeys.auxiliaryByCategory,
+    filters,
+    fetchAuxiliaryByCategory,
   )
 }
 

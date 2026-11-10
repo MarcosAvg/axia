@@ -97,7 +97,7 @@ function QualityRates({
     >
       {rateStats(summary, comparison).map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1">
-          <span className="flex min-h-7 items-start gap-1 text-[11px] leading-tight font-medium tracking-wide text-muted-foreground uppercase">
+          <span className="flex min-h-7 items-start gap-1 text-xs leading-tight font-medium text-muted-foreground">
             <span>{stat.label}</span>
             <HintIcon hint={stat.hint} label={stat.label} />
           </span>
@@ -152,6 +152,62 @@ function DuplicateStats({
   )
 }
 
+function TimeQualityCard({ summary }: { summary: MetricsSummary }) {
+  return (
+    <ChartCard
+      title={metricsMessages.quality.timeQuality}
+      hint={metricsMessages.quality.timeQualityHint}
+    >
+      <dl className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">
+            {metricsMessages.quality.unverifiedTickets}
+          </dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {summary.unverifiedTickets}
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">
+            {metricsMessages.quality.openTimeAlerts}
+          </dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {summary.openTimeAlerts}
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">
+            {metricsMessages.quality.duplicateReview}
+          </dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {formatMinutes(summary.avgDuplicateReview)}
+          </dd>
+        </div>
+      </dl>
+    </ChartCard>
+  )
+}
+
+function DuplicatesSection({
+  duplicates,
+}: {
+  duplicates: {
+    tickets: DuplicateTicket[]
+    alerts: DuplicateAlert[]
+    rows: DuplicateDimensionRow[]
+  }
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-muted-foreground">
+        {metricsMessages.duplicates.title}
+      </h2>
+      <DuplicateStats duplicates={duplicates} />
+      <DuplicateTable rows={duplicates.rows} />
+    </section>
+  )
+}
+
 /** Calidad: tasas, mapa por dimensión, riesgo, pausas y descartes. */
 export function QualityTab({
   summary,
@@ -177,6 +233,7 @@ export function QualityTab({
   return (
     <div className="flex flex-col gap-5">
       <QualityRates summary={summary} comparison={comparison} />
+      <TimeQualityCard summary={summary} />
       <QualityHeatmap groups={groups} />
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <RiskScatter groups={groups} />
@@ -195,13 +252,7 @@ export function QualityTab({
           </div>
         </ChartCard>
       </div>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          {metricsMessages.duplicates.title}
-        </h2>
-        <DuplicateStats duplicates={duplicates} />
-        <DuplicateTable rows={duplicates.rows} />
-      </section>
+      <DuplicatesSection duplicates={duplicates} />
       <ChartCard
         title={metricsMessages.rejectCancel.title}
         hint={metricsMessages.chartHints.rejectCancel}

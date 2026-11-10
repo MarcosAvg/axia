@@ -261,11 +261,13 @@ rechazada sigue [pendiente](estados-y-transiciones.md).
 | `GET` | `/api/metrics/pause-substates` |
 | `GET` | `/api/metrics/reject-cancel` |
 | `GET` | `/api/metrics/routing` |
+| `GET` | `/api/metrics/auxiliary-by-category` |
 
 Resumen y actividad requieren `ticket.view`; las demás métricas requieren `metrics.view` y usan
 su alcance. Los filtros de métricas son `from` y `to` (`YYYY-MM-DD`), `buildingId`, `teamId`,
 `categoryId`, `dependencyId` y `outcome` (`open`, `closed`, `rejected`, `cancelled`, `duplicate`);
-un filtro nunca amplía el alcance. Resumen admite `compact=0|1`; actividad admite `limit` (1–50,
+un filtro nunca amplía el alcance. `clock` (`calendar` o `laboral`) elige el reloj de SLA; sin él
+se usa el modo configurado en la instancia. Resumen admite `compact=0|1`; actividad admite `limit` (1–50,
 por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
 
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
@@ -277,6 +279,14 @@ también está disponible como dimensión de agrupación. La antigüedad (`aging
 pendientes visibles aunque su registro quede fuera del periodo, y respeta el alcance y las
 dimensiones del filtro. SLA, resolución y primera resolución excluyen rechazados, cancelados y
 duplicados; el volumen, los motivos y la carga de trabajo los conservan según el indicador.
+
+El resumen también devuelve `dormant` y la revisión de duplicado como indicadores propios, los
+percentiles P50/P90 (`p50Total`, `p90Total`, `p50Response`, `p50Active`, `p50Validation`,
+`p50Claim` y `p50Resolution`, con sus pares `p90`), `unverifiedTickets`, `openTimeAlerts`,
+`agingBuckets` (rangos de antigüedad) y las variantes por modo `*Labor` y `*Extra` de las fases
+del ciclo. El detalle de un tiquet expone `cycleTimes`, `cycleTimesLabor` y `cycleTimesExtra` con
+la misma forma. La tabla de apoyo auxiliar devuelve minutos continuos y laborales por técnico y
+categoría.
 
 Los contratos ejecutables están junto a las rutas y en `apps/server/src/**/schemas.ts`;
 las pruebas de integración verifican formas, permisos y casos de error. Esta referencia no es un

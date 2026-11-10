@@ -15,6 +15,7 @@ import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
 import { ChartCard } from './chart-card'
+import { CycleBar } from './cycle-bar'
 import { HealthStrip } from './health-strip'
 import { RankingBars } from './ranking-bars'
 import { SatisfactionPanel, SlaPanel } from './sla-panels'
@@ -78,12 +79,30 @@ function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
   )
 }
 
-function AgingCard({ aging }: { aging: AgingRow[] }) {
+function AgingCard({
+  aging,
+  buckets,
+}: {
+  aging: AgingRow[]
+  buckets: Array<{ bucket: string; tickets: number }>
+}) {
   return (
     <ChartCard
       title={metricsMessages.aging.title}
       hint={metricsMessages.chartHints.aging}
     >
+      {buckets.length > 0 ? (
+        <dl className="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+          {buckets.map((bucket) => (
+            <div key={bucket.bucket} className="flex items-baseline gap-1">
+              <dt>{bucket.bucket} d</dt>
+              <dd className="font-semibold tabular-nums text-foreground">
+                {bucket.tickets}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
       <div className="max-h-80 overflow-auto">
         <AgingList rows={aging} statusLabel={statusLabel} />
       </div>
@@ -91,10 +110,35 @@ function AgingCard({ aging }: { aging: AgingRow[] }) {
   )
 }
 
+function VolumeAndStatus({
+  volume,
+  groups,
+}: {
+  volume: VolumePoint[]
+  groups: DimensionGroup[]
+}) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
+      <div className="lg:col-span-3">
+        <ChartCard
+          title={metricsMessages.charts.volume}
+          hint={metricsMessages.chartHints.volume}
+        >
+          <VolumeChart data={volume} />
+        </ChartCard>
+      </div>
+      <div className="lg:col-span-2">
+        <StatusChart groups={groups} />
+      </div>
+    </div>
+  )
+}
+
 /** Resumen: salud, volumen, estado, categorías, SLA, satisfacción y antigüedad. */
 export function SummaryTab({
   volume,
   aging,
+  agingBuckets,
   groups,
   summary,
   comparison,
@@ -102,9 +146,11 @@ export function SummaryTab({
   satisfactionDistribution,
   sla,
   slaRows,
+  mode,
 }: {
   volume: VolumePoint[]
   aging: AgingRow[]
+  agingBuckets: Array<{ bucket: string; tickets: number }>
   groups: DimensionGroup[]
   summary: MetricsSummary
   comparison: Comparison | null
@@ -112,6 +158,7 @@ export function SummaryTab({
   satisfactionDistribution: number[]
   sla: SlaSummary
   slaRows: SlaPriorityRow[]
+  mode: import('../domain/time-mode').TimeMode
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -120,20 +167,10 @@ export function SummaryTab({
         comparison={comparison}
         satisfaction={satisfaction}
         sla={sla}
+        mode={mode}
       />
-      <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
-        <div className="lg:col-span-3">
-          <ChartCard
-            title={metricsMessages.charts.volume}
-            hint={metricsMessages.chartHints.volume}
-          >
-            <VolumeChart data={volume} />
-          </ChartCard>
-        </div>
-        <div className="lg:col-span-2">
-          <StatusChart groups={groups} />
-        </div>
-      </div>
+      <CycleBar summary={summary} mode={mode} />
+      <VolumeAndStatus volume={volume} groups={groups} />
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         <TopCategories groups={groups} />
         <OutcomeBreakdown groups={groups} />
@@ -144,7 +181,7 @@ export function SummaryTab({
       </div>
       <SlaPanel sla={sla} rows={slaRows} />
       <StatusTableCard groups={groups} />
-      <AgingCard aging={aging} />
+      <AgingCard aging={aging} buckets={agingBuckets} />
     </div>
   )
 }

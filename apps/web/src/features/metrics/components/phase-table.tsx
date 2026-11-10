@@ -9,6 +9,7 @@ import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CyclePhase } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
+import { modeValue, type TimeMode } from '../domain/time-mode'
 
 const t = metricsMessages.times
 
@@ -22,50 +23,49 @@ interface PhaseRow {
 function phaseRows(
   summary: MetricsSummary,
   aggregation: TimeAggregation,
+  mode: TimeMode,
 ): PhaseRow[] {
-  const pick = (average: number, total: number) =>
-    timeValue(aggregation, average, total)
-  const average = cyclePhases({
-    response: summary.avgResponse,
-    assignment: summary.avgAssignment,
-    pendingTake: summary.avgPendingTake,
-    wait: summary.avgWait,
-    active: summary.avgActive,
-    pause: summary.avgPause,
-    dormant: 0,
-    validation: summary.avgValidation,
-    claim: summary.avgClaim,
-    total: summary.avgTotal,
+  const record = summary as unknown as Record<string, number>
+  const value = (key: string, agg: 'average' | 'total') =>
+    modeValue(record, key, mode, agg)
+  const phases = (agg: 'average' | 'total') => ({
+    response: value('response', agg),
+    assignment: value('assignment', agg),
+    pendingTake: value('pendingTake', agg),
+    wait: value('wait', agg),
+    active: value('active', agg),
+    pause: value('pause', agg),
+    dormant: value('dormant', agg),
+    validation: value('validation', agg),
+    claim: value('claim', agg),
+    total: value('total', agg),
   })
-  const accumulated = cyclePhases({
-    response: summary.sumResponse,
-    assignment: summary.sumAssignment,
-    pendingTake: summary.sumPendingTake,
-    wait: summary.sumWait,
-    active: summary.sumActive,
-    pause: summary.sumPause,
-    dormant: 0,
-    validation: summary.sumValidation,
-    claim: summary.sumClaim,
-    total: summary.sumTotal,
-  })
-  const total = pick(summary.avgTotal, summary.sumTotal)
+  const average = cyclePhases(phases('average'))
+  const accumulated = cyclePhases(phases('total'))
+  const total = value('total', aggregation)
   const byPhase = new Map(accumulated.map((slice) => [slice.phase, slice]))
   return average.map((slice) => {
     const sum = byPhase.get(slice.phase)?.minutes ?? 0
+    const shown = aggregation === 'total' ? sum : slice.minutes
     return {
       phase: slice.phase,
-      average: pick(slice.minutes, sum),
+      average: shown,
       accumulated: sum,
-      share: shareOf(pick(slice.minutes, sum), total),
+      share: shareOf(shown, total),
     }
   })
 }
 
 /** Tabla de todas las fases del ciclo, con promedio y acumulado. */
-export function PhaseTable({ summary }: { summary: MetricsSummary }) {
+export function PhaseTable({
+  summary,
+  mode,
+}: {
+  summary: MetricsSummary
+  mode: TimeMode
+}) {
   const { aggregation } = useTimeAggregation()
-  const rows = phaseRows(summary, aggregation)
+  const rows = phaseRows(summary, aggregation, mode)
   const columns: DataTableColumn<PhaseRow>[] = [
     {
       id: 'phase',

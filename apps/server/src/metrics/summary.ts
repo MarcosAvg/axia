@@ -5,120 +5,40 @@ import type { Database } from '../db/client.js'
 import type { MetricsFilters } from './filters.js'
 import {
   metricsAging,
+  metricsAgingBuckets,
   metricsBase,
   metricsGroups,
   metricsRatings,
   metricsVolume,
 } from './summary-sql.js'
 
-type AggregateRow = {
-  dimension: string
-  dimension_id: string | null
-  dimension_name: string | null
-  parent_id: string | null
-  tickets: number
-  open: number
-  reassigned: number
-  reassigned_technician: number
-  recaptured: number
-  reopened: number
-  closed: number
-  first_fix: number
-  closed_or_reopened: number
-  flow_tickets: number
-  rejected: number
-  cancelled: number
-  duplicate: number
-  avg_total: number
-  avg_total_all: number
-  avg_total_closed: number
-  avg_resolution: number
-  avg_net: number
-  avg_active: number
-  avg_active_labor: number
-  avg_active_extra: number
-  avg_response: number
-  avg_assignment: number
-  avg_pending_take: number
-  avg_reassignment: number
-  avg_wait: number
-  avg_pause: number
-  avg_validation: number
-  avg_claim: number
-  avg_total_labor: number
-  avg_net_labor: number
-  sum_total: number
-  sum_total_all: number
-  sum_total_closed: number
-  sum_resolution: number
-  sum_net: number
-  sum_active: number
-  sum_active_extra: number
-  sum_response: number
-  sum_assignment: number
-  sum_pending_take: number
-  sum_reassignment: number
-  sum_wait: number
-  sum_pause: number
-  sum_validation: number
-  sum_claim: number
-  sum_total_labor: number
-  sum_net_labor: number
+type AggregateRow = Record<string, unknown>
+
+const META_KEYS = new Set([
+  'dimension',
+  'dimension_id',
+  'dimension_name',
+  'parent_id',
+])
+
+function camelize(key: string) {
+  return key.replace(/_([a-z0-9])/g, (_, letter: string) =>
+    letter.toUpperCase(),
+  )
 }
 
-const EMPTY_AGGREGATE: AggregateRow = {
-  dimension: 'all',
-  dimension_id: null,
-  dimension_name: null,
-  parent_id: null,
-  tickets: 0,
-  open: 0,
-  reassigned: 0,
-  reassigned_technician: 0,
-  recaptured: 0,
-  reopened: 0,
-  closed: 0,
-  first_fix: 0,
-  closed_or_reopened: 0,
-  flow_tickets: 0,
-  rejected: 0,
-  cancelled: 0,
-  duplicate: 0,
-  avg_total: 0,
-  avg_total_all: 0,
-  avg_total_closed: 0,
-  avg_resolution: 0,
-  avg_net: 0,
-  avg_active: 0,
-  avg_active_labor: 0,
-  avg_active_extra: 0,
-  avg_response: 0,
-  avg_assignment: 0,
-  avg_pending_take: 0,
-  avg_reassignment: 0,
-  avg_wait: 0,
-  avg_pause: 0,
-  avg_validation: 0,
-  avg_claim: 0,
-  avg_total_labor: 0,
-  avg_net_labor: 0,
-  sum_total: 0,
-  sum_total_all: 0,
-  sum_total_closed: 0,
-  sum_resolution: 0,
-  sum_net: 0,
-  sum_active: 0,
-  sum_active_extra: 0,
-  sum_response: 0,
-  sum_assignment: 0,
-  sum_pending_take: 0,
-  sum_reassignment: 0,
-  sum_wait: 0,
-  sum_pause: 0,
-  sum_validation: 0,
-  sum_claim: 0,
-  sum_total_labor: 0,
-  sum_net_labor: 0,
+function value(row: AggregateRow, key: string): number {
+  return Number(row[key] ?? 0)
+}
+
+/** Convierte las columnas SQL (snake_case) en el contrato de la API. */
+function numbers(row: AggregateRow): Record<string, number> {
+  const result: Record<string, number> = {}
+  for (const [key, raw] of Object.entries(row)) {
+    if (META_KEYS.has(key)) continue
+    result[camelize(key)] = Number(raw ?? 0)
+  }
+  return result
 }
 
 function rate(part: number, total: number) {
@@ -126,112 +46,42 @@ function rate(part: number, total: number) {
 }
 
 function toSummary(row: AggregateRow | undefined) {
-  const data = row ?? EMPTY_AGGREGATE
-  const tickets = Number(data.tickets)
+  const data = row ?? {}
+  const tickets = value(data, 'tickets')
   return {
-    tickets,
-    open: Number(data.open),
-    reassigned: Number(data.reassigned),
-    reassignedTechnician: Number(data.reassigned_technician),
-    recaptured: Number(data.recaptured),
-    reopened: Number(data.reopened),
-    closed: Number(data.closed),
-    flowTickets: Number(data.flow_tickets),
-    rejected: Number(data.rejected),
-    cancelled: Number(data.cancelled),
-    duplicate: Number(data.duplicate),
-    reassignmentRate: rate(Number(data.reassigned), tickets),
+    ...numbers(data),
+    reassignmentRate: rate(value(data, 'reassigned'), tickets),
     technicianReassignmentRate: rate(
-      Number(data.reassigned_technician),
+      value(data, 'reassigned_technician'),
       tickets,
     ),
-    recaptureRate: rate(Number(data.recaptured), tickets),
-    reopenRate: rate(Number(data.reopened), Number(data.closed_or_reopened)),
-    firstTimeFixRate: rate(Number(data.first_fix), Number(data.closed)),
-    avgTotal: Number(data.avg_total),
-    avgTotalAll: Number(data.avg_total_all),
-    avgTotalClosed: Number(data.avg_total_closed),
-    avgResolution: Number(data.avg_resolution),
-    avgNet: Number(data.avg_net),
-    avgActive: Number(data.avg_active),
-    avgActiveLabor: Number(data.avg_active_labor),
-    avgActiveExtra: Number(data.avg_active_extra),
-    avgResponse: Number(data.avg_response),
-    avgAssignment: Number(data.avg_assignment),
-    avgPendingTake: Number(data.avg_pending_take),
-    avgReassignment: Number(data.avg_reassignment),
-    avgWait: Number(data.avg_wait),
-    avgPause: Number(data.avg_pause),
-    avgValidation: Number(data.avg_validation),
-    avgClaim: Number(data.avg_claim),
-    avgTotalLabor: Number(data.avg_total_labor),
-    avgNetLabor: Number(data.avg_net_labor),
-    sumTotal: Number(data.sum_total),
-    sumTotalAll: Number(data.sum_total_all),
-    sumTotalClosed: Number(data.sum_total_closed),
-    sumResolution: Number(data.sum_resolution),
-    sumNet: Number(data.sum_net),
-    sumActive: Number(data.sum_active),
-    sumActiveExtra: Number(data.sum_active_extra),
-    sumResponse: Number(data.sum_response),
-    sumAssignment: Number(data.sum_assignment),
-    sumPendingTake: Number(data.sum_pending_take),
-    sumReassignment: Number(data.sum_reassignment),
-    sumWait: Number(data.sum_wait),
-    sumPause: Number(data.sum_pause),
-    sumValidation: Number(data.sum_validation),
-    sumClaim: Number(data.sum_claim),
-    sumTotalLabor: Number(data.sum_total_labor),
-    sumNetLabor: Number(data.sum_net_labor),
+    recaptureRate: rate(value(data, 'recaptured'), tickets),
+    reopenRate: rate(
+      value(data, 'reopened'),
+      value(data, 'closed_or_reopened'),
+    ),
+    firstTimeFixRate: rate(value(data, 'first_fix'), value(data, 'closed')),
   }
 }
 
 function toGroup(row: AggregateRow) {
-  const tickets = Number(row.tickets)
-  const closed = Number(row.closed)
+  const tickets = value(row, 'tickets')
+  const closed = value(row, 'closed')
   return {
-    dimension: row.dimension,
+    dimension: String(row.dimension),
     row: {
-      id: row.dimension_id ?? '',
-      name: row.dimension_name ?? '',
-      parentId: row.parent_id,
-      tickets,
-      open: Number(row.open),
-      avgActive: Number(row.avg_active),
-      avgTotal: Number(row.avg_total),
-      avgTotalAll: Number(row.avg_total_all),
-      avgTotalClosed: Number(row.avg_total_closed),
-      avgActiveExtra: Number(row.avg_active_extra),
-      avgResponse: Number(row.avg_response),
-      avgAssignment: Number(row.avg_assignment),
-      avgPendingTake: Number(row.avg_pending_take),
-      avgReassignment: Number(row.avg_reassignment),
-      avgWait: Number(row.avg_wait),
-      avgPause: Number(row.avg_pause),
-      avgValidation: Number(row.avg_validation),
-      avgClaim: Number(row.avg_claim),
-      avgTotalLabor: Number(row.avg_total_labor),
-      avgNetLabor: Number(row.avg_net_labor),
-      sumActive: Number(row.sum_active),
-      sumTotal: Number(row.sum_total),
-      sumTotalAll: Number(row.sum_total_all),
-      sumTotalClosed: Number(row.sum_total_closed),
-      sumActiveExtra: Number(row.sum_active_extra),
-      sumResponse: Number(row.sum_response),
-      sumAssignment: Number(row.sum_assignment),
-      sumPendingTake: Number(row.sum_pending_take),
-      sumReassignment: Number(row.sum_reassignment),
-      sumWait: Number(row.sum_wait),
-      sumPause: Number(row.sum_pause),
-      sumValidation: Number(row.sum_validation),
-      sumClaim: Number(row.sum_claim),
-      sumTotalLabor: Number(row.sum_total_labor),
-      sumNetLabor: Number(row.sum_net_labor),
-      reassignmentRate: rate(Number(row.reassigned), tickets),
-      recaptureRate: rate(Number(row.recaptured), tickets),
-      reopenRate: rate(Number(row.reopened), Number(row.closed_or_reopened)),
-      firstFixRate: rate(Number(row.first_fix), closed),
-      reopened: Number(row.reopened),
+      id: typeof row.dimension_id === 'string' ? row.dimension_id : '',
+      name: typeof row.dimension_name === 'string' ? row.dimension_name : '',
+      parentId: typeof row.parent_id === 'string' ? row.parent_id : null,
+      ...numbers(row),
+      reassignmentRate: rate(value(row, 'reassigned'), tickets),
+      recaptureRate: rate(value(row, 'recaptured'), tickets),
+      reopenRate: rate(
+        value(row, 'reopened'),
+        value(row, 'closed_or_reopened'),
+      ),
+      firstFixRate: rate(value(row, 'first_fix'), closed),
+      reopened: value(row, 'reopened'),
       closed,
     },
   }
@@ -240,6 +90,7 @@ function toGroup(row: AggregateRow) {
 interface SummaryData {
   groups: AggregateRow[] | null
   volume: Array<{ month: string; tickets: number }> | null
+  aging_buckets: Array<{ bucket: string; tickets: number }> | null
   aging: Array<{
     id: string
     folio: string
@@ -249,28 +100,47 @@ interface SummaryData {
   rating_counts: Array<{ score: number; ratings: number }> | null
 }
 
+function volumePoints(data: SummaryData | undefined) {
+  return (data?.volume ?? []).map((point) => ({
+    month: point.month,
+    tickets: Number(point.tickets),
+  }))
+}
+
+function agingRows(data: SummaryData | undefined) {
+  return (data?.aging ?? []).map((row) => ({
+    id: row.id,
+    folio: row.folio,
+    status: row.status,
+    ageMinutes: Number(row.age_minutes),
+  }))
+}
+
+function agingBuckets(data: SummaryData | undefined) {
+  return (data?.aging_buckets ?? []).map((row) => ({
+    bucket: row.bucket,
+    tickets: Number(row.tickets),
+  }))
+}
+
+function satisfaction(data: SummaryData | undefined) {
+  const ratings = data?.rating_counts ?? []
+  return [1, 2, 3, 4, 5].map(
+    (score) =>
+      Number(ratings.find((row) => Number(row.score) === score)?.ratings) || 0,
+  )
+}
+
 function toResponse(data: SummaryData | undefined) {
   const groups = data?.groups ?? []
   const all = groups.find((group) => group.dimension === 'all')
-  const ratings = data?.rating_counts ?? []
   return {
     summary: toSummary(all),
     groups: groups.filter((group) => group.dimension !== 'all').map(toGroup),
-    volume: (data?.volume ?? []).map((point) => ({
-      month: point.month,
-      tickets: Number(point.tickets),
-    })),
-    aging: (data?.aging ?? []).map((row) => ({
-      id: row.id,
-      folio: row.folio,
-      status: row.status,
-      ageMinutes: Number(row.age_minutes),
-    })),
-    satisfactionDistribution: [1, 2, 3, 4, 5].map(
-      (score) =>
-        Number(ratings.find((row) => Number(row.score) === score)?.ratings) ||
-        0,
-    ),
+    volume: volumePoints(data),
+    aging: agingRows(data),
+    agingBuckets: agingBuckets(data),
+    satisfactionDistribution: satisfaction(data),
   }
 }
 
@@ -288,6 +158,7 @@ export async function metricsSummary(
     grouped as (${metricsGroups(compact)}),
     volume as (${metricsVolume(actor.timezone)}),
     aging as (${metricsAging()}),
+    aging_buckets as (${metricsAgingBuckets()}),
     ratings as (${metricsRatings()})
     select
       (select json_agg(g order by g.tickets desc, g.dimension_id)

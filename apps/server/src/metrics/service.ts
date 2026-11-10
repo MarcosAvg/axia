@@ -166,8 +166,17 @@ export async function satisfaction(
   return scopedRows(db, actor, filters, 'metrics_satisfaction')
 }
 
+function slaMetric(
+  clock: MetricsFilters['clock'],
+  base: 'metrics_sla' | 'metrics_sla_by_priority',
+): Metric {
+  if (clock === 'calendar') return `${base}_calendar` as Metric
+  if (clock === 'laboral') return `${base}_labor` as Metric
+  return base
+}
+
 export async function sla(db: Database, actor: Actor, filters: MetricsFilters) {
-  return scopedRows(db, actor, filters, 'metrics_sla')
+  return scopedRows(db, actor, filters, slaMetric(filters.clock, 'metrics_sla'))
 }
 
 export async function slaByPriority(
@@ -175,7 +184,12 @@ export async function slaByPriority(
   actor: Actor,
   filters: MetricsFilters,
 ) {
-  return scopedRows(db, actor, filters, 'metrics_sla_by_priority')
+  return scopedRows(
+    db,
+    actor,
+    filters,
+    slaMetric(filters.clock, 'metrics_sla_by_priority'),
+  )
 }
 
 export async function byTechnician(

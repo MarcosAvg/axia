@@ -11,6 +11,7 @@ import type { Actor } from '../auth/authorization.js'
 import type { AuthService } from '../auth/service.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
+import { auxiliaryByCategory } from './auxiliary.js'
 import {
   byTechnician,
   duplicateAlerts,
@@ -53,6 +54,7 @@ const filterSchema = z.object({
     .enum(['open', 'closed', 'rejected', 'cancelled', 'duplicate'])
     .optional()
     .or(z.literal('')),
+  clock: z.enum(['calendar', 'laboral']).optional().or(z.literal('')),
 })
 
 function filtersOf(query: unknown): MetricsFilters {
@@ -65,6 +67,7 @@ function filtersOf(query: unknown): MetricsFilters {
     categoryId: parsed.categoryId || undefined,
     dependencyId: parsed.dependencyId || undefined,
     outcome: parsed.outcome || undefined,
+    clock: parsed.clock || undefined,
   }
 }
 
@@ -98,6 +101,7 @@ const METRIC_ROUTES = [
   ['/api/metrics/sla', sla],
   ['/api/metrics/sla-by-priority', slaByPriority],
   ['/api/metrics/by-technician', byTechnician],
+  ['/api/metrics/auxiliary-by-category', auxiliaryByCategory],
   ['/api/metrics/technician-times', technicianTimes],
   ['/api/metrics/technician-subject-times', subjectTechnicianTimes],
   ['/api/metrics/requester-times', requesterTimes],

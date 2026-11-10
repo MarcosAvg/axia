@@ -8,6 +8,7 @@ import type { MetricsSummary } from '../domain/metrics'
 import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CycleInput, CyclePhase, CycleSlice } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
+import { modeValue, type TimeMode } from '../domain/time-mode'
 
 const COLORS: Record<CyclePhase, string> = {
   response: 'var(--chart-1)',
@@ -114,21 +115,27 @@ export function TicketCycleChart({ times }: { times: CycleInput }) {
 }
 
 /** Composición del ciclo medio en una sola barra apilada. */
-export function CycleBar({ summary }: { summary: MetricsSummary }) {
+export function CycleBar({
+  summary,
+  mode,
+}: {
+  summary: MetricsSummary
+  mode: TimeMode
+}) {
   const { aggregation } = useTimeAggregation()
-  const minutes = (average: number, total: number) =>
-    timeValue(aggregation, average, total)
-  const total = minutes(summary.avgTotal, summary.sumTotal)
+  const record = summary as unknown as Record<string, number>
+  const value = (key: string) => modeValue(record, key, mode, aggregation)
+  const total = value('total')
   const slices: PhaseView[] = cyclePhases({
-    response: minutes(summary.avgResponse, summary.sumResponse),
-    assignment: minutes(summary.avgAssignment, summary.sumAssignment),
-    pendingTake: minutes(summary.avgPendingTake, summary.sumPendingTake),
-    wait: minutes(summary.avgWait, summary.sumWait),
-    active: minutes(summary.avgActive, summary.sumActive),
-    pause: minutes(summary.avgPause, summary.sumPause),
-    dormant: 0,
-    validation: minutes(summary.avgValidation, summary.sumValidation),
-    claim: minutes(summary.avgClaim, summary.sumClaim),
+    response: value('response'),
+    assignment: value('assignment'),
+    pendingTake: value('pendingTake'),
+    wait: value('wait'),
+    active: value('active'),
+    pause: value('pause'),
+    dormant: value('dormant'),
+    validation: value('validation'),
+    claim: value('claim'),
     total,
   }).map((slice) => ({
     ...slice,

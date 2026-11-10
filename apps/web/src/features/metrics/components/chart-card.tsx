@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { HintLabel } from '@/components/shared/hint'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-/** Tarjeta que contiene una gráfica o tabla con título y ayuda opcional. */
+/** Bloque de contenido con título y ayuda; superficie plana, sin tarjeta. */
 export function ChartCard({
   title,
   hint,
@@ -13,13 +12,13 @@ export function ChartCard({
   children: ReactNode
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle as="h2" className="text-base">
+    <section data-slot="card" className="rounded-xl bg-card p-4 sm:p-5">
+      <header className="mb-4">
+        <h2 className="text-base font-medium tracking-tight text-foreground">
           <HintLabel label={title} hint={hint} />
-        </CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+        </h2>
+      </header>
+      {children}
+    </section>
   )
 }

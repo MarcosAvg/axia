@@ -1,9 +1,12 @@
 import type {
+  AuxiliaryCategoryRow,
   PauseSubstateRow,
+  RejectCancelRow,
   SupervisorRow,
   TechnicianTimeRow,
 } from '../domain/indicators'
 import type { MetricsFilters } from '../domain/metrics'
+import { intervalToMinutes } from '../domain/metrics'
 import { fetchItems } from './metrics-api'
 import { toNumber } from './numbers'
 
@@ -71,5 +74,43 @@ export async function fetchPauseSubstates(
     name: row.substate_name,
     pauses: toNumber(row.pauses),
     pauseMinutes: toNumber(row.pause_minutes),
+  }))
+}
+
+export async function fetchAuxiliaryByCategory(
+  filters: MetricsFilters,
+): Promise<AuxiliaryCategoryRow[]> {
+  const items = await fetchItems<{
+    technician_id: string
+    technician_name: string
+    category_id: string | null
+    category_name: string | null
+    tickets: number
+    participation_time: string | null
+    participation_time_labor: string | null
+  }>('/api/metrics/auxiliary-by-category', filters)
+  return items.map((row) => ({
+    technicianId: row.technician_id,
+    technicianName: row.technician_name,
+    categoryId: row.category_id,
+    categoryName: row.category_name,
+    tickets: toNumber(row.tickets),
+    minutes: intervalToMinutes(row.participation_time),
+    laborMinutes: intervalToMinutes(row.participation_time_labor),
+  }))
+}
+
+export async function fetchRejectCancel(
+  filters: MetricsFilters,
+): Promise<RejectCancelRow[]> {
+  const items = await fetchItems<{
+    event_type: string
+    reason_name: string
+    tickets: number
+  }>('/api/metrics/reject-cancel', filters)
+  return items.map((row) => ({
+    eventType: row.event_type,
+    reasonName: row.reason_name,
+    tickets: toNumber(row.tickets),
   }))
 }

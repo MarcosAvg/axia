@@ -1,5 +1,8 @@
 // Tipos y funciones puras de los indicadores. Sin React, el cliente HTTP ni TanStack.
 
+export type { MetricsSummary } from './metrics-summary'
+export { EMPTY_SUMMARY } from './metrics-summary'
+
 export interface MetricsFilters {
   from: string
   to: string
@@ -8,6 +11,7 @@ export interface MetricsFilters {
   categoryId: string
   dependencyId: string
   outcome: string
+  clock?: 'calendar' | 'laboral'
 }
 
 export const EMPTY_FILTERS: MetricsFilters = {
@@ -63,114 +67,6 @@ export function formatMinutes(minutes: number): string {
 export function formatPercent(rate: number): string {
   if (!Number.isFinite(rate)) return '0%'
   return `${Math.round(rate * 100)}%`
-}
-
-export interface MetricsSummary {
-  tickets: number
-  open: number
-  reassigned: number
-  reassignedTechnician: number
-  recaptured: number
-  reopened: number
-  closed: number
-  flowTickets: number
-  rejected: number
-  cancelled: number
-  duplicate: number
-  reassignmentRate: number
-  technicianReassignmentRate: number
-  recaptureRate: number
-  reopenRate: number
-  firstTimeFixRate: number
-  avgTotal: number
-  avgTotalAll: number
-  avgTotalClosed: number
-  avgResolution: number
-  avgNet: number
-  avgActive: number
-  avgActiveLabor: number
-  avgActiveExtra: number
-  avgResponse: number
-  avgAssignment: number
-  avgPendingTake: number
-  avgReassignment: number
-  avgWait: number
-  avgPause: number
-  avgValidation: number
-  avgClaim: number
-  avgTotalLabor: number
-  avgNetLabor: number
-  sumTotal: number
-  sumTotalAll: number
-  sumTotalClosed: number
-  sumResolution: number
-  sumNet: number
-  sumActive: number
-  sumActiveExtra: number
-  sumResponse: number
-  sumAssignment: number
-  sumPendingTake: number
-  sumReassignment: number
-  sumWait: number
-  sumPause: number
-  sumValidation: number
-  sumClaim: number
-  sumTotalLabor: number
-  sumNetLabor: number
-}
-
-export const EMPTY_SUMMARY: MetricsSummary = {
-  tickets: 0,
-  open: 0,
-  reassigned: 0,
-  reassignedTechnician: 0,
-  recaptured: 0,
-  reopened: 0,
-  closed: 0,
-  flowTickets: 0,
-  rejected: 0,
-  cancelled: 0,
-  duplicate: 0,
-  reassignmentRate: 0,
-  technicianReassignmentRate: 0,
-  recaptureRate: 0,
-  reopenRate: 0,
-  firstTimeFixRate: 0,
-  avgTotal: 0,
-  avgTotalAll: 0,
-  avgTotalClosed: 0,
-  avgResolution: 0,
-  avgNet: 0,
-  avgActive: 0,
-  avgActiveLabor: 0,
-  avgActiveExtra: 0,
-  avgResponse: 0,
-  avgAssignment: 0,
-  avgPendingTake: 0,
-  avgReassignment: 0,
-  avgWait: 0,
-  avgPause: 0,
-  avgValidation: 0,
-  avgClaim: 0,
-  avgTotalLabor: 0,
-  avgNetLabor: 0,
-  sumTotal: 0,
-  sumTotalAll: 0,
-  sumTotalClosed: 0,
-  sumResolution: 0,
-  sumNet: 0,
-  sumActive: 0,
-  sumActiveExtra: 0,
-  sumResponse: 0,
-  sumAssignment: 0,
-  sumPendingTake: 0,
-  sumReassignment: 0,
-  sumWait: 0,
-  sumPause: 0,
-  sumValidation: 0,
-  sumClaim: 0,
-  sumTotalLabor: 0,
-  sumNetLabor: 0,
 }
 
 export interface VolumePoint {

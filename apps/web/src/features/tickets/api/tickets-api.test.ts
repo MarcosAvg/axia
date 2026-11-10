@@ -26,6 +26,19 @@ const item = {
   teamName: null,
   technicianName: 'Luis',
 }
+const cycleTimes = {
+  total: 20,
+  response: 1,
+  assignment: 2,
+  pendingTake: 0,
+  reassignment: 0,
+  wait: 3,
+  active: 14,
+  pause: 0,
+  dormant: 0,
+  validation: 0,
+  claim: 0,
+}
 const detail = {
   ...item,
   cycle: 1,
@@ -56,19 +69,9 @@ const detail = {
   requesterDependencyId: 'rd1',
   requesterDependencyName: 'Dependencia del solicitante',
   validationPolicy: 'both',
-  cycleTimes: {
-    total: 20,
-    response: 1,
-    assignment: 2,
-    pendingTake: 0,
-    reassignment: 0,
-    wait: 3,
-    active: 14,
-    pause: 0,
-    dormant: 0,
-    validation: 0,
-    claim: 0,
-  },
+  cycleTimes,
+  cycleTimesLabor: cycleTimes,
+  cycleTimesExtra: cycleTimes,
 }
 function respond(body: unknown, status = 200) {
   vi.stubGlobal(

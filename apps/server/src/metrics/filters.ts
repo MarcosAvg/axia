@@ -8,6 +8,7 @@ export type MetricsFilters = {
   categoryId?: string
   dependencyId?: string
   outcome?: MetricsOutcome
+  clock?: 'calendar' | 'laboral'
 }
 
 export function filterParams(filters: MetricsFilters) {

@@ -1,10 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import {
-  CalendarIcon,
-  ChevronDownIcon,
-  SlidersHorizontalIcon,
-} from 'lucide-react'
+import { CalendarIcon, ChevronDownIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -12,7 +8,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { FilterChips } from '@/components/shared/filter-chips'
-import type { FilterChip } from '@/components/shared/filter-chips'
 import type { FilterCatalogs } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
 import {
@@ -22,12 +17,10 @@ import {
 } from '../domain/period'
 import type { MetricsFilters } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
-import {
-  CatalogFilterSelect,
-  DateRangeFields,
-  filterSelects,
-} from './metrics-filter-fields'
-import type { FilterField } from './metrics-filter-fields'
+import { DateRangeFields } from './metrics-filter-fields'
+import { buildChips, FiltersPopover } from './metrics-filters'
+import { TimeModeToggle } from './time-mode-toggle'
+import type { TimeMode } from '../domain/time-mode'
 
 const t = metricsMessages.filters
 const quick = metricsMessages.quickRanges
@@ -156,118 +149,13 @@ function PeriodPicker({
   )
 }
 
-function FiltersPanel({
-  fields,
-  filters,
-  activeCount,
-  onFiltersChange,
-}: {
-  fields: FilterField[]
-  filters: MetricsFilters
-  activeCount: number
-  onFiltersChange: (filters: MetricsFilters) => void
-}) {
-  return (
-    <div className="grid gap-3">
-      {fields.map((field) => (
-        <CatalogFilterSelect
-          key={field.key}
-          field={field}
-          value={filters[field.key]}
-          onChange={(value) =>
-            onFiltersChange({ ...filters, [field.key]: value })
-          }
-        />
-      ))}
-      <Button
-        type="button"
-        variant="ghost"
-        className="min-h-11 lg:min-h-9"
-        disabled={activeCount === 0}
-        onClick={() =>
-          onFiltersChange({
-            ...filters,
-            buildingId: '',
-            teamId: '',
-            categoryId: '',
-            dependencyId: '',
-            outcome: '',
-          })
-        }
-      >
-        {t.clear}
-      </Button>
-    </div>
-  )
-}
-
-function FiltersPopover({
-  filters,
-  catalogs,
-  onFiltersChange,
-}: {
-  filters: MetricsFilters
-  catalogs: FilterCatalogs
-  onFiltersChange: (filters: MetricsFilters) => void
-}) {
-  const fields = filterSelects(catalogs)
-  const activeCount = fields.filter((field) => filters[field.key]).length
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="min-h-11 lg:min-h-9">
-          <SlidersHorizontalIcon className="size-4" />
-          {t.title}
-          {activeCount > 0 ? (
-            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-xs text-secondary-foreground">
-              {activeCount}
-            </span>
-          ) : null}
-          <ChevronDownIcon className="size-4 text-muted-foreground" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        id="metrics-catalog-filters"
-        className="w-80"
-        aria-label={t.title}
-      >
-        <FiltersPanel
-          fields={fields}
-          filters={filters}
-          activeCount={activeCount}
-          onFiltersChange={onFiltersChange}
-        />
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function buildChips(
-  filters: MetricsFilters,
-  catalogs: FilterCatalogs,
-  onFiltersChange: (filters: MetricsFilters) => void,
-): FilterChip[] {
-  const chips: FilterChip[] = []
-  const update = (patch: Partial<MetricsFilters>) =>
-    onFiltersChange({ ...filters, ...patch })
-  for (const field of filterSelects(catalogs)) {
-    const value = filters[field.key]
-    if (!value) continue
-    const name = field.items.find((item) => item.id === value)?.name ?? value
-    chips.push({
-      key: field.key,
-      label: name,
-      onRemove: () => update({ [field.key]: '' }),
-    })
-  }
-  return chips
-}
-
 interface MetricsToolbarProps {
   filters: MetricsFilters
   catalogs: FilterCatalogs
   onFiltersChange: (filters: MetricsFilters) => void
   tabs?: ReactNode
+  mode?: TimeMode
+  onModeChange?: (mode: TimeMode) => void
 }
 
 /** Contexto del tablero: periodo, filtros, pestañas y chips en una sola fila. */
@@ -276,6 +164,8 @@ export function MetricsToolbar({
   catalogs,
   onFiltersChange,
   tabs,
+  mode,
+  onModeChange,
 }: MetricsToolbarProps) {
   const onRange = (days: number | null) => {
     if (days === null) {
@@ -286,7 +176,7 @@ export function MetricsToolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-3">
       <PeriodPicker
         filters={filters}
         onRange={onRange}
@@ -298,6 +188,9 @@ export function MetricsToolbar({
         onFiltersChange={onFiltersChange}
       />
       {tabs}
+      {mode && onModeChange ? (
+        <TimeModeToggle mode={mode} onChange={onModeChange} />
+      ) : null}
       <div className="min-w-0 flex-1">
         <FilterChips
           items={buildChips(filters, catalogs, onFiltersChange)}

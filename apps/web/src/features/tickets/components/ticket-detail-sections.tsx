@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { cn } from 'cn'
 import { HintLabel } from '@/components/shared/hint'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Identity } from '@/features/auth'
 import { TicketCycleChart } from '@/features/metrics'
@@ -135,18 +137,45 @@ export function TicketExtras({
 
 export function CycleTimesSection({
   times,
+  timesLabor,
+  timesExtra,
   canSee,
 }: {
   times: TicketDetailWithTimes['cycleTimes']
+  timesLabor: TicketDetailWithTimes['cycleTimesLabor']
+  timesExtra: TicketDetailWithTimes['cycleTimesExtra']
   canSee: boolean
 }) {
+  const [mode, setMode] = useState<'calendar' | 'laboral' | 'extra'>('calendar')
+  const selected =
+    mode === 'calendar' ? times : mode === 'laboral' ? timesLabor : timesExtra
   return (
     <Section
       title={ticketMessages.detail.cycleTimes}
       hint={detailSectionHints.cycleTimes}
       className={cn(!canSee && 'hidden lg:block')}
     >
-      <TicketCycleChart times={times} />
+      <div className="flex flex-col gap-3">
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={ticketMessages.detail.cycleTimes}
+        >
+          {(['calendar', 'laboral', 'extra'] as const).map((value) => (
+            <Button
+              key={value}
+              type="button"
+              size="sm"
+              variant={mode === value ? 'secondary' : 'outline'}
+              aria-pressed={mode === value}
+              onClick={() => setMode(value)}
+            >
+              {ticketMessages.detail.timeModes[value]}
+            </Button>
+          ))}
+        </div>
+        <TicketCycleChart times={selected} />
+      </div>
     </Section>
   )
 }

@@ -48,6 +48,11 @@ export const ticketMessages = {
     takeOffer: 'Tomar tiquet',
     capture: 'Captura',
     cycleTimes: 'Tiempo por fase',
+    timeModes: {
+      calendar: 'Continuo',
+      laboral: 'Laboral',
+      extra: 'Extra',
+    },
     timeline: 'Línea de tiempo',
     participants: 'Participantes',
     evidence: 'Evidencias',

@@ -3,7 +3,6 @@
 import { apiFetch } from '@/lib/api-client'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
-  RejectCancelRow,
   RequesterTimeRow,
   RoutingSummary,
   TechnicianRow,
@@ -30,6 +29,7 @@ interface MetricsAggregate {
   groups: DimensionGroup[]
   volume: VolumePoint[]
   aging: AgingRow[]
+  agingBuckets: Array<{ bucket: string; tickets: number }>
   satisfactionDistribution: number[]
 }
 
@@ -42,6 +42,7 @@ function filtersQuery(filters: MetricsFilters) {
   if (filters.categoryId) params.set('categoryId', filters.categoryId)
   if (filters.dependencyId) params.set('dependencyId', filters.dependencyId)
   if (filters.outcome) params.set('outcome', filters.outcome)
+  if (filters.clock) params.set('clock', filters.clock)
   return params.toString()
 }
 
@@ -270,21 +271,6 @@ export async function fetchRequesterTimes(
     validationLaborMinutes: intervalToMinutes(row.validation_time_labor),
     claimMinutes: intervalToMinutes(row.claim_time),
     claimLaborMinutes: intervalToMinutes(row.claim_time_labor),
-  }))
-}
-
-export async function fetchRejectCancel(
-  filters: MetricsFilters,
-): Promise<RejectCancelRow[]> {
-  const items = await fetchItems<{
-    event_type: string
-    reason_name: string
-    tickets: number
-  }>('/api/metrics/reject-cancel', filters)
-  return items.map((row) => ({
-    eventType: row.event_type,
-    reasonName: row.reason_name,
-    tickets: toNumber(row.tickets),
   }))
 }
 

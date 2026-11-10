@@ -24,8 +24,46 @@ export interface DimensionRow {
   avgValidation: number
   avgClaim: number
   avgTotalLabor: number
+  avgTotalExtra: number
   avgNetLabor: number
+  avgResponseLabor: number
+  avgResponseExtra: number
+  sumResponseLabor: number
+  sumResponseExtra: number
+  avgAssignmentLabor: number
+  avgAssignmentExtra: number
+  sumAssignmentLabor: number
+  sumAssignmentExtra: number
+  avgPendingTakeLabor: number
+  avgPendingTakeExtra: number
+  sumPendingTakeLabor: number
+  sumPendingTakeExtra: number
+  avgReassignmentLabor: number
+  avgReassignmentExtra: number
+  sumReassignmentLabor: number
+  sumReassignmentExtra: number
+  avgWaitLabor: number
+  avgWaitExtra: number
+  sumWaitLabor: number
+  sumWaitExtra: number
+  avgPauseLabor: number
+  avgPauseExtra: number
+  sumPauseLabor: number
+  sumPauseExtra: number
+  avgValidationLabor: number
+  avgValidationExtra: number
+  sumValidationLabor: number
+  sumValidationExtra: number
+  avgClaimLabor: number
+  avgClaimExtra: number
+  sumClaimLabor: number
+  sumClaimExtra: number
+  avgDormant: number
+  sumDormant: number
+  avgDuplicateReview: number
+  sumDuplicateReview: number
   sumActive: number
+  sumActiveLabor: number
   sumTotal: number
   sumTotalAll: number
   sumTotalClosed: number
@@ -39,6 +77,7 @@ export interface DimensionRow {
   sumValidation: number
   sumClaim: number
   sumTotalLabor: number
+  sumTotalExtra: number
   sumNetLabor: number
   reassignmentRate: number
   recaptureRate: number

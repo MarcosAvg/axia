@@ -90,3 +90,13 @@ export interface PauseSubstateRow {
   pauses: number
   pauseMinutes: number
 }
+
+export interface AuxiliaryCategoryRow {
+  technicianId: string
+  technicianName: string
+  categoryId: string | null
+  categoryName: string | null
+  tickets: number
+  minutes: number
+  laborMinutes: number
+}

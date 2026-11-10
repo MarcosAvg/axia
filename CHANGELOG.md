@@ -5,6 +5,21 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- El tablero y el detalle de un tiquet muestran los tiempos en tres relojes: **Continuo** (24
+  horas), **Laboral** (calendario del equipo) y **Extra** (fuera del horario laboral). Las fases,
+  tablas y la barra del ciclo respetan el modo elegido; el SLA acepta `clock=calendar|laboral`.
+- Nuevos indicadores: percentiles P50/P90 por fase, rangos de antigüedad, calidad del tiempo
+  (hora sin verificar y alertas abiertas), tiempo hasta marcar un duplicado y horas de apoyo
+  auxiliar por técnico y categoría.
+
+### Cambiado
+
+- El tablero de métricas se rediseñó como una sala de control: superficies planas, barra de
+  herramientas fija, barra del ciclo en el resumen, pestañas de tiempos y calidad más claras y
+  cifras tabulares de mayor jerarquía.
+
 ### Corregido
 
 - Los tiempos laborales por técnico sujeto y por solicitante usan el calendario guardado en cada

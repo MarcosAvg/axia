@@ -1,6 +1,7 @@
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
+  AuxiliaryCategoryRow,
   PauseSubstateRow,
   RejectCancelRow,
   RequesterTimeRow,
@@ -31,8 +32,10 @@ import { TeamTab } from './team-tab'
 import { TimesTab } from './times-tab'
 
 interface MetricsTabsProps {
+  mode: import('../domain/time-mode').TimeMode
   volume: VolumePoint[]
   aging: AgingRow[]
+  agingBuckets: Array<{ bucket: string; tickets: number }>
   summary: MetricsSummary
   comparison: Comparison | null
   groups: DimensionGroup[]
@@ -48,6 +51,7 @@ interface MetricsTabsProps {
   satisfaction: SatisfactionSummary
   satisfactionDistribution: number[]
   technicians: TechnicianRow[]
+  auxiliaryByCategory: AuxiliaryCategoryRow[]
   technicianTimes: TechnicianTimeRow[]
   technicianSubjectTimes: TechnicianSubjectTimeRow[]
   requesterTimes: RequesterTimeRow[]
@@ -67,7 +71,7 @@ const TAB_VALUES = [
 /** Selector de pestañas del tablero; se muestra junto a los filtros. */
 export function MetricsTabList() {
   return (
-    <TabsList className="h-auto flex-wrap justify-start">
+    <TabsList className="h-auto flex-wrap justify-start rounded-lg bg-muted/50 p-1">
       {TAB_VALUES.map((value) => (
         <TabsTrigger
           key={value}
@@ -89,10 +93,12 @@ export function MetricsTabs(props: MetricsTabsProps) {
         <SummaryTab
           volume={props.volume}
           aging={props.aging}
+          agingBuckets={props.agingBuckets}
           groups={props.groups}
           summary={props.summary}
           comparison={props.comparison}
           satisfaction={props.satisfaction}
+          mode={props.mode}
           satisfactionDistribution={props.satisfactionDistribution}
           sla={props.sla}
           slaRows={props.slaRows}
@@ -104,6 +110,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
       <TabsContent value="times">
         <TimesTab
           summary={props.summary}
+          mode={props.mode}
           groups={props.groups}
           technicians={props.technicians}
           technicianTimes={props.technicianTimes}
@@ -124,6 +131,8 @@ export function MetricsTabs(props: MetricsTabsProps) {
       </TabsContent>
       <TabsContent value="team">
         <TeamTab
+          mode={props.mode}
+          auxiliaryByCategory={props.auxiliaryByCategory}
           groups={props.groups}
           routing={props.routing}
           supervisors={props.supervisors}
