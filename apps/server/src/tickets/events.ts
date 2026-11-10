@@ -6,6 +6,7 @@ import {
   type TimeAlertKind,
   type TimeConfidence,
 } from './event-context.js'
+import { linkBusinessRows } from './event-links.js'
 import { insertTimeAlert } from './time-alerts.js'
 
 export type HandledEvent = {
@@ -93,6 +94,39 @@ function normalizedEvent(input: EventInput) {
   return { ...input, ...subjectFields(input), ...timeFields(input) }
 }
 
+async function recordUnverifiedAlert(
+  executor: DbExecutor,
+  event: ReturnType<typeof normalizedEvent>,
+  eventId: string,
+): Promise<void> {
+  if (event.timeConfidence !== 'unverified') return
+  const alertId = await insertTimeAlert(executor, {
+    ticketId: event.ticketId,
+    eventId,
+    kind: event.timeAlertKind ?? 'clock_unknown',
+    clientClockSkewMs: event.clientClockSkewMs,
+    suggestedOccurredAt: event.suggestedOccurredAt,
+  })
+  if (!alertId) return
+  await executor.execute(sql`
+    insert into public.ticket_events (
+      ticket_id, cycle, type, payload, occurred_at
+    )
+    select
+      t.id, t.cycle, 'time_alert'::public.event_type,
+      ${JSON.stringify({
+        alertId,
+        eventId: Number(eventId),
+        kind: event.timeAlertKind ?? 'clock_unknown',
+        clockSkewMs: event.clientClockSkewMs,
+        suggestedOccurredAt: event.suggestedOccurredAt,
+      })}::jsonb,
+      now()
+    from public.tickets t
+    where t.id = ${event.ticketId}
+  `)
+}
+
 export async function writeEvent(
   executor: DbExecutor,
   input: EventInput,
@@ -113,38 +147,21 @@ export async function writeEvent(
       ${event.clientReportedAt}::timestamptz, ${event.clientClockSkewMs}
     from public.tickets t
     where t.id = ${event.ticketId}
-    returning id
+    returning id, occurred_at
   `)
-  const row = result.rows[0] as { id: string } | undefined
+  const row = result.rows[0] as
+    { id: string; occurred_at: Date | string } | undefined
   if (!row) throw new Error('Event could not be written')
 
-  if (event.timeConfidence === 'unverified') {
-    const alertId = await insertTimeAlert(executor, {
+  await recordUnverifiedAlert(executor, event, row.id)
+
+  if (!['event_time_corrected', 'time_alert'].includes(event.type)) {
+    await linkBusinessRows(executor, {
       ticketId: event.ticketId,
-      eventId: row.id,
-      kind: event.timeAlertKind ?? 'clock_unknown',
-      clientClockSkewMs: event.clientClockSkewMs,
-      suggestedOccurredAt: event.suggestedOccurredAt,
+      eventId: Number(row.id),
+      type: event.type,
+      occurredAt: row.occurred_at,
     })
-    if (alertId) {
-      await executor.execute(sql`
-        insert into public.ticket_events (
-          ticket_id, cycle, type, payload, occurred_at
-        )
-        select
-          t.id, t.cycle, 'time_alert'::public.event_type,
-          ${JSON.stringify({
-            alertId,
-            eventId: Number(row.id),
-            kind: event.timeAlertKind ?? 'clock_unknown',
-            clockSkewMs: event.clientClockSkewMs,
-            suggestedOccurredAt: event.suggestedOccurredAt,
-          })}::jsonb,
-          now()
-        from public.tickets t
-        where t.id = ${event.ticketId}
-      `)
-    }
   }
 
   return { id: row.id }
