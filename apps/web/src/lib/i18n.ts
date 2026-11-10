@@ -32,6 +32,10 @@ export const messages = {
     syncNow: 'Sincronizar ahora',
     action: 'Acción del tiquet',
     evidence: 'Evidencia',
+    timeCorrection: 'Corregir hora',
+    timeCorrectionHelp:
+      'El reloj del dispositivo estaba desfasado. Indica la hora real de la acción en la zona de la instancia.',
+    timeCorrectionLabel: 'Hora real',
   },
   fileField: {
     takePhoto: 'Tomar foto',

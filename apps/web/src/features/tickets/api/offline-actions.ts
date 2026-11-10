@@ -3,6 +3,7 @@
 // y el UUID. La hora manual de la acción viaja aparte.
 
 import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
+import { OutboxError } from '@/lib/offline/errors'
 import { z } from 'zod'
 import { sendSyncBatch } from './sync-api'
 import { ticketCommandSchema } from './ticket-commands'
@@ -60,7 +61,10 @@ export function registerTicketActionHandler() {
       ])
       if (!result) throw new Error('La sincronización no devolvió resultado')
       if (result.status === 'applied' || result.status === 'duplicate') return
-      throw new Error(result.message ?? result.code ?? result.status)
+      throw new OutboxError(
+        result.message ?? result.code ?? result.status,
+        result.code,
+      )
     },
     undefined,
     async (payload) =>

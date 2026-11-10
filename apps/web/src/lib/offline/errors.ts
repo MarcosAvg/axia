@@ -1,3 +1,14 @@
+/** Error de un elemento de la cola con un código de dominio para la UI. */
+export class OutboxError extends Error {
+  readonly code?: string
+
+  constructor(message: string, code?: string) {
+    super(message)
+    this.name = 'OutboxError'
+    this.code = code
+  }
+}
+
 function messageOf(error: unknown): string {
   if (error instanceof Error) return error.message
   if (typeof error === 'object' && error !== null) {

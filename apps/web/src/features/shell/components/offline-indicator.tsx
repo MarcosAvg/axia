@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useAuth } from '@/features/auth'
+import { OutboxTimeCorrection, isTimeError } from '@/features/tickets'
 import type { OutboxItem } from '@/lib/offline/db'
 import {
   discardOutboxItem,
@@ -28,21 +29,25 @@ function itemLabel(type: string): string {
 }
 
 function OutboxErrorItem({ item }: { item: OutboxItem }) {
+  const timeError = isTimeError(item)
   return (
     <li className="space-y-1 rounded-md border p-2 text-sm">
       <p className="font-medium">{itemLabel(item.type)}</p>
       <p className="break-words text-xs text-destructive">{item.lastError}</p>
+      {timeError ? <OutboxTimeCorrection item={item} /> : null}
       <div className="flex justify-end gap-1">
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          onClick={() =>
-            void retryOutboxItem(item.id).then(() => processOutbox())
-          }
-        >
-          {messages.offline.retry}
-        </Button>
+        {timeError ? null : (
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() =>
+              void retryOutboxItem(item.id).then(() => processOutbox())
+            }
+          >
+            {messages.offline.retry}
+          </Button>
+        )}
         <Button
           type="button"
           variant="destructive"

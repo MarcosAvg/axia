@@ -8,6 +8,10 @@ export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
 export { TicketStatusSummary } from './components/ticket-status-summary'
 export {
+  OutboxTimeCorrection,
+  isTimeError,
+} from './components/outbox-time-correction'
+export {
   useAttentionCounts,
   useMyOffers,
   useMyWork,

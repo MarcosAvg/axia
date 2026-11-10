@@ -18,6 +18,8 @@ export interface OutboxItem {
   state: 'pending' | 'sending' | 'error'
   attempts: number
   lastError: string | null
+  /** Código de dominio del último fallo; permite ofrecer la corrección adecuada. */
+  lastErrorCode?: string | null
   /** Marca de tiempo del último intento, para recuperar envíos interrumpidos. */
   sendingAt?: number | null
   createdAt: number

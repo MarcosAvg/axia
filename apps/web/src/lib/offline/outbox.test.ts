@@ -7,6 +7,7 @@ import {
   processOutbox,
   registerOutboxHandler,
   retryOutboxItem,
+  retryOutboxItemWithManualTime,
 } from './outbox'
 import { setOfflineUserId } from './user'
 
@@ -300,5 +301,32 @@ describe('recuperación de dependencias', () => {
     await processOutbox()
     expect(handler).toHaveBeenCalledTimes(1)
     expect(await db.outbox.count()).toBe(1)
+  })
+})
+
+it('corrige la hora de un ítem rechazado y lo devuelve a pendiente', async () => {
+  await enqueue(
+    'ticket_action',
+    {
+      ticketId: 't1',
+      clientRequestId: '00000000-0000-4000-8000-000000000001',
+      clientReportedAt: '2026-11-10T20:00:00.000Z',
+    },
+    't1',
+  )
+  const [item] = await db.outbox.toArray()
+  if (!item) throw new Error('El ítem no se encoló')
+
+  await retryOutboxItemWithManualTime(item.id, '2026-11-10T14:30')
+
+  expect(await db.outbox.get(item.id)).toMatchObject({
+    state: 'pending',
+    attempts: 0,
+    lastError: null,
+    lastErrorCode: null,
+    payload: expect.objectContaining({
+      occurredLocal: '2026-11-10T14:30',
+      manualTime: true,
+    }),
   })
 })
