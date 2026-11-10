@@ -99,7 +99,10 @@ it('actualiza 0016 sin alterar cuentas, tiquets, eventos, referencias ni huellas
     select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and proname like 'metrics_%'
   `)
-  expect(functions.rows).toEqual([{ proname: 'metrics_date_in' }])
+  expect(functions.rows).toEqual([
+    { proname: 'metrics_date_in' },
+    { proname: 'metrics_date_in' },
+  ])
   await runMigrations(owner, upgrade)
   expect(await snapshot()).toEqual(after)
 })
