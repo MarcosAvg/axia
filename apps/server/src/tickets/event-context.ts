@@ -9,13 +9,6 @@ export type ActionContext = {
   clientClockSkewMs: number | null
 }
 
-const DEFAULT_CONTEXT: ActionContext = {
-  occurredAt: null,
-  clientReportedAt: null,
-  timeConfidence: 'trusted',
-  clientClockSkewMs: null,
-}
-
 const storage = new AsyncLocalStorage<ActionContext>()
 
 export function withActionContext<T>(
@@ -23,16 +16,6 @@ export function withActionContext<T>(
   callback: () => Promise<T>,
 ): Promise<T> {
   return storage.run(context, callback)
-}
-
-export function withOccurredAt<T>(
-  occurredAt: string,
-  callback: () => Promise<T>,
-): Promise<T> {
-  return withActionContext(
-    { ...DEFAULT_CONTEXT, occurredAt, timeConfidence: 'corrected' },
-    callback,
-  )
 }
 
 export function currentActionContext(): ActionContext | null {

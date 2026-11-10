@@ -17,12 +17,14 @@ const itemSchema = z.object({
   ticketId: z.string().uuid(),
   type: z.string().min(1).max(50),
   args: z.record(z.string(), z.unknown()).default({}),
-  occurredAt: z.string().min(1).max(80),
+  clientReportedAt: z.string().datetime().optional(),
+  occurredAt: z.string().datetime().optional(),
   manualTime: z.boolean().optional(),
 })
 
 const bodySchema = z.object({
   items: z.array(itemSchema).min(1).max(100),
+  deviceNow: z.string().datetime().optional(),
 })
 
 export type SyncRoutesOptions = {
@@ -41,7 +43,7 @@ export function registerSyncRoutes(
   app.post('/api/sync/actions', { preHandler: canView }, async (request) => {
     const body = bodySchema.parse(request.body)
     return {
-      results: await runSync(db, currentActor(request), config, body.items),
+      results: await runSync(db, currentActor(request), config, body),
     }
   })
 }

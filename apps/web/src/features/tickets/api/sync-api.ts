@@ -5,7 +5,8 @@ export type SyncItem = {
   ticketId: string
   type: string
   args: Record<string, unknown>
-  occurredAt: string
+  clientReportedAt?: string
+  occurredAt?: string
   manualTime?: boolean
 }
 
@@ -20,6 +21,10 @@ export type SyncResult = {
   currentState?: string
   eventId?: number
   blockedBy?: string
+  timeStatus?: 'ok' | 'skew_detected' | 'manual_required'
+  clockSkewMs?: number | null
+  suggestedOccurredAt?: string | null
+  timeAlertKind?: 'clock_skew' | 'clock_unknown' | null
 }
 
 export async function sendSyncBatch(items: SyncItem[]): Promise<SyncResult[]> {
@@ -27,7 +32,7 @@ export async function sendSyncBatch(items: SyncItem[]): Promise<SyncResult[]> {
     '/api/sync/actions',
     {
       method: 'POST',
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items, deviceNow: new Date().toISOString() }),
     },
   )
   return response.results

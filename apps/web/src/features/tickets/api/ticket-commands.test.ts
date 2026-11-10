@@ -75,23 +75,23 @@ it('conserva UUID, hora manual y proxy mediante sincronización', async () => {
     occurredAt: '2026-10-01T10:00:00Z',
     manualTime: true,
   })
-  expect(request).toHaveBeenCalledWith(
-    '/api/sync/actions',
-    expect.objectContaining({
-      body: JSON.stringify({
-        items: [
-          {
-            ticketId: 't1',
-            clientRequestId: context.clientRequestId,
-            type: 'start',
-            args: { subjectTechnicianId: 'u2' },
-            occurredAt: '2026-10-01T10:00:00Z',
-            manualTime: true,
-          },
-        ],
-      }),
-    }),
-  )
+  const [url, options] = request.mock.calls[0] as [string, { body: string }]
+  expect(url).toBe('/api/sync/actions')
+  const body = JSON.parse(options.body) as {
+    items: unknown[]
+    deviceNow: unknown
+  }
+  expect(body.items).toEqual([
+    {
+      ticketId: 't1',
+      clientRequestId: context.clientRequestId,
+      type: 'start',
+      args: { subjectTechnicianId: 'u2' },
+      occurredAt: '2026-10-01T10:00:00Z',
+      manualTime: true,
+    },
+  ])
+  expect(typeof body.deviceNow).toBe('string')
 })
 
 it('normaliza opcionales nulos heredados sin inventar argumentos requeridos', () => {

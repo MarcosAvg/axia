@@ -1,5 +1,6 @@
 // Cola de acciones del tiquet: cuando no hay conexión, la acción se encola y se
-// reenvía con el contrato de sincronización, conservando `occurredAt` y el UUID.
+// reenvía con el contrato de sincronización, conservando la hora del dispositivo
+// y el UUID. La hora manual de la acción viaja aparte.
 
 import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
 import { z } from 'zod'
@@ -12,7 +13,8 @@ const TICKET_ACTION = 'ticket_action'
 const contextSchema = z.object({
   ticketId: z.string().min(1),
   clientRequestId: z.string().uuid(),
-  occurredAt: z.string().datetime(),
+  clientReportedAt: z.string().datetime(),
+  occurredAt: z.string().datetime().optional(),
   manualTime: z.boolean().optional(),
 })
 
@@ -26,7 +28,7 @@ export async function enqueueTicketAction(
       ...command,
       ...contextSchema.parse({
         ...input,
-        occurredAt: input.occurredAt ?? new Date().toISOString(),
+        clientReportedAt: new Date().toISOString(),
       }),
     },
     input.ticketId,
@@ -48,6 +50,7 @@ export function registerTicketActionHandler() {
           ticketId: data.ticketId,
           type: data.operation,
           args: data.args,
+          clientReportedAt: data.clientReportedAt,
           occurredAt: data.occurredAt,
           manualTime: data.manualTime,
         },
@@ -57,6 +60,8 @@ export function registerTicketActionHandler() {
       throw new Error(result.message ?? result.code ?? result.status)
     },
     undefined,
-    async (payload) => contextSchema.safeParse(payload).data?.ticketId,
+    async (payload) =>
+      z.object({ ticketId: z.string().min(1) }).safeParse(payload).data
+        ?.ticketId,
   )
 }

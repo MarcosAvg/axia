@@ -64,6 +64,7 @@ it('conserva comando, UUID, hora manual y proxy al encolar y reenviar', async ()
       clientRequestId: context.clientRequestId,
       type: 'start',
       args: { subjectTechnicianId: 'technician-a' },
+      clientReportedAt: expect.any(String),
       occurredAt: context.occurredAt,
       manualTime: true,
     },
