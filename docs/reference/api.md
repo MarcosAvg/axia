@@ -269,10 +269,14 @@ un filtro nunca amplía el alcance. Resumen admite `compact=0|1`; actividad admi
 por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
 
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
-`closed`, `rejected`, `cancelled`, `duplicate`, `avgResolution` (solo cerrados) y `avgTotal` (todos
-los tiquets del filtro). `outcome` también está disponible como dimensión de agrupación. SLA,
-resolución y primera resolución excluyen rechazados, cancelados y duplicados; el volumen, los
-motivos y la carga de trabajo los conservan según el indicador.
+`closed`, `rejected`, `cancelled`, `duplicate`, `avgTotalAll` y `sumTotalAll` (todos los tiquets
+del filtro), `avgTotalClosed` y `sumTotalClosed` (solo cerrados) y `avgResolution` (alias de
+resolución de cerrados). Las medias de desempeño excluyen duplicados y tiquets con algún evento
+`unverified`; el volumen, los conteos y la distribución por desenlace los conservan. `outcome`
+también está disponible como dimensión de agrupación. La antigüedad (`aging`) muestra todos los
+pendientes visibles aunque su registro quede fuera del periodo, y respeta el alcance y las
+dimensiones del filtro. SLA, resolución y primera resolución excluyen rechazados, cancelados y
+duplicados; el volumen, los motivos y la carga de trabajo los conservan según el indicador.
 
 Los contratos ejecutables están junto a las rutas y en `apps/server/src/**/schemas.ts`;
 las pruebas de integración verifican formas, permisos y casos de error. Esta referencia no es un

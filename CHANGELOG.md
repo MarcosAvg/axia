@@ -26,6 +26,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   los que se registraron; reconstruir el histórico ya no relee los catálogos actuales.
 - Los filtros por día y el volumen de métricas usan la zona horaria de la instancia. Los
   calendarios laborales admiten turnos que cruzan medianoche y rechazan solapamientos.
+- Las medias de desempeño excluyen duplicados y tiquets con tiempo no verificado; el volumen y la
+  distribución por desenlace los siguen contando. El resumen separa “Tiempo total (todos)” de
+  “Resolución (cerrados)” y la antigüedad muestra todos los pendientes, sin limitarse al periodo.
 - Reactivar un tiquet descartado restaura la pausa, la asignación del líder y su participación.
 - El tiempo entre un desenlace y una reclamación o reactivación se mide como fase `dormant`
   (“Fuera de atención”) y queda fuera de los indicadores de desempeño.
