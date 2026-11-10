@@ -14,6 +14,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Se añadió `pnpm db:audit:time`, un reporte de solo lectura sobre cobertura de fases, duraciones
   negativas, desfase entre hora de acción y registro, pausas y alertas de tiempo.
 
+### Cambiado
+
+- La corrección manual de la hora de un evento ajusta también sus filas enlazadas (pausas, pasos,
+  asignaciones, participaciones, validaciones, reclamaciones, ofertas y capturas), recalcula el
+  cierre del tiquet y reconstruye los tramos. El ajuste no puede saltar entre ciclos ni mover el
+  alta a otro año.
+
 ## [0.20.0] - 2026-11-09
 
 ### Añadido
