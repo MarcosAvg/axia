@@ -3,11 +3,9 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import { can as hasPermission } from '../auth/authorization.js'
 import {
-  linkAttachment,
   writeAttachmentEvent,
   type LinkedAttachment,
 } from '../attachments/link.js'
-import { problemAttachmentTypes } from '../attachments/requirements.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import {
@@ -22,11 +20,13 @@ import type {
   CreateTicketResult,
   TicketSummaryRow,
 } from './create-types.js'
-import { assertCreateTime } from './action-time.js'
+import { assertCreateTime, parseActionTime } from './action-time.js'
+import { linkRequiredAttachment } from './create-attachment.js'
 import type { DbExecutor } from './db.js'
 import { detectAndStoreDuplicates } from './duplicates.js'
-import { withOccurredAt } from './event-context.js'
+import { withActionContext } from './event-context.js'
 import { findHandledEvent, isUniqueViolation, writeEvent } from './events.js'
+import { parseInstanceWallClock } from './instance-time.js'
 import { routeTicket } from './routing.js'
 
 type RequesterContext = {
@@ -93,7 +93,7 @@ type InsertTicketInput = {
   input: ResolvedCreateInput
   requester: RequesterRow
   teamId: string
-  occurredAt: string
+  occurredAt: string | null
 }
 
 async function insertTicket({
@@ -103,7 +103,11 @@ async function insertTicket({
   requester,
   teamId,
   occurredAt,
-}: InsertTicketInput): Promise<{ id: string; cycle: number }> {
+}: InsertTicketInput): Promise<{
+  id: string
+  cycle: number
+  reportedAt: string
+}> {
   const inserted = await tx.execute(sql`
     insert into public.tickets (
       building_id, location_id, dependency_id, category_id, subcategory_id,
@@ -117,22 +121,26 @@ async function insertTicket({
       ${input.channelId}, ${input.description}, ${requester.id},
       ${input.requesterName ?? requester.full_name},
       ${input.requesterContact ?? requester.contact},
-      ${actor.id}, ${teamId}, ${occurredAt}
+      ${actor.id}, ${teamId}, coalesce(${occurredAt}::timestamptz, now())
     )
-    returning id, cycle
+    returning id, cycle, reported_at
   `)
-  const ticket = inserted.rows[0] as { id: string; cycle: number } | undefined
+  const ticket = inserted.rows[0] as
+    { id: string; cycle: number; reported_at: Date | string } | undefined
   if (!ticket) throw new Error('The ticket could not be created')
-  return ticket
+  return {
+    id: ticket.id,
+    cycle: ticket.cycle,
+    reportedAt: new Date(ticket.reported_at).toISOString(),
+  }
 }
 
 type FinalizeCreate = {
   tx: DbExecutor
   actor: Actor
   input: CreateTicketInput
-  ticket: { id: string; cycle: number }
+  ticket: { id: string; cycle: number; reportedAt: string }
   teamId: string
-  occurredAt: string
   onBehalf: boolean
   linkedAttachment: LinkedAttachment | null
 }
@@ -143,7 +151,6 @@ async function finalizeCreate({
   input,
   ticket,
   teamId,
-  occurredAt,
   onBehalf,
   linkedAttachment,
 }: FinalizeCreate): Promise<CreateTicketResult> {
@@ -153,6 +160,7 @@ async function finalizeCreate({
     actorId: actor.id,
     clientRequestId: input.clientRequestId,
     subjectRequesterId: input.requesterId,
+    occurredAt: ticket.reportedAt,
     payload: { onBehalf },
   })
   if (linkedAttachment) {
@@ -178,7 +186,7 @@ async function finalizeCreate({
       problemId: input.problemId,
       dependencyId: input.dependencyId,
       description: input.description,
-      reportedAt: occurredAt,
+      reportedAt: ticket.reportedAt,
       excludeTicketId: ticket.id,
     },
   })
@@ -191,58 +199,18 @@ async function finalizeCreate({
   }
 }
 
-async function linkRequiredAttachment({
-  tx,
-  actor,
-  ticketId,
-  problemId,
-  attachmentId,
-}: {
-  tx: DbExecutor
-  actor: Actor
-  ticketId: string
-  problemId: string
-  attachmentId: string | undefined
-}): Promise<LinkedAttachment | null> {
-  const required = await problemAttachmentTypes(tx, problemId)
-  if (required.length === 0) {
-    if (attachmentId) {
-      throw new AppError(
-        422,
-        'attachment_not_required',
-        'Este problema no admite adjunto',
-      )
-    }
-    return null
-  }
-  if (!attachmentId) {
-    throw new AppError(
-      422,
-      'attachment_required',
-      'Este problema exige adjuntar un archivo',
-    )
-  }
-  return linkAttachment({
-    tx,
-    actor,
-    ticketId,
-    attachmentId,
-    allowed: required,
-  })
-}
-
 async function createInTransaction(
   tx: DbExecutor,
   actor: Actor,
   input: CreateTicketInput,
-  occurredAt: string,
+  occurredAt: string | null,
 ): Promise<CreateTicketResult> {
   const handled = await findHandledEvent(tx, input.clientRequestId)
   if (handled) return replayedCreate(tx, handled)
 
   const resolved = await resolveCreateDefaults(tx, input)
   const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
-  if (input.occurredAt && !onBehalf) {
+  if ((input.occurredLocal || input.occurredAt) && !onBehalf) {
     throw new AppError(
       400,
       'validation',
@@ -275,7 +243,6 @@ async function createInTransaction(
     input,
     ticket,
     teamId,
-    occurredAt,
     onBehalf,
     linkedAttachment,
   })
@@ -286,11 +253,26 @@ export async function createTicket(
   actor: Actor,
   input: CreateTicketInput,
 ): Promise<CreateTicketResult> {
-  assertCreateTime(actor, input.occurredAt)
-  const occurredAt = input.occurredAt ?? new Date().toISOString()
+  await assertCreateTime(db, actor, input.occurredLocal, input.occurredAt)
+  const occurredAt = input.occurredLocal
+    ? (await parseInstanceWallClock(db, input.occurredLocal)).toISOString()
+    : input.occurredAt
+      ? parseActionTime(input.occurredAt).toISOString()
+      : null
   try {
-    return await withOccurredAt(occurredAt, () =>
-      db.transaction((tx) => createInTransaction(tx, actor, input, occurredAt)),
+    return await withActionContext(
+      {
+        occurredAt,
+        clientReportedAt: null,
+        timeConfidence: occurredAt ? 'corrected' : 'trusted',
+        clientClockSkewMs: null,
+        timeAlertKind: null,
+        suggestedOccurredAt: null,
+      },
+      () =>
+        db.transaction((tx) =>
+          createInTransaction(tx, actor, input, occurredAt),
+        ),
     )
   } catch (error) {
     if (!isUniqueViolation(error)) throw error

@@ -18,12 +18,14 @@ import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
   endOpenParticipants,
+  endTechnicianAssignments,
   reopenLeaderParticipation,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
 import { assertTicketHolder, type TicketAccess } from './access.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTimeVerified } from './time-alerts.js'
 
 type DiscardInput = {
   ticketId: string
@@ -58,6 +60,7 @@ async function applyDiscard(
     where id = ${input.ticketId}
   `)
   await endOpenParticipants(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
     tx,
     input.ticketId,
@@ -109,6 +112,7 @@ async function discardInTransaction(
   if (isFinalStatus(ticket.status)) {
     throw conflict('El tiquet ya está cerrado o descartado')
   }
+  await assertTimeVerified(tx, input.ticketId)
   await requireReason(tx, input.reasonId, input.reasonUse, 'Motivo')
   await applyDiscard(tx, { actor, access, ticket, input, onBehalf })
   return {

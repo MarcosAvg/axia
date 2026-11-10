@@ -51,6 +51,19 @@ describe('createTicketSchema', () => {
       createTicketSchema.safeParse({ ...valid, description: 'no' }).success,
     ).toBe(false)
   })
+
+  it('acepta la hora manual vacía como ausencia de hora', () => {
+    expect(
+      createTicketSchema.safeParse({ ...valid, occurredLocal: '' }).success,
+    ).toBe(true)
+  })
+
+  it('rechaza una hora manual incompleta', () => {
+    expect(
+      createTicketSchema.safeParse({ ...valid, occurredLocal: '2026-11-10' })
+        .success,
+    ).toBe(false)
+  })
 })
 
 describe('ticketListSearchSchema', () => {

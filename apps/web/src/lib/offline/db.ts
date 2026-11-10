@@ -18,6 +18,8 @@ export interface OutboxItem {
   state: 'pending' | 'sending' | 'error'
   attempts: number
   lastError: string | null
+  /** Código de dominio del último fallo; permite ofrecer la corrección adecuada. */
+  lastErrorCode?: string | null
   /** Marca de tiempo del último intento, para recuperar envíos interrumpidos. */
   sendingAt?: number | null
   createdAt: number
@@ -37,7 +39,7 @@ export interface Evidence {
   /** Nota opcional (por ejemplo, el avance al registrar `during`). */
   note?: string | null
   /** Hora real de la evidencia, si quien la sube puede ajustarla. */
-  occurredAt?: string
+  occurredLocal?: string
   /** Técnico proxy al que se atribuye la evidencia. */
   subjectTechnicianId?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'

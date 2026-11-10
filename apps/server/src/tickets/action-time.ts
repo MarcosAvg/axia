@@ -2,100 +2,57 @@ import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import type { Actor } from '../auth/authorization.js'
-import { can } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from './db.js'
-import { withOccurredAt } from './event-context.js'
+import {
+  assertTimePermission,
+  lastActionTime,
+  parseActionTime,
+  serverNow,
+  ticketClock,
+  TOLERANCE_MS,
+} from './action-time-support.js'
+import { withActionContext } from './event-context.js'
 import { writeEvent } from './events.js'
+import { INSTANCE_WALL_CLOCK, parseInstanceWallClock } from './instance-time.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 
-const TOLERANCE_MS = 60_000
+export { parseActionTime } from './action-time-support.js'
 
-export const eventTimeSchema = z.object({
-  occurredAt: z.string().datetime(),
-})
-
-type TicketClock = {
-  reported_at: Date | string
-  closed_at: Date | string | null
-  cycle: number
-  status: string
-}
+export const eventTimeSchema = z
+  .object({
+    occurredLocal: z.string().regex(INSTANCE_WALL_CLOCK).optional(),
+    occurredAt: z.string().datetime().optional(),
+  })
+  .refine((value) => Boolean(value.occurredLocal || value.occurredAt), {
+    message: 'Indica la hora de la acción',
+  })
 
 type EventRow = {
   id: number
   cycle: number
   type: string
   occurred_at: Date | string
+  time_confidence: string
 }
 
 type ActionTimeInput = {
   db: Database
   actor: Actor
   ticketId: string
-  occurredAt: string
+  occurredLocal?: string | null
+  occurredAt?: string | null
   subjectTechnicianId?: string | null
+  clientReportedAt?: string | null
+  clientClockSkewMs?: number | null
 }
 
 type AdjustInput = {
   ticketId: string
   eventId: number
-  occurredAt: string
-}
-
-export function parseActionTime(value: string): Date {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    throw new AppError(400, 'validation', 'La hora no es válida')
-  }
-  if (date.getTime() > Date.now() + TOLERANCE_MS) {
-    throw new AppError(400, 'validation', 'La hora no puede estar en el futuro')
-  }
-  return date
-}
-
-function assertTimePermission(actor: Actor): void {
-  if (!can(actor, 'time.record_manual')) {
-    throw new AppError(
-      403,
-      'forbidden',
-      'No tienes permiso para ajustar la hora de las acciones',
-    )
-  }
-}
-
-async function ticketClock(
-  db: DbExecutor,
-  ticketId: string,
-  lock = false,
-): Promise<TicketClock> {
-  const result = await db.execute(sql`
-    select reported_at, closed_at, cycle, status
-    from public.tickets where id = ${ticketId}
-    ${lock ? sql`for update` : sql``}
-  `)
-  const ticket = result.rows[0] as TicketClock | undefined
-  if (!ticket) throw new AppError(404, 'not_found', 'Tiquet no encontrado')
-  return ticket
-}
-
-async function lastActionTime(
-  db: DbExecutor,
-  ticketId: string,
-  cycle: number,
-): Promise<Date | null> {
-  const result = await db.execute(sql`
-    select occurred_at from public.ticket_events
-    where ticket_id = ${ticketId}
-      and cycle = ${cycle}
-      and type <> 'event_time_corrected'
-    order by occurred_at desc, id desc
-    limit 1
-  `)
-  const value = (result.rows[0] as { occurred_at: Date | string } | undefined)
-    ?.occurred_at
-  return value ? new Date(value) : null
+  occurredLocal?: string | null
+  occurredAt?: string | null
 }
 
 /** Valida que el actor pueda fijar la hora de una acción por proxy. */
@@ -103,6 +60,7 @@ export async function validateManualActionTime({
   db,
   actor,
   ticketId,
+  occurredLocal,
   occurredAt,
   subjectTechnicianId,
 }: ActionTimeInput): Promise<Date> {
@@ -116,7 +74,13 @@ export async function validateManualActionTime({
       'Solo puedes fijar la hora al actuar a nombre de un técnico',
     )
   }
-  const proposed = parseActionTime(occurredAt)
+  const proposed = occurredLocal
+    ? await parseInstanceWallClock(db, occurredLocal)
+    : parseActionTime(occurredAt ?? '')
+  const now = await serverNow(db)
+  if (proposed.getTime() > now.getTime() + TOLERANCE_MS) {
+    throw new AppError(400, 'validation', 'La hora no puede estar en el futuro')
+  }
   const ticket = await ticketClock(db, ticketId)
   const previous = await lastActionTime(db, ticketId, ticket.cycle)
   if (proposed < new Date(ticket.reported_at)) {
@@ -141,16 +105,49 @@ export async function withActionTime<T>(
   input: ActionTimeInput,
   callback: () => Promise<T>,
 ): Promise<T> {
-  if (!input.occurredAt) return callback()
+  if (!input.occurredLocal && !input.occurredAt) {
+    return withActionContext(
+      {
+        occurredAt: null,
+        clientReportedAt: input.clientReportedAt ?? null,
+        timeConfidence: 'trusted',
+        clientClockSkewMs: input.clientClockSkewMs ?? null,
+        timeAlertKind: null,
+        suggestedOccurredAt: null,
+      },
+      callback,
+    )
+  }
   const proposed = await validateManualActionTime(input)
-  return withOccurredAt(proposed.toISOString(), callback)
+  return withActionContext(
+    {
+      occurredAt: proposed.toISOString(),
+      clientReportedAt: input.clientReportedAt ?? null,
+      timeConfidence: 'corrected',
+      clientClockSkewMs: input.clientClockSkewMs ?? null,
+      timeAlertKind: null,
+      suggestedOccurredAt: null,
+    },
+    callback,
+  )
 }
 
 /** Valida una hora explícita al crear un tiquet. */
-export function assertCreateTime(actor: Actor, occurredAt: string | undefined) {
-  if (!occurredAt) return
+export async function assertCreateTime(
+  db: DbExecutor,
+  actor: Actor,
+  occurredLocal: string | undefined,
+  occurredAt: string | undefined,
+): Promise<void> {
+  if (!occurredLocal && !occurredAt) return
   assertTimePermission(actor)
-  parseActionTime(occurredAt)
+  const proposed = occurredLocal
+    ? await parseInstanceWallClock(db, occurredLocal)
+    : parseActionTime(occurredAt ?? '')
+  const now = await serverNow(db)
+  if (proposed.getTime() > now.getTime() + TOLERANCE_MS) {
+    throw new AppError(400, 'validation', 'La hora no puede estar en el futuro')
+  }
 }
 
 async function eventRow(
@@ -159,7 +156,7 @@ async function eventRow(
   eventId: number,
 ): Promise<EventRow> {
   const result = await tx.execute(sql`
-    select id, cycle, type, occurred_at
+    select id, cycle, type, occurred_at, time_confidence
     from public.ticket_events
     where id = ${eventId} and ticket_id = ${ticketId}
   `)
@@ -190,7 +187,7 @@ async function assertNeighbourTime(
     where ticket_id = ${ticketId}
       and cycle = ${event.cycle}
       and id <> ${event.id}
-      and type <> 'event_time_corrected'
+      and type not in ('event_time_corrected', 'time_alert')
   `)
   const bounds = result.rows[0] as
     { previous: Date | string | null; next: Date | string | null } | undefined
@@ -227,8 +224,16 @@ async function applyAdjustment(
   const previous = new Date(event.occurred_at)
   await tx.execute(sql`
     update public.ticket_events
-    set occurred_at = ${proposed}
+    set occurred_at = ${proposed}, time_confidence = 'corrected'
     where id = ${event.id} and ticket_id = ${ticketId}
+  `)
+  await tx.execute(sql`
+    update public.ticket_time_alerts
+    set status = 'resolved',
+        resolved_by = ${actor.id},
+        resolved_at = now(),
+        note = 'Hora corregida manualmente'
+    where event_id = ${event.id} and status = 'open'
   `)
   if (event.type === 'created') {
     await tx.execute(sql`
@@ -245,6 +250,7 @@ async function applyAdjustment(
       previousOccurredAt: previous.toISOString(),
       occurredAt: proposed.toISOString(),
       eventType: event.type,
+      previousTimeConfidence: event.time_confidence,
     },
   })
   await tx.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
@@ -257,7 +263,13 @@ async function adjustInTransaction(
 ): Promise<void> {
   const ticket = await ticketClock(tx, input.ticketId, true)
   const event = await eventRow(tx, input.ticketId, input.eventId)
-  const proposed = parseActionTime(input.occurredAt)
+  const proposed = input.occurredLocal
+    ? await parseInstanceWallClock(tx, input.occurredLocal)
+    : parseActionTime(input.occurredAt ?? '')
+  const now = await serverNow(tx)
+  if (proposed.getTime() > now.getTime() + TOLERANCE_MS) {
+    throw new AppError(400, 'validation', 'La hora no puede estar en el futuro')
+  }
   // El alta define el límite inferior; corregirla mueve ese límite.
   if (event.type !== 'created' && proposed < new Date(ticket.reported_at)) {
     throw new AppError(

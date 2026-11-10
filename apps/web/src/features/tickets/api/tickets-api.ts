@@ -12,6 +12,7 @@ import type {
   TicketPauseState,
   TicketPauseStep,
   TicketStatus,
+  TicketTimeAlert,
   TicketTimelineItem,
 } from '../domain/types'
 import {
@@ -20,6 +21,7 @@ import {
   ticketItemsResponseSchema,
   ticketDetailResponseSchema,
   timelineResponseSchema,
+  timeAlertResponseSchema,
 } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
@@ -124,11 +126,11 @@ export async function fetchPauseState(
 export async function adjustEventTime(
   ticketId: string,
   eventId: number,
-  occurredAt: string,
+  occurredLocal: string,
 ): Promise<void> {
   await apiFetch(`/api/tickets/${ticketId}/events/${eventId}/time`, {
     method: 'PATCH',
-    body: JSON.stringify({ occurredAt }),
+    body: JSON.stringify({ occurredLocal }),
   })
 }
 
@@ -147,6 +149,14 @@ export async function fetchParticipants(
     `/api/tickets/${ticketId}/participants`,
   )
   return body.items
+}
+
+export async function fetchTimeAlerts(
+  ticketId: string,
+): Promise<TicketTimeAlert[]> {
+  return timeAlertResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets/${ticketId}/time-alerts`),
+  ).items
 }
 
 type EvidenceResponse = {
@@ -191,9 +201,7 @@ export async function createTicket(
       channelId: input.channelId || undefined,
       description: input.description,
       requesterId: input.requesterId,
-      occurredAt: input.occurredAt
-        ? new Date(input.occurredAt).toISOString()
-        : undefined,
+      occurredLocal: input.occurredLocal || undefined,
       clientRequestId,
       shownCandidateIds,
       attachmentId,

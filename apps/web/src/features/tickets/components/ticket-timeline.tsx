@@ -64,9 +64,19 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
   attachment_added: PaperclipIcon,
   manual_time_recorded: ClockIcon,
   event_time_corrected: ClockIcon,
+  time_alert: AlertTriangleIcon,
   rated: StarIcon,
   imported: DownloadIcon,
   unrouted: AlertTriangleIcon,
+}
+
+function TimeConfidenceWarning({ item }: { item: TicketTimelineItem }) {
+  if (item.timeConfidence !== 'unverified') return null
+  return (
+    <span className="text-xs text-destructive">
+      Hora no verificada; corrígela antes de cerrar el tiquet.
+    </span>
+  )
 }
 
 function FeedItem({
@@ -112,6 +122,7 @@ function FeedItem({
           </span>
         ) : null}
         {timelineNote(item) ? <p>{timelineNote(item)}</p> : null}
+        <TimeConfidenceWarning item={item} />
         {canAdjust ? (
           <Button
             type="button"

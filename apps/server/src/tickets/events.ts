@@ -1,7 +1,12 @@
 import { sql } from 'drizzle-orm'
 
 import type { DbExecutor } from './db.js'
-import { currentOccurredAt } from './event-context.js'
+import {
+  currentActionContext,
+  type TimeAlertKind,
+  type TimeConfidence,
+} from './event-context.js'
+import { insertTimeAlert } from './time-alerts.js'
 
 export type HandledEvent = {
   ticketId: string
@@ -18,7 +23,12 @@ export type EventInput = {
   subjectUserId?: string | null
   subjectTechnicianId?: string | null
   subjectRequesterId?: string | null
-  occurredAt?: string
+  occurredAt?: string | null
+  clientReportedAt?: string | null
+  timeConfidence?: TimeConfidence
+  clientClockSkewMs?: number | null
+  timeAlertKind?: TimeAlertKind | null
+  suggestedOccurredAt?: string | null
 }
 
 export async function findHandledEvent(
@@ -35,9 +45,15 @@ export async function findHandledEvent(
   return row ? { ticketId: row.ticket_id, type: row.type } : null
 }
 
-function normalizedEvent(input: EventInput) {
+function firstDefined<T>(...values: Array<T | null | undefined>): T | null {
+  for (const value of values) {
+    if (value !== undefined && value !== null) return value
+  }
+  return null
+}
+
+function subjectFields(input: EventInput) {
   return {
-    ...input,
     actorId: input.actorId ?? null,
     clientRequestId: input.clientRequestId ?? null,
     payload: input.payload ?? {},
@@ -45,9 +61,36 @@ function normalizedEvent(input: EventInput) {
     subjectUserId: input.subjectUserId ?? null,
     subjectTechnicianId: input.subjectTechnicianId ?? null,
     subjectRequesterId: input.subjectRequesterId ?? null,
-    occurredAt:
-      input.occurredAt ?? currentOccurredAt() ?? new Date().toISOString(),
   }
+}
+
+function timeFields(input: EventInput) {
+  const context = currentActionContext()
+  const timeConfidence =
+    firstDefined(input.timeConfidence, context?.timeConfidence) ?? 'trusted'
+  return {
+    occurredAt: firstDefined(input.occurredAt, context?.occurredAt),
+    clientReportedAt: firstDefined(
+      input.clientReportedAt,
+      context?.clientReportedAt,
+    ),
+    timeConfidence,
+    clientClockSkewMs: firstDefined(
+      input.clientClockSkewMs,
+      context?.clientClockSkewMs,
+    ),
+    timeAlertKind:
+      firstDefined(input.timeAlertKind, context?.timeAlertKind) ??
+      (timeConfidence === 'unverified' ? 'clock_unknown' : null),
+    suggestedOccurredAt: firstDefined(
+      input.suggestedOccurredAt,
+      context?.suggestedOccurredAt,
+    ),
+  }
+}
+
+function normalizedEvent(input: EventInput) {
+  return { ...input, ...subjectFields(input), ...timeFields(input) }
 }
 
 export async function writeEvent(
@@ -58,19 +101,52 @@ export async function writeEvent(
   const result = await executor.execute(sql`
     insert into public.ticket_events (
       ticket_id, cycle, type, actor_id, subject_user_id, subject_technician_id,
-      subject_requester_id, reason_id, payload, client_request_id, occurred_at
+      subject_requester_id, reason_id, payload, client_request_id, occurred_at,
+      time_confidence, client_reported_at, client_clock_skew_ms
     )
     select
       t.id, t.cycle, ${event.type}, ${event.actorId}, ${event.subjectUserId},
       ${event.subjectTechnicianId}, ${event.subjectRequesterId},
       ${event.reasonId}, ${JSON.stringify(event.payload)}::jsonb,
-      ${event.clientRequestId}, ${event.occurredAt}::timestamptz
+      ${event.clientRequestId}, coalesce(${event.occurredAt}::timestamptz, now()),
+      ${event.timeConfidence}::public.time_confidence,
+      ${event.clientReportedAt}::timestamptz, ${event.clientClockSkewMs}
     from public.tickets t
     where t.id = ${event.ticketId}
     returning id
   `)
   const row = result.rows[0] as { id: string } | undefined
   if (!row) throw new Error('Event could not be written')
+
+  if (event.timeConfidence === 'unverified') {
+    const alertId = await insertTimeAlert(executor, {
+      ticketId: event.ticketId,
+      eventId: row.id,
+      kind: event.timeAlertKind ?? 'clock_unknown',
+      clientClockSkewMs: event.clientClockSkewMs,
+      suggestedOccurredAt: event.suggestedOccurredAt,
+    })
+    if (alertId) {
+      await executor.execute(sql`
+        insert into public.ticket_events (
+          ticket_id, cycle, type, payload, occurred_at
+        )
+        select
+          t.id, t.cycle, 'time_alert'::public.event_type,
+          ${JSON.stringify({
+            alertId,
+            eventId: Number(row.id),
+            kind: event.timeAlertKind ?? 'clock_unknown',
+            clockSkewMs: event.clientClockSkewMs,
+            suggestedOccurredAt: event.suggestedOccurredAt,
+          })}::jsonb,
+          now()
+        from public.tickets t
+        where t.id = ${event.ticketId}
+      `)
+    }
+  }
+
   return { id: row.id }
 }
 

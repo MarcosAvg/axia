@@ -18,7 +18,7 @@ function toPendingAction(item: OutboxItem): PendingTicketAction | null {
   if (!command.success) return null
   const payload = item.payload as {
     ticketId?: unknown
-    occurredAt?: unknown
+    clientReportedAt?: unknown
   }
   if (typeof payload.ticketId !== 'string' || !payload.ticketId) return null
   return {
@@ -28,8 +28,8 @@ function toPendingAction(item: OutboxItem): PendingTicketAction | null {
     operation: command.data.operation,
     args: { ...command.data.args },
     occurredAt:
-      typeof payload.occurredAt === 'string'
-        ? payload.occurredAt
+      typeof payload.clientReportedAt === 'string'
+        ? payload.clientReportedAt
         : new Date(item.createdAt).toISOString(),
   }
 }

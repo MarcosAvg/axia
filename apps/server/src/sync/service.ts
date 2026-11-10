@@ -6,15 +6,22 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import { runTicketAction } from '../tickets/actions.js'
 import { validateManualActionTime } from '../tickets/action-time.js'
-import { withOccurredAt } from '../tickets/event-context.js'
+import { withActionContext } from '../tickets/event-context.js'
+import type { TicketActionInput } from '../tickets/schemas.js'
 import { ticketActionSchema } from '../tickets/schemas.js'
+import {
+  classifyClientTime,
+  type TimeClassification,
+} from '../tickets/time-classification.js'
 
-export type SyncItem = {
+type SyncItem = {
   clientRequestId: string
   ticketId: string
   type: string
   args: Record<string, unknown>
-  occurredAt: string
+  clientReportedAt?: string
+  occurredLocal?: string
+  occurredAt?: string
   manualTime?: boolean
 }
 
@@ -29,10 +36,36 @@ export type SyncResult = {
   currentState?: string
   eventId?: number
   blockedBy?: string
+  timeStatus?: 'ok' | 'skew_detected' | 'manual_required'
+  clockSkewMs?: number | null
+  suggestedOccurredAt?: string | null
+  timeAlertKind?: 'clock_skew' | 'clock_unknown' | null
+}
+
+export type SyncRequest = {
+  items: SyncItem[]
+  deviceNow?: string
+}
+
+type ExecuteContext = {
+  db: Database
+  actor: Actor
+  config: AppConfig
+  item: SyncItem
+  deviceNow?: string
 }
 
 type TicketInfo = {
   reported_at: Date | string
+}
+
+type TimeFields = Pick<
+  SyncResult,
+  'timeStatus' | 'clockSkewMs' | 'suggestedOccurredAt' | 'timeAlertKind'
+>
+
+type AppliedAction = {
+  replayed: boolean
 }
 
 function rejected(
@@ -50,6 +83,14 @@ function rejected(
   }
 }
 
+function timeFields(classified: TimeClassification): TimeFields {
+  return {
+    clockSkewMs: classified.clientClockSkewMs,
+    suggestedOccurredAt: classified.suggestedOccurredAt,
+    timeAlertKind: classified.alertKind,
+  }
+}
+
 async function ticketInfo(
   db: Database,
   ticketId: string,
@@ -58,27 +99,6 @@ async function ticketInfo(
     select reported_at from public.tickets where id = ${ticketId} limit 1
   `)
   return (result.rows[0] as TicketInfo | undefined) ?? null
-}
-
-function validateOccurredAt(
-  item: SyncItem,
-  ticket: TicketInfo,
-  config: AppConfig,
-): string | null {
-  const occurred = Date.parse(item.occurredAt)
-  if (!Number.isFinite(occurred)) return 'La fecha de la acción no es válida'
-  const reported = new Date(ticket.reported_at).getTime()
-  if (occurred < reported) {
-    return 'La acción es anterior a la creación del tiquet'
-  }
-  const now = Date.now()
-  if (occurred > now + config.SYNC_FUTURE_TOLERANCE_MS) {
-    return 'La acción está demasiado en el futuro'
-  }
-  if (!item.manualTime && occurred < now - config.SYNC_MAX_AGE_MS) {
-    return 'La acción es demasiado antigua'
-  }
-  return null
 }
 
 async function currentState(
@@ -104,18 +124,113 @@ async function eventId(
   return id === undefined ? undefined : Number(id)
 }
 
-async function executeItem(
-  db: Database,
-  actor: Actor,
-  config: AppConfig,
-  item: SyncItem,
+async function appliedResult(
+  context: ExecuteContext,
+  result: AppliedAction,
+  time: TimeFields,
 ): Promise<SyncResult> {
+  return {
+    clientRequestId: context.item.clientRequestId,
+    status: result.replayed ? 'duplicate' : 'applied',
+    currentState: await currentState(context.db, context.item.ticketId),
+    eventId: await eventId(context.db, context.item.clientRequestId),
+    ...time,
+  }
+}
+
+async function executeManualItem(
+  context: ExecuteContext,
+  input: TicketActionInput,
+): Promise<SyncResult> {
+  const { item, db, actor } = context
+  if (!item.occurredLocal && !item.occurredAt) {
+    return {
+      ...rejected(item, 'time_invalid', 'Falta la hora manual de la acción'),
+      timeStatus: 'manual_required',
+    }
+  }
+
+  const proposed = await validateManualActionTime({
+    db,
+    actor,
+    ticketId: item.ticketId,
+    occurredLocal: item.occurredLocal,
+    occurredAt: item.occurredAt,
+    subjectTechnicianId:
+      'subjectTechnicianId' in input ? input.subjectTechnicianId : undefined,
+  })
+  const result = await withActionContext(
+    {
+      occurredAt: proposed.toISOString(),
+      clientReportedAt: item.clientReportedAt ?? null,
+      timeConfidence: 'corrected',
+      clientClockSkewMs: null,
+      timeAlertKind: null,
+      suggestedOccurredAt: null,
+    },
+    () => runTicketAction(db, actor, item.ticketId, input),
+  )
+  return appliedResult(context, result, { timeStatus: 'ok' })
+}
+
+async function executeDeviceItem(
+  context: ExecuteContext,
+  input: TicketActionInput,
+): Promise<SyncResult> {
+  const { item, db, actor, config } = context
+  if (!item.clientReportedAt) {
+    return {
+      ...rejected(
+        item,
+        'time_invalid',
+        'Falta la hora reportada por el dispositivo',
+      ),
+      timeStatus: 'manual_required',
+    }
+  }
+
+  const classified = await classifyClientTime({
+    db,
+    ticketId: item.ticketId,
+    clientReportedAt: item.clientReportedAt,
+    deviceNow: context.deviceNow,
+    futureToleranceMs: config.SYNC_FUTURE_TOLERANCE_MS,
+    maxAgeMs: config.SYNC_MAX_AGE_MS,
+  })
+  if (classified.rejection) {
+    return {
+      ...rejected(
+        item,
+        classified.rejection.code,
+        classified.rejection.message,
+      ),
+      timeStatus: 'manual_required',
+      ...timeFields(classified),
+    }
+  }
+
+  const result = await withActionContext(
+    {
+      occurredAt: classified.occurredAt,
+      clientReportedAt: classified.clientReportedAt,
+      timeConfidence: classified.timeConfidence,
+      clientClockSkewMs: classified.clientClockSkewMs,
+      timeAlertKind: classified.alertKind,
+      suggestedOccurredAt: classified.suggestedOccurredAt,
+    },
+    () => runTicketAction(db, actor, item.ticketId, input),
+  )
+  return appliedResult(context, result, {
+    timeStatus:
+      classified.timeConfidence === 'unverified' ? 'skew_detected' : 'ok',
+    ...timeFields(classified),
+  })
+}
+
+async function executeItem(context: ExecuteContext): Promise<SyncResult> {
+  const { item, db } = context
   const ticket = await ticketInfo(db, item.ticketId)
   if (!ticket) return rejected(item, 'not_found', 'Tiquet no encontrado')
-  const timeError = validateOccurredAt(item, ticket, config)
-  if (timeError) {
-    return rejected(item, 'invalid_occurred_at', timeError)
-  }
 
   const parsed = ticketActionSchema.safeParse({
     ...item.args,
@@ -132,27 +247,9 @@ async function executeItem(
   }
 
   try {
-    if (item.manualTime) {
-      await validateManualActionTime({
-        db,
-        actor,
-        ticketId: item.ticketId,
-        occurredAt: item.occurredAt,
-        subjectTechnicianId:
-          'subjectTechnicianId' in parsed.data
-            ? parsed.data.subjectTechnicianId
-            : undefined,
-      })
-    }
-    const result = await withOccurredAt(item.occurredAt, () =>
-      runTicketAction(db, actor, item.ticketId, parsed.data),
-    )
-    return {
-      clientRequestId: item.clientRequestId,
-      status: result.replayed ? 'duplicate' : 'applied',
-      currentState: await currentState(db, item.ticketId),
-      eventId: await eventId(db, item.clientRequestId),
-    }
+    return item.manualTime
+      ? await executeManualItem(context, parsed.data)
+      : await executeDeviceItem(context, parsed.data)
   } catch (error) {
     if (error instanceof AppError) {
       return {
@@ -171,12 +268,12 @@ export async function runSync(
   db: Database,
   actor: Actor,
   config: AppConfig,
-  items: SyncItem[],
+  request: SyncRequest,
 ): Promise<SyncResult[]> {
   const results: SyncResult[] = []
   const blocked = new Map<string, string>()
 
-  for (const item of items) {
+  for (const item of request.items) {
     const blockedBy = blocked.get(item.ticketId)
     if (blockedBy) {
       results.push({
@@ -188,7 +285,13 @@ export async function runSync(
       })
       continue
     }
-    const result = await executeItem(db, actor, config, item)
+    const result = await executeItem({
+      db,
+      actor,
+      config,
+      item,
+      deviceNow: request.deviceNow,
+    })
     if (result.status === 'rejected' || result.status === 'conflict') {
       blocked.set(item.ticketId, item.clientRequestId)
     }

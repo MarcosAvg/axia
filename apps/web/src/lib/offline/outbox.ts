@@ -1,6 +1,6 @@
 import { db } from './db'
 import type { OutboxItem } from './db'
-import { isNetworkError } from './errors'
+import { isNetworkError, OutboxError } from './errors'
 import { currentOfflineUserId } from './user'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
@@ -149,6 +149,30 @@ export async function retryOutboxItem(id: string): Promise<void> {
       state: 'pending',
       attempts: 0,
       lastError: null,
+      lastErrorCode: null,
+      sendingAt: null,
+    })
+  })
+}
+
+/** Corrige la hora de un envío rechazado y lo vuelve a poner en cola. */
+export async function retryOutboxItemWithManualTime(
+  id: string,
+  occurredLocal: string,
+): Promise<void> {
+  await exclusive(async () => {
+    const item = await db.outbox.get(id)
+    if (!item || item.userId !== currentOfflineUserId()) return
+    const payload =
+      typeof item.payload === 'object' && item.payload !== null
+        ? (item.payload as Record<string, unknown>)
+        : {}
+    await db.outbox.update(id, {
+      payload: { ...payload, occurredLocal, manualTime: true },
+      state: 'pending',
+      attempts: 0,
+      lastError: null,
+      lastErrorCode: null,
       sendingAt: null,
     })
   })
@@ -193,6 +217,7 @@ async function processItem(item: OutboxItem): Promise<boolean> {
       attempts,
       sendingAt: null,
       lastError: error instanceof Error ? error.message : String(error),
+      lastErrorCode: error instanceof OutboxError ? error.code : null,
     })
     return false
   }

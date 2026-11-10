@@ -32,6 +32,22 @@ export function formatDateOnly(isoDate: string): string {
   return new Intl.DateTimeFormat('es-MX', options).format(date)
 }
 
+/** Hora de pared `YYYY-MM-DDTHH:mm` de la instancia para un `datetime-local`. */
+export function toInstanceWallClockInput(iso: string): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: displayTimezone ?? 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(iso))
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? ''
+  return `${value('year')}-${value('month')}-${value('day')}T${value('hour')}:${value('minute')}`
+}
+
 export function formatBytes(bytes: number | null): string {
   if (bytes === null) return ''
   if (bytes < 1024) return `${bytes} B`

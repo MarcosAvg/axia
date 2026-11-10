@@ -13,6 +13,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { actionTimestamp } from './flow-state.js'
 import { findVisibleTicket } from './repository.js'
 
 async function assertOffer(
@@ -56,13 +57,16 @@ async function markTaken(
         when supervisor_user_id = ${actorId} then 'taken'::public.offer_status
         else 'withdrawn'::public.offer_status
       end,
-      resolved_at = now()
+      resolved_at = ${actionTimestamp()}
     where ticket_id = ${ticketId} and cycle = ${cycle} and status = 'offered'
   `)
   await tx.execute(sql`
     insert into public.ticket_assignments (
-      ticket_id, cycle, stage, assignee_user_id, assigned_by
-    ) values (${ticketId}, ${cycle}, 'supervisor', ${actorId}, ${actorId})
+      ticket_id, cycle, stage, assignee_user_id, assigned_by, assigned_at
+    ) values (
+      ${ticketId}, ${cycle}, 'supervisor', ${actorId}, ${actorId},
+      ${actionTimestamp()}
+    )
   `)
 }
 

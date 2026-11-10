@@ -28,6 +28,7 @@ export const eventLabels: Record<EventType, string> = {
   attachment_added: 'Adjunto agregado',
   manual_time_recorded: 'Tiempo manual',
   event_time_corrected: 'Hora de la acción ajustada',
+  time_alert: 'Alerta de hora',
   rated: 'Calificación',
   imported: 'Importado',
   unrouted: 'Sin ruteo',

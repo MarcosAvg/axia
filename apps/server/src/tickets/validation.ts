@@ -10,9 +10,14 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
-import { actionTimestamp, endOpenParticipants } from './flow-state.js'
+import {
+  actionTimestamp,
+  endOpenParticipants,
+  endTechnicianAssignments,
+} from './flow-state.js'
 import { assertRequesterProxy } from './proxy.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTimeVerified } from './time-alerts.js'
 import type { TicketAccess } from './access.js'
 import {
   resolveValidationRole,
@@ -89,9 +94,10 @@ async function recordValidation(
 ): Promise<void> {
   const inserted = await tx.execute(sql`
     insert into public.ticket_validations (
-      ticket_id, cycle, validator_user_id, validator_role
+      ticket_id, cycle, validator_user_id, validator_role, validated_at
     ) values (
-      ${input.ticketId}, ${input.cycle}, ${input.actorId}, ${input.role}
+      ${input.ticketId}, ${input.cycle}, ${input.actorId}, ${input.role},
+      ${actionTimestamp()}
     )
     on conflict (ticket_id, cycle, validator_role) do nothing
     returning id
@@ -122,6 +128,7 @@ async function closeIfDone(
     where id = ${ticketId}
   `)
   await endOpenParticipants(tx, ticketId)
+  await endTechnicianAssignments(tx, ticketId)
   return true
 }
 
@@ -168,6 +175,7 @@ async function validateInTransaction(
   if (ticket.status !== 'attended') {
     throw conflict('El tiquet no está pendiente de validación')
   }
+  await assertTimeVerified(tx, ticketId)
 
   const onBehalf = assertRequesterProxy({
     actor,

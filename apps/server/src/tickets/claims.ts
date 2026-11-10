@@ -20,6 +20,7 @@ import {
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
+import { assertTimeVerified } from './time-alerts.js'
 
 type ResolveClaimInput = {
   ticketId: string
@@ -111,6 +112,7 @@ async function resolveUpheld(
     set status = 'assigned', cycle = ${claim.cycle + 1}, closed_at = null
     where id = ${input.ticketId}
   `)
+  await endOpenParticipants(tx, input.ticketId)
   await reopenLeaderParticipation(tx, input.ticketId, actor.id)
   await writeEvent(tx, {
     ticketId: input.ticketId,
@@ -168,6 +170,9 @@ async function resolveWithNewTicket(
     where id = ${input.ticketId}
   `)
   const derivedTicketId = await copyDerivedTicket(tx, actor, ticket)
+  if (claim.prior_status === 'closed') {
+    await endTechnicianAssignments(tx, input.ticketId)
+  }
   await writeEvent(tx, {
     ticketId: input.ticketId,
     type: 'claim_resolved',
@@ -206,6 +211,7 @@ async function resolveClaimInTransaction(
   if (ticket.status !== 'under_claim') {
     throw conflict('El tiquet no está en reclamación')
   }
+  await assertTimeVerified(tx, input.ticketId)
   const claim = await openClaimRow(tx, input.ticketId)
   if (input.resultId) {
     await requireReason(tx, input.resultId, 'claim_outcome', 'Resultado')
@@ -216,7 +222,7 @@ async function resolveClaimInTransaction(
       resolution = ${input.resolution},
       result_id = ${input.resultId},
       resolved_by = ${actor.id},
-      resolved_at = now(),
+      resolved_at = ${actionTimestamp()},
       resolution_note = ${input.note}
     where id = ${claim.id}
   `)

@@ -1,7 +1,9 @@
 // Cola de acciones del tiquet: cuando no hay conexión, la acción se encola y se
-// reenvía con el contrato de sincronización, conservando `occurredAt` y el UUID.
+// reenvía con el contrato de sincronización, conservando la hora del dispositivo
+// y el UUID. La hora manual de la acción viaja aparte.
 
 import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
+import { OutboxError } from '@/lib/offline/errors'
 import { z } from 'zod'
 import { sendSyncBatch } from './sync-api'
 import { ticketCommandSchema } from './ticket-commands'
@@ -12,7 +14,11 @@ const TICKET_ACTION = 'ticket_action'
 const contextSchema = z.object({
   ticketId: z.string().min(1),
   clientRequestId: z.string().uuid(),
-  occurredAt: z.string().datetime(),
+  clientReportedAt: z.string().datetime(),
+  occurredLocal: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    .optional(),
   manualTime: z.boolean().optional(),
 })
 
@@ -26,7 +32,7 @@ export async function enqueueTicketAction(
       ...command,
       ...contextSchema.parse({
         ...input,
-        occurredAt: input.occurredAt ?? new Date().toISOString(),
+        clientReportedAt: new Date().toISOString(),
       }),
     },
     input.ticketId,
@@ -48,15 +54,21 @@ export function registerTicketActionHandler() {
           ticketId: data.ticketId,
           type: data.operation,
           args: data.args,
-          occurredAt: data.occurredAt,
+          clientReportedAt: data.clientReportedAt,
+          occurredLocal: data.occurredLocal,
           manualTime: data.manualTime,
         },
       ])
       if (!result) throw new Error('La sincronización no devolvió resultado')
       if (result.status === 'applied' || result.status === 'duplicate') return
-      throw new Error(result.message ?? result.code ?? result.status)
+      throw new OutboxError(
+        result.message ?? result.code ?? result.status,
+        result.code,
+      )
     },
     undefined,
-    async (payload) => contextSchema.safeParse(payload).data?.ticketId,
+    async (payload) =>
+      z.object({ ticketId: z.string().min(1) }).safeParse(payload).data
+        ?.ticketId,
   )
 }

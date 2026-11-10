@@ -4,6 +4,7 @@ import type { DuplicateCandidate } from './domain/types'
 
 export const ticketStatusSchema = z.enum(TICKET_STATUSES)
 const nullableText = z.string().nullable()
+const timeConfidenceSchema = z.enum(['trusted', 'unverified', 'corrected'])
 const ticketListItemSchema = z.object({
   id: z.string(),
   folio: z.string(),
@@ -90,6 +91,21 @@ export const timelineResponseSchema = z.object({
       subjectTechnicianName: nullableText,
       subjectRequesterName: nullableText,
       reasonName: nullableText,
+      timeConfidence: timeConfidenceSchema,
+    }),
+  ),
+})
+export const timeAlertResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      eventId: z.number().int(),
+      eventType: z.enum(EVENT_TYPES),
+      kind: z.string(),
+      clientClockSkewMs: z.number().nullable(),
+      suggestedOccurredAt: z.string().nullable(),
+      occurredAt: z.string(),
+      detectedAt: z.string(),
     }),
   ),
 })
@@ -122,7 +138,11 @@ export const createTicketSchema = z.object({
     .min(5, 'Describe el problema con un poco más de detalle.')
     .max(4000),
   requesterId: z.string().min(1, 'Selecciona un solicitante.'),
-  occurredAt: z.string().optional(),
+  occurredLocal: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    .or(z.literal(''))
+    .optional(),
 })
 export type CreateTicketInput = z.infer<typeof createTicketSchema>
 

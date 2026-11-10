@@ -11,6 +11,7 @@ import {
 } from './action-shared.js'
 import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
+import { actionTimestamp } from './flow-state.js'
 import { assertTechnicianAction } from './proxy.js'
 import { requirePauseDescendant, requirePauseRoot } from './reasons.js'
 import { findVisibleTicket } from './repository.js'
@@ -71,18 +72,22 @@ async function pauseInTransaction(
   const inserted = await tx.execute(sql`
     insert into public.ticket_pauses (
       ticket_id, cycle, reason_id, opened_by, note, estimated_date,
-      recorded_by, client_request_id, root_reason_id
+      recorded_by, client_request_id, root_reason_id, opened_at
     ) values (
       ${input.ticketId}, ${ticket.cycle}, ${input.reasonId}, ${actor.id},
       ${input.note}, ${input.estimatedDate}, ${actor.id},
-      ${input.clientRequestId}, ${input.reasonId}
+      ${input.clientRequestId}, ${input.reasonId}, ${actionTimestamp()}
     )
     returning id
   `)
   const pauseId = (inserted.rows[0] as { id: string }).id
   await tx.execute(sql`
-    insert into public.ticket_pause_steps (pause_id, reason_id, actor_id, note)
-    values (${pauseId}, ${input.reasonId}, ${actor.id}, ${input.note})
+    insert into public.ticket_pause_steps (
+      pause_id, reason_id, actor_id, note, entered_at
+    ) values (
+      ${pauseId}, ${input.reasonId}, ${actor.id}, ${input.note},
+      ${actionTimestamp()}
+    )
   `)
   await tx.execute(sql`
     update public.tickets set status = 'paused' where id = ${input.ticketId}
@@ -151,12 +156,16 @@ async function advanceInTransaction(
   await requirePauseDescendant(tx, pause.root_reason_id, input.reasonId)
   await tx.execute(sql`
     update public.ticket_pause_steps
-    set exited_at = now()
+    set exited_at = ${actionTimestamp()}
     where pause_id = ${pause.id} and exited_at is null
   `)
   await tx.execute(sql`
-    insert into public.ticket_pause_steps (pause_id, reason_id, actor_id, note)
-    values (${pause.id}, ${input.reasonId}, ${actor.id}, ${input.note})
+    insert into public.ticket_pause_steps (
+      pause_id, reason_id, actor_id, note, entered_at
+    ) values (
+      ${pause.id}, ${input.reasonId}, ${actor.id}, ${input.note},
+      ${actionTimestamp()}
+    )
   `)
   await tx.execute(sql`
     update public.ticket_pauses
@@ -226,11 +235,13 @@ async function resumeInTransaction(
   await requirePauseDescendant(tx, pause.root_reason_id, input.reasonId)
   await tx.execute(sql`
     update public.ticket_pause_steps
-    set exited_at = now()
+    set exited_at = ${actionTimestamp()}
     where pause_id = ${pause.id} and exited_at is null
   `)
   await tx.execute(sql`
-    update public.ticket_pauses set closed_at = now() where id = ${pause.id}
+    update public.ticket_pauses
+    set closed_at = ${actionTimestamp()}
+    where id = ${pause.id}
   `)
   await tx.execute(sql`
     update public.tickets set status = 'in_progress' where id = ${input.ticketId}

@@ -14,6 +14,10 @@ interface SettingsFieldsProps {
 
 const { settings, validationPolicies, evidencePolicies } = adminMessages
 
+const VISIBILITY_EVENT_TYPES = EVENT_TYPES.filter(
+  (type) => type !== 'time_alert',
+)
+
 const validationOptions = (
   Object.keys(validationPolicies) as (keyof typeof validationPolicies)[]
 ).map((value) => ({ value, label: validationPolicies[value] }))
@@ -163,7 +167,7 @@ export function VisibilityFields({ register, errors }: SettingsFieldsProps) {
         {settings.requesterVisibleEvents}
       </span>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {EVENT_TYPES.map((type) => (
+        {VISIBILITY_EVENT_TYPES.map((type) => (
           <label
             key={type}
             className="flex min-h-11 items-center gap-2 text-sm"

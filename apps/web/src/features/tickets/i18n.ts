@@ -32,6 +32,14 @@ export const ticketMessages = {
     submit: 'Guardar hora',
     error: 'No se pudo ajustar la hora.',
   },
+  timeAlerts: {
+    title: 'Horas pendientes de corrección',
+    help: 'El tiquet no puede cerrarse hasta corregir estas acciones.',
+    skew: (minutes: number) => `Desfase del dispositivo: ${minutes} min.`,
+    unknown: 'No se recibió la hora del dispositivo.',
+    correct: 'Corregir hora',
+    unverified: 'Hora no verificada',
+  },
   detail: {
     title: 'Detalle del tiquet',
     back: 'Volver a la lista',
@@ -185,6 +193,7 @@ export const ticketMessages = {
     add_auxiliary: 'Agregar auxiliar',
   },
   actionFields: {
+    realTime: (timezone: string) => `Hora real de la acción (${timezone})`,
     evidence: 'Evidencia',
     evidenceRequired: 'Adjunta la evidencia para continuar.',
     progress: 'Avance del trabajo (opcional)',

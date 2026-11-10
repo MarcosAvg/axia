@@ -136,7 +136,7 @@ export type ArgsFor<Operation extends TicketOperation> = Extract<
 export type TicketCommandInput = TicketCommand & {
   ticketId: string
   clientRequestId: string
-  occurredAt?: string
+  occurredLocal?: string
   manualTime?: boolean
 }
 
@@ -145,14 +145,14 @@ export async function sendTicketCommand(
   input: TicketCommandInput,
 ): Promise<void> {
   const command = ticketCommandSchema.parse(input)
-  if (input.manualTime && input.occurredAt) {
+  if (input.manualTime && input.occurredLocal) {
     const [result] = await sendSyncBatch([
       {
         ticketId: input.ticketId,
         clientRequestId: input.clientRequestId,
         type: command.operation,
         args: command.args,
-        occurredAt: input.occurredAt,
+        occurredLocal: input.occurredLocal,
         manualTime: true,
       },
     ])

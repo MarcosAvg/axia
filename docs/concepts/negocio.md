@@ -26,9 +26,11 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
 4. **Tiempos por acción.** Las acciones directas registran la hora en que se ejecutan. Quien lleva
    el seguimiento (supervisor o administrador) puede fijar la **hora real de la acción** solo
    cuando actúa **a nombre de un técnico**, o la hora de registro cuando crea el tiquet **a nombre
-   de otra persona**. Después puede ajustarla si queda entre los eventos vecinos. Los tramos se
-   derivan de los eventos; el ajuste queda auditado y reconstruye los tramos. No se crean tramos
-   manuales independientes.
+   de otra persona**. La hora manual se expresa como **hora de pared de la instancia**
+   (`instance_settings.timezone`) y la interpreta el servidor; nunca se construye con la zona del
+   navegador. Después puede ajustarse **cualquier evento** (salvo los de auditoría) si queda entre
+   los eventos vecinos. Los tramos se derivan de los eventos; el ajuste queda auditado y reconstruye
+   los tramos. No se crean tramos manuales independientes.
 5. **Permisos nuevos.** Se añaden al conjunto fijo: crear a nombre de, actuar en nombre de
    técnico, ajustar la hora de las acciones, y validar / cancelar / reclamar / calificar a nombre
    del solicitante sin cuenta.
@@ -40,7 +42,10 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
    acuerdo **abre una reclamación** (RN-16).
 8. **Concurrencia y acciones tardías** (RN-27). "La primera es verdad": gana la primera acción.
    Una acción que llega tarde (sin conexión) sobre un estado ya resuelto se **registra** pero
-   **no surte efecto**, y se informa a quien la envió.
+   **no surte efecto**, y se informa a quien la envió. La hora offline conserva la hora del
+   dispositivo con una **confianza** (`trusted`, `unverified` o `corrected`). Si el reloj está
+   desfasado, se alerta y se exige corrección manual; si la hora produciría un valor negativo,
+   futuro o fuera de orden, se **rechaza** y se pide una hora manual antes de reintentar.
 9. **Una sola instancia por base** (§1): una fila de configuración; en la misma base conviven
    varias dependencias solicitantes.
 10. **Reactivación** (RN-30): un tiquet descartado **vuelve al estado que tenía justo antes de
@@ -53,6 +58,15 @@ abajo. Se reflejan en `docs/concepts/dominio.md` y `docs/concepts/datos.md`.
     real.
 14. **Contenido de la alerta de duplicados**: folio, estado, fecha, ubicación, problema y contacto
     de quien registró (configurable).
+15. **Tiempo offline con confianza y corrección obligatoria.** La hora de una acción sin conexión
+    se toma del dispositivo, pero es **provisional**: el lote envía también `deviceNow` y el
+    servidor mide el desfase contra su reloj. Si el desfase supera `time_sync_tolerance` o falta
+    `deviceNow`, el evento queda `unverified`, se crea una alerta y el tiquet **no puede cerrarse**
+    hasta que una persona con permiso ajuste la hora manualmente en la zona de la instancia. Si la
+    hora produciría una duración negativa, un valor futuro o fuera de orden, la acción se rechaza y
+    se pide la hora manual antes de reintentar. La fase `dormant` mide el tiempo fuera de atención
+    entre un estado terminal y una reclamación o reactivación, y queda fuera de los indicadores de
+    desempeño.
 
 ---
 
@@ -262,9 +276,19 @@ puede, precondiciones y efectos.
   contar tiquets. El folio nunca cambia.
 - **RN-26 Roles configurables.** Ver sección 2.
 - **RN-27 Trabajo sin conexión.** Los técnicos operan sin señal. Toda acción lleva un identificador
-  único del cliente (idempotente) y el historial guarda **cuándo ocurrió** (`occurred_at`, reportado por
-  el cliente, con validaciones) y **cuándo se registró** (`recorded_at`, del servidor). Define cómo se
-  resuelven acciones que llegan tarde o en conflicto (por ejemplo, el tiquet ya cambió de estado).
+  único del cliente (idempotente). El historial guarda **cuándo ocurrió** (`occurred_at`), **cuándo
+  se registró** (`recorded_at`, del servidor) y la **hora reportada por el dispositivo**
+  (`client_reported_at`, solo auditoría). La acción offline usa la hora del dispositivo como
+  `occurred_at` provisional y la marca con `time_confidence`:
+  - `trusted` si el desfase medido con `deviceNow` está dentro de `time_sync_tolerance` y el orden
+    es coherente.
+  - `unverified` si el desfase supera la tolerancia o falta `deviceNow`; se crea una alerta y el
+    tiquet no puede pasar a un estado final hasta corregir la hora manualmente.
+  - `corrected` cuando una persona con permiso ajusta la hora en la zona de la instancia.
+  Una hora que produciría un valor negativo, futuro o fuera de orden se **rechaza** con
+  `time_out_of_order`, `time_future` o `time_too_old`; la acción queda en la cola para corregirla y
+  reintentarla. Las acciones tardías sobre un estado ya resuelto se registran sin efecto y se
+  informan, según la decisión de concurrencia.
 - **RN-28 Prioridad.** La propone el solicitante y la pueden ajustar el supervisor o el administrador,
   con historial.
 - **RN-29 Duplicados.**
@@ -374,6 +398,13 @@ Tramos que deben poder distinguirse:
 | Validación | Atendido → cerrado o reclamación |
 | Reclamación y reapertura | Reclamación abierta → resuelta (**aparte**, pero suma al total) |
 | Revisión de duplicado | Registro → marcado como duplicado (**aparte**, fuera de los indicadores de desempeño) |
+| Fuera de atención (`dormant`) | Estado terminal → reclamación o reactivación (**aparte**, fuera de los indicadores de desempeño) |
+
+La hora de una acción en línea se sella con `now()` de PostgreSQL. La hora de una acción offline
+se toma del dispositivo, pero es provisional: se marca `trusted`, `unverified` o `corrected`. Un
+evento `unverified` bloquea los desenlaces finales hasta que se corrija manualmente en la zona de la
+instancia; una hora que produciría un valor negativo, futuro o fuera de orden se rechaza. Los
+tiquets con tiempo no verificado quedan fuera de las medias de desempeño hasta corregirse.
 
 **Tiempo total** = continuo desde el registro hasta el cierre final, **incluidas** reasignaciones,
 recapturas, pausas, reclamaciones y reaperturas. Debe poder obtenerse también el **tiempo neto**

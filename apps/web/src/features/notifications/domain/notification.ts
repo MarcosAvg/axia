@@ -52,6 +52,7 @@ const titles: Record<string, string> = {
   duplicate_marked: 'Tiquet marcado como duplicado',
   reactivated: 'Tiquet reactivado',
   priority_changed: 'Prioridad ajustada',
+  time_alert: 'Hora pendiente de corrección',
   unrouted: 'Tiquet sin supervisores',
   rated: 'Calificación recibida',
 }

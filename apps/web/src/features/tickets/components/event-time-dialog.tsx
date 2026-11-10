@@ -10,16 +10,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { TextField } from '@/components/shared/form-fields'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, toInstanceWallClockInput } from '@/lib/format'
 import { toTicketError } from '../domain/errors'
-import type { TicketTimelineItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { useAdjustEventTime } from '../hooks/use-tickets'
 
+type AdjustableEvent = {
+  id: number
+  occurredAt: string
+  suggestedOccurredAt?: string | null
+}
+
 function toLocal(iso: string): string {
-  const date = new Date(iso)
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 16)
+  return toInstanceWallClockInput(iso)
 }
 
 function EventTimeActions({
@@ -53,10 +56,12 @@ export function EventTimeDialog({
   onClose,
 }: {
   ticketId: string
-  item: TicketTimelineItem
+  item: AdjustableEvent
   onClose: () => void
 }) {
-  const [value, setValue] = useState(() => toLocal(item.occurredAt))
+  const [value, setValue] = useState(() =>
+    toLocal(item.suggestedOccurredAt ?? item.occurredAt),
+  )
   const adjust = useAdjustEventTime(ticketId)
   const messages = ticketMessages.eventTime
 
@@ -64,7 +69,7 @@ export function EventTimeDialog({
     event.preventDefault()
     if (!value) return
     adjust.mutate(
-      { eventId: item.id, occurredAt: new Date(value).toISOString() },
+      { eventId: item.id, occurredLocal: value },
       { onSuccess: onClose },
     )
   }

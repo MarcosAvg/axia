@@ -8,6 +8,7 @@ import { changePriority, commentTicket } from './annotation.js'
 import { openClaim } from './claims-open.js'
 import { resolveClaim } from './claims.js'
 import { cancelTicket, reactivateTicket, rejectTicket } from './disposition.js'
+import { currentActionContext } from './event-context.js'
 import { markDuplicate } from './mark-duplicate.js'
 import { advancePause, pauseTicket, resumeTicket } from './pause.js'
 import { rateTicket } from './rating.js'
@@ -273,11 +274,15 @@ export async function runTicketAction(
   ticketId: string,
   input: TicketActionInput,
 ): Promise<ActionResult> {
+  if (currentActionContext()) {
+    return runTicketActionNow(db, actor, ticketId, input)
+  }
   return withActionTime(
     {
       db,
       actor,
       ticketId,
+      occurredLocal: input.occurredLocal ?? '',
       occurredAt: input.occurredAt ?? '',
       subjectTechnicianId: subjectOf(input),
     },

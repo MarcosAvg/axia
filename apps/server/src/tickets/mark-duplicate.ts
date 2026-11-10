@@ -19,11 +19,13 @@ import { findHandledEvent, writeEvent } from './events.js'
 import {
   actionTimestamp,
   endOpenParticipants,
+  endTechnicianAssignments,
   resolveOpenClaimOnDiscard,
 } from './flow-state.js'
 import { assertTicketHolder } from './access.js'
 import { assertTicketAction, findVisibleTicket } from './repository.js'
 import { scopePredicate } from './scope.js'
+import { assertTimeVerified } from './time-alerts.js'
 
 export type MarkDuplicateInput = {
   ticketId: string
@@ -134,6 +136,7 @@ async function applyDuplicate(
   await linkCandidate(tx, input.ticketId, actor.id, input.originalId)
   await dismissReciprocalCandidates(tx, input.ticketId, actor.id)
   await endOpenParticipants(tx, input.ticketId)
+  await endTechnicianAssignments(tx, input.ticketId)
   await resolveOpenClaimOnDiscard(
     tx,
     input.ticketId,
@@ -173,6 +176,7 @@ async function markDuplicateInTransaction(
   if (isFinalStatus(ticket.status)) {
     throw conflict('El tiquet ya está cerrado o descartado')
   }
+  await assertTimeVerified(tx, input.ticketId)
   await applyDuplicate(tx, actor, input, ticket)
   return {
     ticketId: input.ticketId,

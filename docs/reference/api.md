@@ -6,8 +6,11 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 
 ## Contratos comunes
 
-- UUID para identificadores de recursos y `clientRequestId`; fechas de acción en formato ISO con
-  zona (`occurredAt`). Los esquemas validan entradas antes de ejecutar servicios.
+- UUID para identificadores de recursos y `clientRequestId`; las horas de acción manuales se envían
+  como hora de pared de la instancia (`occurredLocal`, `YYYY-MM-DDTHH:mm`) y el servidor las
+  interpreta con `instance_settings.timezone`. Los instantes calculados se devuelven en ISO con
+  zona. La sincronización offline envía además `clientReportedAt` y `deviceNow`. Los esquemas
+  validan entradas antes de ejecutar servicios.
 - Alta, acciones y reserva de evidencia son idempotentes. Conserva `clientRequestId` al reintentar.
   El alta devuelve `{ ticket: { id, folio, possibleDuplicate }, replayed }`: 201 al crear, 200 al
   repetir. Una acción devuelve `{ ticketId, action, replayed }`.
@@ -56,6 +59,7 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | `GET` | `/api/tickets/:id/participants` | Participantes |
 | `GET` | `/api/tickets/:id/pause-state` | Pausa abierta |
 | `GET` | `/api/tickets/:id/pause-steps` | Subestados de pausa |
+| `GET` | `/api/tickets/:id/time-alerts` | Alertas de hora no verificada |
 | `GET` | `/api/tickets/:id/rating` | Calificación |
 | `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
@@ -112,13 +116,21 @@ validación `both`, el solicitante valida primero y el supervisor después. Un s
 que intenta validar antes de ese lado recibe 409; con `subjectRequesterId` registra el lado del
 solicitante. Reclamar o cancelar sin proxy se atribuye al actor, no al solicitante.
 
-El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredAt` para registrar la
-hora real. En las acciones solo se acepta junto con `subjectTechnicianId`, para las acciones de
-técnico ejecutadas por proxy (`start`, `pause`, `advance_pause`, `resume`, `attend`, `recapture`).
-En el alta solo se acepta cuando el tiquet se registra a nombre de otra persona. El ajuste de un
-evento valida que la nueva hora quede entre el evento anterior y el siguiente, deja auditoría y
-reconstruye los tramos del tiquet. En la sincronización offline, `manualTime: true` exige permiso
-para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
+El alta de tiquet, las acciones y la reserva de evidencia aceptan `occurredLocal` para registrar la
+hora real como hora de pared de la instancia. En las acciones solo se acepta junto con
+`subjectTechnicianId`, para las acciones de técnico ejecutadas por proxy (`start`, `pause`,
+`advance_pause`, `resume`, `attend`, `recapture`). En el alta solo se acepta cuando el tiquet se
+registra a nombre de otra persona. El ajuste de un evento acepta cualquier evento salvo
+`event_time_corrected`, valida que la nueva hora quede entre el evento anterior y el siguiente,
+deja auditoría y reconstruye los tramos del tiquet. En la sincronización offline, `manualTime: true`
+exige permiso para ajustar horas y un sujeto válido, y aplica las mismas validaciones.
+
+Una acción offline usa la hora del dispositivo (`clientReportedAt`) como hora provisional. El lote
+incluye `deviceNow`; si el desfase contra el servidor supera `time_sync_tolerance` o falta
+`deviceNow`, el evento queda `unverified`, se crea una alerta y el tiquet no puede pasar a un estado
+final hasta corregir la hora. Una hora anterior al último evento, futura o demasiado antigua se
+rechaza con `time_out_of_order`, `time_future` o `time_too_old`; la acción queda en la cola para
+corregirla con `occurredLocal` y reintentarla.
 
 Si el solicitante del alta tiene dependencia, `dependencyId` debe ser esa dependencia y la
 `locationId` debe estar vinculada a ella; si no coincide, la API responde 400. En `recapture` la
@@ -183,13 +195,17 @@ calificación.
 (1–200, por defecto 100); devuelve `{ items }` en orden por ID. SSE y recuperación respetan alcance
 y visibilidad de eventos para solicitantes. SSE se cierra al expirar o revocar la sesión.
 
-La sincronización recibe `{ items: [...] }` (1–100). Cada elemento lleva `clientRequestId`,
-`ticketId`, `type` (comando), `args`, `occurredAt` y `manualTime` opcional. Devuelve `{ results }`
-con estado por envío: `applied`, `duplicate`, `rejected`, `conflict` o `blocked`, y código/mensaje
-cuando corresponde. Una acción fallida bloquea las siguientes del mismo tiquet en el lote
-(`blockedBy`), sin detener otros tiquets. Valida antigüedad, tolerancia de futuro, permisos y estado;
-no existe aceptación automática por haber trabajado sin conexión. El registro histórico de una
-acción tardía rechazada sigue [pendiente](estados-y-transiciones.md).
+La sincronización recibe `{ items: [...], deviceNow }` (1–100 ítems). Cada elemento lleva
+`clientRequestId`, `ticketId`, `type` (comando), `args`, `clientReportedAt` y, si la persona fija
+la hora, `occurredLocal` con `manualTime: true`. Devuelve `{ results }` con estado por envío:
+`applied`, `duplicate`, `rejected`, `conflict` o `blocked`, y código/mensaje cuando corresponde.
+Los resultados pueden incluir `timeStatus` (`ok`, `skew_detected`, `manual_required`), `clockSkewMs`,
+`suggestedOccurredAt` y `timeAlertId`. Una acción fallida bloquea las siguientes del mismo tiquet en
+el lote (`blockedBy`), sin detener otros tiquets. Se validan antigüedad, futuro, orden, permisos y
+estado; una hora que produciría un valor negativo se rechaza. Mientras haya una alerta de tiempo
+abierta, `validate`, `reject`, `cancel`, `mark_duplicate` y `resolve_claim` responden 409
+`time_unverified` con las alertas y una hora sugerida. El registro histórico de una acción tardía
+rechazada sigue [pendiente](estados-y-transiciones.md).
 
 ## Administración
 

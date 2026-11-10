@@ -23,7 +23,7 @@ interface EvidenceInput {
   type: EvidenceType
   file: File
   note?: string | null
-  occurredAt?: string
+  occurredLocal?: string
   subjectTechnicianId?: string
 }
 
@@ -41,7 +41,7 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
     mimeType: blob.type || params.file.type,
     fileName: params.file.name,
     note: params.note ?? null,
-    occurredAt: params.occurredAt,
+    occurredLocal: params.occurredLocal || undefined,
     subjectTechnicianId: params.subjectTechnicianId,
     state: 'pending',
     progress: 0,
@@ -74,8 +74,10 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
         clientRequestId: evidence.id,
         mimeType: evidence.mimeType,
         sizeBytes: evidence.blob.size,
-        occurredAt: evidence.occurredAt,
+        occurredLocal: evidence.occurredLocal || undefined,
         subjectTechnicianId: evidence.subjectTechnicianId,
+        clientCapturedAt: new Date(evidence.createdAt).toISOString(),
+        deviceNow: new Date().toISOString(),
       }),
     },
   )

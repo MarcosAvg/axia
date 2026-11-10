@@ -64,7 +64,12 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   su resultado; no debe generarse otro UUID para reintentar.
 - Los envíos offline conservan hora y UUID; un fallo bloquea los siguientes del mismo tiquet.
   Actualmente el servidor devuelve conflicto o rechazo sin insertar un evento de acción tardía.
-  El registro sin efecto exigido por RN-27 sigue pendiente.
+  El registro sin efecto exigido por RN-27 sigue pendiente. El
+  [ADR 0125](../decisions/0125-tiempo-autoritativo-instancia.md) aprueba además la confianza de la
+  hora offline (`trusted`, `unverified`, `corrected`), las alertas por desfase y el bloqueo de los
+  desenlaces finales hasta corregir; esa parte está en implementación.
+- El ajuste de hora acepta cualquier evento del tiquet, salvo `event_time_corrected`. El servidor
+  valida que la nueva hora quede entre los eventos vecinos, deja auditoría y reconstruye los tramos.
 - La recaptura actual no está disponible durante una reclamación, aunque RN-17 prevé corregir la
   captura al evaluarla. El motivo es opcional en su contrato actual.
 - La validación a nombre del solicitante exige elegir explícitamente al solicitante como sujeto y
@@ -99,6 +104,8 @@ adicional de transición. Ajustar la hora de un evento tiene su propio endpoint 
   por separado.
 - Cada tiquet tiene una sola fase primaria abierta. Los estados finales (`closed`, `rejected`,
   `cancelled`, `duplicate`) cierran la fase en `closed_at`; `reactivated` la reabre según el estado
-  restaurado. La reasignación y la revisión de duplicado son anotaciones, no fases de la barra.
+  restaurado. La reasignación y la revisión de duplicado son anotaciones, no fases de la barra. El
+  [ADR 0125](../decisions/0125-tiempo-autoritativo-instancia.md) añade `dormant` para el tiempo
+  fuera de atención; su implementación está en curso.
 - Rechazados, cancelados y duplicados no cuentan como cerrados. Se miden hasta su `closed_at` y se
   segmentan por `outcome`; solo los duplicados quedan fuera de SLA, resolución y carga.

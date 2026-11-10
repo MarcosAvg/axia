@@ -1,8 +1,5 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { ButtonGrid } from '@/components/shared/button-grid'
-import { ErrorAlert } from '@/components/shared/async-state'
 import { FileField } from '@/components/shared/file-field'
 import { TextField } from '@/components/shared/form-fields'
 import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
@@ -10,13 +7,13 @@ import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
 import type { ActionKey, ProxySubject } from '../domain/actions'
 import { isProxyAction } from '../domain/actions'
-import { toTicketError } from '../domain/errors'
 import type { EvidenceType, TicketDetail } from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useActionCatalogs } from '../hooks/use-action-catalogs'
 import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
+import { ActionFormFooter } from './action-form-footer'
 import { TicketActionFields } from './ticket-action-fields'
 import {
   actionFormState,
@@ -24,35 +21,6 @@ import {
   reasonUseFor,
 } from './ticket-action-handlers'
 import { useActionSubmission } from './use-action-submission'
-
-function ActionFormFooter({
-  error,
-  isPending,
-  onClose,
-}: {
-  error: unknown
-  isPending: boolean
-  onClose: () => void
-}) {
-  return (
-    <>
-      {error ? <ErrorAlert message={toTicketError(error).message} /> : null}
-      <ButtonGrid>
-        <Button type="submit" disabled={isPending} className="min-h-11">
-          {ticketMessages.actionFields.submit}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          className="min-h-11"
-          onClick={onClose}
-        >
-          {ticketMessages.actionFields.cancel}
-        </Button>
-      </ButtonGrid>
-    </>
-  )
-}
 
 function EvidenceBlock({
   evidenceType,
@@ -98,7 +66,8 @@ interface ActionFormViewProps {
   reasonRequired: boolean
   values: ActionValues
   validationErrors: Partial<Record<ActionField, string>>
-  occurredAt: string
+  occurredLocal: string
+  timezone: string | null
   showOccurredAt: boolean
   onOccurredAtChange: (value: string) => void
   onChange: (patch: Partial<ActionValues>) => void
@@ -106,6 +75,29 @@ interface ActionFormViewProps {
   isPending: boolean
   onSubmit: (event: FormEvent) => void
   onClose: () => void
+}
+
+function ActionTimeField({
+  value,
+  timezone,
+  show,
+  onChange,
+}: {
+  value: string
+  timezone: string | null
+  show: boolean
+  onChange: (value: string) => void
+}) {
+  if (!show) return null
+  return (
+    <TextField
+      id="action-occurred-at"
+      label={ticketMessages.actionFields.realTime(timezone ?? 'instancia')}
+      type="datetime-local"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  )
 }
 
 function ActionFormView({
@@ -123,7 +115,8 @@ function ActionFormView({
   reasonRequired,
   values,
   validationErrors,
-  occurredAt,
+  occurredLocal,
+  timezone,
   showOccurredAt,
   onOccurredAtChange,
   onChange,
@@ -134,15 +127,12 @@ function ActionFormView({
 }: ActionFormViewProps) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      {showOccurredAt ? (
-        <TextField
-          id="action-occurred-at"
-          label="Hora real de la acción"
-          type="datetime-local"
-          value={occurredAt}
-          onChange={(event) => onOccurredAtChange(event.target.value)}
-        />
-      ) : null}
+      <ActionTimeField
+        value={occurredLocal}
+        timezone={timezone}
+        show={showOccurredAt}
+        onChange={onOccurredAtChange}
+      />
       <EvidenceBlock
         evidenceType={evidenceType}
         evidenceError={evidenceError}
@@ -211,7 +201,7 @@ function useTicketActionForm({
   const time = useActionTime(
     isProxyAction(action) && Boolean(subjectTechnicianId),
   )
-  const actions = useTicketActions(ticketId, subject, time.iso)
+  const actions = useTicketActions(ticketId, subject, time.local)
   const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
   const catalogs = useActionCatalogs({
@@ -227,7 +217,7 @@ function useTicketActionForm({
     action,
     ticketId,
     cycle,
-    occurredAt: time.iso,
+    occurredLocal: time.local,
     subjectTechnicianId,
     reasonRequired: catalogs.reasonRequired,
     onClose,
@@ -242,7 +232,8 @@ function useTicketActionForm({
     submission,
     values,
     onChange,
-    occurredAt: time.value,
+    occurredLocal: time.value,
+    timezone: time.timezone,
     showOccurredAt: time.show,
     onOccurredAtChange: time.setValue,
     technicians: catalogs.technicians,
@@ -275,7 +266,8 @@ export function TicketActionForm(props: TicketActionFormProps) {
       reasonRequired={form.reasonRequired}
       values={form.values}
       validationErrors={form.submission.validationErrors}
-      occurredAt={form.occurredAt}
+      occurredLocal={form.occurredLocal}
+      timezone={form.timezone}
       showOccurredAt={form.showOccurredAt}
       onOccurredAtChange={form.onOccurredAtChange}
       onChange={form.onChange}

@@ -10,6 +10,7 @@ import {
 import type { AuthService } from '../auth/service.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
+import { INSTANCE_WALL_CLOCK } from '../tickets/instance-time.js'
 import { runSync } from './service.js'
 
 const itemSchema = z.object({
@@ -17,12 +18,15 @@ const itemSchema = z.object({
   ticketId: z.string().uuid(),
   type: z.string().min(1).max(50),
   args: z.record(z.string(), z.unknown()).default({}),
-  occurredAt: z.string().min(1).max(80),
+  clientReportedAt: z.string().datetime().optional(),
+  occurredLocal: z.string().regex(INSTANCE_WALL_CLOCK).optional(),
+  occurredAt: z.string().datetime().optional(),
   manualTime: z.boolean().optional(),
 })
 
 const bodySchema = z.object({
   items: z.array(itemSchema).min(1).max(100),
+  deviceNow: z.string().datetime().optional(),
 })
 
 export type SyncRoutesOptions = {
@@ -41,7 +45,7 @@ export function registerSyncRoutes(
   app.post('/api/sync/actions', { preHandler: canView }, async (request) => {
     const body = bodySchema.parse(request.body)
     return {
-      results: await runSync(db, currentActor(request), config, body.items),
+      results: await runSync(db, currentActor(request), config, body),
     }
   })
 }

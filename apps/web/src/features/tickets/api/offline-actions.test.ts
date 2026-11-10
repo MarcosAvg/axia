@@ -26,7 +26,7 @@ vi.mock('@/lib/offline/image', () => ({
 const context = {
   ticketId: 'ticket-a',
   clientRequestId: 'f33c9e64-268a-42a3-8d26-9273035c9b0f',
-  occurredAt: '2026-10-01T10:00:00Z',
+  occurredLocal: '2026-10-01T10:00',
 }
 
 beforeEach(async () => {
@@ -64,7 +64,8 @@ it('conserva comando, UUID, hora manual y proxy al encolar y reenviar', async ()
       clientRequestId: context.clientRequestId,
       type: 'start',
       args: { subjectTechnicianId: 'technician-a' },
-      occurredAt: context.occurredAt,
+      clientReportedAt: expect.any(String),
+      occurredLocal: context.occurredLocal,
       manualTime: true,
     },
   ])
