@@ -58,23 +58,81 @@ async function olderAttendedTicket() {
   return ticketId
 }
 
-it('crea la alerta, avisa y bloquea la validación', async () => {
-  const ticketId = await olderAttendedTicket()
+async function syncSkewedComment(ticketId: string, text: string) {
   const deviceNow = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
   const deviceAction = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-
-  const { result } = await sync({
+  return sync({
     deviceNow,
     items: [
       {
         clientRequestId: randomUUID(),
         ticketId,
         type: 'comment',
-        args: { text: 'Comentario con reloj desfasado' },
+        args: { text },
         clientReportedAt: deviceAction,
       },
     ],
   })
+}
+
+it('resuelve la alerta al corregir la hora y desbloquea la validación', async () => {
+  const ticketId = await olderAttendedTicket()
+  const { result } = await syncSkewedComment(
+    ticketId,
+    'Comentario por corregir',
+  )
+  expect(result.eventId).toBeDefined()
+
+  const correctedAt = new Date().toISOString()
+  const correction = await context.app.inject({
+    method: 'PATCH',
+    url: `/api/tickets/${ticketId}/events/${result.eventId}/time`,
+    headers: authHeaders(context.cookies.admin),
+    payload: { occurredAt: correctedAt },
+  })
+  expect(correction.statusCode).toBe(204)
+
+  const event = await context.db.execute(sql`
+    select time_confidence
+    from public.ticket_events
+    where id = ${result.eventId}
+  `)
+  expect((event.rows[0] as { time_confidence: string }).time_confidence).toBe(
+    'corrected',
+  )
+
+  const alert = await context.db.execute(sql`
+    select status, resolved_by
+    from public.ticket_time_alerts
+    where event_id = ${result.eventId}
+  `)
+  expect(alert.rows[0]).toMatchObject({
+    status: 'resolved',
+    resolved_by: context.people.adminId,
+  })
+
+  const list = await context.app.inject({
+    method: 'GET',
+    url: `/api/tickets/${ticketId}/time-alerts`,
+    headers: authHeaders(context.cookies.admin),
+  })
+  expect((list.json() as { items: unknown[] }).items).toEqual([])
+
+  const validation = await action(
+    context,
+    context.cookies.requester,
+    ticketId,
+    { action: 'validate', clientRequestId: randomUUID() },
+  )
+  expect(validation.statusCode).toBe(200)
+})
+
+it('crea la alerta, avisa y bloquea la validación', async () => {
+  const ticketId = await olderAttendedTicket()
+  const { result } = await syncSkewedComment(
+    ticketId,
+    'Comentario con reloj desfasado',
+  )
   expect(result.timeStatus).toBe('skew_detected')
 
   const alerts = await context.db.execute(sql`

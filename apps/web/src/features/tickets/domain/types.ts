@@ -61,6 +61,8 @@ export const EVENT_TYPES = [
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 
+type TimeConfidence = 'trusted' | 'unverified' | 'corrected'
+
 /** Calificación de satisfacción de un tiquet (1-5, opcional). */
 export interface TicketRating {
   score: number
@@ -155,6 +157,18 @@ export interface TicketTimelineItem {
   subjectRequesterName: string | null
   reasonName: string | null
   payload: Record<string, unknown>
+  timeConfidence: TimeConfidence
+}
+
+export interface TicketTimeAlert {
+  id: string
+  eventId: number
+  eventType: EventType
+  kind: string
+  clientClockSkewMs: number | null
+  suggestedOccurredAt: string | null
+  occurredAt: string
+  detectedAt: string
 }
 
 export interface TicketPauseStep {

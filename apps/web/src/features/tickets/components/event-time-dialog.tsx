@@ -12,9 +12,14 @@ import {
 import { TextField } from '@/components/shared/form-fields'
 import { formatDateTime } from '@/lib/format'
 import { toTicketError } from '../domain/errors'
-import type { TicketTimelineItem } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { useAdjustEventTime } from '../hooks/use-tickets'
+
+type AdjustableEvent = {
+  id: number
+  occurredAt: string
+  suggestedOccurredAt?: string | null
+}
 
 function toLocal(iso: string): string {
   const date = new Date(iso)
@@ -53,10 +58,12 @@ export function EventTimeDialog({
   onClose,
 }: {
   ticketId: string
-  item: TicketTimelineItem
+  item: AdjustableEvent
   onClose: () => void
 }) {
-  const [value, setValue] = useState(() => toLocal(item.occurredAt))
+  const [value, setValue] = useState(() =>
+    toLocal(item.suggestedOccurredAt ?? item.occurredAt),
+  )
   const adjust = useAdjustEventTime(ticketId)
   const messages = ticketMessages.eventTime
 

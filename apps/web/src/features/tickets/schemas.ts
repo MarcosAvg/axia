@@ -4,6 +4,7 @@ import type { DuplicateCandidate } from './domain/types'
 
 export const ticketStatusSchema = z.enum(TICKET_STATUSES)
 const nullableText = z.string().nullable()
+const timeConfidenceSchema = z.enum(['trusted', 'unverified', 'corrected'])
 const ticketListItemSchema = z.object({
   id: z.string(),
   folio: z.string(),
@@ -90,6 +91,21 @@ export const timelineResponseSchema = z.object({
       subjectTechnicianName: nullableText,
       subjectRequesterName: nullableText,
       reasonName: nullableText,
+      timeConfidence: timeConfidenceSchema,
+    }),
+  ),
+})
+export const timeAlertResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      eventId: z.number().int(),
+      eventType: z.enum(EVENT_TYPES),
+      kind: z.string(),
+      clientClockSkewMs: z.number().nullable(),
+      suggestedOccurredAt: z.string().nullable(),
+      occurredAt: z.string(),
+      detectedAt: z.string(),
     }),
   ),
 })

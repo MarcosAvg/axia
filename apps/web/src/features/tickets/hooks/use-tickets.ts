@@ -21,6 +21,7 @@ import {
   fetchTicket,
   fetchTickets,
   fetchTimeline,
+  fetchTimeAlerts,
   TICKETS_PAGE_SIZE,
   fetchSupervisors,
   searchTicketsByFolio,
@@ -42,6 +43,7 @@ const ticketKeys = {
   evidence: (id: string) => ['tickets', 'evidence', id] as const,
   pauseSteps: (id: string) => ['tickets', 'pause-steps', id] as const,
   pauseState: (id: string) => ['tickets', 'pause-state', id] as const,
+  timeAlerts: (id: string) => ['tickets', 'time-alerts', id] as const,
   duplicateAlerts: (id: string) => ['tickets', 'duplicate-alerts', id] as const,
 }
 
@@ -94,6 +96,14 @@ export function useTicketTimeline(id: string | undefined) {
   return useQuery({
     queryKey: ticketKeys.timeline(id ?? ''),
     queryFn: () => (id ? fetchTimeline(id) : Promise.resolve([])),
+    enabled: Boolean(id),
+  })
+}
+
+export function useTimeAlerts(id: string | undefined) {
+  return useQuery({
+    queryKey: ticketKeys.timeAlerts(id ?? ''),
+    queryFn: () => (id ? fetchTimeAlerts(id) : Promise.resolve([])),
     enabled: Boolean(id),
   })
 }

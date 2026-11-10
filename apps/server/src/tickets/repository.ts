@@ -67,6 +67,7 @@ type TimelineRow = {
   subject_requester_name: string | null
   reason_id: string | null
   reason_name: string | null
+  time_confidence: string
 }
 
 export async function loadTicketAccess(
@@ -280,7 +281,7 @@ export async function getTimeline(
       e.subject_user_id, e.subject_user_name,
       e.subject_technician_id, e.subject_technician_name,
       e.subject_requester_id, e.subject_requester_name,
-      e.reason_id, e.reason_name
+      e.reason_id, e.reason_name, e.time_confidence
     from public.v_ticket_timeline e
     where e.ticket_id = ${ticketId}
     ${visibility}
@@ -305,5 +306,6 @@ export async function getTimeline(
     subjectRequesterName: row.subject_requester_name,
     reasonId: row.reason_id,
     reasonName: row.reason_name,
+    timeConfidence: row.time_confidence,
   }))
 }

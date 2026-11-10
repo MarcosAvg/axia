@@ -70,6 +70,15 @@ const EVENT_ICONS: Record<EventType, LucideIcon> = {
   unrouted: AlertTriangleIcon,
 }
 
+function TimeConfidenceWarning({ item }: { item: TicketTimelineItem }) {
+  if (item.timeConfidence !== 'unverified') return null
+  return (
+    <span className="text-xs text-destructive">
+      Hora no verificada; corrígela antes de cerrar el tiquet.
+    </span>
+  )
+}
+
 function FeedItem({
   item,
   isLast,
@@ -113,6 +122,7 @@ function FeedItem({
           </span>
         ) : null}
         {timelineNote(item) ? <p>{timelineNote(item)}</p> : null}
+        <TimeConfidenceWarning item={item} />
         {canAdjust ? (
           <Button
             type="button"

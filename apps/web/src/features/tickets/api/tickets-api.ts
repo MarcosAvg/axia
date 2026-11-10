@@ -12,6 +12,7 @@ import type {
   TicketPauseState,
   TicketPauseStep,
   TicketStatus,
+  TicketTimeAlert,
   TicketTimelineItem,
 } from '../domain/types'
 import {
@@ -20,6 +21,7 @@ import {
   ticketItemsResponseSchema,
   ticketDetailResponseSchema,
   timelineResponseSchema,
+  timeAlertResponseSchema,
 } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
@@ -147,6 +149,14 @@ export async function fetchParticipants(
     `/api/tickets/${ticketId}/participants`,
   )
   return body.items
+}
+
+export async function fetchTimeAlerts(
+  ticketId: string,
+): Promise<TicketTimeAlert[]> {
+  return timeAlertResponseSchema.parse(
+    await apiFetch<unknown>(`/api/tickets/${ticketId}/time-alerts`),
+  ).items
 }
 
 type EvidenceResponse = {

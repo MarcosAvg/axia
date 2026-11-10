@@ -148,6 +148,7 @@ describe('DTO HTTP de timeline', () => {
           subjectUserName: null,
           reasonName: null,
           payload: null,
+          timeConfidence: 'trusted',
         },
       ],
     })
@@ -163,6 +164,7 @@ describe('DTO HTTP de timeline', () => {
         subjectUserName: null,
         reasonName: null,
         payload: {},
+        timeConfidence: 'trusted',
       },
     ])
   })

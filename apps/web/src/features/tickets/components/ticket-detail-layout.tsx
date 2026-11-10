@@ -15,6 +15,7 @@ import type { TicketProxy } from '../hooks/use-ticket-proxy'
 import { ticketMessages } from '../i18n'
 import { PausePanel } from './pause-panel'
 import { TicketActionBar } from './ticket-action-bar'
+import { TimeAlertBanner } from './time-alert-banner'
 import {
   ActionsSection,
   AttachmentsSection,
@@ -64,41 +65,44 @@ function TicketContentColumns({
     proxy.subject?.kind === 'requester' ? proxy.subject.requesterId : undefined
 
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
-      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
-        <ActionsSection
-          shared={shared}
-          proxy={proxy}
-          isDesktop={isDesktop}
-          hasActions={hasActions}
-          onValidated={onValidated}
-        />
-        <Section
-          title={ticketMessages.detail.capture}
-          hint={detailSectionHints.capture}
-        >
-          <TicketSummary ticket={ticket} />
-        </Section>
-        <PausePanel ticketId={ticketId} />
+    <>
+      <TimeAlertBanner ticketId={ticketId} />
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(20rem,2fr)]">
+        <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+          <ActionsSection
+            shared={shared}
+            proxy={proxy}
+            isDesktop={isDesktop}
+            hasActions={hasActions}
+            onValidated={onValidated}
+          />
+          <Section
+            title={ticketMessages.detail.capture}
+            hint={detailSectionHints.capture}
+          >
+            <TicketSummary ticket={ticket} />
+          </Section>
+          <PausePanel ticketId={ticketId} />
+        </div>
+        <TicketActivity ticketId={ticketId} timeline={timeline} />
+        <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
+          <AttachmentsSection ticketId={ticketId} />
+          <EvidenceSection
+            ticketId={ticketId}
+            cycle={ticket.cycle}
+            status={ticket.status}
+            canAttach={canAttachEvidence}
+          />
+          <TicketExtras
+            ticketId={ticketId}
+            participants={participants}
+            canRate={canRate}
+            subjectRequesterId={subjectRequesterId}
+            onOpenRating={onOpenRating}
+          />
+        </div>
       </div>
-      <TicketActivity ticketId={ticketId} timeline={timeline} />
-      <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
-        <AttachmentsSection ticketId={ticketId} />
-        <EvidenceSection
-          ticketId={ticketId}
-          cycle={ticket.cycle}
-          status={ticket.status}
-          canAttach={canAttachEvidence}
-        />
-        <TicketExtras
-          ticketId={ticketId}
-          participants={participants}
-          canRate={canRate}
-          subjectRequesterId={subjectRequesterId}
-          onOpenRating={onOpenRating}
-        />
-      </div>
-    </div>
+    </>
   )
 }
 

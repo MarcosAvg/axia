@@ -28,6 +28,7 @@ type EventRow = {
   cycle: number
   type: string
   occurred_at: Date | string
+  time_confidence: string
 }
 
 type ActionTimeInput = {
@@ -91,7 +92,7 @@ async function lastActionTime(
     select occurred_at from public.ticket_events
     where ticket_id = ${ticketId}
       and cycle = ${cycle}
-      and type <> 'event_time_corrected'
+      and type not in ('event_time_corrected', 'time_alert')
     order by occurred_at desc, id desc
     limit 1
   `)
@@ -183,7 +184,7 @@ async function eventRow(
   eventId: number,
 ): Promise<EventRow> {
   const result = await tx.execute(sql`
-    select id, cycle, type, occurred_at
+    select id, cycle, type, occurred_at, time_confidence
     from public.ticket_events
     where id = ${eventId} and ticket_id = ${ticketId}
   `)
@@ -214,7 +215,7 @@ async function assertNeighbourTime(
     where ticket_id = ${ticketId}
       and cycle = ${event.cycle}
       and id <> ${event.id}
-      and type <> 'event_time_corrected'
+      and type not in ('event_time_corrected', 'time_alert')
   `)
   const bounds = result.rows[0] as
     { previous: Date | string | null; next: Date | string | null } | undefined
@@ -251,8 +252,16 @@ async function applyAdjustment(
   const previous = new Date(event.occurred_at)
   await tx.execute(sql`
     update public.ticket_events
-    set occurred_at = ${proposed}
+    set occurred_at = ${proposed}, time_confidence = 'corrected'
     where id = ${event.id} and ticket_id = ${ticketId}
+  `)
+  await tx.execute(sql`
+    update public.ticket_time_alerts
+    set status = 'resolved',
+        resolved_by = ${actor.id},
+        resolved_at = now(),
+        note = 'Hora corregida manualmente'
+    where event_id = ${event.id} and status = 'open'
   `)
   if (event.type === 'created') {
     await tx.execute(sql`
@@ -269,6 +278,7 @@ async function applyAdjustment(
       previousOccurredAt: previous.toISOString(),
       occurredAt: proposed.toISOString(),
       eventType: event.type,
+      previousTimeConfidence: event.time_confidence,
     },
   })
   await tx.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
