@@ -49,7 +49,7 @@ export async function subjectTechnicianTimes(
           - ts.started_at
       ) filter (where ts.kind = 'active_work'), interval '0') as active_time,
       coalesce(sum(public.work_calendar_overlap(
-        public.ticket_calendar(b.id),
+        ts.work_calendar_id,
         ts.started_at,
         greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
       )) filter (where ts.kind = 'active_work'), interval '0') as active_time_labor,
@@ -58,7 +58,7 @@ export async function subjectTechnicianTimes(
           - ts.started_at
       ) filter (where ts.kind = 'pause'), interval '0') as pause_time,
       coalesce(sum(public.work_calendar_overlap(
-        public.ticket_calendar(b.id),
+        ts.work_calendar_id,
         ts.started_at,
         greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
       )) filter (where ts.kind = 'pause'), interval '0') as pause_time_labor,
@@ -67,7 +67,7 @@ export async function subjectTechnicianTimes(
           - ts.started_at
       ) filter (where ts.kind = 'wait_start'), interval '0') as wait_time,
       coalesce(sum(public.work_calendar_overlap(
-        public.ticket_calendar(b.id),
+        ts.work_calendar_id,
         ts.started_at,
         greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
       )) filter (where ts.kind = 'wait_start'), interval '0') as wait_time_labor
@@ -100,7 +100,7 @@ export async function requesterTimes(
           - ts.started_at
       ) filter (where ts.kind = 'validation'), interval '0') as validation_time,
       coalesce(sum(public.work_calendar_overlap(
-        public.ticket_calendar(b.id),
+        ts.work_calendar_id,
         ts.started_at,
         greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
       )) filter (where ts.kind = 'validation'), interval '0') as validation_time_labor,
@@ -109,7 +109,7 @@ export async function requesterTimes(
           - ts.started_at
       ) filter (where ts.kind = 'claim'), interval '0') as claim_time,
       coalesce(sum(public.work_calendar_overlap(
-        public.ticket_calendar(b.id),
+        ts.work_calendar_id,
         ts.started_at,
         greatest(coalesce(ts.ended_at, t.closed_at, now()), ts.started_at)
       )) filter (where ts.kind = 'claim'), interval '0') as claim_time_labor

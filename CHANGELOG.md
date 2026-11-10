@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Los tiempos laborales por técnico sujeto y por solicitante usan el calendario guardado en cada
+  tramo, no el calendario actual del equipo. Cambiar el calendario de un equipo ya no altera el
+  histórico de esos indicadores.
+
 ## [0.21.0] - 2026-11-10
 
 ### Añadido
