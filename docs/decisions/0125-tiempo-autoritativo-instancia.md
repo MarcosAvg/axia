@@ -1,7 +1,7 @@
 # 0125 — Tiempo autoritativo de la instancia, confianza y corrección manual
 
 **Fecha:** 2026-11-10
-**Estado:** aceptada.
+**Estado:** aceptada e implementada.
 
 ## Contexto
 
@@ -78,6 +78,14 @@ navegador.
   puede demostrarse se repara.
 - La zona de la instancia se usa para interpretar horas de pared y para filtrar por día o mes; el
   instante sigue guardado como `timestamptz`.
+
+## Implementación
+
+La política se implementó en el registro de tiempos: confianza, alertas y corrección manual;
+escritura de las tablas de negocio con el mismo instante; enlaces de evento; ajuste atómico;
+pausas y reapertura; evidencia con ciclo; calendario y `clock_class` congelados; zona de la
+instancia y universo de indicadores. La migración `0050_time_backfill.sql` repara y reconstruye el
+histórico demostrable; no reescribe horas ni convierte alertas reales en `trusted`.
 
 ## Reversión
 

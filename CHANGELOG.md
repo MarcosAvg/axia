@@ -35,6 +35,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - La evidencia conserva el ciclo en que se capturó aunque se suba tras una reapertura. La captura
   sin conexión mantiene su hora provisional con confianza y la lista marca “Hora sin verificar”
   cuando falta corregirla; las subidas en línea usan la hora del servidor.
+- La migración de backfill repara duraciones y cierres demostrables y reconstruye los tramos del
+  histórico, sin reescribir horas ni convertir alertas reales en tiempo confiable.
 
 ## [0.20.0] - 2026-11-09
 
