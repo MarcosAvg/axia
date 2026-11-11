@@ -28,10 +28,10 @@ interface NavLinkProps {
 }
 
 const expandedClass =
-  'flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:min-h-10 aria-[current=page]:bg-sidebar-accent aria-[current=page]:font-medium aria-[current=page]:text-sidebar-accent-foreground'
+  'flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:min-h-10 aria-[current=page]:bg-primary/10 aria-[current=page]:font-medium aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15 dark:aria-[current=page]:text-primary'
 
 const collapsedClass =
-  'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[current=page]:bg-sidebar-accent aria-[current=page]:text-sidebar-accent-foreground'
+  'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15 dark:aria-[current=page]:text-primary'
 
 function NavLink({ item, badge, collapsed, onNavigate }: NavLinkProps) {
   const Icon: LucideIcon = item.icon

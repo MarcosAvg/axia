@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { cn } from 'cn'
 import { fieldSelectClass } from '@/components/shared/form-fields'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { PageHeader } from '@/components/shared/page-header'
 import {
   ADMIN_CATALOGS,
@@ -67,7 +68,7 @@ function CatalogsPage() {
                 className={cn(
                   'inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm transition-colors',
                   active
-                    ? 'bg-muted font-medium text-foreground'
+                    ? cn('font-medium', SELECTED_CONTROL)
                     : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
                 )}
               >
