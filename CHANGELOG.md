@@ -5,6 +5,14 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- El Resumen muestra ocho indicadores —total de tiquets, tiquets activos, sin asignar, en pausa,
+  cerrados, cumplimiento del SLA, satisfacción y primera resolución— y organiza el resto en un
+  bento de seis tarjetas que se reacomoda sin huecos. El ciclo medio sale del Resumen y el detalle
+  por estado se unifica con las familias del estado actual; la composición del ciclo queda en
+  Tiempos y la tabla completa por estado en Distribución.
+
 ## [0.22.0] - 2026-11-10
 
 ### Añadido

@@ -14,12 +14,13 @@ import { formatMinutes, formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
+import { BentoGrid } from './bento-grid'
+import type { BentoItem } from './bento-grid'
 import { ChartCard } from './chart-card'
-import { CycleBar } from './cycle-bar'
 import { HealthStrip } from './health-strip'
 import { RankingBars } from './ranking-bars'
 import { SatisfactionPanel, SlaPanel } from './sla-panels'
-import { StatusChart, StatusTableCard } from './status-distribution'
+import { StatusChart } from './status-distribution'
 import { VolumeChart } from './volume-chart'
 
 const statusLabel = (status: string): string =>
@@ -59,7 +60,7 @@ function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
   if (rows.length === 0) return null
   return (
     <ChartCard title={t.title} hint={metricsMessages.chartHints.outcomes}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 sm:min-h-52 sm:justify-center">
         {rows.map((row) => (
           <div
             key={row.id}
@@ -110,31 +111,104 @@ function AgingCard({
   )
 }
 
-function VolumeAndStatus({
+function volumeItem(volume: VolumePoint[]): BentoItem {
+  return {
+    key: 'volume',
+    className: 'md:col-span-3 xl:col-span-7',
+    rowGroup: 'primary',
+    content: (
+      <ChartCard
+        title={metricsMessages.charts.volume}
+        hint={metricsMessages.chartHints.volume}
+      >
+        <VolumeChart data={volume} />
+      </ChartCard>
+    ),
+  }
+}
+
+function statusItem(groups: DimensionGroup[]): BentoItem {
+  return {
+    key: 'status',
+    className: 'md:col-span-3 xl:col-span-5',
+    rowGroup: 'primary',
+    content: <StatusChart groups={groups} />,
+  }
+}
+
+function categoriesItem(groups: DimensionGroup[]): BentoItem {
+  return {
+    key: 'categories',
+    className: 'md:col-span-3 xl:col-span-4',
+    rowGroup: 'secondary',
+    content: <TopCategories groups={groups} />,
+  }
+}
+
+function outcomesItem(groups: DimensionGroup[]): BentoItem {
+  return {
+    key: 'outcomes',
+    className: 'md:col-span-3 xl:col-span-4',
+    rowGroup: 'secondary',
+    content: <OutcomeBreakdown groups={groups} />,
+  }
+}
+
+function satisfactionItem(
+  satisfaction: SatisfactionSummary,
+  distribution: number[],
+): BentoItem {
+  return {
+    key: 'satisfaction',
+    className: 'md:col-span-6 xl:col-span-4',
+    rowGroup: 'secondary',
+    content: (
+      <SatisfactionPanel
+        satisfaction={satisfaction}
+        distribution={distribution}
+      />
+    ),
+  }
+}
+
+function slaItem(sla: SlaSummary, rows: SlaPriorityRow[]): BentoItem {
+  return {
+    key: 'sla',
+    className: 'md:col-span-6 xl:col-span-12',
+    content: <SlaPanel sla={sla} rows={rows} />,
+  }
+}
+
+function SummaryBento({
   volume,
   groups,
+  satisfaction,
+  satisfactionDistribution,
+  sla,
+  slaRows,
 }: {
   volume: VolumePoint[]
   groups: DimensionGroup[]
+  satisfaction: SatisfactionSummary
+  satisfactionDistribution: number[]
+  sla: SlaSummary
+  slaRows: SlaPriorityRow[]
 }) {
   return (
-    <div className="grid gap-4 lg:grid-cols-5 lg:items-start">
-      <div className="lg:col-span-3">
-        <ChartCard
-          title={metricsMessages.charts.volume}
-          hint={metricsMessages.chartHints.volume}
-        >
-          <VolumeChart data={volume} />
-        </ChartCard>
-      </div>
-      <div className="lg:col-span-2">
-        <StatusChart groups={groups} />
-      </div>
-    </div>
+    <BentoGrid
+      items={[
+        volumeItem(volume),
+        statusItem(groups),
+        categoriesItem(groups),
+        outcomesItem(groups),
+        satisfactionItem(satisfaction, satisfactionDistribution),
+        slaItem(sla, slaRows),
+      ]}
+    />
   )
 }
 
-/** Resumen: salud, volumen, estado, categorías, SLA, satisfacción y antigüedad. */
+/** Resumen: salud, bento de indicadores y antigüedad. */
 export function SummaryTab({
   volume,
   aging,
@@ -146,7 +220,6 @@ export function SummaryTab({
   satisfactionDistribution,
   sla,
   slaRows,
-  mode,
 }: {
   volume: VolumePoint[]
   aging: AgingRow[]
@@ -158,29 +231,24 @@ export function SummaryTab({
   satisfactionDistribution: number[]
   sla: SlaSummary
   slaRows: SlaPriorityRow[]
-  mode: import('../domain/time-mode').TimeMode
 }) {
   return (
     <div className="flex flex-col gap-4">
       <HealthStrip
         summary={summary}
+        groups={groups}
         comparison={comparison}
         satisfaction={satisfaction}
         sla={sla}
-        mode={mode}
       />
-      <CycleBar summary={summary} mode={mode} />
-      <VolumeAndStatus volume={volume} groups={groups} />
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <TopCategories groups={groups} />
-        <OutcomeBreakdown groups={groups} />
-        <SatisfactionPanel
-          satisfaction={satisfaction}
-          distribution={satisfactionDistribution}
-        />
-      </div>
-      <SlaPanel sla={sla} rows={slaRows} />
-      <StatusTableCard groups={groups} />
+      <SummaryBento
+        volume={volume}
+        groups={groups}
+        satisfaction={satisfaction}
+        satisfactionDistribution={satisfactionDistribution}
+        sla={sla}
+        slaRows={slaRows}
+      />
       <AgingCard aging={aging} buckets={agingBuckets} />
     </div>
   )

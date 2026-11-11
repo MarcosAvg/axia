@@ -2,6 +2,15 @@
 
 export const hintMessages = {
   kpiHints: {
+    ticketsTotal: 'Tiquets registrados en el periodo con los filtros activos.',
+    activeTickets:
+      'Tiquets que siguen en flujo: registrados, con supervisor, asignados, en proceso, pausados, atendidos o en reclamación.',
+    unassigned:
+      'Tiquets registrados o con supervisor que todavía no tienen técnico asignado.',
+    pausedTickets: 'Tiquets detenidos con una pausa abierta.',
+    closedTickets: 'Tiquets cerrados después de cumplir la validación.',
+    slaCompliance:
+      'Porcentaje de tiquets cerrados que cumplieron su tiempo objetivo.',
     tickets: 'Número de tiquets con los filtros y el periodo activos.',
     open: 'Tiquets del periodo que siguen abiertos: registrados, asignados, en proceso, pausados, atendidos o en reclamación.',
     active:

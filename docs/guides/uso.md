@@ -93,11 +93,13 @@ Quien la evalúa usa **Resolver reclamación** y elige el resultado. Consulta lo
 
 ## Consultar métricas
 
-El tablero de **Métricas** resume el periodo con la franja de salud (tiquets, abiertos, trabajo
-activo, SLA, satisfacción y primera resolución), la barra del ciclo y las gráficas de volumen y
-estado. El selector **Continuo / Laboral / Extra** cambia el reloj de las fases y tablas: continuo
-corre 24 horas, laboral solo dentro del calendario del equipo y extra es el trabajo fuera de ese
-horario. El SLA usa el reloj de la instancia, salvo que elijas uno en el tablero.
+El tablero de **Métricas** resume el periodo con la franja de salud (total de tiquets, tiquets
+activos, sin asignar, en pausa, cerrados, cumplimiento del SLA, satisfacción y primera resolución)
+y un bento de indicadores: volumen por mes, estado actual por familias, top categorías, desenlaces,
+satisfacción y tiempos objetivo. La composición del ciclo y el detalle completo por estado viven en
+**Tiempos** y **Distribución**. El selector **Continuo / Laboral / Extra** cambia el reloj de las
+fases y tablas: continuo corre 24 horas, laboral solo dentro del calendario del equipo y extra es el
+trabajo fuera de ese horario. El SLA usa el reloj de la instancia, salvo que elijas uno en el tablero.
 
 Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con percentiles
 P50/P90, fases, técnicos y horas de apoyo auxiliar, **Calidad** con la calidad del tiempo, pausas,

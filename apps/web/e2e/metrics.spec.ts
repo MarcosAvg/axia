@@ -24,6 +24,38 @@ test('el administrador abre las métricas', async ({ page }) => {
   ).toHaveCount(0)
 })
 
+test('el resumen muestra los indicadores y el bento vigente', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+
+  const summary = page.getByRole('tabpanel')
+  const health = summary.getByRole('region', { name: 'Salud del periodo' })
+
+  for (const label of [
+    'Total de tiquets',
+    'Tiquets activos',
+    'Sin asignar',
+    'En pausa',
+    'Cerrados',
+    'Cumplimiento SLA',
+    'Satisfacción',
+    '1ª resolución',
+  ]) {
+    await expect(health.getByText(label, { exact: true })).toBeVisible()
+  }
+
+  await expect(
+    summary.getByRole('heading', { name: 'Estado actual' }),
+  ).toBeVisible()
+  await expect(summary.getByText('Ciclo medio')).toHaveCount(0)
+  await expect(summary.getByText('Detalle por estado')).toHaveCount(0)
+})
+
 test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await page

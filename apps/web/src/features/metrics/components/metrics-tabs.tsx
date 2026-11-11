@@ -98,7 +98,6 @@ export function MetricsTabs(props: MetricsTabsProps) {
           summary={props.summary}
           comparison={props.comparison}
           satisfaction={props.satisfaction}
-          mode={props.mode}
           satisfactionDistribution={props.satisfactionDistribution}
           sla={props.sla}
           slaRows={props.slaRows}

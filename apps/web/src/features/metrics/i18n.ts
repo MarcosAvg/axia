@@ -53,6 +53,12 @@ export const metricsMessages = {
       `${count} ${count === 1 ? 'agrupación' : 'agrupaciones'}`,
   },
   kpi: {
+    ticketsTotal: 'Total de tiquets',
+    activeTickets: 'Tiquets activos',
+    unassigned: 'Sin asignar',
+    paused: 'En pausa',
+    closedTickets: 'Cerrados',
+    slaCompliance: 'Cumplimiento SLA',
     tickets: 'Tiquets',
     open: 'Abiertos',
     active: 'Trabajo activo',
