@@ -38,9 +38,9 @@ Todas exigen acceso al tiquet y autorización en el servidor. La referencia de
 | `assign_supervisor` | `with_supervisor`, `assigned`, `in_progress`, `paused`; `registered` solo administrador | Titular o permiso de alcance global; motivo y destino; a un equipo pasa a `registered` y abre una nueva ronda de ofertas, a un supervisor a `with_supervisor` y exige que el destino pueda continuar el tiquet |
 | `add_auxiliary` | `assigned`, `in_progress`, `paused` | Técnico y motivo; el supervisor debe haber tomado; agrega participación sin cambiar estado |
 | `start` | `assigned` | Evidencia `before` del ciclo; pasa a `in_progress` |
-| `pause` | `in_progress` | Motivo raíz activo con al menos un subestado activo; pasa a `paused` |
-| `advance_pause` | `paused` | Motivo descendiente de la raíz de la pausa; registra otro paso |
-| `resume` | `paused` | Subestado descendiente de la raíz obligatorio; cierra la pausa y pasa a `in_progress` |
+| `pause` | `in_progress` | Motivo raíz activo con una salida alcanzable; pasa a `paused` |
+| `advance_pause` | `paused` | Paso de avance conectado desde el subestado actual; registra otro paso |
+| `resume` | `paused` | Salida conectada desde el subestado actual; cierra la pausa y pasa a `in_progress` |
 | `attend` | `in_progress` | Evidencia `after` del ciclo y descripción del trabajo; pasa a `attended` |
 | `validate` | `attended` | `role` opcional: `requester` (identidad del solicitante o `subjectRequesterId` con `ticket.validate_on_behalf`) o `supervisor` (ámbito no `own` o titularidad). En `both` el solicitante valida primero (409 si falta); `supervisor` solo registra su lado y `requester` solo el suyo. Una vez por rol y ciclo; pasa a `closed` al cumplir la política. Sin `role` se deriva para clientes antiguos |
 | `open_claim` | `attended`, `closed` dentro de ventana; no si el solicitante ya validó su lado | Motivo, descripción y evidencia `claim`; pasa a `under_claim`. Con `subjectRequesterId` y `ticket.open_claim_on_behalf` se atribuye al solicitante; sin proxy al actor |

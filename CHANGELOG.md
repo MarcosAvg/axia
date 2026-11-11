@@ -5,6 +5,19 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La pausa sigue un flujo por motivo: los subestados se separan en pasos de avance y salidas, y
+  la salida solo se habilita desde el paso actual. Se agregan el editor de flujo en administración,
+  la hoja **Transiciones de pausa** en la importación/exportación y motivos base para diagnóstico,
+  permisos, condiciones inseguras, documentación, equipo de acceso y traslado de personal. La
+  interfaz oculta las acciones de avance y reanudación cuando no tienen opciones.
+
+### Cambiado
+
+- El catálogo de pausa ya no acepta cualquier descendiente de la raíz al reanudar. La semilla
+  incluye dieciséis motivos con sus flujos y salidas alcanzables.
+
 ## [0.23.0] - 2026-11-11
 
 ### Cambiado
