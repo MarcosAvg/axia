@@ -11,6 +11,7 @@ export interface DimensionRow {
   tickets: number
   open: number
   avgActive: number
+  avgActiveLabor: number
   avgTotal: number
   avgTotalAll: number
   avgTotalClosed: number

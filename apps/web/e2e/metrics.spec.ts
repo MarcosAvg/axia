@@ -56,6 +56,43 @@ test('el resumen muestra los indicadores y el bento vigente', async ({
   await expect(summary.getByText('Detalle por estado')).toHaveCount(0)
 })
 
+test('calidad agrupa salud, diagnóstico y motivos de salida', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Calidad' }).click()
+
+  const quality = page.getByRole('tabpanel')
+  await expect(
+    quality.getByRole('heading', { name: 'Salud de calidad' }),
+  ).toBeVisible()
+  await expect(
+    quality.getByRole('heading', { name: 'Dónde falla' }),
+  ).toBeVisible()
+  await expect(
+    quality.getByRole('heading', { name: 'Motivos y salidas' }),
+  ).toBeVisible()
+  await expect(
+    quality.getByRole('heading', { name: 'Calidad del tiempo' }),
+  ).toBeVisible()
+
+  await quality
+    .getByRole('combobox', { name: 'Señal de riesgo' })
+    .selectOption({ label: 'Recaptura' })
+  await quality.getByRole('button', { name: 'Duplicados', exact: true }).click()
+  await expect(quality.getByText('Detalle por agrupación')).toBeVisible()
+  await quality
+    .getByRole('button', { name: 'Rechazos y cancelaciones' })
+    .click()
+  await expect(
+    quality.getByRole('heading', { name: 'Rechazos y cancelaciones' }),
+  ).toBeVisible()
+})
+
 test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await page
@@ -191,6 +228,10 @@ test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
   await page.goto('/metricas')
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Motivos y salidas' }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Duplicados', exact: true }).click()
   await expect(page.getByText('Detalle por agrupación')).toBeVisible()
 })
 

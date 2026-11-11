@@ -23,7 +23,13 @@ describe('RiskScatter', () => {
   it('identifica cada punto con el nombre de su categoría', () => {
     render(
       <TooltipProvider>
-        <RiskScatter groups={groups()} />
+        <RiskScatter
+          groups={groups()}
+          dimension="category"
+          measure="reopen"
+          mode="calendar"
+          onMeasureChange={() => {}}
+        />
       </TooltipProvider>,
     )
 
@@ -43,7 +49,8 @@ describe('RiskTooltip', () => {
               id: 'a',
               name: 'Eléctrico',
               tickets: 2,
-              reopen: 5,
+              rate: 5,
+              measureLabel: 'Reapertura',
               active: 125,
             },
           },

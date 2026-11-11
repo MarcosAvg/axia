@@ -1,7 +1,7 @@
 import { HintIcon } from '@/components/shared/hint'
 import { Progress } from '@/components/ui/progress'
-import type { RejectCancelRow, PauseSubstateRow } from '../domain/indicators'
-import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
+import type { PauseSubstateRow, RejectCancelRow } from '../domain/indicators'
+import { formatPercent } from '../domain/metrics'
 import type {
   DuplicateAlert,
   DuplicateDimensionRow,
@@ -12,15 +12,12 @@ import type {
 import { deltaOf } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import type { DimensionGroup } from '../domain/dimensions'
+import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DeltaBadge } from './delta-badge'
-import { DuplicateTable } from './duplicate-table'
-import { PausesChart } from './pauses-chart'
-import { PauseSubstates } from './pause-substates'
-import { QualityHeatmap } from './quality-heatmap'
-import { RejectCancelTable } from './reject-cancel-chart'
-import { RiskScatter } from './risk-scatter'
+import { QualityDiagnosis } from './quality-diagnosis'
+import { QualityReasons } from './quality-reasons'
 
 interface RateStat {
   label: string
@@ -93,7 +90,7 @@ function QualityRates({
   return (
     <section
       aria-label={metricsMessages.kpiGroups.calidad}
-      className="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-5"
+      className="grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
     >
       {rateStats(summary, comparison).map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1">
@@ -124,34 +121,6 @@ function QualityRates({
   )
 }
 
-function DuplicateStats({
-  duplicates,
-}: {
-  duplicates: { tickets: DuplicateTicket[]; alerts: DuplicateAlert[] }
-}) {
-  const t = metricsMessages.duplicates
-  const decisions = t.decisions as Record<string, string>
-  const average = averageOf(
-    duplicates.tickets.map((item) => item.timeToMarkMinutes),
-  )
-  return (
-    <dl className="flex flex-wrap items-baseline gap-x-8 gap-y-2 text-sm">
-      <div className="flex items-baseline gap-2">
-        <dt className="text-muted-foreground">{t.timeToMark}</dt>
-        <dd className="font-semibold tabular-nums">{formatMinutes(average)}</dd>
-      </div>
-      {duplicates.alerts.map((alert) => (
-        <div key={alert.decision} className="flex items-baseline gap-2">
-          <dt className="text-muted-foreground">
-            {decisions[alert.decision] ?? alert.decision}
-          </dt>
-          <dd className="font-semibold tabular-nums">{alert.candidates}</dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
-
 function TimeQualityCard({ summary }: { summary: MetricsSummary }) {
   return (
     <ChartCard
@@ -175,40 +144,18 @@ function TimeQualityCard({ summary }: { summary: MetricsSummary }) {
             {summary.openTimeAlerts}
           </dd>
         </div>
-        <div className="flex flex-col gap-1">
-          <dt className="text-xs text-muted-foreground">
-            {metricsMessages.quality.duplicateReview}
+        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <dt className="font-medium text-foreground">
+            {metricsMessages.quality.timeQualityActionTitle}
           </dt>
-          <dd className="text-2xl font-semibold tabular-nums">
-            {formatMinutes(summary.avgDuplicateReview)}
-          </dd>
+          <dd>{metricsMessages.quality.timeQualityAction}</dd>
         </div>
       </dl>
     </ChartCard>
   )
 }
 
-function DuplicatesSection({
-  duplicates,
-}: {
-  duplicates: {
-    tickets: DuplicateTicket[]
-    alerts: DuplicateAlert[]
-    rows: DuplicateDimensionRow[]
-  }
-}) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        {metricsMessages.duplicates.title}
-      </h2>
-      <DuplicateStats duplicates={duplicates} />
-      <DuplicateTable rows={duplicates.rows} />
-    </section>
-  )
-}
-
-/** Calidad: tasas, mapa por dimensión, riesgo, pausas y descartes. */
+/** Calidad: salud, diagnóstico por dimensión y motivos de salida. */
 export function QualityTab({
   summary,
   comparison,
@@ -217,6 +164,7 @@ export function QualityTab({
   pauseSubstates,
   duplicates,
   rejectCancel,
+  mode,
 }: {
   summary: MetricsSummary
   comparison: Comparison | null
@@ -229,36 +177,24 @@ export function QualityTab({
     rows: DuplicateDimensionRow[]
   }
   rejectCancel: RejectCancelRow[]
+  mode: TimeMode
 }) {
+  const t = metricsMessages.quality
   return (
     <div className="flex flex-col gap-5">
-      <QualityRates summary={summary} comparison={comparison} />
-      <TimeQualityCard summary={summary} />
-      <QualityHeatmap groups={groups} />
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <RiskScatter groups={groups} />
-        <ChartCard
-          title={metricsMessages.charts.pauses}
-          hint={metricsMessages.chartHints.pauses}
-        >
-          <div className="flex flex-col gap-4">
-            <PausesChart data={pauses} />
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Subestados
-              </h3>
-              <PauseSubstates rows={pauseSubstates} />
-            </div>
-          </div>
-        </ChartCard>
-      </div>
-      <DuplicatesSection duplicates={duplicates} />
-      <ChartCard
-        title={metricsMessages.rejectCancel.title}
-        hint={metricsMessages.chartHints.rejectCancel}
-      >
-        <RejectCancelTable rows={rejectCancel} />
-      </ChartCard>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-medium">{t.health}</h2>
+        <QualityRates summary={summary} comparison={comparison} />
+        <TimeQualityCard summary={summary} />
+      </section>
+      <QualityDiagnosis groups={groups} mode={mode} />
+      <QualityReasons
+        summary={summary}
+        pauses={pauses}
+        pauseSubstates={pauseSubstates}
+        duplicates={duplicates}
+        rejectCancel={rejectCancel}
+      />
     </div>
   )
 }

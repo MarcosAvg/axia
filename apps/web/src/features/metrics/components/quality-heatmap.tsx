@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type {
   Dimension,
   DimensionGroup,
@@ -9,7 +8,6 @@ import { formatPercent } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { DimensionPicker } from './dimension-picker'
 
 const t = metricsMessages.quality
 
@@ -32,14 +30,14 @@ function QualityTable({
       <table className="w-full border-separate border-spacing-1 text-xs">
         <thead>
           <tr>
-            <th className="px-2 py-1 text-left text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            <th className="px-2 py-1 text-left text-xs font-medium text-muted-foreground">
               {metricsMessages.table.name}
             </th>
             {RATES.map((rate) => (
               <th
                 key={rate.key}
                 scope="col"
-                className="px-2 py-1 text-right text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                className="px-2 py-1 text-right text-xs font-medium text-muted-foreground"
               >
                 {rate.label}
               </th>
@@ -71,8 +69,13 @@ function QualityTable({
 }
 
 /** Mapa de calor de tasas de calidad por dimensión. */
-export function QualityHeatmap({ groups }: { groups: DimensionGroup[] }) {
-  const [dimension, setDimension] = useState<Dimension>('category')
+export function QualityHeatmap({
+  groups,
+  dimension,
+}: {
+  groups: DimensionGroup[]
+  dimension: Dimension
+}) {
   const rows = rowsByDimension(groups, dimension).slice(0, 10)
   const max = new Map(
     RATES.map((rate) => [
@@ -83,7 +86,6 @@ export function QualityHeatmap({ groups }: { groups: DimensionGroup[] }) {
   return (
     <ChartCard title={t.byDimension}>
       <div className="flex flex-col gap-3">
-        <DimensionPicker value={dimension} onChange={setDimension} />
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {metricsMessages.empty}

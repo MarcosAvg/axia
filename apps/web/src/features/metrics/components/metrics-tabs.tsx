@@ -126,6 +126,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
           pauseSubstates={props.pauseSubstates}
           duplicates={props.duplicates}
           rejectCancel={props.rejectCancel}
+          mode={props.mode}
         />
       </TabsContent>
       <TabsContent value="team">

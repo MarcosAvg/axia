@@ -145,6 +145,16 @@ export const metricsMessages = {
     concentration: 'Top 3',
   },
   quality: {
+    health: 'Salud de calidad',
+    diagnosis: 'Dónde falla',
+    reasons: 'Motivos y salidas',
+    pausesTab: 'Pausas',
+    duplicatesTab: 'Duplicados',
+    rejectCancelTab: 'Rechazos y cancelaciones',
+    substates: 'Subestados',
+    substate: 'Subestado',
+    pausesCount: 'Pausas',
+    pauseTime: 'Tiempo (continuo)',
     byDimension: 'Calidad por dimensión',
     timeQuality: 'Calidad del tiempo',
     unverifiedTickets: 'Tiquets con hora sin verificar',
@@ -152,10 +162,14 @@ export const metricsMessages = {
     duplicateReview: 'Tiempo hasta marcar duplicado',
     timeQualityHint:
       'Los tiquets con tiempo no verificado quedan fuera de las medias de desempeño hasta corregirlos.',
+    timeQualityActionTitle: 'Cómo corregirlo',
+    timeQualityAction:
+      'Ajusta la hora desde la línea de tiempo del tiquet afectado.',
 
     risk: 'Riesgo de retrabajo',
+    riskMeasure: 'Señal de riesgo',
     riskHint:
-      'Cada punto es una categoría: tiquets frente a la tasa de reapertura. Más a la derecha, más volumen; más arriba, más retrabajo.',
+      'Cada punto es una agrupación: tiquets frente a la señal elegida. Más a la derecha, más volumen; más arriba, más riesgo; el tamaño indica el tiempo activo en el reloj seleccionado.',
     firstFix: 'Primera resolución',
   },
   team: {
@@ -220,7 +234,8 @@ export const metricsMessages = {
     title: 'Duplicados',
     byDimension: 'Duplicados por dimensión',
     detail: 'Detalle por agrupación',
-    timeToMark: 'Tiempo medio hasta marcarse',
+    timeToMark: 'Tiempo medio hasta marcarse (continuo)',
+    duplicateRate: 'Tasa de duplicados',
     alerts: 'Alertas de posible duplicado',
     dimension: 'Dimensión',
     tickets: 'Tiquets',

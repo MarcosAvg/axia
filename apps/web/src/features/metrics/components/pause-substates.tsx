@@ -5,11 +5,19 @@ import { formatMinutes } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
 const columns: DataTableColumn<PauseSubstateRow>[] = [
-  { id: 'name', header: 'Subestado', cell: (row) => row.name },
-  { id: 'pauses', header: 'Pausas', cell: (row) => row.pauses },
+  {
+    id: 'name',
+    header: metricsMessages.quality.substate,
+    cell: (row) => row.name,
+  },
+  {
+    id: 'pauses',
+    header: metricsMessages.quality.pausesCount,
+    cell: (row) => row.pauses,
+  },
   {
     id: 'minutes',
-    header: 'Tiempo',
+    header: metricsMessages.quality.pauseTime,
     cell: (row) => formatMinutes(row.pauseMinutes),
   },
 ]

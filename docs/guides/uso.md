@@ -102,8 +102,11 @@ fases y tablas: continuo corre 24 horas, laboral solo dentro del calendario del 
 trabajo fuera de ese horario. El SLA usa el reloj de la instancia, salvo que elijas uno en el tablero.
 
 Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con el ciclo, las
-fases, los percentiles, las dimensiones y las personas, **Calidad** con la calidad del tiempo,
-pausas, duplicados y descartes, y **Equipo** con equipos, supervisores, técnicos y apoyo auxiliar.
+fases, los percentiles, las dimensiones y las personas, **Calidad** con salud de calidad,
+diagnóstico por dimensión y motivos de salida (pausas, duplicados y rechazos o cancelaciones), y
+**Equipo** con equipos, supervisores, técnicos y apoyo auxiliar. En Calidad, el riesgo de retrabajo
+comparte la dimensión con el mapa de calor y permite elegir la señal (reapertura, recaptura o
+reasignación); el tiempo de pausas y duplicados se identifica como continuo.
 En **Tiempos**, el selector **Promedio / Acumulado** está en la cabecera y afecta a las tablas de la
 pestaña; el reloj **Continuo / Laboral / Extra** de la barra superior se aplica también a técnicos,
 solicitantes y dimensiones. Los percentiles se muestran siempre en reloj continuo y así se indica.
