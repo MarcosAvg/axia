@@ -103,7 +103,7 @@ export function TimesTab({
   return (
     <div className="flex flex-col gap-6">
       <TimesHeader />
-      <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+      <div className="flex flex-col gap-4">
         <CycleBar summary={summary} mode={mode} />
         <PhaseTable summary={summary} mode={mode} />
       </div>
