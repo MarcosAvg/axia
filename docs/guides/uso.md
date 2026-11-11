@@ -33,8 +33,9 @@ En **Tiquets**, busca por folio o descripción y usa los filtros de estado, edif
 En el detalle verás **Captura**, **Participantes**, **Línea de tiempo**, **Tiempo por fase** y
 **Evidencias**. Pulsa una imagen para ampliarla; cierra el visor con Escape o el botón de cerrar.
 
-**Mi trabajo** muestra lo asignado a tu perfil de técnico. **Bandeja** reúne ofertas y tiquets
-para su seguimiento. La campana abre los [avisos](notificaciones.md).
+**Mi trabajo** muestra lo asignado a tu perfil de técnico. **Bandeja** separa las ofertas para ti,
+los tiquets sin asignar y el trabajo en atención. Cada oferta se puede tomar directamente desde la
+lista; la campana abre los [avisos](notificaciones.md).
 
 **Bandeja** y **Mi trabajo** ofrecen **Ver tablero**: una vista de solo lectura con columnas por
 estado. Pulsa una tarjeta para abrir el tiquet; **Ver lista** vuelve a la bandeja. El tablero no

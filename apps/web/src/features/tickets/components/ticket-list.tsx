@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ClockIcon } from 'lucide-react'
 import { formatDateTime, formatElapsed } from '@/lib/format'
@@ -49,31 +50,40 @@ function TicketMeta({
 function TicketCard({
   ticket,
   showElapsed,
+  action,
 }: {
   ticket: TicketListItem
   showElapsed: boolean
+  action?: (ticket: TicketListItem) => ReactNode
 }) {
   return (
-    <Link
-      to="/tickets/$ticketId"
-      params={{ ticketId: ticket.id }}
-      className="flex flex-col gap-1 p-4 hover:bg-muted/50"
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-medium">{ticket.folio}</span>
-        <span className="flex items-center gap-1.5">
-          <StatusBadge status={ticket.status} />
-          {ticket.pendingSync ? <PendingSyncBadge /> : null}
-        </span>
-      </div>
-      <p className="line-clamp-2 text-sm text-muted-foreground">
-        {ticket.description}
-      </p>
-      <p className="truncate text-xs text-muted-foreground">
-        {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
-      </p>
-      <TicketMeta ticket={ticket} showElapsed={showElapsed} />
-    </Link>
+    <div className="flex flex-col">
+      <Link
+        to="/tickets/$ticketId"
+        params={{ ticketId: ticket.id }}
+        className="flex flex-col gap-1 p-4 hover:bg-muted/50"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-medium">{ticket.folio}</span>
+          <span className="flex items-center gap-1.5">
+            <StatusBadge status={ticket.status} />
+            {ticket.pendingSync ? <PendingSyncBadge /> : null}
+          </span>
+        </div>
+        <p className="line-clamp-2 text-sm text-muted-foreground">
+          {ticket.description}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
+        </p>
+        <TicketMeta ticket={ticket} showElapsed={showElapsed} />
+      </Link>
+      {action ? (
+        <div className="flex justify-end border-t px-4 py-2">
+          {action(ticket)}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -81,15 +91,21 @@ function TicketCard({
 export function TicketList({
   items,
   showElapsed = false,
+  action,
 }: {
   items: TicketListItem[]
   showElapsed?: boolean
+  action?: (ticket: TicketListItem) => ReactNode
 }) {
   return (
     <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card">
       {items.map((ticket) => (
         <li key={ticket.id}>
-          <TicketCard ticket={ticket} showElapsed={showElapsed} />
+          <TicketCard
+            ticket={ticket}
+            showElapsed={showElapsed}
+            action={action}
+          />
         </li>
       ))}
     </ul>

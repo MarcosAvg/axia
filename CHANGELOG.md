@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- La Bandeja permite tomar una oferta sin abrir el detalle, separa los tiquets sin asignar del
+  trabajo en atención, evita repetir las ofertas en la cola del equipo y muestra antigüedad,
+  conteos y estados de carga, error y vacío propios por sección.
+
 ### Añadido
 
 - Dos temas nuevos: **Ámbar**, con primario naranja cálido, y **Rosa**, con primario rosa. Ambos

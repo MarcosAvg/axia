@@ -7,6 +7,7 @@ export { TicketFilters } from './components/ticket-filters'
 export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
 export { TicketStatusSummary } from './components/ticket-status-summary'
+export { TakeOfferButton } from './components/take-offer-button'
 export {
   OutboxTimeCorrection,
   isTimeError,
@@ -25,5 +26,6 @@ export { EVENT_TYPES } from './domain/types'
 export type { TicketStatus, EventType } from './domain/types'
 export { ACTIVE_STATUSES } from './domain/status'
 export { ticketPageInfo } from './domain/ticket-page'
+export { splitTeamQueue, withoutOffers } from './domain/inbox'
 export { ticketFiltersFromSearch } from './domain/list-filters'
 export { useTicketFilterCatalogs } from './hooks/use-ticket-filter-catalogs'
