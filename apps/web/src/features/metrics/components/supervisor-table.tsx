@@ -1,7 +1,8 @@
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import type { SupervisorRow } from '../domain/indicators'
-import { formatMinutes } from '../domain/metrics'
+import { formatMinutes, formatPercent } from '../domain/metrics'
+import { offerRate } from '../domain/team'
 import { metricsMessages } from '../i18n'
 import { StackedBarCell } from './bar-cell'
 
@@ -12,7 +13,7 @@ const columns: DataTableColumn<SupervisorRow>[] = [
   { id: 'offers', header: t.offers, cell: (row) => row.offers },
   {
     id: 'load',
-    header: `${t.taken} / ${t.pending}`,
+    header: `${t.taken} / ${t.pending} / ${t.withdrawn}`,
     cell: (row) => (
       <StackedBarCell
         segments={[
@@ -20,14 +21,26 @@ const columns: DataTableColumn<SupervisorRow>[] = [
           { key: 'pending', value: row.pending, color: 'var(--warning)' },
           { key: 'withdrawn', value: row.withdrawn, color: 'var(--border)' },
         ]}
-        label={`${row.taken} / ${row.pending}`}
-        className="min-w-36"
+        label={`${row.taken} / ${row.pending} / ${row.withdrawn}`}
+        className="min-w-40"
       />
     ),
   },
   {
+    id: 'takeRate',
+    header: t.takeRate,
+    hideBelow: 'lg',
+    cell: (row) => formatPercent(offerRate(row.taken, row.offers)),
+  },
+  {
+    id: 'pendingRate',
+    header: t.pendingRate,
+    hideBelow: 'lg',
+    cell: (row) => formatPercent(offerRate(row.pending, row.offers)),
+  },
+  {
     id: 'time',
-    header: t.timeToTake,
+    header: t.timeToTakeContinuous,
     cell: (row) => formatMinutes(row.avgTimeToTakeMinutes),
   },
   {
@@ -39,7 +52,7 @@ const columns: DataTableColumn<SupervisorRow>[] = [
   {
     id: 'validated',
     header: t.validated,
-    hideBelow: 'md',
+    hideBelow: '2xl',
     cell: (row) => row.validated,
   },
 ]

@@ -7,6 +7,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- La pestaña Equipo conserva los tiempos y los alinea con el reloj activo en la participación de
+  técnicos y el apoyo auxiliar. Los supervisores muestran tasa de toma, tasa de pendientes y
+  retiradas, y el tiempo hasta la toma se identifica como continuo. Se añade un ranking de
+  participación y búsqueda en el apoyo auxiliar.
 - La pestaña Calidad se organiza en salud de calidad, dónde falla y motivos y salidas. El mapa de
   calor y el riesgo de retrabajo comparten dimensión; el riesgo permite elegir reapertura,
   recaptura o reasignación y se muestra como comparación de cada agrupación contra el promedio

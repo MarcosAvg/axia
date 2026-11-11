@@ -16,6 +16,7 @@ import { ChartCard } from './chart-card'
 import { RoutingStats } from './routing-stats'
 import { SupervisorTable } from './supervisor-table'
 import { teamColumns } from './team-columns'
+import { TechnicianParticipationChart } from './technician-participation-chart'
 import { TechnicianTable } from './technician-table'
 
 const t = metricsMessages.team
@@ -97,25 +98,29 @@ function SupervisorsView({
 function TechniciansView({
   technicians,
   auxiliaryByCategory,
+  mode,
 }: {
   technicians: TechnicianRow[]
   auxiliaryByCategory: AuxiliaryCategoryRow[]
+  mode: TimeMode
 }) {
   return (
     <div className="flex flex-col gap-4">
       <ChartCard title={metricsMessages.technicians.title}>
-        <div className="max-h-[32rem] overflow-auto">
-          <TechnicianTable
-            rows={[...technicians].sort(
-              (left, right) => right.tickets - left.tickets,
-            )}
-          />
+        <div className="flex flex-col gap-4">
+          <TechnicianParticipationChart rows={technicians} mode={mode} />
+          <div className="max-h-[32rem] overflow-auto">
+            <TechnicianTable
+              rows={[...technicians].sort(
+                (left, right) => right.tickets - left.tickets,
+              )}
+              mode={mode}
+            />
+          </div>
         </div>
       </ChartCard>
       <ChartCard title={t.auxiliaryByCategory}>
-        <div className="max-h-80 overflow-auto">
-          <AuxiliaryByCategoryTable rows={auxiliaryByCategory} />
-        </div>
+        <AuxiliaryByCategoryTable rows={auxiliaryByCategory} mode={mode} />
       </ChartCard>
     </div>
   )
@@ -153,6 +158,7 @@ export function TeamTab({
         <TechniciansView
           technicians={technicians}
           auxiliaryByCategory={auxiliaryByCategory}
+          mode={mode}
         />
       ) : null}
     </div>

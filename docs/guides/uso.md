@@ -104,7 +104,9 @@ trabajo fuera de ese horario. El SLA usa el reloj de la instancia, salvo que eli
 Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con el ciclo, las
 fases, los percentiles, las dimensiones y las personas, **Calidad** con salud de calidad,
 diagnóstico por dimensión y motivos de salida (pausas, duplicados y rechazos o cancelaciones), y
-**Equipo** con equipos, supervisores, técnicos y apoyo auxiliar. En Calidad, el riesgo de retrabajo
+**Equipo** con equipos, supervisores, técnicos y apoyo auxiliar. La participación de técnicos y
+el apoyo auxiliar siguen el reloj activo; los supervisores muestran tasa de toma, tasa de
+pendientes y retiradas, y el tiempo hasta la toma se identifica como continuo. En Calidad, el riesgo de retrabajo
 comparte la dimensión con el mapa de calor, permite elegir la señal (reapertura, recaptura o
 reasignación) y compara cada agrupación con el promedio global; el tiempo de pausas y duplicados
 se identifica como continuo.
