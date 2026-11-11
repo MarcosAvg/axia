@@ -18,10 +18,19 @@ export interface DependencyRow {
 export interface CatalogWorkbook {
   sheets: CatalogSheetRows
   dependencies: DependencyRow[]
+  pauseTransitions: PauseTransitionRow[]
+}
+
+export interface PauseTransitionRow {
+  motive: string
+  from: string
+  to: string
 }
 
 export const DEPENDENCY_SHEET = 'Dependencias'
 const DEPENDENCY_HEADERS = ['Nombre', 'Activo', 'Edificio', 'Ubicación']
+export const PAUSE_TRANSITION_SHEET = 'Transiciones de pausa'
+const PAUSE_TRANSITION_HEADERS = ['Motivo', 'Desde', 'Hacia']
 
 const XLSX_MIME =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -68,6 +77,16 @@ function dependencyRows(rows: Record<string, unknown>[]): DependencyRow[] {
   }))
 }
 
+function pauseTransitionRows(
+  rows: Record<string, unknown>[],
+): PauseTransitionRow[] {
+  return rows.map((row) => ({
+    motive: String(row.Motivo ?? ''),
+    from: String(row.Desde ?? ''),
+    to: String(row.Hacia ?? ''),
+  }))
+}
+
 /** Lee un XLSX y devuelve las hojas de catálogo y las dependencias con sus ubicaciones. */
 export async function readCatalogWorkbook(
   file: File,
@@ -77,12 +96,18 @@ export async function readCatalogWorkbook(
   await workbook.xlsx.load(await file.arrayBuffer())
   const sheets: CatalogSheetRows = {}
   const dependencies: DependencyRow[] = []
+  const pauseTransitions: PauseTransitionRow[] = []
   const dependencyName = DEPENDENCY_SHEET.toLocaleLowerCase('es-MX')
+  const pauseTransitionName = PAUSE_TRANSITION_SHEET.toLocaleLowerCase('es-MX')
 
   workbook.eachSheet((sheet) => {
     const name = sheet.name.trim().toLocaleLowerCase('es-MX')
     if (name === dependencyName) {
       dependencies.push(...dependencyRows(readRows(sheet)))
+      return
+    }
+    if (name === pauseTransitionName) {
+      pauseTransitions.push(...pauseTransitionRows(readRows(sheet)))
       return
     }
     const spec = CATALOG_IMPORT_SPECS.find(
@@ -93,7 +118,7 @@ export async function readCatalogWorkbook(
     if (spec) sheets[spec.key] = readRows(sheet)
   })
 
-  return { sheets, dependencies }
+  return { sheets, dependencies, pauseTransitions }
 }
 
 function writeDependencySheet(workbook: Workbook, rows: DependencyRow[]): void {
@@ -118,6 +143,7 @@ function writeDependencySheet(workbook: Workbook, rows: DependencyRow[]): void {
 export async function writeCatalogWorkbook(
   sheets: CatalogSheets,
   dependencies: DependencyRow[] = [],
+  pauseTransitions: PauseTransitionRow[] = [],
 ): Promise<void> {
   const ExcelJS = (await import('exceljs')).default
   const workbook = new ExcelJS.Workbook()
@@ -135,6 +161,21 @@ export async function writeCatalogWorkbook(
     }))
     sheet.getRow(1).font = { bold: true }
     for (const row of sheets[spec.key] ?? []) sheet.addRow(row)
+  }
+
+  const transitions = workbook.addWorksheet(PAUSE_TRANSITION_SHEET)
+  transitions.columns = PAUSE_TRANSITION_HEADERS.map((header) => ({
+    header,
+    key: header,
+    width: 28,
+  }))
+  transitions.getRow(1).font = { bold: true }
+  for (const row of pauseTransitions) {
+    transitions.addRow({
+      Motivo: row.motive,
+      Desde: row.from,
+      Hacia: row.to,
+    })
   }
 
   downloadBlob(

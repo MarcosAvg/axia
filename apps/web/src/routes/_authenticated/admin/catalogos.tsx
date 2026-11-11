@@ -7,6 +7,7 @@ import {
   ADMIN_CATALOGS,
   CatalogManager,
   CatalogTransfer,
+  PauseFlowEditor,
   adminMessages,
   catalogByKey,
 } from '@/features/admin'
@@ -78,6 +79,7 @@ function CatalogsPage() {
           })}
         </nav>
         <CatalogManager config={config} />
+        {config.key === 'reasons' ? <PauseFlowEditor /> : null}
       </div>
     </div>
   )

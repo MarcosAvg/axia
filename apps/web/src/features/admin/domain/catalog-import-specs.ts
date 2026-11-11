@@ -69,6 +69,9 @@ const reasonUseOptions = Object.entries(adminMessages.reasonUse).map(
 const clockClassOptions = Object.entries(adminMessages.clockClass).map(
   ([value, label]) => ({ value, label }),
 )
+const pauseStepKindOptions = Object.entries(adminMessages.pauseStepKind).map(
+  ([value, label]) => ({ value, label }),
+)
 
 const text = (key: string, header: string, required = false): ImportColumn => ({
   key,
@@ -274,6 +277,7 @@ export const CATALOG_IMPORT_SPECS: ImportSpec[] = [
       boolean('requires_note', 'Exige nota'),
       boolean('allows_estimated_date', 'Admite fecha estimada'),
       fixed('clock_class', 'Clasificación de reloj', clockClassOptions, true),
+      fixed('pause_step_kind', 'Tipo de subestado', pauseStepKindOptions),
       active,
     ],
     ['use', 'parent_id', 'name'],

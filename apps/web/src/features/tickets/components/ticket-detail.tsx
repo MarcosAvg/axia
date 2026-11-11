@@ -19,6 +19,7 @@ import { usePendingTicketActions } from '../hooks/use-pending-actions'
 import {
   useTicket,
   useTicketParticipants,
+  useTicketPauseState,
   useTicketTimeline,
 } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
@@ -77,6 +78,9 @@ function TicketDetailContent({
   pending: PendingTicketAction[]
 }) {
   const projection = projectPendingTicket(ticket, pending)
+  const pause = useTicketPauseState(
+    projection.ticket.status === 'paused' ? ticketId : undefined,
+  )
   const actions = allowedActions({
     identity,
     status: projection.ticket.status,
@@ -88,6 +92,10 @@ function TicketDetailContent({
     validationPolicy: projection.ticket.validationPolicy,
     isSupervisorRole: isSupervisorIdentity(identity),
     hasTaken: projection.ticket.hasTaken,
+    pauseHasAdvance: pause.data
+      ? pause.data.advanceOptions.length > 0
+      : undefined,
+    pauseHasExit: pause.data ? pause.data.exitOptions.length > 0 : undefined,
   })
 
   return (

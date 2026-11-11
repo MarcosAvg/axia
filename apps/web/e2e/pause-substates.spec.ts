@@ -85,26 +85,30 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await clickAndWait(page, 'Confirmar', 'ticket_pause')
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Subestado actual').first()).toBeVisible()
+  await expect(page.getByText('Sin subestado').first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Reanudar' })).toHaveCount(0)
 
-  // Gestiona la pausa: baja dos niveles del árbol (cascada).
-  await page.getByRole('button', { name: 'Avanzar subestado' }).click()
-  await page
-    .getByLabel('Nuevo subestado')
-    .selectOption({ label: 'Por solicitar' })
-  await page
-    .getByLabel('Subestado · Por solicitar')
-    .selectOption({ label: 'Con proveedor' })
-  await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
-  await expect(page.getByText('Con proveedor').first()).toBeVisible()
+  // Avanza por el flujo. La salida no aparece hasta llegar al paso que la habilita.
+  for (const step of [
+    'Por solicitar',
+    'Con proveedor',
+    'Solicitado',
+    'En cotización',
+    'Cotización aprobada',
+    'Compra externa',
+    'En tránsito',
+  ]) {
+    await page.getByRole('button', { name: 'Avanzar subestado' }).click()
+    await page.getByLabel('Siguiente subestado').selectOption({ label: step })
+    await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
+    await expect(page.getByText(step).first()).toBeVisible()
+  }
 
-  // Reanuda: exige un subestado (descendiente del motivo), también en cascada.
+  // En tránsito ya hay una salida: solo entonces se ofrece reanudar.
+  await expect(page.getByText('Salidas disponibles').first()).toBeVisible()
   await page.getByRole('button', { name: 'Reanudar' }).click()
-  await page
-    .getByLabel('Nuevo subestado')
-    .selectOption({ label: 'Por solicitar' })
-  await page
-    .getByLabel('Subestado · Por solicitar')
-    .selectOption({ label: 'Sin proveedor' })
+  await page.getByLabel('Salida').selectOption({ label: 'Recibido' })
   await clickAndWait(page, 'Confirmar', 'ticket_resume')
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(page.getByText('Cerrada con: Recibido').first()).toBeVisible()
 })

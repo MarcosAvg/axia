@@ -1,7 +1,8 @@
 import { adminMessages } from '../i18n'
 import type { AdminCatalogConfig } from './catalog-types'
 
-const { titles, fields, list, reasonUse, clockClass } = adminMessages
+const { titles, fields, list, reasonUse, clockClass, pauseStepKind } =
+  adminMessages
 
 const reasonUseOptions = Object.entries(reasonUse).map(([value, label]) => ({
   value,
@@ -11,6 +12,9 @@ const clockClassOptions = Object.entries(clockClass).map(([value, label]) => ({
   value,
   label,
 }))
+const pauseStepKindOptions = Object.entries(pauseStepKind).map(
+  ([value, label]) => ({ value, label }),
+)
 
 /** Catálogo de motivos jerárquicos (con uso, subestado y clasificación de reloj). */
 export const reasonsCatalog: AdminCatalogConfig = {
@@ -56,6 +60,12 @@ export const reasonsCatalog: AdminCatalogConfig = {
       options: clockClassOptions,
     },
     {
+      key: 'pause_step_kind',
+      label: fields.pause_step_kind,
+      options: pauseStepKindOptions,
+      hideBelow: 'xl',
+    },
+    {
       key: 'position',
       label: fields.position,
       align: 'right',
@@ -90,6 +100,14 @@ export const reasonsCatalog: AdminCatalogConfig = {
       kind: 'select-fixed',
       options: clockClassOptions,
       required: true,
+    },
+    {
+      name: 'pause_step_kind',
+      label: fields.pause_step_kind,
+      kind: 'select-fixed',
+      options: pauseStepKindOptions,
+      visibleWhen: (values) =>
+        values.use === 'pause' && Boolean(values.parent_id),
     },
     {
       name: 'position',

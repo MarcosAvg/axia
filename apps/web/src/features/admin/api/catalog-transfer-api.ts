@@ -14,7 +14,8 @@ import { toReferences } from '../domain/catalog-export'
 import { adminInsert, adminList, adminUpdate } from './admin-api'
 import type { AdminRow, AdminTable } from './admin-api'
 import { applyDependencies } from './catalog-transfer-dependencies'
-import type { DependencyRow } from './catalog-workbook'
+import type { DependencyRow, PauseTransitionRow } from './catalog-workbook'
+import { applyPauseTransitions } from './catalog-transfer-pause'
 
 const LABEL_COLUMN: Partial<Record<CatalogKey, string>> = {
   requesters: 'full_name',
@@ -174,22 +175,10 @@ function reportOf(states: SheetState[]): ImportReport[] {
   }))
 }
 
-/**
- * Aplica las hojas en orden de dependencias. Una fila con referencias sin
- * resolver se reintenta tras insertar las demás (instancia vacía o motivos
- * con padre en el mismo archivo).
- */
-export async function importCatalogSheets(
-  sheets: CatalogSheetRows,
-  dependencies: DependencyRow[] = [],
-): Promise<{ report: ImportReport[]; issues: ImportIssue[] }> {
-  const cache = await loadCatalogRows()
-  const dependencyResult =
-    dependencies.length > 0
-      ? await applyDependencies(dependencies, cache)
-      : null
-  const states = createStates(sheets)
-
+async function applyAllSheets(
+  states: SheetState[],
+  cache: Record<CatalogKey, AdminRow[]>,
+): Promise<ImportIssue[]> {
   let progressed = true
   while (progressed) {
     progressed = false
@@ -198,14 +187,58 @@ export async function importCatalogSheets(
       if ((await applySheet(state, cache)) > 0) progressed = true
     }
   }
+  return flushPending(states)
+}
 
-  const issues = flushPending(states)
+function combineReports(
+  dependency: ImportReport | undefined,
+  states: SheetState[],
+  transition: ImportReport | undefined,
+): ImportReport[] {
+  return [
+    ...(dependency ? [dependency] : []),
+    ...reportOf(states),
+    ...(transition ? [transition] : []),
+  ]
+}
+
+function combineIssues(
+  dependency: ImportIssue[],
+  sheets: ImportIssue[],
+  transition: ImportIssue[],
+): ImportIssue[] {
+  return [...dependency, ...sheets, ...transition]
+}
+
+/**
+ * Aplica las hojas en orden de dependencias. Una fila con referencias sin
+ * resolver se reintenta tras insertar las demás (instancia vacía o motivos
+ * con padre en el mismo archivo).
+ */
+export async function importCatalogSheets(
+  sheets: CatalogSheetRows,
+  dependencies: DependencyRow[] = [],
+  pauseTransitions: PauseTransitionRow[] = [],
+): Promise<{ report: ImportReport[]; issues: ImportIssue[] }> {
+  const cache = await loadCatalogRows()
+  const dependencyResult =
+    dependencies.length > 0
+      ? await applyDependencies(dependencies, cache)
+      : null
+  const states = createStates(sheets)
+  const issues = await applyAllSheets(states, cache)
+  const transitionResult = await applyPauseTransitions(pauseTransitions)
 
   return {
-    report: [
-      ...(dependencyResult ? [dependencyResult.report] : []),
-      ...reportOf(states),
-    ],
-    issues: [...(dependencyResult?.issues ?? []), ...issues],
+    report: combineReports(
+      dependencyResult?.report,
+      states,
+      transitionResult?.report,
+    ),
+    issues: combineIssues(
+      dependencyResult?.issues ?? [],
+      issues,
+      transitionResult?.issues ?? [],
+    ),
   }
 }

@@ -1,13 +1,15 @@
 import type { CatalogKey } from '../domain/catalog-import'
 
+type ImportCatalog = CatalogKey | 'pause_transitions'
+
 export interface ImportIssue {
-  catalog: CatalogKey
+  catalog: ImportCatalog
   row: number
   messages: string[]
 }
 
 export interface ImportReport {
-  catalog: CatalogKey
+  catalog: ImportCatalog
   title: string
   total: number
   inserted: number

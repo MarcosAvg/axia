@@ -25,9 +25,4 @@ export type {
   SubcategoryOption,
   TechnicianOption,
 } from './domain/types'
-export {
-  childReasons,
-  indentReasons,
-  pathToReason,
-  resumablePauseRoots,
-} from './domain/reasons'
+export { indentReasons, resumablePauseRoots } from './domain/reasons'

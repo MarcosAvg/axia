@@ -18,6 +18,8 @@ export interface AdminField {
   options?: { value: string; label: string }[]
   /** Valor para registros nuevos y para números vacíos. */
   defaultValue?: string | number | boolean
+  /** Muestra el campo solo cuando la condición del formulario se cumple. */
+  visibleWhen?: (values: Record<string, unknown>) => boolean
 }
 
 /** Presentación del valor de una columna de solo lectura. */

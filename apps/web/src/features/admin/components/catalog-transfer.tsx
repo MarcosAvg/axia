@@ -1,6 +1,9 @@
 import { Button } from '@/components/ui/button'
 import type { ImportReport } from '../api/catalog-transfer-api'
-import { DEPENDENCY_SHEET } from '../api/catalog-workbook'
+import {
+  DEPENDENCY_SHEET,
+  PAUSE_TRANSITION_SHEET,
+} from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
 import { useCatalogTransfer } from '../hooks/use-catalog-transfer'
 import { adminMessages } from '../i18n'
@@ -25,6 +28,7 @@ function totalsOf(report: ImportReport[]) {
 function Preview({ transfer }: { transfer: Transfer }) {
   if (!transfer.workbook) return null
   const dependencies = transfer.workbook.dependencies
+  const transitions = transfer.workbook.pauseTransitions
   const rows = [
     ...CATALOG_IMPORT_SPECS.filter((spec) => spec.key !== 'dependencies').map(
       (spec) => ({
@@ -34,6 +38,9 @@ function Preview({ transfer }: { transfer: Transfer }) {
     ),
     ...(dependencies.length > 0
       ? [{ title: DEPENDENCY_SHEET, count: dependencies.length }]
+      : []),
+    ...(transitions.length > 0
+      ? [{ title: PAUSE_TRANSITION_SHEET, count: transitions.length }]
       : []),
   ].filter((item) => item.count > 0)
 

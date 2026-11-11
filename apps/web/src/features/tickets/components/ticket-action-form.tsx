@@ -7,7 +7,11 @@ import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
 import type { ActionKey, ProxySubject } from '../domain/actions'
 import { isProxyAction } from '../domain/actions'
-import type { EvidenceType, TicketDetail } from '../domain/types'
+import type {
+  EvidenceType,
+  TicketDetail,
+  TicketPauseOption,
+} from '../domain/types'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
 import { useActionCatalogs } from '../hooks/use-action-catalogs'
 import { useActionTime } from '../hooks/use-action-time'
@@ -61,7 +65,10 @@ interface ActionFormViewProps {
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
-  motiveReasonId: string | null
+  pauseOptions: {
+    advance: TicketPauseOption[]
+    exit: TicketPauseOption[]
+  }
   categoryId: string
   reasonRequired: boolean
   values: ActionValues
@@ -110,7 +117,7 @@ function ActionFormView({
   reasons,
   priorities,
   serviceTypes,
-  motiveReasonId,
+  pauseOptions,
   categoryId,
   reasonRequired,
   values,
@@ -145,7 +152,7 @@ function ActionFormView({
         reasons={reasons}
         priorities={priorities}
         serviceTypes={serviceTypes}
-        motiveReasonId={motiveReasonId}
+        pauseOptions={pauseOptions}
         categoryId={categoryId}
         reasonRequired={reasonRequired}
         values={values}
@@ -157,14 +164,14 @@ function ActionFormView({
   )
 }
 
-/** Motivo de la pausa abierta (para ofrecer sus subestados al reanudar y al gestionar). */
-function usePauseMotiveReasonId(
-  action: ActionKey,
-  ticketId: string,
-): string | null {
+/** Opciones de avance y salida del subestado actual de la pausa. */
+function usePauseOptions(action: ActionKey, ticketId: string) {
   const needed = action === 'resume' || action === 'advance_pause'
   const state = useTicketPauseState(needed ? ticketId : undefined)
-  return state.data?.motiveId ?? null
+  return {
+    advance: state.data?.advanceOptions ?? [],
+    exit: state.data?.exitOptions ?? [],
+  }
 }
 
 interface TicketActionFormProps {
@@ -202,7 +209,7 @@ function useTicketActionForm({
     isProxyAction(action) && Boolean(subjectTechnicianId),
   )
   const actions = useTicketActions(ticketId, subject, time.local)
-  const motiveReasonId = usePauseMotiveReasonId(action, ticketId)
+  const pauseOptions = usePauseOptions(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
   const catalogs = useActionCatalogs({
     action,
@@ -240,7 +247,7 @@ function useTicketActionForm({
     reasons: catalogs.reasons,
     priorities: catalogs.priorities,
     serviceTypes: catalogs.serviceTypes,
-    motiveReasonId,
+    pauseOptions,
     reasonRequired: catalogs.reasonRequired,
   }
 }
@@ -261,7 +268,7 @@ export function TicketActionForm(props: TicketActionFormProps) {
       reasons={form.reasons}
       priorities={form.priorities}
       serviceTypes={form.serviceTypes}
-      motiveReasonId={form.motiveReasonId}
+      pauseOptions={form.pauseOptions}
       categoryId={props.ticket.categoryId}
       reasonRequired={form.reasonRequired}
       values={form.values}

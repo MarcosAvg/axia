@@ -44,6 +44,7 @@ const reasonRow = {
   allows_estimated_date: false,
   clock_class: 'counted',
   active: true,
+  pause_step_kind: 'progress',
 }
 
 const reasonRows = rows({
@@ -179,10 +180,12 @@ describe('motivos', () => {
       'Exige nota': 'Sí',
       'Admite fecha estimada': 'No',
       'Clasificación de reloj': 'Cuenta',
+      'Tipo de subestado': 'Avance',
       Activo: 'Sí',
     })
     const prepared = prepareRow(spec, exported, 2, references)
     expect(prepared.issues).toEqual([])
     expect(prepared.data.parent_id).toBe('rea-1')
+    expect(prepared.data.pause_step_kind).toBe('progress')
   })
 })

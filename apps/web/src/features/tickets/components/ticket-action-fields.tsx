@@ -7,9 +7,9 @@ import type { ActionValues } from '../domain/action-values'
 import type { ActionField } from '../domain/action-validation'
 import type { ActionKey } from '../domain/actions'
 import { CLAIM_RESOLUTIONS } from '../domain/types'
+import type { TicketPauseOption } from '../domain/types'
 import { ticketMessages } from '../i18n'
-import { pauseMessages } from '../pause-i18n'
-import { ReasonCascade } from './reason-cascade'
+import { PauseActionField } from './pause-action-field'
 
 export interface TicketActionFieldsProps {
   action: ActionKey
@@ -17,7 +17,10 @@ export interface TicketActionFieldsProps {
   reasons: ReasonOption[]
   priorities: { id: string; name: string }[]
   serviceTypes: { id: string; name: string }[]
-  motiveReasonId?: string | null
+  pauseOptions: {
+    advance: TicketPauseOption[]
+    exit: TicketPauseOption[]
+  }
   categoryId: string
   reasonRequired: boolean
   values: ActionValues
@@ -152,11 +155,14 @@ function reasonBlock(props: TicketActionFieldsProps): ReactNode | null {
   const { action, values, onChange, reasons, errors } = props
   if (action === 'resume' || action === 'advance_pause') {
     return (
-      <ReasonCascade
-        key="reason-cascade"
-        label={pauseMessages.substate}
-        reasons={reasons}
-        rootId={props.motiveReasonId ?? null}
+      <PauseActionField
+        key="pause-option"
+        action={action}
+        options={
+          action === 'resume'
+            ? props.pauseOptions.exit
+            : props.pauseOptions.advance
+        }
         value={values.reasonId}
         error={errors?.reason}
         onChange={(reasonId) => onChange({ reasonId })}
