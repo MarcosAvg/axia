@@ -52,6 +52,8 @@ export const messages = {
       neutral: 'Neutro',
       emerald: 'Esmeralda',
       violet: 'Violeta',
+      amber: 'Ámbar',
+      rose: 'Rosa',
       contrast: 'Alto contraste',
     },
     modes: {

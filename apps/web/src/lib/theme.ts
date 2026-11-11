@@ -11,6 +11,8 @@ export const THEMES = [
   'neutral',
   'emerald',
   'violet',
+  'amber',
+  'rose',
   'contrast',
 ] as const
 export type ThemeName = (typeof THEMES)[number]

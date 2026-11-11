@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Dos temas nuevos: **Ámbar**, con primario naranja cálido, y **Rosa**, con primario rosa. Ambos
+  incluyen modo claro y oscuro, fondos y bordes propios, colores semánticos y una paleta de
+  gráficas ajustada para mantener la distinción entre series.
+
 ### Cambiado
 
 - El Panel se reorganiza como bandeja accionable: las cifras se pueden pulsar para abrir su lista,

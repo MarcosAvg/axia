@@ -14,6 +14,8 @@ import {
 describe('resolveTheme', () => {
   it('acepta un tema válido', () => {
     expect(resolveTheme('emerald')).toBe('emerald')
+    expect(resolveTheme('amber')).toBe('amber')
+    expect(resolveTheme('rose')).toBe('rose')
   })
 
   it('cae al tema predeterminado con un valor inválido', () => {
