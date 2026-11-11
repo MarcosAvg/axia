@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-11
+
 ### Cambiado
 
 - La Bandeja permite tomar una oferta sin abrir el detalle, separa los tiquets sin asignar del
