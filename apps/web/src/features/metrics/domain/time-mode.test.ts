@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { modeValue } from './time-mode'
+import { modeValue, totalInMode } from './time-mode'
 
 const row = {
   avgTotal: 100,
@@ -41,5 +41,17 @@ describe('modo de tiempo', () => {
 
   it('devuelve cero cuando la fase no existe en el modo', () => {
     expect(modeValue({}, 'pause', 'laboral', 'average')).toBe(0)
+  })
+})
+
+describe('totalInMode', () => {
+  it('elige el total continuo, laboral o extra', () => {
+    expect(totalInMode(100, 60, 'calendar')).toBe(100)
+    expect(totalInMode(100, 60, 'laboral')).toBe(60)
+    expect(totalInMode(100, 60, 'extra')).toBe(40)
+  })
+
+  it('nunca devuelve un extra negativo', () => {
+    expect(totalInMode(50, 60, 'extra')).toBe(0)
   })
 })

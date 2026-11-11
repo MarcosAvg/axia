@@ -48,12 +48,18 @@ function rateColumns() {
     coalesce(avg(extract(epoch from v.total_time) / 60) filter (
       where v.status = 'closed' and ${p}
     ), 0) as avg_total_closed,
+    coalesce(avg(extract(epoch from v.total_time_labor) / 60) filter (
+      where v.status = 'closed' and ${p}
+    ), 0) as avg_total_closed_labor,
     coalesce(avg(extract(epoch from v.total_time) / 60) filter (
       where v.status = 'closed' and ${p}
     ), 0) as avg_resolution,
     coalesce(sum(extract(epoch from v.total_time) / 60) filter (
       where v.status = 'closed' and ${p}
     ), 0) as sum_total_closed,
+    coalesce(sum(extract(epoch from v.total_time_labor) / 60) filter (
+      where v.status = 'closed' and ${p}
+    ), 0) as sum_total_closed_labor,
     coalesce(sum(extract(epoch from v.total_time) / 60) filter (
       where v.status = 'closed' and ${p}
     ), 0) as sum_resolution

@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
-import { timeValue } from '@/lib/time-aggregation'
-import { modeValue, type TimeMode } from '../domain/time-mode'
+import { modeValue, totalInMode, type TimeMode } from '../domain/time-mode'
 import type {
   Dimension,
   DimensionGroup,
@@ -26,8 +25,11 @@ const MEASURES = [
   { key: 'avgResponse', label: t.phases.response },
   { key: 'avgAssignment', label: t.phases.assignment },
   { key: 'avgPendingTake', label: t.phases.pending_take },
+  { key: 'avgReassignment', label: metricsMessages.kpi.reassignment },
   { key: 'avgValidation', label: t.phases.validation },
   { key: 'avgPause', label: t.phases.pause },
+  { key: 'avgDormant', label: t.phases.dormant },
+  { key: 'avgClaim', label: t.phases.claim },
   { key: 'avgWait', label: t.phases.wait },
 ] as const
 
@@ -40,10 +42,17 @@ function measureValue(
   mode: TimeMode,
 ) {
   if (measure === 'avgTotalAll') {
-    return timeValue(aggregation, row.avgTotalAll, row.sumTotalAll)
+    return modeValue(
+      row as unknown as Record<string, number>,
+      'total',
+      mode,
+      aggregation,
+    )
   }
   if (measure === 'avgTotalClosed') {
-    return timeValue(aggregation, row.avgTotalClosed, row.sumTotalClosed)
+    return aggregation === 'total'
+      ? totalInMode(row.sumTotalClosed, row.sumTotalClosedLabor, mode)
+      : totalInMode(row.avgTotalClosed, row.avgTotalClosedLabor, mode)
   }
   const key = measure.replace(/^avg/, '')
   const normalized = key[0]?.toLowerCase() + key.slice(1)

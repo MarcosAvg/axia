@@ -7,6 +7,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- La pestaña Tiempos se organiza en ciclo, dimensiones y personas. El selector de agregación se
+  mueve a la cabecera, el mapa de calor incluye fuera de atención y reclamación, y el reloj
+  continuo/laboral/extra se aplica también a técnicos, solicitantes y totales por dimensión. Los
+  percentiles se identifican como continuos.
 - El Resumen muestra ocho indicadores —total de tiquets, tiquets activos, sin asignar, en pausa,
   cerrados, cumplimiento del SLA, satisfacción y primera resolución— y organiza el resto en un
   bento de seis tarjetas que se reacomoda sin huecos. El ciclo medio sale del Resumen y el detalle

@@ -6,19 +6,21 @@ import type {
   TechnicianTimeRow,
 } from '../domain/indicators'
 import type { MetricsSummary } from '../domain/metrics'
-import { ChartCard } from './chart-card'
+import type { TimeMode } from '../domain/time-mode'
 import { formatMinutes } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
+import { ChartCard } from './chart-card'
 import { CycleBar } from './cycle-bar'
+import { PeopleTimes } from './people-times'
 import { PhaseHeatmap } from './phase-heatmap'
 import { PhaseTable } from './phase-table'
-import { RequesterTimes } from './requester-times'
-import { TechnicianTimes } from './technician-times'
 import { TimesDimensionTable } from './times-dimension-table'
-import type { TimeMode } from '../domain/time-mode'
+import { TimesHeader } from './times-header'
+
+const t = metricsMessages.times
 
 function percentileRows(summary: MetricsSummary) {
-  const phases = metricsMessages.times.phases
+  const phases = t.phases
   return [
     {
       key: 'total',
@@ -62,11 +64,8 @@ function percentileRows(summary: MetricsSummary) {
 function PercentilesCard({ summary }: { summary: MetricsSummary }) {
   const rows = percentileRows(summary)
   return (
-    <ChartCard
-      title={metricsMessages.times.percentiles}
-      hint={metricsMessages.times.percentilesHint}
-    >
-      <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+    <ChartCard title={t.percentiles} hint={t.percentilesHint}>
+      <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-3">
         {rows.map((row) => (
           <div
             key={row.key}
@@ -83,7 +82,7 @@ function PercentilesCard({ summary }: { summary: MetricsSummary }) {
   )
 }
 
-/** Tiempos: ciclo, fases, mapa de calor, dimensiones y técnicos. */
+/** Tiempos: ciclo, dimensiones y personas. */
 export function TimesTab({
   summary,
   groups,
@@ -103,17 +102,24 @@ export function TimesTab({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <CycleBar summary={summary} mode={mode} />
-      <PhaseTable summary={summary} mode={mode} />
+      <TimesHeader />
+      <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+        <CycleBar summary={summary} mode={mode} />
+        <PhaseTable summary={summary} mode={mode} />
+      </div>
       <PercentilesCard summary={summary} />
-      <PhaseHeatmap groups={groups} />
-      <TimesDimensionTable groups={groups} mode={mode} />
-      <TechnicianTimes
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-medium">{t.dimensionSection}</h2>
+        <PhaseHeatmap groups={groups} mode={mode} />
+        <TimesDimensionTable groups={groups} mode={mode} />
+      </section>
+      <PeopleTimes
         technicians={technicians}
-        times={technicianTimes}
-        subjectTimes={technicianSubjectTimes}
+        technicianTimes={technicianTimes}
+        technicianSubjectTimes={technicianSubjectTimes}
+        requesterTimes={requesterTimes}
+        mode={mode}
       />
-      <RequesterTimes rows={requesterTimes} />
     </div>
   )
 }

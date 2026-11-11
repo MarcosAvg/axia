@@ -18,20 +18,30 @@ export async function fetchTechnicianTimes(
     technician_name: string
     tickets: number
     avg_active: number
+    avg_active_labor: number
     avg_total: number
+    avg_total_labor: number
     avg_response: number
+    avg_response_labor: number
     avg_assignment: number
+    avg_assignment_labor: number
     avg_validation: number
+    avg_validation_labor: number
   }>('/api/metrics/technician-times', filters)
   return items.map((row) => ({
     technicianId: row.technician_id,
     name: row.technician_name,
     tickets: toNumber(row.tickets),
     avgActive: toNumber(row.avg_active),
+    avgActiveLabor: toNumber(row.avg_active_labor),
     avgTotal: toNumber(row.avg_total),
+    avgTotalLabor: toNumber(row.avg_total_labor),
     avgResponse: toNumber(row.avg_response),
+    avgResponseLabor: toNumber(row.avg_response_labor),
     avgAssignment: toNumber(row.avg_assignment),
+    avgAssignmentLabor: toNumber(row.avg_assignment_labor),
     avgValidation: toNumber(row.avg_validation),
+    avgValidationLabor: toNumber(row.avg_validation_labor),
   }))
 }
 

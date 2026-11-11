@@ -2,14 +2,17 @@ import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import type { RequesterTimeRow } from '../domain/indicators'
 import { formatMinutes } from '../domain/metrics'
+import { totalInMode, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 
-function columns(): DataTableColumn<RequesterTimeRow>[] {
+const t = metricsMessages.times
+
+function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
   return [
     {
       id: 'name',
-      header: 'Solicitante',
+      header: t.requester,
       cell: (row) => row.name,
     },
     {
@@ -19,28 +22,40 @@ function columns(): DataTableColumn<RequesterTimeRow>[] {
     },
     {
       id: 'validation',
-      header: 'Validación',
-      cell: (row) => formatMinutes(row.validationMinutes),
+      header: t.phases.validation,
+      cell: (row) =>
+        formatMinutes(
+          totalInMode(row.validationMinutes, row.validationLaborMinutes, mode),
+        ),
     },
     {
       id: 'claim',
-      header: 'Reclamación',
+      header: t.phases.claim,
       hideBelow: 'md',
-      cell: (row) => formatMinutes(row.claimMinutes),
+      cell: (row) =>
+        formatMinutes(
+          totalInMode(row.claimMinutes, row.claimLaborMinutes, mode),
+        ),
     },
   ]
 }
 
 /** Tiempo de validación y reclamación atribuido a cada solicitante. */
-export function RequesterTimes({ rows }: { rows: RequesterTimeRow[] }) {
+export function RequesterTimes({
+  rows,
+  mode,
+}: {
+  rows: RequesterTimeRow[]
+  mode: TimeMode
+}) {
   return (
-    <ChartCard title="Tiempos por solicitante">
+    <ChartCard title={t.requesters}>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       ) : (
         <div className="max-h-80 overflow-auto">
           <DataTable
-            columns={columns()}
+            columns={columns(mode)}
             rows={rows}
             getRowId={(row) => row.requesterId}
           />

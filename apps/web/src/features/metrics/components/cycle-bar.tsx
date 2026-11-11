@@ -1,14 +1,13 @@
-import { AggregationToggle } from '@/components/shared/aggregation-toggle'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
 import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
 import type { TimeAggregation } from '@/lib/time-aggregation'
-import { messages } from '@/lib/i18n'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
 import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CycleInput, CyclePhase, CycleSlice } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
-import { modeValue, type TimeMode } from '../domain/time-mode'
+import { modeValue, totalInMode, type TimeMode } from '../domain/time-mode'
+import { ChartCard } from './chart-card'
 
 const COLORS: Record<CyclePhase, string> = {
   response: 'var(--chart-1)',
@@ -57,12 +56,18 @@ function CycleLegend({ slices }: { slices: PhaseView[] }) {
 function CycleFooter({
   summary,
   aggregation,
+  mode,
 }: {
   summary: MetricsSummary
   aggregation: TimeAggregation
+  mode: TimeMode
 }) {
   const minutes = (average: number, total: number) =>
     formatMinutes(timeValue(aggregation, average, total))
+  const net =
+    aggregation === 'total'
+      ? totalInMode(summary.sumNet, summary.sumNetLabor, mode)
+      : totalInMode(summary.avgNet, summary.avgNetLabor, mode)
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t pt-2 text-xs text-muted-foreground">
       <span>
@@ -74,7 +79,7 @@ function CycleFooter({
       <span>
         {k.net}:{' '}
         <span className="font-medium text-foreground">
-          {minutes(summary.avgNet, summary.sumNet)}
+          {formatMinutes(net)}
         </span>
       </span>
     </div>
@@ -143,18 +148,11 @@ export function CycleBar({
   }))
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-medium text-muted-foreground">{t.cycle}</h2>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {messages.aggregation.label}
-          </span>
-          <AggregationToggle />
-        </div>
+    <ChartCard title={t.cycle}>
+      <div className="flex flex-col gap-3">
+        <CycleChart slices={slices} total={total} />
+        <CycleFooter summary={summary} aggregation={aggregation} mode={mode} />
       </div>
-      <CycleChart slices={slices} total={total} />
-      <CycleFooter summary={summary} aggregation={aggregation} />
-    </section>
+    </ChartCard>
   )
 }

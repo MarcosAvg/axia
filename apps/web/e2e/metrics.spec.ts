@@ -85,6 +85,35 @@ test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
   ).toBeVisible()
 })
 
+test('la pestaña de tiempos agrupa ciclo, dimensiones y personas', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
+
+  const times = page.getByRole('tabpanel')
+  await expect(
+    times.getByRole('heading', { name: 'Tiempos del periodo' }),
+  ).toBeVisible()
+  await expect(
+    times.getByRole('heading', { name: 'Ciclo medio' }),
+  ).toBeVisible()
+  await expect(
+    times.getByRole('heading', { name: 'Fases del ciclo' }),
+  ).toBeVisible()
+  await expect(
+    times.getByRole('heading', { name: 'Por dimensión', exact: true }),
+  ).toBeVisible()
+  await expect(times.getByRole('heading', { name: 'Personas' })).toBeVisible()
+
+  await times.getByRole('button', { name: 'Solicitantes' }).click()
+  await expect(times.getByText('Tiempos por solicitante')).toBeVisible()
+})
+
 test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await page

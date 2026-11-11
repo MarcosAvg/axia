@@ -101,11 +101,15 @@ satisfacción y tiempos objetivo. La composición del ciclo y el detalle complet
 fases y tablas: continuo corre 24 horas, laboral solo dentro del calendario del equipo y extra es el
 trabajo fuera de ese horario. El SLA usa el reloj de la instancia, salvo que elijas uno en el tablero.
 
-Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con percentiles
-P50/P90, fases, técnicos y horas de apoyo auxiliar, **Calidad** con la calidad del tiempo, pausas,
-duplicados y descartes, y **Equipo** con equipos, supervisores y técnicos. Los filtros de periodo,
-edificio, equipo, categoría, dependencia y desenlace nunca amplían lo que tu alcance permite ver.
-Los tiquets con hora sin verificar quedan fuera de las medias de desempeño hasta corregirlos.
+Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con el ciclo, las
+fases, los percentiles, las dimensiones y las personas, **Calidad** con la calidad del tiempo,
+pausas, duplicados y descartes, y **Equipo** con equipos, supervisores, técnicos y apoyo auxiliar.
+En **Tiempos**, el selector **Promedio / Acumulado** está en la cabecera y afecta a las tablas de la
+pestaña; el reloj **Continuo / Laboral / Extra** de la barra superior se aplica también a técnicos,
+solicitantes y dimensiones. Los percentiles se muestran siempre en reloj continuo y así se indica.
+Los filtros de periodo, edificio, equipo, categoría, dependencia y desenlace nunca amplían lo que tu
+alcance permite ver. Los tiquets con hora sin verificar quedan fuera de las medias de desempeño
+hasta corregirlos.
 
 ## Trabajar sin conexión
 

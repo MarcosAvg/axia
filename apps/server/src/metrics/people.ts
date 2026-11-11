@@ -18,10 +18,15 @@ export async function technicianTimes(
       tech.full_name as technician_name,
       count(distinct p.ticket_id)::int as tickets,
       coalesce(avg(extract(epoch from b.active_work_time) / 60), 0) as avg_active,
+      coalesce(avg(extract(epoch from b.active_work_time_labor) / 60), 0) as avg_active_labor,
       coalesce(avg(extract(epoch from b.total_time) / 60), 0) as avg_total,
+      coalesce(avg(extract(epoch from b.total_time_labor) / 60), 0) as avg_total_labor,
       coalesce(avg(extract(epoch from b.response_time) / 60), 0) as avg_response,
+      coalesce(avg(extract(epoch from b.response_time_labor) / 60), 0) as avg_response_labor,
       coalesce(avg(extract(epoch from b.assignment_time) / 60), 0) as avg_assignment,
-      coalesce(avg(extract(epoch from b.validation_time) / 60), 0) as avg_validation
+      coalesce(avg(extract(epoch from b.assignment_time_labor) / 60), 0) as avg_assignment_labor,
+      coalesce(avg(extract(epoch from b.validation_time) / 60), 0) as avg_validation,
+      coalesce(avg(extract(epoch from b.validation_time_labor) / 60), 0) as avg_validation_labor
     from base b
     join public.ticket_participants p
       on p.ticket_id = b.id and p.participation_type = 'leader'

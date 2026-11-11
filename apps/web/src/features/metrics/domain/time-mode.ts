@@ -29,3 +29,14 @@ export function modeValue(
   const field = `${prefix}${capitalize(key)}${FIELD_SUFFIX[mode]}`
   return Number(row[field] ?? 0)
 }
+
+/** Total de un tramo en el reloj elegido; el extra descuenta el laboral. */
+export function totalInMode(
+  continuous: number,
+  labor: number,
+  mode: TimeMode,
+): number {
+  if (mode === 'laboral') return labor
+  if (mode === 'extra') return Math.max(0, continuous - labor)
+  return continuous
+}

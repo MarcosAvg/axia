@@ -1,7 +1,6 @@
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
-import { timeValue } from '@/lib/time-aggregation'
 import type { TimeAggregation } from '@/lib/time-aggregation'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
@@ -9,7 +8,7 @@ import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CyclePhase } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { modeValue, type TimeMode } from '../domain/time-mode'
+import { modeValue, totalInMode, type TimeMode } from '../domain/time-mode'
 
 const t = metricsMessages.times
 
@@ -66,6 +65,12 @@ export function PhaseTable({
 }) {
   const { aggregation } = useTimeAggregation()
   const rows = phaseRows(summary, aggregation, mode)
+  const record = summary as unknown as Record<string, number>
+  const total = modeValue(record, 'total', mode, aggregation)
+  const net =
+    aggregation === 'total'
+      ? totalInMode(summary.sumNet, summary.sumNetLabor, mode)
+      : totalInMode(summary.avgNet, summary.avgNetLabor, mode)
   const columns: DataTableColumn<PhaseRow>[] = [
     {
       id: 'phase',
@@ -97,17 +102,13 @@ export function PhaseTable({
           <span>
             {metricsMessages.kpi.total}:{' '}
             <span className="font-medium text-foreground">
-              {formatMinutes(
-                timeValue(aggregation, summary.avgTotal, summary.sumTotal),
-              )}
+              {formatMinutes(total)}
             </span>
           </span>
           <span>
             {metricsMessages.kpi.net}:{' '}
             <span className="font-medium text-foreground">
-              {formatMinutes(
-                timeValue(aggregation, summary.avgNet, summary.sumNet),
-              )}
+              {formatMinutes(net)}
             </span>
           </span>
         </p>

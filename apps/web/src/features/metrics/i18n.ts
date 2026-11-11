@@ -81,10 +81,12 @@ export const metricsMessages = {
     calidad: 'Calidad',
   },
   times: {
+    title: 'Tiempos del periodo',
+    titleHint: 'El reloj y la agregación elegidos aplican a toda la pestaña.',
     cycle: 'Ciclo medio',
-    percentiles: 'Percentiles P50 / P90',
+    percentiles: 'Percentiles P50 / P90 en continuo',
     percentilesHint:
-      'Mediana y percentil 90 de los tiquets del universo de desempeño.',
+      'Mediana y percentil 90 sobre el reloj continuo de los tiquets del universo de desempeño.',
     phases: {
       response: 'Respuesta',
       assignment: 'Asignación',
@@ -104,6 +106,11 @@ export const metricsMessages = {
     byDimension: 'Tiempo por dimensión',
     measure: 'Medida',
     technicians: 'Técnicos',
+    requesters: 'Tiempos por solicitante',
+    requestersTab: 'Solicitantes',
+    requester: 'Solicitante',
+    people: 'Personas',
+    dimensionSection: 'Por dimensión',
     heatmap: 'Tiempo por categoría y fase',
     participation: 'Participación',
     noTimes: 'Sin tiempos de tiquets liderados.',

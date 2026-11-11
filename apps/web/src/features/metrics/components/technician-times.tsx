@@ -5,23 +5,24 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { DataTable } from '@/components/shared/data-table'
-import type { DataTableColumn } from '@/components/shared/data-table'
 import type {
   TechnicianRow,
   TechnicianSubjectTimeRow,
   TechnicianTimeRow,
 } from '../domain/indicators'
 import { formatMinutes } from '../domain/metrics'
+import { totalInMode, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
-import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
 import { RankingBars } from './ranking-bars'
+import {
+  identityColumns,
+  subjectColumns,
+  timeColumns,
+} from './technician-columns'
+import type { TechnicianView } from './technician-columns'
 
 const t = metricsMessages.times
-
-type TechnicianView = TechnicianRow &
-  Partial<TechnicianTimeRow> &
-  Partial<TechnicianSubjectTimeRow>
 
 interface ScatterPoint {
   name: string
@@ -78,106 +79,6 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
   )
 }
 
-function identityColumns(
-  maxParticipation: number,
-): DataTableColumn<TechnicianView>[] {
-  return [
-    {
-      id: 'name',
-      header: metricsMessages.technicians.technician,
-      cell: (row) => row.name,
-    },
-    {
-      id: 'tickets',
-      header: metricsMessages.table.tickets,
-      cell: (row) => row.tickets,
-    },
-    {
-      id: 'participation',
-      header: t.participation,
-      cell: (row) => (
-        <BarCell
-          value={row.participationMinutes}
-          max={maxParticipation}
-          label={formatMinutes(row.participationMinutes)}
-          className="min-w-40"
-        />
-      ),
-    },
-  ]
-}
-
-function timeColumns(): DataTableColumn<TechnicianView>[] {
-  return [
-    {
-      id: 'active',
-      header: t.phases.active,
-      cell: (row) =>
-        row.avgActive === undefined ? '—' : formatMinutes(row.avgActive),
-    },
-    {
-      id: 'total',
-      header: metricsMessages.kpi.total,
-      hideBelow: 'md',
-      cell: (row) =>
-        row.avgTotal === undefined ? '—' : formatMinutes(row.avgTotal),
-    },
-    {
-      id: 'response',
-      header: t.phases.response,
-      hideBelow: 'xl',
-      cell: (row) =>
-        row.avgResponse === undefined ? '—' : formatMinutes(row.avgResponse),
-    },
-    {
-      id: 'assignment',
-      header: t.phases.assignment,
-      hideBelow: 'xl',
-      cell: (row) =>
-        row.avgAssignment === undefined
-          ? '—'
-          : formatMinutes(row.avgAssignment),
-    },
-    {
-      id: 'validation',
-      header: t.phases.validation,
-      hideBelow: 'xl',
-      cell: (row) =>
-        row.avgValidation === undefined
-          ? '—'
-          : formatMinutes(row.avgValidation),
-    },
-  ]
-}
-
-function subjectColumns(): DataTableColumn<TechnicianView>[] {
-  return [
-    {
-      id: 'attributedActive',
-      header: 'Trabajo atribuido',
-      hideBelow: 'md',
-      cell: (row) =>
-        row.activeMinutes === undefined
-          ? '—'
-          : formatMinutes(row.activeMinutes),
-    },
-    {
-      id: 'attributedPause',
-      header: 'Pausa atribuida',
-      hideBelow: 'xl',
-      cell: (row) =>
-        row.pauseMinutes === undefined ? '—' : formatMinutes(row.pauseMinutes),
-    },
-    {
-      id: 'attributedWait',
-      header: 'Espera atribuida',
-      hideBelow: 'xl',
-      cell: (row) =>
-        row.waitMinutes === undefined ? '—' : formatMinutes(row.waitMinutes),
-    },
-  ]
-}
-
 function buildRows(
   technicians: TechnicianRow[],
   times: TechnicianTimeRow[],
@@ -194,57 +95,88 @@ function buildRows(
   }))
 }
 
+function maxParticipationOf(rows: TechnicianView[], mode: TimeMode) {
+  return Math.max(
+    1,
+    ...rows.map((row) =>
+      totalInMode(
+        row.participationMinutes,
+        row.participationLaborMinutes,
+        mode,
+      ),
+    ),
+  )
+}
+
+function pointsOf(rows: TechnicianView[], mode: TimeMode) {
+  return rows
+    .filter((row) => row.avgActive !== undefined)
+    .map((row) => ({
+      name: row.name,
+      tickets: row.tickets,
+      active: totalInMode(row.avgActive ?? 0, row.avgActiveLabor ?? 0, mode),
+      participation: totalInMode(
+        row.participationMinutes,
+        row.participationLaborMinutes,
+        mode,
+      ),
+    }))
+}
+
+function participationOf(rows: TechnicianView[], mode: TimeMode) {
+  return rows.map((row) => {
+    const value = totalInMode(
+      row.participationMinutes,
+      row.participationLaborMinutes,
+      mode,
+    )
+    return {
+      id: row.technicianId,
+      name: row.name,
+      value,
+      label: formatMinutes(value),
+    }
+  })
+}
+
 /** Tiempos de los tiquets que lideró cada técnico, con burbujas y detalle. */
 export function TechnicianTimes({
   technicians,
   times,
   subjectTimes,
+  mode,
 }: {
   technicians: TechnicianRow[]
   times: TechnicianTimeRow[]
   subjectTimes: TechnicianSubjectTimeRow[]
+  mode: TimeMode
 }) {
   const rows = buildRows(technicians, times, subjectTimes)
-  const maxParticipation = Math.max(
-    1,
-    ...rows.map((row) => row.participationMinutes),
-  )
-  const points = rows
-    .filter((row) => row.avgActive !== undefined)
-    .map((row) => ({
-      name: row.name,
-      tickets: row.tickets,
-      active: row.avgActive ?? 0,
-      participation: row.participationMinutes,
-    }))
-  const participationRows = rows.map((row) => ({
-    id: row.technicianId,
-    name: row.name,
-    value: row.participationMinutes,
-    label: formatMinutes(row.participationMinutes),
-  }))
+  const maxParticipation = maxParticipationOf(rows, mode)
+  const points = pointsOf(rows, mode)
+  const participationRows = participationOf(rows, mode)
   return (
     <ChartCard title={t.technicians}>
       <div className="flex flex-col gap-3">
         {points.length >= 3 ? (
           <ScatterBox points={points} />
-        ) : participationRows.length > 0 ? (
+        ) : participationRows.length > 1 ? (
           <RankingBars
             rows={participationRows}
             label={t.participation}
-            height={220}
+            height={160}
           />
-        ) : (
+        ) : rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {metricsMessages.empty}
           </p>
-        )}
+        ) : null}
         <div className="max-h-80 overflow-auto">
           <DataTable
             columns={[
-              ...identityColumns(maxParticipation),
-              ...timeColumns(),
-              ...subjectColumns(),
+              ...identityColumns(maxParticipation, mode),
+              ...timeColumns(mode),
+              ...subjectColumns(mode),
             ]}
             rows={rows}
             getRowId={(row) => row.technicianId}

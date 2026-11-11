@@ -45,10 +45,15 @@ export interface TechnicianTimeRow {
   name: string
   tickets: number
   avgActive: number
+  avgActiveLabor: number
   avgTotal: number
+  avgTotalLabor: number
   avgResponse: number
+  avgResponseLabor: number
   avgAssignment: number
+  avgAssignmentLabor: number
   avgValidation: number
+  avgValidationLabor: number
 }
 
 export interface TechnicianSubjectTimeRow {

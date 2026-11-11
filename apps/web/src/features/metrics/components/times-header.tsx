@@ -1,0 +1,17 @@
+import { AggregationToggle } from '@/components/shared/aggregation-toggle'
+import { metricsMessages } from '../i18n'
+
+const t = metricsMessages.times
+
+/** Cabecera de Tiempos: explica el alcance de los controles globales. */
+export function TimesHeader() {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-base font-medium">{t.title}</h2>
+        <p className="text-xs text-muted-foreground">{t.titleHint}</p>
+      </div>
+      <AggregationToggle />
+    </div>
+  )
+}

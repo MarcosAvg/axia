@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
-import { createTicket } from './tickets-lifecycle-helpers.js'
+import { createTicket, takeAndAssign } from './tickets-lifecycle-helpers.js'
 import {
   authHeaders,
   buildTicketHttpApp,
@@ -130,4 +130,47 @@ it('devuelve dormant y revisión de duplicado como indicadores propios', async (
   expect(summary.sumDormant).toBeCloseTo(20, 0)
   expect(summary.avgDuplicateReview).toBeCloseTo(30, 0)
   expect(summary.sumDuplicateReview).toBeCloseTo(30, 0)
+})
+
+it('expone las variantes laborales por técnico y de cierre', async () => {
+  await context.db.execute(sql`
+    update public.tickets set reported_at = '2019-01-01T00:00:00Z'
+  `)
+  const ticketId = await createTicket(context, refs)
+  await takeAndAssign(context, refs, ticketId)
+  await context.db.execute(sql`
+    update public.tickets set reported_at = now() - interval '2 hours'
+    where id = ${ticketId}
+  `)
+
+  const technicians = await context.app.inject({
+    method: 'GET',
+    url: '/api/metrics/technician-times',
+    headers: authHeaders(context.cookies.admin),
+  })
+  expect(technicians.statusCode).toBe(200)
+  const items = (
+    technicians.json() as { items: Array<Record<string, unknown>> }
+  ).items
+  expect(items.length).toBeGreaterThan(0)
+  expect(items[0]).toHaveProperty('avg_active_labor')
+  expect(items[0]).toHaveProperty('avg_total_labor')
+  expect(items[0]).toHaveProperty('avg_response_labor')
+  expect(items[0]).toHaveProperty('avg_assignment_labor')
+  expect(items[0]).toHaveProperty('avg_validation_labor')
+
+  const summary = await context.app.inject({
+    method: 'GET',
+    url: '/api/metrics/summary?from=2026-01-01&to=2026-12-31',
+    headers: authHeaders(context.cookies.admin),
+  })
+  expect(summary.statusCode).toBe(200)
+  const groups = (
+    summary.json() as {
+      groups: Array<{ dimension: string; row: Record<string, unknown> }>
+    }
+  ).groups
+  const category = groups.find((group) => group.dimension === 'category')
+  expect(category).toBeTruthy()
+  expect(typeof category?.row.avgTotalClosedLabor).toBe('number')
 })

@@ -129,6 +129,15 @@ describe('alcance único de métricas', () => {
   })
 })
 
+/** El cálculo laboral depende del reloj; aquí solo importa el alcance. */
+function stripLabor<T extends Record<string, unknown>>(rows: T[]) {
+  return rows.map((row) =>
+    Object.fromEntries(
+      Object.entries(row).filter(([key]) => !key.endsWith('_labor')),
+    ),
+  )
+}
+
 it.each([
   ['pauses', pausesByReason],
   ['duplicate-tickets', duplicateTickets],
@@ -156,11 +165,13 @@ it.each([
       ],
     }
     const expected = await load(context.db, admin, { teamId: teamA })
-    expect(await load(context.db, scopedActor, { teamId: teamA })).toEqual(
-      expected,
-    )
     expect(
-      await load(context.db, withScope('team'), { teamId: teamB }),
-    ).toEqual(await load(context.db, { ...actor, permissions: [] }, {}))
+      stripLabor(await load(context.db, scopedActor, { teamId: teamA })),
+    ).toEqual(stripLabor(expected))
+    expect(
+      stripLabor(await load(context.db, withScope('team'), { teamId: teamB })),
+    ).toEqual(
+      stripLabor(await load(context.db, { ...actor, permissions: [] }, {})),
+    )
   },
 )
