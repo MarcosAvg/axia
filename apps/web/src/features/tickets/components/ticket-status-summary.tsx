@@ -16,7 +16,7 @@ export function TicketStatusSummary({ items }: { items: TicketListItem[] }) {
       {counts.map(({ status, count }) => (
         <span
           key={status}
-          className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
+          className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs"
         >
           <span className="text-muted-foreground">{statusLabels[status]}</span>
           <span className="font-medium">{count}</span>

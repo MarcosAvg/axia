@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import type { PauseSubstateRow, RejectCancelRow } from '../domain/indicators'
 import type {
   DuplicateAlert,
@@ -42,7 +44,10 @@ function ViewSwitch({
           type="button"
           variant={view === value ? 'secondary' : 'ghost'}
           aria-pressed={view === value}
-          className="min-h-11 px-3 lg:min-h-8"
+          className={cn(
+            'min-h-11 px-3 lg:min-h-8',
+            view === value && SELECTED_CONTROL,
+          )}
           onClick={() => onChange(value)}
         >
           {label}

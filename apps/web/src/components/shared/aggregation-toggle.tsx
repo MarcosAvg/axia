@@ -4,6 +4,7 @@ import { messages } from '@/lib/i18n'
 import { TIME_AGGREGATIONS } from '@/lib/time-aggregation'
 import type { TimeAggregation } from '@/lib/time-aggregation'
 import { useTimeAggregation } from './time-aggregation-context'
+import { SELECTED_CONTROL } from '@/lib/selection'
 
 const t = messages.aggregation
 
@@ -33,7 +34,7 @@ export function AggregationToggle({ className }: { className?: string }) {
             size="sm"
             variant={active ? 'secondary' : 'ghost'}
             aria-pressed={active}
-            className="min-h-11 lg:min-h-9"
+            className={cn('min-h-11 lg:min-h-9', active && SELECTED_CONTROL)}
             onClick={() => setAggregation(value)}
           >
             {LABELS[value]}

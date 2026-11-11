@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { cn } from 'cn'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { HintLabel } from '@/components/shared/hint'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,7 +42,7 @@ export function Section({
   return (
     <Card
       className={cn(
-        'gap-2 rounded-none bg-transparent py-4 ring-0 lg:gap-4 lg:rounded-xl lg:bg-card lg:ring-1',
+        'gap-2 rounded-none border-0 bg-transparent py-4 lg:gap-4 lg:rounded-xl lg:border lg:bg-card',
         className,
       )}
     >
@@ -167,6 +168,7 @@ export function CycleTimesSection({
               type="button"
               size="sm"
               variant={mode === value ? 'secondary' : 'outline'}
+              className={mode === value ? SELECTED_CONTROL : undefined}
               aria-pressed={mode === value}
               onClick={() => setMode(value)}
             >

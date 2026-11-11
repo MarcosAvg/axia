@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { CalendarIcon, ChevronDownIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from 'cn'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import {
   Popover,
   PopoverContent,
@@ -56,7 +58,7 @@ function QuickRange({
       type="button"
       variant={active ? 'secondary' : 'outline'}
       aria-pressed={active}
-      className="min-h-11 lg:min-h-9"
+      className={cn('min-h-11 lg:min-h-9', active && SELECTED_CONTROL)}
       onClick={onClick}
     >
       {children}

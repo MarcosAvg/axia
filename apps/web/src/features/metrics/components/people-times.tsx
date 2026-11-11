@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
 import type {
   RequesterTimeRow,
@@ -7,6 +8,7 @@ import type {
   TechnicianTimeRow,
 } from '../domain/indicators'
 import type { TimeMode } from '../domain/time-mode'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { metricsMessages } from '../i18n'
 import { RequesterTimes } from './requester-times'
 import { TechnicianTimes } from './technician-times'
@@ -35,7 +37,10 @@ function ViewSwitch({
           type="button"
           variant={view === value ? 'secondary' : 'ghost'}
           aria-pressed={view === value}
-          className="min-h-11 px-3 lg:min-h-8"
+          className={cn(
+            'min-h-11 px-3 lg:min-h-8',
+            view === value && SELECTED_CONTROL,
+          )}
           onClick={() => onChange(value)}
         >
           {label}

@@ -86,7 +86,7 @@ export function TicketList({
   showElapsed?: boolean
 }) {
   return (
-    <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
+    <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card">
       {items.map((ticket) => (
         <li key={ticket.id}>
           <TicketCard ticket={ticket} showElapsed={showElapsed} />

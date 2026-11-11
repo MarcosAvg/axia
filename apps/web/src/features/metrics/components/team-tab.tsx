@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/shared/data-table'
 import type { DimensionGroup } from '../domain/dimensions'
@@ -10,6 +11,7 @@ import type {
   TechnicianRow,
 } from '../domain/indicators'
 import type { TimeMode } from '../domain/time-mode'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { metricsMessages } from '../i18n'
 import { AuxiliaryByCategoryTable } from './auxiliary-by-category-table'
 import { ChartCard } from './chart-card'
@@ -66,7 +68,10 @@ function ViewSwitch({
           type="button"
           variant={view === value ? 'secondary' : 'ghost'}
           aria-pressed={view === value}
-          className="min-h-11 px-3 lg:min-h-8"
+          className={cn(
+            'min-h-11 px-3 lg:min-h-8',
+            view === value && SELECTED_CONTROL,
+          )}
           onClick={() => onChange(value)}
         >
           {label}

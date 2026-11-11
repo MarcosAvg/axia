@@ -1,4 +1,6 @@
+import { cn } from 'cn'
 import { Button } from '@/components/ui/button'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { metricsMessages } from '../i18n'
 import { TIME_MODES, type TimeMode } from '../domain/time-mode'
 
@@ -22,7 +24,7 @@ export function TimeModeToggle({
           size="sm"
           variant={mode === value ? 'secondary' : 'ghost'}
           aria-pressed={mode === value}
-          className="min-h-9 px-3"
+          className={cn('min-h-9 px-3', mode === value && SELECTED_CONTROL)}
           onClick={() => onChange(value)}
         >
           {metricsMessages.timeMode[value]}

@@ -15,7 +15,7 @@ export function DuplicateCandidates({
   onPick,
 }: DuplicateCandidatesProps) {
   return (
-    <ul className="flex flex-col divide-y overflow-hidden rounded-xl ring-1 ring-foreground/10">
+    <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card">
       {candidates.map((ticket) => (
         <li
           key={ticket.id}

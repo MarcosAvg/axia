@@ -97,7 +97,7 @@ function AdminCard({ entry }: { entry: AdminEntry }) {
   const Icon = entry.icon
   const content = (
     <>
-      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <Icon className="size-5" />
       </span>
       <span className="flex min-w-0 flex-col gap-0.5">
@@ -139,7 +139,7 @@ function AdminHome() {
       />
       {visibleGroups.map((group) => (
         <section key={group.label} className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+          <h2 className="text-sm font-semibold text-muted-foreground">
             {group.label}
           </h2>
           <div className={cn('grid gap-3', GROUP_GRID)}>

@@ -80,7 +80,7 @@ function TicketBoardCard({
     <Link
       to="/tickets/$ticketId"
       params={{ ticketId: ticket.id }}
-      className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm shadow-xs transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium">{ticket.folio}</span>
