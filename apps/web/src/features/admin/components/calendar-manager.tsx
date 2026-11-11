@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cn } from 'cn'
 import { PencilIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +10,7 @@ import {
   useCreateCalendar,
   useUpdateCalendar,
 } from '../hooks/use-calendars'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { adminMessages } from '../i18n'
 import { CalendarForm } from './calendar-form'
 import { CalendarHolidays } from './calendar-holidays'
@@ -36,7 +38,10 @@ function CalendarPicker({
             <Button
               type="button"
               variant={calendar.id === selectedId ? 'secondary' : 'ghost'}
-              className="min-h-11 w-full justify-between"
+              className={cn(
+                'min-h-11 w-full justify-between',
+                calendar.id === selectedId && SELECTED_CONTROL,
+              )}
               onClick={() => onSelect(calendar.id)}
             >
               <span className="truncate">{calendar.name}</span>

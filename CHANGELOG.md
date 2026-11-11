@@ -11,7 +11,7 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   ganan contraste. Las tarjetas de métricas y la franja de salud usan el mismo límite visible que
   el resto de tarjetas, sin añadir sombras generales.
 - Se unificó el límite de tarjetas, tablas, listas y pastillas de estado. Las pestañas y segmentos
-  activos usan el acento primario suave, igual que la navegación lateral y el selector de catálogos;
+  activos usan el acento primario suave, igual que la navegación lateral, el selector de catálogos, la lista de roles y los calendarios;
   los accesos de administración heredan ese mismo acento.
 - La pestaña Equipo conserva los tiempos y los alinea con el reloj activo en la participación de
   técnicos y el apoyo auxiliar. Los supervisores muestran tasa de toma, tasa de pendientes y

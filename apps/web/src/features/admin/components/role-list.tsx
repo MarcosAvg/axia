@@ -1,6 +1,8 @@
+import { cn } from 'cn'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { Role } from '../domain/access'
+import { SELECTED_CONTROL } from '@/lib/selection'
 import { adminMessages } from '../i18n'
 
 interface RoleListProps {
@@ -18,7 +20,10 @@ export function RoleList({ roles, selectedId, onSelect }: RoleListProps) {
           <Button
             type="button"
             variant={role.id === selectedId ? 'secondary' : 'ghost'}
-            className="min-h-11 w-full justify-start gap-2"
+            className={cn(
+              'min-h-11 w-full justify-start gap-2',
+              role.id === selectedId && SELECTED_CONTROL,
+            )}
             onClick={() => onSelect(role.id)}
           >
             <span className="truncate">{role.label}</span>
