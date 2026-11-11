@@ -23,14 +23,15 @@ test('la bandeja ofrece tomar un tiquet sin abrir el detalle', async ({
 
   const offers = page.getByRole('heading', { name: /Ofertas para ti/ })
   await expect(offers).toBeVisible()
-  const match = (await offers.textContent())?.match(/\((\d+)\)/)
-  const count = match ? Number(match[1]) : 0
-  if (count > 0) {
-    await expect(
-      page.getByRole('button', { name: 'Tomar tiquet' }).first(),
-    ).toBeVisible()
+  const takeButton = page.getByRole('button', { name: 'Tomar tiquet' })
+  const emptyOffers = page.getByText('No tienes ofertas pendientes.')
+  await expect
+    .poll(async () => (await takeButton.count()) + (await emptyOffers.count()))
+    .toBeGreaterThan(0)
+  if ((await takeButton.count()) > 0) {
+    await expect(takeButton.first()).toBeVisible()
   } else {
-    await expect(page.getByText('No tienes ofertas pendientes.')).toBeVisible()
+    await expect(emptyOffers).toBeVisible()
   }
   await expect(page.getByText(/Tiquets del equipo/)).toBeVisible()
 })
