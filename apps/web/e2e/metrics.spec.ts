@@ -5,8 +5,10 @@ const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(email)
-  await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
+  await page.getByLabel('Usuario').pressSequentially(email, { delay: 5 })
+  await page
+    .getByLabel('Contraseña')
+    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
 }
 
@@ -249,6 +251,34 @@ test('el equipo cambia entre equipos, supervisores y técnicos', async ({
   await expect(page.getByText('Ruteo y toma')).toBeVisible()
   await page.getByRole('button', { name: 'Técnicos' }).click()
   await expect(page.getByText('Carga por técnico')).toBeVisible()
+})
+
+test('equipo conserva los tiempos y añade lectura de carga', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Equipo' }).click()
+
+  const team = page.getByRole('tabpanel')
+  await expect(team.getByText('Resumen por equipo')).toBeVisible()
+  await team.getByRole('button', { name: 'Supervisores' }).click()
+  await expect(team.getByText('Ruteo y toma')).toBeVisible()
+  await expect(
+    team.getByRole('columnheader', { name: 'Tasa de toma' }),
+  ).toBeVisible()
+  await expect(
+    team.getByRole('columnheader', { name: /continuo/ }),
+  ).toBeVisible()
+
+  await team.getByRole('button', { name: 'Técnicos' }).click()
+  await expect(team.getByText('Carga por técnico')).toBeVisible()
+  await expect(
+    team.getByRole('textbox', { name: 'Buscar técnico o categoría' }),
+  ).toBeVisible()
 })
 
 test('cambia el periodo desde el popover', async ({ page }) => {

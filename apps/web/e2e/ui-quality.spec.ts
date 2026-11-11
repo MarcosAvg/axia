@@ -23,8 +23,10 @@ const AUTHENTICATED_ROUTES = [
 
 async function signIn(page: Page, username = 'demo.admin') {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(username)
-  await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
+  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
+  await page
+    .getByLabel('Contraseña')
+    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
     page.getByRole('button', { name: 'Menú de usuario' }),

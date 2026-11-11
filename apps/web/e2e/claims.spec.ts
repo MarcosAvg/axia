@@ -11,8 +11,10 @@ const ATTENDED_TICKET = 'de000000-0000-4000-8000-000000000005'
 
 async function signIn(page: Page) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill('demo.requester')
-  await page.getByLabel('Contraseña').fill(PASSWORD)
+  await page
+    .getByLabel('Usuario')
+    .pressSequentially('demo.requester', { delay: 5 })
+  await page.getByLabel('Contraseña').pressSequentially(PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
     page.getByRole('button', { name: 'Menú de usuario' }),

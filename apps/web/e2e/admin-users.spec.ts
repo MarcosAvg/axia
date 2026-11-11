@@ -7,8 +7,8 @@ const PROFILE_PASSWORD = 'E2ePerfilPassword123!'
 
 async function submitLogin(page: Page, username: string, password: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(username)
-  await page.getByLabel('Contraseña').fill(password)
+  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
+  await page.getByLabel('Contraseña').pressSequentially(password, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
 }
 

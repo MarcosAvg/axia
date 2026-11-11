@@ -6,8 +6,10 @@ const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, user: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(user)
-  await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
+  await page.getByLabel('Usuario').pressSequentially(user, { delay: 5 })
+  await page
+    .getByLabel('Contraseña')
+    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
     page.getByRole('button', { name: 'Menú de usuario' }),

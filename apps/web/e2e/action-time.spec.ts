@@ -16,8 +16,8 @@ function localInput(date: Date): string {
 
 async function signIn(page: Page) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill('demo.admin')
-  await page.getByLabel('Contraseña').fill(PASSWORD)
+  await page.getByLabel('Usuario').pressSequentially('demo.admin', { delay: 5 })
+  await page.getByLabel('Contraseña').pressSequentially(PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
     page.getByRole('button', { name: 'Menú de usuario' }),

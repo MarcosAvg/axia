@@ -27,8 +27,10 @@ async function trimWorkbook(path: string): Promise<string> {
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(email)
-  await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
+  await page.getByLabel('Usuario').pressSequentially(email, { delay: 5 })
+  await page
+    .getByLabel('Contraseña')
+    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(
     page.getByRole('button', { name: 'Menú de usuario' }),
