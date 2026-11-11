@@ -3,6 +3,14 @@
 Entra con tu cuenta. Si recibiste una contraseña temporal, cámbiala cuando se solicite.
 El menú muestra las secciones disponibles para tus permisos y perfil.
 
+## Panel
+
+El **Panel** es una bandeja accionable. Arriba muestra las cifras que requieren atención y cada una
+abre la lista correspondiente: ofertas, por validar, en pausa, sin asignar o SLA. Después aparecen
+tus bandejas —ofertas para ti, mi trabajo y tiquets del equipo—, la actividad reciente y, al final,
+el resumen de volumen si tienes permiso de métricas. Las personas con varios roles ven las bandejas
+de todos sus roles, no solo las del rol principal.
+
 ## Registrar una solicitud
 
 1. Abre **Tiquets → Nuevo tiquet**.

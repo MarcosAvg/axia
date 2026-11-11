@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, canAny, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
+import type { DashboardCapabilities } from '../domain/kpis'
 import { useDashboardData } from '../hooks/use-dashboard'
 import type { DashboardData } from '../hooks/use-dashboard'
 import { dashboardMessages as t } from '../i18n'
@@ -15,7 +16,6 @@ import { ActivitySection } from './activity-section'
 import { DashboardCharts } from './dashboard-charts'
 import { DashboardKpis } from './dashboard-kpis'
 import { DashboardSections } from './dashboard-sections'
-import type { DashboardRole } from './dashboard-sections'
 
 const ADMIN_PERMISSIONS = [
   'catalog.manage',
@@ -24,20 +24,16 @@ const ADMIN_PERMISSIONS = [
   'assignment.manage',
 ]
 
-function dashboardRole(identity: Identity | null): DashboardRole {
-  if (canAny(identity, ADMIN_PERMISSIONS)) {
-    return 'admin'
+function capabilitiesOf(identity: Identity | null): DashboardCapabilities {
+  return {
+    canTakeOffer: can(identity, 'ticket.take_offer'),
+    isTechnician: Boolean(identity?.technicianId),
+    isSupervisor:
+      can(identity, 'ticket.take_offer') ||
+      can(identity, 'ticket.assign_technician'),
+    isAdmin: canAny(identity, ADMIN_PERMISSIONS),
+    canViewMetrics: can(identity, 'metrics.view'),
   }
-  if (can(identity, 'ticket.start') || can(identity, 'ticket.attend')) {
-    return 'technician'
-  }
-  if (
-    can(identity, 'ticket.take_offer') ||
-    can(identity, 'ticket.assign_technician')
-  ) {
-    return 'supervisor'
-  }
-  return 'other'
 }
 
 function QuickActions({ canCreate }: { canCreate: boolean }) {
@@ -59,6 +55,11 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
             <HardHatIcon />
             {t.actions.myWork}
           </Link>
+        </Button>
+      ) : null}
+      {can(identity, 'ticket.take_offer') ? (
+        <Button asChild variant="outline" className="min-h-11">
+          <Link to="/inbox">{t.actions.inbox}</Link>
         </Button>
       ) : null}
       <Button asChild variant="outline" className="min-h-11">
@@ -96,40 +97,27 @@ function DashboardLoading() {
 }
 
 function DashboardBody({
-  identity,
   data,
-  role,
-  showAnalytics,
-  focus,
+  capabilities,
 }: {
-  identity: Identity | null
   data: DashboardData
-  role: DashboardRole
-  showAnalytics: boolean
-  focus: boolean
+  capabilities: DashboardCapabilities
 }) {
   return (
     <>
       <DashboardKpis
-        identity={identity}
+        capabilities={capabilities}
         work={data.work}
         offers={data.offerItems.length}
         totals={data.totals}
         sla={data.sla}
         satisfaction={data.satisfaction}
       />
-      {showAnalytics ? <DashboardCharts volume={data.volume} /> : null}
-      {focus ? (
-        <>
-          <DashboardSections data={data} role={role} />
-          <ActivitySection items={data.activity} />
-        </>
-      ) : (
-        <>
-          <ActivitySection items={data.activity} />
-          <DashboardSections data={data} role={role} />
-        </>
-      )}
+      <DashboardSections data={data} capabilities={capabilities} />
+      <ActivitySection items={data.activity} />
+      {capabilities.canViewMetrics ? (
+        <DashboardCharts volume={data.volume} />
+      ) : null}
     </>
   )
 }
@@ -139,9 +127,7 @@ export function Dashboard() {
   const { identity } = useAuth()
   const data = useDashboardData(identity)
   const queryClient = useQueryClient()
-  const role = dashboardRole(identity)
-  const showAnalytics = can(identity, 'metrics.view')
-  const focus = role === 'technician' || role === 'other'
+  const capabilities = capabilitiesOf(identity)
 
   return (
     <div className="flex flex-col gap-6">
@@ -171,13 +157,7 @@ export function Dashboard() {
       {data.loading ? (
         <DashboardLoading />
       ) : (
-        <DashboardBody
-          identity={identity}
-          data={data}
-          role={role}
-          showAnalytics={showAnalytics}
-          focus={focus}
-        />
+        <DashboardBody data={data} capabilities={capabilities} />
       )}
     </div>
   )

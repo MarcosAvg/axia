@@ -7,6 +7,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- El Panel se reorganiza como bandeja accionable: las cifras se pueden pulsar para abrir su lista,
+  las ofertas y el trabajo propio aparecen antes que la actividad y las métricas, y las bandejas
+  se componen por capacidades para que una persona con varios roles vea todas sus tareas. La
+  actividad reciente usa un tono por tipo de evento y las ofertas se limitan a cinco elementos.
 - En el tema claro, el fondo de la aplicación se tiñe ligeramente y los bordes de las superficies
   ganan contraste. Las tarjetas de métricas y la franja de salud usan el mismo límite visible que
   el resto de tarjetas, sin añadir sombras generales.

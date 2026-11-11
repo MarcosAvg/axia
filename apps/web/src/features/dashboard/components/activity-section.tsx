@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ToneDot } from '@/components/shared/tone'
 import { eventLabels } from '@/features/tickets'
 import { formatDateTime } from '@/lib/format'
+import { toneForId } from '@/lib/tones'
 import type { ActivityItem } from '../api/dashboard-api'
 import { dashboardMessages as t } from '../i18n'
 
@@ -35,7 +37,8 @@ export function ActivitySection({ items }: { items: ActivityItem[] }) {
                     >
                       {item.folio || '—'}
                     </Link>
-                    <span className="text-muted-foreground">
+                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                      <ToneDot tone={toneForId(item.type)} />
                       {eventLabel(item.type)}
                     </span>
                   </div>

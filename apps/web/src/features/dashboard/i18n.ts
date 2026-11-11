@@ -8,12 +8,14 @@ export const dashboardMessages = {
   actions: {
     newTicket: 'Nuevo tiquet',
     myWork: 'Mi trabajo',
+    inbox: 'Bandeja',
     tickets: 'Ver tiquets',
     metrics: 'Métricas',
     admin: 'Administración',
   },
   kpi: {
     myWork: 'Mi trabajo',
+    inbox: 'Bandeja',
     offers: 'Ofertas pendientes',
     active: 'Tiquets activos',
     inProgress: 'En curso',
@@ -50,6 +52,7 @@ export const dashboardMessages = {
     team: 'Tiquets del equipo',
     active: 'Tiquets activos',
     myActive: 'Tus tiquets activos',
+    myWork: 'Mi trabajo',
   },
   viewAll: 'Ver todos',
   empty: {

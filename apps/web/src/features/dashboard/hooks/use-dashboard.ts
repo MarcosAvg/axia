@@ -67,6 +67,7 @@ export interface DashboardData {
   work: WorkSummary
   offerItems: TicketListItem[]
   activeItems: TicketListItem[]
+  myWorkItems: TicketListItem[]
   totals: {
     active: number
     paused: number
@@ -121,6 +122,7 @@ export function useDashboardData(identity: Identity | null): DashboardData {
     isError: queries.some((query) => query.isError),
     work: summarizeWork(myWork.data ?? []),
     offerItems: offers.data ?? [],
+    myWorkItems: or(myWork.data, []).slice(0, PREVIEW),
     activeItems: pageItems(active.data).slice(0, PREVIEW),
     totals: {
       active: pageTotal(active.data),
