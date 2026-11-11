@@ -13,7 +13,11 @@ import type { DbExecutor } from './db.js'
 import { findHandledEvent, writeEvent } from './events.js'
 import { actionTimestamp } from './flow-state.js'
 import { assertTechnicianAction } from './proxy.js'
-import { requirePauseDescendant, requirePauseRoot } from './reasons.js'
+import {
+  requireAdvanceTarget,
+  requireExitTarget,
+  requirePauseRoot,
+} from './reasons.js'
 import { findVisibleTicket } from './repository.js'
 
 type PauseInput = {
@@ -27,12 +31,13 @@ type PauseInput = {
 
 type PauseRow = {
   id: string
+  reason_id: string
   root_reason_id: string
 }
 
 async function openPause(tx: DbExecutor, ticketId: string): Promise<PauseRow> {
   const result = await tx.execute(sql`
-    select id, root_reason_id
+    select id, reason_id, root_reason_id
     from public.ticket_pauses
     where ticket_id = ${ticketId} and closed_at is null
     order by opened_at desc
@@ -153,7 +158,7 @@ async function advanceInTransaction(
     throw conflict('El tiquet no está pausado')
   }
   const pause = await openPause(tx, input.ticketId)
-  await requirePauseDescendant(tx, pause.root_reason_id, input.reasonId)
+  await requireAdvanceTarget(tx, pause.reason_id, input.reasonId)
   await tx.execute(sql`
     update public.ticket_pause_steps
     set exited_at = ${actionTimestamp()}
@@ -232,7 +237,7 @@ async function resumeInTransaction(
     throw conflict('El tiquet no está pausado')
   }
   const pause = await openPause(tx, input.ticketId)
-  await requirePauseDescendant(tx, pause.root_reason_id, input.reasonId)
+  await requireExitTarget(tx, pause.reason_id, input.reasonId)
   await tx.execute(sql`
     update public.ticket_pause_steps
     set exited_at = ${actionTimestamp()}

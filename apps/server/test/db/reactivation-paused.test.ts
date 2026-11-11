@@ -61,8 +61,7 @@ async function openPauses(ticketId: string) {
   }>
 }
 
-it('reabre la pausa al reactivar un tiquet pausado', async () => {
-  const ticketId = await pausedTicket()
+async function reactivatePausedTicket(ticketId: string): Promise<void> {
   const cancelled = await action(
     context,
     context.cookies.supervisor,
@@ -111,14 +110,22 @@ it('reabre la pausa al reactivar un tiquet pausado', async () => {
       and stage = 'technician' and ended_at is null
   `)
   expect((assignment.rows[0] as { count: number }).count).toBe(1)
+}
 
-  const child = await context.db.execute(sql`
-    select id from public.reasons
-    where parent_id = ${refs.pauseReasonId} order by name limit 1
-  `)
+it('reabre la pausa al reactivar un tiquet pausado', async () => {
+  const ticketId = await pausedTicket()
+  await reactivatePausedTicket(ticketId)
+
+  const advanced = await action(context, context.cookies.technician, ticketId, {
+    action: 'advance_pause',
+    reasonId: refs.pauseStepId,
+    clientRequestId: randomUUID(),
+  })
+  expect(advanced.statusCode).toBe(200)
+
   const resumed = await action(context, context.cookies.technician, ticketId, {
     action: 'resume',
-    reasonId: (child.rows[0] as { id: string }).id,
+    reasonId: refs.pauseExitId,
     clientRequestId: randomUUID(),
   })
   expect(resumed.statusCode).toBe(200)

@@ -15,7 +15,7 @@ import {
   closeTicketHttpApp,
   type TicketHttpContext,
 } from './tickets-http-helpers.js'
-import { childReasonId, lastEventId } from './time-links-helpers.js'
+import { lastEventId } from './time-links-helpers.js'
 import { loadWriteRefs, type WriteRefs } from './tickets-write-helpers.js'
 
 let context: TicketHttpContext
@@ -85,7 +85,7 @@ it('enlaza la pausa y sus pasos con sus eventos', async () => {
   const openedSteps = await steps(pause.id)
   expect(String(openedSteps[0]?.entered_event_id)).toBe(pausedEvent)
 
-  const childId = await childReasonId(context, refs.pauseReasonId)
+  const childId = refs.pauseStepId
   const advanced = await action(context, context.cookies.technician, ticketId, {
     action: 'advance_pause',
     reasonId: childId,
@@ -100,7 +100,7 @@ it('enlaza la pausa y sus pasos con sus eventos', async () => {
 
   const resumed = await action(context, context.cookies.technician, ticketId, {
     action: 'resume',
-    reasonId: childId,
+    reasonId: refs.pauseExitId,
     clientRequestId: randomUUID(),
   })
   expect(resumed.statusCode).toBe(200)

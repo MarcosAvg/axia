@@ -96,16 +96,6 @@ async function openPauseRow(ticketId: string): Promise<{
   return { id: row.id, openedAt: timestamp(row.opened_at) }
 }
 
-async function pauseDescendant(): Promise<string> {
-  const result = await context.db.execute(sql`
-    select id from public.reasons
-    where use = 'pause' and parent_id = ${refs.pauseReasonId}
-    order by name
-    limit 1
-  `)
-  return (result.rows[0] as { id: string }).id
-}
-
 async function expectStepTimes(pauseId: string, expected: string) {
   const result = await context.db.execute(sql`
     select entered_at, exited_at from public.ticket_pause_steps
@@ -139,7 +129,7 @@ it('escribe la pausa y sus pasos con la hora manual de la acción', async () => 
   await expectStepTimes(pause.id, expected)
   expect(await eventTime(context, ticketId, 'paused')).toBe(expected)
 
-  const descendantId = await pauseDescendant()
+  const descendantId = refs.pauseStepId
   const advanced = await manualAction(
     ticketId,
     { action: 'advance_pause', reasonId: descendantId },
@@ -150,7 +140,7 @@ it('escribe la pausa y sus pasos con la hora manual de la acción', async () => 
 
   const resumed = await manualAction(
     ticketId,
-    { action: 'resume', reasonId: descendantId },
+    { action: 'resume', reasonId: refs.pauseExitId },
     wallClock,
   )
   expect(resumed.statusCode).toBe(200)

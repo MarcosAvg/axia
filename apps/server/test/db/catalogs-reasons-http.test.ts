@@ -95,6 +95,38 @@ describe('administración de motivos', () => {
   })
 })
 
+describe('tipo de subestado de pausa', () => {
+  it('distingue avance y salida y protege una salida con siguientes', async () => {
+    const root = await create('Raíz con tipos')
+    const progress = await create('Avance con tipos', { parent_id: root })
+    const exit = await create('Salida con tipos', {
+      parent_id: root,
+      pause_step_kind: 'exit',
+    })
+    const read = await context.app.inject({
+      method: 'GET',
+      url: '/api/catalogs/reasons?use=pause',
+      headers: authHeaders(context.cookies.admin),
+    })
+    expect(read.json()).toMatchObject({
+      items: expect.arrayContaining([
+        expect.objectContaining({
+          id: progress,
+          pauseStepKind: 'progress',
+        }),
+        expect.objectContaining({ id: exit, pauseStepKind: 'exit' }),
+      ]),
+    })
+    await context.db.execute(sql`
+      insert into public.pause_transitions (from_reason_id, to_reason_id)
+      values (${progress}, ${exit})
+    `)
+    expect(
+      (await update(progress, { pause_step_kind: 'exit' })).statusCode,
+    ).toBe(400)
+  })
+})
+
 describe('integridad del árbol de motivos', () => {
   it('rechaza padre inexistente, padre de otro uso y ciclos', async () => {
     const root = await create('Raíz para ciclos')

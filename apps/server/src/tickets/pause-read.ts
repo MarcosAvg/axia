@@ -16,6 +16,11 @@ export type PauseStepItem = {
   closedReasonName: string | null
 }
 
+type PauseOptionItem = {
+  id: string
+  name: string
+}
+
 export type PauseStateItem = {
   pauseId: string
   motiveId: string
@@ -23,6 +28,8 @@ export type PauseStateItem = {
   currentId: string
   currentName: string
   openedAt: string
+  advanceOptions: PauseOptionItem[]
+  exitOptions: PauseOptionItem[]
 }
 
 type StepRow = {
@@ -43,6 +50,12 @@ type StateRow = {
   current_id: string
   current_name: string
   opened_at: Date | string
+}
+
+type OptionRow = {
+  id: string
+  name: string
+  pause_step_kind: 'progress' | 'exit'
 }
 
 export async function getPauseSteps(
@@ -99,6 +112,22 @@ export async function getPauseState(
   `)
   const row = result.rows[0] as StateRow | undefined
   if (!row) return null
+  const options = await db.execute(sql`
+    select target.id, target.name, target.pause_step_kind
+    from public.pause_transitions t
+    join public.reasons target on target.id = t.to_reason_id
+    where t.from_reason_id = ${row.current_id}
+      and target.active
+      and target.use = 'pause'
+      and target.pause_step_kind in ('progress', 'exit')
+    order by target.pause_step_kind, target.position,
+      public.natural_sort_key(target.name)
+  `)
+  const optionRows = options.rows as OptionRow[]
+  const toOption = (option: OptionRow) => ({
+    id: option.id,
+    name: option.name,
+  })
   return {
     pauseId: row.pause_id,
     motiveId: row.motive_id,
@@ -106,5 +135,11 @@ export async function getPauseState(
     currentId: row.current_id,
     currentName: row.current_name,
     openedAt: iso(row.opened_at),
+    advanceOptions: optionRows
+      .filter((option) => option.pause_step_kind === 'progress')
+      .map(toOption),
+    exitOptions: optionRows
+      .filter((option) => option.pause_step_kind === 'exit')
+      .map(toOption),
   }
 }

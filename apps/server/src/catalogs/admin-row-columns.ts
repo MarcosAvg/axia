@@ -107,6 +107,7 @@ export const READ_COLUMNS: Record<AdminCatalogTable, readonly string[]> = {
     'allows_estimated_date',
     'clock_class',
     'active',
+    'pause_step_kind',
     'updated_at',
     'path',
     'depth',

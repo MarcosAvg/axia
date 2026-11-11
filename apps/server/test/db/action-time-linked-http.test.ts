@@ -16,7 +16,7 @@ import {
   closeTicketHttpApp,
   type TicketHttpContext,
 } from './tickets-http-helpers.js'
-import { childReasonId, reasonId } from './time-links-helpers.js'
+import { reasonId } from './time-links-helpers.js'
 import { loadWriteRefs, type WriteRefs } from './tickets-write-helpers.js'
 
 let context: TicketHttpContext
@@ -71,8 +71,7 @@ async function startedTicket(): Promise<string> {
   return ticketId
 }
 
-it('mueve la pausa, sus pasos y la reanudación con sus eventos', async () => {
-  const ticketId = await startedTicket()
+async function pauseAndAdjust(ticketId: string): Promise<string> {
   const paused = await action(context, context.cookies.technician, ticketId, {
     action: 'pause',
     reasonId: refs.pauseReasonId,
@@ -100,11 +99,23 @@ it('mueve la pausa, sus pasos y la reanudación con sus eventos', async () => {
   expect(iso((step.rows[0] as { entered_at: Date | string }).entered_at)).toBe(
     pausedAt,
   )
+  return pauseRow.id
+}
 
-  const childId = await childReasonId(context, refs.pauseReasonId)
+async function resumeAndAdjust(
+  ticketId: string,
+  pauseId: string,
+): Promise<void> {
+  const advanced = await action(context, context.cookies.technician, ticketId, {
+    action: 'advance_pause',
+    reasonId: refs.pauseStepId,
+    clientRequestId: randomUUID(),
+  })
+  expect(advanced.statusCode).toBe(200)
+
   const resumed = await action(context, context.cookies.technician, ticketId, {
     action: 'resume',
-    reasonId: childId,
+    reasonId: refs.pauseExitId,
     clientRequestId: randomUUID(),
   })
   expect(resumed.statusCode).toBe(200)
@@ -115,18 +126,26 @@ it('mueve la pausa, sus pasos y la reanudación con sus eventos', async () => {
   })
 
   const closed = await context.db.execute(sql`
-    select closed_at from public.ticket_pauses where id = ${pauseRow.id}
+    select closed_at from public.ticket_pauses where id = ${pauseId}
   `)
   expect(iso((closed.rows[0] as { closed_at: Date | string }).closed_at)).toBe(
     resumedAt,
   )
   const exited = await context.db.execute(sql`
     select exited_at from public.ticket_pause_steps
-    where pause_id = ${pauseRow.id} and exited_at is not null
+    where pause_id = ${pauseId} and exited_at is not null
+    order by entered_at desc
+    limit 1
   `)
   expect(iso((exited.rows[0] as { exited_at: Date | string }).exited_at)).toBe(
     resumedAt,
   )
+}
+
+it('mueve la pausa, sus pasos y la reanudación con sus eventos', async () => {
+  const ticketId = await startedTicket()
+  const pauseId = await pauseAndAdjust(ticketId)
+  await resumeAndAdjust(ticketId, pauseId)
 })
 
 it('mueve la oferta y la asignación de supervisor al ajustar la toma', async () => {

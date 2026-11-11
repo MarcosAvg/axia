@@ -37,7 +37,7 @@ async function expectReferenceCounts() {
   ).toBe(28)
   expect(
     await scalar('select count(*)::text as value from public.reasons'),
-  ).toBe(91)
+  ).toBe(151)
   expect(
     await scalar('select count(*)::text as value from public.escalation_rules'),
   ).toBe(5)
@@ -108,7 +108,7 @@ describe('reference seed catalogs', () => {
       await scalar(
         "select count(*)::text as value from public.reasons where use = 'pause' and parent_id is not null",
       ),
-    ).toBe(39)
+    ).toBe(93)
   })
 })
 
