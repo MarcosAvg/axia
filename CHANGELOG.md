@@ -8,8 +8,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 ### Cambiado
 
 - La pestaña Calidad se organiza en salud de calidad, dónde falla y motivos y salidas. El mapa de
-  calor y el riesgo de retrabajo comparten dimensión y el riesgo permite elegir reapertura,
-  recaptura o reasignación. Se evita repetir el tiempo de duplicados, se añade la tasa de
+  calor y el riesgo de retrabajo comparten dimensión; el riesgo permite elegir reapertura,
+  recaptura o reasignación y se muestra como comparación de cada agrupación contra el promedio
+  global. Se evita repetir el tiempo de duplicados, se añade la tasa de
   duplicados y los tiempos sin variante laboral se identifican como continuos.
 - La pestaña Tiempos se organiza en ciclo, dimensiones y personas. El selector de agregación se
   mueve a la cabecera, el mapa de calor incluye fuera de atención y reclamación, y el reloj

@@ -169,7 +169,10 @@ export const metricsMessages = {
     risk: 'Riesgo de retrabajo',
     riskMeasure: 'Señal de riesgo',
     riskHint:
-      'Cada punto es una agrupación: tiquets frente a la señal elegida. Más a la derecha, más volumen; más arriba, más riesgo; el tamaño indica el tiempo activo en el reloj seleccionado.',
+      'Cada fila compara la agrupación con el promedio global de la señal elegida. La línea muestra la brecha; los tiquets y el tiempo activo acompañan la lectura.',
+    aboveAverage: 'Por encima del promedio',
+    belowAverage: 'Por debajo del promedio',
+    average: 'Promedio',
     firstFix: 'Primera resolución',
   },
   team: {

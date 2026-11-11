@@ -1,13 +1,8 @@
-import type { ReactNode } from 'react'
-import { Scatter, ScatterChart, XAxis, YAxis, ZAxis } from 'recharts'
-import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
-import { DataTable } from '@/components/shared/data-table'
-import type { DataTableColumn } from '@/components/shared/data-table'
 import type { Dimension, DimensionGroup } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
 import type { RiskMeasure } from '../domain/quality'
-import { activeMinutesInMode, riskRate } from '../domain/quality'
-import { formatMinutes } from '../domain/metrics'
+import { activeMinutesInMode, riskAverage, riskRate } from '../domain/quality'
+import { formatMinutes, formatPercent } from '../domain/metrics'
 import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
@@ -22,154 +17,13 @@ const RISK_LABELS: Record<RiskMeasure, string> = {
 
 const RISK_MEASURES = Object.keys(RISK_LABELS) as RiskMeasure[]
 
-interface RiskPoint {
+interface RiskRow {
   id: string
   name: string
   tickets: number
   rate: number
-  measureLabel: string
   active: number
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function isRiskPoint(value: unknown): value is RiskPoint {
-  if (!isRecord(value)) return false
-  return (
-    typeof value.name === 'string' &&
-    typeof value.tickets === 'number' &&
-    typeof value.rate === 'number' &&
-    typeof value.measureLabel === 'string' &&
-    typeof value.active === 'number'
-  )
-}
-
-function MetricRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-foreground tabular-nums">{value}</dd>
-    </div>
-  )
-}
-
-/** Tooltip con el nombre completo de la agrupación y sus valores legibles. */
-export function RiskTooltip({
-  active,
-  payload,
-}: {
-  active?: boolean
-  payload?: ReadonlyArray<{ payload?: unknown }>
-}) {
-  const point = payload?.[0]?.payload
-  if (!active || !isRiskPoint(point)) {
-    return null
-  }
-  return (
-    <div className="grid min-w-40 gap-1.5 rounded-lg border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground">
-      <p className="font-medium">{point.name}</p>
-      <dl className="grid gap-1">
-        <MetricRow
-          label={metricsMessages.table.tickets}
-          value={point.tickets}
-        />
-        <MetricRow label={point.measureLabel} value={`${point.rate}%`} />
-        <MetricRow
-          label={metricsMessages.times.phases.active}
-          value={formatMinutes(point.active)}
-        />
-      </dl>
-    </div>
-  )
-}
-
-function RiskChart({
-  points,
-  measureLabel,
-}: {
-  points: RiskPoint[]
-  measureLabel: string
-}) {
-  const config = {
-    tickets: {
-      label: metricsMessages.table.tickets,
-      color: 'var(--chart-1)',
-    },
-    rate: { label: measureLabel, color: 'var(--chart-5)' },
-    active: {
-      label: metricsMessages.times.phases.active,
-      color: 'var(--chart-1)',
-    },
-  }
-  return (
-    <ChartContainer config={config} className="aspect-auto h-64">
-      <ScatterChart margin={{ left: 4, right: 12, top: 8, bottom: 8 }}>
-        <XAxis
-          type="number"
-          dataKey="tickets"
-          name={metricsMessages.table.tickets}
-          allowDecimals={false}
-          tickLine={false}
-          axisLine={false}
-          fontSize={11}
-        />
-        <YAxis
-          type="number"
-          dataKey="rate"
-          name={measureLabel}
-          width={40}
-          tickLine={false}
-          axisLine={false}
-          fontSize={11}
-          tickFormatter={(value: number) => `${value}%`}
-        />
-        <ZAxis
-          type="number"
-          dataKey="active"
-          name={metricsMessages.times.phases.active}
-          range={[60, 280]}
-        />
-        <ChartTooltip content={<RiskTooltip />} />
-        <Scatter
-          data={points}
-          fill="var(--chart-5)"
-          isAnimationActive={false}
-        />
-      </ScatterChart>
-    </ChartContainer>
-  )
-}
-
-function riskColumns(measureLabel: string): DataTableColumn<RiskPoint>[] {
-  return [
-    {
-      id: 'name',
-      header: metricsMessages.table.name,
-      cell: (row) => row.name,
-      className: 'max-w-40 truncate',
-    },
-    {
-      id: 'tickets',
-      header: metricsMessages.table.tickets,
-      align: 'right',
-      cell: (row) => row.tickets,
-    },
-    {
-      id: 'rate',
-      header: measureLabel,
-      align: 'right',
-      cell: (row) => `${row.rate}%`,
-    },
-    {
-      id: 'active',
-      header: metricsMessages.times.phases.active,
-      align: 'right',
-      hideBelow: 'lg',
-      cell: (row) => formatMinutes(row.active),
-    },
-  ]
+  gap: number
 }
 
 function RiskMeasurePicker({
@@ -198,7 +52,86 @@ function RiskMeasurePicker({
   )
 }
 
-/** Tiquets contra la señal de riesgo elegida, con el detalle de cada grupo. */
+function rowColor(gap: number) {
+  if (gap > 0.0001) return 'var(--destructive)'
+  if (gap < -0.0001) return 'var(--success)'
+  return 'var(--muted-foreground)'
+}
+
+function DumbbellRow({
+  row,
+  average,
+  scaleMax,
+}: {
+  row: RiskRow
+  average: number
+  scaleMax: number
+}) {
+  const ratePosition = (row.rate / scaleMax) * 100
+  const averagePosition = (average / scaleMax) * 100
+  const start = Math.min(ratePosition, averagePosition)
+  const width = Math.abs(ratePosition - averagePosition)
+  const color = rowColor(row.gap)
+  const gapPoints = Math.round(row.gap * 100)
+  const gapLabel = `${gapPoints > 0 ? '+' : ''}${gapPoints} pts`
+  return (
+    <li
+      data-risk-row
+      className="grid grid-cols-[minmax(6rem,0.9fr)_minmax(6rem,1.4fr)_auto] items-center gap-x-3 gap-y-1"
+    >
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">{row.name}</p>
+        <p className="text-[11px] text-muted-foreground">
+          {row.tickets} tiquets · {formatMinutes(row.active)}
+        </p>
+      </div>
+      <div className="relative h-6" aria-hidden>
+        <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-border" />
+        <span
+          className="absolute top-1/2 h-0.5 -translate-y-1/2 rounded-full"
+          style={{
+            left: `${start}%`,
+            width: `${width}%`,
+            background: color,
+          }}
+        />
+        <span
+          className="absolute top-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-muted-foreground/70"
+          style={{ left: `${averagePosition}%` }}
+        />
+        <span
+          className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-background"
+          style={{ left: `${ratePosition}%`, background: color }}
+        />
+      </div>
+      <div className="flex min-w-16 flex-col items-end tabular-nums">
+        <span className="text-sm font-semibold">{formatPercent(row.rate)}</span>
+        <span className="text-[11px] text-muted-foreground">{gapLabel}</span>
+      </div>
+    </li>
+  )
+}
+
+function DumbbellLegend({ average }: { average: number }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <span className="inline-flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-destructive" aria-hidden />
+        {t.aboveAverage}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="size-2 rounded-full bg-success" aria-hidden />
+        {t.belowAverage}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="h-3 w-px bg-muted-foreground/70" aria-hidden />
+        {t.average} {formatPercent(average)}
+      </span>
+    </div>
+  )
+}
+
+/** Riesgo de retrabajo por agrupación, comparado con el promedio global. */
 export function RiskScatter({
   groups,
   dimension,
@@ -212,36 +145,46 @@ export function RiskScatter({
   mode: TimeMode
   onMeasureChange: (measure: RiskMeasure) => void
 }) {
-  const measureLabel = RISK_LABELS[measure]
-  const rows = rowsByDimension(groups, dimension).slice(0, 10)
-  const points: RiskPoint[] = rows.map((row) => ({
-    id: row.id,
-    name: row.name || 'Sin dato',
-    tickets: row.tickets,
-    rate: Math.round(riskRate(row, measure) * 100),
-    measureLabel,
-    active: activeMinutesInMode(row, mode),
-  }))
+  const allRows = rowsByDimension(groups, dimension)
+  const average = riskAverage(allRows, measure)
+  const rows: RiskRow[] = allRows
+    .map((row) => {
+      const rate = riskRate(row, measure)
+      return {
+        id: row.id,
+        name: row.name || 'Sin dato',
+        tickets: row.tickets,
+        rate,
+        active: activeMinutesInMode(row, mode),
+        gap: rate - average,
+      }
+    })
+    .sort((left, right) => right.rate - left.rate)
+    .slice(0, 10)
+  const scaleMax = Math.max(0.05, average, ...rows.map((row) => row.rate)) * 1.1
   return (
     <ChartCard title={t.risk} hint={t.riskHint}>
       <div className="flex flex-col gap-3">
         <div className="flex justify-end">
           <RiskMeasurePicker measure={measure} onChange={onMeasureChange} />
         </div>
-        {points.length === 0 ? (
+        {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {metricsMessages.empty}
           </p>
         ) : (
           <>
-            <RiskChart points={points} measureLabel={measureLabel} />
-            <div className="max-h-56 overflow-auto">
-              <DataTable
-                columns={riskColumns(measureLabel)}
-                rows={points}
-                getRowId={(row) => row.id}
-              />
-            </div>
+            <DumbbellLegend average={average} />
+            <ul className="flex flex-col gap-3">
+              {rows.map((row) => (
+                <DumbbellRow
+                  key={row.id}
+                  row={row}
+                  average={average}
+                  scaleMax={scaleMax}
+                />
+              ))}
+            </ul>
           </>
         )}
       </div>

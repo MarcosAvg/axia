@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { DimensionGroup, DimensionRow } from '../domain/dimensions'
-import { RiskScatter, RiskTooltip } from './risk-scatter'
+import { RiskScatter } from './risk-scatter'
 
 function row(
   id: string,
@@ -9,7 +9,20 @@ function row(
   tickets: number,
   reopenRate: number,
 ): DimensionRow {
-  return { id, name, tickets, reopenRate, avgActive: 30 } as DimensionRow
+  return {
+    id,
+    name,
+    tickets,
+    reopenRate,
+    recaptureRate: 0,
+    reassignmentRate: 0,
+    reopened: Math.round(tickets * reopenRate),
+    closedOrReopened: tickets,
+    recaptured: 0,
+    reassigned: 0,
+    avgActive: 30,
+    avgActiveLabor: 20,
+  } as unknown as DimensionRow
 }
 
 function groups(): DimensionGroup[] {
@@ -20,8 +33,8 @@ function groups(): DimensionGroup[] {
 }
 
 describe('RiskScatter', () => {
-  it('identifica cada punto con el nombre de su categoría', () => {
-    render(
+  it('muestra una fila por agrupación con su tasa', () => {
+    const { container } = render(
       <TooltipProvider>
         <RiskScatter
           groups={groups()}
@@ -35,37 +48,24 @@ describe('RiskScatter', () => {
 
     expect(screen.getByText('Eléctrico')).toBeInTheDocument()
     expect(screen.getByText('Plomería')).toBeInTheDocument()
+    expect(screen.getByText('25%')).toBeInTheDocument()
+    expect(screen.getByText('50%')).toBeInTheDocument()
+    expect(container.querySelectorAll('[data-risk-row]')).toHaveLength(2)
   })
-})
 
-describe('RiskTooltip', () => {
-  it('muestra el nombre de la categoría y sus valores', () => {
+  it('muestra el promedio global de la señal', () => {
     render(
-      <RiskTooltip
-        active
-        payload={[
-          {
-            payload: {
-              id: 'a',
-              name: 'Eléctrico',
-              tickets: 2,
-              rate: 5,
-              measureLabel: 'Reapertura',
-              active: 125,
-            },
-          },
-        ]}
-      />,
+      <TooltipProvider>
+        <RiskScatter
+          groups={groups()}
+          dimension="category"
+          measure="reopen"
+          mode="calendar"
+          onMeasureChange={() => {}}
+        />
+      </TooltipProvider>,
     )
 
-    expect(screen.getByText('Eléctrico')).toBeInTheDocument()
-    expect(screen.getByText('5%')).toBeInTheDocument()
-    expect(screen.getByText('2 h 5 min')).toBeInTheDocument()
-  })
-
-  it('no muestra nada cuando el punto no está activo', () => {
-    const { container } = render(<RiskTooltip active={false} payload={[]} />)
-
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByText(/Promedio/)).toBeInTheDocument()
   })
 })

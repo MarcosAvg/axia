@@ -9,6 +9,9 @@ export interface DimensionRow {
   name: string
   parentId: string | null
   tickets: number
+  closedOrReopened: number
+  reassigned: number
+  recaptured: number
   open: number
   avgActive: number
   avgActiveLabor: number

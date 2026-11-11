@@ -93,7 +93,9 @@ test('calidad agrupa salud, diagnóstico y motivos de salida', async ({
   ).toBeVisible()
 })
 
-test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
+test('el riesgo de retrabajo compara cada categoría con el promedio', async ({
+  page,
+}) => {
   await signIn(page, 'demo.admin')
   await page
     .getByRole('navigation', { name: 'Navegación principal' })
@@ -108,18 +110,16 @@ test('la gráfica de riesgo identifica cada categoría', async ({ page }) => {
     risk.getByRole('heading', { name: 'Riesgo de retrabajo' }),
   ).toBeVisible()
   await expect(risk.getByText('Eléctrico', { exact: true })).toBeVisible()
+  await expect(risk.getByText(/Promedio/).first()).toBeVisible()
 
-  await risk.scrollIntoViewIfNeeded()
-  const symbol = risk.locator('path.recharts-symbols').last()
-  const name = await symbol.getAttribute('name')
-  const box = await symbol.boundingBox()
-  if (!name || !box) {
-    throw new Error('El punto de la gráfica no tiene nombre o posición.')
-  }
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await expect(
-    risk.locator('.recharts-tooltip-wrapper').getByText(name, { exact: true }),
-  ).toBeVisible()
+  const rows = risk.locator('[data-risk-row]')
+  await expect(rows).not.toHaveCount(0)
+  await expect(rows.first()).toContainText('%')
+
+  await risk
+    .getByRole('combobox', { name: 'Señal de riesgo' })
+    .selectOption({ label: 'Recaptura' })
+  await expect(risk.getByText(/Promedio/).first()).toBeVisible()
 })
 
 test('la pestaña de tiempos agrupa ciclo, dimensiones y personas', async ({

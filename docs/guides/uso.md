@@ -105,8 +105,9 @@ Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempo
 fases, los percentiles, las dimensiones y las personas, **Calidad** con salud de calidad,
 diagnóstico por dimensión y motivos de salida (pausas, duplicados y rechazos o cancelaciones), y
 **Equipo** con equipos, supervisores, técnicos y apoyo auxiliar. En Calidad, el riesgo de retrabajo
-comparte la dimensión con el mapa de calor y permite elegir la señal (reapertura, recaptura o
-reasignación); el tiempo de pausas y duplicados se identifica como continuo.
+comparte la dimensión con el mapa de calor, permite elegir la señal (reapertura, recaptura o
+reasignación) y compara cada agrupación con el promedio global; el tiempo de pausas y duplicados
+se identifica como continuo.
 En **Tiempos**, el selector **Promedio / Acumulado** está en la cabecera y afecta a las tablas de la
 pestaña; el reloj **Continuo / Laboral / Extra** de la barra superior se aplica también a técnicos,
 solicitantes y dimensiones. Los percentiles se muestran siempre en reloj continuo y así se indica.
