@@ -12,7 +12,7 @@ export function ChartCard({
   children: ReactNode
 }) {
   return (
-    <section data-slot="card" className="rounded-xl bg-card p-4 sm:p-5">
+    <section data-slot="card" className="rounded-xl border bg-card p-4 sm:p-5">
       <header className="mb-4">
         <h2 className="text-base font-medium tracking-tight text-foreground">
           <HintLabel label={title} hint={hint} />

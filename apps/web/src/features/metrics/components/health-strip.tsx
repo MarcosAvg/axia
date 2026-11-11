@@ -178,7 +178,7 @@ export function HealthStrip({
   return (
     <section
       aria-label={metricsMessages.health}
-      className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-xl bg-card p-4 sm:p-5 lg:grid-cols-4"
+      className="grid grid-cols-2 gap-x-6 gap-y-5 rounded-xl border bg-card p-4 sm:p-5 lg:grid-cols-4"
     >
       {stats.map((stat, index) => (
         <StatItem

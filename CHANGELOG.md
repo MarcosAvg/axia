@@ -7,6 +7,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- En el tema claro, el fondo de la aplicación se tiñe ligeramente y los bordes de las superficies
+  ganan contraste. Las tarjetas de métricas y la franja de salud usan el mismo límite visible que
+  el resto de tarjetas, sin añadir sombras generales.
 - La pestaña Equipo conserva los tiempos y los alinea con el reloj activo en la participación de
   técnicos y el apoyo auxiliar. Los supervisores muestran tasa de toma, tasa de pendientes y
   retiradas, y el tiempo hasta la toma se identifica como continuo. Se añade un ranking de

@@ -83,7 +83,7 @@ export function BentoGrid({ items }: { items: BentoItem[] }) {
   return (
     <div
       ref={containerRef}
-      className="grid grid-cols-1 gap-4 [&>div>section]:border [&>div>section]:border-border md:grid-cols-6 xl:grid-cols-12"
+      className="grid grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12"
       style={{
         gridAutoRows: `${BENTO_ROW_HEIGHT}px`,
         gridAutoFlow: 'dense',
