@@ -119,6 +119,15 @@ test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
 
   await page.goto('/admin/catalogos?catalog=reasons')
   const reasons = page.getByRole('table')
+  const flowTitle = page.getByText('Flujo de pausa')
+  await expect(flowTitle).toBeVisible()
+  const catalogNav = page.getByRole('navigation', { name: 'Catálogos' })
+  const navBox = await catalogNav.boundingBox()
+  const flowBox = await flowTitle.boundingBox()
+  expect(navBox && flowBox).toBeTruthy()
+  if (navBox && flowBox) {
+    expect(flowBox.x).toBeGreaterThanOrEqual(navBox.x + navBox.width)
+  }
   const search = page.getByRole('textbox', { name: 'Buscar…', exact: true })
   await search.fill('En cotización')
   await expect(reasons.getByText('En cotización')).toBeVisible()

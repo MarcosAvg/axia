@@ -78,9 +78,11 @@ function CatalogsPage() {
             )
           })}
         </nav>
-        <CatalogManager config={config} />
-        {config.key === 'reasons' ? <PauseFlowEditor /> : null}
-      </div>
+        <div className="flex min-w-0 flex-col gap-6">
+          <CatalogManager config={config} />
+          {config.key === 'reasons' ? <PauseFlowEditor /> : null}
+        </div>
+      </div>{' '}
     </div>
   )
 }
