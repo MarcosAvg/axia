@@ -69,9 +69,16 @@ export function finalAt(context: TicketContext) {
 }
 
 export function reassignedAt(context: TicketContext, afterHours: number) {
-  const candidate = atHours(context.times.assigned, afterHours)
+  const candidate = atHours(context.times.reportedAt, afterHours)
   const beforeStart = new Date(context.times.started.getTime() - 5 * 60 * 1000)
   return candidate < beforeStart ? candidate : beforeStart
+}
+
+export function activeTechnicianId(context: TicketContext) {
+  const reassigned = context.ticket.reassignment
+  return reassigned
+    ? context.people.technicians[reassigned.technician]
+    : context.ids.technicianId
 }
 
 export type TicketSeedInput = {

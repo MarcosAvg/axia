@@ -5,16 +5,32 @@ import type { DemoTicket } from './data.js'
 export async function insertDemoOffers(
   client: Client,
   ticketId: string,
-  timing: { created: Date; taken: Date; stage: number; supervisorId?: string },
+  timing: {
+    created: Date
+    taken: Date
+    stage: number
+    supervisorId?: string
+    terminalAt?: Date
+    cycle?: number
+  },
 ) {
   await client.query(
     `insert into public.ticket_offers (
        ticket_id, cycle, supervisor_user_id, status, offered_at, resolved_at
-     ) select t.id, t.cycle, ss.user_id,
-         case when $4 = 0 then 'offered'::public.offer_status
+     ) select t.id, $7::int, ss.user_id,
+         case
+           when $4 = 0 and $6::timestamptz is not null
+             then 'withdrawn'::public.offer_status
+           when $4 = 0 then 'offered'::public.offer_status
            when ss.user_id = $5::uuid then 'taken'::public.offer_status
-           else 'withdrawn'::public.offer_status end,
-         $2, case when $4 = 0 then null else $3::timestamptz end
+           else 'withdrawn'::public.offer_status
+         end,
+         $2,
+         case
+           when $4 = 0 and $6::timestamptz is not null then $6
+           when $4 = 0 then null
+           else $3::timestamptz
+         end
        from public.tickets t
        join public.supervisor_scopes ss on ss.team_id = t.team_id and ss.active
        join public.supervisor_scope_buildings sb
@@ -27,6 +43,8 @@ export async function insertDemoOffers(
       timing.taken,
       timing.stage,
       timing.supervisorId ?? null,
+      timing.terminalAt ?? null,
+      timing.cycle ?? 1,
     ],
   )
 }

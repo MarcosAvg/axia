@@ -1,5 +1,7 @@
 import {
+  activeTechnicianId,
   atHours,
+  reassignedAt,
   type DemoEvent,
   type EventDraft,
   type TicketContext,
@@ -35,6 +37,7 @@ function pushRoutingEvents(context: TicketContext, push: Push) {
       type: 'reassigned_supervisor',
       at: atHours(times.taken, ticket.supervisorReassignment.afterHours),
       actorId: supervisor,
+      subjectUserId: supervisor,
       reasonId: reasons.id(
         'supervisor_reassignment',
         ticket.supervisorReassignment.reason,
@@ -71,7 +74,7 @@ function pushReworkEvents(context: TicketContext, push: Push) {
     const technicianId = people.technicians[ticket.reassignment.technician]
     push({
       type: 'reassigned_technician',
-      at: atHours(times.assigned, ticket.reassignment.afterHours),
+      at: reassignedAt(context, ticket.reassignment.afterHours),
       actorId: supervisor,
       technicianId,
       reasonId: reasons.id(
@@ -94,7 +97,8 @@ function pushReworkEvents(context: TicketContext, push: Push) {
 }
 
 function pushPauseEvents(context: TicketContext, push: Push) {
-  const { ticket, people, times, ids, reasons } = context
+  const { ticket, people, times, reasons } = context
+  const technicianId = activeTechnicianId(context)
   for (const pause of ticket.pauses ?? []) {
     const substateId = reasons.id('pause', pause.substate, pause.root)
     const exitId =
@@ -105,14 +109,14 @@ function pushPauseEvents(context: TicketContext, push: Push) {
       type: 'paused',
       at: atHours(times.reportedAt, pause.openedAfterHours),
       actorId: people.technicianUserId,
-      technicianId: ids.technicianId,
+      technicianId,
       reasonId: reasons.id('pause', pause.root),
     })
     push({
       type: 'pause_advanced',
       at: atHours(times.reportedAt, pause.advanceAfterHours),
       actorId: people.technicianUserId,
-      technicianId: ids.technicianId,
+      technicianId,
       reasonId: substateId,
     })
     if (pause.closedAfterHours !== undefined) {
@@ -120,7 +124,7 @@ function pushPauseEvents(context: TicketContext, push: Push) {
         type: 'resumed',
         at: atHours(times.reportedAt, pause.closedAfterHours),
         actorId: people.technicianUserId,
-        technicianId: ids.technicianId,
+        technicianId,
         reasonId: exitId,
       })
     }
@@ -128,13 +132,14 @@ function pushPauseEvents(context: TicketContext, push: Push) {
 }
 
 function pushWorkEvents(context: TicketContext, push: Push) {
-  const { people, times, ids, stage } = context
+  const { people, times, stage } = context
+  const technicianId = activeTechnicianId(context)
   if (stage >= 3) {
     push({
       type: 'started',
       at: times.started,
       actorId: people.technicianUserId,
-      technicianId: ids.technicianId,
+      technicianId,
     })
   }
   pushPauseEvents(context, push)
@@ -143,7 +148,7 @@ function pushWorkEvents(context: TicketContext, push: Push) {
       type: 'attended',
       at: times.attended,
       actorId: people.technicianUserId,
-      technicianId: ids.technicianId,
+      technicianId,
       payload: {
         workDescription:
           'Trabajo de demostración concluido; se verificó el funcionamiento.',
@@ -152,13 +157,19 @@ function pushWorkEvents(context: TicketContext, push: Push) {
   }
 }
 
+function claimActor(context: TicketContext) {
+  return context.ticket.requester === 'ana'
+    ? context.people.requesterUserId
+    : context.people.supervisorId
+}
+
 function pushClaimEvents(context: TicketContext, push: Push) {
-  const { ticket, people, times, ids, reasons } = context
+  const { ticket, times, ids, reasons } = context
   if (ticket.status !== 'under_claim' || !times.claimAt) return
   push({
     type: 'claim_opened',
     at: times.claimAt,
-    actorId: people.requesterUserId,
+    actorId: claimActor(context),
     subjectRequesterId: ids.requesterId,
     reasonId: reasons.id('claim', ticket.claimReason ?? 'Trabajo incompleto'),
     payload: { description: ticket.claimDescription ?? 'Reclamación demo' },
@@ -171,11 +182,11 @@ function pushReopenEvents(context: TicketContext, push: Push) {
   const supervisor = people.supervisorId
   const secondTechnician = ticket.reopen.technician
     ? people.technicians[ticket.reopen.technician]
-    : ids.technicianId
+    : activeTechnicianId(context)
   push({
     type: 'claim_opened',
     at: times.reopen.claimAt,
-    actorId: people.requesterUserId,
+    actorId: claimActor(context),
     subjectRequesterId: ids.requesterId,
     reasonId: reasons.id('claim', ticket.reopen.claimReason),
     payload: { description: ticket.reopen.description },

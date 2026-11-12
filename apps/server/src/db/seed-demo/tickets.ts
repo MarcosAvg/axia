@@ -94,6 +94,8 @@ async function insertOffers(context: TicketContext) {
     ...times,
     stage,
     supervisorId: people.supervisorId,
+    terminalAt: DISCARDED.includes(ticket.status) ? times.discardAt : undefined,
+    cycle: 1,
   })
 }
 

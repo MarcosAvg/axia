@@ -17,6 +17,7 @@ async function insertEvidenceEvent(context: TicketContext, event: DemoEvent) {
     subjectTechnicianId: event.technicianId,
     type: event.type === 'started' ? 'before' : 'after',
     at: event.at,
+    cycle: event.cycle ?? 1,
   })
 }
 

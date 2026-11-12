@@ -1,4 +1,5 @@
 import {
+  activeTechnicianId,
   atHours,
   finalAt,
   reassignedAt,
@@ -14,6 +15,28 @@ async function insertSupervisorAssignment(context: TicketContext) {
   )
 }
 
+async function insertSupervisorReassignment(context: TicketContext) {
+  const { client, ticket, people, times, reasons } = context
+  if (!ticket.supervisorReassignment) return
+  const at = atHours(times.taken, ticket.supervisorReassignment.afterHours)
+  const reasonId = reasons.id(
+    'supervisor_reassignment',
+    ticket.supervisorReassignment.reason,
+  )
+  await client.query(
+    `update public.ticket_assignments set ended_at = $2
+     where ticket_id = $1 and stage = 'supervisor' and ended_at is null`,
+    [ticket.id, at],
+  )
+  await client.query(
+    `insert into public.ticket_assignments (
+       ticket_id, cycle, stage, assignee_user_id, assigned_by, assigned_at,
+       reason_id
+     ) values ($1, 1, 'supervisor', $2, $2, $3, $4)`,
+    [ticket.id, people.supervisorId, at, reasonId],
+  )
+}
+
 function reassignment(context: TicketContext) {
   if (!context.ticket.reassignment) return undefined
   return {
@@ -24,11 +47,11 @@ function reassignment(context: TicketContext) {
 }
 
 async function insertReopenedAssignment(context: TicketContext) {
-  const { client, ticket, people, times, ids } = context
+  const { client, ticket, people, times } = context
   if (!ticket.reopen) return
   const secondTechnician = ticket.reopen.technician
     ? people.technicians[ticket.reopen.technician]
-    : ids.technicianId
+    : activeTechnicianId(context)
   await client.query(
     `insert into public.ticket_assignments (
        ticket_id, cycle, stage, assignee_technician_id, assigned_by,
@@ -82,6 +105,7 @@ async function insertTechnicianAssignments(context: TicketContext) {
 export async function insertAssignments(context: TicketContext) {
   if (context.stage < 1) return
   await insertSupervisorAssignment(context)
+  await insertSupervisorReassignment(context)
   if (context.stage >= 2) await insertTechnicianAssignments(context)
 }
 
@@ -129,10 +153,7 @@ async function insertLeaderParticipants(context: TicketContext) {
 async function insertAuxiliaryParticipant(context: TicketContext) {
   const { client, ticket, ids, times } = context
   if (!ticket.auxiliary || !ids.auxiliaryTechnicianId) return
-  const activeLeader =
-    ticket.reassignment &&
-    context.people.technicians[ticket.reassignment.technician]
-  if (ids.auxiliaryTechnicianId === (activeLeader ?? ids.technicianId)) return
+  if (ids.auxiliaryTechnicianId === activeTechnicianId(context)) return
   await client.query(
     `insert into public.ticket_participants (
        ticket_id, cycle, technician_id, participation_type, category_id,
@@ -153,7 +174,7 @@ async function insertReopenedParticipant(context: TicketContext) {
   if (!ticket.reopen) return
   const secondTechnician = ticket.reopen.technician
     ? people.technicians[ticket.reopen.technician]
-    : ids.technicianId
+    : activeTechnicianId(context)
   await client.query(
     `insert into public.ticket_participants (
        ticket_id, cycle, technician_id, participation_type, category_id,

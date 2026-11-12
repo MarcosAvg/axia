@@ -66,7 +66,7 @@ export async function insertPauses(context: TicketContext) {
        returning id`,
       [
         ticket.id,
-        closed ? rootId : substateId,
+        substateId,
         context.people.technicianUserId,
         opened,
         closed,
@@ -97,7 +97,9 @@ export async function insertClaims(context: TicketContext) {
        ) values ($1, 1, $2, $3, $4, $5, 'open', 'attended')`,
       [
         ticket.id,
-        context.people.requesterUserId,
+        ticket.requester === 'ana'
+          ? context.people.requesterUserId
+          : context.people.supervisorId,
         times.claimAt,
         reasons.id('claim', ticket.claimReason ?? 'Trabajo incompleto'),
         ticket.claimDescription ?? 'Reclamación ficticia de la demo',
@@ -114,7 +116,9 @@ export async function insertClaims(context: TicketContext) {
          'upheld', $6, $7, $8)`,
       [
         ticket.id,
-        context.people.requesterUserId,
+        ticket.requester === 'ana'
+          ? context.people.requesterUserId
+          : context.people.supervisorId,
         times.reopen.claimAt,
         reasons.id('claim', ticket.reopen.claimReason),
         ticket.reopen.description,
@@ -166,7 +170,7 @@ export async function insertDuplicateLinks(context: TicketContext) {
       ticket.duplicateCandidateOf,
       0.72 + (context.cycle % 3) * 0.05,
       ['problem', 'location'],
-      at,
+      times.reportedAt,
       decision,
       decision === null ? null : context.people.supervisorId,
       decision === null ? null : at,
