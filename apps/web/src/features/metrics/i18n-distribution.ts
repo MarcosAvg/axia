@@ -9,6 +9,8 @@ export const distributionMessages = {
   sampleOfTotal: 'n / N',
   coverage: 'Cobertura',
   median: 'Mediana',
+  p25: 'P25',
+  p75: 'P75',
   iqr: 'IQR (P25–P75)',
   p90: 'P90',
   p95: 'P95',

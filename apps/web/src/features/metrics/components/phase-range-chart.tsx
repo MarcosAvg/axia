@@ -1,6 +1,11 @@
 import type { TimeMeasure } from '@/lib/time-measure'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { DistributionProfileRow } from '../domain/metrics'
-import { formatMinutes } from '../domain/metrics'
+import { formatMinutes, formatPercent } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 
 const t = metricsMessages.times
@@ -24,6 +29,62 @@ function position(value: number, max: number): string {
   return `${Math.min(100, Math.max(0, (value / max) * 100))}%`
 }
 
+function RangeTooltipContent({ row }: { row: DistributionProfileRow }) {
+  const values = [
+    [t.sample, String(row.n)],
+    [t.p25, formatMinutes(row.p25)],
+    [t.median, formatMinutes(row.median)],
+    [t.p75, formatMinutes(row.p75)],
+    [t.p90, formatMinutes(row.p90)],
+    [t.max, formatMinutes(row.max)],
+    [t.outliers, `${row.outliers} · ${formatPercent(row.outlierRate)}`],
+  ]
+  return (
+    <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5 text-xs">
+      {values.map(([label, value]) => (
+        <div key={label} className="contents">
+          <span className="text-background/70">{label}</span>
+          <span className="text-right tabular-nums">{value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function RangeMarks({
+  row,
+  max,
+}: {
+  row: DistributionProfileRow
+  max: number
+}) {
+  const left = position(row.p25, max)
+  const width = position(row.p75 - row.p25, max)
+  const median = position(row.median, max)
+  const p90 = position(row.p90, max)
+  return (
+    <>
+      <span className="absolute inset-y-1/2 left-0 h-px w-full bg-border" />
+      <span
+        className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-sm bg-chart-1/35"
+        style={{ left, width }}
+      />
+      <span
+        className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chart-1"
+        style={{ left: median }}
+      />
+      <span
+        className="absolute top-1/2 h-px bg-chart-1"
+        style={{ left: median, width: position(row.p90 - row.median, max) }}
+      />
+      <span
+        className="absolute top-1/2 h-2 w-px -translate-x-1/2 -translate-y-1/2 bg-chart-1/60"
+        style={{ left: p90 }}
+      />
+    </>
+  )
+}
+
 function RangeRow({
   row,
   measure,
@@ -33,13 +94,11 @@ function RangeRow({
   measure: TimeMeasure
   max: number
 }) {
-  const left = position(row.p25, max)
-  const width = position(row.p75 - row.p25, max)
-  const median = position(row.median, max)
-  const p90 = position(row.p90, max)
-  const title = `${phaseLabel(row.phase)}: P25 ${formatMinutes(
+  const label = `${phaseLabel(row.phase)}: P25 ${formatMinutes(
     row.p25,
-  )}, mediana ${formatMinutes(row.median)}, P90 ${formatMinutes(row.p90)}`
+  )}, mediana ${formatMinutes(row.median)}, P75 ${formatMinutes(
+    row.p75,
+  )}, P90 ${formatMinutes(row.p90)}`
   return (
     <li className="grid grid-cols-[minmax(6rem,9rem)_1fr_auto] items-center gap-2 text-xs">
       <div className="min-w-0">
@@ -50,25 +109,20 @@ function RangeRow({
           {t.sample} {row.n}
         </span>
       </div>
-      <div className="relative h-5" title={title}>
-        <div className="absolute inset-y-1/2 left-0 h-px w-full bg-border" />
-        <div
-          className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-sm bg-chart-1/35"
-          style={{ left, width }}
-        />
-        <div
-          className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chart-1"
-          style={{ left: median }}
-        />
-        <div
-          className="absolute top-1/2 h-px bg-chart-1"
-          style={{ left: median, width: position(row.p90 - row.median, max) }}
-        />
-        <div
-          className="absolute top-1/2 h-2 w-px -translate-x-1/2 -translate-y-1/2 bg-chart-1/60"
-          style={{ left: p90 }}
-        />
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={label}
+            className="relative h-5 w-full cursor-help rounded-sm border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <RangeMarks row={row} max={max} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <RangeTooltipContent row={row} />
+        </TooltipContent>
+      </Tooltip>
       <span className="font-medium tabular-nums">
         {formatMinutes(valueFor(row, measure))}
       </span>

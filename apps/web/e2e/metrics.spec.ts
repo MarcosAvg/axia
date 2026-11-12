@@ -5,7 +5,17 @@ const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(email)
+  await expect(
+    page.getByRole('heading', { name: 'Inicia sesión' }),
+  ).toBeVisible()
+  // Vite dev hidrata el formulario después del primer render; esperar evita
+  // que el valor escrito se pierda al montar los manejadores de React.
+  await page.waitForTimeout(400)
+  const user = page.getByLabel('Usuario')
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await user.fill(email)
+    if ((await user.inputValue()) === email) break
+  }
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
@@ -227,15 +237,20 @@ test('alterna la medida de tiempos entre promedio, acumulado y mediana', async (
     page.getByRole('heading', { name: 'Perfil de fases' }),
   ).toBeVisible()
   await expect(page.getByText(/Barra: P25–P75/)).toBeVisible()
+  await page
+    .getByRole('button', { name: /Trabajo activo/ })
+    .first()
+    .hover()
+  await expect(page.getByRole('tooltip', { name: /P25/ })).toContainText('P25')
   await expect(
     page.getByRole('heading', { name: 'Distribución y atípicos' }),
   ).toBeVisible()
   await expect(page.getByText('n / N')).toBeVisible()
   await expect(page.locator('[data-active="true"]')).toContainText('Mediana')
   await page.getByRole('button', { name: 'Más información: n / N' }).focus()
-  await expect(page.getByRole('tooltip')).toContainText(
-    'No cambia con la medida',
-  )
+  await expect(
+    page.getByRole('tooltip', { name: /Tiquets que tuvieron la fase/ }),
+  ).toContainText('No cambia con la medida')
 })
 
 test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
