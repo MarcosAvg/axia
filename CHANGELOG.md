@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-12
+
 ### Añadido
 
 - El tablero de Métricas incorpora medidas robustas en **Tiempos**: mediana, P90, P95 y máximo,
