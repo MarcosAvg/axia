@@ -177,7 +177,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   ).toBeVisible()
 
   await expect(page.locator('#metrics-catalog-filters')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click()
   await page
     .getByRole('combobox', { name: 'Edificio' })
     .selectOption({ label: 'Edificio Central' })
@@ -191,7 +191,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
     page.getByRole('button', { name: 'Quitar Edificio Central' }),
   ).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click()
   await page
     .getByRole('combobox', { name: 'Desenlace' })
     .selectOption({ label: 'Cancelados' })
@@ -229,6 +229,12 @@ test('alterna la medida de tiempos entre promedio, acumulado y mediana', async (
   await expect(
     page.getByRole('heading', { name: 'Distribución y atípicos' }),
   ).toBeVisible()
+  await expect(page.getByText('n / N')).toBeVisible()
+  await expect(page.locator('[data-active="true"]')).toContainText('Mediana')
+  await page.getByRole('button', { name: 'Más información: n / N' }).focus()
+  await expect(page.getByRole('tooltip')).toContainText(
+    'No cambia con la medida',
+  )
 })
 
 test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
@@ -296,9 +302,9 @@ test('cambia el periodo desde el popover', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
 
-  await page.getByRole('button', { name: 'Periodo' }).click()
+  await page.getByRole('button', { name: /^Periodo:/ }).click()
   await page.getByRole('button', { name: '7 días' }).click()
-  await expect(page.getByRole('button', { name: 'Periodo' })).toContainText(
+  await expect(page.getByRole('button', { name: /^Periodo:/ })).toContainText(
     '7 días',
   )
 })

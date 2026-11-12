@@ -1,5 +1,6 @@
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
+import { HintIcon } from '@/components/shared/hint'
 import { useTimeMeasure } from '@/components/shared/time-measure-context'
 import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 import { formatMinutes } from '../domain/metrics'
@@ -60,6 +61,7 @@ function phaseColumns(measure: TimeMeasure): DataTableColumn<PhaseRow>[] {
     {
       id: 'value',
       header: valueHeader(measure),
+      hint: metricsMessages.timesHints.phaseValue,
       cell: (row) => formatMinutes(row.value),
     },
   ]
@@ -67,6 +69,7 @@ function phaseColumns(measure: TimeMeasure): DataTableColumn<PhaseRow>[] {
     columns.push({
       id: 'share',
       header: t.share,
+      hint: metricsMessages.timesHints.share,
       hideBelow: 'md',
       cell: (row) => `${Math.round(row.share * 100)}%`,
     })
@@ -91,7 +94,10 @@ export function PhaseTable({
       ? totalInMode(summary.sumNet, summary.sumNetLabor, mode)
       : totalInMode(summary.avgNet, summary.avgNetLabor, mode)
   return (
-    <ChartCard title={t.phaseTable}>
+    <ChartCard
+      title={t.phaseTable}
+      hint={metricsMessages.chartHints.phaseTable}
+    >
       <div className="flex flex-col gap-2">
         <DataTable
           columns={phaseColumns(measure)}
@@ -99,8 +105,12 @@ export function PhaseTable({
           getRowId={(row) => row.phase}
         />
         <p className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-          <span>
-            {metricsMessages.kpi.total}:{' '}
+          <span className="inline-flex items-center gap-1">
+            {metricsMessages.kpi.total}
+            <HintIcon
+              hint={metricsMessages.timesHints.total}
+              label={metricsMessages.kpi.total}
+            />
             <span className="font-medium text-foreground">
               {formatMinutes(total)}
             </span>
@@ -108,8 +118,12 @@ export function PhaseTable({
           {isRobustMeasure(measure) ? (
             <span>{metricsMessages.times.robustHint}</span>
           ) : (
-            <span>
-              {metricsMessages.kpi.net}:{' '}
+            <span className="inline-flex items-center gap-1">
+              {metricsMessages.kpi.net}
+              <HintIcon
+                hint={metricsMessages.timesHints.net}
+                label={metricsMessages.kpi.net}
+              />
               <span className="font-medium text-foreground">
                 {formatMinutes(net)}
               </span>

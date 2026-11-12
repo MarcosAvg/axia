@@ -1,3 +1,5 @@
+import { useId } from 'react'
+import { HintIcon } from '@/components/shared/hint'
 import { DIMENSIONS } from '../domain/dimensions'
 import type { Dimension } from '../domain/dimensions'
 import { dimensionLabels, metricsMessages } from '../i18n'
@@ -8,16 +10,21 @@ export function DimensionPicker({
   onChange,
   label = metricsMessages.dimensions.viewBy,
   dimensions = DIMENSIONS,
+  hint = metricsMessages.filterHints.dimension,
 }: {
   value: Dimension
   onChange: (dimension: Dimension) => void
   label?: string
   dimensions?: Dimension[]
+  hint?: string
 }) {
+  const id = useId()
   return (
-    <label className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-      <span>{label}</span>
+    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <label htmlFor={id}>{label}</label>
+      <HintIcon hint={hint} label={label} />
       <select
+        id={id}
         value={value}
         aria-label={label}
         onChange={(event) => onChange(event.target.value as Dimension)}
@@ -29,6 +36,6 @@ export function DimensionPicker({
           </option>
         ))}
       </select>
-    </label>
+    </div>
   )
 }

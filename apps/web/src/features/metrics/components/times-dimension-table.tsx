@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
+import { HintIcon } from '@/components/shared/hint'
 import { useTimeMeasure } from '@/components/shared/time-measure-context'
 import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 import { measureSample, measureValue, type TimeMode } from '../domain/time-mode'
@@ -68,6 +69,7 @@ function identityColumns(
     {
       id: 'tickets',
       header: metricsMessages.table.tickets,
+      hint: metricsMessages.tableHints.dimensionTickets,
       cell: (row) => row.tickets,
     },
   ]
@@ -81,6 +83,7 @@ function sampleColumn(
   return {
     id: 'sample',
     header: t.sample,
+    hint: metricsMessages.timesHints.dimensionSample,
     hideBelow: 'lg',
     cell: (row) =>
       measureSample(
@@ -108,6 +111,7 @@ function measureColumn({
   return {
     id: 'measure',
     header: label,
+    hint: metricsMessages.timesHints.dimensionMeasure,
     cell: (row) => {
       const sample = measureSample(
         row as unknown as Record<string, number>,
@@ -140,12 +144,14 @@ function rateColumns(): DataTableColumn<DimensionRow>[] {
     {
       id: 'reassignment',
       header: metricsMessages.table.reassignment,
+      hint: metricsMessages.tableHints.reassignment,
       hideBelow: 'lg',
       cell: (row) => formatPercent(row.reassignmentRate),
     },
     {
       id: 'reopen',
       header: k.reopen,
+      hint: metricsMessages.kpiHints.reopen,
       hideBelow: 'lg',
       cell: (row) => formatPercent(row.reopenRate),
     },
@@ -183,10 +189,16 @@ function MeasurePicker({
   measureKey: Measure
   onChange: (measure: Measure) => void
 }) {
+  const id = useId()
   return (
-    <label className="flex items-center gap-2 text-xs text-muted-foreground">
-      <span>{t.measure}</span>
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <label htmlFor={id}>{t.measure}</label>
+      <HintIcon
+        hint={metricsMessages.timesHints.dimensionMeasure}
+        label={t.measure}
+      />
       <select
+        id={id}
         value={measureKey}
         aria-label={t.measure}
         onChange={(event) => onChange(event.target.value as Measure)}
@@ -198,7 +210,7 @@ function MeasurePicker({
           </option>
         ))}
       </select>
-    </label>
+    </div>
   )
 }
 
@@ -227,7 +239,10 @@ export function TimesDimensionTable({
     measure,
   )
   return (
-    <ChartCard title={t.byDimension}>
+    <ChartCard
+      title={t.byDimension}
+      hint={metricsMessages.chartHints.timesByDimension}
+    >
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <DimensionPicker value={dimension} onChange={setDimension} />

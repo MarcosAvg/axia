@@ -111,13 +111,16 @@ export function PhaseHeatmap({
   )
   if (rows.length === 0) {
     return (
-      <ChartCard title={t.heatmap}>
+      <ChartCard
+        title={t.heatmap}
+        hint={metricsMessages.chartHints.phaseHeatmap}
+      >
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       </ChartCard>
     )
   }
   return (
-    <ChartCard title={t.heatmap}>
+    <ChartCard title={t.heatmap} hint={metricsMessages.chartHints.phaseHeatmap}>
       <HeatTable rows={rows} max={max} mode={mode} measure={measure} />
       <p className="pt-2 text-xs text-muted-foreground">
         {isRobustMeasure(measure)

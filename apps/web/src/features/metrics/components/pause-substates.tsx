@@ -13,11 +13,13 @@ const columns: DataTableColumn<PauseSubstateRow>[] = [
   {
     id: 'pauses',
     header: metricsMessages.quality.pausesCount,
+    hint: metricsMessages.tableHints.pauseCount,
     cell: (row) => row.pauses,
   },
   {
     id: 'minutes',
     header: metricsMessages.quality.pauseTime,
+    hint: metricsMessages.tableHints.pauseTime,
     cell: (row) => formatMinutes(row.pauseMinutes),
   },
 ]

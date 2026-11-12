@@ -150,7 +150,7 @@ export function CycleBar({
   }))
 
   return (
-    <ChartCard title={t.cycle}>
+    <ChartCard title={t.cycle} hint={metricsMessages.chartHints.cycle}>
       <div className="flex flex-col gap-3">
         <CycleChart slices={slices} total={total} />
         <CycleFooter summary={summary} measure={measure} mode={mode} />

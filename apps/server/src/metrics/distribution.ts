@@ -90,6 +90,7 @@ function profileRow(row: ProfileRow) {
   return {
     phase: String(row.phase),
     n,
+    total,
     coverage: total > 0 ? n / total : 0,
     mean: Number(row.mean),
     median: Number(row.p50),

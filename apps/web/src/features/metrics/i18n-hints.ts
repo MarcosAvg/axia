@@ -40,8 +40,9 @@ export const hintMessages = {
       'Tiquets registrados en cada mes del periodo (por fecha de reporte).',
     timesByDimension:
       'Tiempo por agrupación (equipo, edificio, categoría, dependencia o solicitante).',
-    countsByDimension:
-      'Tiquets por agrupación, con su tasa de reasignación y de recaptura.',
+    countsByDimension: 'Tiquets por agrupación en el periodo.',
+    topCategories:
+      'Categorías con más tiquets en el periodo, con su porcentaje del total.',
     status:
       'Estado actual de los tiquets del periodo, agrupado por etapa del flujo.',
     pauses: 'Número de pausas por motivo en el periodo.',
@@ -57,14 +58,29 @@ export const hintMessages = {
       'Volumen y tiempo medio de cada desenlace: abiertos, cerrados, rechazados, cancelados y duplicados.',
     techniciansTable:
       'Carga y participación por técnico: tiquets como líder y auxiliar, y minutos de participación.',
+    phaseTable:
+      'Todas las fases del ciclo con la medida y el reloj activos. Los cuantiles no son aditivos.',
+    phaseHeatmap:
+      'Tiempo de cada fase por categoría. La intensidad es relativa a la columna.',
+    cycle:
+      'Composición del ciclo con la medida activa. La barra apilada solo se muestra con promedio o acumulado.',
+    technicianTimes:
+      'Tiempos de los tiquets que lideró cada técnico. Estas tablas usan promedios y no cambian con el selector Medida.',
+    requesterTimes:
+      'Tiempos de validación y reclamación atribuidos al solicitante. Usan promedios y no cambian con el selector Medida.',
+    qualityHeatmap:
+      'Tasas de reasignación, recaptura, reapertura y primera resolución por agrupación. La intensidad es relativa a la columna.',
+    distribution:
+      'Volumen, porcentaje, tiempos promedio y tasas de calidad por agrupación.',
   },
   tableHints: {
     dimensionTickets: 'Tiquets de la agrupación en el periodo.',
-    avgActive: 'Trabajo activo de la agrupación en el periodo.',
-    avgTotal: 'Tiempo total de la agrupación en el periodo.',
+    avgActive: 'Promedio del trabajo activo de la agrupación en el periodo.',
+    avgTotal: 'Promedio del tiempo total de la agrupación en el periodo.',
     extra: 'Trabajo de la agrupación fuera del horario laboral.',
-    reassignment: 'Reasignaciones registradas en la agrupación.',
-    recapture: 'Recapturas registradas en la agrupación.',
+    reassignment:
+      'Porcentaje de tiquets de la agrupación con reasignación de supervisor.',
+    recapture: 'Porcentaje de tiquets de la agrupación con recaptura.',
     participation:
       'Tiempo total participando, ya sea como líder o como auxiliar.',
     leader: 'Veces que el técnico fue líder de la atención.',
@@ -72,10 +88,87 @@ export const hintMessages = {
     assigned: 'Veces que el tiquet se le asignó como técnico.',
     duplicateRate: 'Duplicados entre los tiquets de la agrupación.',
     age: 'Tiempo transcurrido desde el registro.',
+    share: 'Porcentaje de la agrupación sobre el total.',
+    cumulative:
+      'Porcentaje acumulado de las filas anteriores en el orden actual.',
+    parent: 'Agrupación padre en la jerarquía.',
+    parentShare: 'Porcentaje de la agrupación sobre su dimensión padre.',
+    pauseCount: 'Pausas registradas en el subestado.',
+    pauseTime: 'Tiempo total en pausa en el subestado, en reloj continuo.',
   },
   duplicateHints: {
     timeToMark: 'Tiempo medio desde el registro hasta marcar el duplicado.',
     alerts:
       'Tiquets señalados como posible duplicado, según la decisión tomada.',
+  },
+  timesHints: {
+    header:
+      'El reloj aplica a toda la pestaña. La medida afecta a las vistas de una sola medida; la distribución muestra varias a la vez.',
+    measure:
+      'Promedio y acumulado usan todos los tiquets. Mediana, P90, P95 y máximo excluyen los tiquets sin la fase y no son aditivos.',
+    phaseValue:
+      'Valor de la fase con la medida activa. Las medidas robustas excluyen los tiquets sin la fase.',
+    share: 'Porcentaje de la fase sobre el tiempo total acumulado del periodo.',
+    total: 'Tiempo total del periodo con la medida activa.',
+    net: 'Tiempo neto: el total menos los tramos clasificados como no contables.',
+    dimensionSample:
+      'Tiquets que tuvieron la fase. La medida se oculta cuando la muestra es menor a 5.',
+    dimensionMeasure:
+      'Fase que se muestra en la tabla; la medida global decide cómo se resume.',
+    people: 'Estas tablas usan promedios y no cambian con el selector Medida.',
+    insufficientSample:
+      'Con menos de 5 tiquets, la mediana y los cuantiles no son representativos.',
+  },
+  distributionHints: {
+    sample:
+      'Tiquets que tuvieron la fase. No cambia con la medida: todas las columnas resumen la misma muestra.',
+    coverage:
+      'Proporción del universo de desempeño que tuvo la fase en el periodo.',
+    median: 'Valor central: la mitad de la muestra quedó por debajo.',
+    iqr: 'Rango del 50% central (P25–P75). Menos sensible a los extremos que el promedio.',
+    p90: 'El 90% de la muestra quedó por debajo de este tiempo.',
+    p95: 'El 95% de la muestra quedó por debajo; muestra mejor la cola.',
+    max: 'El caso más largo de la muestra. Un solo tiquet puede moverlo.',
+    outliers:
+      'Tiquets fuera de la valla Q1−1.5·IQR / Q3+1.5·IQR. La tasa es sobre la muestra de la fase.',
+    mean: 'Promedio de la muestra; se muestra para contrastar con la mediana.',
+    active:
+      'La columna resaltada corresponde a la medida elegida en la cabecera.',
+  },
+  filterHints: {
+    period:
+      'Periodo por fecha de registro. La antigüedad de pendientes no se limita al periodo.',
+    filters:
+      'Filtros de catálogo y desenlace. Nunca amplían el alcance de lo que puedes ver.',
+    timeMode:
+      'Continuo corre 24 horas; laboral solo dentro del calendario del equipo; extra es el trabajo fuera de ese horario.',
+    dimension: 'Agrupación que usan las tablas y gráficas.',
+    export:
+      'Exporta las agrupaciones por dimensión con la medida y el reloj activos.',
+  },
+  teamHints: {
+    supervisors:
+      'Ofertas recibidas, tomadas, pendientes y retiradas, además de reasignaciones y validaciones.',
+    auxiliary:
+      'Horas de apoyo auxiliar por técnico y categoría. Sigue el reloj activo.',
+    routing:
+      'Ofertas a supervisores: pendientes, tomadas y tiempo hasta la toma en reloj continuo.',
+    offers: 'Ofertas de tiquets recibidas como candidato.',
+    load: 'Tomadas, pendientes y retiradas sobre las ofertas recibidas.',
+    takeRate: 'Ofertas tomadas sobre el total de ofertas.',
+    pendingRate: 'Ofertas que siguen pendientes sobre el total de ofertas.',
+    timeToTake:
+      'Tiempo medio desde la oferta hasta la toma, en reloj continuo.',
+    reassigned: 'Tiquets que reasignó como supervisor.',
+    validated: 'Tiquets que validó como supervisor.',
+    technicianTickets: 'Tiquets en los que participó el técnico.',
+    attributedActive:
+      'Trabajo activo atribuido al técnico sujeto, no a quien registró la acción.',
+    attributedPause: 'Tiempo en pausa atribuido al técnico sujeto.',
+    attributedWait: 'Tiempo de espera de inicio atribuido al técnico sujeto.',
+    requesterTickets: 'Tiquets del solicitante en el periodo.',
+    requesterValidation:
+      'Tiempo de validación atribuido al solicitante sujeto.',
+    requesterClaim: 'Tiempo de reclamación atribuido al solicitante sujeto.',
   },
 }

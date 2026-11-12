@@ -38,7 +38,7 @@ function TopCategories({ groups }: { groups: DimensionGroup[] }) {
   return (
     <ChartCard
       title={metricsMessages.charts.topCategories}
-      hint={metricsMessages.chartHints.countsByDimension}
+      hint={metricsMessages.chartHints.topCategories}
     >
       {chartRows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>

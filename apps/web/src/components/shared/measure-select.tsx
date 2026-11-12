@@ -1,4 +1,6 @@
+import { useId } from 'react'
 import { cn } from 'cn'
+import { HintIcon } from '@/components/shared/hint'
 import { messages } from '@/lib/i18n'
 import { TIME_MEASURES, type TimeMeasure } from '@/lib/time-measure'
 import { useTimeMeasure } from './time-measure-context'
@@ -16,16 +18,19 @@ const LABELS: Record<TimeMeasure, string> = {
 
 /** Selector de la medida de tiempos del tablero. */
 export function MeasureSelect({ className }: { className?: string }) {
+  const id = useId()
   const { measure, setMeasure } = useTimeMeasure()
   return (
-    <label
+    <div
       className={cn(
         'flex items-center gap-2 text-xs text-muted-foreground',
         className,
       )}
     >
-      <span>{t.label}</span>
+      <label htmlFor={id}>{t.label}</label>
+      <HintIcon hint={t.hint} label={t.label} />
       <select
+        id={id}
         value={measure}
         aria-label={t.aria}
         onChange={(event) => setMeasure(event.target.value as TimeMeasure)}
@@ -37,6 +42,6 @@ export function MeasureSelect({ className }: { className?: string }) {
           </option>
         ))}
       </select>
-    </label>
+    </div>
   )
 }

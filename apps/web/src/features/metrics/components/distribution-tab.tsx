@@ -50,6 +50,7 @@ function identityColumns(
     {
       id: 'tickets',
       header: metricsMessages.table.tickets,
+      hint: metricsMessages.tableHints.dimensionTickets,
       cell: (row) => (
         <BarCell
           value={row.tickets}
@@ -79,11 +80,13 @@ function shareColumns({
     {
       id: 'share',
       header: t.share,
+      hint: metricsMessages.tableHints.share,
       cell: (row) => formatPercent(shareOf(row.tickets, total)),
     },
     {
       id: 'cumulative',
       header: t.cumulative,
+      hint: metricsMessages.tableHints.cumulative,
       hideBelow: 'md',
       cell: (row) => formatPercent(shareOf(cumulative.get(row.id) ?? 0, total)),
     },
@@ -93,6 +96,7 @@ function shareColumns({
     {
       id: 'parent',
       header: metricsMessages.table.parent,
+      hint: metricsMessages.tableHints.parent,
       hideBelow: 'md',
       cell: (row) =>
         row.parentId ? (parentNames.get(row.parentId) ?? '—') : '—',
@@ -101,6 +105,7 @@ function shareColumns({
     {
       id: 'parentShare',
       header: t.parentShare,
+      hint: metricsMessages.tableHints.parentShare,
       hideBelow: 'md',
       cell: (row) => {
         if (!row.parentId) return '—'
@@ -137,18 +142,21 @@ function qualityColumns(): DataTableColumn<DimensionRow>[] {
     {
       id: 'reassignment',
       header: metricsMessages.table.reassignment,
+      hint: metricsMessages.tableHints.reassignment,
       hideBelow: '2xl',
       cell: (row) => formatPercent(row.reassignmentRate),
     },
     {
       id: 'reopen',
       header: metricsMessages.kpi.reopen,
+      hint: metricsMessages.kpiHints.reopen,
       hideBelow: '2xl',
       cell: (row) => formatPercent(row.reopenRate),
     },
     {
       id: 'firstFix',
       header: metricsMessages.quality.firstFix,
+      hint: metricsMessages.kpiHints.firstFix,
       hideBelow: '2xl',
       cell: (row) => formatPercent(row.firstFixRate),
     },
@@ -227,7 +235,7 @@ export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
           <CardTitle as="h2" className="text-base">
             <HintLabel
               label={t.title}
-              hint={metricsMessages.chartHints.countsByDimension}
+              hint={metricsMessages.chartHints.distribution}
             />
           </CardTitle>
           <p className="text-xs text-muted-foreground">

@@ -156,7 +156,10 @@ export function TechnicianTimes({
   const points = pointsOf(rows, mode)
   const participationRows = participationOf(rows, mode)
   return (
-    <ChartCard title={t.technicians}>
+    <ChartCard
+      title={t.technicians}
+      hint={metricsMessages.chartHints.technicianTimes}
+    >
       <div className="flex flex-col gap-3">
         {points.length >= 3 ? (
           <ScatterBox points={points} />

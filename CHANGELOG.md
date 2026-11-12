@@ -5,6 +5,17 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La tarjeta **Distribución y atípicos** muestra `n / N`, P95 y resalta la columna de la medida
+  activa. Las fichas informativas explican las definiciones de las tarjetas, columnas y controles
+  de Métricas.
+
+### Cambiado
+
+- El perfil de distribución devuelve `total` (universo de desempeño) además de `coverage`; los
+  textos de ayuda corrigen tasas, fuentes y alcance de la medida.
+
 ## [0.25.0] - 2026-11-12
 
 ### Añadido

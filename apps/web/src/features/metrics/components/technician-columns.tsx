@@ -48,11 +48,13 @@ export function identityColumns(
     {
       id: 'tickets',
       header: metricsMessages.table.tickets,
+      hint: metricsMessages.teamHints.technicianTickets,
       cell: (row) => row.tickets,
     },
     {
       id: 'participation',
       header: t.participation,
+      hint: metricsMessages.tableHints.participation,
       cell: (row) => {
         const value = totalInMode(
           row.participationMinutes,
@@ -77,29 +79,34 @@ export function timeColumns(mode: TimeMode): DataTableColumn<TechnicianView>[] {
     {
       id: 'active',
       header: t.phases.active,
+      hint: metricsMessages.kpiHints.active,
       cell: (row) => timeCell(row.avgActive, row.avgActiveLabor, mode),
     },
     {
       id: 'total',
       header: metricsMessages.kpi.total,
+      hint: metricsMessages.kpiHints.total,
       hideBelow: 'md',
       cell: (row) => timeCell(row.avgTotal, row.avgTotalLabor, mode),
     },
     {
       id: 'response',
       header: t.phases.response,
+      hint: metricsMessages.kpiHints.response,
       hideBelow: 'xl',
       cell: (row) => timeCell(row.avgResponse, row.avgResponseLabor, mode),
     },
     {
       id: 'assignment',
       header: t.phases.assignment,
+      hint: metricsMessages.kpiHints.assignment,
       hideBelow: 'xl',
       cell: (row) => timeCell(row.avgAssignment, row.avgAssignmentLabor, mode),
     },
     {
       id: 'validation',
       header: t.phases.validation,
+      hint: metricsMessages.kpiHints.validation,
       hideBelow: 'xl',
       cell: (row) => timeCell(row.avgValidation, row.avgValidationLabor, mode),
     },
@@ -113,6 +120,7 @@ export function subjectColumns(
     {
       id: 'attributedActive',
       header: 'Trabajo atribuido',
+      hint: metricsMessages.teamHints.attributedActive,
       hideBelow: 'md',
       cell: (row) =>
         subjectCell(row.activeMinutes, row.activeLaborMinutes, mode),
@@ -120,12 +128,14 @@ export function subjectColumns(
     {
       id: 'attributedPause',
       header: 'Pausa atribuida',
+      hint: metricsMessages.teamHints.attributedPause,
       hideBelow: 'xl',
       cell: (row) => subjectCell(row.pauseMinutes, row.pauseLaborMinutes, mode),
     },
     {
       id: 'attributedWait',
       header: 'Espera atribuida',
+      hint: metricsMessages.teamHints.attributedWait,
       hideBelow: 'xl',
       cell: (row) => subjectCell(row.waitMinutes, row.waitLaborMinutes, mode),
     },

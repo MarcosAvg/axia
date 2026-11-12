@@ -125,6 +125,7 @@ it('describe la distribución con cobertura, vallas y atípicos', async () => {
   expect(total).toMatchObject({
     phase: 'total',
     n: 4,
+    total: 4,
     coverage: 1,
     outliers: 1,
   })

@@ -10,10 +10,16 @@ const t = metricsMessages.team
 
 const columns: DataTableColumn<SupervisorRow>[] = [
   { id: 'name', header: t.supervisor, cell: (row) => row.name },
-  { id: 'offers', header: t.offers, cell: (row) => row.offers },
+  {
+    id: 'offers',
+    header: t.offers,
+    hint: metricsMessages.teamHints.offers,
+    cell: (row) => row.offers,
+  },
   {
     id: 'load',
     header: `${t.taken} / ${t.pending} / ${t.withdrawn}`,
+    hint: metricsMessages.teamHints.load,
     cell: (row) => (
       <StackedBarCell
         segments={[
@@ -29,29 +35,34 @@ const columns: DataTableColumn<SupervisorRow>[] = [
   {
     id: 'takeRate',
     header: t.takeRate,
+    hint: metricsMessages.teamHints.takeRate,
     hideBelow: 'lg',
     cell: (row) => formatPercent(offerRate(row.taken, row.offers)),
   },
   {
     id: 'pendingRate',
     header: t.pendingRate,
+    hint: metricsMessages.teamHints.pendingRate,
     hideBelow: 'lg',
     cell: (row) => formatPercent(offerRate(row.pending, row.offers)),
   },
   {
     id: 'time',
     header: t.timeToTakeContinuous,
+    hint: metricsMessages.teamHints.timeToTake,
     cell: (row) => formatMinutes(row.avgTimeToTakeMinutes),
   },
   {
     id: 'reassigned',
     header: t.reassigned,
+    hint: metricsMessages.teamHints.reassigned,
     hideBelow: 'md',
     cell: (row) => row.reassigned,
   },
   {
     id: 'validated',
     header: t.validated,
+    hint: metricsMessages.teamHints.validated,
     hideBelow: '2xl',
     cell: (row) => row.validated,
   },

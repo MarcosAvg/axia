@@ -84,7 +84,6 @@ export const metricsMessages = {
   },
   times: {
     title: 'Tiempos del periodo',
-    titleHint: 'El reloj y la medida elegidos aplican a toda la pestaña.',
     cycle: 'Ciclo medio',
     ...distributionMessages,
     phases: {
