@@ -25,6 +25,8 @@ export type WriteRefs = {
   technicianId: string
   teamId: string
   pauseReasonId: string
+  pauseStepId: string
+  pauseExitId: string
 }
 
 type RefsRow = {
@@ -44,7 +46,6 @@ type RefsRow = {
   requester_id: string
   technician_id: string
   team_id: string
-  pause_reason_id: string
 }
 
 async function loadRefsRow(context: TicketHttpContext): Promise<RefsRow> {
@@ -65,8 +66,7 @@ async function loadRefsRow(context: TicketHttpContext): Promise<RefsRow> {
       (select id from public.channels where name = 'Teléfono') as channel_id,
       (select id from public.requesters where full_name = 'Solicitante vinculado') as requester_id,
       (select id from public.technicians where full_name = 'Técnico A') as technician_id,
-      (select id from public.teams where name = 'Equipo A') as team_id,
-      (select id from public.reasons where name = 'Falta de material' and use = 'pause' and parent_id is null) as pause_reason_id
+      (select id from public.teams where name = 'Equipo A') as team_id
   `)
   const row = result.rows[0] as RefsRow | undefined
   if (!row) throw new Error('Write refs could not be loaded')
@@ -77,6 +77,7 @@ export async function loadWriteRefs(
   context: TicketHttpContext,
 ): Promise<WriteRefs> {
   const row = await loadRefsRow(context)
+  const pause = await ensurePauseFlow(context)
   return {
     buildingId: row.building_id,
     locationId: row.location_id,
@@ -94,8 +95,43 @@ export async function loadWriteRefs(
     requesterId: row.requester_id,
     technicianId: row.technician_id,
     teamId: row.team_id,
-    pauseReasonId: row.pause_reason_id,
+    pauseReasonId: pause.rootId,
+    pauseStepId: pause.stepId,
+    pauseExitId: pause.exitId,
   }
+}
+
+/** Flujo mínimo y estable para las pruebas de pausa: raíz → paso → salida. */
+async function ensurePauseFlow(context: TicketHttpContext): Promise<{
+  rootId: string
+  stepId: string
+  exitId: string
+}> {
+  const root = await context.db.execute(sql`
+    select id from public.reasons
+    where use = 'pause' and parent_id is null and name = 'Falta de material'
+  `)
+  const rootId = (root.rows[0] as { id: string }).id
+  const step = await context.db.execute(sql`
+    insert into public.reasons (use, name, parent_id)
+    values ('pause', 'Paso de prueba', ${rootId})
+    on conflict (use, parent_id, name) do update set name = excluded.name
+    returning id
+  `)
+  const stepId = (step.rows[0] as { id: string }).id
+  const exit = await context.db.execute(sql`
+    insert into public.reasons (use, name, parent_id, pause_step_kind)
+    values ('pause', 'Salida de prueba', ${rootId}, 'exit')
+    on conflict (use, parent_id, name) do update set name = excluded.name
+    returning id
+  `)
+  const exitId = (exit.rows[0] as { id: string }).id
+  await context.db.execute(sql`
+    insert into public.pause_transitions (from_reason_id, to_reason_id)
+    values (${rootId}, ${stepId}), (${stepId}, ${exitId})
+    on conflict (from_reason_id, to_reason_id) do nothing
+  `)
+  return { rootId, stepId, exitId }
 }
 
 /** Crea una ubicación y una dependencia alternas para probar el ámbito. */

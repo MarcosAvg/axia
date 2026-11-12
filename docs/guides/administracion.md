@@ -52,14 +52,19 @@ técnicos y motivos.
 - Los motivos son jerárquicos y se agrupan por uso: pausa, rechazo, cancelación, reasignación,
   recaptura, reclamación, reactivación y apoyo auxiliar.
 
-Para un motivo de pausa nuevo, crear primero la raíz y después al menos un subestado con el mismo
-uso y la raíz como padre. Ambos deben estar activos. Las raíces incompletas no se ofrecen al
-pausar; los diez motivos preconfigurados ya tienen subestados. El padre no puede ser el mismo
-motivo ni uno de sus descendientes. Los motivos nuevos se crean activos por defecto.
+Para un motivo de pausa nuevo, crear primero la raíz, después sus pasos de avance y al menos una
+salida. Cada subestado se marca como **avance** o **salida**; una salida no puede tener siguientes.
+El editor **Flujo de pausa** conecta el motivo con sus pasos y cada paso con el siguiente o con una
+salida. El flujo siempre avanza y cada motivo debe tener una salida alcanzable; si no, no se ofrece
+al pausar. Los dieciséis motivos preconfigurados ya traen su flujo, con salidas directas y como
+máximo dos pasos de avance. El padre del árbol
+solo organiza el catálogo: no define el orden de la pausa. El padre no puede ser el mismo motivo ni
+uno de sus descendientes. Los motivos nuevos se crean activos por defecto.
 
 Mientras haya pausas abiertas en el árbol, solo se pueden cambiar nombres/orden o agregar nodos;
-desactivar, mover o cambiar su uso se rechaza para conservar una salida. Guardar refresca también
-los selectores operativos. La interfaz muestra los errores esperados de captura o duplicado.
+desactivar, mover, cambiar su uso o editar el flujo se rechaza para conservar una salida. Guardar
+refresca también los selectores operativos. La importación y exportación incluyen la hoja
+**Transiciones de pausa** con Motivo, Desde y Hacia.
 
 Antes de operar una instancia propia, configurar al menos un recorrido activo de edificio →
 ubicación → dependencia vinculada y categoría → subcategoría → problema con equipo; añadir técnicos,

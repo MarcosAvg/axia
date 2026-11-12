@@ -185,6 +185,11 @@ export interface TicketPauseStep {
   closedReasonName: string | null
 }
 
+export interface TicketPauseOption {
+  id: string
+  name: string
+}
+
 export interface TicketPauseState {
   pauseId: string
   motiveId: string
@@ -192,6 +197,8 @@ export interface TicketPauseState {
   currentId: string
   currentName: string
   openedAt: string
+  advanceOptions: TicketPauseOption[]
+  exitOptions: TicketPauseOption[]
 }
 
 export interface TicketParticipant {

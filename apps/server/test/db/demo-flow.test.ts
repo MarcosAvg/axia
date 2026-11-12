@@ -8,16 +8,14 @@ import sharp from 'sharp'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
 import { loadActor } from '../../src/auth/authorization.js'
-import type { Actor } from '../../src/auth/authorization.js'
-import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
 import { ID } from '../../src/db/seed-demo/data.js'
 import { insertDemoEvidence } from '../../src/db/seed-demo/evidence.js'
-import { pauseTicket, resumeTicket } from '../../src/tickets/pause.js'
 import { attendTicket } from '../../src/tickets/work.js'
 import { validateTicket } from '../../src/tickets/validation.js'
 import { seedDemo } from '../../src/db/seed-demo/index.js'
 import { takeTicket } from '../../src/tickets/take.js'
+import { exerciseDemoPauses } from './demo-pause-flow.js'
 import { ownerConnectionString, prepareTestDatabase } from './helpers.js'
 
 let owner: Client
@@ -188,39 +186,6 @@ it('does not restore offers after a registered ticket has user activity', async 
   ).toEqual([])
 })
 
-async function exerciseDemoPauses(
-  db: Database,
-  actor: Actor,
-  ticketId: string,
-) {
-  const roots = await owner.query<{ id: string; child: string | null }>(`
-    select r.id, (select c.id from public.reasons c
-      where c.parent_id = r.id and c.active order by c.position, c.id limit 1) as child
-    from public.reasons r where r.use = 'pause' and r.parent_id is null and r.active
-    order by r.position, r.id
-  `)
-  expect(roots.rows).toHaveLength(10)
-  for (const root of roots.rows) {
-    if (!root.child) throw new Error('Demo pause root has no active descendant')
-    await expect(
-      pauseTicket(db, actor, {
-        ticketId,
-        reasonId: root.id,
-        note: 'Pausa de prueba demo',
-        estimatedDate: null,
-        clientRequestId: randomUUID(),
-      }),
-    ).resolves.toMatchObject({ replayed: false })
-    await expect(
-      resumeTicket(db, actor, {
-        ticketId,
-        reasonId: root.child,
-        clientRequestId: randomUUID(),
-      }),
-    ).resolves.toMatchObject({ replayed: false })
-  }
-}
-
 it('advances the in-progress demo through every pause root, attendance and both validations', async () => {
   const { db, pool } = createDb(ownerConnectionString())
   const ticketId = 'de000000-0000-4000-8000-000000000004'
@@ -228,7 +193,7 @@ it('advances the in-progress demo through every pause root, attendance and both 
     const technician = await loadActor(db, ID.userTechnician)
     const supervisor = await loadActor(db, ID.userSupervisor)
     if (!technician || !supervisor) throw new Error('Demo actors not found')
-    await exerciseDemoPauses(db, technician, ticketId)
+    await exerciseDemoPauses(owner, db, technician, ticketId)
     await insertDemoEvidence(
       owner,
       { directory: evidenceDir, createdFiles: [] },

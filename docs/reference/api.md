@@ -235,6 +235,8 @@ rechazada sigue [pendiente](estados-y-transiciones.md).
 | `POST/PATCH` | `/api/admin/catalogs/dependencies` y `/:id` | Dependencia con al menos una ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/locations` | Vínculos dependencia–ubicación |
 | `GET` | `/api/admin/catalogs/dependencies/:id/locations` | Ubicaciones de una dependencia |
+| `GET` | `/api/admin/pause-flow` | Flujo de pausa por motivo: nodos y transiciones |
+| `PUT` | `/api/admin/pause-flow/:rootId` | Reemplaza el flujo de un motivo (bloqueado si hay una pausa abierta) |
 | `GET/POST/PATCH` | `/api/admin/calendars` y `/:id` | Calendarios |
 | `POST` | `/api/admin/calendars/:id/intervals`, `/:id/holidays` | Añadir franjas y festivos |
 | `DELETE` | `/api/admin/calendar-intervals/:id`, `/api/admin/calendar-holidays/:id` | Retirar franjas y festivos |

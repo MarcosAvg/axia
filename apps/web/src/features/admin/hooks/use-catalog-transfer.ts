@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { adminDependencyLocationLinks } from '../api/admin-api'
 import type { AdminRow, DependencyLocationLink } from '../api/admin-api'
+import { adminPauseFlows } from '../api/pause-flow-api'
 import {
   importCatalogSheets,
   loadCatalogRows,
@@ -16,6 +17,7 @@ import type {
   CatalogSheets,
   CatalogWorkbook,
   DependencyRow,
+  PauseTransitionRow,
 } from '../api/catalog-workbook'
 import { CATALOG_IMPORT_SPECS } from '../domain/catalog-import'
 import type { CatalogKey } from '../domain/catalog-import'
@@ -64,9 +66,10 @@ function dependencyRows(
 }
 
 async function exportWorkbook() {
-  const [rows, links] = await Promise.all([
+  const [rows, links, flows] = await Promise.all([
     loadCatalogRows(),
     adminDependencyLocationLinks(),
+    adminPauseFlows(),
   ])
   const references = toReferences(rows)
   const data: CatalogSheets = {}
@@ -75,7 +78,15 @@ async function exportWorkbook() {
       data[spec.key] = toExportRows(spec, rows[spec.key], references)
     }
   }
-  await writeCatalogWorkbook(data, dependencyRows(rows, links))
+  const transitions: PauseTransitionRow[] = flows.flatMap((flow) => {
+    const names = new Map(flow.nodes.map((node) => [node.id, node.name]))
+    return flow.edges.map((edge) => ({
+      motive: flow.rootName,
+      from: names.get(edge.from) ?? '',
+      to: names.get(edge.to) ?? '',
+    }))
+  })
+  await writeCatalogWorkbook(data, dependencyRows(rows, links), transitions)
 }
 
 /** Lee el archivo; `null` si no trae hojas de catálogo ni dependencias. */
@@ -83,6 +94,7 @@ async function loadSheets(file: File): Promise<CatalogWorkbook | null> {
   const workbook = await readCatalogWorkbook(file)
   const hasRows =
     workbook.dependencies.length > 0 ||
+    workbook.pauseTransitions.length > 0 ||
     Object.values(workbook.sheets).some((rows) => rows?.length)
   return hasRows ? workbook : null
 }
@@ -120,6 +132,7 @@ export function useCatalogTransfer() {
       const result = await importCatalogSheets(
         workbook.sheets,
         workbook.dependencies,
+        workbook.pauseTransitions,
       )
       setReport(result.report)
       setIssues(result.issues)

@@ -182,6 +182,7 @@ export const SELECTS: Record<AdminCatalogTable, SQL> = {
       r.allows_estimated_date,
       r.clock_class,
       r.active,
+      r.pause_step_kind,
       r.updated_at,
       coalesce(tree.path, r.name) as path,
       coalesce(tree.depth, 1)::int as depth,

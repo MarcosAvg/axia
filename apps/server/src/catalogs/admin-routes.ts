@@ -7,6 +7,7 @@ import { authGuards, requirePermission, type Guard } from '../auth/guards.js'
 import type { AuthService } from '../auth/service.js'
 import { AppError } from '../http/errors.js'
 import { isAttachmentMimeType } from '../attachments/types.js'
+import { listPauseFlow, savePauseFlow } from './pause-flow.js'
 import { saveAdminReason } from './admin-reasons.js'
 import {
   adminTable,
@@ -23,6 +24,7 @@ import { deleteAdminRow } from './admin-delete.js'
 const tableParams = z.object({ table: z.string().min(1).max(40) })
 const rowParams = tableParams.extend({ id: z.string().uuid() })
 const dependencyParams = z.object({ id: z.string().uuid() })
+const pauseFlowParams = z.object({ rootId: z.string().uuid() })
 const dependencyBody = z.object({
   name: z.string().trim().min(1).max(200),
   active: z.boolean(),
@@ -96,6 +98,26 @@ function registerDependencyLocationRoutes(
       const { id } = dependencyParams.parse(request.params)
       const body = dependencyBody.parse(request.body)
       await saveDependency(db, { ...body, id })
+      return reply.status(204).send()
+    },
+  )
+}
+
+function registerPauseFlowRoutes(
+  app: FastifyInstance,
+  guard: Guard[],
+  db: Database,
+) {
+  app.get('/api/admin/pause-flow', { preHandler: guard }, async () => ({
+    items: await listPauseFlow(db),
+  }))
+
+  app.put(
+    '/api/admin/pause-flow/:rootId',
+    { preHandler: guard },
+    async (request, reply) => {
+      const { rootId } = pauseFlowParams.parse(request.params)
+      await savePauseFlow(db, rootId, request.body)
       return reply.status(204).send()
     },
   )
@@ -198,4 +220,5 @@ export function registerAdminCatalogRoutes(
   registerGenericCatalogRoutes(app, guard, db)
   registerDeleteRoute(app, guard, db)
   registerDependencyLocationRoutes(app, guard, db)
+  registerPauseFlowRoutes(app, guard, db)
 }

@@ -96,6 +96,10 @@ export interface ActionContext {
   isSupervisorRole: boolean
   /** El actor ya tiene una asignación abierta como supervisor del tiquet. */
   hasTaken: boolean
+  /** Hay al menos un paso de avance desde el subestado actual. */
+  pauseHasAdvance?: boolean
+  /** Hay al menos una salida desde el subestado actual. */
+  pauseHasExit?: boolean
 }
 
 const ASSIGNABLE: TicketStatus[] = [
@@ -195,8 +199,13 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
   pause: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.pause'),
   advance_pause: (c) =>
-    c.status === 'paused' && technicianAction(c, 'ticket.pause'),
-  resume: (c) => c.status === 'paused' && technicianAction(c, 'ticket.resume'),
+    c.status === 'paused' &&
+    c.pauseHasAdvance !== false &&
+    technicianAction(c, 'ticket.pause'),
+  resume: (c) =>
+    c.status === 'paused' &&
+    c.pauseHasExit !== false &&
+    technicianAction(c, 'ticket.resume'),
   attend: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.attend'),
   validate_requester: (c) =>

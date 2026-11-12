@@ -25,6 +25,8 @@ const mocks = vi.hoisted(() => {
       },
     ),
     adminSaveDependency: vi.fn(async () => 'dep-1'),
+    adminPauseFlows: vi.fn(async () => [] as unknown[]),
+    adminSavePauseFlow: vi.fn(async () => undefined),
   }
 })
 
@@ -33,6 +35,11 @@ vi.mock('./admin-api', () => ({
   adminInsert: mocks.adminInsert,
   adminUpdate: mocks.adminUpdate,
   adminSaveDependency: mocks.adminSaveDependency,
+}))
+
+vi.mock('./pause-flow-api', () => ({
+  adminPauseFlows: mocks.adminPauseFlows,
+  adminSavePauseFlow: mocks.adminSavePauseFlow,
 }))
 
 import { importCatalogSheets } from './catalog-transfer-api'
@@ -67,6 +74,78 @@ describe('catálogos', () => {
     )
     const child = mocks.store.reasons?.find((row) => row.name === 'Sin stock')
     expect(child?.parent_id).toBe(parent?.id)
+  })
+})
+
+const pauseFlow = {
+  rootId: 'root-1',
+  rootName: 'Falta de material',
+  nodes: [
+    {
+      id: 'root-1',
+      parentId: null,
+      name: 'Falta de material',
+      kind: null,
+      active: true,
+    },
+    {
+      id: 'step-1',
+      parentId: 'root-1',
+      name: 'Por solicitar',
+      kind: 'progress',
+      active: true,
+    },
+    {
+      id: 'exit-1',
+      parentId: 'root-1',
+      name: 'Recibido',
+      kind: 'exit',
+      active: true,
+    },
+  ],
+  edges: [],
+}
+
+describe('transiciones de pausa', () => {
+  it('reemplaza el flujo del motivo y reporta las aristas aplicadas', async () => {
+    mocks.adminPauseFlows.mockResolvedValue([pauseFlow])
+    const result = await importCatalogSheets(
+      {},
+      [],
+      [
+        {
+          motive: 'Falta de material',
+          from: 'Falta de material',
+          to: 'Por solicitar',
+        },
+        { motive: 'Falta de material', from: 'Por solicitar', to: 'Recibido' },
+      ],
+    )
+
+    expect(mocks.adminSavePauseFlow).toHaveBeenCalledWith('root-1', [
+      { from: 'root-1', to: 'step-1' },
+      { from: 'step-1', to: 'exit-1' },
+    ])
+    expect(result.report).toContainEqual(
+      expect.objectContaining({
+        catalog: 'pause_transitions',
+        inserted: 2,
+        invalid: 0,
+      }),
+    )
+  })
+
+  it('reporta una transición de un motivo inexistente', async () => {
+    mocks.adminPauseFlows.mockResolvedValue([])
+    const result = await importCatalogSheets(
+      {},
+      [],
+      [{ motive: 'No existe', from: 'A', to: 'B' }],
+    )
+    expect(result.report).toContainEqual(
+      expect.objectContaining({ catalog: 'pause_transitions', invalid: 1 }),
+    )
+    expect(mocks.adminSavePauseFlow).not.toHaveBeenCalled()
   })
 })
 

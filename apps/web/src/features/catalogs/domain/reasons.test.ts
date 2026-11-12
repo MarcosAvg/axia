@@ -51,4 +51,13 @@ describe('resumablePauseRoots', () => {
     expect(resumablePauseRoots(reasons).map((r) => r.id)).toEqual(['r1'])
     expect(resumablePauseRoots([reasons[0]!, reasons[2]!])).toEqual([])
   })
+
+  it('respeta la salida alcanzable que calcula el servidor', () => {
+    expect(
+      resumablePauseRoots([
+        { ...reasons[0]!, hasExitPath: false },
+        { ...reasons[3]!, hasExitPath: true },
+      ]).map((r) => r.id),
+    ).toEqual(['r4'])
+  })
 })

@@ -68,7 +68,7 @@ export function pathToReason(
   return []
 }
 
-/** Raíces de pausa que permiten elegir un subestado activo al reanudar. */
+/** Raíces de pausa que permiten elegir una salida activa al reanudar. */
 export function resumablePauseRoots(reasons: ReasonOption[]): ReasonOption[] {
   const parents = new Set(
     reasons
@@ -76,6 +76,7 @@ export function resumablePauseRoots(reasons: ReasonOption[]): ReasonOption[] {
       .map((reason) => reason.parentId),
   )
   return rootReasons(reasons).filter(
-    (reason) => reason.use === 'pause' && parents.has(reason.id),
+    (reason) =>
+      reason.use === 'pause' && (reason.hasExitPath ?? parents.has(reason.id)),
   )
 }

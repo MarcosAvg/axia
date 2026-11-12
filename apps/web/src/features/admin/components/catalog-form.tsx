@@ -48,7 +48,10 @@ export function CatalogForm({
     onSave,
   })
   const { form } = adminMessages
-  const groups = groupFields(fields)
+  const visibleFields = fields.filter(
+    (field) => !field.visibleWhen || field.visibleWhen(raw),
+  )
+  const groups = groupFields(visibleFields)
 
   const renderField = (field: AdminField) => (
     <CatalogFieldInput

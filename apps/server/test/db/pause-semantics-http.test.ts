@@ -29,12 +29,15 @@ afterAll(async () => {
 async function childReason(
   name: string,
   clockClass: 'counted' | 'not_counted',
+  kind: 'progress' | 'exit' = 'progress',
 ): Promise<string> {
   const result = await context.db.execute(sql`
-    insert into public.reasons (use, name, clock_class, parent_id)
+    insert into public.reasons (
+      use, name, clock_class, parent_id, pause_step_kind
+    )
     values (
       'pause'::public.reason_use, ${name}, ${clockClass}::public.clock_class,
-      ${refs.pauseReasonId}
+      ${refs.pauseReasonId}, ${kind}::public.pause_step_kind
     )
     returning id
   `)
@@ -113,7 +116,13 @@ async function runPauseSequence(): Promise<{
   const childName = 'Subestado en pausa'
   const exitName = 'Subestado de salida'
   const pausedChild = await childReason(childName, 'counted')
-  const exitReason = await childReason(exitName, 'not_counted')
+  const exitReason = await childReason(exitName, 'not_counted', 'exit')
+  await context.db.execute(sql`
+    insert into public.pause_transitions (from_reason_id, to_reason_id)
+    values
+      (${refs.pauseReasonId}, ${pausedChild}),
+      (${pausedChild}, ${exitReason})
+  `)
   await offline(context, {
     cookie: context.cookies.technician,
     ticketId,

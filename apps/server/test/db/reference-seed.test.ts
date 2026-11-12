@@ -37,7 +37,7 @@ async function expectReferenceCounts() {
   ).toBe(28)
   expect(
     await scalar('select count(*)::text as value from public.reasons'),
-  ).toBe(91)
+  ).toBe(98)
   expect(
     await scalar('select count(*)::text as value from public.escalation_rules'),
   ).toBe(5)
@@ -108,7 +108,7 @@ describe('reference seed catalogs', () => {
       await scalar(
         "select count(*)::text as value from public.reasons where use = 'pause' and parent_id is not null",
       ),
-    ).toBe(39)
+    ).toBe(40)
   })
 })
 
@@ -158,7 +158,7 @@ describe('reference seed boundaries', () => {
 describe('reference seed idempotency', () => {
   it('does not overwrite operator choices when adding missing substates', async () => {
     const migration = await readFile(
-      new URL('../../db/migrations/0018_pause_substates.sql', import.meta.url),
+      new URL('../../db/migrations/0051_pause_flow.sql', import.meta.url),
       'utf8',
     )
     await owner.query(`update public.reasons set active = false, position = 42, requires_note = true
@@ -176,10 +176,7 @@ describe('reference seed idempotency', () => {
 
   it('can be re-run without duplicating reference data', async () => {
     const migration = await readFile(
-      new URL(
-        '../../db/migrations/0007_reference_catalogs.sql',
-        import.meta.url,
-      ),
+      new URL('../../db/migrations/0051_pause_flow.sql', import.meta.url),
       'utf8',
     )
     await owner.query(migration)

@@ -12,7 +12,7 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 | Catálogos | `teams`, `buildings`, `locations`, `dependencies`, `dependency_locations`, `categories`, `subcategories`, `problems`, `service_types`, `priorities`, `channels` |
 | Personas | `requesters`, `technicians`, `technician_categories`, `supervisor_scopes`, `supervisor_scope_buildings` |
 | Tiquets | `tickets`, `ticket_events`, `ticket_assignments`, `ticket_participants`, `ticket_offers` |
-| Flujo | `ticket_pauses`, `ticket_pause_steps`, `ticket_captures`, `ticket_claims`, `ticket_links`, `ticket_ratings`, `ticket_validations` |
+| Flujo | `ticket_pauses`, `ticket_pause_steps`, `pause_transitions`, `ticket_captures`, `ticket_claims`, `ticket_links`, `ticket_ratings`, `ticket_validations` |
 | Tiempo | `time_spans`, `ticket_time_alerts`, `work_calendars`, `work_calendar_intervals`, `work_calendar_holidays` |
 | Evidencia | `evidence` y el volumen privado de archivos |
 | Adjuntos | `ticket_attachments` (documentos obligatorios de ciertos problemas) |
@@ -34,6 +34,9 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - El solicitante puede tener cuenta o existir solo en el catálogo.
 - El técnico puede tener cuenta o existir solo en el catálogo.
 - Las asignaciones y participantes conservan el histórico con `ended_at`.
+- El catálogo de pausa distingue pasos de avance y salidas (`reasons.pause_step_kind`). El flujo
+  vive en `pause_transitions`: desde el motivo o un paso de avance se llega al siguiente paso o a
+  una salida. El árbol de `reasons` solo organiza el catálogo. Una salida no tiene siguientes.
 - Cada cambio de estado genera un evento con actor, sujeto, motivo y hora. El sujeto puede ser
   usuario, técnico o solicitante; los tramos de `time_spans` guardan el mismo sujeto para atribuir
   el tiempo a la persona y no a quien ejecuta la acción.

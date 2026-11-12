@@ -52,4 +52,6 @@ export interface ReasonOption {
   name: string
   use: ReasonUse
   parentId: string | null
+  pauseStepKind?: 'progress' | 'exit' | null
+  hasExitPath?: boolean
 }

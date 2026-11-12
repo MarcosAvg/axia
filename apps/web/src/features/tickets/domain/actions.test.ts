@@ -57,6 +57,30 @@ describe('allowedActions', () => {
   })
 })
 
+describe('opciones de pausa', () => {
+  it('oculta avance y reanudación cuando el subestado actual no los habilita', () => {
+    const actions = allowedActions(
+      context(['ticket.pause', 'ticket.resume'], 'paused', {
+        pauseHasAdvance: false,
+        pauseHasExit: false,
+      }),
+    )
+    expect(actions).not.toContain('advance_pause')
+    expect(actions).not.toContain('resume')
+  })
+
+  it('muestra solo la acción que tiene opciones en el subestado actual', () => {
+    const actions = allowedActions(
+      context(['ticket.pause', 'ticket.resume'], 'paused', {
+        pauseHasAdvance: true,
+        pauseHasExit: false,
+      }),
+    )
+    expect(actions).toContain('advance_pause')
+    expect(actions).not.toContain('resume')
+  })
+})
+
 describe('validación y proxy', () => {
   it('el solicitante valida un tiquet atendido', () => {
     expect(

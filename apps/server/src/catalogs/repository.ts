@@ -214,10 +214,33 @@ async function listTechnicians(db: Database): Promise<TechnicianOption[]> {
 
 async function listReasons(db: Database, use: string): Promise<ReasonOption[]> {
   const result = await db.execute(sql`
-    select id, name, use, parent_id as "parentId"
-    from public.reasons
-    where active and use = ${use}
-    order by position, public.natural_sort_key(name)
+    with recursive reachable(root_id, node_id) as (
+      select root.id, root.id
+      from public.reasons root
+      where root.use = 'pause' and root.parent_id is null and root.active
+      union
+      select reachable.root_id, t.to_reason_id
+      from reachable
+      join public.pause_transitions t on t.from_reason_id = reachable.node_id
+    )
+    select
+      r.id, r.name, r.use, r.parent_id as "parentId",
+      r.pause_step_kind as "pauseStepKind",
+      (
+        r.parent_id is null
+        and r.use = 'pause'
+        and exists (
+          select 1
+          from reachable
+          join public.reasons exit on exit.id = reachable.node_id
+          where reachable.root_id = r.id
+            and exit.pause_step_kind = 'exit'
+            and exit.active
+        )
+      ) as "hasExitPath"
+    from public.reasons r
+    where r.active and r.use = ${use}
+    order by r.position, public.natural_sort_key(r.name)
   `)
   return result.rows as ReasonOption[]
 }

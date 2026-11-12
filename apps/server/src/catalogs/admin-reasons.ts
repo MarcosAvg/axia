@@ -15,6 +15,7 @@ const reasonSchema = z.strictObject({
   allows_estimated_date: z.boolean(),
   clock_class: z.enum(['counted', 'not_counted']),
   active: z.boolean(),
+  pause_step_kind: z.enum(['progress', 'exit']).nullable(),
 })
 const createSchema = reasonSchema.extend({
   parent_id: reasonSchema.shape.parent_id.default(null),
@@ -24,6 +25,7 @@ const createSchema = reasonSchema.extend({
     reasonSchema.shape.allows_estimated_date.default(false),
   clock_class: reasonSchema.shape.clock_class.default('counted'),
   active: reasonSchema.shape.active.default(true),
+  pause_step_kind: reasonSchema.shape.pause_step_kind.default(null),
 })
 type Reason = z.infer<typeof reasonSchema>
 const structuralFields = [
@@ -33,6 +35,7 @@ const structuralFields = [
   'allows_estimated_date',
   'clock_class',
   'active',
+  'pause_step_kind',
 ] as const
 
 function invalid(message: string) {
@@ -41,7 +44,7 @@ function invalid(message: string) {
 
 async function currentReason(tx: Executor, id: string): Promise<Reason> {
   const result = await tx.execute(sql`
-    select use, name, parent_id, position, requires_note, allows_estimated_date, clock_class, active
+    select use, name, parent_id, position, requires_note, allows_estimated_date, clock_class, active, pause_step_kind
     from public.reasons where id = ${id}
   `)
   if (!result.rows[0])
@@ -136,6 +139,16 @@ export async function saveAdminReason(
       await validateParent(tx, reason, id)
       if (id) {
         await validateChildren(tx, reason, id)
+        if (reason.pause_step_kind === 'exit') {
+          const outgoing = await tx.execute(sql`
+            select 1 from public.pause_transitions
+            where from_reason_id = ${id}
+            limit 1
+          `)
+          if (outgoing.rows[0]) {
+            throw invalid('Una salida no puede tener siguientes')
+          }
+        }
         await updateAdminRow(tx, 'reasons', id, values)
         return id
       }

@@ -46,7 +46,7 @@ test('el administrador crea un equipo desde la administración', async ({
   await page.goto('/admin/catalogos')
   await expect(page.getByRole('heading', { name: 'Equipos' })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   await page.getByLabel('Nombre').fill(name)
   await page.getByRole('button', { name: 'Guardar' }).click()
 
@@ -61,7 +61,7 @@ test('@smoke crea una dependencia con ubicación', async ({ page }) => {
     page.getByRole('heading', { name: 'Dependencias' }),
   ).toBeVisible()
 
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText('Nueva dependencia')).toBeVisible()
   await dialog.getByLabel('Nombre').fill(name)
@@ -119,9 +119,20 @@ test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
 
   await page.goto('/admin/catalogos?catalog=reasons')
   const reasons = page.getByRole('table')
+  const flowTitle = page.getByText('Flujo de pausa')
+  await expect(flowTitle).toBeVisible()
+  const catalogNav = page.getByRole('navigation', { name: 'Catálogos' })
+  const navBox = await catalogNav.boundingBox()
+  const flowBox = await flowTitle.boundingBox()
+  expect(navBox && flowBox).toBeTruthy()
+  if (navBox && flowBox) {
+    expect(flowBox.x).toBeGreaterThanOrEqual(navBox.x + navBox.width)
+  }
   const search = page.getByRole('textbox', { name: 'Buscar…', exact: true })
-  await search.fill('En cotización')
-  await expect(reasons.getByText('En cotización')).toBeVisible()
+  await search.fill('En compra externa o cotización')
+  await expect(
+    reasons.getByText('En compra externa o cotización'),
+  ).toBeVisible()
   await search.fill('')
   await expect(
     reasons.getByText('Falta de material', { exact: true }).first(),
@@ -130,7 +141,9 @@ test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
   await page
     .getByRole('button', { name: 'Contraer: Falta de material' })
     .click()
-  await expect(reasons.getByText('En cotización')).toHaveCount(0)
+  await expect(reasons.getByText('En compra externa o cotización')).toHaveCount(
+    0,
+  )
 })
 
 test('@smoke ofrece orden y jerarquía en pantalla angosta', async ({
@@ -159,7 +172,7 @@ test('@smoke crea motivos activos con subestados del mismo uso', async ({
   await expect(
     page.getByRole('heading', { name: 'Motivos', exact: true }),
   ).toBeVisible()
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   const dialog = page.getByRole('dialog')
   await dialog.getByLabel('Uso', { exact: true }).selectOption('pause')
   await dialog.getByLabel('Nombre', { exact: true }).fill(name)
@@ -169,7 +182,7 @@ test('@smoke crea motivos activos con subestados del mismo uso', async ({
   ).toBeChecked()
   await dialog.getByRole('button', { name: 'Guardar' }).click()
   await expect(dialog).not.toBeVisible()
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   await dialog.getByLabel('Uso', { exact: true }).selectOption('pause')
   await dialog.getByLabel('Nombre', { exact: true }).fill(`${name} disponible`)
   await dialog.getByLabel('Motivo padre').selectOption({ label: name })
@@ -196,13 +209,13 @@ test('@smoke elimina un registro sin uso y bloquea el que está en uso', async (
   await signIn(page, 'demo.admin')
 
   await page.goto('/admin/catalogos?catalog=buildings')
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   await page.getByLabel('Nombre').fill(building)
   await page.getByRole('button', { name: 'Guardar' }).click()
   await expect(page.getByRole('table').getByText(building)).toBeVisible()
 
   await page.goto('/admin/catalogos?catalog=locations')
-  await page.getByRole('button', { name: 'Agregar' }).click()
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
   const locationDialog = page.getByRole('dialog')
   await locationDialog.getByLabel('Edificio').selectOption({ label: building })
   await locationDialog.getByLabel('Nombre').fill(location)
