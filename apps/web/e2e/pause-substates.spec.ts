@@ -88,27 +88,38 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await expect(page.getByText('Sin subestado').first()).toBeVisible()
   await expect(page.getByRole('button', { name: 'Reanudar' })).toHaveCount(0)
 
-  // Avanza por el flujo. La salida no aparece hasta llegar al paso que la habilita.
-  for (const step of [
-    'Por solicitar',
-    'Con proveedor',
-    'Solicitado',
-    'En cotización',
-    'Cotización aprobada',
-    'Compra externa',
-    'En tránsito',
-  ]) {
-    await page.getByRole('button', { name: 'Avanzar subestado' }).click()
-    await page.getByLabel('Siguiente subestado').selectOption({ label: step })
-    await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
-    await expect(page.getByText(step).first()).toBeVisible()
-  }
+  // El primer paso no habilita la reanudación: solo describe el avance.
+  await page.getByRole('button', { name: 'Avanzar subestado' }).click()
+  await page
+    .getByLabel('Siguiente subestado')
+    .selectOption({ label: 'Solicitado' })
+  await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
+  await expect(page.getByText('Solicitado').first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Reanudar' })).toHaveCount(0)
 
-  // En tránsito ya hay una salida: solo entonces se ofrece reanudar.
+  // El segundo paso habilita las salidas.
+  await page.getByRole('button', { name: 'Avanzar subestado' }).click()
+  await page
+    .getByLabel('Siguiente subestado')
+    .selectOption({ label: 'En compra externa o cotización' })
+  await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
   await expect(page.getByText('Salidas disponibles').first()).toBeVisible()
   await page.getByRole('button', { name: 'Reanudar' }).click()
   await page.getByLabel('Salida').selectOption({ label: 'Recibido' })
   await clickAndWait(page, 'Confirmar', 'ticket_resume')
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
   await expect(page.getByText('Cerrada con: Recibido').first()).toBeVisible()
+
+  // Un motivo con salida directa se reanuda sin recorrer pasos.
+  await page.getByRole('button', { name: 'Pausar' }).click()
+  await page.getByLabel('Motivo').selectOption({ label: 'Falta de personal' })
+  await clickAndWait(page, 'Confirmar', 'ticket_pause')
+  await expect(page.getByRole('button', { name: 'Reanudar' })).toBeVisible()
+  await page.getByRole('button', { name: 'Reanudar' }).click()
+  await page.getByLabel('Salida').selectOption({ label: 'Personal disponible' })
+  await clickAndWait(page, 'Confirmar', 'ticket_resume')
+  await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(
+    page.getByText('Cerrada con: Personal disponible').first(),
+  ).toBeVisible()
 })

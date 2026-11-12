@@ -164,35 +164,85 @@ grant select, insert, update, delete on public.pause_transitions to axia_app;
 grant execute on function public.pause_transitions_validate() to axia_app;
 grant execute on function public.reasons_set_pause_step_kind() to axia_app;
 
--- Clasificación de los subestados existentes. Los nombres son los de la
--- semilla de referencia; las instalaciones nuevas reciben el catálogo completo.
-update public.reasons
-set pause_step_kind = 'progress'
-where use = 'pause'
-  and parent_id is not null
-  and pause_step_kind is null;
 
-update public.reasons
-set pause_step_kind = 'exit'
-where use = 'pause'
-  and parent_id is not null
-  and name in (
-    'Recibido',
-    'Personal disponible',
-    'Servicio del proveedor concluido',
-    'Acceso disponible',
-    'Autorización recibida',
-    'Herramienta disponible',
-    'Condiciones restablecidas',
-    'Tiquet relacionado concluido',
-    'Información recibida',
-    'Fecha acordada alcanzada'
-  );
+-- Semilla operativa: máximo dos pasos de avance por motivo y salidas directas
+-- donde la condición puede resolverse sin seguimiento. El administrador puede
+-- agregar más pasos o salidas desde el editor de flujo.
+create temporary table pause_seed_nodes (
+  root_name text not null,
+  name text not null,
+  kind public.pause_step_kind not null
+) on commit drop;
 
--- Motivos nuevos que cubren situaciones frecuentes no incluidas en la semilla
--- original. Cada uno nace con su secuencia y su salida.
+insert into pause_seed_nodes (root_name, name, kind) values
+  ('Falta de material', 'Solicitado', 'progress'),
+  ('Falta de material', 'En compra externa o cotización', 'progress'),
+  ('Falta de material', 'Recibido', 'exit'),
+  ('Falta de material', 'Sustituido', 'exit'),
+
+  ('Falta de personal', 'Cobertura solicitada', 'progress'),
+  ('Falta de personal', 'Personal disponible', 'exit'),
+  ('Falta de personal', 'Apoyo externo disponible', 'exit'),
+
+  ('Proveedor o contratista externo', 'Contactado', 'progress'),
+  ('Proveedor o contratista externo', 'Visita agendada', 'progress'),
+  ('Proveedor o contratista externo', 'Servicio concluido', 'exit'),
+
+  ('Acceso al área', 'Acceso gestionado', 'progress'),
+  ('Acceso al área', 'Acceso disponible', 'exit'),
+
+  ('Autorización', 'Trámite en revisión', 'progress'),
+  ('Autorización', 'Autorización recibida', 'exit'),
+  ('Autorización', 'Autorización condicionada', 'exit'),
+
+  ('Herramienta o equipo especial', 'Herramienta solicitada', 'progress'),
+  ('Herramienta o equipo especial', 'Herramienta disponible', 'exit'),
+  ('Herramienta o equipo especial', 'Herramienta sustituta disponible', 'exit'),
+
+  ('Condiciones externas', 'Condiciones en observación', 'progress'),
+  ('Condiciones externas', 'Condiciones restablecidas', 'exit'),
+
+  ('Dependencia de otro tiquet', 'Tiquet relacionado en proceso', 'progress'),
+  ('Dependencia de otro tiquet', 'Tiquet relacionado concluido', 'exit'),
+
+  ('Esperando información del solicitante', 'Información solicitada', 'progress'),
+  ('Esperando información del solicitante', 'Información recibida', 'exit'),
+  ('Esperando información del solicitante', 'Información parcial recibida', 'exit'),
+
+  ('Programado', 'Fecha acordada', 'progress'),
+  ('Programado', 'Fecha acordada alcanzada', 'exit'),
+
+  ('Diagnóstico especializado', 'Prueba solicitada', 'progress'),
+  ('Diagnóstico especializado', 'Diagnóstico concluido', 'exit'),
+
+  ('Permiso o trámite', 'Trámite presentado', 'progress'),
+  ('Permiso o trámite', 'Permiso otorgado', 'exit'),
+  ('Permiso o trámite', 'Permiso condicionado', 'exit'),
+
+  ('Condición insegura', 'Medidas en ejecución', 'progress'),
+  ('Condición insegura', 'Área segura', 'exit'),
+
+  ('Documentación técnica', 'Documento solicitado', 'progress'),
+  ('Documentación técnica', 'Documentación disponible', 'exit'),
+
+  ('Equipo de acceso', 'Equipo solicitado', 'progress'),
+  ('Equipo de acceso', 'Acceso listo', 'exit'),
+
+  ('Traslado de personal', 'Traslado programado', 'progress'),
+  ('Traslado de personal', 'Personal en sitio', 'exit');
+
 insert into public.reasons (use, name, pause_step_kind)
 values
+  ('pause', 'Falta de material', null),
+  ('pause', 'Falta de personal', null),
+  ('pause', 'Proveedor o contratista externo', null),
+  ('pause', 'Acceso al área', null),
+  ('pause', 'Autorización', null),
+  ('pause', 'Herramienta o equipo especial', null),
+  ('pause', 'Condiciones externas', null),
+  ('pause', 'Dependencia de otro tiquet', null),
+  ('pause', 'Esperando información del solicitante', null),
+  ('pause', 'Programado', null),
   ('pause', 'Diagnóstico especializado', null),
   ('pause', 'Permiso o trámite', null),
   ('pause', 'Condición insegura', null),
@@ -202,68 +252,50 @@ values
 on conflict (use, parent_id, name) do nothing;
 
 insert into public.reasons (use, parent_id, name, pause_step_kind)
-select 'pause', root.id, node.name, node.kind::public.pause_step_kind
-from (values
-  ('Falta de material', 'En almacén central', 'progress'),
-  ('Falta de material', 'En importación o aduana', 'progress'),
-  ('Falta de personal', 'Personal en otra atención', 'progress'),
-  ('Falta de personal', 'Turno no cubierto', 'progress'),
-  ('Falta de personal', 'Cobertura solicitada', 'progress'),
-  ('Falta de personal', 'Cobertura aprobada', 'progress'),
-  ('Falta de personal', 'Capacitación programada', 'progress'),
-  ('Falta de personal', 'Capacitación completada', 'progress'),
-  ('Falta de personal', 'Especialista contactado', 'progress'),
-  ('Falta de personal', 'Especialista en sitio', 'progress'),
-  ('Proveedor o contratista externo', 'Cotización solicitada', 'progress'),
-  ('Proveedor o contratista externo', 'Cotización recibida', 'progress'),
-  ('Proveedor o contratista externo', 'Orden de servicio emitida', 'progress'),
-  ('Proveedor o contratista externo', 'Servicio en ejecución', 'progress'),
-  ('Acceso al área', 'Solicitud de acceso enviada', 'progress'),
-  ('Acceso al área', 'Autorización de acceso pendiente', 'progress'),
-  ('Acceso al área', 'Área en liberación', 'progress'),
-  ('Autorización', 'Presupuesto aprobado', 'progress'),
-  ('Herramienta o equipo especial', 'Herramienta solicitada', 'progress'),
-  ('Herramienta o equipo especial', 'Calibración pendiente', 'progress'),
-  ('Herramienta o equipo especial', 'Herramienta en sitio', 'progress'),
-  ('Condiciones externas', 'Paro de planta', 'progress'),
-  ('Condiciones externas', 'Restricción vial', 'progress'),
-  ('Dependencia de otro tiquet', 'Tiquet relacionado en proceso', 'progress'),
-  ('Dependencia de otro tiquet', 'Tiquet relacionado en validación', 'progress'),
-  ('Esperando información del solicitante', 'Recordatorio enviado', 'progress'),
-  ('Programado', 'Fecha propuesta', 'progress'),
-  ('Programado', 'Fecha acordada', 'progress'),
-  ('Diagnóstico especializado', 'Prueba solicitada', 'progress'),
-  ('Diagnóstico especializado', 'Prueba programada', 'progress'),
-  ('Diagnóstico especializado', 'Prueba realizada', 'progress'),
-  ('Diagnóstico especializado', 'Resultados recibidos', 'progress'),
-  ('Diagnóstico especializado', 'Diagnóstico concluido', 'exit'),
-  ('Permiso o trámite', 'Solicitud presentada', 'progress'),
-  ('Permiso o trámite', 'En revisión', 'progress'),
-  ('Permiso o trámite', 'Observaciones atendidas', 'progress'),
-  ('Permiso o trámite', 'Derechos pagados', 'progress'),
-  ('Permiso o trámite', 'Permiso otorgado', 'exit'),
-  ('Condición insegura', 'Área delimitada', 'progress'),
-  ('Condición insegura', 'Riesgo evaluado', 'progress'),
-  ('Condición insegura', 'Medidas aplicadas', 'progress'),
-  ('Condición insegura', 'Área segura', 'exit'),
-  ('Documentación técnica', 'Documento solicitado', 'progress'),
-  ('Documentación técnica', 'Documento recibido', 'progress'),
-  ('Documentación técnica', 'Documento validado', 'progress'),
-  ('Documentación técnica', 'Documentación disponible', 'exit'),
-  ('Equipo de acceso', 'Equipo solicitado', 'progress'),
-  ('Equipo de acceso', 'Equipo en sitio', 'progress'),
-  ('Equipo de acceso', 'Equipo inspeccionado', 'progress'),
-  ('Equipo de acceso', 'Acceso listo', 'exit'),
-  ('Traslado de personal', 'Traslado solicitado', 'progress'),
-  ('Traslado de personal', 'Viático autorizado', 'progress'),
-  ('Traslado de personal', 'Traslado programado', 'progress'),
-  ('Traslado de personal', 'Personal en sitio', 'exit')
-) as node (root_name, name, kind)
+select 'pause', root.id, node.name, node.kind
+from pause_seed_nodes node
 join public.reasons root
   on root.use = 'pause'
   and root.parent_id is null
   and root.name = node.root_name
-on conflict (use, parent_id, name) do nothing;
+on conflict (use, parent_id, name) do update
+  set pause_step_kind = excluded.pause_step_kind;
+
+delete from public.pause_transitions;
+
+do $$
+declare
+  removed integer;
+begin
+  if not exists (select 1 from public.ticket_pauses limit 1) then
+    -- Instalación sin historial: retira los nodos del catálogo anterior que no
+    -- pertenecen a la semilla operativa. Se eliminan de hoja hacia la raíz.
+    loop
+      delete from public.reasons r
+      where r.use = 'pause'
+        and r.parent_id is not null
+        and not exists (
+          select 1 from pause_seed_nodes node where node.name = r.name
+        )
+        and not exists (
+          select 1 from public.reasons child where child.parent_id = r.id
+        );
+      get diagnostics removed = row_count;
+      exit when removed = 0;
+    end loop;
+  else
+    -- Instalación con historial: conserva los tiquets y desactiva los nodos
+    -- que no forman parte de la semilla operativa.
+    update public.reasons r
+    set active = false
+    where r.use = 'pause'
+      and r.parent_id is not null
+      and not exists (
+        select 1 from pause_seed_nodes node where node.name = r.name
+      );
+  end if;
+end
+$$;
 
 alter table public.reasons
   drop constraint if exists reasons_pause_step_kind_check;
@@ -275,137 +307,84 @@ alter table public.reasons
     or (use = 'pause' and parent_id is not null and pause_step_kind is not null)
   );
 
--- Aristas del flujo. La raíz encabeza la secuencia; cada paso de avance tiene
--- al menos una arista y las salidas solo aparecen al final de su rama.
+-- Aristas del flujo. La raíz puede saltar directo a una salida o a su primer
+-- paso de avance; los demás motivos conservan dos pasos como máximo.
 with edge (root_name, from_name, to_name) as (
   values
-    ('Falta de material', 'Falta de material', 'Por solicitar'),
-    ('Falta de material', 'Por solicitar', 'Con proveedor'),
-    ('Falta de material', 'Por solicitar', 'Sin proveedor'),
-    ('Falta de material', 'Con proveedor', 'Solicitado'),
-    ('Falta de material', 'Sin proveedor', 'Solicitado'),
-    ('Falta de material', 'Solicitado', 'En cotización'),
-    ('Falta de material', 'En cotización', 'Cotización aprobada'),
-    ('Falta de material', 'Cotización aprobada', 'Compra externa'),
-    ('Falta de material', 'Cotización aprobada', 'Salida de almacén'),
-    ('Falta de material', 'Compra externa', 'En importación o aduana'),
-    ('Falta de material', 'Compra externa', 'En tránsito'),
-    ('Falta de material', 'En importación o aduana', 'En tránsito'),
-    ('Falta de material', 'Salida de almacén', 'En almacén central'),
-    ('Falta de material', 'En almacén central', 'En tránsito'),
-    ('Falta de material', 'En tránsito', 'Recibido'),
+    ('Falta de material', 'Falta de material', 'Solicitado'),
+    ('Falta de material', 'Solicitado', 'En compra externa o cotización'),
+    ('Falta de material', 'En compra externa o cotización', 'Recibido'),
+    ('Falta de material', 'En compra externa o cotización', 'Sustituido'),
 
-    ('Falta de personal', 'Falta de personal', 'Sin técnico disponible'),
-    ('Falta de personal', 'Sin técnico disponible', 'Personal en otra atención'),
-    ('Falta de personal', 'Sin técnico disponible', 'Turno no cubierto'),
-    ('Falta de personal', 'Sin técnico disponible', 'Técnico no capacitado'),
-    ('Falta de personal', 'Sin técnico disponible', 'Requiere especialista'),
-    ('Falta de personal', 'Personal en otra atención', 'Personal disponible'),
-    ('Falta de personal', 'Turno no cubierto', 'Cobertura solicitada'),
-    ('Falta de personal', 'Cobertura solicitada', 'Cobertura aprobada'),
-    ('Falta de personal', 'Cobertura aprobada', 'Personal disponible'),
-    ('Falta de personal', 'Técnico no capacitado', 'Capacitación programada'),
-    ('Falta de personal', 'Capacitación programada', 'Capacitación completada'),
-    ('Falta de personal', 'Capacitación completada', 'Personal disponible'),
-    ('Falta de personal', 'Requiere especialista', 'Especialista contactado'),
-    ('Falta de personal', 'Especialista contactado', 'Especialista en sitio'),
-    ('Falta de personal', 'Especialista en sitio', 'Personal disponible'),
+    ('Falta de personal', 'Falta de personal', 'Personal disponible'),
+    ('Falta de personal', 'Falta de personal', 'Cobertura solicitada'),
+    ('Falta de personal', 'Cobertura solicitada', 'Personal disponible'),
+    ('Falta de personal', 'Cobertura solicitada', 'Apoyo externo disponible'),
 
-    ('Proveedor o contratista externo', 'Proveedor o contratista externo', 'Por contactar'),
-    ('Proveedor o contratista externo', 'Por contactar', 'Contactado'),
-    ('Proveedor o contratista externo', 'Contactado', 'Cotización solicitada'),
+    ('Proveedor o contratista externo', 'Proveedor o contratista externo', 'Servicio concluido'),
+    ('Proveedor o contratista externo', 'Proveedor o contratista externo', 'Contactado'),
     ('Proveedor o contratista externo', 'Contactado', 'Visita agendada'),
-    ('Proveedor o contratista externo', 'Contactado', 'En garantía'),
-    ('Proveedor o contratista externo', 'Cotización solicitada', 'Cotización recibida'),
-    ('Proveedor o contratista externo', 'Cotización recibida', 'Orden de servicio emitida'),
-    ('Proveedor o contratista externo', 'Orden de servicio emitida', 'Visita agendada'),
-    ('Proveedor o contratista externo', 'Visita agendada', 'Servicio en ejecución'),
-    ('Proveedor o contratista externo', 'Servicio en ejecución', 'Servicio del proveedor concluido'),
-    ('Proveedor o contratista externo', 'En garantía', 'Servicio del proveedor concluido'),
+    ('Proveedor o contratista externo', 'Contactado', 'Servicio concluido'),
+    ('Proveedor o contratista externo', 'Visita agendada', 'Servicio concluido'),
 
-    ('Acceso al área', 'Acceso al área', 'Sin acceso'),
-    ('Acceso al área', 'Sin acceso', 'Solicitud de acceso enviada'),
-    ('Acceso al área', 'Sin acceso', 'Área ocupada'),
-    ('Acceso al área', 'Sin acceso', 'Esperando al solicitante'),
-    ('Acceso al área', 'Sin acceso', 'Fuera de horario permitido'),
-    ('Acceso al área', 'Solicitud de acceso enviada', 'Autorización de acceso pendiente'),
-    ('Acceso al área', 'Autorización de acceso pendiente', 'Acceso disponible'),
-    ('Acceso al área', 'Área ocupada', 'Área en liberación'),
-    ('Acceso al área', 'Área en liberación', 'Acceso disponible'),
-    ('Acceso al área', 'Esperando al solicitante', 'Acceso disponible'),
-    ('Acceso al área', 'Fuera de horario permitido', 'Acceso disponible'),
+    ('Acceso al área', 'Acceso al área', 'Acceso disponible'),
+    ('Acceso al área', 'Acceso al área', 'Acceso gestionado'),
+    ('Acceso al área', 'Acceso gestionado', 'Acceso disponible'),
 
-    ('Autorización', 'Autorización', 'Esperando aprobación de presupuesto'),
-    ('Autorización', 'Esperando aprobación de presupuesto', 'Presupuesto aprobado'),
-    ('Autorización', 'Presupuesto aprobado', 'Esperando aprobación de dirección'),
-    ('Autorización', 'Esperando aprobación de dirección', 'Autorización recibida'),
+    ('Autorización', 'Autorización', 'Autorización recibida'),
+    ('Autorización', 'Autorización', 'Trámite en revisión'),
+    ('Autorización', 'Trámite en revisión', 'Autorización recibida'),
+    ('Autorización', 'Trámite en revisión', 'Autorización condicionada'),
 
-    ('Herramienta o equipo especial', 'Herramienta o equipo especial', 'Por conseguir'),
-    ('Herramienta o equipo especial', 'Por conseguir', 'Herramienta solicitada'),
-    ('Herramienta o equipo especial', 'Herramienta solicitada', 'En renta o préstamo'),
-    ('Herramienta o equipo especial', 'Herramienta solicitada', 'Calibración pendiente'),
-    ('Herramienta o equipo especial', 'En renta o préstamo', 'Herramienta en sitio'),
-    ('Herramienta o equipo especial', 'Calibración pendiente', 'Herramienta en sitio'),
-    ('Herramienta o equipo especial', 'Herramienta en sitio', 'Herramienta disponible'),
+    ('Herramienta o equipo especial', 'Herramienta o equipo especial', 'Herramienta disponible'),
+    ('Herramienta o equipo especial', 'Herramienta o equipo especial', 'Herramienta solicitada'),
+    ('Herramienta o equipo especial', 'Herramienta solicitada', 'Herramienta disponible'),
+    ('Herramienta o equipo especial', 'Herramienta solicitada', 'Herramienta sustituta disponible'),
 
-    ('Condiciones externas', 'Condiciones externas', 'Clima'),
-    ('Condiciones externas', 'Condiciones externas', 'Falla de servicios'),
-    ('Condiciones externas', 'Condiciones externas', 'Paro de planta'),
-    ('Condiciones externas', 'Condiciones externas', 'Restricción vial'),
-    ('Condiciones externas', 'Clima', 'Condiciones restablecidas'),
-    ('Condiciones externas', 'Falla de servicios', 'Condiciones restablecidas'),
-    ('Condiciones externas', 'Paro de planta', 'Condiciones restablecidas'),
-    ('Condiciones externas', 'Restricción vial', 'Condiciones restablecidas'),
+    ('Condiciones externas', 'Condiciones externas', 'Condiciones restablecidas'),
+    ('Condiciones externas', 'Condiciones externas', 'Condiciones en observación'),
+    ('Condiciones externas', 'Condiciones en observación', 'Condiciones restablecidas'),
 
-    ('Dependencia de otro tiquet', 'Dependencia de otro tiquet', 'Pendiente de otro tiquet'),
-    ('Dependencia de otro tiquet', 'Pendiente de otro tiquet', 'Tiquet relacionado en proceso'),
-    ('Dependencia de otro tiquet', 'Tiquet relacionado en proceso', 'Tiquet relacionado en validación'),
-    ('Dependencia de otro tiquet', 'Tiquet relacionado en validación', 'Tiquet relacionado concluido'),
+    ('Dependencia de otro tiquet', 'Dependencia de otro tiquet', 'Tiquet relacionado concluido'),
+    ('Dependencia de otro tiquet', 'Dependencia de otro tiquet', 'Tiquet relacionado en proceso'),
+    ('Dependencia de otro tiquet', 'Tiquet relacionado en proceso', 'Tiquet relacionado concluido'),
 
+    ('Esperando información del solicitante', 'Esperando información del solicitante', 'Información recibida'),
     ('Esperando información del solicitante', 'Esperando información del solicitante', 'Información solicitada'),
-    ('Esperando información del solicitante', 'Información solicitada', 'Recordatorio enviado'),
-    ('Esperando información del solicitante', 'Recordatorio enviado', 'Información recibida'),
+    ('Esperando información del solicitante', 'Información solicitada', 'Información recibida'),
+    ('Esperando información del solicitante', 'Información solicitada', 'Información parcial recibida'),
 
-    ('Programado', 'Programado', 'Fecha pendiente'),
-    ('Programado', 'Fecha pendiente', 'Fecha propuesta'),
-    ('Programado', 'Fecha propuesta', 'Fecha acordada'),
+    ('Programado', 'Programado', 'Fecha acordada alcanzada'),
+    ('Programado', 'Programado', 'Fecha acordada'),
     ('Programado', 'Fecha acordada', 'Fecha acordada alcanzada'),
 
+    ('Diagnóstico especializado', 'Diagnóstico especializado', 'Diagnóstico concluido'),
     ('Diagnóstico especializado', 'Diagnóstico especializado', 'Prueba solicitada'),
-    ('Diagnóstico especializado', 'Prueba solicitada', 'Prueba programada'),
-    ('Diagnóstico especializado', 'Prueba programada', 'Prueba realizada'),
-    ('Diagnóstico especializado', 'Prueba realizada', 'Resultados recibidos'),
-    ('Diagnóstico especializado', 'Resultados recibidos', 'Diagnóstico concluido'),
+    ('Diagnóstico especializado', 'Prueba solicitada', 'Diagnóstico concluido'),
 
-    ('Permiso o trámite', 'Permiso o trámite', 'Solicitud presentada'),
-    ('Permiso o trámite', 'Solicitud presentada', 'En revisión'),
-    ('Permiso o trámite', 'En revisión', 'Observaciones atendidas'),
-    ('Permiso o trámite', 'Observaciones atendidas', 'Derechos pagados'),
-    ('Permiso o trámite', 'Derechos pagados', 'Permiso otorgado'),
+    ('Permiso o trámite', 'Permiso o trámite', 'Permiso otorgado'),
+    ('Permiso o trámite', 'Permiso o trámite', 'Trámite presentado'),
+    ('Permiso o trámite', 'Trámite presentado', 'Permiso otorgado'),
+    ('Permiso o trámite', 'Trámite presentado', 'Permiso condicionado'),
 
-    ('Condición insegura', 'Condición insegura', 'Área delimitada'),
-    ('Condición insegura', 'Área delimitada', 'Riesgo evaluado'),
-    ('Condición insegura', 'Riesgo evaluado', 'Medidas aplicadas'),
-    ('Condición insegura', 'Medidas aplicadas', 'Área segura'),
+    ('Condición insegura', 'Condición insegura', 'Área segura'),
+    ('Condición insegura', 'Condición insegura', 'Medidas en ejecución'),
+    ('Condición insegura', 'Medidas en ejecución', 'Área segura'),
 
+    ('Documentación técnica', 'Documentación técnica', 'Documentación disponible'),
     ('Documentación técnica', 'Documentación técnica', 'Documento solicitado'),
-    ('Documentación técnica', 'Documento solicitado', 'Documento recibido'),
-    ('Documentación técnica', 'Documento recibido', 'Documento validado'),
-    ('Documentación técnica', 'Documento validado', 'Documentación disponible'),
+    ('Documentación técnica', 'Documento solicitado', 'Documentación disponible'),
 
+    ('Equipo de acceso', 'Equipo de acceso', 'Acceso listo'),
     ('Equipo de acceso', 'Equipo de acceso', 'Equipo solicitado'),
-    ('Equipo de acceso', 'Equipo solicitado', 'Equipo en sitio'),
-    ('Equipo de acceso', 'Equipo en sitio', 'Equipo inspeccionado'),
-    ('Equipo de acceso', 'Equipo inspeccionado', 'Acceso listo'),
+    ('Equipo de acceso', 'Equipo solicitado', 'Acceso listo'),
 
-    ('Traslado de personal', 'Traslado de personal', 'Traslado solicitado'),
-    ('Traslado de personal', 'Traslado solicitado', 'Viático autorizado'),
-    ('Traslado de personal', 'Viático autorizado', 'Traslado programado'),
+    ('Traslado de personal', 'Traslado de personal', 'Personal en sitio'),
+    ('Traslado de personal', 'Traslado de personal', 'Traslado programado'),
     ('Traslado de personal', 'Traslado programado', 'Personal en sitio')
 ),
 resolved as (
   select
-    root.id as root_id,
     coalesce(source.id, root.id) as from_id,
     target.id as to_id
   from edge e
@@ -415,11 +394,11 @@ resolved as (
     and root.name = e.root_name
   left join public.reasons source
     on source.use = 'pause'
-    and source.parent_id is not null
+    and source.parent_id = root.id
     and source.name = e.from_name
   join public.reasons target
     on target.use = 'pause'
-    and target.parent_id is not null
+    and target.parent_id = root.id
     and target.name = e.to_name
 )
 insert into public.pause_transitions (from_reason_id, to_reason_id)

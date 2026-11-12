@@ -76,17 +76,22 @@ function EdgeRow({
 
 function FlowActions({
   isSaving,
-  onAdd,
+  onAddAdvance,
+  onAddExit,
   onSave,
 }: {
   isSaving: boolean
-  onAdd: () => void
+  onAddAdvance: () => void
+  onAddExit: () => void
   onSave: () => void
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="button" variant="outline" onClick={onAdd}>
-        {messages.add}
+      <Button type="button" variant="outline" onClick={onAddAdvance}>
+        {messages.addAdvance}
+      </Button>
+      <Button type="button" variant="outline" onClick={onAddExit}>
+        {messages.addExit}
       </Button>
       <Button type="button" onClick={onSave} disabled={isSaving}>
         {isSaving ? adminMessages.actions.saving : messages.save}
@@ -133,9 +138,9 @@ function useFlowEditor(flow: PauseFlow) {
     setEdges((current) => current.filter((_, position) => position !== index))
   }
 
-  function add() {
+  function add(kind: 'progress' | 'exit') {
     const target = flow.nodes.find(
-      (node) => node.kind === 'progress' && node.parentId !== null,
+      (node) => node.kind === kind && node.parentId !== null,
     )
     if (!target) return
     setSaved(false)
@@ -205,7 +210,8 @@ function FlowEditor({ flow }: { flow: PauseFlow }) {
       ) : null}
       <FlowActions
         isSaving={editor.isSaving}
-        onAdd={editor.add}
+        onAddAdvance={() => editor.add('progress')}
+        onAddExit={() => editor.add('exit')}
         onSave={() => void editor.save()}
       />
     </div>

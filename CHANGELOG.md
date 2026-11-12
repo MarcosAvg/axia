@@ -16,7 +16,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 ### Cambiado
 
 - El catálogo de pausa ya no acepta cualquier descendiente de la raíz al reanudar. La semilla
-  incluye dieciséis motivos con sus flujos y salidas alcanzables.
+  incluye dieciséis motivos con salidas directas y como máximo dos pasos de avance; el resto se
+  configura desde el editor de flujo.
 
 ## [0.23.0] - 2026-11-11
 

@@ -29,10 +29,11 @@ terminar ambas en `En tránsito` y luego en `Recibido`; un árbol tipado obligar
    avances; `ticket_pauses.closed_reason_id` guarda la salida. El tiempo por subestado no cambia.
 6. **El flujo va siempre hacia delante.** El disparador de la tabla rechaza ciclos. Si más adelante
    hace falta retroceder, se cambia con una migración y un ADR nuevo.
-7. **La semilla cubre los motivos frecuentes.** Se clasifican las salidas existentes y se agregan
-   motivos y pasos para diagnóstico especializado, permisos y trámites, condiciones inseguras,
-   documentación técnica, equipo de acceso y traslado de personal. Cada motivo nace con al menos
-   una salida alcanzable.
+7. **La semilla es operativa, no exhaustiva.** Cada motivo nace con una salida alcanzable, salidas
+   directas donde la condición puede resolverse sin seguimiento y como máximo dos pasos de avance.
+   El administrador agrega más pasos o salidas desde el editor cuando su operación lo necesite. La
+   migración normaliza el catálogo anterior: en una instalación sin historial elimina los nodos
+   sobrantes y en una con historial los deja inactivos.
 8. **Administración edita el flujo por motivo.** Se agrega el tipo al formulario de motivos y un
    editor de transiciones. No se puede cambiar el flujo de un motivo con una pausa abierta. La
    exportación e importación incluyen una hoja «Transiciones de pausa» con Motivo, Desde y Hacia.

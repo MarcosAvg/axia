@@ -56,7 +56,8 @@ Para un motivo de pausa nuevo, crear primero la raíz, después sus pasos de ava
 salida. Cada subestado se marca como **avance** o **salida**; una salida no puede tener siguientes.
 El editor **Flujo de pausa** conecta el motivo con sus pasos y cada paso con el siguiente o con una
 salida. El flujo siempre avanza y cada motivo debe tener una salida alcanzable; si no, no se ofrece
-al pausar. Los dieciséis motivos preconfigurados ya traen su flujo y sus salidas. El padre del árbol
+al pausar. Los dieciséis motivos preconfigurados ya traen su flujo, con salidas directas y como
+máximo dos pasos de avance. El padre del árbol
 solo organiza el catálogo: no define el orden de la pausa. El padre no puede ser el mismo motivo ni
 uno de sus descendientes. Los motivos nuevos se crean activos por defecto.
 

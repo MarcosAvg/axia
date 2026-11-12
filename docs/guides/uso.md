@@ -69,7 +69,8 @@ captura.
 - **Registrar avance:** adjunta evidencia del trabajo y, si hace falta, describe el avance.
 - **Pausar:** elige un motivo; puedes añadir nota y fecha estimada. Usa **Avanzar subestado**
   para registrar el siguiente paso del flujo. Al **Reanudar**, selecciona la salida que explica
-  cómo terminó la pausa. Solo aparecen las opciones habilitadas desde el subestado actual.
+  cómo terminó la pausa. Solo aparecen las opciones habilitadas desde el subestado actual. Si el
+  motivo tiene una salida directa, puedes reanudar sin recorrer pasos.
 - **Marcar atendido:** adjunta evidencia **Después** y describe el trabajo. Completa los demás
   campos del formulario.
 

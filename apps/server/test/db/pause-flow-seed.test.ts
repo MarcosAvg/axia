@@ -45,7 +45,38 @@ it('separa los pasos de avance de las salidas', async () => {
           and pause_step_kind = 'exit'
           and active
       `),
-  ).toBe(16)
+  ).toBe(22)
+})
+
+it('limita los motivos predefinidos a dos pasos de avance', async () => {
+  const result = await owner.query<{ name: string; steps: number }>(`
+    select root.name, count(step.id)::int as steps
+    from public.reasons root
+    join public.reasons step
+      on step.parent_id = root.id
+      and step.use = 'pause'
+      and step.pause_step_kind = 'progress'
+      and step.active
+    where root.use = 'pause' and root.parent_id is null and root.active
+    group by root.id, root.name
+    having count(step.id) > 2
+    order by root.name
+  `)
+  expect(result.rows).toEqual([])
+})
+
+it('ofrece salidas directas desde el motivo en la mayoría de los casos', async () => {
+  expect(
+    await scalar(`
+      select count(*)::text as value
+      from public.pause_transitions t
+      join public.reasons source on source.id = t.from_reason_id
+      join public.reasons target on target.id = t.to_reason_id
+      where source.use = 'pause' and source.parent_id is null
+        and source.active and target.active
+        and target.pause_step_kind = 'exit'
+    `),
+  ).toBe(15)
 })
 
 it('no deja pasos de avance sin una arista de salida', async () => {
