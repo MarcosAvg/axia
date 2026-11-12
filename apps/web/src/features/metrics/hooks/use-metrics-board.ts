@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useTimeMeasure } from '@/components/shared/time-measure-context'
+import type { TimeMeasure } from '@/lib/time-measure'
 import {
   useBuildings,
   useCategories,
@@ -14,11 +16,14 @@ import type {
   SatisfactionSummary,
   SlaSummary,
 } from '../domain/metrics'
+import type { TimeMode } from '../domain/time-mode'
 import { formatRangeLabel, previousRange } from '../domain/period'
 import type { Comparison } from '../domain/period'
+import { useTimeMode } from './use-time-mode'
 import {
   useAuxiliaryByCategory,
   useByTechnician,
+  useDistributionProfile,
   useDuplicates,
   useMetricsSummary,
   usePausesByReason,
@@ -74,8 +79,12 @@ function buildCatalogs(options: {
 }
 
 /** Consultas del tablero, separadas del estado y los catálogos. */
-function useMetricsData(filters: MetricsFilters) {
-  const current = useMetricsSummary(filters)
+function useMetricsData(
+  filters: MetricsFilters,
+  mode: TimeMode,
+  measure: TimeMeasure,
+) {
+  const current = useMetricsSummary(filters, { measure, mode })
   const prevFilters = previousRange(filters)
   const previous = useMetricsSummary(prevFilters ?? EMPTY_FILTERS, {
     compact: true,
@@ -85,6 +94,7 @@ function useMetricsData(filters: MetricsFilters) {
     current,
     prevFilters,
     previous,
+    profile: useDistributionProfile(filters, mode),
     pauses: usePausesByReason(filters),
     duplicates: useDuplicates(filters),
     satisfaction: useSatisfaction(filters),
@@ -101,41 +111,31 @@ function useMetricsData(filters: MetricsFilters) {
   }
 }
 
-/** Estado y datos del tablero de métricas. */
-export function useMetricsBoard() {
-  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
-  const data = useMetricsData(filters)
-  const buildings = useBuildings()
-  const teams = useTeams()
-  const categories = useCategories()
-  const dependencies = useDependencies()
-  const requesters = useRequesters()
-
-  const catalogs = buildCatalogs({
-    buildings: buildings.data,
-    teams: teams.data,
-    categories: categories.data,
-    dependencies: dependencies.data,
-    requesters: requesters.data,
-  })
-  const comparison: Comparison | null =
-    data.prevFilters && data.previous.data
-      ? {
-          summary: data.previous.data.summary,
-          label: formatRangeLabel(data.prevFilters.from, data.prevFilters.to),
-        }
-      : null
-
+function boardResult(args: {
+  filters: MetricsFilters
+  setFilters: (value: MetricsFilters) => void
+  mode: TimeMode
+  changeMode: (mode: TimeMode) => void
+  measure: TimeMeasure
+  catalogs: FilterCatalogs
+  comparison: Comparison | null
+  data: ReturnType<typeof useMetricsData>
+}) {
+  const { data } = args
   return {
-    filters,
-    setFilters,
-    catalogs,
+    filters: args.filters,
+    setFilters: args.setFilters,
+    mode: args.mode,
+    changeMode: args.changeMode,
+    measure: args.measure,
+    catalogs: args.catalogs,
     summary: or(data.current.data?.summary, EMPTY_SUMMARY),
     volume: or(data.current.data?.volume, []),
     aging: or(data.current.data?.aging, []),
     agingBuckets: or(data.current.data?.agingBuckets, []),
-    comparison,
+    comparison: args.comparison,
     groups: or(data.current.data?.groups, []),
+    profile: or(data.profile.data, []),
     satisfactionDistribution: or(
       data.current.data?.satisfactionDistribution,
       [0, 0, 0, 0, 0],
@@ -161,4 +161,43 @@ export function useMetricsBoard() {
     rejectCancel: or(data.rejectCancel.data, []),
     routing: or(data.routing.data, EMPTY_ROUTING),
   }
+}
+
+/** Estado y datos del tablero de métricas. */
+export function useMetricsBoard() {
+  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
+  const { mode, changeMode } = useTimeMode(filters, setFilters)
+  const { measure } = useTimeMeasure()
+  const data = useMetricsData(filters, mode, measure)
+  const buildings = useBuildings()
+  const teams = useTeams()
+  const categories = useCategories()
+  const dependencies = useDependencies()
+  const requesters = useRequesters()
+
+  const catalogs = buildCatalogs({
+    buildings: buildings.data,
+    teams: teams.data,
+    categories: categories.data,
+    dependencies: dependencies.data,
+    requesters: requesters.data,
+  })
+  const comparison: Comparison | null =
+    data.prevFilters && data.previous.data
+      ? {
+          summary: data.previous.data.summary,
+          label: formatRangeLabel(data.prevFilters.from, data.prevFilters.to),
+        }
+      : null
+
+  return boardResult({
+    filters,
+    setFilters,
+    mode,
+    changeMode,
+    measure,
+    catalogs,
+    comparison,
+    data,
+  })
 }

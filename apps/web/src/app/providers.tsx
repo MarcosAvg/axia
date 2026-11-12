@@ -5,7 +5,7 @@ import { queryPersister, shouldPersistQuery } from '@/app/query-persister'
 import { PwaUpdatePrompt } from '@/app/pwa-update-prompt'
 import { queryClient } from '@/app/query-client'
 import { ThemeProvider } from '@/components/shared/theme-provider'
-import { TimeAggregationProvider } from '@/components/shared/time-aggregation-provider'
+import { TimeMeasureProvider } from '@/components/shared/time-measure-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/features/auth'
@@ -29,7 +29,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       }}
     >
       <ThemeProvider>
-        <TimeAggregationProvider>
+        <TimeMeasureProvider>
           <AuthProvider>
             <OfflineBootstrap />
             <TooltipProvider>
@@ -38,7 +38,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
               <Toaster />
             </TooltipProvider>
           </AuthProvider>
-        </TimeAggregationProvider>
+        </TimeMeasureProvider>
       </ThemeProvider>
     </PersistQueryClientProvider>
   )

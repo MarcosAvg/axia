@@ -1,4 +1,4 @@
-import { AggregationToggle } from '@/components/shared/aggregation-toggle'
+import { MeasureSelect } from '@/components/shared/measure-select'
 import { metricsMessages } from '../i18n'
 
 const t = metricsMessages.times
@@ -11,7 +11,7 @@ export function TimesHeader() {
         <h2 className="text-base font-medium">{t.title}</h2>
         <p className="text-xs text-muted-foreground">{t.titleHint}</p>
       </div>
-      <AggregationToggle />
+      <MeasureSelect />
     </div>
   )
 }

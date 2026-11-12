@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
-import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
-import { modeValue, totalInMode, type TimeMode } from '../domain/time-mode'
+import { useTimeMeasure } from '@/components/shared/time-measure-context'
+import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
+import { measureSample, measureValue, type TimeMode } from '../domain/time-mode'
 import type {
   Dimension,
   DimensionGroup,
   DimensionRow,
 } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
-import { formatMinutes, formatPercent } from '../domain/metrics'
+import { formatMinutes, formatPercent, MIN_SAMPLE } from '../domain/metrics'
 import { dimensionValueLabel, metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
@@ -19,66 +20,44 @@ const t = metricsMessages.times
 const k = metricsMessages.kpi
 
 const MEASURES = [
-  { key: 'avgActive', label: k.active },
-  { key: 'avgTotalAll', label: k.total },
-  { key: 'avgTotalClosed', label: k.resolution },
-  { key: 'avgResponse', label: t.phases.response },
-  { key: 'avgAssignment', label: t.phases.assignment },
-  { key: 'avgPendingTake', label: t.phases.pending_take },
-  { key: 'avgReassignment', label: metricsMessages.kpi.reassignment },
-  { key: 'avgValidation', label: t.phases.validation },
-  { key: 'avgPause', label: t.phases.pause },
-  { key: 'avgDormant', label: t.phases.dormant },
-  { key: 'avgClaim', label: t.phases.claim },
-  { key: 'avgWait', label: t.phases.wait },
+  { key: 'active', label: k.active },
+  { key: 'total', label: k.total },
+  { key: 'resolution', label: k.resolution },
+  { key: 'response', label: t.phases.response },
+  { key: 'assignment', label: t.phases.assignment },
+  { key: 'pending_take', label: t.phases.pending_take },
+  { key: 'reassignment', label: metricsMessages.kpi.reassignment },
+  { key: 'validation', label: t.phases.validation },
+  { key: 'pause', label: t.phases.pause },
+  { key: 'dormant', label: t.phases.dormant },
+  { key: 'claim', label: t.phases.claim },
+  { key: 'wait', label: t.phases.wait },
 ] as const
 
 type Measure = (typeof MEASURES)[number]['key']
 
-function measureValue(
+function valueOf(
   row: DimensionRow,
-  measure: Measure,
-  aggregation: 'average' | 'total',
+  key: Measure,
+  measure: TimeMeasure,
   mode: TimeMode,
 ) {
-  if (measure === 'avgTotalAll') {
-    return modeValue(
-      row as unknown as Record<string, number>,
-      'total',
-      mode,
-      aggregation,
-    )
-  }
-  if (measure === 'avgTotalClosed') {
-    return aggregation === 'total'
-      ? totalInMode(row.sumTotalClosed, row.sumTotalClosedLabor, mode)
-      : totalInMode(row.avgTotalClosed, row.avgTotalClosedLabor, mode)
-  }
-  const key = measure.replace(/^avg/, '')
-  const normalized = key[0]?.toLowerCase() + key.slice(1)
-  return modeValue(
+  return measureValue(
     row as unknown as Record<string, number>,
-    normalized,
+    key,
     mode,
-    aggregation,
+    measure,
   )
 }
 
-function timeColumns({
-  dimension,
-  measure,
-  max,
-  aggregation,
-  label,
-  mode,
-}: {
-  dimension: Dimension
-  measure: Measure
-  max: number
-  aggregation: 'average' | 'total'
-  label: string
-  mode: TimeMode
-}): DataTableColumn<DimensionRow>[] {
+function measureLabelOf(label: string, measure: TimeMeasure): string {
+  if (measure === 'average') return label
+  return `${label} (${metricsMessages.measure.tags[measure]})`
+}
+
+function identityColumns(
+  dimension: Dimension,
+): DataTableColumn<DimensionRow>[] {
   return [
     {
       id: 'name',
@@ -91,21 +70,73 @@ function timeColumns({
       header: metricsMessages.table.tickets,
       cell: (row) => row.tickets,
     },
-    {
-      id: 'measure',
-      header: label,
-      cell: (row) => {
-        const value = measureValue(row, measure, aggregation, mode)
+  ]
+}
+
+function sampleColumn(
+  measureKey: Measure,
+  measure: TimeMeasure,
+  mode: TimeMode,
+): DataTableColumn<DimensionRow> {
+  return {
+    id: 'sample',
+    header: t.sample,
+    hideBelow: 'lg',
+    cell: (row) =>
+      measureSample(
+        row as unknown as Record<string, number>,
+        measureKey,
+        measure,
+        mode,
+      ) ?? 0,
+  }
+}
+
+function measureColumn({
+  measureKey,
+  measure,
+  max,
+  label,
+  mode,
+}: {
+  measureKey: Measure
+  measure: TimeMeasure
+  max: number
+  label: string
+  mode: TimeMode
+}): DataTableColumn<DimensionRow> {
+  return {
+    id: 'measure',
+    header: label,
+    cell: (row) => {
+      const sample = measureSample(
+        row as unknown as Record<string, number>,
+        measureKey,
+        measure,
+        mode,
+      )
+      if (sample !== null && sample < MIN_SAMPLE) {
         return (
-          <BarCell
-            value={value}
-            max={max}
-            label={formatMinutes(value)}
-            className="min-w-44"
-          />
+          <span title={t.insufficientSample} className="text-muted-foreground">
+            —
+          </span>
         )
-      },
+      }
+      const value = valueOf(row, measureKey, measure, mode)
+      return (
+        <BarCell
+          value={value}
+          max={max}
+          label={formatMinutes(value)}
+          className="min-w-44"
+        />
+      )
     },
+  }
+}
+
+function rateColumns(): DataTableColumn<DimensionRow>[] {
+  return [
     {
       id: 'reassignment',
       header: metricsMessages.table.reassignment,
@@ -121,25 +152,42 @@ function timeColumns({
   ]
 }
 
-function measureLabelOf(measure: Measure, aggregation: 'average' | 'total') {
-  if (measure === 'avgActive') {
-    return aggregation === 'total' ? `${k.active} (acumulado)` : k.active
+function timeColumns({
+  dimension,
+  measureKey,
+  measure,
+  max,
+  label,
+  mode,
+}: {
+  dimension: Dimension
+  measureKey: Measure
+  measure: TimeMeasure
+  max: number
+  label: string
+  mode: TimeMode
+}): DataTableColumn<DimensionRow>[] {
+  const columns = identityColumns(dimension)
+  if (isRobustMeasure(measure)) {
+    columns.push(sampleColumn(measureKey, measure, mode))
   }
-  return MEASURES.find((item) => item.key === measure)?.label ?? measure
+  columns.push(measureColumn({ measureKey, measure, max, label, mode }))
+  columns.push(...rateColumns())
+  return columns
 }
 
 function MeasurePicker({
-  measure,
+  measureKey,
   onChange,
 }: {
-  measure: Measure
+  measureKey: Measure
   onChange: (measure: Measure) => void
 }) {
   return (
     <label className="flex items-center gap-2 text-xs text-muted-foreground">
       <span>{t.measure}</span>
       <select
-        value={measure}
+        value={measureKey}
         aria-label={t.measure}
         onChange={(event) => onChange(event.target.value as Measure)}
         className="h-11 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
@@ -154,7 +202,7 @@ function MeasurePicker({
   )
 }
 
-/** Tabla de tiempos por dimensión con selector de medida. */
+/** Tabla de tiempos por dimensión con selector de fase y medida global. */
 export function TimesDimensionTable({
   groups,
   mode,
@@ -163,34 +211,37 @@ export function TimesDimensionTable({
   mode: TimeMode
 }) {
   const [dimension, setDimension] = useState<Dimension>('category')
-  const [measure, setMeasure] = useState<Measure>('avgActive')
-  const { aggregation } = useTimeAggregation()
+  const [measureKey, setMeasureKey] = useState<Measure>('active')
+  const { measure } = useTimeMeasure()
   const rows = [...rowsByDimension(groups, dimension)].sort(
     (left, right) =>
-      measureValue(right, measure, aggregation, mode) -
-      measureValue(left, measure, aggregation, mode),
+      valueOf(right, measureKey, measure, mode) -
+      valueOf(left, measureKey, measure, mode),
   )
   const max = Math.max(
     1,
-    ...rows.map((row) => measureValue(row, measure, aggregation, mode)),
+    ...rows.map((row) => valueOf(row, measureKey, measure, mode)),
   )
-  const measureLabel = measureLabelOf(measure, aggregation)
+  const label = measureLabelOf(
+    MEASURES.find((item) => item.key === measureKey)?.label ?? measureKey,
+    measure,
+  )
   return (
     <ChartCard title={t.byDimension}>
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <DimensionPicker value={dimension} onChange={setDimension} />
-          <MeasurePicker measure={measure} onChange={setMeasure} />
+          <MeasurePicker measureKey={measureKey} onChange={setMeasureKey} />
         </div>
         <div className="max-h-80 overflow-auto">
           <DataTable
             columns={timeColumns({
               dimension,
-              mode,
+              measureKey,
               measure,
               max,
-              aggregation,
-              label: measureLabel,
+              label,
+              mode,
             })}
             rows={rows}
             getRowId={(row) => `${dimension}:${row.id}`}

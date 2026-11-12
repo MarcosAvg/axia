@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import type { MetricsFilters } from './filters.js'
+import type { MeasureStat, MetricsTimeMode } from './phase-columns.js'
 import {
   metricsAging,
   metricsAgingBuckets,
@@ -148,14 +149,21 @@ export async function metricsSummary(
   db: Database,
   actor: Actor,
   filters: MetricsFilters,
-  compact = false,
+  options: {
+    compact?: boolean
+    stat?: MeasureStat
+    timeMode?: MetricsTimeMode
+  } = {},
 ) {
+  const compact = options.compact ?? false
+  const stat = options.stat ?? 'average'
+  const timeMode = options.timeMode ?? 'calendar'
   const result = await db.execute(sql`
     with base as materialized (${metricsBase(actor, filters, 'ticket.view', { scope: 'all' })}),
     aging_base as materialized (
       ${metricsBase(actor, filters, 'ticket.view', { scope: 'all', ignorePeriod: true })}
     ),
-    grouped as (${metricsGroups(compact)}),
+    grouped as (${metricsGroups(compact, stat, timeMode)}),
     volume as (${metricsVolume(actor.timezone)}),
     aging as (${metricsAging()}),
     aging_buckets as (${metricsAgingBuckets()}),

@@ -1,7 +1,7 @@
 import type { DataTableColumn } from '@/components/shared/data-table'
 import type { DimensionRow } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
-import { modeValue, type TimeMode } from '../domain/time-mode'
+import { measureValue, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { StackedBarCell } from './bar-cell'
 
@@ -52,7 +52,7 @@ function timeColumn(
     hideBelow,
     cell: (row) =>
       formatMinutes(
-        modeValue(
+        measureValue(
           row as unknown as Record<string, number>,
           key,
           mode,

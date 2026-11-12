@@ -112,17 +112,21 @@ fases y tablas: continuo corre 24 horas, laboral solo dentro del calendario del 
 trabajo fuera de ese horario. El SLA usa el reloj de la instancia, salvo que elijas uno en el tablero.
 
 Las pestañas completan el análisis: **Distribución** por dimensión, **Tiempos** con el ciclo, las
-fases, los percentiles, las dimensiones y las personas, **Calidad** con salud de calidad,
-diagnóstico por dimensión y motivos de salida (pausas, duplicados y rechazos o cancelaciones), y
+fases, la distribución y las personas, **Calidad** con salud de calidad,
+diagnóstico por dimensión, atípicos del periodo y motivos de salida (pausas, duplicados y rechazos
+o cancelaciones), y
 **Equipo** con equipos, supervisores, técnicos y apoyo auxiliar. La participación de técnicos y
 el apoyo auxiliar siguen el reloj activo; los supervisores muestran tasa de toma, tasa de
 pendientes y retiradas, y el tiempo hasta la toma se identifica como continuo. En Calidad, el riesgo de retrabajo
 comparte la dimensión con el mapa de calor, permite elegir la señal (reapertura, recaptura o
 reasignación) y compara cada agrupación con el promedio global; el tiempo de pausas y duplicados
 se identifica como continuo.
-En **Tiempos**, el selector **Promedio / Acumulado** está en la cabecera y afecta a las tablas de la
-pestaña; el reloj **Continuo / Laboral / Extra** de la barra superior se aplica también a técnicos,
-solicitantes y dimensiones. Los percentiles se muestran siempre en reloj continuo y así se indica.
+En **Tiempos**, el selector **Medida** de la cabecera (Promedio, Acumulado, Mediana, P90, P95,
+Máximo) afecta a las tablas de la pestaña; el reloj **Continuo / Laboral / Extra** de la barra
+superior se aplica también a técnicos, solicitantes y dimensiones. Las medidas robustas se calculan
+sobre los tiquets que tuvieron la fase: no incluyen ceros, no son aditivas y se ocultan cuando la
+muestra es menor a cinco casos. La tarjeta **Distribución y atípicos** muestra la muestra y su
+cobertura, la mediana, el IQR, el P90, el máximo y el porcentaje fuera de la valla de 1.5×IQR.
 Los filtros de periodo, edificio, equipo, categoría, dependencia y desenlace nunca amplían lo que tu
 alcance permite ver. Los tiquets con hora sin verificar quedan fuera de las medias de desempeño
 hasta corregirlos.

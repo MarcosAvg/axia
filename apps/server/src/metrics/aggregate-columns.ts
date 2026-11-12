@@ -1,12 +1,23 @@
 import { sql, type SQL } from 'drizzle-orm'
 
+import {
+  PHASE_KEYS,
+  isRobustStat,
+  performancePredicate,
+  phaseMinutes,
+  phasePredicate,
+  statAggregate,
+  type MeasureStat,
+  type MetricsTimeMode,
+} from './phase-columns.js'
+
 export const OPEN_STATUSES = sql`(
   'registered', 'with_supervisor', 'assigned', 'in_progress', 'paused',
   'attended', 'under_claim'
 )`
 
 function performance() {
-  return sql`(v.outcome <> 'duplicate' and not v.has_unverified_time)`
+  return performancePredicate()
 }
 
 function volumeColumns() {
@@ -129,30 +140,20 @@ function modeColumns() {
   return sql.join(parts, sql`, `)
 }
 
-function percentileColumns() {
+function statColumns(stat: MeasureStat, mode: MetricsTimeMode) {
+  if (!isRobustStat(stat)) return sql``
   const p = performance()
-  const phases: Array<[string, string]> = [
-    ['total', 'total_time'],
-    ['response', 'response_time'],
-    ['active', 'active_work_time'],
-    ['validation', 'validation_time'],
-    ['claim', 'claim_time'],
-  ]
   const parts: SQL[] = []
-  for (const [key, column] of phases) {
+  for (const key of PHASE_KEYS) {
+    const minutes = phaseMinutes(key, mode)
+    const filter = sql`${p} and ${minutes} > 0 and ${phasePredicate(key)}`
     parts.push(
-      sql`coalesce(percentile_cont(0.5) within group (order by extract(epoch from v.${sql.identifier(column)}) / 60) filter (where ${p}), 0) as ${sql.identifier(`p50_${key}`)}`,
+      sql`coalesce(${statAggregate(stat, minutes)} filter (where ${filter}), 0) as ${sql.identifier(`stat_${key}`)}`,
     )
     parts.push(
-      sql`coalesce(percentile_cont(0.9) within group (order by extract(epoch from v.${sql.identifier(column)}) / 60) filter (where ${p}), 0) as ${sql.identifier(`p90_${key}`)}`,
+      sql`count(*) filter (where ${filter})::int as ${sql.identifier(`n_${key}`)}`,
     )
   }
-  parts.push(
-    sql`coalesce(percentile_cont(0.5) within group (order by extract(epoch from v.total_time) / 60) filter (where v.status = 'closed' and ${p}), 0) as p50_resolution`,
-  )
-  parts.push(
-    sql`coalesce(percentile_cont(0.9) within group (order by extract(epoch from v.total_time) / 60) filter (where v.status = 'closed' and ${p}), 0) as p90_resolution`,
-  )
   return sql.join(parts, sql`, `)
 }
 
@@ -166,6 +167,9 @@ function specialColumns() {
   `
 }
 
-export function aggregateColumns() {
-  return sql`${volumeColumns()}, ${rateColumns()}, ${phaseColumns()}, ${modeColumns()}, ${percentileColumns()}, ${specialColumns()}`
+export function aggregateColumns(stat: MeasureStat, mode: MetricsTimeMode) {
+  const parts = [volumeColumns(), rateColumns(), phaseColumns(), modeColumns()]
+  if (isRobustStat(stat)) parts.push(statColumns(stat, mode))
+  parts.push(specialColumns())
+  return sql.join(parts, sql`, `)
 }

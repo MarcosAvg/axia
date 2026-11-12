@@ -12,6 +12,8 @@ import type { AuthService } from '../auth/service.js'
 import type { AppConfig } from '../config.js'
 import type { Database } from '../db/client.js'
 import { auxiliaryByCategory } from './auxiliary.js'
+import { distributionProfile } from './distribution.js'
+import { MEASURE_STATS, METRICS_TIME_MODES } from './phase-columns.js'
 import {
   byTechnician,
   duplicateAlerts,
@@ -121,6 +123,47 @@ function registerScopedMetrics(
   }
 }
 
+function registerSummary(app: FastifyInstance, db: Database, guard: Guard[]) {
+  app.get('/api/metrics/summary', { preHandler: guard }, async (request) => {
+    const { compact, stat, timeMode } = z
+      .object({
+        compact: z.coerce.number().int().min(0).max(1).default(0),
+        stat: z.enum(MEASURE_STATS).default('average'),
+        timeMode: z.enum(METRICS_TIME_MODES).default('calendar'),
+      })
+      .parse(request.query)
+    return metricsSummary(db, currentActor(request), filtersOf(request.query), {
+      compact: compact === 1,
+      stat,
+      timeMode,
+    })
+  })
+}
+
+function registerDistributionProfile(
+  app: FastifyInstance,
+  db: Database,
+  guard: Guard[],
+) {
+  app.get(
+    '/api/metrics/distribution-profile',
+    { preHandler: guard },
+    async (request) => {
+      const { timeMode } = z
+        .object({ timeMode: z.enum(METRICS_TIME_MODES).default('calendar') })
+        .parse(request.query)
+      return {
+        items: await distributionProfile(
+          db,
+          currentActor(request),
+          filtersOf(request.query),
+          timeMode,
+        ),
+      }
+    },
+  )
+}
+
 export function registerMetricsRoutes(
   app: FastifyInstance,
   auth: AuthService,
@@ -136,21 +179,8 @@ export function registerMetricsRoutes(
     requirePermission('metrics.view'),
   ]
 
-  app.get(
-    '/api/metrics/summary',
-    { preHandler: ticketView },
-    async (request) => {
-      const { compact } = z
-        .object({ compact: z.coerce.number().int().min(0).max(1).default(0) })
-        .parse(request.query)
-      return metricsSummary(
-        db,
-        currentActor(request),
-        filtersOf(request.query),
-        compact === 1,
-      )
-    },
-  )
+  registerSummary(app, db, ticketView)
+  registerDistributionProfile(app, db, metricsView)
   app.get(
     '/api/dashboard/activity',
     { preHandler: ticketView },

@@ -154,3 +154,24 @@ export interface AgingRow {
   status: string
   ageMinutes: number
 }
+
+/** Perfil de distribución de una fase (fila global del periodo). */
+export interface DistributionProfileRow {
+  phase: string
+  n: number
+  coverage: number
+  mean: number
+  median: number
+  p25: number
+  p75: number
+  p90: number
+  p95: number
+  max: number
+  lowerFence: number
+  upperFence: number
+  outliers: number
+  outlierRate: number
+}
+
+/** Muestra mínima para mostrar una medida robusta. */
+export const MIN_SAMPLE = 5

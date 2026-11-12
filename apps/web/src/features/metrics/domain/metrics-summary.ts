@@ -19,18 +19,6 @@ export interface MetricsSummary {
   recaptureRate: number
   reopenRate: number
   firstTimeFixRate: number
-  p50Total: number
-  p90Total: number
-  p50Response: number
-  p90Response: number
-  p50Active: number
-  p90Active: number
-  p50Validation: number
-  p90Validation: number
-  p50Claim: number
-  p90Claim: number
-  p50Resolution: number
-  p90Resolution: number
   avgTotal: number
   avgTotalAll: number
   avgTotalClosed: number
@@ -126,18 +114,6 @@ export const EMPTY_SUMMARY: MetricsSummary = {
   recaptureRate: 0,
   reopenRate: 0,
   firstTimeFixRate: 0,
-  p50Total: 0,
-  p90Total: 0,
-  p50Response: 0,
-  p90Response: 0,
-  p50Active: 0,
-  p90Active: 0,
-  p50Validation: 0,
-  p90Validation: 0,
-  p50Claim: 0,
-  p90Claim: 0,
-  p50Resolution: 0,
-  p90Resolution: 0,
   avgTotal: 0,
   avgTotalAll: 0,
   avgTotalClosed: 0,

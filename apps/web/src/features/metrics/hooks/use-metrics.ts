@@ -1,5 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import type { TimeMeasure } from '@/lib/time-measure'
 import type { MetricsFilters } from '../domain/metrics'
+import type { TimeMode } from '../domain/time-mode'
 import {
   fetchAuxiliaryByCategory,
   fetchPauseSubstates,
@@ -9,6 +11,7 @@ import {
 } from '../api/indicators-api'
 import {
   fetchByTechnician,
+  fetchDistributionProfile,
   fetchDuplicateAlerts,
   fetchDuplicateTickets,
   fetchDuplicatesByDimension,
@@ -24,6 +27,7 @@ import {
 
 const metricsKeys = {
   summary: ['metrics', 'summary'] as const,
+  distributionProfile: ['metrics', 'distribution-profile'] as const,
   pauses: ['metrics', 'pauses'] as const,
   duplicateTickets: ['metrics', 'duplicate-tickets'] as const,
   duplicateAlerts: ['metrics', 'duplicate-alerts'] as const,
@@ -58,14 +62,34 @@ function useFilteredQuery<T>(
 
 export function useMetricsSummary(
   filters: MetricsFilters,
-  options: { compact?: boolean; enabled?: boolean } = {},
+  options: {
+    compact?: boolean
+    enabled?: boolean
+    measure?: TimeMeasure
+    mode?: TimeMode
+  } = {},
 ) {
   const compact = options.compact ?? false
+  const measure = options.measure ?? 'average'
+  const mode = options.mode ?? 'calendar'
   return useQuery({
-    queryKey: [...metricsKeys.summary, filters, compact],
-    queryFn: () => fetchMetricsSummary(filters, compact),
+    queryKey: [...metricsKeys.summary, filters, compact, measure, mode],
+    queryFn: () => fetchMetricsSummary(filters, { compact, measure, mode }),
     placeholderData: keepPreviousData,
     enabled: options.enabled ?? true,
+  })
+}
+
+export function useDistributionProfile(
+  filters: MetricsFilters,
+  mode: TimeMode,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: [...metricsKeys.distributionProfile, filters, mode],
+    queryFn: () => fetchDistributionProfile(filters, mode),
+    placeholderData: keepPreviousData,
+    enabled,
   })
 }
 

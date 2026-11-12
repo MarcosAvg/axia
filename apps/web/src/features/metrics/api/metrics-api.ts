@@ -1,6 +1,7 @@
 // Lectura de indicadores contra la API de Axia.
 
 import { apiFetch } from '@/lib/api-client'
+import type { TimeMeasure } from '@/lib/time-measure'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
   RequesterTimeRow,
@@ -9,9 +10,11 @@ import type {
   TechnicianSubjectTimeRow,
 } from '../domain/indicators'
 import { intervalToMinutes } from '../domain/metrics'
+import type { TimeMode } from '../domain/time-mode'
 import { toNullableNumber, toNumber } from './numbers'
 import type {
   AgingRow,
+  DistributionProfileRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
@@ -57,14 +60,32 @@ export async function fetchItems<T>(
 
 export async function fetchMetricsSummary(
   filters: MetricsFilters,
-  compact = false,
+  options: {
+    compact?: boolean
+    measure?: TimeMeasure
+    mode?: TimeMode
+  } = {},
 ): Promise<MetricsAggregate> {
   const params = new URLSearchParams(filtersQuery(filters))
-  if (compact) params.set('compact', '1')
+  if (options.compact) params.set('compact', '1')
+  params.set('stat', options.measure ?? 'average')
+  params.set('timeMode', options.mode ?? 'calendar')
   const query = params.toString()
   return apiFetch<MetricsAggregate>(
     query ? `/api/metrics/summary?${query}` : '/api/metrics/summary',
   )
+}
+
+export async function fetchDistributionProfile(
+  filters: MetricsFilters,
+  mode: TimeMode,
+): Promise<DistributionProfileRow[]> {
+  const params = new URLSearchParams(filtersQuery(filters))
+  params.set('timeMode', mode)
+  const body = await apiFetch<{ items: DistributionProfileRow[] }>(
+    `/api/metrics/distribution-profile?${params.toString()}`,
+  )
+  return body.items
 }
 
 export async function fetchPausesByReason(

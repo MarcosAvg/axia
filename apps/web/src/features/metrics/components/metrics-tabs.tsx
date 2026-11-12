@@ -13,6 +13,7 @@ import type {
 } from '../domain/indicators'
 import type {
   AgingRow,
+  DistributionProfileRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
@@ -39,6 +40,7 @@ interface MetricsTabsProps {
   summary: MetricsSummary
   comparison: Comparison | null
   groups: DimensionGroup[]
+  profile: DistributionProfileRow[]
   pauses: PauseReasonRow[]
   pauseSubstates: PauseSubstateRow[]
   duplicates: {
@@ -111,6 +113,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
           summary={props.summary}
           mode={props.mode}
           groups={props.groups}
+          profile={props.profile}
           technicians={props.technicians}
           technicianTimes={props.technicianTimes}
           technicianSubjectTimes={props.technicianSubjectTimes}
@@ -122,6 +125,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
           summary={props.summary}
           comparison={props.comparison}
           groups={props.groups}
+          profile={props.profile}
           pauses={props.pauses}
           pauseSubstates={props.pauseSubstates}
           duplicates={props.duplicates}

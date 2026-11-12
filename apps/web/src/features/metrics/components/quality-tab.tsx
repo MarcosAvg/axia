@@ -1,8 +1,9 @@
 import { HintIcon } from '@/components/shared/hint'
 import { Progress } from '@/components/ui/progress'
 import type { PauseSubstateRow, RejectCancelRow } from '../domain/indicators'
-import { formatPercent } from '../domain/metrics'
+import { formatMinutes, formatPercent } from '../domain/metrics'
 import type {
+  DistributionProfileRow,
   DuplicateAlert,
   DuplicateDimensionRow,
   DuplicateTicket,
@@ -155,11 +156,42 @@ function TimeQualityCard({ summary }: { summary: MetricsSummary }) {
   )
 }
 
+function OutliersCard({ profile }: { profile: DistributionProfileRow[] }) {
+  const total = profile.find((row) => row.phase === 'total')
+  if (!total) return null
+  const q = metricsMessages.quality
+  return (
+    <ChartCard title={q.outliers} hint={q.outliersHint}>
+      <dl className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">{q.outliers}</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {total.outliers} · {formatPercent(total.outlierRate)}
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">{q.median}</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {formatMinutes(total.median)}
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">{q.meanMedianGap}</dt>
+          <dd className="text-2xl font-semibold tabular-nums">
+            {formatMinutes(Math.max(0, total.mean - total.median))}
+          </dd>
+        </div>
+      </dl>
+    </ChartCard>
+  )
+}
+
 /** Calidad: salud, diagnóstico por dimensión y motivos de salida. */
 export function QualityTab({
   summary,
   comparison,
   groups,
+  profile,
   pauses,
   pauseSubstates,
   duplicates,
@@ -169,6 +201,7 @@ export function QualityTab({
   summary: MetricsSummary
   comparison: Comparison | null
   groups: DimensionGroup[]
+  profile: DistributionProfileRow[]
   pauses: PauseReasonRow[]
   pauseSubstates: PauseSubstateRow[]
   duplicates: {
@@ -186,6 +219,7 @@ export function QualityTab({
         <h2 className="text-base font-medium">{t.health}</h2>
         <QualityRates summary={summary} comparison={comparison} />
         <TimeQualityCard summary={summary} />
+        <OutliersCard profile={profile} />
       </section>
       <QualityDiagnosis groups={groups} mode={mode} />
       <QualityReasons

@@ -5,6 +5,19 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- El tablero de Métricas incorpora medidas robustas en **Tiempos**: mediana, P90, P95 y máximo,
+  además de promedio y acumulado. La tarjeta **Distribución y atípicos** muestra la muestra y su
+  cobertura, la mediana, el IQR, el P90, el máximo y el porcentaje fuera de la valla de 1.5×IQR
+  por fase, y **Calidad** resume los atípicos del periodo. Las medidas robustas excluyen los
+  tiquets sin la fase y se ocultan con menos de cinco casos.
+
+### Cambiado
+
+- El resumen de métricas acepta `stat` y `timeMode`; los campos fijos `p50*`/`p90*` se sustituyen
+  por `stat*` y `n*`. Los percentiles dejan de mostrarse solo en reloj continuo.
+
 ## [0.24.0] - 2026-11-12
 
 ### Añadido

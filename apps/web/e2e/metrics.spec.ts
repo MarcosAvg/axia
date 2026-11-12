@@ -203,7 +203,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await page.getByRole('button', { name: 'Quitar Cancelados' }).click()
 })
 
-test('alterna la vista de tiempos entre promedio y acumulado', async ({
+test('alterna la medida de tiempos entre promedio, acumulado y mediana', async ({
   page,
 }) => {
   await signIn(page, 'demo.admin')
@@ -217,9 +217,18 @@ test('alterna la vista de tiempos entre promedio y acumulado', async ({
     page.getByText('Trabajo activo', { exact: true }).first(),
   ).toBeVisible()
   await expect(page.getByText('Sin clasificar')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Acumulado' }).click()
+  const measure = page.getByRole('combobox', {
+    name: 'Elegir la medida de tiempos',
+  })
+  await measure.selectOption({ label: 'Acumulado' })
   await expect(
     page.getByText('Trabajo activo (acumulado)').first(),
+  ).toBeVisible()
+
+  await measure.selectOption({ label: 'Mediana' })
+  await expect(page.getByText('Trabajo activo (mediana)').first()).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Distribución y atípicos' }),
   ).toBeVisible()
 })
 

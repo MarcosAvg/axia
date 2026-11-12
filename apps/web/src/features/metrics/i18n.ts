@@ -1,5 +1,7 @@
 // Textos de métricas (es-MX).
 
+import { messages } from '@/lib/i18n'
+import { distributionMessages } from './i18n-distribution'
 import { outcomeMessages } from './dimension-labels'
 import { hintMessages } from './i18n-hints'
 
@@ -82,11 +84,9 @@ export const metricsMessages = {
   },
   times: {
     title: 'Tiempos del periodo',
-    titleHint: 'El reloj y la agregación elegidos aplican a toda la pestaña.',
+    titleHint: 'El reloj y la medida elegidos aplican a toda la pestaña.',
     cycle: 'Ciclo medio',
-    percentiles: 'Percentiles P50 / P90 en continuo',
-    percentilesHint:
-      'Mediana y percentil 90 sobre el reloj continuo de los tiquets del universo de desempeño.',
+    ...distributionMessages,
     phases: {
       response: 'Respuesta',
       assignment: 'Asignación',
@@ -165,6 +165,12 @@ export const metricsMessages = {
     timeQualityActionTitle: 'Cómo corregirlo',
     timeQualityAction:
       'Ajusta la hora desde la línea de tiempo del tiquet afectado.',
+    outliers: 'Atípicos del periodo',
+    outliersHint:
+      'Tiquets fuera de la valla de 1.5×IQR del tiempo total. Se excluyen duplicados y horas sin verificar.',
+    outlierRate: 'Tasa de atípicos',
+    meanMedianGap: 'Brecha media/mediana',
+    median: 'Mediana',
 
     risk: 'Riesgo de retrabajo',
     riskMeasure: 'Señal de riesgo',
@@ -201,6 +207,7 @@ export const metricsMessages = {
     supervisor: 'Supervisor',
   },
   ...hintMessages,
+  measure: messages.measure,
   delta: {
     vsPrevious: 'vs periodo anterior',
     vs: 'vs',

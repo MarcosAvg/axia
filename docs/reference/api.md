@@ -247,6 +247,7 @@ rechazada sigue [pendiente](estados-y-transiciones.md).
 | Método | Ruta |
 |---|---|
 | `GET` | `/api/metrics/summary` |
+| `GET` | `/api/metrics/distribution-profile` |
 | `GET` | `/api/dashboard/activity` |
 | `GET` | `/api/metrics/pauses` |
 | `GET` | `/api/metrics/duplicate-tickets` |
@@ -272,6 +273,16 @@ un filtro nunca amplía el alcance. `clock` (`calendar` o `laboral`) elige el re
 se usa el modo configurado en la instancia. Resumen admite `compact=0|1`; actividad admite `limit` (1–50,
 por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
 
+El resumen admite `stat` (`average`, `total`, `median`, `p90`, `p95` o `max`; por defecto
+`average`) y `timeMode` (`calendar`, `laboral` o `extra`; por defecto `calendar`). Con una medida
+robusta devuelve, por cada fase, `stat<Tipo>` y `n<Tipo>` (por ejemplo `statTotal`, `nTotal`,
+`statResolution`); las medidas robustas excluyen los tiquets sin la fase y no son aditivas. Con
+`average` o `total` se usan las columnas `avg*` y `sum*` existentes. El perfil de distribución
+(`/api/metrics/distribution-profile`, también con `timeMode`) devuelve por fase `phase`, `n`,
+`coverage`, `mean`, `median`, `p25`, `p75`, `p90`, `p95`, `max`, `lowerFence`, `upperFence`,
+`outliers` y `outlierRate`; las vallas son Q1−1.5·IQR y Q3+1.5·IQR y los ceros de cada fase quedan
+fuera.
+
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
 `closed`, `rejected`, `cancelled`, `duplicate`, `avgTotalAll` y `sumTotalAll` (todos los tiquets
 del filtro), `avgTotalClosed` y `sumTotalClosed` (solo cerrados) y `avgResolution` (alias de
@@ -282,13 +293,11 @@ pendientes visibles aunque su registro quede fuera del periodo, y respeta el alc
 dimensiones del filtro. SLA, resolución y primera resolución excluyen rechazados, cancelados y
 duplicados; el volumen, los motivos y la carga de trabajo los conservan según el indicador.
 
-El resumen también devuelve `dormant` y la revisión de duplicado como indicadores propios, los
-percentiles P50/P90 (`p50Total`, `p90Total`, `p50Response`, `p50Active`, `p50Validation`,
-`p50Claim` y `p50Resolution`, con sus pares `p90`), `unverifiedTickets`, `openTimeAlerts`,
-`agingBuckets` (rangos de antigüedad) y las variantes por modo `*Labor` y `*Extra` de las fases
-del ciclo. El detalle de un tiquet expone `cycleTimes`, `cycleTimesLabor` y `cycleTimesExtra` con
-la misma forma. La tabla de apoyo auxiliar devuelve minutos continuos y laborales por técnico y
-categoría.
+El resumen también devuelve `dormant` y la revisión de duplicado como indicadores propios,
+`unverifiedTickets`, `openTimeAlerts`, `agingBuckets` (rangos de antigüedad) y las variantes por
+modo `*Labor` y `*Extra` de las fases del ciclo. El detalle de un tiquet expone `cycleTimes`,
+`cycleTimesLabor` y `cycleTimesExtra` con la misma forma. La tabla de apoyo auxiliar devuelve
+minutos continuos y laborales por técnico y categoría.
 
 Los contratos ejecutables están junto a las rutas y en `apps/server/src/**/schemas.ts`;
 las pruebas de integración verifican formas, permisos y casos de error. Esta referencia no es un

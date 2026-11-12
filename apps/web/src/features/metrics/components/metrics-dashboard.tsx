@@ -2,7 +2,6 @@ import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { Tabs } from '@/components/ui/tabs'
 import { useMetricsBoard } from '../hooks/use-metrics-board'
-import { useTimeMode } from '../hooks/use-time-mode'
 import { metricsMessages } from '../i18n'
 import { MetricsExport } from './metrics-export'
 import { MetricsTabList, MetricsTabs } from './metrics-tabs'
@@ -11,13 +10,12 @@ import { MetricsToolbar } from './metrics-toolbar'
 /** Tablero de indicadores agrupado por tema. */
 export function MetricsDashboard() {
   const board = useMetricsBoard()
-  const { mode, changeMode } = useTimeMode(board.filters, board.setFilters)
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={metricsMessages.title}
         description={metricsMessages.subtitle}
-        actions={<MetricsExport groups={board.groups} />}
+        actions={<MetricsExport groups={board.groups} mode={board.mode} />}
       />
       <Tabs defaultValue="summary" className="flex flex-col gap-6">
         <MetricsToolbar
@@ -25,8 +23,8 @@ export function MetricsDashboard() {
           catalogs={board.catalogs}
           onFiltersChange={board.setFilters}
           tabs={board.summary.tickets > 0 ? <MetricsTabList /> : null}
-          mode={mode}
-          onModeChange={changeMode}
+          mode={board.mode}
+          onModeChange={board.changeMode}
         />
         {board.loading ? <LoadingList rows={4} /> : null}
         {board.error ? <ErrorAlert message={metricsMessages.error} /> : null}
@@ -37,13 +35,14 @@ export function MetricsDashboard() {
         ) : null}
         {board.summary.tickets > 0 ? (
           <MetricsTabs
-            mode={mode}
+            mode={board.mode}
             volume={board.volume}
             aging={board.aging}
             agingBuckets={board.agingBuckets}
             summary={board.summary}
             comparison={board.comparison}
             groups={board.groups}
+            profile={board.profile}
             pauses={board.pauses}
             pauseSubstates={board.pauseSubstates}
             duplicates={board.duplicates}

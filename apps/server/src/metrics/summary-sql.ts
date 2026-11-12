@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import { scopePredicate } from '../tickets/scope.js'
 import { aggregateColumns, OPEN_STATUSES } from './aggregate-columns.js'
+import type { MeasureStat, MetricsTimeMode } from './phase-columns.js'
 import { filterParams, type MetricsFilters } from './filters.js'
 
 /** Estados que cuentan como trabajo todavía abierto. */
@@ -190,11 +191,15 @@ function groupingSets() {
   )`
 }
 
-export function metricsGroups(compact: boolean) {
+export function metricsGroups(
+  compact: boolean,
+  stat: MeasureStat,
+  mode: MetricsTimeMode,
+) {
   return sql`
     select
       ${compact ? compactSelect() : groupedSelect()}
-      ${aggregateColumns()}
+      ${aggregateColumns(stat, mode)}
     from base v
     ${catalogJoins()}
     group by ${compact ? sql`grouping sets (())` : groupingSets()}

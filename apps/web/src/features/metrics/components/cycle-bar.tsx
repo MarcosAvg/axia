@@ -1,12 +1,11 @@
-import { useTimeAggregation } from '@/components/shared/time-aggregation-context'
-import { aggregationLabel, timeValue } from '@/lib/time-aggregation'
-import type { TimeAggregation } from '@/lib/time-aggregation'
+import { useTimeMeasure } from '@/components/shared/time-measure-context'
+import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 import { formatMinutes } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
 import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CycleInput, CyclePhase, CycleSlice } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
-import { modeValue, totalInMode, type TimeMode } from '../domain/time-mode'
+import { measureValue, totalInMode, type TimeMode } from '../domain/time-mode'
 import { ChartCard } from './chart-card'
 
 const COLORS: Record<CyclePhase, string> = {
@@ -28,8 +27,10 @@ interface PhaseView extends CycleSlice {
   label: string
 }
 
-function phaseLabel(phase: CyclePhase, aggregation: TimeAggregation): string {
-  if (phase === 'active') return aggregationLabel(k.active, aggregation)
+function phaseLabel(phase: CyclePhase, measure: TimeMeasure): string {
+  if (phase === 'active' && measure !== 'average') {
+    return `${k.active} (${metricsMessages.measure.tags[measure]})`
+  }
   return t.phases[phase]
 }
 
@@ -55,17 +56,17 @@ function CycleLegend({ slices }: { slices: PhaseView[] }) {
 
 function CycleFooter({
   summary,
-  aggregation,
+  measure,
   mode,
 }: {
   summary: MetricsSummary
-  aggregation: TimeAggregation
+  measure: TimeMeasure
   mode: TimeMode
 }) {
   const minutes = (average: number, total: number) =>
-    formatMinutes(timeValue(aggregation, average, total))
+    formatMinutes(measure === 'total' ? total : average)
   const net =
-    aggregation === 'total'
+    measure === 'total'
       ? totalInMode(summary.sumNet, summary.sumNetLabor, mode)
       : totalInMode(summary.avgNet, summary.avgNetLabor, mode)
   return (
@@ -127,9 +128,10 @@ export function CycleBar({
   summary: MetricsSummary
   mode: TimeMode
 }) {
-  const { aggregation } = useTimeAggregation()
+  const { measure } = useTimeMeasure()
+  if (isRobustMeasure(measure)) return null
   const record = summary as unknown as Record<string, number>
-  const value = (key: string) => modeValue(record, key, mode, aggregation)
+  const value = (key: string) => measureValue(record, key, mode, measure)
   const total = value('total')
   const slices: PhaseView[] = cyclePhases({
     response: value('response'),
@@ -144,14 +146,14 @@ export function CycleBar({
     total,
   }).map((slice) => ({
     ...slice,
-    label: phaseLabel(slice.phase, aggregation),
+    label: phaseLabel(slice.phase, measure),
   }))
 
   return (
     <ChartCard title={t.cycle}>
       <div className="flex flex-col gap-3">
         <CycleChart slices={slices} total={total} />
-        <CycleFooter summary={summary} aggregation={aggregation} mode={mode} />
+        <CycleFooter summary={summary} measure={measure} mode={mode} />
       </div>
     </ChartCard>
   )

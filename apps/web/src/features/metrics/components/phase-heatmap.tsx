@@ -1,9 +1,11 @@
+import { useTimeMeasure } from '@/components/shared/time-measure-context'
+import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 import type { DimensionGroup } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
 import { formatMinutes } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
-import { modeValue, type TimeMode } from '../domain/time-mode'
+import { measureValue, type TimeMode } from '../domain/time-mode'
 import { ChartCard } from './chart-card'
 
 const t = metricsMessages.times
@@ -24,12 +26,13 @@ function phaseValue(
   row: DimensionGroup['row'],
   phase: (typeof PHASES)[number]['key'],
   mode: TimeMode,
+  measure: TimeMeasure,
 ) {
-  return modeValue(
+  return measureValue(
     row as unknown as Record<string, number>,
     phase,
     mode,
-    'average',
+    measure,
   )
 }
 
@@ -37,10 +40,12 @@ function HeatTable({
   rows,
   max,
   mode,
+  measure,
 }: {
   rows: DimensionGroup['row'][]
   max: Map<string, number>
   mode: TimeMode
+  measure: TimeMeasure
 }) {
   return (
     <div className="overflow-x-auto">
@@ -73,7 +78,7 @@ function HeatTable({
               {PHASES.map((phase) => (
                 <HeatCell
                   key={phase.key}
-                  value={phaseValue(row, phase.key, mode)}
+                  value={phaseValue(row, phase.key, mode, measure)}
                   max={max.get(phase.key) ?? 1}
                 />
               ))}
@@ -93,11 +98,15 @@ export function PhaseHeatmap({
   groups: DimensionGroup[]
   mode: TimeMode
 }) {
+  const { measure } = useTimeMeasure()
   const rows = rowsByDimension(groups, 'category').slice(0, 8)
   const max = new Map(
     PHASES.map((phase) => [
       phase.key,
-      Math.max(1, ...rows.map((row) => phaseValue(row, phase.key, mode))),
+      Math.max(
+        1,
+        ...rows.map((row) => phaseValue(row, phase.key, mode, measure)),
+      ),
     ]),
   )
   if (rows.length === 0) {
@@ -109,10 +118,11 @@ export function PhaseHeatmap({
   }
   return (
     <ChartCard title={t.heatmap}>
-      <HeatTable rows={rows} max={max} mode={mode} />
+      <HeatTable rows={rows} max={max} mode={mode} measure={measure} />
       <p className="pt-2 text-xs text-muted-foreground">
-        Promedio por tiquet en el reloj activo. La intensidad es relativa a la
-        columna.
+        {isRobustMeasure(measure)
+          ? `${metricsMessages.measure[measure]} de los tiquets que tuvieron la fase en el reloj activo. La intensidad es relativa a la columna.`
+          : 'Promedio por tiquet en el reloj activo. La intensidad es relativa a la columna.'}
       </p>
     </ChartCard>
   )
