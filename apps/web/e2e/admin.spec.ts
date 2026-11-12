@@ -129,8 +129,10 @@ test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
     expect(flowBox.x).toBeGreaterThanOrEqual(navBox.x + navBox.width)
   }
   const search = page.getByRole('textbox', { name: 'Buscar…', exact: true })
-  await search.fill('En cotización')
-  await expect(reasons.getByText('En cotización')).toBeVisible()
+  await search.fill('En compra externa o cotización')
+  await expect(
+    reasons.getByText('En compra externa o cotización'),
+  ).toBeVisible()
   await search.fill('')
   await expect(
     reasons.getByText('Falta de material', { exact: true }).first(),
@@ -139,7 +141,9 @@ test('@smoke muestra datos derivados y contrae motivos', async ({ page }) => {
   await page
     .getByRole('button', { name: 'Contraer: Falta de material' })
     .click()
-  await expect(reasons.getByText('En cotización')).toHaveCount(0)
+  await expect(reasons.getByText('En compra externa o cotización')).toHaveCount(
+    0,
+  )
 })
 
 test('@smoke ofrece orden y jerarquía en pantalla angosta', async ({
