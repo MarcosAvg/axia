@@ -1,24 +1,11 @@
-export const MIN_PASSWORD_LENGTH = 12
+import { ID } from './ids.js'
+import type { DemoTicket, DemoTicketStatus } from './ticket-types.js'
 
-export const ID = {
-  userAdmin: 'd0000000-0000-4000-8000-000000000004',
-  userSupervisor: 'd0000000-0000-4000-8000-000000000001',
-  userTechnician: 'd0000000-0000-4000-8000-000000000002',
-  userRequester: 'd0000000-0000-4000-8000-000000000003',
-  teamMaintenance: 'd1000000-0000-4000-8000-000000000001',
-  teamSecurity: 'd1000000-0000-4000-8000-000000000002',
-  buildingCentral: 'd2000000-0000-4000-8000-000000000001',
-  buildingNorth: 'd2000000-0000-4000-8000-000000000002',
-  dependencySystems: 'd4000000-0000-4000-8000-000000000001',
-  dependencyHr: 'd4000000-0000-4000-8000-000000000002',
-  technicianLead: 'd8000000-0000-4000-8000-000000000001',
-  technicianSecond: 'd8000000-0000-4000-8000-000000000002',
-  technicianSecurity: 'd8000000-0000-4000-8000-000000000003',
-  requesterAna: 'd9000000-0000-4000-8000-000000000001',
-  requesterBeto: 'd9000000-0000-4000-8000-000000000002',
-  scopeMaintenance: 'dd000000-0000-4000-8000-000000000001',
-  scopeSecurity: 'dd000000-0000-4000-8000-000000000002',
-} as const
+export { ID } from './ids.js'
+export * from './people-data.js'
+export * from './ticket-types.js'
+
+export const MIN_PASSWORD_LENGTH = 12
 
 export type UserSpec = {
   id: string
@@ -53,29 +40,6 @@ export const USERS: UserSpec[] = [
     role: 'requester',
   },
 ]
-
-export type DemoTicket = {
-  id: string
-  status:
-    | 'registered'
-    | 'with_supervisor'
-    | 'assigned'
-    | 'in_progress'
-    | 'attended'
-    | 'closed'
-  category: string
-  subcategory: string
-  problem: string
-  serviceType: string
-  priority: string
-  channel: string
-  building: string
-  location: string
-  dependency: string
-  requester: 'ana' | 'beto'
-  description: string
-  reportedHoursAgo: number
-}
 
 export const DEMO_TICKETS: DemoTicket[] = [
   {
@@ -139,6 +103,7 @@ export const DEMO_TICKETS: DemoTicket[] = [
     location: 'Planta baja',
     dependency: 'Recursos Humanos',
     requester: 'beto',
+    leaderParticipation: 'auxiliary',
     description: 'La puerta de acceso principal no cierra',
     reportedHoursAgo: 72,
   },
@@ -176,11 +141,16 @@ export const DEMO_TICKETS: DemoTicket[] = [
   },
 ]
 
-export const STAGE: Record<DemoTicket['status'], number> = {
+export const STAGE: Record<DemoTicketStatus, number> = {
   registered: 0,
   with_supervisor: 1,
   assigned: 2,
   in_progress: 3,
+  paused: 3,
   attended: 4,
+  under_claim: 4,
   closed: 5,
+  rejected: 0,
+  cancelled: 0,
+  duplicate: 0,
 }

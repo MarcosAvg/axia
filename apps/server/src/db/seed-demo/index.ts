@@ -3,8 +3,10 @@ import type { Client } from 'pg'
 import { generateTemporaryPassword, hashPassword } from '../../auth/password.js'
 import { buildDemoCatalogs } from './catalogs.js'
 import { DEMO_TICKETS, MIN_PASSWORD_LENGTH } from './data.js'
+import { buildGeneratedTickets } from './generate.js'
 import { buildDemoPeople, buildDemoScopes } from './people.js'
 import { removeDemoFiles, type DemoEvidenceStorage } from './evidence.js'
+import { loadDemoReasons } from './reasons.js'
 import { insertDemoTicket } from './tickets.js'
 
 const DEMO_LOCK_KEY = 1_147_365_203 // "AXIA-DEMO"
@@ -41,6 +43,25 @@ async function ensureReference(client: Client) {
   }
 }
 
+async function seedTickets(input: {
+  client: Client
+  catalogs: Awaited<ReturnType<typeof buildDemoCatalogs>>
+  people: Awaited<ReturnType<typeof buildDemoPeople>>
+  reasons: Awaited<ReturnType<typeof loadDemoReasons>>
+  storage: DemoEvidenceStorage
+}) {
+  let created = 0
+  let skipped = 0
+  for (const ticket of [...DEMO_TICKETS, ...buildGeneratedTickets()]) {
+    if (await insertDemoTicket({ ...input, ticket })) {
+      created += 1
+    } else {
+      skipped += 1
+    }
+  }
+  return { created, skipped }
+}
+
 function demoPassword(options: DemoSeedOptions) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('The demo seed cannot run with NODE_ENV=production')
@@ -65,9 +86,7 @@ export async function seedDemo(
     directory: options.evidenceDir ?? './data/evidence',
     createdFiles: [],
   }
-  let usersCreated = 0
-  let ticketsCreated = 0
-  let ticketsSkipped = 0
+  const counts = { usersCreated: 0, ticketsCreated: 0, ticketsSkipped: 0 }
 
   await client.query('begin')
   try {
@@ -81,19 +100,19 @@ export async function seedDemo(
       resetPasswords,
     )
     await buildDemoScopes(client, catalogs, people.supervisorId)
-    usersCreated = [...people.users.values()].filter(
+    const reasons = await loadDemoReasons(client)
+    counts.usersCreated = [...people.users.values()].filter(
       (user) => user.created,
     ).length
-
-    for (const ticket of DEMO_TICKETS) {
-      if (
-        await insertDemoTicket({ client, ticket, catalogs, people, storage })
-      ) {
-        ticketsCreated += 1
-      } else {
-        ticketsSkipped += 1
-      }
-    }
+    const tickets = await seedTickets({
+      client,
+      catalogs,
+      people,
+      reasons,
+      storage,
+    })
+    counts.ticketsCreated = tickets.created
+    counts.ticketsSkipped = tickets.skipped
     await client.query('commit')
   } catch (error) {
     await client.query('rollback')
@@ -104,9 +123,7 @@ export async function seedDemo(
   return {
     password,
     passwordGenerated: options.password === undefined,
-    passwordApplied: usersCreated > 0 || resetPasswords,
-    usersCreated,
-    ticketsCreated,
-    ticketsSkipped,
+    passwordApplied: counts.usersCreated > 0 || resetPasswords,
+    ...counts,
   }
 }

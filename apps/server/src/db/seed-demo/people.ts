@@ -1,7 +1,15 @@
 import type { Client } from 'pg'
 
 import type { DemoCatalogs } from './catalogs.js'
-import { ID, USERS, type UserSpec } from './data.js'
+import {
+  ID,
+  REQUESTERS,
+  TECHNICIANS,
+  USERS,
+  type RequesterKey,
+  type TechnicianKey,
+  type UserSpec,
+} from './data.js'
 
 type IdRow = { id: string }
 
@@ -137,36 +145,25 @@ async function ensureTechnicians(
   catalogs: DemoCatalogs,
   technicianUserId: string,
 ) {
-  const lead = await ensureTechnician(client, {
-    id: ID.technicianLead,
-    fullName: 'Luis Gómez',
-    teamId: catalogs.maintenance,
-    userId: technicianUserId,
-  })
-  const second = await ensureTechnician(client, {
-    id: ID.technicianSecond,
-    fullName: 'Marta Ruiz',
-    teamId: catalogs.maintenance,
-  })
-  const security = await ensureTechnician(client, {
-    id: ID.technicianSecurity,
-    fullName: 'Diana Torres',
-    teamId: catalogs.security,
-  })
-  for (const [technicianId, categoryIds] of [
-    [lead, [catalogs.electrical, catalogs.plumbing, catalogs.climate]],
-    [second, [catalogs.electrical, catalogs.plumbing]],
-    [security, [catalogs.access]],
-  ] as const) {
-    for (const categoryId of categoryIds) {
+  const ids = {} as Record<TechnicianKey, string>
+  for (const spec of TECHNICIANS) {
+    const technicianId = await ensureTechnician(client, {
+      id: spec.id,
+      fullName: spec.fullName,
+      teamId:
+        spec.team === 'maintenance' ? catalogs.maintenance : catalogs.security,
+      ...(spec.key === 'lead' ? { userId: technicianUserId } : {}),
+    })
+    ids[spec.key] = technicianId
+    for (const category of spec.categories) {
       await client.query(
         `insert into public.technician_categories (technician_id, category_id)
          values ($1, $2) on conflict do nothing`,
-        [technicianId, categoryId],
+        [technicianId, catalogs[category]],
       )
     }
   }
-  return { lead, second, security }
+  return ids
 }
 
 async function ensureRequesters(
@@ -174,20 +171,18 @@ async function ensureRequesters(
   catalogs: DemoCatalogs,
   requesterUserId: string,
 ) {
-  const ana = await ensureRequester(client, {
-    id: ID.requesterAna,
-    fullName: 'Ana Pérez',
-    contact: 'ana@example.test',
-    dependencyId: catalogs.systems,
-    userId: requesterUserId,
-  })
-  const beto = await ensureRequester(client, {
-    id: ID.requesterBeto,
-    fullName: 'Beto Lima',
-    contact: 'beto@example.test',
-    dependencyId: catalogs.hr,
-  })
-  return { ana, beto }
+  const ids = {} as Record<RequesterKey, string>
+  for (const spec of REQUESTERS) {
+    ids[spec.key] = await ensureRequester(client, {
+      id: spec.id,
+      fullName: spec.fullName,
+      contact: spec.contact,
+      dependencyId:
+        spec.dependency === 'Sistemas' ? catalogs.systems : catalogs.hr,
+      ...(spec.key === 'ana' ? { userId: requesterUserId } : {}),
+    })
+  }
+  return ids
 }
 
 async function ensureScopes(
@@ -221,8 +216,8 @@ export type DemoPeople = {
   supervisorId: string
   technicianUserId: string
   requesterUserId: string
-  technicians: { lead: string; second: string; security: string }
-  requesters: { ana: string; beto: string }
+  technicians: Record<TechnicianKey, string>
+  requesters: Record<RequesterKey, string>
 }
 
 export async function buildDemoPeople(

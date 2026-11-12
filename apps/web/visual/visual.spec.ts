@@ -26,6 +26,7 @@ test('panel móvil', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await signIn(page, 'demo.admin')
   await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
+  await expect(page.getByText('Tiquets por mes')).toBeVisible()
   await expect(page).toHaveScreenshot('panel-movil.png', {
     fullPage: true,
     mask: [
@@ -39,6 +40,7 @@ test('panel móvil', async ({ page }) => {
 test('panel y métricas', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
+  await expect(page.getByText('Tiquets por mes')).toBeVisible()
   await expect(page).toHaveScreenshot('panel.png', {
     fullPage: true,
     mask: [
@@ -101,7 +103,10 @@ test('métricas: tiempos, calidad y equipo', async ({ page }) => {
   })
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
-  await expect(page.getByRole('heading', { name: 'Duplicados' })).toBeVisible()
+  await expect(page.getByText('Pausas por motivo')).toBeVisible()
+  await expect(page.getByText('Subestados')).toBeVisible()
+  await page.getByRole('button', { name: 'Duplicados', exact: true }).click()
+  await expect(page.getByText('Detalle por agrupación')).toBeVisible()
   await expect(page).toHaveScreenshot('calidad.png', {
     fullPage: true,
     mask: [page.locator('svg.recharts-surface')],
@@ -109,10 +114,14 @@ test('métricas: tiempos, calidad y equipo', async ({ page }) => {
 
   await page.getByRole('tab', { name: 'Equipo' }).click()
   await expect(page.getByText('Resumen por equipo')).toBeVisible()
+  await expect(
+    page.getByText('Mantenimiento', { exact: true }).first(),
+  ).toBeVisible()
   await expect(page).toHaveScreenshot('equipo.png', { fullPage: true })
 
   await page.getByRole('button', { name: 'Supervisores' }).click()
   await expect(page.getByText('Ruteo y toma')).toBeVisible()
+  await expect(page.getByText('Supervisora Demo').first()).toBeVisible()
   await expect(page).toHaveScreenshot('supervisores.png', { fullPage: true })
 })
 
@@ -144,6 +153,7 @@ test('métricas en móvil', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
   await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
+  await expect(page.getByText('Tiquets por mes')).toBeVisible()
 
   await expect(page).toHaveScreenshot('metricas-movil.png', {
     fullPage: true,

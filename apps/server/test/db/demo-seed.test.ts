@@ -19,7 +19,7 @@ async function scalar(sql: string): Promise<number> {
   return Number(result.rows[0]?.value ?? 0)
 }
 
-async function expectDemoCounts() {
+async function expectCatalogCounts() {
   expect(await scalar('select count(*)::text as value from public.users')).toBe(
     4,
   )
@@ -37,31 +37,39 @@ async function expectDemoCounts() {
   ).toBe(4)
   expect(
     await scalar('select count(*)::text as value from public.technicians'),
-  ).toBe(3)
+  ).toBe(5)
   expect(
     await scalar('select count(*)::text as value from public.requesters'),
-  ).toBe(2)
-  expect(
-    await scalar('select count(*)::text as value from public.tickets'),
   ).toBe(6)
-  expect(
-    await scalar('select count(*)::text as value from public.ticket_events'),
-  ).toBe(33)
-  expect(
-    await scalar(
-      'select count(*)::text as value from public.ticket_assignments',
-    ),
-  ).toBe(9)
-  expect(
-    await scalar(
-      'select count(*)::text as value from public.ticket_participants',
-    ),
-  ).toBe(4)
   expect(
     await scalar(
       'select count(*)::text as value from public.supervisor_scopes',
     ),
   ).toBe(2)
+}
+
+async function expectDataCounts() {
+  expect(
+    await scalar('select count(*)::text as value from public.tickets'),
+  ).toBe(240)
+  expect(
+    await scalar('select count(*)::text as value from public.ticket_events'),
+  ).toBeGreaterThan(1500)
+  expect(
+    await scalar(
+      'select count(*)::text as value from public.ticket_assignments',
+    ),
+  ).toBeGreaterThan(200)
+  expect(
+    await scalar(
+      'select count(*)::text as value from public.ticket_participants',
+    ),
+  ).toBeGreaterThan(150)
+}
+
+async function expectDemoCounts() {
+  await expectCatalogCounts()
+  await expectDataCounts()
 }
 
 beforeAll(async () => {
@@ -76,33 +84,60 @@ afterAll(async () => {
   await rm(evidenceDir, { recursive: true, force: true })
 })
 
-describe('demo seed', () => {
-  it('creates demo users, catalogs and one ticket per state', async () => {
+describe('demo seed creation', () => {
+  it('creates demo users, catalogs and the full metrics dataset', async () => {
     const result = await seedDemo(owner, {
       password: DEMO_PASSWORD,
       evidenceDir,
     })
     expect(result).toMatchObject({
       usersCreated: 4,
-      ticketsCreated: 6,
+      ticketsCreated: 240,
       ticketsSkipped: 0,
       passwordGenerated: false,
       passwordApplied: true,
     })
     await expectDemoCounts()
   })
+})
 
-  it('keeps one ticket per state and hashes the demo password', async () => {
+describe('demo seed state and idempotency', () => {
+  it('keeps the curated states, covers every state and hashes the password', async () => {
     const statuses = await owner.query<{ status: string }>(
-      'select status::text from public.tickets order by status::text',
+      'select distinct status::text from public.tickets order by status::text',
     )
     expect(statuses.rows.map((row) => row.status)).toEqual([
       'assigned',
       'attended',
+      'cancelled',
       'closed',
+      'duplicate',
       'in_progress',
+      'paused',
+      'registered',
+      'rejected',
+      'under_claim',
+      'with_supervisor',
+    ])
+    const curated = await owner.query<{ status: string }>(
+      `select status::text from public.tickets
+       where id in (
+         'de000000-0000-4000-8000-000000000001',
+         'de000000-0000-4000-8000-000000000002',
+         'de000000-0000-4000-8000-000000000003',
+         'de000000-0000-4000-8000-000000000004',
+         'de000000-0000-4000-8000-000000000005',
+         'de000000-0000-4000-8000-000000000006'
+       )
+       order by id`,
+    )
+    expect(curated.rows.map((row) => row.status)).toEqual([
       'registered',
       'with_supervisor',
+      'assigned',
+      'in_progress',
+      'attended',
+      'closed',
     ])
 
     const users = await owner.query<{ password_hash: string }>(
@@ -121,7 +156,7 @@ describe('demo seed', () => {
     expect(result).toMatchObject({
       usersCreated: 0,
       ticketsCreated: 0,
-      ticketsSkipped: 6,
+      ticketsSkipped: 240,
       passwordApplied: false,
     })
     await expectDemoCounts()

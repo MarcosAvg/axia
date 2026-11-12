@@ -14,8 +14,10 @@ type DemoEvidence = {
   ticketId: string
   actorId: string
   technicianId: string
+  subjectTechnicianId?: string
   type: 'before' | 'after'
   at: Date
+  cycle?: number
 }
 
 async function writeDemoImage(storage: DemoEvidenceStorage, type: string) {
@@ -61,11 +63,14 @@ export async function insertDemoEvidence(
   const requestId = randomUUID()
   const event = await client.query<{ id: string }>(
     `insert into public.ticket_events (
-       ticket_id, cycle, type, actor_id, occurred_at, client_request_id, payload
-     ) values ($1, 1, 'evidence_added', $2, $3, $4, $5::jsonb) returning id`,
+       ticket_id, cycle, type, actor_id, subject_technician_id,
+       occurred_at, client_request_id, payload
+     ) values ($1, $2, 'evidence_added', $3, $4, $5, $6, $7::jsonb) returning id`,
     [
       evidence.ticketId,
+      evidence.cycle ?? 1,
       evidence.actorId,
+      evidence.subjectTechnicianId ?? null,
       evidence.at,
       requestId,
       JSON.stringify({ evidenceId: image.id, type: evidence.type, demo: true }),
@@ -77,11 +82,12 @@ export async function insertDemoEvidence(
        mime_type, size_bytes, captured_by_technician_id, captured_by_user_id,
        uploaded_by, occurred_at, client_request_id, sha256, width, height,
        processing_state, processed_at
-     ) values ($1, $2, 1, $3, $4, $5, $6, 'image/webp', $7, $8, $9, $9,
-       $10, $11, $12, $13, $14, 'ready', now())`,
+     ) values ($1, $2, $3, $4, $5, $6, $7, 'image/webp', $8, $9, $10, $10,
+       $11, $12, $13, $14, $15, 'ready', now())`,
     [
       image.id,
       evidence.ticketId,
+      evidence.cycle ?? 1,
       event.rows[0]?.id,
       evidence.type,
       image.storagePath,

@@ -22,6 +22,14 @@ let owner: Client
 let evidenceDir: string
 const password = 'DemoPassword123!'
 const registered = 'de000000-0000-4000-8000-000000000001'
+const CURATED_IDS = `
+  'de000000-0000-4000-8000-000000000001',
+  'de000000-0000-4000-8000-000000000002',
+  'de000000-0000-4000-8000-000000000003',
+  'de000000-0000-4000-8000-000000000004',
+  'de000000-0000-4000-8000-000000000005',
+  'de000000-0000-4000-8000-000000000006'
+`
 
 beforeAll(async () => {
   evidenceDir = await mkdtemp(join(tmpdir(), 'axia-demo-flow-'))
@@ -68,7 +76,8 @@ it('keeps historical evidence backed by readable images and events', async () =>
     event_type: string
   }>(`select ev.*, e.type::text as event_type from public.evidence ev
       join public.ticket_events e on e.id = ev.event_id
-      where ev.processing_state = 'ready'`)
+      where ev.processing_state = 'ready'
+        and ev.ticket_id in (${CURATED_IDS})`)
   expect(result.rows).toHaveLength(5)
   for (const row of result.rows) {
     const data = await readFile(join(evidenceDir, row.storage_path))
@@ -94,7 +103,8 @@ it('records both validations, work descriptions and correct participation', asyn
     { validator_role: 'supervisor' },
   ])
   const work = await owner.query(
-    `select payload from public.ticket_events where type = 'attended'`,
+    `select payload from public.ticket_events
+     where type = 'attended' and ticket_id in (${CURATED_IDS})`,
   )
   expect(work.rows).toHaveLength(2)
   for (const row of work.rows)
@@ -103,13 +113,23 @@ it('records both validations, work descriptions and correct participation', asyn
     await owner.query(`select participation_type from public.ticket_participants
     where ticket_id = 'de000000-0000-4000-8000-000000000004'`)
   expect(support.rows).toEqual([{ participation_type: 'auxiliary' }])
-  const assignments =
-    await owner.query(`select ended_at from public.ticket_assignments
-    where stage = 'technician'`)
-  expect(assignments.rows.every((row) => row.ended_at === null)).toBe(true)
-  const participants =
-    await owner.query(`select t.status, p.ended_at, t.closed_at
-    from public.ticket_participants p join public.tickets t on t.id = p.ticket_id`)
+  const assignments = await owner.query<{
+    status: string
+    ended_at: Date | null
+    closed_at: Date | null
+  }>(`select t.status::text, a.ended_at, t.closed_at
+    from public.ticket_assignments a join public.tickets t on t.id = a.ticket_id
+    where a.stage = 'technician' and a.ticket_id in (${CURATED_IDS})`)
+  for (const row of assignments.rows) {
+    expect(row.ended_at).toEqual(row.status === 'closed' ? row.closed_at : null)
+  }
+  const participants = await owner.query<{
+    status: string
+    ended_at: Date | null
+    closed_at: Date | null
+  }>(`select t.status::text, p.ended_at, t.closed_at
+    from public.ticket_participants p join public.tickets t on t.id = p.ticket_id
+    where p.ticket_id in (${CURATED_IDS})`)
   for (const row of participants.rows) {
     expect(row.ended_at).toEqual(row.status === 'closed' ? row.closed_at : null)
   }
