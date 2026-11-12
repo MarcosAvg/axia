@@ -84,7 +84,8 @@ export const metricsMessages = {
   },
   times: {
     title: 'Tiempos del periodo',
-    cycle: 'Ciclo medio',
+    cycleAndPhases: 'Ciclo y fases',
+    phaseProfile: 'Perfil de fases',
     ...distributionMessages,
     phases: {
       response: 'Respuesta',
@@ -97,7 +98,6 @@ export const metricsMessages = {
       validation: 'Validación',
       claim: 'Reclamación',
     },
-    phaseTable: 'Fases del ciclo',
     phase: 'Fase',
     average: 'Promedio',
     accumulated: 'Acumulado',

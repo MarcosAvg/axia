@@ -1,6 +1,5 @@
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
-import { HintIcon } from '@/components/shared/hint'
 import { useTimeMeasure } from '@/components/shared/time-measure-context'
 import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 import { formatMinutes } from '../domain/metrics'
@@ -8,8 +7,7 @@ import type { MetricsSummary } from '../domain/metrics'
 import { cyclePhases, shareOf } from '../domain/visuals'
 import type { CyclePhase } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
-import { ChartCard } from './chart-card'
-import { measureValue, totalInMode, type TimeMode } from '../domain/time-mode'
+import { measureValue, type TimeMode } from '../domain/time-mode'
 
 const t = metricsMessages.times
 
@@ -77,7 +75,7 @@ function phaseColumns(measure: TimeMeasure): DataTableColumn<PhaseRow>[] {
   return columns
 }
 
-/** Tabla de todas las fases del ciclo con la medida activa. */
+/** Tabla de fases del ciclo; la tarjeta contenedora aporta título y totales. */
 export function PhaseTable({
   summary,
   mode,
@@ -86,51 +84,11 @@ export function PhaseTable({
   mode: TimeMode
 }) {
   const { measure } = useTimeMeasure()
-  const rows = phaseRows(summary, measure, mode)
-  const record = summary as unknown as Record<string, number>
-  const total = measureValue(record, 'total', mode, measure)
-  const net =
-    measure === 'total'
-      ? totalInMode(summary.sumNet, summary.sumNetLabor, mode)
-      : totalInMode(summary.avgNet, summary.avgNetLabor, mode)
   return (
-    <ChartCard
-      title={t.phaseTable}
-      hint={metricsMessages.chartHints.phaseTable}
-    >
-      <div className="flex flex-col gap-2">
-        <DataTable
-          columns={phaseColumns(measure)}
-          rows={rows}
-          getRowId={(row) => row.phase}
-        />
-        <p className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            {metricsMessages.kpi.total}
-            <HintIcon
-              hint={metricsMessages.timesHints.total}
-              label={metricsMessages.kpi.total}
-            />
-            <span className="font-medium text-foreground">
-              {formatMinutes(total)}
-            </span>
-          </span>
-          {isRobustMeasure(measure) ? (
-            <span>{metricsMessages.times.robustHint}</span>
-          ) : (
-            <span className="inline-flex items-center gap-1">
-              {metricsMessages.kpi.net}
-              <HintIcon
-                hint={metricsMessages.timesHints.net}
-                label={metricsMessages.kpi.net}
-              />
-              <span className="font-medium text-foreground">
-                {formatMinutes(net)}
-              </span>
-            </span>
-          )}
-        </p>
-      </div>
-    </ChartCard>
+    <DataTable
+      columns={phaseColumns(measure)}
+      rows={phaseRows(summary, measure, mode)}
+      getRowId={(row) => row.phase}
+    />
   )
 }

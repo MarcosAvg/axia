@@ -8,11 +8,10 @@ import type {
 import type { DistributionProfileRow, MetricsSummary } from '../domain/metrics'
 import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
-import { CycleBar } from './cycle-bar'
+import { CycleCard } from './cycle-card'
 import { DistributionProfileCard } from './distribution-profile'
 import { PeopleTimes } from './people-times'
 import { PhaseHeatmap } from './phase-heatmap'
-import { PhaseTable } from './phase-table'
 import { TimesDimensionTable } from './times-dimension-table'
 import { TimesHeader } from './times-header'
 
@@ -41,10 +40,7 @@ export function TimesTab({
   return (
     <div className="flex flex-col gap-6">
       <TimesHeader />
-      <div className="flex flex-col gap-4">
-        <CycleBar summary={summary} mode={mode} />
-        <PhaseTable summary={summary} mode={mode} />
-      </div>
+      <CycleCard summary={summary} profile={profile} mode={mode} />
       <DistributionProfileCard profile={profile} />
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-medium">{t.dimensionSection}</h2>

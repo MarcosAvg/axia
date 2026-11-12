@@ -122,15 +122,19 @@ comparte la dimensión con el mapa de calor, permite elegir la señal (reapertur
 reasignación) y compara cada agrupación con el promedio global; el tiempo de pausas y duplicados
 se identifica como continuo.
 En **Tiempos**, el selector **Medida** de la cabecera (Promedio, Acumulado, Mediana, P90, P95,
-Máximo) afecta a las vistas de una sola medida: tabla de fases, tabla por dimensión, mapa de calor,
-ciclo y exportación. El reloj **Continuo / Laboral / Extra** de la barra superior se aplica a toda
-la pestaña. Las medidas robustas se calculan sobre los tiquets que tuvieron la fase: no incluyen
+Máximo) afecta a las vistas de una sola medida: tabla por dimensión, mapa de calor, ciclo y
+exportación. El reloj **Continuo / Laboral / Extra** de la barra superior se aplica a toda la
+pestaña. Las medidas robustas se calculan sobre los tiquets que tuvieron la fase: no incluyen
 ceros, no son aditivas y se ocultan cuando la muestra es menor a cinco casos. La tarjeta
-**Distribución y atípicos** muestra `n / N` (tiquets con la fase sobre el universo), la mediana, el
-IQR, el P90, el P95, el máximo y el porcentaje fuera de la valla de 1.5×IQR; resalta la columna de
-la medida activa y no cambia con el selector porque muestra el perfil completo. Las fichas
-informativas explican las definiciones al pasar el cursor o al enfocar cada control, tarjeta o
-columna.
+**Ciclo y fases** reúne la composición del ciclo con la tabla de fases; con una medida robusta se
+convierte en **Perfil de fases**, una gráfica de rango por fase (P25–P75, mediana y P90) que no suma
+cuantiles. La tarjeta **Distribución y atípicos** muestra `n / N` (tiquets con la fase sobre el
+universo), la mediana, el IQR, el P90, el P95, el máximo y el porcentaje fuera de la valla de
+1.5×IQR; resalta la columna de la medida activa y no cambia con el selector porque muestra el perfil
+completo. Las fichas informativas explican las definiciones al pasar el cursor o al enfocar cada
+control, tarjeta o columna. En el detalle del tiquet, **Tiempo por fase** es una lista compacta
+ordenada por duración; la reasignación se mide aparte y lo que no cae en una fase se muestra como
+sin clasificar.
 Los filtros de periodo, edificio, equipo, categoría, dependencia y desenlace nunca amplían lo que tu
 alcance permite ver. Los tiquets con hora sin verificar quedan fuera de las medias de desempeño
 hasta corregirlos.

@@ -63,7 +63,9 @@ export const hintMessages = {
     phaseHeatmap:
       'Tiempo de cada fase por categoría. La intensidad es relativa a la columna.',
     cycle:
-      'Composición del ciclo con la medida activa. La barra apilada solo se muestra con promedio o acumulado.',
+      'Composición del ciclo con la medida activa. La tabla de fases es la leyenda.',
+    phaseProfile:
+      'Distribución por fase: caja P25–P75, mediana y P90. Solo se muestran fases con muestra.',
     technicianTimes:
       'Tiempos de los tiquets que lideró cada técnico. Estas tablas usan promedios y no cambian con el selector Medida.',
     requesterTimes:
@@ -115,6 +117,8 @@ export const hintMessages = {
       'Tiquets que tuvieron la fase. La medida se oculta cuando la muestra es menor a 5.',
     dimensionMeasure:
       'Fase que se muestra en la tabla; la medida global decide cómo se resume.',
+    unclassified:
+      'Tiempo del periodo que no cae en una fase medida; suele ser reasignación medida aparte.',
     people: 'Estas tablas usan promedios y no cambian con el selector Medida.',
     insufficientSample:
       'Con menos de 5 tiquets, la mediana y los cuantiles no son representativos.',

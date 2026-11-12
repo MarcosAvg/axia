@@ -5,7 +5,6 @@ import { HintLabel } from '@/components/shared/hint'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Identity } from '@/features/auth'
-import { TicketCycleChart } from '@/features/metrics'
 import type { ActionKey } from '../domain/actions'
 import type {
   TicketDetailWithTimes,
@@ -22,6 +21,7 @@ import { EvidenceUploader } from './evidence-uploader'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketAttachmentsList } from './ticket-attachments-list'
+import { TicketCycleSummary } from './ticket-cycle-summary'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketRatingPanel } from './ticket-rating-panel'
 import { TicketTimeline } from './ticket-timeline'
@@ -176,7 +176,7 @@ export function CycleTimesSection({
             </Button>
           ))}
         </div>
-        <TicketCycleChart times={selected} />
+        <TicketCycleSummary times={selected} />
       </div>
     </Section>
   )

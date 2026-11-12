@@ -67,7 +67,7 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   await expect(dialog).toHaveCount(0)
 })
 
-test('el técnico tiene sus acciones fijas y no ve la gráfica en móvil', async ({
+test('el técnico tiene sus acciones fijas y no ve el tiempo por fase en móvil', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })

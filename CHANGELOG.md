@@ -15,6 +15,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 - El perfil de distribución devuelve `total` (universo de desempeño) además de `coverage`; los
   textos de ayuda corrigen tasas, fuentes y alcance de la medida.
+- La tarjeta de ciclo de Métricas reúne composición y tabla de fases; con medidas robustas muestra
+  un perfil de rango por fase. El detalle del tiquet sustituye la gráfica por un resumen compacto
+  por fase, con reasignación y sin clasificar.
 
 ## [0.25.0] - 2026-11-12
 

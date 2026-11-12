@@ -53,7 +53,7 @@ test('el resumen muestra los indicadores y el bento vigente', async ({
   await expect(
     summary.getByRole('heading', { name: 'Estado actual' }),
   ).toBeVisible()
-  await expect(summary.getByText('Ciclo medio')).toHaveCount(0)
+  await expect(summary.getByText('Ciclo y fases')).toHaveCount(0)
   await expect(summary.getByText('Detalle por estado')).toHaveCount(0)
 })
 
@@ -138,10 +138,7 @@ test('la pestaña de tiempos agrupa ciclo, dimensiones y personas', async ({
     times.getByRole('heading', { name: 'Tiempos del periodo' }),
   ).toBeVisible()
   await expect(
-    times.getByRole('heading', { name: 'Ciclo medio' }),
-  ).toBeVisible()
-  await expect(
-    times.getByRole('heading', { name: 'Fases del ciclo' }),
+    times.getByRole('heading', { name: 'Ciclo y fases' }),
   ).toBeVisible()
   await expect(
     times.getByRole('heading', { name: 'Por dimensión', exact: true }),
@@ -226,6 +223,10 @@ test('alterna la medida de tiempos entre promedio, acumulado y mediana', async (
 
   await measure.selectOption({ label: 'Mediana' })
   await expect(page.getByText('Trabajo activo (mediana)').first()).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Perfil de fases' }),
+  ).toBeVisible()
+  await expect(page.getByText(/Barra: P25–P75/)).toBeVisible()
   await expect(
     page.getByRole('heading', { name: 'Distribución y atípicos' }),
   ).toBeVisible()
