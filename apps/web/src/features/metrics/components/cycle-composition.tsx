@@ -92,23 +92,24 @@ export function CycleComposition({
     total,
   }).filter((slice) => slice.minutes > 0)
   const sum = slices.reduce((acc, slice) => acc + slice.minutes, 0)
-  const residual = Math.max(0, total - sum)
+  const residual = measure === 'total' ? Math.max(0, total - sum) : 0
+  const barTotal = sum > 0 ? sum : total
   const label = slices
-    .map((slice) => segmentLabel(slice.phase, slice.minutes, total))
+    .map((slice) => segmentLabel(slice.phase, slice.minutes, barTotal))
     .join(', ')
 
   return (
     <div className="flex flex-col gap-2">
       <CompositionBar
         slices={slices}
-        total={total}
+        total={barTotal}
         residual={residual}
         label={label}
       />
       {residual > 0 ? (
         <p className="text-xs text-muted-foreground">
           {t.unclassified}: {formatMinutes(residual)} ·{' '}
-          {formatPercent(shareOf(residual, total))}
+          {formatPercent(shareOf(residual, barTotal))}
         </p>
       ) : null}
     </div>
