@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { FilterChips } from '@/components/shared/filter-chips'
+import { HintIcon } from '@/components/shared/hint'
 import type { FilterCatalogs } from '../domain/indicators'
 import { EMPTY_FILTERS } from '../domain/metrics'
 import {
@@ -179,16 +180,22 @@ export function MetricsToolbar({
 
   return (
     <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-3">
-      <PeriodPicker
-        filters={filters}
-        onRange={onRange}
-        onFiltersChange={onFiltersChange}
-      />
-      <FiltersPopover
-        filters={filters}
-        catalogs={catalogs}
-        onFiltersChange={onFiltersChange}
-      />
+      <div className="flex items-center gap-1">
+        <PeriodPicker
+          filters={filters}
+          onRange={onRange}
+          onFiltersChange={onFiltersChange}
+        />
+        <HintIcon hint={metricsMessages.filterHints.period} label={t.period} />
+      </div>
+      <div className="flex items-center gap-1">
+        <FiltersPopover
+          filters={filters}
+          catalogs={catalogs}
+          onFiltersChange={onFiltersChange}
+        />
+        <HintIcon hint={metricsMessages.filterHints.filters} label={t.title} />
+      </div>
       {tabs}
       {mode && onModeChange ? (
         <TimeModeToggle mode={mode} onChange={onModeChange} />

@@ -159,6 +159,7 @@ export interface AgingRow {
 export interface DistributionProfileRow {
   phase: string
   n: number
+  total: number
   coverage: number
   mean: number
   median: number

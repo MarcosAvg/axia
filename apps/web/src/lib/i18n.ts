@@ -65,6 +65,7 @@ export const messages = {
   measure: {
     label: 'Medida',
     aria: 'Elegir la medida de tiempos',
+    hint: 'Promedio y acumulado usan todos los tiquets. Mediana, P90, P95 y máximo excluyen los tiquets sin la fase y no son aditivos.',
     average: 'Promedio',
     total: 'Acumulado',
     median: 'Mediana',

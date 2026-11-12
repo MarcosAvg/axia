@@ -5,7 +5,10 @@ export const detailSectionHints = {
   capture:
     'Datos con los que se registró el tiquet: ubicación, clasificación, prioridad y solicitante.',
   cycleTimes:
-    'Tiempo transcurrido en cada fase de este tiquet. Lo que no cae en una fase medida se muestra como sin clasificar.',
+    'Fases con tiempo, de mayor a menor. La reasignación se mide aparte y puede solaparse; lo que no cae en una fase se muestra como sin clasificar.',
+  cycleReassignment:
+    'Tiempo con un supervisor equivocado. Se mide aparte y puede solaparse con otras fases.',
+  cycleUnclassified: 'Tiempo del total que no cae en una fase medida.',
   evidence:
     'Fotos o archivos del ciclo de atención: solicitud, antes, avance, después y reclamación.',
   attachments:

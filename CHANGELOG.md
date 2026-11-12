@@ -11,11 +11,19 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   muestre volumen, estados, antigüedad, SLA, satisfacción, pausas, calidad y carga de equipo con
   datos suficientes. El conjunto incluye los seis escenarios curados, cinco técnicos, seis
   solicitantes, reasignaciones, recapturas, reaperturas, duplicados y una muestra de evidencias.
+- La tarjeta **Distribución y atípicos** muestra `n / N`, P95 y resalta la columna de la medida
+  activa. Las fichas informativas explican las definiciones de las tarjetas, columnas y controles
+  de Métricas.
 
 ### Cambiado
 
 - Reaplicar la semilla demo agrega los tiquets generados que falten sin reescribir los existentes;
   la documentación de desarrollo explica cómo reconstruir la demo completa.
+- El perfil de distribución devuelve `total` (universo de desempeño) además de `coverage`; los
+  textos de ayuda corrigen tasas, fuentes y alcance de la medida.
+- La tarjeta de ciclo de Métricas reúne composición y tabla de fases; con medidas robustas muestra
+  un perfil de rango por fase. El detalle del tiquet sustituye la gráfica por un resumen compacto
+  por fase, con reasignación y sin clasificar.
 
 ## [0.25.0] - 2026-11-12
 

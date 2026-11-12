@@ -51,11 +51,13 @@ export function AuxiliaryByCategoryTable({
             {
               id: 'tickets',
               header: metricsMessages.table.tickets,
+              hint: metricsMessages.tableHints.dimensionTickets,
               cell: (row) => row.tickets,
             },
             {
               id: 'minutes',
               header: t.auxiliaryParticipation,
+              hint: metricsMessages.teamHints.auxiliary,
               cell: (row) => formatMinutes(auxiliaryMinutes(row, mode)),
             },
           ]}

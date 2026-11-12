@@ -84,7 +84,10 @@ export function QualityHeatmap({
     ]),
   )
   return (
-    <ChartCard title={t.byDimension}>
+    <ChartCard
+      title={t.byDimension}
+      hint={metricsMessages.chartHints.qualityHeatmap}
+    >
       <div className="flex flex-col gap-3">
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">

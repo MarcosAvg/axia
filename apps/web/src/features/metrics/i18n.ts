@@ -84,8 +84,8 @@ export const metricsMessages = {
   },
   times: {
     title: 'Tiempos del periodo',
-    titleHint: 'El reloj y la medida elegidos aplican a toda la pestaña.',
-    cycle: 'Ciclo medio',
+    cycleAndPhases: 'Ciclo y fases',
+    phaseProfile: 'Perfil de fases',
     ...distributionMessages,
     phases: {
       response: 'Respuesta',
@@ -98,7 +98,6 @@ export const metricsMessages = {
       validation: 'Validación',
       claim: 'Reclamación',
     },
-    phaseTable: 'Fases del ciclo',
     phase: 'Fase',
     average: 'Promedio',
     accumulated: 'Acumulado',

@@ -90,10 +90,16 @@ function SupervisorsView({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <ChartCard title={metricsMessages.routing.title}>
+      <ChartCard
+        title={metricsMessages.routing.title}
+        hint={metricsMessages.chartHints.routing}
+      >
         <RoutingStats routing={routing} />
       </ChartCard>
-      <ChartCard title={t.supervisors}>
+      <ChartCard
+        title={t.supervisors}
+        hint={metricsMessages.teamHints.supervisors}
+      >
         <SupervisorTable rows={supervisors} />
       </ChartCard>
     </div>
@@ -111,7 +117,10 @@ function TechniciansView({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      <ChartCard title={metricsMessages.technicians.title}>
+      <ChartCard
+        title={metricsMessages.technicians.title}
+        hint={metricsMessages.chartHints.techniciansTable}
+      >
         <div className="flex flex-col gap-4">
           <TechnicianParticipationChart rows={technicians} mode={mode} />
           <div className="max-h-[32rem] overflow-auto">
@@ -124,7 +133,10 @@ function TechniciansView({
           </div>
         </div>
       </ChartCard>
-      <ChartCard title={t.auxiliaryByCategory}>
+      <ChartCard
+        title={t.auxiliaryByCategory}
+        hint={metricsMessages.teamHints.auxiliary}
+      >
         <AuxiliaryByCategoryTable rows={auxiliaryByCategory} mode={mode} />
       </ChartCard>
     </div>

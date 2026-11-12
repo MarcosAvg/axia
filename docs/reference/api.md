@@ -279,8 +279,9 @@ robusta devuelve, por cada fase, `stat<Tipo>` y `n<Tipo>` (por ejemplo `statTota
 `statResolution`); las medidas robustas excluyen los tiquets sin la fase y no son aditivas. Con
 `average` o `total` se usan las columnas `avg*` y `sum*` existentes. El perfil de distribución
 (`/api/metrics/distribution-profile`, también con `timeMode`) devuelve por fase `phase`, `n`,
-`coverage`, `mean`, `median`, `p25`, `p75`, `p90`, `p95`, `max`, `lowerFence`, `upperFence`,
-`outliers` y `outlierRate`; las vallas son Q1−1.5·IQR y Q3+1.5·IQR y los ceros de cada fase quedan
+`total`, `coverage`, `mean`, `median`, `p25`, `p75`, `p90`, `p95`, `max`, `lowerFence`,
+`upperFence`, `outliers` y `outlierRate`; `total` es el universo de desempeño del periodo y
+`coverage` es `n / total`. Las vallas son Q1−1.5·IQR y Q3+1.5·IQR y los ceros de cada fase quedan
 fuera.
 
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),

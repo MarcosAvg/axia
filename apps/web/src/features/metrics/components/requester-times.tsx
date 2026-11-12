@@ -18,11 +18,13 @@ function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
     {
       id: 'tickets',
       header: metricsMessages.table.tickets,
+      hint: metricsMessages.teamHints.requesterTickets,
       cell: (row) => row.tickets,
     },
     {
       id: 'validation',
       header: t.phases.validation,
+      hint: metricsMessages.teamHints.requesterValidation,
       cell: (row) =>
         formatMinutes(
           totalInMode(row.validationMinutes, row.validationLaborMinutes, mode),
@@ -31,6 +33,7 @@ function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
     {
       id: 'claim',
       header: t.phases.claim,
+      hint: metricsMessages.teamHints.requesterClaim,
       hideBelow: 'md',
       cell: (row) =>
         formatMinutes(
@@ -49,7 +52,10 @@ export function RequesterTimes({
   mode: TimeMode
 }) {
   return (
-    <ChartCard title={t.requesters}>
+    <ChartCard
+      title={t.requesters}
+      hint={metricsMessages.chartHints.requesterTimes}
+    >
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
       ) : (

@@ -5,7 +5,17 @@ const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 async function signIn(page: Page, email: string) {
   await page.goto('/login')
-  await page.getByLabel('Usuario').fill(email)
+  await expect(
+    page.getByRole('heading', { name: 'Inicia sesión' }),
+  ).toBeVisible()
+  // Vite dev hidrata el formulario después del primer render; esperar evita
+  // que el valor escrito se pierda al montar los manejadores de React.
+  await page.waitForTimeout(400)
+  const user = page.getByLabel('Usuario')
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await user.fill(email)
+    if ((await user.inputValue()) === email) break
+  }
   await page.getByLabel('Contraseña').fill(DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page.getByText(/Hola, Administrador Demo/)).toBeVisible()
@@ -53,7 +63,7 @@ test('el resumen muestra los indicadores y el bento vigente', async ({
   await expect(
     summary.getByRole('heading', { name: 'Estado actual' }),
   ).toBeVisible()
-  await expect(summary.getByText('Ciclo medio')).toHaveCount(0)
+  await expect(summary.getByText('Ciclo y fases')).toHaveCount(0)
   await expect(summary.getByText('Detalle por estado')).toHaveCount(0)
 })
 
@@ -138,10 +148,7 @@ test('la pestaña de tiempos agrupa ciclo, dimensiones y personas', async ({
     times.getByRole('heading', { name: 'Tiempos del periodo' }),
   ).toBeVisible()
   await expect(
-    times.getByRole('heading', { name: 'Ciclo medio' }),
-  ).toBeVisible()
-  await expect(
-    times.getByRole('heading', { name: 'Fases del ciclo' }),
+    times.getByRole('heading', { name: 'Ciclo y fases' }),
   ).toBeVisible()
   await expect(
     times.getByRole('heading', { name: 'Por dimensión', exact: true }),
@@ -177,7 +184,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   ).toBeVisible()
 
   await expect(page.locator('#metrics-catalog-filters')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click()
   await page
     .getByRole('combobox', { name: 'Edificio' })
     .selectOption({ label: 'Edificio Central' })
@@ -191,7 +198,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
     page.getByRole('button', { name: 'Quitar Edificio Central' }),
   ).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Filtros' }).click()
+  await page.getByRole('button', { name: 'Filtros', exact: true }).click()
   await page
     .getByRole('combobox', { name: 'Desenlace' })
     .selectOption({ label: 'Cancelados' })
@@ -227,8 +234,23 @@ test('alterna la medida de tiempos entre promedio, acumulado y mediana', async (
   await measure.selectOption({ label: 'Mediana' })
   await expect(page.getByText('Trabajo activo (mediana)').first()).toBeVisible()
   await expect(
+    page.getByRole('heading', { name: 'Perfil de fases' }),
+  ).toBeVisible()
+  await expect(page.getByText(/Barra: P25–P75/)).toBeVisible()
+  await page
+    .getByRole('button', { name: /Trabajo activo/ })
+    .first()
+    .hover()
+  await expect(page.getByRole('tooltip', { name: /P25/ })).toContainText('P25')
+  await expect(
     page.getByRole('heading', { name: 'Distribución y atípicos' }),
   ).toBeVisible()
+  await expect(page.getByText('n / N')).toBeVisible()
+  await expect(page.locator('[data-active="true"]')).toContainText('Mediana')
+  await page.getByRole('button', { name: 'Más información: n / N' }).focus()
+  await expect(
+    page.getByRole('tooltip', { name: /Tiquets que tuvieron la fase/ }),
+  ).toContainText('No cambia con la medida')
 })
 
 test('en móvil las métricas se navegan por pestañas', async ({ page }) => {
@@ -296,9 +318,9 @@ test('cambia el periodo desde el popover', async ({ page }) => {
     .getByRole('link', { name: 'Métricas' })
     .click()
 
-  await page.getByRole('button', { name: 'Periodo' }).click()
+  await page.getByRole('button', { name: /^Periodo:/ }).click()
   await page.getByRole('button', { name: '7 días' }).click()
-  await expect(page.getByRole('button', { name: 'Periodo' })).toContainText(
+  await expect(page.getByRole('button', { name: /^Periodo:/ })).toContainText(
     '7 días',
   )
 })

@@ -1,12 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { MeasureSelect } from './measure-select'
 import { TimeMeasureProvider } from './time-measure-provider'
 
 function renderSelect() {
   return render(
-    <TimeMeasureProvider>
-      <MeasureSelect />
-    </TimeMeasureProvider>,
+    <TooltipProvider>
+      <TimeMeasureProvider>
+        <MeasureSelect />
+      </TimeMeasureProvider>
+    </TooltipProvider>,
   )
 }
 

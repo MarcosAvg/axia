@@ -1,4 +1,5 @@
 import { ChevronDownIcon, DownloadIcon } from 'lucide-react'
+import { HintIcon } from '@/components/shared/hint'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -166,29 +167,35 @@ export function MetricsExport({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11 lg:min-h-9"
-          disabled={groups.length === 0}
-        >
-          <DownloadIcon className="size-4" />
-          {metricsMessages.export}
-          <ChevronDownIcon className="size-4 text-muted-foreground" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem
-          onSelect={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
-        >
-          {metricsMessages.exportCsv}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => void handleXlsx()}>
-          {metricsMessages.exportXlsx}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 lg:min-h-9"
+            disabled={groups.length === 0}
+          >
+            <DownloadIcon className="size-4" />
+            {metricsMessages.export}
+            <ChevronDownIcon className="size-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem
+            onSelect={() => downloadTextFile('metricas.csv', toCsv(head, rows))}
+          >
+            {metricsMessages.exportCsv}
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void handleXlsx()}>
+            {metricsMessages.exportXlsx}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <HintIcon
+        hint={metricsMessages.filterHints.export}
+        label={metricsMessages.export}
+      />
+    </div>
   )
 }
