@@ -14,6 +14,7 @@ type DemoEvidence = {
   ticketId: string
   actorId: string
   technicianId: string
+  subjectTechnicianId?: string
   type: 'before' | 'after'
   at: Date
 }
@@ -61,11 +62,13 @@ export async function insertDemoEvidence(
   const requestId = randomUUID()
   const event = await client.query<{ id: string }>(
     `insert into public.ticket_events (
-       ticket_id, cycle, type, actor_id, occurred_at, client_request_id, payload
-     ) values ($1, 1, 'evidence_added', $2, $3, $4, $5::jsonb) returning id`,
+       ticket_id, cycle, type, actor_id, subject_technician_id,
+       occurred_at, client_request_id, payload
+     ) values ($1, 1, 'evidence_added', $2, $3, $4, $5, $6::jsonb) returning id`,
     [
       evidence.ticketId,
       evidence.actorId,
+      evidence.subjectTechnicianId ?? null,
       evidence.at,
       requestId,
       JSON.stringify({ evidenceId: image.id, type: evidence.type, demo: true }),

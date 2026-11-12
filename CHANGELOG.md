@@ -5,6 +5,18 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La semilla demo crece a 240 tiquets repartidos en doce meses para que el tablero de métricas
+  muestre volumen, estados, antigüedad, SLA, satisfacción, pausas, calidad y carga de equipo con
+  datos suficientes. El conjunto incluye los seis escenarios curados, cinco técnicos, seis
+  solicitantes, reasignaciones, recapturas, reaperturas, duplicados y una muestra de evidencias.
+
+### Cambiado
+
+- Reaplicar la semilla demo agrega los tiquets generados que falten sin reescribir los existentes;
+  la documentación de desarrollo explica cómo reconstruir la demo completa.
+
 ## [0.25.0] - 2026-11-12
 
 ### Añadido

@@ -51,17 +51,3 @@ export async function repairDemoOffers(client: Client, ticket: DemoTicket) {
     stage: 0,
   })
 }
-
-export async function insertDemoValidations(
-  client: Client,
-  ticketId: string,
-  supervisorId: string,
-  at: Date,
-) {
-  await client.query(
-    `insert into public.ticket_validations (
-       ticket_id, cycle, validator_user_id, validator_role, validated_at
-     ) values ($1, 1, $2, 'requester', $3), ($1, 1, $2, 'supervisor', $3)`,
-    [ticketId, supervisorId, at],
-  )
-}

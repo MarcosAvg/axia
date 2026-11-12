@@ -101,7 +101,8 @@ test('métricas: tiempos, calidad y equipo', async ({ page }) => {
   })
 
   await page.getByRole('tab', { name: 'Calidad' }).click()
-  await expect(page.getByRole('heading', { name: 'Duplicados' })).toBeVisible()
+  await page.getByRole('button', { name: 'Duplicados', exact: true }).click()
+  await expect(page.getByText('Detalle por agrupación')).toBeVisible()
   await expect(page).toHaveScreenshot('calidad.png', {
     fullPage: true,
     mask: [page.locator('svg.recharts-surface')],

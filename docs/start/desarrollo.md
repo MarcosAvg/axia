@@ -40,20 +40,29 @@ Para una instalación nueva con datos ficticios, sustituir el paso de instalaci�
 pnpm db:demo -- --demo
 ```
 
-La semilla crea catálogos, seis tiquets y las cuentas `demo.admin`, `demo.supervisor`,
-`demo.technician` y `demo.requester`. Se usa la contraseña comunicada por la semilla; no hay una
-contraseña fija ni un acceso especial. La demo no se carga al migrar ni se permite en producción.
+La semilla crea catálogos, 240 tiquets repartidos en doce meses y las cuentas `demo.admin`,
+`demo.supervisor`, `demo.technician` y `demo.requester`. Se usa la contraseña comunicada por la
+semilla; no hay una contraseña fija ni un acceso especial. La demo no se carga al migrar ni se
+permite en producción.
+
+El conjunto incluye los seis escenarios curados y un volumen generado de forma determinista para
+que el tablero de métricas tenga datos en todas sus pestañas: todos los estados, antigüedades de
+0–1 a más de 30 días, tiempos dentro y fuera de SLA, calificaciones, pausas con subestados,
+rechazos, cancelaciones, duplicados, reasignaciones, recapturas y reaperturas. La evidencia WebP
+ficticia se genera solo para una muestra de tiquets, de modo que el detalle siga siendo
+demostrable sin ralentizar la carga.
 
 `AXIA_DEMO_PASSWORD` definida en el entorno seleccionado reaplica esa contraseña a cuentas demo
 existentes. Sin ella, una nueva ejecución conserva las contraseñas ya creadas salvo que se pase
 `--reset-passwords`. Reiniciar la API no cambia contraseñas guardadas en la base.
 
-Los escenarios nuevos incluyen ofertas, evidencias WebP ficticias rotuladas DEMO y validaciones
+Los escenarios incluyen ofertas, evidencias WebP ficticias rotuladas DEMO y validaciones
 coherentes con su estado. El comando local y la API comparten `AXIA_DEV_STORAGE_DIR` o, si no está
-definida, `apps/server/data/evidence`. Las pruebas usan su propio `STORAGE_DIR`. Reaplicar la semilla recupera ofertas ausentes de tiquets demo aún registrados y
-sin actividad; no reescribe los ya operados ni agrega retrospectivamente evidencias a escenarios
-antiguos. Para obtener todos los escenarios nuevos se necesita una base demo nueva; no reiniciar
-una base con trabajo que deba conservarse.
+definida, `apps/server/data/evidence`. Las pruebas usan su propio `STORAGE_DIR`. Reaplicar la
+semilla recupera ofertas ausentes de tiquets demo aún registrados y sin actividad, y agrega los
+tiquets generados que falten; no reescribe los ya operados ni agrega retrospectivamente evidencias
+a escenarios antiguos. Para ver la demo completa desde cero conviene `pnpm db:reset` antes de
+volver a sembrar; no reiniciar una base con trabajo que deba conservarse.
 
 ## Pruebas
 
