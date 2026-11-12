@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-11-12
+
 ### Añadido
 
 - La pausa sigue un flujo por motivo: los subestados se separan en pasos de avance y salidas, y
