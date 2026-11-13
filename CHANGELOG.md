@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-11-13
+
 ### Añadido
 
 - La semilla demo crece a 240 tiquets repartidos en doce meses para que el tablero de métricas
