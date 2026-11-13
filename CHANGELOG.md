@@ -9,6 +9,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 - La tarjeta **Distribución y atípicos** de Métricas deja de mostrar la columna P95; conserva la
   mediana, el IQR, el P90, el máximo y los atípicos.
+- **Perfil de fases** usa una escala compartida redondeada por encima del P90 más alto, con marcas
+  de tiempo y una nota que identifica ese P90; el fondo discontinuo ya no se confunde con el P90
+  de cada fase. Con P95 o Máximo se avisa de que el valor puede superar el eje.
 
 ## [0.27.0] - 2026-11-13
 

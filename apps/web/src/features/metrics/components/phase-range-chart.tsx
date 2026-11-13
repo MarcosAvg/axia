@@ -1,3 +1,4 @@
+import { cn } from 'cn'
 import type { TimeMeasure } from '@/lib/time-measure'
 import {
   Tooltip,
@@ -6,9 +7,13 @@ import {
 } from '@/components/ui/tooltip'
 import type { DistributionProfileRow } from '../domain/metrics'
 import { formatMinutes, formatPercent } from '../domain/metrics'
+import { niceTimeScale, type TimeScale } from '../domain/range-scale'
 import { metricsMessages } from '../i18n'
 
 const t = metricsMessages.times
+
+const LABEL_COLUMN = 'w-24 shrink-0 sm:w-36'
+const VALUE_COLUMN = 'w-20 shrink-0'
 
 function phaseLabel(phase: string): string {
   if (phase === 'total') return metricsMessages.kpi.total
@@ -64,7 +69,7 @@ function RangeMarks({
   const p90 = position(row.p90, max)
   return (
     <>
-      <span className="absolute inset-y-1/2 left-0 h-px w-full bg-border" />
+      <span className="absolute top-1/2 left-0 w-full border-t border-dashed border-border" />
       <span
         className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-sm bg-chart-1/35"
         style={{ left, width }}
@@ -85,6 +90,46 @@ function RangeMarks({
   )
 }
 
+function RangeAxis({ scale }: { scale: TimeScale }) {
+  return (
+    <div
+      className="flex items-center gap-2 text-[10px] text-muted-foreground"
+      aria-hidden="true"
+    >
+      <span className={LABEL_COLUMN} />
+      <div className="relative h-6 min-w-0 flex-1">
+        {scale.ticks.map((tick) => {
+          const isFirst = tick === 0
+          const isLast = tick === scale.max
+          return (
+            <span
+              key={tick}
+              className={cn(
+                'absolute top-0 flex flex-col',
+                isFirst && 'items-start',
+                isLast && '-translate-x-full items-end',
+                !isFirst && !isLast && '-translate-x-1/2 items-center',
+              )}
+              style={{ left: position(tick, scale.max) }}
+            >
+              <span className="h-1 w-px bg-border" />
+              <span
+                className={cn(
+                  'whitespace-nowrap',
+                  !isFirst && !isLast && 'hidden sm:block',
+                )}
+              >
+                {formatMinutes(tick)}
+              </span>
+            </span>
+          )
+        })}
+      </div>
+      <span className={VALUE_COLUMN} />
+    </div>
+  )
+}
+
 function RangeRow({
   row,
   measure,
@@ -100,8 +145,8 @@ function RangeRow({
     row.p75,
   )}, P90 ${formatMinutes(row.p90)}`
   return (
-    <li className="grid grid-cols-[minmax(6rem,9rem)_1fr_auto] items-center gap-2 text-xs">
-      <div className="min-w-0">
+    <li className="flex items-center gap-2 text-xs">
+      <div className={cn(LABEL_COLUMN, 'min-w-0')}>
         <span className="block truncate text-muted-foreground">
           {phaseLabel(row.phase)}
         </span>
@@ -114,7 +159,7 @@ function RangeRow({
           <button
             type="button"
             aria-label={label}
-            className="relative h-5 w-full cursor-help rounded-sm border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="relative h-5 min-w-0 flex-1 cursor-help rounded-sm border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <RangeMarks row={row} max={max} />
           </button>
@@ -123,10 +168,31 @@ function RangeRow({
           <RangeTooltipContent row={row} />
         </TooltipContent>
       </Tooltip>
-      <span className="font-medium tabular-nums">
+      <span className={cn(VALUE_COLUMN, 'text-right font-medium tabular-nums')}>
         {formatMinutes(valueFor(row, measure))}
       </span>
     </li>
+  )
+}
+
+function RangeScaleNote({
+  scale,
+  maxP90,
+  measure,
+}: {
+  scale: TimeScale
+  maxP90: number
+  measure: TimeMeasure
+}) {
+  return (
+    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <p>{t.rangeLegend}</p>
+      <p>
+        {t.rangeScale}: 0–{formatMinutes(scale.max)} · {t.rangeP90Max}:{' '}
+        {formatMinutes(maxP90)}
+      </p>
+      {measure === 'p95' || measure === 'max' ? <p>{t.rangeOverflow}</p> : null}
+    </div>
   )
 }
 
@@ -144,15 +210,22 @@ export function PhaseRangeChart({
       <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
     )
   }
-  const max = Math.max(1, ...rows.map((row) => row.p90))
+  const maxP90 = Math.max(1, ...rows.map((row) => row.p90))
+  const scale = niceTimeScale(maxP90)
   return (
     <div className="flex flex-col gap-2">
       <ul className="flex flex-col gap-2">
         {rows.map((row) => (
-          <RangeRow key={row.phase} row={row} measure={measure} max={max} />
+          <RangeRow
+            key={row.phase}
+            row={row}
+            measure={measure}
+            max={scale.max}
+          />
         ))}
       </ul>
-      <p className="text-xs text-muted-foreground">{t.rangeLegend}</p>
+      <RangeAxis scale={scale} />
+      <RangeScaleNote scale={scale} maxP90={maxP90} measure={measure} />
     </div>
   )
 }

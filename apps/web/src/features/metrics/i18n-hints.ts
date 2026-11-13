@@ -65,7 +65,7 @@ export const hintMessages = {
     cycle:
       'Composición del ciclo con la medida activa. La tabla de fases es la leyenda.',
     phaseProfile:
-      'Distribución por fase: caja P25–P75, mediana y P90. Solo se muestran fases con muestra.',
+      'Distribución por fase: caja P25–P75, mediana y P90. La escala es compartida, se redondea por encima del P90 más alto y solo se muestran fases con muestra.',
     technicianTimes:
       'Tiempos de los tiquets que lideró cada técnico. Estas tablas usan promedios y no cambian con el selector Medida.',
     requesterTimes:

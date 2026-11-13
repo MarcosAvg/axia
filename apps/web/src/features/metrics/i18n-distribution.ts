@@ -1,7 +1,11 @@
 /** Textos de la tarjeta de distribución y de las medidas robustas. */
 export const distributionMessages = {
   distribution: 'Distribución y atípicos',
-  rangeLegend: 'Barra: P25–P75 · punto: mediana · línea: P90',
+  rangeLegend: 'Barra: P25–P75 · punto: mediana · línea: mediana → P90',
+  rangeScale: 'Escala compartida',
+  rangeP90Max: 'P90 más alto',
+  rangeOverflow:
+    'P95 y máximo pueden superar el eje; consulta el valor de la derecha.',
   unclassified: 'Sin clasificar',
   distributionHint:
     'Perfil completo de cada fase: muestra, centro, dispersión y extremos. No cambia con la medida.',
