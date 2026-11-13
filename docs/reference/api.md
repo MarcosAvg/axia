@@ -289,8 +289,9 @@ un filtro nunca amplía el alcance. `clock` (`calendar` o `laboral`) elige el re
 se usa el modo configurado en la instancia. Resumen admite `compact=0|1`; actividad admite `limit` (1–50,
 por defecto 8). Las rutas de métricas por grupo devuelven `{ items }`.
 
-El resumen admite `stat` (`average`, `total`, `median`, `p90`, `p95` o `max`; por defecto
-`average`) y `timeMode` (`calendar`, `laboral` o `extra`; por defecto `calendar`). Con una medida
+El resumen admite `stat` (`average`, `total`, `median`, `iqr`, `p90`, `p95` o `max`; por defecto
+`average`) y `timeMode` (`calendar`, `laboral` o `extra`; por defecto `calendar`). `iqr` es la
+amplitud del 50% central (`P75 − P25`). Con una medida
 robusta devuelve, por cada fase, `stat<Tipo>` y `n<Tipo>` (por ejemplo `statTotal`, `nTotal`,
 `statResolution`); las medidas robustas excluyen los tiquets sin la fase y no son aditivas. Con
 `average` o `total` se usan las columnas `avg*` y `sum*` existentes. El perfil de distribución

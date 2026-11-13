@@ -69,9 +69,11 @@ describe('medida de tiempo', () => {
 describe('medidas robustas', () => {
   it('lee las medidas robustas y su muestra', () => {
     expect(measureValue(robust, 'active', 'calendar', 'median')).toBe(55)
+    expect(measureValue(robust, 'active', 'calendar', 'iqr')).toBe(55)
     expect(measureValue(robust, 'total', 'extra', 'p90')).toBe(210)
     expect(measureValue(robust, 'resolution', 'laboral', 'max')).toBe(200)
     expect(measureSample(robust, 'active', 'median', 'calendar')).toBe(3)
+    expect(measureSample(robust, 'active', 'iqr', 'calendar')).toBe(3)
     expect(measureSample(robust, 'resolution', 'p90', 'calendar')).toBe(2)
   })
 

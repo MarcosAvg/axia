@@ -29,4 +29,17 @@ describe('MeasureSelect', () => {
 
     expect(select).toHaveValue('median')
   })
+
+  it('incluye IQR entre las medidas', () => {
+    renderSelect()
+    const select = screen.getByRole('combobox', {
+      name: 'Elegir la medida de tiempos',
+    })
+
+    expect(screen.getByRole('option', { name: 'IQR' })).toBeInTheDocument()
+
+    fireEvent.change(select, { target: { value: 'iqr' } })
+
+    expect(select).toHaveValue('iqr')
+  })
 })

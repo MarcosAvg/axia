@@ -108,6 +108,11 @@ it('calcula P90 y el máximo sin inflar el esquema', async () => {
   expect(max.summary.statTotal).toBeCloseTo(600, 0)
 })
 
+it('calcula el rango intercuartílico', async () => {
+  const iqr = await summary('stat=iqr')
+  expect(iqr.summary.statTotal).toBeCloseTo(165, 0)
+})
+
 it('aplica el reloj elegido a las medidas robustas', async () => {
   const extra = await summary('stat=median&timeMode=extra')
   expect(extra.summary.statTotal).toBeCloseTo(210, 0)

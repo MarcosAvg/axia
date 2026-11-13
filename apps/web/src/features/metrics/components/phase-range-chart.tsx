@@ -24,6 +24,7 @@ function phaseLabel(phase: string): string {
 
 function valueFor(row: DistributionProfileRow, measure: TimeMeasure): number {
   if (measure === 'median') return row.median
+  if (measure === 'iqr') return row.p75 - row.p25
   if (measure === 'p90') return row.p90
   if (measure === 'p95') return row.p95
   if (measure === 'max') return row.max

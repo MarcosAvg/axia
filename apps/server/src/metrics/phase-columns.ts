@@ -5,6 +5,7 @@ export const MEASURE_STATS = [
   'average',
   'total',
   'median',
+  'iqr',
   'p90',
   'p95',
   'max',
@@ -91,6 +92,9 @@ export function phaseMinutes(key: PhaseKey, mode: MetricsTimeMode): SQL {
 export function statAggregate(stat: MeasureStat, minutes: SQL): SQL {
   if (stat === 'median') {
     return sql`percentile_cont(0.5) within group (order by ${minutes})`
+  }
+  if (stat === 'iqr') {
+    return sql`percentile_cont(0.75) within group (order by ${minutes}) - percentile_cont(0.25) within group (order by ${minutes})`
   }
   if (stat === 'p90') {
     return sql`percentile_cont(0.9) within group (order by ${minutes})`

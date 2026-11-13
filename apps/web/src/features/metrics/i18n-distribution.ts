@@ -36,7 +36,7 @@ export const distributionMessages = {
   active: 'activa',
   activeNote: 'La columna resaltada corresponde a la medida elegida.',
   sampleNote:
-    'n mide cuántos tiquets tuvieron la fase; no cambia al elegir mediana, P90 o máximo.',
+    'n mide cuántos tiquets tuvieron la fase; no cambia al elegir mediana, IQR, P90 o máximo.',
   accumulatedNote:
     'El acumulado no tiene una columna equivalente en el perfil; consulta la tabla de fases.',
   insufficientSample: 'Muestra insuficiente: menos de 5 tiquets.',

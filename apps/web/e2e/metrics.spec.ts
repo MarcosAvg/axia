@@ -178,7 +178,7 @@ test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await page.getByRole('button', { name: 'Quitar Cancelados' }).click()
 })
 
-test('alterna la medida de tiempos entre promedio, acumulado y mediana', async ({
+test('alterna la medida de tiempos entre promedio, acumulado, mediana e IQR', async ({
   page,
 }) => {
   await signIn(page, 'demo.admin')
@@ -216,6 +216,13 @@ test('alterna la medida de tiempos entre promedio, acumulado y mediana', async (
   ).toBeVisible()
   await expect(page.getByText('n / N')).toBeVisible()
   await expect(page.locator('[data-active="true"]')).toContainText('Mediana')
+
+  await measure.selectOption({ label: 'IQR' })
+  await expect(page.getByText('Trabajo activo (IQR)').first()).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Perfil de fases' }),
+  ).toBeVisible()
+  await expect(page.locator('[data-active="true"]')).toContainText('IQR')
   await page.getByRole('button', { name: 'Más información: n / N' }).focus()
   await expect(
     page.getByRole('tooltip', { name: /Tiquets que tuvieron la fase/ }),

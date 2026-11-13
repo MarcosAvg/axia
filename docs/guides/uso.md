@@ -130,9 +130,10 @@ pendientes y retiradas, y el tiempo hasta la toma se identifica como continuo. E
 comparte la dimensión con el mapa de calor, permite elegir la señal (reapertura, recaptura o
 reasignación) y compara cada agrupación con el promedio global; el tiempo de pausas y duplicados
 se identifica como continuo.
-En **Tiempos**, el selector **Medida** de la cabecera (Promedio, Acumulado, Mediana, P90, P95,
+En **Tiempos**, el selector **Medida** de la cabecera (Promedio, Acumulado, Mediana, IQR, P90, P95,
 Máximo) afecta a las vistas de una sola medida: tabla por dimensión, mapa de calor, ciclo y
-exportación. El reloj **Continuo / Laboral / Extra** de la barra superior se aplica a toda la
+exportación. **IQR** es la amplitud del 50% central (P75 − P25). El reloj **Continuo / Laboral /
+Extra** de la barra superior se aplica a toda la
 pestaña. Las medidas robustas se calculan sobre los tiquets que tuvieron la fase: no incluyen
 ceros, no son aditivas y se ocultan cuando la muestra es menor a cinco casos. La tarjeta
 **Ciclo y fases** reúne la composición del ciclo con la tabla de fases; con una medida robusta se

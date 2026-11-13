@@ -12,6 +12,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   problema; los selectores manuales siguen disponibles.
 - Las barras de composición del ciclo en el detalle del tiquet y en Métricas → Tiempos muestran
   fase, duración y porcentaje al pasar el cursor o enfocar cada segmento con teclado.
+- El selector **Medida** de Tiempos incluye **IQR**, la amplitud del 50% central (P75 − P25), en la
+  tabla, el mapa de calor, el perfil de fases y la exportación.
 
 ### Cambiado
 

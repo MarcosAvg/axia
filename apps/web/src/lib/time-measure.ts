@@ -8,6 +8,7 @@ export const TIME_MEASURES = [
   'average',
   'total',
   'median',
+  'iqr',
   'p90',
   'p95',
   'max',

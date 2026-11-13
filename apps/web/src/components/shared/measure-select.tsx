@@ -11,6 +11,7 @@ const LABELS: Record<TimeMeasure, string> = {
   average: t.average,
   total: t.total,
   median: t.median,
+  iqr: t.iqr,
   p90: t.p90,
   p95: t.p95,
   max: t.max,
