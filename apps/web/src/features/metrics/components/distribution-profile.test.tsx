@@ -28,7 +28,7 @@ function renderCard() {
   return render(
     <TooltipProvider>
       <TimeMeasureProvider>
-        <DistributionProfileCard profile={profile} />
+        <DistributionProfileCard profile={profile} mode="calendar" />
       </TimeMeasureProvider>
     </TooltipProvider>,
   )
@@ -45,7 +45,9 @@ describe('DistributionProfileCard', () => {
 
     expect(screen.getByText('n / N')).toBeInTheDocument()
     expect(screen.getByText('P95')).toBeInTheDocument()
-    expect(screen.getByText(/4 \/ 10/)).toBeInTheDocument()
+    expect(screen.getByTitle('4 de 10 tiquets')).toHaveTextContent(
+      /4\s*\/\s*10/,
+    )
   })
 
   it('resalta la columna de la medida activa', () => {

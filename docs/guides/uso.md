@@ -139,6 +139,14 @@ Los filtros de periodo, edificio, equipo, categoría, dependencia y desenlace nu
 alcance permite ver. Los tiquets con hora sin verificar quedan fuera de las medias de desempeño
 hasta corregirlos.
 
+Los números de las tarjetas y tablas que representan tiquets abren un panel lateral con la lista
+correspondiente. La lista hereda los filtros del tablero, pagina y permite abrir el detalle o pasar a
+la lista completa. Para pausas y percentiles la lista muestra los tiquets actuales que cumplen el
+criterio, no una reconstrucción exacta de cada evento: un motivo de pausa cuenta pausas y la lista
+muestra tiquets con esa pausa, y el perfil de fases lista el universo de la fase, no un tramo exacto
+entre cuantiles; con el reloj **Extra** el perfil no ofrece desglose. El desglose requiere permiso
+para ver tiquets; sin él, la cifra queda como texto.
+
 ## Trabajar sin conexión
 
 Las acciones y fotos admitidas se guardan en este dispositivo y se envían al recuperar conexión.

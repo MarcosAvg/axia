@@ -17,6 +17,7 @@ import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DeltaBadge } from './delta-badge'
+import { MetricCount } from './metric-count'
 import { QualityDiagnosis } from './quality-diagnosis'
 import { QualityReasons } from './quality-reasons'
 
@@ -134,7 +135,13 @@ function TimeQualityCard({ summary }: { summary: MetricsSummary }) {
             {metricsMessages.quality.unverifiedTickets}
           </dt>
           <dd className="text-2xl font-semibold tabular-nums">
-            {summary.unverifiedTickets}
+            <MetricCount
+              title={`${metricsMessages.drillDown.label} · ${metricsMessages.quality.unverifiedTickets}`}
+              filters={{ unverifiedTime: true }}
+              disabled={summary.unverifiedTickets === 0}
+            >
+              {summary.unverifiedTickets}
+            </MetricCount>
           </dd>
         </div>
         <div className="flex flex-col gap-1">

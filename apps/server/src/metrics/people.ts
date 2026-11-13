@@ -199,6 +199,7 @@ export async function pauseSubstates(
   const result = await db.execute(sql`
     with base as materialized (${metricsBase(actor, filters, 'metrics.view', { scope: 'workload' })})
     select
+      r.id as substate_id,
       r.name as substate_name,
       count(distinct p.id)::int as pauses,
       coalesce(

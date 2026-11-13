@@ -9,6 +9,7 @@ import { formatMinutes, formatRate, formatScore } from '../domain/metrics'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.sla
 const k = metricsMessages.kpi
@@ -45,7 +46,22 @@ function BulletRows({ rows }: { rows: SlaPriorityRow[] }) {
               />
             </span>
             <span className="text-xs text-muted-foreground tabular-nums">
-              {formatRate(row.complianceRate)} · {row.met}/{row.withTarget}
+              {formatRate(row.complianceRate)} ·{' '}
+              <MetricCount
+                title={`${t.met} · ${row.priorityName}`}
+                filters={{ priorityId: row.priorityId, sla: 'met' }}
+                disabled={row.met === 0}
+              >
+                {row.met}
+              </MetricCount>
+              {' / '}
+              <MetricCount
+                title={`${t.title} · ${row.priorityName}`}
+                filters={{ priorityId: row.priorityId, sla: 'with_target' }}
+                disabled={row.withTarget === 0}
+              >
+                {row.withTarget}
+              </MetricCount>
             </span>
           </li>
         )
@@ -76,7 +92,21 @@ export function SlaPanel({
           <div className="flex items-baseline gap-1.5">
             <dt className="text-muted-foreground">{t.met}:</dt>
             <dd className="font-medium tabular-nums">
-              {sla.met} / {sla.withTarget}
+              <MetricCount
+                title={t.met}
+                filters={{ sla: 'met' }}
+                disabled={sla.met === 0}
+              >
+                {sla.met}
+              </MetricCount>
+              {' / '}
+              <MetricCount
+                title={t.title}
+                filters={{ sla: 'with_target' }}
+                disabled={sla.withTarget === 0}
+              >
+                {sla.withTarget}
+              </MetricCount>
             </dd>
           </div>
           <div className="flex items-baseline gap-1.5">
@@ -97,6 +127,35 @@ export function SlaPanel({
   )
 }
 
+function ScoreRows({ distribution }: { distribution: number[] }) {
+  const counts = [1, 2, 3, 4, 5].map((score) => distribution[score - 1] ?? 0)
+  const maxCount = Math.max(1, ...counts)
+  return (
+    <ul className="flex flex-col gap-1 text-xs">
+      {counts.map((count, index) => (
+        <li key={index} className="flex items-center gap-2">
+          <span className="w-3 text-muted-foreground">{index + 1}</span>
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <span
+              className="block h-full rounded-full bg-chart-1"
+              style={{ width: `${shareOf(count, maxCount) * 100}%` }}
+            />
+          </span>
+          <span className="w-6 text-right tabular-nums">
+            <MetricCount
+              title={`${k.satisfaction} · ${index + 1}`}
+              filters={{ rating: index + 1 }}
+              disabled={count === 0}
+            >
+              {count}
+            </MetricCount>
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /** Promedio y distribución de calificaciones. */
 export function SatisfactionPanel({
   satisfaction,
@@ -108,8 +167,6 @@ export function SatisfactionPanel({
   const average = satisfaction.average
   const percent =
     average === null ? 0 : Math.min(100, Math.max(0, (average / 5) * 100))
-  const counts = [1, 2, 3, 4, 5].map((score) => distribution[score - 1] ?? 0)
-  const maxCount = Math.max(1, ...counts)
   return (
     <ChartCard title={k.satisfaction} hint={hints.satisfaction}>
       <div className="flex flex-col gap-4">
@@ -133,20 +190,7 @@ export function SatisfactionPanel({
             </span>
           </div>
         </div>
-        <ul className="flex flex-col gap-1 text-xs">
-          {counts.map((count, index) => (
-            <li key={index} className="flex items-center gap-2">
-              <span className="w-3 text-muted-foreground">{index + 1}</span>
-              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                <span
-                  className="block h-full rounded-full bg-chart-1"
-                  style={{ width: `${shareOf(count, maxCount) * 100}%` }}
-                />
-              </span>
-              <span className="w-6 text-right tabular-nums">{count}</span>
-            </li>
-          ))}
-        </ul>
+        <ScoreRows distribution={distribution} />
       </div>
     </ChartCard>
   )

@@ -1,5 +1,6 @@
 import { sql, type SQL } from 'drizzle-orm'
 
+import { drillDownConditions } from './drill-down-filters.js'
 import { isUnroutedSql } from './routing-sql.js'
 
 export type TicketFilters = {
@@ -9,6 +10,10 @@ export type TicketFilters = {
   dependencyId?: string
   teamId?: string
   categoryId?: string
+  subcategoryId?: string
+  problemId?: string
+  locationId?: string
+  channelId?: string
   priorityId?: string
   requesterId?: string
   technicianId?: string
@@ -18,6 +23,22 @@ export type TicketFilters = {
   unrouted?: boolean
   possibleDuplicate?: boolean
   search?: string
+  outcome?: string
+  sla?: 'met' | 'missed' | 'with_target'
+  slaClock?: 'calendar' | 'laboral'
+  rating?: number
+  reassigned?: boolean
+  recaptured?: boolean
+  reopened?: boolean
+  firstFix?: boolean
+  unverifiedTime?: boolean
+  pauseReasonId?: string
+  pauseSubstateId?: string
+  terminalReasonId?: string
+  pendingOffer?: boolean
+  participantTechnicianId?: string
+  phase?: string
+  timeMode?: 'calendar' | 'laboral'
   assigneeTechnicianId?: string
   offerSupervisorUserId?: string
   excludeFinal?: boolean
@@ -49,6 +70,18 @@ function classificationConditions(filters: TicketFilters): SQL[] {
   if (filters.teamId) conditions.push(sql`t.team_id = ${filters.teamId}`)
   if (filters.categoryId) {
     conditions.push(sql`t.category_id = ${filters.categoryId}`)
+  }
+  if (filters.subcategoryId) {
+    conditions.push(sql`t.subcategory_id = ${filters.subcategoryId}`)
+  }
+  if (filters.problemId) {
+    conditions.push(sql`t.problem_id = ${filters.problemId}`)
+  }
+  if (filters.locationId) {
+    conditions.push(sql`t.location_id = ${filters.locationId}`)
+  }
+  if (filters.channelId) {
+    conditions.push(sql`t.channel_id = ${filters.channelId}`)
   }
   if (filters.priorityId) {
     conditions.push(sql`t.priority_id = ${filters.priorityId}`)
@@ -112,6 +145,7 @@ function baseConditions(filters: TicketFilters, timezone: string): SQL[] {
     ...technicianCondition(filters),
     ...rangeAndFlagConditions(filters, timezone),
     ...searchConditions(filters),
+    ...drillDownConditions(filters),
   ]
 }
 

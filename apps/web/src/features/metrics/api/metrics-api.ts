@@ -92,12 +92,14 @@ export async function fetchPausesByReason(
   filters: MetricsFilters,
 ): Promise<PauseReasonRow[]> {
   const items = await fetchItems<{
+    reason_id: string
     reason_name: string
     pauses: number
     pause_time: string | null
     pause_time_labor: string | null
   }>('/api/metrics/pauses', filters)
   return items.map((row) => ({
+    reasonId: row.reason_id,
     reasonName: row.reason_name,
     pauses: toNumber(row.pauses),
     pauseMinutes: intervalToMinutes(row.pause_time),

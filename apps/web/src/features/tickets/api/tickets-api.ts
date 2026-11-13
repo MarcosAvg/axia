@@ -2,6 +2,8 @@
 
 import { apiFetch, ApiError } from '@/lib/api-client'
 import { isFinalStatus } from '../domain/status'
+import { ticketListQuery } from './ticket-list-params'
+import type { TicketFilters } from './ticket-list-params'
 import type {
   DuplicateCandidate,
   SupervisorOption,
@@ -11,7 +13,6 @@ import type {
   TicketParticipant,
   TicketPauseState,
   TicketPauseStep,
-  TicketStatus,
   TicketTimeAlert,
   TicketTimelineItem,
 } from '../domain/types'
@@ -25,25 +26,9 @@ import {
 } from '../schemas'
 import type { CreateTicketInput } from '../schemas'
 
-export const TICKETS_PAGE_SIZE = 20
+export type { TicketFilters } from './ticket-list-params'
 
-export interface TicketFilters {
-  status?: TicketStatus
-  statuses?: TicketStatus[]
-  buildingId?: string
-  categoryId?: string
-  teamId?: string
-  priorityId?: string
-  requesterId?: string
-  technicianId?: string
-  dependencyId?: string
-  serviceTypeId?: string
-  from?: string
-  to?: string
-  unrouted?: boolean
-  possibleDuplicate?: boolean
-  search?: string
-}
+export const TICKETS_PAGE_SIZE = 20
 
 export interface TicketPage {
   items: TicketListItem[]
@@ -52,42 +37,15 @@ export interface TicketPage {
   pageSize: number
 }
 
-function queryString(
-  params: Record<string, string | number | boolean | undefined>,
-) {
-  const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== '') search.set(key, String(value))
-  }
-  return search.toString()
-}
-
 export async function fetchTickets(
   filters: TicketFilters,
   page: number,
   pageSize = TICKETS_PAGE_SIZE,
 ): Promise<TicketPage> {
-  const query = queryString({
-    status: filters.status,
-    statuses: filters.statuses?.join(','),
-    buildingId: filters.buildingId,
-    categoryId: filters.categoryId,
-    teamId: filters.teamId,
-    priorityId: filters.priorityId,
-    requesterId: filters.requesterId,
-    technicianId: filters.technicianId,
-    dependencyId: filters.dependencyId,
-    serviceTypeId: filters.serviceTypeId,
-    from: filters.from,
-    to: filters.to,
-    unrouted: filters.unrouted ? true : undefined,
-    possibleDuplicate: filters.possibleDuplicate ? true : undefined,
-    search: filters.search,
-    page,
-    pageSize,
-  })
   return ticketPageResponseSchema.parse(
-    await apiFetch<unknown>(`/api/tickets?${query}`),
+    await apiFetch<unknown>(
+      `/api/tickets?${ticketListQuery(filters, page, pageSize)}`,
+    ),
   )
 }
 

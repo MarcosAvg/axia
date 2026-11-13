@@ -84,6 +84,7 @@ export function toCsv(headers: string[], rows: (string | number)[][]): string {
 }
 
 export interface PauseReasonRow {
+  reasonId: string
   reasonName: string
   pauses: number
   pauseMinutes: number

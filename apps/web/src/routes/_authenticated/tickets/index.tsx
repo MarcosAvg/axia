@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { can, RequirePermission, useAuth } from '@/features/auth'
 import {
+  InheritedFiltersNotice,
   TicketFilters,
   TicketListPanel,
   ticketFiltersFromSearch,
@@ -52,6 +53,10 @@ function TicketsPage() {
           value={search}
           onChange={applySearch}
           catalogs={catalogs}
+        />
+        <InheritedFiltersNotice
+          search={search}
+          onClear={(next) => applySearch({ ...next, page: 1 })}
         />
         {query.data ? (
           <p className="text-sm text-muted-foreground">

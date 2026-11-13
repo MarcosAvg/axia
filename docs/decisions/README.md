@@ -34,6 +34,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0124](0124-retirada-referencias-externas.md) | Retiro de las referencias externas y la integración deshabilitada |
 | [0125](0125-tiempo-autoritativo-instancia.md) | Tiempo de la instancia, confianza offline y corrección manual |
 | [0126](0126-flujo-pausa-avance-y-salida.md) | Flujo de pausa con pasos de avance y salidas |
+| [0127](0127-desglose-metricas-lista.md) | Desglose de métricas con la lista de tiquets |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

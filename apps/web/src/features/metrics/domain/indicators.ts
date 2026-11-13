@@ -29,6 +29,7 @@ export interface TechnicianRow {
 
 export interface RejectCancelRow {
   eventType: string
+  reasonId: string
   reasonName: string
   tickets: number
 }
@@ -91,6 +92,7 @@ export interface SupervisorRow {
 }
 
 export interface PauseSubstateRow {
+  id: string
   name: string
   pauses: number
   pauseMinutes: number

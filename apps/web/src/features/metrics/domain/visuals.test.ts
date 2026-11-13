@@ -87,13 +87,40 @@ describe('rejectReasons', () => {
   it('agrupa por motivo, separa tipos y ordena por total', () => {
     expect(
       rejectReasons([
-        { eventType: 'rejected', reasonName: 'Sin evidencia', tickets: 2 },
-        { eventType: 'cancelled', reasonName: 'Duplicado', tickets: 1 },
-        { eventType: 'rejected', reasonName: 'Duplicado', tickets: 3 },
+        {
+          eventType: 'rejected',
+          reasonId: 'sin-evidencia',
+          reasonName: 'Sin evidencia',
+          tickets: 2,
+        },
+        {
+          eventType: 'cancelled',
+          reasonId: 'duplicado',
+          reasonName: 'Duplicado',
+          tickets: 1,
+        },
+        {
+          eventType: 'rejected',
+          reasonId: 'duplicado',
+          reasonName: 'Duplicado',
+          tickets: 3,
+        },
       ]),
     ).toEqual([
-      { name: 'Duplicado', rejected: 3, cancelled: 1, total: 4 },
-      { name: 'Sin evidencia', rejected: 2, cancelled: 0, total: 2 },
+      {
+        reasonId: 'duplicado',
+        name: 'Duplicado',
+        rejected: 3,
+        cancelled: 1,
+        total: 4,
+      },
+      {
+        reasonId: 'sin-evidencia',
+        name: 'Sin evidencia',
+        rejected: 2,
+        cancelled: 0,
+        total: 2,
+      },
     ])
   })
 })

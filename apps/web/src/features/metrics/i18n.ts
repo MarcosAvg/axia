@@ -4,6 +4,8 @@ import { messages } from '@/lib/i18n'
 import { distributionMessages } from './i18n-distribution'
 import { outcomeMessages } from './dimension-labels'
 import { hintMessages } from './i18n-hints'
+import { drillDownMessages } from './i18n-drill-down'
+import { exportMessages } from './i18n-export'
 
 export { dimensionLabels, dimensionValueLabel } from './dimension-labels'
 
@@ -298,7 +300,6 @@ export const metricsMessages = {
     pendingRate: 'Tasa de pendientes',
     withdrawnRate: 'Retiradas',
   },
-  export: 'Exportar',
-  exportCsv: 'Exportar CSV',
-  exportXlsx: 'Exportar XLSX',
+  drillDown: drillDownMessages,
+  ...exportMessages,
 } as const

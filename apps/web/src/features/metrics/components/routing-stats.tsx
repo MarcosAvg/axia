@@ -1,11 +1,13 @@
+import type { ReactNode } from 'react'
 import { offerRate } from '../domain/team'
 import type { RoutingSummary } from '../domain/indicators'
 import { formatMinutes, formatPercent } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.routing
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
       <dt className="text-xs text-muted-foreground">{label}</dt>
@@ -21,7 +23,18 @@ export function RoutingStats({ routing }: { routing: RoutingSummary }) {
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label={t.offers} value={String(routing.offers)} />
         <Stat label={t.taken} value={String(routing.taken)} />
-        <Stat label={t.pending} value={String(routing.pendingOffers)} />
+        <Stat
+          label={t.pending}
+          value={
+            <MetricCount
+              title={`${metricsMessages.drillDown.label} · ${t.pending}`}
+              filters={{ pendingOffer: true }}
+              disabled={routing.pendingOffers === 0}
+            >
+              {routing.pendingOffers}
+            </MetricCount>
+          }
+        />
         <Stat
           label={t.takeRate}
           value={formatPercent(offerRate(routing.taken, routing.offers))}

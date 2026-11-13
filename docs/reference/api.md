@@ -64,10 +64,20 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | `PATCH` | `/api/tickets/:id/events/:eventId/time` | Ajustar la hora de una acción |
 | `POST` | `/api/tickets/:id/actions` | Acciones de flujo |
 
-`GET /api/tickets` acepta `status`, `statuses`, `search`, `buildingId`, `categoryId`, `teamId`,
-`priorityId`, `requesterId`, `technicianId`, `dependencyId`, `serviceTypeId`, `from` y `to`
-(`YYYY-MM-DD`, sobre la fecha de registro), `unrouted` y `possibleDuplicate` (`true`). Cada elemento
-incluye la ubicación y el técnico asignado del ciclo actual. Los filtros nunca amplían el alcance.
+`GET /api/tickets` acepta `status`, `statuses`, `search`, `buildingId`, `categoryId`,
+`subcategoryId`, `problemId`, `locationId`, `channelId`, `teamId`, `priorityId`, `requesterId`,
+`technicianId`, `dependencyId`, `serviceTypeId`, `from` y `to` (`YYYY-MM-DD`, sobre la fecha de
+registro), `unrouted` y `possibleDuplicate` (`true`). Cada elemento incluye la ubicación, la
+subcategoría, el problema y el técnico asignado del ciclo actual. Los filtros nunca amplían el
+alcance.
+
+Para el desglose de métricas, la misma lista acepta `outcome` (`open`, `closed`, `rejected`,
+`cancelled` o `duplicate`), `sla` (`met`, `missed` o `with_target`) con `slaClock` (`calendar` o
+`laboral`), `rating` (1–5), `pauseReasonId`, `pauseSubstateId`, `terminalReasonId`, `pendingOffer`,
+`reassigned`, `recaptured`, `reopened`, `firstFix`, `unverifiedTime`, `participantTechnicianId` y
+`phase` con `timeMode` (`calendar` o `laboral`). El conteo y la página usan la misma cláusula de
+alcance y filtros; las pausas y percentiles son aproximaciones sobre los datos actuales, no una
+reconstrucción histórica.
 
 `GET /api/tickets/attention` devuelve `{ offers, myWork }`: ofertas vigentes para el actor y tiquets
 no finales asignados a su perfil de técnico. Reutiliza el alcance de `ticket.view`; `offers` queda en

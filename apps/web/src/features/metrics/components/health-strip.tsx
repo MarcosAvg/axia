@@ -1,5 +1,6 @@
 import { cn } from 'cn'
 import { HintIcon } from '@/components/shared/hint'
+import type { TicketListFilters } from '@/features/tickets'
 import { formatPercent, formatRate, formatScore } from '../domain/metrics'
 import type {
   MetricsSummary,
@@ -13,6 +14,7 @@ import { deltaOf as deltaOfValue } from '../domain/period'
 import type { Comparison } from '../domain/period'
 import { metricsMessages } from '../i18n'
 import { DeltaBadge } from './delta-badge'
+import { MetricCount } from './metric-count'
 
 interface Stat {
   label: string
@@ -20,6 +22,8 @@ interface Stat {
   hint: string
   delta?: number
   lowerIsBetter?: boolean
+  filters?: TicketListFilters
+  disabled?: boolean
 }
 
 function StatItem({
@@ -43,7 +47,17 @@ function StatItem({
         <HintIcon hint={stat.hint} label={stat.label} />
       </span>
       <span className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
-        {stat.value}
+        {stat.filters ? (
+          <MetricCount
+            title={`${metricsMessages.drillDown.label} · ${stat.label}`}
+            filters={stat.filters}
+            disabled={stat.disabled}
+          >
+            {stat.value}
+          </MetricCount>
+        ) : (
+          stat.value
+        )}
       </span>
       <span className="min-h-4 text-xs">
         {stat.delta !== undefined ? (
@@ -77,6 +91,8 @@ function ticketStat(input: StatInput): Stat {
     label: metricsMessages.kpi.ticketsTotal,
     value: String(input.snapshot.tickets),
     hint: metricsMessages.kpiHints.ticketsTotal,
+    filters: {},
+    disabled: input.snapshot.tickets === 0,
     delta: deltaOf(
       input,
       input.snapshot.tickets,
@@ -90,6 +106,8 @@ function activeStat(input: StatInput): Stat {
     label: metricsMessages.kpi.activeTickets,
     value: String(input.snapshot.active),
     hint: metricsMessages.kpiHints.activeTickets,
+    filters: { outcome: 'open' },
+    disabled: input.snapshot.active === 0,
     delta: deltaOf(
       input,
       input.snapshot.active,
@@ -103,6 +121,8 @@ function unassignedStat(input: StatInput): Stat {
     label: metricsMessages.kpi.unassigned,
     value: String(input.snapshot.unassigned),
     hint: metricsMessages.kpiHints.unassigned,
+    filters: { statuses: ['registered', 'with_supervisor'] },
+    disabled: input.snapshot.unassigned === 0,
   }
 }
 
@@ -111,6 +131,8 @@ function pausedStat(input: StatInput): Stat {
     label: metricsMessages.kpi.paused,
     value: String(input.snapshot.paused),
     hint: metricsMessages.kpiHints.pausedTickets,
+    filters: { status: 'paused' },
+    disabled: input.snapshot.paused === 0,
   }
 }
 
@@ -119,6 +141,8 @@ function closedStat(input: StatInput): Stat {
     label: metricsMessages.kpi.closedTickets,
     value: String(input.snapshot.closed),
     hint: metricsMessages.kpiHints.closedTickets,
+    filters: { outcome: 'closed' },
+    disabled: input.snapshot.closed === 0,
   }
 }
 

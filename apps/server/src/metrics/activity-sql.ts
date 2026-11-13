@@ -105,8 +105,9 @@ export const activityQueries = {
     select * from metric
   `,
   metrics_pauses_by_reason: sql`
-    , metric (reason_name, pauses, pause_time, pause_time_labor) as (
+    , metric (reason_id, reason_name, pauses, pause_time, pause_time_labor) as (
       select
+          r.id,
           r.name,
           count(*),
           sum(coalesce(p.closed_at, now()) - p.opened_at),
@@ -117,19 +118,27 @@ export const activityQueries = {
         from public.ticket_pauses p
         join public.reasons r on r.id = p.reason_id
         join visible_tickets t on t.id = p.ticket_id
-        group by r.name
+        group by r.id, r.name
         order by count(*) desc
     )
     select * from metric
   `,
   metrics_reject_cancel_by_reason: sql`
-    , metric (event_type, reason_name, tickets) as (
-      select e.type::text, r.name, count(*)
-        from public.ticket_events e
-        join public.reasons r on r.id = e.reason_id
-        join visible_tickets t on t.id = e.ticket_id
-        where e.type in ('rejected', 'cancelled')
-        group by e.type, r.name
+    , metric (event_type, reason_id, reason_name, tickets) as (
+      select t.status::text, r.id, r.name, count(*)
+        from visible_tickets t
+        join lateral (
+          select e.reason_id
+          from public.ticket_events e
+          where e.ticket_id = t.id
+            and e.type in ('rejected', 'cancelled')
+            and e.reason_id is not null
+          order by e.occurred_at desc, e.id desc
+          limit 1
+        ) last on true
+        join public.reasons r on r.id = last.reason_id
+        where t.status in ('rejected', 'cancelled')
+        group by t.status, r.id, r.name
         order by count(*) desc
     )
     select * from metric
@@ -141,14 +150,20 @@ export const activityQueries = {
             t.id,
             (select count(*) from public.ticket_offers o where o.ticket_id = t.id) as offers,
             (select count(*) from public.ticket_offers o
-              where o.ticket_id = t.id and o.status = 'offered') as pending_offers,
+              where o.ticket_id = t.id
+                and o.cycle = t.cycle
+                and o.status = 'offered') as pending_offers,
             (select count(*) from public.ticket_offers o
               where o.ticket_id = t.id and o.status = 'taken') as taken,
             (select min(o.resolved_at) from public.ticket_offers o
               where o.ticket_id = t.id and o.status = 'taken') - t.reported_at as time_to_take
           from visible_tickets t
         )
-        select sum(offers), sum(pending_offers), sum(taken), avg(time_to_take)
+        select
+          sum(offers),
+          count(distinct id) filter (where pending_offers > 0),
+          sum(taken),
+          avg(time_to_take)
         from base
     )
     select * from metric

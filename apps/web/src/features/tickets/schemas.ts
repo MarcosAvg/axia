@@ -17,6 +17,8 @@ const ticketListItemSchema = z.object({
   buildingName: nullableText,
   locationName: nullableText,
   categoryName: nullableText,
+  subcategoryName: nullableText.optional(),
+  problemName: nullableText.optional(),
   priorityName: nullableText,
   priorityPosition: z.number().nullable(),
   teamName: nullableText,
@@ -162,11 +164,26 @@ const optionalSearchBoolean = z.preprocess((value) => {
   if (value === 'false') return false
   return value
 }, z.boolean().optional().catch(undefined))
+const optionalStatusList = z.preprocess(
+  (value) =>
+    typeof value === 'string'
+      ? value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : value,
+  z.array(ticketStatusSchema).min(1).optional().catch(undefined),
+)
 
 export const ticketListSearchSchema = z.object({
   status: ticketStatusSchema.optional().catch(undefined),
+  statuses: optionalStatusList,
   buildingId: optionalSearchString,
   categoryId: optionalSearchString,
+  subcategoryId: optionalSearchString,
+  problemId: optionalSearchString,
+  locationId: optionalSearchString,
+  channelId: optionalSearchString,
   teamId: optionalSearchString,
   priorityId: optionalSearchString,
   requesterId: optionalSearchString,
@@ -178,6 +195,41 @@ export const ticketListSearchSchema = z.object({
   unrouted: optionalSearchBoolean,
   possibleDuplicate: optionalSearchBoolean,
   search: optionalSearchString,
+  outcome: z
+    .enum(['open', 'closed', 'rejected', 'cancelled', 'duplicate'])
+    .optional()
+    .catch(undefined),
+  sla: z.enum(['met', 'missed', 'with_target']).optional().catch(undefined),
+  slaClock: z.enum(['calendar', 'laboral']).optional().catch(undefined),
+  rating: z.coerce.number().int().min(1).max(5).optional().catch(undefined),
+  reassigned: optionalSearchBoolean,
+  recaptured: optionalSearchBoolean,
+  reopened: optionalSearchBoolean,
+  firstFix: optionalSearchBoolean,
+  unverifiedTime: optionalSearchBoolean,
+  pauseReasonId: optionalSearchString,
+  pauseSubstateId: optionalSearchString,
+  terminalReasonId: optionalSearchString,
+  pendingOffer: optionalSearchBoolean,
+  participantTechnicianId: optionalSearchString,
+  phase: z
+    .enum([
+      'total',
+      'response',
+      'assignment',
+      'pending_take',
+      'reassignment',
+      'wait',
+      'active',
+      'pause',
+      'validation',
+      'claim',
+      'dormant',
+      'resolution',
+    ])
+    .optional()
+    .catch(undefined),
+  timeMode: z.enum(['calendar', 'laboral']).optional().catch(undefined),
   page: z.coerce.number().int().min(1).catch(1),
 })
 export type TicketListSearch = z.infer<typeof ticketListSearchSchema>
