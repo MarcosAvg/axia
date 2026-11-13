@@ -5,6 +5,21 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Las métricas permiten abrir la lista paginada de tiquets detrás de cada indicador: salud, desenlaces,
+  estados, dimensiones, SLA, satisfacción, pausas, rechazos, duplicados, ruteo, tiempos y fases. La
+  lista hereda los filtros del tablero, abre el detalle y conserva el alcance de `ticket.view`.
+
+### Cambiado
+
+- `GET /api/tickets` acepta filtros de desglose (desenlace, subcategoría, problema, ubicación, canal,
+  SLA, calificación, pausas, motivo terminal, banderas de calidad, oferta pendiente, participación y
+  fase) y devuelve la subcategoría y el problema de cada elemento.
+- Los rechazos y cancelaciones por motivo y las ofertas pendientes cuentan tiquets distintos del
+  ciclo y estado actuales, para que el desglose coincida con la lista. Se añaden índices para los
+  filtros de pausas, recapturas y calificaciones.
+
 ## [0.26.0] - 2026-11-13
 
 ### Añadido

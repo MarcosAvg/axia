@@ -40,7 +40,7 @@ function InboxBoardContent() {
   const catalogs = useTicketFilterCatalogs()
   const offers = useMyOffers(identity?.userId)
   const team = useTicketsList(
-    { statuses: ACTIVE_STATUSES, ...ticketFiltersFromSearch(search) },
+    { ...ticketFiltersFromSearch(search), statuses: ACTIVE_STATUSES },
     1,
     BOARD_PAGE_SIZE,
   )

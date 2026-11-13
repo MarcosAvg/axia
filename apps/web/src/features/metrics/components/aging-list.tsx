@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { ClockIcon } from 'lucide-react'
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
@@ -22,7 +23,19 @@ export function AgingList({
   }
   const maxAge = Math.max(1, ...rows.map((row) => row.ageMinutes))
   const columns: DataTableColumn<AgingRow>[] = [
-    { id: 'folio', header: t.ticket, cell: (row) => row.folio },
+    {
+      id: 'folio',
+      header: t.ticket,
+      cell: (row) => (
+        <Link
+          to="/tickets/$ticketId"
+          params={{ ticketId: row.id }}
+          className="text-primary hover:underline"
+        >
+          {row.folio}
+        </Link>
+      ),
+    },
     {
       id: 'status',
       header: t.status,

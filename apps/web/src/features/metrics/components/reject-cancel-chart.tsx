@@ -7,8 +7,12 @@ import { rejectReasons } from '../domain/visuals'
 import type { RejectReasonRow } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { StackedBarCell } from './bar-cell'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.rejectCancel
+
+const drillTitle = (reason: string, kind: string) =>
+  `${metricsMessages.drillDown.label} · ${reason} (${kind})`
 
 const columns: DataTableColumn<RejectReasonRow>[] = [
   { id: 'reason', header: t.reason, cell: (row) => row.name },
@@ -25,6 +29,34 @@ const columns: DataTableColumn<RejectReasonRow>[] = [
         label={`${row.rejected} / ${row.cancelled}`}
         className="min-w-36"
       />
+    ),
+  },
+  {
+    id: 'rejected',
+    header: t.rejected,
+    hideBelow: 'md',
+    cell: (row) => (
+      <MetricCount
+        title={drillTitle(row.name, t.rejected)}
+        filters={{ terminalReasonId: row.reasonId, status: 'rejected' }}
+        disabled={row.rejected === 0}
+      >
+        {row.rejected}
+      </MetricCount>
+    ),
+  },
+  {
+    id: 'cancelled',
+    header: t.cancelled,
+    hideBelow: 'md',
+    cell: (row) => (
+      <MetricCount
+        title={drillTitle(row.name, t.cancelled)}
+        filters={{ terminalReasonId: row.reasonId, status: 'cancelled' }}
+        disabled={row.cancelled === 0}
+      >
+        {row.cancelled}
+      </MetricCount>
     ),
   },
 ]
@@ -53,7 +85,11 @@ export function RejectCancelTable({ rows }: { rows: RejectCancelRow[] }) {
   return (
     <div className="flex flex-col gap-2">
       <Legend />
-      <DataTable columns={columns} rows={data} getRowId={(row) => row.name} />
+      <DataTable
+        columns={columns}
+        rows={data}
+        getRowId={(row) => row.reasonId}
+      />
     </div>
   )
 }

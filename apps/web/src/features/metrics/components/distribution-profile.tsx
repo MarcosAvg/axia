@@ -4,8 +4,11 @@ import { useTimeMeasure } from '@/components/shared/time-measure-context'
 import type { TimeMeasure } from '@/lib/time-measure'
 import type { DistributionProfileRow } from '../domain/metrics'
 import { MIN_SAMPLE, formatMinutes, formatPercent } from '../domain/metrics'
+import { phaseTicketFilters } from '../domain/drill-down'
+import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.times
 const hints = metricsMessages.distributionHints
@@ -98,12 +101,39 @@ function ProfileHeader({ active }: { active: string | null }) {
   )
 }
 
+function SampleCell({
+  row,
+  mode,
+}: {
+  row: DistributionProfileRow
+  mode: TimeMode
+}) {
+  const filters = phaseTicketFilters(row.phase, mode)
+  return (
+    <td
+      className="px-2 py-1.5 text-right text-xs text-muted-foreground"
+      title={`${row.n} de ${row.total} tiquets`}
+    >
+      <MetricCount
+        title={`${metricsMessages.drillDown.label} · ${phaseLabel(row.phase)}`}
+        filters={filters ?? {}}
+        disabled={!filters || row.n === 0}
+      >
+        {row.n}
+      </MetricCount>{' '}
+      / {row.total} · {formatPercent(row.coverage)}
+    </td>
+  )
+}
+
 function ProfileRowView({
   row,
   active,
+  mode,
 }: {
   row: DistributionProfileRow
   active: string | null
+  mode: TimeMode
 }) {
   const enough = row.n >= MIN_SAMPLE
   return (
@@ -111,12 +141,7 @@ function ProfileRowView({
       <th scope="row" className="px-2 py-1.5 text-left font-medium">
         {phaseLabel(row.phase)}
       </th>
-      <td
-        className="px-2 py-1.5 text-right text-xs text-muted-foreground"
-        title={`${row.n} de ${row.total} tiquets`}
-      >
-        {row.n} / {row.total} · {formatPercent(row.coverage)}
-      </td>
+      <SampleCell row={row} mode={mode} />
       <td
         className={cn('px-2 py-1.5 text-right', cellClass(active === 'median'))}
       >
@@ -169,8 +194,10 @@ function ProfileNote({ measure }: { measure: TimeMeasure }) {
 /** Perfil por fase: muestra, centro, dispersión y casos extremos. */
 export function DistributionProfileCard({
   profile,
+  mode,
 }: {
   profile: DistributionProfileRow[]
+  mode: TimeMode
 }) {
   const { measure } = useTimeMeasure()
   const active = activeColumn(measure)
@@ -184,7 +211,12 @@ export function DistributionProfileCard({
             <ProfileHeader active={active} />
             <tbody>
               {profile.map((row) => (
-                <ProfileRowView key={row.phase} row={row} active={active} />
+                <ProfileRowView
+                  key={row.phase}
+                  row={row}
+                  active={active}
+                  mode={mode}
+                />
               ))}
             </tbody>
           </table>

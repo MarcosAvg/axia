@@ -8,17 +8,36 @@ import { technicianParticipation } from '../domain/team'
 import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.technicians
 const hints = metricsMessages.tableHints
+
+function loadColumns(): DataTableColumn<TechnicianRow>[] {
+  return [
+    { id: 'technician', header: t.technician, cell: (row) => row.name },
+    {
+      id: 'tickets',
+      header: t.tickets,
+      cell: (row) => (
+        <MetricCount
+          title={`${metricsMessages.drillDown.label} · ${row.name}`}
+          filters={{ participantTechnicianId: row.technicianId }}
+          disabled={row.tickets === 0}
+        >
+          {row.tickets}
+        </MetricCount>
+      ),
+    },
+  ]
+}
 
 function columns(
   maxParticipation: number,
   mode: TimeMode,
 ): DataTableColumn<TechnicianRow>[] {
   return [
-    { id: 'technician', header: t.technician, cell: (row) => row.name },
-    { id: 'tickets', header: t.tickets, cell: (row) => row.tickets },
+    ...loadColumns(),
     {
       id: 'leader',
       header: t.leader,

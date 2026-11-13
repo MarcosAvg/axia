@@ -18,6 +18,7 @@ import { BentoGrid } from './bento-grid'
 import type { BentoItem } from './bento-grid'
 import { ChartCard } from './chart-card'
 import { HealthStrip } from './health-strip'
+import { MetricCount } from './metric-count'
 import { RankingBars } from './ranking-bars'
 import { SatisfactionPanel, SlaPanel } from './sla-panels'
 import { StatusChart } from './status-distribution'
@@ -70,7 +71,14 @@ function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
               {t[row.id as keyof typeof t] ?? row.name}
             </span>
             <span className="tabular-nums">
-              {row.tickets} · {formatPercent(shareOf(row.tickets, total))} ·{' '}
+              <MetricCount
+                title={`${metricsMessages.drillDown.label} · ${t[row.id as keyof typeof t] ?? row.name}`}
+                filters={{ outcome: row.id }}
+                disabled={row.tickets === 0}
+              >
+                {row.tickets}
+              </MetricCount>{' '}
+              · {formatPercent(shareOf(row.tickets, total))} ·{' '}
               {formatMinutes(row.avgTotal)}
             </span>
           </div>

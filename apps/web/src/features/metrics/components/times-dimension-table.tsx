@@ -12,10 +12,12 @@ import type {
 } from '../domain/dimensions'
 import { rowsByDimension } from '../domain/dimensions'
 import { formatMinutes, formatPercent, MIN_SAMPLE } from '../domain/metrics'
+import { dimensionTicketFilters } from '../domain/drill-down'
 import { dimensionValueLabel, metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
 import { DimensionPicker } from './dimension-picker'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.times
 const k = metricsMessages.kpi
@@ -59,18 +61,38 @@ function measureLabelOf(label: string, measure: TimeMeasure): string {
 function identityColumns(
   dimension: Dimension,
 ): DataTableColumn<DimensionRow>[] {
+  const drillTitle = (name: string) =>
+    `${metricsMessages.drillDown.label} · ${name}`
+  const rowFilters = (row: DimensionRow) =>
+    dimensionTicketFilters(dimension, row.id)
   return [
     {
       id: 'name',
       header: metricsMessages.table.name,
-      cell: (row) =>
-        dimensionValueLabel(dimension, row.id, row.name) || 'Sin dato',
+      cell: (row) => {
+        const label =
+          dimensionValueLabel(dimension, row.id, row.name) || 'Sin dato'
+        if (!row.id) return label
+        return (
+          <MetricCount title={drillTitle(label)} filters={rowFilters(row)}>
+            {label}
+          </MetricCount>
+        )
+      },
     },
     {
       id: 'tickets',
       header: metricsMessages.table.tickets,
       hint: metricsMessages.tableHints.dimensionTickets,
-      cell: (row) => row.tickets,
+      cell: (row) => (
+        <MetricCount
+          title={drillTitle(row.name || metricsMessages.table.tickets)}
+          filters={rowFilters(row)}
+          disabled={!row.id || row.tickets === 0}
+        >
+          {row.tickets}
+        </MetricCount>
+      ),
     },
   ]
 }

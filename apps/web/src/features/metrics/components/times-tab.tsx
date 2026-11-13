@@ -41,7 +41,7 @@ export function TimesTab({
     <div className="flex flex-col gap-6">
       <TimesHeader />
       <CycleCard summary={summary} profile={profile} mode={mode} />
-      <DistributionProfileCard profile={profile} />
+      <DistributionProfileCard profile={profile} mode={mode} />
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-medium">{t.dimensionSection}</h2>
         <PhaseHeatmap groups={groups} mode={mode} />

@@ -37,6 +37,10 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 - El tipo de servicio es opcional en la API de alta y atención; la interfaz lo exige al atender.
 - La demo conserva una supervisora con dos equipos. RN-04 limita a uno y esa restricción todavía no
   se impone; no impide el ruteo, pero requiere una revisión específica.
+- El desglose de Métricas abre la lista con filtros sobre los datos actuales. En pausas, la cifra
+  cuenta eventos y la lista tiquets; en percentiles, la lista muestra el universo de la fase y no el
+  tramo exacto entre cuantiles. Con el reloj **Extra** el perfil de fases no ofrece desglose. El
+  desglose requiere `ticket.view` además de `metrics.view`.
 
 ## Pendientes operativos
 

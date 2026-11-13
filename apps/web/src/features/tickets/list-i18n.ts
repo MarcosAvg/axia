@@ -28,6 +28,8 @@ export const listMessages = {
     remove: 'Quitar',
   },
   count: (count: number) => (count === 1 ? '1 tiquet' : `${count} tiquets`),
+  inherited: 'Esta lista incluye filtros aplicados desde Métricas.',
+  clearInherited: 'Quitar filtros de Métricas',
   empty: 'No hay tiquets con estos filtros.',
   previous: 'Anterior',
   next: 'Siguiente',

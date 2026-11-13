@@ -168,6 +168,8 @@ function listQuery(where: SQL, pageSize: number, offset: number) {
       b.name as building_name,
       l.name as location_name,
       c.name as category_name,
+      sc.name as subcategory_name,
+      pb.name as problem_name,
       p.name as priority_name,
       p.position as priority_position,
       tm.name as team_name,
@@ -179,6 +181,8 @@ function listQuery(where: SQL, pageSize: number, offset: number) {
     left join public.buildings b on b.id = t.building_id
     left join public.locations l on l.id = t.location_id
     left join public.categories c on c.id = t.category_id
+    left join public.subcategories sc on sc.id = t.subcategory_id
+    left join public.problems pb on pb.id = t.problem_id
     left join public.priorities p on p.id = t.priority_id
     left join public.teams tm on tm.id = t.team_id
     left join lateral (

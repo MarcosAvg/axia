@@ -17,8 +17,10 @@ import type {
   DimensionRow,
 } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
+import { dimensionTicketFilters } from '../domain/drill-down'
 import { shareOf } from '../domain/visuals'
 import { dimensionLabels, dimensionValueLabel, metricsMessages } from '../i18n'
+import { MetricCount } from './metric-count'
 import { DimensionPicker } from './dimension-picker'
 import { DistributionChart, HIERARCHY } from './distribution-chart'
 
@@ -41,11 +43,24 @@ function identityColumns(
   dimension: Dimension,
 ): DataTableColumn<DimensionRow>[] {
   const max = Math.max(1, ...rows.map((item) => item.tickets))
+  const drillTitle = (name: string) =>
+    `${metricsMessages.drillDown.label} · ${name}`
   return [
     {
       id: 'name',
       header: metricsMessages.table.name,
-      cell: (row) => rowName(row, dimension),
+      cell: (row) => {
+        const label = rowName(row, dimension)
+        if (!row.id) return label
+        return (
+          <MetricCount
+            title={drillTitle(label)}
+            filters={dimensionTicketFilters(dimension, row.id)}
+          >
+            {label}
+          </MetricCount>
+        )
+      },
     },
     {
       id: 'tickets',
@@ -55,7 +70,15 @@ function identityColumns(
         <BarCell
           value={row.tickets}
           max={max}
-          label={row.tickets}
+          label={
+            <MetricCount
+              title={drillTitle(row.name || metricsMessages.table.tickets)}
+              filters={dimensionTicketFilters(dimension, row.id)}
+              disabled={!row.id || row.tickets === 0}
+            >
+              {row.tickets}
+            </MetricCount>
+          }
           className="min-w-40"
         />
       ),

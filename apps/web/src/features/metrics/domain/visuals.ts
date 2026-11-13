@@ -64,6 +64,7 @@ export function shareOf(value: number, total: number): number {
 }
 
 export interface RejectReasonRow {
+  reasonId: string
   name: string
   rejected: number
   cancelled: number
@@ -74,7 +75,8 @@ export interface RejectReasonRow {
 export function rejectReasons(rows: RejectCancelRow[]): RejectReasonRow[] {
   const byReason = new Map<string, RejectReasonRow>()
   for (const row of rows) {
-    const entry = byReason.get(row.reasonName) ?? {
+    const entry = byReason.get(row.reasonId) ?? {
+      reasonId: row.reasonId,
       name: row.reasonName,
       rejected: 0,
       cancelled: 0,
@@ -83,7 +85,7 @@ export function rejectReasons(rows: RejectCancelRow[]): RejectReasonRow[] {
     if (row.eventType === 'cancelled') entry.cancelled += row.tickets
     else entry.rejected += row.tickets
     entry.total += row.tickets
-    byReason.set(row.reasonName, entry)
+    byReason.set(row.reasonId, entry)
   }
   return [...byReason.values()].sort((left, right) => right.total - left.total)
 }

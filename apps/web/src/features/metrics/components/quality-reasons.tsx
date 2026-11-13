@@ -14,6 +14,7 @@ import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { DuplicateTable } from './duplicate-table'
+import { PauseReasonsList } from './pause-reasons-list'
 import { PausesChart } from './pauses-chart'
 import { PauseSubstates } from './pause-substates'
 import { RejectCancelTable } from './reject-cancel-chart'
@@ -71,6 +72,7 @@ function PausesContent({
     >
       <div className="flex flex-col gap-4">
         <PausesChart data={pauses} />
+        <PauseReasonsList rows={pauses} />
         <div className="flex flex-col gap-2">
           <h3 className="text-xs font-medium text-muted-foreground">
             {t.substates}

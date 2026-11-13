@@ -6,10 +6,12 @@ import { EmptyState } from '@/components/shared/empty-state'
 import type { Dimension } from '../domain/dimensions'
 import { formatPercent } from '../domain/metrics'
 import type { DuplicateDimensionRow } from '../domain/metrics'
+import { dimensionTicketFilters } from '../domain/drill-down'
 import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
 import { ChartCard } from './chart-card'
 import { DimensionPicker } from './dimension-picker'
+import { MetricCount } from './metric-count'
 
 const t = metricsMessages.duplicates
 const hints = metricsMessages.tableHints
@@ -23,42 +25,74 @@ const DUPLICATE_DIMENSIONS: Dimension[] = [
   'requester',
 ]
 
-const columns: DataTableColumn<DuplicateDimensionRow>[] = [
-  {
-    id: 'name',
-    header: metricsMessages.table.name,
-    cell: (row) => row.dimensionName ?? row.dimensionId,
-  },
-  {
-    id: 'tickets',
-    header: t.tickets,
-    hideBelow: 'md',
-    cell: (row) => row.tickets,
-  },
-  {
-    id: 'duplicates',
-    header: t.duplicates,
-    hideBelow: 'md',
-    cell: (row) => row.duplicates,
-  },
-  {
-    id: 'rate',
-    header: t.rate,
-    hint: hints.duplicateRate,
-    cell: (row) => (
-      <BarCell
-        value={row.duplicateRate}
-        max={1}
-        label={formatPercent(row.duplicateRate)}
-        className="min-w-32"
-      />
-    ),
-  },
-]
+const drillTitle = (name: string, kind: string) =>
+  `${metricsMessages.drillDown.label} · ${kind} · ${name}`
+
+function duplicateColumns(
+  dimension: Dimension,
+): DataTableColumn<DuplicateDimensionRow>[] {
+  return [
+    {
+      id: 'name',
+      header: metricsMessages.table.name,
+      cell: (row) => row.dimensionName ?? row.dimensionId,
+    },
+    {
+      id: 'tickets',
+      header: t.tickets,
+      hideBelow: 'md',
+      cell: (row) => {
+        const name = row.dimensionName ?? row.dimensionId
+        const filters = dimensionTicketFilters(dimension, row.dimensionId)
+        return (
+          <MetricCount
+            title={drillTitle(name, t.tickets)}
+            filters={filters}
+            disabled={row.tickets === 0}
+          >
+            {row.tickets}
+          </MetricCount>
+        )
+      },
+    },
+    {
+      id: 'duplicates',
+      header: t.duplicates,
+      hideBelow: 'md',
+      cell: (row) => {
+        const name = row.dimensionName ?? row.dimensionId
+        const filters = dimensionTicketFilters(dimension, row.dimensionId)
+        return (
+          <MetricCount
+            title={drillTitle(name, t.duplicates)}
+            filters={{ ...filters, status: 'duplicate' }}
+            disabled={row.duplicates === 0}
+          >
+            {row.duplicates}
+          </MetricCount>
+        )
+      },
+    },
+    {
+      id: 'rate',
+      header: t.rate,
+      hint: hints.duplicateRate,
+      cell: (row) => (
+        <BarCell
+          value={row.duplicateRate}
+          max={1}
+          label={formatPercent(row.duplicateRate)}
+          className="min-w-32"
+        />
+      ),
+    },
+  ]
+}
 
 /** Detalle de duplicados por una dimensión seleccionable. */
 export function DuplicateTable({ rows }: { rows: DuplicateDimensionRow[] }) {
   const [dimension, setDimension] = useState<Dimension>('category')
+  const columns = duplicateColumns(dimension)
   const filtered = rows
     .filter((row) => row.dimension === dimension)
     .sort(

@@ -12,6 +12,8 @@ export type TicketListItem = {
   buildingName: string | null
   locationName: string | null
   categoryName: string | null
+  subcategoryName: string | null
+  problemName: string | null
   priorityName: string | null
   priorityPosition: number | null
   teamName: string | null
@@ -31,6 +33,8 @@ export type ListRow = {
   building_name: string | null
   location_name: string | null
   category_name: string | null
+  subcategory_name: string | null
+  problem_name: string | null
   priority_name: string | null
   priority_position: number | null
   team_name: string | null
@@ -55,6 +59,8 @@ export function toListItem(
     buildingName: row.building_name,
     locationName: row.location_name,
     categoryName: row.category_name,
+    subcategoryName: row.subcategory_name,
+    problemName: row.problem_name,
     priorityName: row.priority_name,
     priorityPosition: row.priority_position,
     teamName: row.team_name,
