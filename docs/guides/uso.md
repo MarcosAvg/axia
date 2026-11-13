@@ -30,8 +30,9 @@ ya existe: revisa el aviso antes de intentar registrarlo otra vez.
 ## Encontrar y consultar un tiquet
 
 En **Tiquets**, busca por folio o descripción y usa los filtros de estado, edificio y categoría.
-En el detalle verás **Captura**, **Participantes**, **Línea de tiempo**, **Tiempo por fase** y
-**Evidencias**. Pulsa una imagen para ampliarla; cierra el visor con Escape o el botón de cerrar.
+En el detalle verás **Captura**, **Participantes**, **Línea de tiempo**, **Tiempo por fase** (barra
+de composición y resumen) y **Evidencias**. Pulsa una imagen para ampliarla; cierra el visor con
+Escape o el botón de cerrar.
 
 **Mi trabajo** muestra lo asignado a tu perfil de técnico. **Bandeja** separa las ofertas para ti,
 los tiquets sin asignar y el trabajo en atención. Cada oferta se puede tomar directamente desde la
@@ -139,9 +140,9 @@ ejemplo, P90 muestra hasta el P90 y el inverso los que están por encima; el IQR
 central y el inverso los que quedan fuera. `n / N` sigue abriendo todos los tiquets de la fase. La
 lista usa los valores que muestra la tabla en ese momento y hereda los filtros del tablero. Las
 fichas informativas explican las definiciones al pasar el cursor o al enfocar cada
-control, tarjeta o columna. En el detalle del tiquet, **Tiempo por fase** es una lista compacta
-ordenada por duración; la reasignación se mide aparte y lo que no cae en una fase se muestra como
-sin clasificar.
+control, tarjeta o columna. En el detalle del tiquet, **Tiempo por fase** muestra una barra de
+composición y una lista compacta ordenada por duración; la reasignación se mide aparte y lo que no
+cae en una fase se muestra como sin clasificar.
 Los filtros de periodo, edificio, equipo, categoría, dependencia y desenlace nunca amplían lo que tu
 alcance permite ver. Los tiquets con hora sin verificar quedan fuera de las medias de desempeño
 hasta corregirlos.

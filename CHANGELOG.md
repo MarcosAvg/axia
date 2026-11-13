@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- El detalle del tiquet vuelve a mostrar la barra de composición del ciclo por fase, junto al
+  resumen de tiempos. El resumen usa el color de cada tramo de la barra.
+
 ## [0.28.0] - 2026-11-13
 
 ### Añadido

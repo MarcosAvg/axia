@@ -3,33 +3,11 @@ import { formatMinutes, formatPercent } from '@/features/metrics'
 import type { TicketDetailWithTimes } from '../domain/types'
 import { detailSectionHints } from '../detail-hints'
 import { cycleMessages } from '../i18n-cycle'
+import { CYCLE_PHASES } from './ticket-cycle-phases'
 
 const t = cycleMessages
 
 type CycleTimes = TicketDetailWithTimes['cycleTimes']
-
-type PrimaryKey =
-  | 'response'
-  | 'assignment'
-  | 'pendingTake'
-  | 'wait'
-  | 'active'
-  | 'pause'
-  | 'dormant'
-  | 'validation'
-  | 'claim'
-
-const PRIMARY: Array<{ key: PrimaryKey; label: string }> = [
-  { key: 'response', label: t.phases.response },
-  { key: 'assignment', label: t.phases.assignment },
-  { key: 'pendingTake', label: t.phases.pendingTake },
-  { key: 'wait', label: t.phases.wait },
-  { key: 'active', label: t.phases.active },
-  { key: 'pause', label: t.phases.pause },
-  { key: 'dormant', label: t.phases.dormant },
-  { key: 'validation', label: t.phases.validation },
-  { key: 'claim', label: t.phases.claim },
-]
 
 function percent(minutes: number, total: number): string {
   return total > 0 ? formatPercent(minutes / total) : '0%'
@@ -39,16 +17,23 @@ function SummaryRow({
   label,
   minutes,
   total,
+  color,
   hint,
 }: {
   label: string
   minutes: number
   total: number
+  color?: string
   hint?: string
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <dt className="flex min-w-0 items-center gap-1 text-muted-foreground">
+        <span
+          className="size-2 shrink-0 rounded-full"
+          style={color ? { background: color } : undefined}
+          aria-hidden
+        />
         <span className="truncate">{label}</span>
         {hint ? <HintIcon hint={hint} label={label} /> : null}
       </dt>
@@ -64,7 +49,7 @@ function SummaryRow({
 
 /** Resumen informativo del tiempo por fase de un tiquet, sin gráfica. */
 export function TicketCycleSummary({ times }: { times: CycleTimes }) {
-  const rows = PRIMARY.map((phase) => ({
+  const rows = CYCLE_PHASES.map((phase) => ({
     ...phase,
     minutes: times[phase.key],
   }))
@@ -93,6 +78,7 @@ export function TicketCycleSummary({ times }: { times: CycleTimes }) {
               label={phase.label}
               minutes={phase.minutes}
               total={times.total}
+              color={phase.color}
             />
           ))}
           {reassignment > 0 ? (

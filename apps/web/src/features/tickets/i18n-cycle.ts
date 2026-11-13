@@ -1,6 +1,7 @@
 /** Textos del resumen de tiempo por fase del tiquet. */
 export const cycleMessages = {
   total: 'Total',
+  chart: 'Composición del ciclo',
   empty: 'Sin tiempos registrados.',
   reassignment:
     'Tiempo con un supervisor equivocado. Se mide aparte y puede solaparse con otras fases.',

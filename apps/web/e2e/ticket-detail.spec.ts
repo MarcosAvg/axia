@@ -27,6 +27,9 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   await openTicket(page)
 
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('img', { name: /Composición del ciclo/ }),
+  ).toBeVisible()
   const headings = await page.locator('main h2').allInnerTexts()
   expect(headings.slice(0, 6)).toEqual([
     'Tiempo por fase',

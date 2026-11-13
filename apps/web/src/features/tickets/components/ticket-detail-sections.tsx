@@ -21,6 +21,7 @@ import { EvidenceUploader } from './evidence-uploader'
 import { PendingEvidence } from './pending-evidence'
 import { TicketActionsPanel } from './ticket-actions-panel'
 import { TicketAttachmentsList } from './ticket-attachments-list'
+import { TicketCycleChart } from './ticket-cycle-chart'
 import { TicketCycleSummary } from './ticket-cycle-summary'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketRatingPanel } from './ticket-rating-panel'
@@ -176,6 +177,7 @@ export function CycleTimesSection({
             </Button>
           ))}
         </div>
+        <TicketCycleChart times={selected} />
         <TicketCycleSummary times={selected} />
       </div>
     </Section>
