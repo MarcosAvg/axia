@@ -100,6 +100,31 @@ describe('drill-down quality flags', () => {
       await ids('/api/tickets?phase=active&timeMode=calendar', cookies.admin),
     ).toEqual([ticket.ticketA1])
   })
+
+  it('filters phase minutes by range and outliers', async () => {
+    const { cookies, ids: ticket } = context
+    const active = '/api/tickets?phase=active&timeMode=calendar'
+    expect(await ids(`${active}&phaseMinutesMin=5`, cookies.admin)).toEqual([
+      ticket.ticketA1,
+    ])
+    expect(await ids(`${active}&phaseMinutesMin=15`, cookies.admin)).toEqual([])
+    expect(await ids(`${active}&phaseMinutesMax=15`, cookies.admin)).toEqual([
+      ticket.ticketA1,
+    ])
+    expect(await ids(`${active}&phaseMinutesMax=5`, cookies.admin)).toEqual([])
+    expect(
+      await ids(
+        `${active}&phaseOutsideLow=0&phaseOutsideHigh=5`,
+        cookies.admin,
+      ),
+    ).toEqual([ticket.ticketA1])
+    expect(
+      await ids(
+        `${active}&phaseOutsideLow=0&phaseOutsideHigh=15`,
+        cookies.admin,
+      ),
+    ).toEqual([])
+  })
 })
 
 describe('drill-down scope and validation', () => {
@@ -118,6 +143,12 @@ describe('drill-down scope and validation', () => {
       '/api/tickets?sla=unknown',
       '/api/tickets?phase=unknown',
       '/api/tickets?subcategoryId=not-a-uuid',
+      '/api/tickets?phaseMinutesMin=5',
+      '/api/tickets?phase=active&phaseOutsideLow=0',
+      '/api/tickets?phase=active&phaseOutsideLow=10&phaseOutsideHigh=5',
+      '/api/tickets?phase=active&phaseMinutesMin=-1',
+      '/api/tickets?phase=active&phaseMinutesMin=10&phaseMinutesMax=5',
+      '/api/tickets?phase=active&phaseOutsideLow=abc&phaseOutsideHigh=5',
     ]) {
       const response = await get(path, cookies.admin)
       expect(response.statusCode).toBe(400)

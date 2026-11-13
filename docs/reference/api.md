@@ -75,9 +75,12 @@ Para el desglose de métricas, la misma lista acepta `outcome` (`open`, `closed`
 `cancelled` o `duplicate`), `sla` (`met`, `missed` o `with_target`) con `slaClock` (`calendar` o
 `laboral`), `rating` (1–5), `pauseReasonId`, `pauseSubstateId`, `terminalReasonId`, `pendingOffer`,
 `reassigned`, `recaptured`, `reopened`, `firstFix`, `unverifiedTime`, `participantTechnicianId` y
-`phase` con `timeMode` (`calendar` o `laboral`). El conteo y la página usan la misma cláusula de
-alcance y filtros; las pausas y percentiles son aproximaciones sobre los datos actuales, no una
-reconstrucción histórica.
+`phase` con `timeMode` (`calendar` o `laboral`). Para acotar la fase, acepta
+`phaseMinutesMin` y `phaseMinutesMax` (minutos, inclusivos) o `phaseOutsideLow` y
+`phaseOutsideHigh` (ambos obligatorios; deja los tiquets fuera de la valla de atípicos). Los
+filtros de minutos exigen `phase` y una combinación inválida responde 400. El conteo y la página
+usan la misma cláusula de alcance y filtros; las pausas y percentiles son aproximaciones sobre los
+datos actuales, no una reconstrucción histórica.
 
 `GET /api/tickets/attention` devuelve `{ offers, myWork }`: ofertas vigentes para el actor y tiquets
 no finales asignados a su perfil de técnico. Reutiliza el alcance de `ticket.view`; `offers` queda en

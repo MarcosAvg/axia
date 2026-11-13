@@ -230,6 +230,34 @@ export const ticketListSearchSchema = z.object({
     .optional()
     .catch(undefined),
   timeMode: z.enum(['calendar', 'laboral']).optional().catch(undefined),
+  phaseMinutesMin: z.coerce
+    .number()
+    .finite()
+    .min(0)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
+  phaseMinutesMax: z.coerce
+    .number()
+    .finite()
+    .min(0)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
+  phaseOutsideLow: z.coerce
+    .number()
+    .finite()
+    .min(-10_000_000)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
+  phaseOutsideHigh: z.coerce
+    .number()
+    .finite()
+    .min(-10_000_000)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
   page: z.coerce.number().int().min(1).catch(1),
 })
 export type TicketListSearch = z.infer<typeof ticketListSearchSchema>

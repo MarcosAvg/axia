@@ -43,5 +43,9 @@ export function toTicketFilters(query: ListTicketsQuery): TicketFilters {
     participantTechnicianId: query.participantTechnicianId,
     phase: query.phase,
     timeMode: query.timeMode,
+    phaseMinutesMin: query.phaseMinutesMin,
+    phaseMinutesMax: query.phaseMinutesMax,
+    phaseOutsideLow: query.phaseOutsideLow,
+    phaseOutsideHigh: query.phaseOutsideHigh,
   }
 }

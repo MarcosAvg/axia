@@ -6,6 +6,16 @@ export const distributionMessages = {
   rangeP90Max: 'P90 más alto',
   rangeOverflow:
     'P95 y máximo pueden superar el eje; consulta el valor de la derecha.',
+  subsetMenu: 'Ver tiquets por subconjunto',
+  subsetHint: 'Elige el subconjunto de tiquets de esta fase.',
+  subsets: {
+    all: 'Todos',
+    outliers: 'Atípicos',
+    above_p90: 'Por encima del P90',
+    above_p75: 'Por encima del P75',
+    central: 'En el 50% central',
+    below_median: 'Por debajo de la mediana',
+  },
   unclassified: 'Sin clasificar',
   distributionHint:
     'Perfil completo de cada fase: muestra, centro, dispersión y extremos. No cambia con la medida.',

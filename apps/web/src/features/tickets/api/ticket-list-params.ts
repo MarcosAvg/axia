@@ -36,6 +36,10 @@ export interface TicketFilters {
   participantTechnicianId?: string
   phase?: string
   timeMode?: 'calendar' | 'laboral'
+  phaseMinutesMin?: number
+  phaseMinutesMax?: number
+  phaseOutsideLow?: number
+  phaseOutsideHigh?: number
 }
 
 function queryString(
@@ -90,6 +94,10 @@ export function ticketListQuery(
     participantTechnicianId: filters.participantTechnicianId,
     phase: filters.phase,
     timeMode: filters.timeMode,
+    phaseMinutesMin: filters.phaseMinutesMin,
+    phaseMinutesMax: filters.phaseMinutesMax,
+    phaseOutsideLow: filters.phaseOutsideLow,
+    phaseOutsideHigh: filters.phaseOutsideHigh,
     page,
     pageSize,
   })

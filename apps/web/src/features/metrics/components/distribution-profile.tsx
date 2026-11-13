@@ -8,6 +8,7 @@ import { phaseTicketFilters } from '../domain/drill-down'
 import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
+import { DistributionSubsetMenu } from './distribution-subset-menu'
 import { MetricCount } from './metric-count'
 
 const t = metricsMessages.times
@@ -55,7 +56,7 @@ interface ProfileHeaderColumn {
 }
 
 const HEADERS: ProfileHeaderColumn[] = [
-  { key: 'phase', label: t.phase, align: 'left' },
+  { key: 'phase', label: t.phase, hint: hints.subsets, align: 'left' },
   { key: 'sample', label: t.sampleOfTotal, hint: hints.sample },
   { key: 'median', label: t.median, hint: hints.median },
   { key: 'iqr', label: t.iqr, hint: hints.iqr },
@@ -135,10 +136,14 @@ function ProfileRowView({
   mode: TimeMode
 }) {
   const enough = row.n >= MIN_SAMPLE
+  const label = phaseLabel(row.phase)
   return (
     <tr className="border-t">
       <th scope="row" className="px-2 py-1.5 text-left font-medium">
-        {phaseLabel(row.phase)}
+        <span className="inline-flex min-w-0 items-center gap-1">
+          <span className="truncate">{label}</span>
+          <DistributionSubsetMenu row={row} mode={mode} phaseLabel={label} />
+        </span>
       </th>
       <SampleCell row={row} mode={mode} />
       <td

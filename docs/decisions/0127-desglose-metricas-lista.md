@@ -18,13 +18,14 @@ filtro equivalente en esa lista.
    (`v_ticket_metrics_base`, `v_ticket_sla`, `ticket_pauses`); no reconstruye la historia evento por
    evento para demostrar la causalidad de un percentil.
 4. La interfaz declara la aproximación cuando existe: una pausa es un evento y la lista muestra
-   tiquets con esa pausa; el perfil de fases lista el universo de la fase y no un tramo exacto entre
-   cuantiles.
+   tiquets con esa pausa; el perfil de fases lista el universo de la fase y, desde el menú de cada
+   fila, un subconjunto acotado por los cuantiles y vallas que muestra la tabla.
 
 ## Consecuencias
 
 - No se duplica la lógica de agregación de métricas en un endpoint nuevo.
-- La lista y el número pueden diferir en pausas, percentiles y con el reloj Extra; la interfaz lo
+- La lista y el número pueden diferir en pausas y con el reloj Extra; en la distribución por fase,
+  los subconjuntos usan los umbrales mostrados y pueden diferir si los datos cambian. La interfaz lo
   explica y, en Extra, el perfil de fases no ofrece desglose.
 - El desglose exige `ticket.view`; sin ese permiso la cifra se muestra como texto. El resumen
   conserva su guarda preexistente de `ticket.view`.

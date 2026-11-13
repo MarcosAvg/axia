@@ -23,6 +23,10 @@ const INHERITED_KEYS = [
   'participantTechnicianId',
   'phase',
   'timeMode',
+  'phaseMinutesMin',
+  'phaseMinutesMax',
+  'phaseOutsideLow',
+  'phaseOutsideHigh',
 ] as const satisfies readonly (keyof TicketListSearch)[]
 
 export function hasInheritedTicketFilters(search: TicketListSearch): boolean {
@@ -80,5 +84,9 @@ export function ticketFiltersFromSearch(search: TicketListSearch) {
     participantTechnicianId: search.participantTechnicianId,
     phase: search.phase,
     timeMode: search.timeMode,
+    phaseMinutesMin: search.phaseMinutesMin,
+    phaseMinutesMax: search.phaseMinutesMax,
+    phaseOutsideLow: search.phaseOutsideLow,
+    phaseOutsideHigh: search.phaseOutsideHigh,
   }
 }

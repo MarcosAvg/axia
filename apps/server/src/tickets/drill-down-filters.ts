@@ -155,6 +155,25 @@ function slaCondition(filters: TicketFilters): SQL[] {
   ]
 }
 
+function phaseMinuteBounds(filters: TicketFilters, minutes: SQL): SQL[] {
+  const bounds = [sql`${minutes} > 0`]
+  if (filters.phaseMinutesMin !== undefined) {
+    bounds.push(sql`${minutes} >= ${filters.phaseMinutesMin}`)
+  }
+  if (filters.phaseMinutesMax !== undefined) {
+    bounds.push(sql`${minutes} <= ${filters.phaseMinutesMax}`)
+  }
+  if (
+    filters.phaseOutsideLow !== undefined &&
+    filters.phaseOutsideHigh !== undefined
+  ) {
+    bounds.push(
+      sql`(${minutes} < ${filters.phaseOutsideLow} or ${minutes} > ${filters.phaseOutsideHigh})`,
+    )
+  }
+  return bounds
+}
+
 function phaseCondition(filters: TicketFilters): SQL[] {
   if (!filters.phase) return []
   const column = PHASE_COLUMNS[filters.phase]
@@ -166,6 +185,7 @@ function phaseCondition(filters: TicketFilters): SQL[] {
       : sql`extract(epoch from v.${sql.identifier(
           `${column}${filters.timeMode === 'laboral' ? '_labor' : ''}`,
         )}) / 60`
+  const bounds = phaseMinuteBounds(filters, minutes)
   return [
     sql`exists (
       select 1
@@ -177,7 +197,7 @@ function phaseCondition(filters: TicketFilters): SQL[] {
           where e.ticket_id = t.id and e.time_confidence = 'unverified'
         )
         ${filters.phase === 'resolution' ? sql`and v.status = 'closed'` : sql``}
-        and ${minutes} > 0
+        and ${sql.join(bounds, sql` and `)}
     )`,
   ]
 }

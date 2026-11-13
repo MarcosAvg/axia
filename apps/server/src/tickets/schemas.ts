@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { phaseFilterFields, refinePhaseFilters } from './phase-filter-schema.js'
 
 const TICKET_STATUSES = [
   'registered',
@@ -41,60 +42,63 @@ const optionalBoolean = z.preprocess((value) => {
   return value
 }, z.boolean().optional())
 
-export const listTicketsQuerySchema = paginationSchema.extend({
-  status: z.enum(TICKET_STATUSES).optional(),
-  statuses: statusListSchema,
-  buildingId: z.string().uuid().optional(),
-  categoryId: z.string().uuid().optional(),
-  subcategoryId: z.string().uuid().optional(),
-  problemId: z.string().uuid().optional(),
-  locationId: z.string().uuid().optional(),
-  channelId: z.string().uuid().optional(),
-  teamId: z.string().uuid().optional(),
-  priorityId: z.string().uuid().optional(),
-  requesterId: z.string().uuid().optional(),
-  technicianId: z.string().uuid().optional(),
-  dependencyId: z.string().uuid().optional(),
-  serviceTypeId: z.string().uuid().optional(),
-  from: optionalDate,
-  to: optionalDate,
-  unrouted: optionalBoolean,
-  possibleDuplicate: optionalBoolean,
-  search: z.string().trim().max(100).optional(),
-  outcome: z
-    .enum(['open', 'closed', 'rejected', 'cancelled', 'duplicate'])
-    .optional(),
-  sla: z.enum(['met', 'missed', 'with_target']).optional(),
-  slaClock: z.enum(['calendar', 'laboral']).optional(),
-  rating: z.coerce.number().int().min(1).max(5).optional(),
-  reassigned: optionalBoolean,
-  recaptured: optionalBoolean,
-  reopened: optionalBoolean,
-  firstFix: optionalBoolean,
-  unverifiedTime: optionalBoolean,
-  pauseReasonId: z.string().uuid().optional(),
-  pauseSubstateId: z.string().uuid().optional(),
-  terminalReasonId: z.string().uuid().optional(),
-  pendingOffer: optionalBoolean,
-  participantTechnicianId: z.string().uuid().optional(),
-  phase: z
-    .enum([
-      'total',
-      'response',
-      'assignment',
-      'pending_take',
-      'reassignment',
-      'wait',
-      'active',
-      'pause',
-      'validation',
-      'claim',
-      'dormant',
-      'resolution',
-    ])
-    .optional(),
-  timeMode: z.enum(['calendar', 'laboral']).optional(),
-})
+export const listTicketsQuerySchema = paginationSchema
+  .extend({
+    status: z.enum(TICKET_STATUSES).optional(),
+    statuses: statusListSchema,
+    buildingId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional(),
+    subcategoryId: z.string().uuid().optional(),
+    problemId: z.string().uuid().optional(),
+    locationId: z.string().uuid().optional(),
+    channelId: z.string().uuid().optional(),
+    teamId: z.string().uuid().optional(),
+    priorityId: z.string().uuid().optional(),
+    requesterId: z.string().uuid().optional(),
+    technicianId: z.string().uuid().optional(),
+    dependencyId: z.string().uuid().optional(),
+    serviceTypeId: z.string().uuid().optional(),
+    from: optionalDate,
+    to: optionalDate,
+    unrouted: optionalBoolean,
+    possibleDuplicate: optionalBoolean,
+    search: z.string().trim().max(100).optional(),
+    outcome: z
+      .enum(['open', 'closed', 'rejected', 'cancelled', 'duplicate'])
+      .optional(),
+    sla: z.enum(['met', 'missed', 'with_target']).optional(),
+    slaClock: z.enum(['calendar', 'laboral']).optional(),
+    rating: z.coerce.number().int().min(1).max(5).optional(),
+    reassigned: optionalBoolean,
+    recaptured: optionalBoolean,
+    reopened: optionalBoolean,
+    firstFix: optionalBoolean,
+    unverifiedTime: optionalBoolean,
+    pauseReasonId: z.string().uuid().optional(),
+    pauseSubstateId: z.string().uuid().optional(),
+    terminalReasonId: z.string().uuid().optional(),
+    pendingOffer: optionalBoolean,
+    participantTechnicianId: z.string().uuid().optional(),
+    phase: z
+      .enum([
+        'total',
+        'response',
+        'assignment',
+        'pending_take',
+        'reassignment',
+        'wait',
+        'active',
+        'pause',
+        'validation',
+        'claim',
+        'dormant',
+        'resolution',
+      ])
+      .optional(),
+    timeMode: z.enum(['calendar', 'laboral']).optional(),
+    ...phaseFilterFields,
+  })
+  .superRefine(refinePhaseFilters)
 
 export const paginationQuerySchema = paginationSchema
 

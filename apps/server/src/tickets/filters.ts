@@ -39,6 +39,10 @@ export type TicketFilters = {
   participantTechnicianId?: string
   phase?: string
   timeMode?: 'calendar' | 'laboral'
+  phaseMinutesMin?: number
+  phaseMinutesMax?: number
+  phaseOutsideLow?: number
+  phaseOutsideHigh?: number
   assigneeTechnicianId?: string
   offerSupervisorUserId?: string
   excludeFinal?: boolean

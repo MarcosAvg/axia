@@ -14,6 +14,16 @@ describe('filtros heredados de métricas', () => {
     expect(
       hasInheritedTicketFilters({ page: 1, pauseReasonId: 'reason-1' }),
     ).toBe(true)
+    expect(hasInheritedTicketFilters({ page: 1, phaseMinutesMin: 5 })).toBe(
+      true,
+    )
+    expect(
+      hasInheritedTicketFilters({
+        page: 1,
+        phaseOutsideLow: 0,
+        phaseOutsideHigh: 10,
+      }),
+    ).toBe(true)
   })
 
   it('no avisa por el reloj del SLA si no hay filtro de SLA', () => {
@@ -33,6 +43,9 @@ describe('filtros heredados de métricas', () => {
         problemId: 'problem-1',
         statuses: ['registered', 'with_supervisor'],
         sla: 'met',
+        phaseMinutesMin: 5,
+        phaseOutsideLow: 0,
+        phaseOutsideHigh: 10,
       }),
     ).toEqual({ page: 2, buildingId: 'building-1' })
   })

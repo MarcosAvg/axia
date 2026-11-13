@@ -22,6 +22,29 @@ test('el resumen abre el desglose de tiquets de un indicador', async ({
   await page.waitForURL(/\/tickets\/[0-9a-f-]+/)
 })
 
+test('la tabla de distribución abre un subconjunto de tiquets', async ({
+  page,
+}) => {
+  await openMetrics(page)
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
+  await page
+    .getByRole('combobox', { name: 'Elegir la medida de tiempos' })
+    .selectOption({ label: 'Mediana' })
+
+  await page
+    .getByRole('button', { name: 'Ver tiquets: Trabajo activo' })
+    .click()
+  await page.getByRole('menuitem', { name: /Por encima del P90/ }).click()
+
+  const sheet = page.getByRole('dialog')
+  await expect(
+    sheet.getByRole('heading', { name: /Por encima del P90/ }),
+  ).toBeVisible()
+  await expect(
+    sheet.getByRole('link', { name: 'Abrir en la lista completa' }),
+  ).toHaveAttribute('href', /phaseMinutesMin=/)
+})
+
 test('la lista completa avisa de los filtros heredados', async ({ page }) => {
   await openMetrics(page)
   await page.getByRole('tab', { name: 'Calidad' }).click()

@@ -1,6 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { TimeMeasureProvider } from '@/components/shared/time-measure-provider'
+import { AuthContext, type AuthContextValue } from '@/features/auth'
+import { MetricsDrillDownProvider } from '../drill-down-context'
+import { EMPTY_FILTERS } from '../domain/metrics'
 import type { DistributionProfileRow } from '../domain/metrics'
 import { DistributionProfileCard } from './distribution-profile'
 
@@ -31,6 +34,39 @@ function renderCard() {
         <DistributionProfileCard profile={profile} mode="calendar" />
       </TimeMeasureProvider>
     </TooltipProvider>,
+  )
+}
+
+function authValue(): AuthContextValue {
+  return {
+    status: 'signed-in',
+    session: null,
+    identity: {
+      userId: 'user-1',
+      username: 'demo',
+      fullName: 'Demo',
+      roles: [],
+      permissions: [{ permission: 'ticket.view', scope: 'all' }],
+    },
+    isIdentityLoading: false,
+    isOfflineSession: false,
+    signIn: async () => undefined,
+    signOut: async () => undefined,
+    refreshIdentity: async () => undefined,
+  } as unknown as AuthContextValue
+}
+
+function renderCardWithDrillDown() {
+  return render(
+    <AuthContext.Provider value={authValue()}>
+      <MetricsDrillDownProvider filters={EMPTY_FILTERS}>
+        <TooltipProvider>
+          <TimeMeasureProvider>
+            <DistributionProfileCard profile={profile} mode="calendar" />
+          </TimeMeasureProvider>
+        </TooltipProvider>
+      </MetricsDrillDownProvider>
+    </AuthContext.Provider>,
   )
 }
 
@@ -81,5 +117,13 @@ describe('DistributionProfileCard', () => {
     expect(
       screen.queryByRole('columnheader', { name: /activa/ }),
     ).not.toBeInTheDocument()
+  })
+
+  it('ofrece el menú de subconjuntos por fila cuando hay permiso', () => {
+    renderCardWithDrillDown()
+
+    expect(
+      screen.getByRole('button', { name: /Ver tiquets: Tiempo total/ }),
+    ).toBeInTheDocument()
   })
 })

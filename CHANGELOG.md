@@ -5,6 +5,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- La tabla **Distribución y atípicos** abre desde cada fase la lista de tiquets por subconjunto:
+  todos, atípicos, por encima del P90, por encima del P75, el 50% central o por debajo de la mediana.
+- `GET /api/tickets` acepta `phaseMinutesMin`, `phaseMinutesMax`, `phaseOutsideLow` y
+  `phaseOutsideHigh` para acotar la lista a un tramo de una fase o a sus atípicos.
+
 ### Cambiado
 
 - La tarjeta **Distribución y atípicos** de Métricas deja de mostrar la columna P95; conserva la
