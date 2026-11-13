@@ -107,6 +107,27 @@ test('la pestaña de tiempos agrupa ciclo, dimensiones y personas', async ({
   await expect(times.getByText('Tiempos por solicitante')).toBeVisible()
 })
 
+test('el tooltip de la gráfica de técnicos muestra el nombre', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page
+    .getByRole('navigation', { name: 'Navegación principal' })
+    .getByRole('link', { name: 'Métricas' })
+    .click()
+  await page.getByRole('tab', { name: 'Tiempos' }).click()
+
+  const scatter = page.locator('.recharts-scatter-symbol').first()
+  await expect(scatter).toBeVisible()
+  await scatter.hover()
+
+  const tooltip = page.locator('.recharts-tooltip-wrapper')
+  await expect(tooltip).toBeVisible()
+  await expect(tooltip).toContainText(
+    /Luis Gómez|Marta Ruiz|Diana Torres|Sofía Vega|Omar Castillo/,
+  )
+})
+
 test('explora dimensiones y filtra por edificio', async ({ page }) => {
   await signIn(page, 'demo.admin')
   await page

@@ -31,6 +31,19 @@ interface ScatterPoint {
   participation: number
 }
 
+/** Nombre del técnico a partir del punto que Recharts entrega al tooltip. */
+function tooltipName(payload: readonly unknown[]): string {
+  const [entry] = payload
+  if (typeof entry !== 'object' || entry === null || !('payload' in entry)) {
+    return ''
+  }
+  const point = entry.payload
+  if (typeof point !== 'object' || point === null || !('name' in point)) {
+    return ''
+  }
+  return typeof point.name === 'string' ? point.name : ''
+}
+
 function ScatterBox({ points }: { points: ScatterPoint[] }) {
   if (points.length === 0) {
     return <p className="text-sm text-muted-foreground">{t.noTimes}</p>
@@ -68,7 +81,13 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
           range={[60, 320]}
           name={t.participation}
         />
-        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelFormatter={(_value, payload) => tooltipName(payload)}
+            />
+          }
+        />
         <Scatter
           data={points}
           fill="var(--chart-1)"

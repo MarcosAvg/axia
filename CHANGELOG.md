@@ -10,6 +10,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - El detalle del tiquet vuelve a mostrar la barra de composición del ciclo por fase, junto al
   resumen de tiempos. El resumen usa el color de cada tramo de la barra.
 
+### Corregido
+
+- El tooltip de la gráfica de técnicos en Métricas muestra el nombre del técnico en lugar de
+  repetir «Tiquets».
+
 ## [0.28.0] - 2026-11-13
 
 ### Añadido
