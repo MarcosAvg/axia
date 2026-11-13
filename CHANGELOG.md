@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-13
+
 ### Añadido
 
 - Las métricas permiten abrir la lista paginada de tiquets detrás de cada indicador: salud, desenlaces,
