@@ -2,13 +2,15 @@ import { cn } from 'cn'
 import { HintIcon } from '@/components/shared/hint'
 import { useTimeMeasure } from '@/components/shared/time-measure-context'
 import type { TimeMeasure } from '@/lib/time-measure'
+import { DISTRIBUTION_COLUMNS } from '../domain/distribution-drill-down'
+import type { DistributionColumn } from '../domain/distribution-drill-down'
 import type { DistributionProfileRow } from '../domain/metrics'
 import { MIN_SAMPLE, formatMinutes, formatPercent } from '../domain/metrics'
 import { phaseTicketFilters } from '../domain/drill-down'
 import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
-import { DistributionSubsetMenu } from './distribution-subset-menu'
+import { DistributionValueCell } from './distribution-value-cell'
 import { MetricCount } from './metric-count'
 
 const t = metricsMessages.times
@@ -31,23 +33,6 @@ function cellClass(active: boolean): string | undefined {
   return active ? 'bg-muted/60 text-foreground' : undefined
 }
 
-function RobustValue({
-  enough,
-  children,
-}: {
-  enough: boolean
-  children: string
-}) {
-  if (!enough) {
-    return (
-      <span title={t.insufficientSample} className="text-muted-foreground">
-        —
-      </span>
-    )
-  }
-  return <span className="tabular-nums">{children}</span>
-}
-
 interface ProfileHeaderColumn {
   key: string
   label: string
@@ -56,7 +41,7 @@ interface ProfileHeaderColumn {
 }
 
 const HEADERS: ProfileHeaderColumn[] = [
-  { key: 'phase', label: t.phase, hint: hints.subsets, align: 'left' },
+  { key: 'phase', label: t.phase, hint: hints.values, align: 'left' },
   { key: 'sample', label: t.sampleOfTotal, hint: hints.sample },
   { key: 'median', label: t.median, hint: hints.median },
   { key: 'iqr', label: t.iqr, hint: hints.iqr },
@@ -126,6 +111,22 @@ function SampleCell({
   )
 }
 
+function cellValue(
+  row: DistributionProfileRow,
+  column: DistributionColumn,
+): string {
+  if (column === 'median') return formatMinutes(row.median)
+  if (column === 'iqr') {
+    return `${formatMinutes(row.p25)}–${formatMinutes(row.p75)}`
+  }
+  if (column === 'p90') return formatMinutes(row.p90)
+  if (column === 'max') return formatMinutes(row.max)
+  if (column === 'outliers') {
+    return `${row.outliers} · ${formatPercent(row.outlierRate)}`
+  }
+  return formatMinutes(row.mean)
+}
+
 function ProfileRowView({
   row,
   active,
@@ -140,45 +141,27 @@ function ProfileRowView({
   return (
     <tr className="border-t">
       <th scope="row" className="px-2 py-1.5 text-left font-medium">
-        <span className="inline-flex min-w-0 items-center gap-1">
-          <span className="truncate">{label}</span>
-          <DistributionSubsetMenu row={row} mode={mode} phaseLabel={label} />
-        </span>
+        {label}
       </th>
       <SampleCell row={row} mode={mode} />
-      <td
-        className={cn('px-2 py-1.5 text-right', cellClass(active === 'median'))}
-      >
-        <RobustValue enough={enough}>{formatMinutes(row.median)}</RobustValue>
-      </td>
-      <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'iqr'))}>
-        <RobustValue enough={enough}>
-          {`${formatMinutes(row.p25)}–${formatMinutes(row.p75)}`}
-        </RobustValue>
-      </td>
-      <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'p90'))}>
-        <RobustValue enough={enough}>{formatMinutes(row.p90)}</RobustValue>
-      </td>
-      <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'max'))}>
-        <RobustValue enough={enough}>{formatMinutes(row.max)}</RobustValue>
-      </td>
-      <td
-        className={cn(
-          'px-2 py-1.5 text-right',
-          cellClass(active === 'outliers'),
-        )}
-      >
-        <RobustValue enough={enough}>
-          {`${row.outliers} · ${formatPercent(row.outlierRate)}`}
-        </RobustValue>
-      </td>
-      <td
-        className={cn('px-2 py-1.5 text-right', cellClass(active === 'mean'))}
-      >
-        <span className="tabular-nums text-muted-foreground">
-          {formatMinutes(row.mean)}
-        </span>
-      </td>
+      {DISTRIBUTION_COLUMNS.map((column) => (
+        <td
+          key={column}
+          className={cn('px-2 py-1.5 text-right', cellClass(active === column))}
+        >
+          <DistributionValueCell
+            row={row}
+            mode={mode}
+            column={column}
+            phaseLabel={label}
+            enough={enough}
+            alwaysShow={column === 'mean'}
+            muted={column === 'mean'}
+          >
+            {cellValue(row, column)}
+          </DistributionValueCell>
+        </td>
+      ))}
     </tr>
   )
 }

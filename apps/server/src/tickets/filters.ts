@@ -41,6 +41,8 @@ export type TicketFilters = {
   timeMode?: 'calendar' | 'laboral'
   phaseMinutesMin?: number
   phaseMinutesMax?: number
+  phaseMinutesAbove?: number
+  phaseMinutesBelow?: number
   phaseOutsideLow?: number
   phaseOutsideHigh?: number
   assigneeTechnicianId?: string

@@ -22,7 +22,7 @@ test('el resumen abre el desglose de tiquets de un indicador', async ({
   await page.waitForURL(/\/tickets\/[0-9a-f-]+/)
 })
 
-test('la tabla de distribución abre un subconjunto de tiquets', async ({
+test('la tabla de distribución abre e invierte un subconjunto', async ({
   page,
 }) => {
   await openMetrics(page)
@@ -31,18 +31,24 @@ test('la tabla de distribución abre un subconjunto de tiquets', async ({
     .getByRole('combobox', { name: 'Elegir la medida de tiempos' })
     .selectOption({ label: 'Mediana' })
 
-  await page
-    .getByRole('button', { name: 'Ver tiquets: Trabajo activo' })
-    .click()
-  await page.getByRole('menuitem', { name: /Por encima del P90/ }).click()
+  const row = page.locator('tr').filter({ hasText: 'Trabajo activo' })
+  await row.getByRole('button', { name: /Hasta el P90/ }).click()
 
   const sheet = page.getByRole('dialog')
+  await expect(
+    sheet.getByRole('heading', { name: /Hasta el P90/ }),
+  ).toBeVisible()
+  await expect(
+    sheet.getByRole('link', { name: 'Abrir en la lista completa' }),
+  ).toHaveAttribute('href', /phaseMinutesMax=/)
+
+  await sheet.getByRole('button', { name: 'Invertir' }).click()
   await expect(
     sheet.getByRole('heading', { name: /Por encima del P90/ }),
   ).toBeVisible()
   await expect(
     sheet.getByRole('link', { name: 'Abrir en la lista completa' }),
-  ).toHaveAttribute('href', /phaseMinutesMin=/)
+  ).toHaveAttribute('href', /phaseMinutesAbove=/)
 })
 
 test('la lista completa avisa de los filtros heredados', async ({ page }) => {

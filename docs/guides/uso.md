@@ -133,8 +133,10 @@ y una nota que identifica ese P90; con P95 o Máximo el valor de la derecha pued
 tarjeta **Distribución y atípicos** muestra `n / N` (tiquets con la fase sobre el
 universo), la mediana, el IQR, el P90, el máximo y el porcentaje fuera de la valla de
 1.5×IQR; resalta la columna de la medida activa y no cambia con el selector porque muestra el perfil
-completo. El nombre de cada fase abre un menú para listar sus tiquets por subconjunto: todos,
-atípicos, por encima del P90, por encima del P75, el 50% central o por debajo de la mediana. La
+completo. Los valores de cada columna abren la lista de tiquets de ese criterio: mediana, IQR,
+P90, máximo, atípicos y media. En el panel lateral, **Invertir** cambia al complemento: por
+ejemplo, P90 muestra hasta el P90 y el inverso los que están por encima; el IQR muestra el 50%
+central y el inverso los que quedan fuera. `n / N` sigue abriendo todos los tiquets de la fase. La
 lista usa los valores que muestra la tabla en ese momento y hereda los filtros del tablero. Las
 fichas informativas explican las definiciones al pasar el cursor o al enfocar cada
 control, tarjeta o columna. En el detalle del tiquet, **Tiempo por fase** es una lista compacta
@@ -148,10 +150,10 @@ Los números de las tarjetas y tablas que representan tiquets abren un panel lat
 correspondiente. La lista hereda los filtros del tablero, pagina y permite abrir el detalle o pasar a
 la lista completa. Para pausas la lista muestra los tiquets actuales que cumplen el criterio, no
 una reconstrucción exacta de cada evento: un motivo de pausa cuenta pausas y la lista muestra
-tiquets con esa pausa. En la distribución por fase, los subconjuntos usan los cuantiles y vallas que
-muestra la tabla como umbrales, así que el tramo puede diferir si los datos cambian entre la tabla y
-la lista; con el reloj **Extra** el perfil no ofrece desglose. El desglose requiere permiso
-para ver tiquets; sin él, la cifra queda como texto.
+tiquets con esa pausa. En la distribución por fase, cada valor usa su cuantil o valla como umbral y
+el botón **Invertir** muestra el complemento, así que el tramo puede diferir si los datos cambian
+entre la tabla y la lista; con el reloj **Extra** el perfil no ofrece desglose. El desglose requiere
+permiso para ver tiquets; sin él, la cifra queda como texto.
 
 ## Trabajar sin conexión
 

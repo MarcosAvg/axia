@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { ArrowLeftRightIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { Button } from '@/components/ui/button'
@@ -91,12 +92,19 @@ function SheetPages({
   )
 }
 
-function SheetBody({ spec }: { spec: DrillDownSpec }) {
+function SheetBody({
+  spec,
+  onOpen,
+}: {
+  spec: DrillDownSpec
+  onOpen: (spec: DrillDownSpec) => void
+}) {
   const [page, setPage] = useState(1)
   const query = useTicketsList(spec.filters, page)
   const info = ticketPageInfo(query.data)
   // Ajuste derivado: si la lista se reduce, la página solicitada vuelve al rango.
   if (page > info.totalPages) setPage(info.totalPages)
+  const alternate = spec.alternate
 
   return (
     <SheetContent
@@ -105,10 +113,32 @@ function SheetBody({ spec }: { spec: DrillDownSpec }) {
       aria-describedby="metrics-drilldown-description"
     >
       <SheetHeader className="border-b pb-3">
-        <SheetTitle>{spec.title}</SheetTitle>
-        <SheetDescription id="metrics-drilldown-description">
-          {query.data ? t.count(info.total) : t.note}
-        </SheetDescription>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <SheetTitle>{spec.title}</SheetTitle>
+            <SheetDescription id="metrics-drilldown-description">
+              {query.data ? t.count(info.total) : t.note}
+            </SheetDescription>
+          </div>
+          {alternate ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              title={t.invertHint}
+              onClick={() =>
+                onOpen({
+                  ...alternate,
+                  alternate: { title: spec.title, filters: spec.filters },
+                })
+              }
+            >
+              <ArrowLeftRightIcon />
+              {t.invert}
+            </Button>
+          ) : null}
+        </div>
       </SheetHeader>
       <SheetResults query={query} info={info} />
       <SheetFooter className="border-t">
@@ -128,9 +158,11 @@ function SheetBody({ spec }: { spec: DrillDownSpec }) {
 export function MetricsTicketSheet({
   spec,
   onClose,
+  onOpen,
 }: {
   spec: DrillDownSpec | null
   onClose: () => void
+  onOpen: (spec: DrillDownSpec) => void
 }) {
   return (
     <Sheet open={spec !== null} onOpenChange={(open) => !open && onClose()}>
@@ -138,6 +170,7 @@ export function MetricsTicketSheet({
         <SheetBody
           key={`${spec.title}:${JSON.stringify(spec.filters)}`}
           spec={spec}
+          onOpen={onOpen}
         />
       ) : null}
     </Sheet>

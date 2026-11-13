@@ -1,14 +1,16 @@
 import type { TicketListFilters, TicketListSearch } from '@/features/tickets'
-import type {
-  Dimension,
-  DistributionProfileRow,
-  MetricsFilters,
-} from './metrics'
+import type { Dimension, MetricsFilters } from './metrics'
 import type { TimeMode } from './time-mode'
+
+export type DrillDownAlternate = {
+  title: string
+  filters: TicketListFilters
+}
 
 export type DrillDownSpec = {
   title: string
   filters: TicketListFilters
+  alternate?: DrillDownAlternate
 }
 
 const DIMENSION_FILTER: Partial<Record<Dimension, keyof TicketListFilters>> = {
@@ -75,47 +77,6 @@ export function phaseTicketFilters(
 ): TicketListFilters | null {
   if (!PHASE_KEYS.has(phase) || mode === 'extra') return null
   return { phase, timeMode: mode }
-}
-
-export const PHASE_SUBSETS = [
-  'all',
-  'outliers',
-  'above_p90',
-  'above_p75',
-  'central',
-  'below_median',
-] as const
-
-export type PhaseSubset = (typeof PHASE_SUBSETS)[number]
-
-/** Filtros de una fase acotados al subconjunto elegido en la tabla. */
-export function phaseSubsetFilters(
-  row: DistributionProfileRow,
-  mode: TimeMode,
-  subset: PhaseSubset,
-): TicketListFilters | null {
-  const base = phaseTicketFilters(row.phase, mode)
-  if (!base) return null
-  if (subset === 'outliers') {
-    return {
-      ...base,
-      phaseOutsideLow: row.lowerFence,
-      phaseOutsideHigh: row.upperFence,
-    }
-  }
-  if (subset === 'above_p90') return { ...base, phaseMinutesMin: row.p90 }
-  if (subset === 'above_p75') return { ...base, phaseMinutesMin: row.p75 }
-  if (subset === 'central') {
-    return {
-      ...base,
-      phaseMinutesMin: row.p25,
-      phaseMinutesMax: row.p75,
-    }
-  }
-  if (subset === 'below_median') {
-    return { ...base, phaseMinutesMax: row.median }
-  }
-  return base
 }
 
 /** Traduce filtros de métricas a la búsqueda de la ruta `/tickets`. */

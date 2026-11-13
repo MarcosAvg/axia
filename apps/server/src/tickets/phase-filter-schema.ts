@@ -11,6 +11,8 @@ const fence = z.coerce
 export const phaseFilterFields = {
   phaseMinutesMin: minutes,
   phaseMinutesMax: minutes,
+  phaseMinutesAbove: minutes,
+  phaseMinutesBelow: minutes,
   phaseOutsideLow: fence,
   phaseOutsideHigh: fence,
 }
@@ -19,13 +21,18 @@ type PhaseFilterValues = {
   phase?: string
   phaseMinutesMin?: number
   phaseMinutesMax?: number
+  phaseMinutesAbove?: number
+  phaseMinutesBelow?: number
   phaseOutsideLow?: number
   phaseOutsideHigh?: number
 }
 
 function requirePhase(value: PhaseFilterValues, ctx: z.RefinementCtx) {
   const hasMinutes =
-    value.phaseMinutesMin !== undefined || value.phaseMinutesMax !== undefined
+    value.phaseMinutesMin !== undefined ||
+    value.phaseMinutesMax !== undefined ||
+    value.phaseMinutesAbove !== undefined ||
+    value.phaseMinutesBelow !== undefined
   const hasFences =
     value.phaseOutsideLow !== undefined || value.phaseOutsideHigh !== undefined
   if ((hasMinutes || hasFences) && !value.phase) {

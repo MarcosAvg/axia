@@ -45,6 +45,8 @@ export function toTicketFilters(query: ListTicketsQuery): TicketFilters {
     timeMode: query.timeMode,
     phaseMinutesMin: query.phaseMinutesMin,
     phaseMinutesMax: query.phaseMinutesMax,
+    phaseMinutesAbove: query.phaseMinutesAbove,
+    phaseMinutesBelow: query.phaseMinutesBelow,
     phaseOutsideLow: query.phaseOutsideLow,
     phaseOutsideHigh: query.phaseOutsideHigh,
   }

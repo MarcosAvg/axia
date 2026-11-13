@@ -1,6 +1,8 @@
 export const drillDownMessages = {
   label: 'Ver tiquets',
   fallbackTitle: 'Tiquets del indicador',
+  invert: 'Invertir',
+  invertHint: 'Ver el complemento de este criterio.',
   count: (total: number) =>
     total === 1
       ? '1 tiquet con estos filtros'

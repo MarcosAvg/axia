@@ -3,17 +3,20 @@ import type { ReactNode } from 'react'
 import { AuthContext, can } from '@/features/auth'
 import type { TicketListFilters } from '@/features/tickets'
 import { useMetricsDrillDown } from '../drill-down-context'
+import type { DrillDownAlternate } from '../domain/drill-down'
 
 /** Número o etiqueta que abre la lista de tiquets que lo compone. */
 export function MetricCount({
   title,
   filters,
+  alternate,
   children,
   disabled = false,
   className,
 }: {
   title: string
   filters: TicketListFilters
+  alternate?: DrillDownAlternate
   children: ReactNode
   disabled?: boolean
   className?: string
@@ -26,7 +29,7 @@ export function MetricCount({
   return (
     <button
       type="button"
-      onClick={() => drillDown.open({ title, filters })}
+      onClick={() => drillDown.open({ title, filters, alternate })}
       title={title}
       aria-label={title}
       className={

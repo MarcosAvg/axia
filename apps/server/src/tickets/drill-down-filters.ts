@@ -163,6 +163,12 @@ function phaseMinuteBounds(filters: TicketFilters, minutes: SQL): SQL[] {
   if (filters.phaseMinutesMax !== undefined) {
     bounds.push(sql`${minutes} <= ${filters.phaseMinutesMax}`)
   }
+  if (filters.phaseMinutesAbove !== undefined) {
+    bounds.push(sql`${minutes} > ${filters.phaseMinutesAbove}`)
+  }
+  if (filters.phaseMinutesBelow !== undefined) {
+    bounds.push(sql`${minutes} < ${filters.phaseMinutesBelow}`)
+  }
   if (
     filters.phaseOutsideLow !== undefined &&
     filters.phaseOutsideHigh !== undefined

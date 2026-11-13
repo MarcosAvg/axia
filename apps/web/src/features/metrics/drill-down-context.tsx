@@ -31,14 +31,27 @@ export function MetricsDrillDownProvider({
   const value = useMemo<DrillDownValue>(
     () => ({
       open: (next) =>
-        setSpec({ ...next, filters: { ...base, ...next.filters } }),
+        setSpec({
+          ...next,
+          filters: { ...base, ...next.filters },
+          alternate: next.alternate
+            ? {
+                ...next.alternate,
+                filters: { ...base, ...next.alternate.filters },
+              }
+            : undefined,
+        }),
     }),
     [base],
   )
   return (
     <DrillDownContext.Provider value={value}>
       {children}
-      <MetricsTicketSheet spec={spec} onClose={() => setSpec(null)} />
+      <MetricsTicketSheet
+        spec={spec}
+        onClose={() => setSpec(null)}
+        onOpen={value.open}
+      />
     </DrillDownContext.Provider>
   )
 }

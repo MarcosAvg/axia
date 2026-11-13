@@ -6,19 +6,22 @@ export const distributionMessages = {
   rangeP90Max: 'P90 más alto',
   rangeOverflow:
     'P95 y máximo pueden superar el eje; consulta el valor de la derecha.',
-  subsetMenu: 'Ver tiquets por subconjunto',
-  subsetHint: 'Elige el subconjunto de tiquets de esta fase.',
-  subsets: {
-    all: 'Todos',
-    outliers: 'Atípicos',
-    above_p90: 'Por encima del P90',
-    above_p75: 'Por encima del P75',
-    central: 'En el 50% central',
-    below_median: 'Por debajo de la mediana',
+  valueDrillDown: {
+    median: {
+      primary: 'Hasta la mediana',
+      alternate: 'Por encima de la mediana',
+    },
+    iqr: { primary: 'En el 50% central', alternate: 'Fuera del 50% central' },
+    p90: { primary: 'Hasta el P90', alternate: 'Por encima del P90' },
+    max: { primary: 'El máximo', alternate: 'Por debajo del máximo' },
+    outliers: { primary: 'Atípicos', alternate: 'Dentro de las vallas' },
+    mean: { primary: 'Hasta la media', alternate: 'Por encima de la media' },
   },
+  valueDrillDownHint:
+    'Abre la lista de tiquets de este valor; en el panel puedes invertir el criterio.',
   unclassified: 'Sin clasificar',
   distributionHint:
-    'Perfil completo de cada fase: muestra, centro, dispersión y extremos. No cambia con la medida.',
+    'Perfil completo de cada fase: muestra, centro, dispersión y extremos. Los valores abren la lista de tiquets y el panel permite invertir el criterio. No cambia con la medida.',
   sample: 'n',
   sampleOfTotal: 'n / N',
   coverage: 'Cobertura',

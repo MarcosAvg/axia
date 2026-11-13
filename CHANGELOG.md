@@ -7,10 +7,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Añadido
 
-- La tabla **Distribución y atípicos** abre desde cada fase la lista de tiquets por subconjunto:
-  todos, atípicos, por encima del P90, por encima del P75, el 50% central o por debajo de la mediana.
-- `GET /api/tickets` acepta `phaseMinutesMin`, `phaseMinutesMax`, `phaseOutsideLow` y
-  `phaseOutsideHigh` para acotar la lista a un tramo de una fase o a sus atípicos.
+- Los valores de **Distribución y atípicos** abren la lista de tiquets del criterio: mediana, IQR,
+  P90, máximo, atípicos y media. El panel lateral incluye **Invertir** para ver el complemento
+  (por ejemplo, P90 muestra hasta el P90 y el inverso los que están por encima).
+- `GET /api/tickets` acepta `phaseMinutesMin`, `phaseMinutesMax`, `phaseMinutesAbove`,
+  `phaseMinutesBelow`, `phaseOutsideLow` y `phaseOutsideHigh` para acotar la lista a un tramo de
+  una fase o a sus atípicos.
 
 ### Cambiado
 

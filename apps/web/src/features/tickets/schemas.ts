@@ -244,6 +244,20 @@ export const ticketListSearchSchema = z.object({
     .max(10_000_000)
     .optional()
     .catch(undefined),
+  phaseMinutesAbove: z.coerce
+    .number()
+    .finite()
+    .min(0)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
+  phaseMinutesBelow: z.coerce
+    .number()
+    .finite()
+    .min(0)
+    .max(10_000_000)
+    .optional()
+    .catch(undefined),
   phaseOutsideLow: z.coerce
     .number()
     .finite()

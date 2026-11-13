@@ -38,6 +38,8 @@ export interface TicketFilters {
   timeMode?: 'calendar' | 'laboral'
   phaseMinutesMin?: number
   phaseMinutesMax?: number
+  phaseMinutesAbove?: number
+  phaseMinutesBelow?: number
   phaseOutsideLow?: number
   phaseOutsideHigh?: number
 }
@@ -96,6 +98,8 @@ export function ticketListQuery(
     timeMode: filters.timeMode,
     phaseMinutesMin: filters.phaseMinutesMin,
     phaseMinutesMax: filters.phaseMinutesMax,
+    phaseMinutesAbove: filters.phaseMinutesAbove,
+    phaseMinutesBelow: filters.phaseMinutesBelow,
     phaseOutsideLow: filters.phaseOutsideLow,
     phaseOutsideHigh: filters.phaseOutsideHigh,
     page,

@@ -126,8 +126,8 @@ export const hintMessages = {
   distributionHints: {
     sample:
       'Tiquets que tuvieron la fase. No cambia con la medida: todas las columnas resumen la misma muestra.',
-    subsets:
-      'Abre la lista de tiquets de la fase y permite elegir un subconjunto: todos, atípicos, P90, P75, 50% central o mediana.',
+    values:
+      'Los valores abren la lista de tiquets de ese criterio; en el panel puedes invertirlo.',
     coverage:
       'Proporción del universo de desempeño que tuvo la fase en el periodo.',
     median: 'Valor central: la mitad de la muestra quedó por debajo.',

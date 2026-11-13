@@ -56,13 +56,13 @@ function authValue(): AuthContextValue {
   } as unknown as AuthContextValue
 }
 
-function renderCardWithDrillDown() {
+function renderCardWithDrillDown(data: DistributionProfileRow[] = profile) {
   return render(
     <AuthContext.Provider value={authValue()}>
       <MetricsDrillDownProvider filters={EMPTY_FILTERS}>
         <TooltipProvider>
           <TimeMeasureProvider>
-            <DistributionProfileCard profile={profile} mode="calendar" />
+            <DistributionProfileCard profile={data} mode="calendar" />
           </TimeMeasureProvider>
         </TooltipProvider>
       </MetricsDrillDownProvider>
@@ -118,12 +118,42 @@ describe('DistributionProfileCard', () => {
       screen.queryByRole('columnheader', { name: /activa/ }),
     ).not.toBeInTheDocument()
   })
+})
 
-  it('ofrece el menú de subconjuntos por fila cuando hay permiso', () => {
+describe('DistributionProfileCard drill-down', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    window.localStorage.setItem('axia.time-aggregation', 'median')
+  })
+
+  it('ofrece el desglose de la muestra con permiso', () => {
     renderCardWithDrillDown()
 
     expect(
-      screen.getByRole('button', { name: /Ver tiquets: Tiempo total/ }),
+      screen.getByRole('button', { name: /Ver tiquets · Tiempo total/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('abre el desglose desde los valores con muestra suficiente', () => {
+    renderCardWithDrillDown(profile.map((row) => ({ ...row, n: 10 })))
+
+    expect(
+      screen.getByRole('button', { name: /Hasta la mediana/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /En el 50% central/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Hasta el P90/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /El máximo/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Atípicos \(1 de 10\)/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Hasta la media \(/ }),
     ).toBeInTheDocument()
   })
 })

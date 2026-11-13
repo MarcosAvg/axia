@@ -24,6 +24,12 @@ describe('filtros heredados de métricas', () => {
         phaseOutsideHigh: 10,
       }),
     ).toBe(true)
+    expect(hasInheritedTicketFilters({ page: 1, phaseMinutesAbove: 5 })).toBe(
+      true,
+    )
+    expect(hasInheritedTicketFilters({ page: 1, phaseMinutesBelow: 5 })).toBe(
+      true,
+    )
   })
 
   it('no avisa por el reloj del SLA si no hay filtro de SLA', () => {
@@ -44,6 +50,8 @@ describe('filtros heredados de métricas', () => {
         statuses: ['registered', 'with_supervisor'],
         sla: 'met',
         phaseMinutesMin: 5,
+        phaseMinutesAbove: 5,
+        phaseMinutesBelow: 5,
         phaseOutsideLow: 0,
         phaseOutsideHigh: 10,
       }),

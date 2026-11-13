@@ -38,10 +38,10 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 - La demo conserva una supervisora con dos equipos. RN-04 limita a uno y esa restricción todavía no
   se impone; no impide el ruteo, pero requiere una revisión específica.
 - El desglose de Métricas abre la lista con filtros sobre los datos actuales. En pausas, la cifra
-  cuenta eventos y la lista tiquets. En la distribución por fase, los subconjuntos usan los
-  cuantiles y vallas que muestra la tabla como umbrales; si los datos cambian entre la tabla y la
-  lista, el tramo puede diferir. Con el reloj **Extra** el perfil de fases no ofrece desglose. El
-  desglose requiere `ticket.view` además de `metrics.view`.
+  cuenta eventos y la lista tiquets. En la distribución por fase, al pulsar un valor se usa su
+  cuantil o valla como umbral y el botón **Invertir** muestra el complemento; si los datos cambian
+  entre la tabla y la lista, el tramo puede diferir. Con el reloj **Extra** el perfil de fases no
+  ofrece desglose. El desglose requiere `ticket.view` además de `metrics.view`.
 
 ## Pendientes operativos
 

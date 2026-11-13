@@ -25,6 +25,8 @@ const INHERITED_KEYS = [
   'timeMode',
   'phaseMinutesMin',
   'phaseMinutesMax',
+  'phaseMinutesAbove',
+  'phaseMinutesBelow',
   'phaseOutsideLow',
   'phaseOutsideHigh',
 ] as const satisfies readonly (keyof TicketListSearch)[]
@@ -86,6 +88,8 @@ export function ticketFiltersFromSearch(search: TicketListSearch) {
     timeMode: search.timeMode,
     phaseMinutesMin: search.phaseMinutesMin,
     phaseMinutesMax: search.phaseMinutesMax,
+    phaseMinutesAbove: search.phaseMinutesAbove,
+    phaseMinutesBelow: search.phaseMinutesBelow,
     phaseOutsideLow: search.phaseOutsideLow,
     phaseOutsideHigh: search.phaseOutsideHigh,
   }
