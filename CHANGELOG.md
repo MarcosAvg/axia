@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-13
+
 ### Añadido
 
 - El detalle del tiquet vuelve a mostrar la barra de composición del ciclo por fase, junto al
