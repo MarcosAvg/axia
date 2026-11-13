@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- La tarjeta **Distribución y atípicos** de Métricas deja de mostrar la columna P95; conserva la
+  mediana, el IQR, el P90, el máximo y los atípicos.
+
 ## [0.27.0] - 2026-11-13
 
 ### Añadido

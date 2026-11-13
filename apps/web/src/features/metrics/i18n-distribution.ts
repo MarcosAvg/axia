@@ -13,7 +13,6 @@ export const distributionMessages = {
   p75: 'P75',
   iqr: 'IQR (P25–P75)',
   p90: 'P90',
-  p95: 'P95',
   max: 'Máximo',
   outliers: 'Atípicos',
   mean: 'Media',

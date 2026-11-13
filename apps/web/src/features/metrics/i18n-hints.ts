@@ -131,7 +131,6 @@ export const hintMessages = {
     median: 'Valor central: la mitad de la muestra quedó por debajo.',
     iqr: 'Rango del 50% central (P25–P75). Menos sensible a los extremos que el promedio.',
     p90: 'El 90% de la muestra quedó por debajo de este tiempo.',
-    p95: 'El 95% de la muestra quedó por debajo; muestra mejor la cola.',
     max: 'El caso más largo de la muestra. Un solo tiquet puede moverlo.',
     outliers:
       'Tiquets fuera de la valla Q1−1.5·IQR / Q3+1.5·IQR. La tasa es sobre la muestra de la fase.',

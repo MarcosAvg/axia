@@ -129,7 +129,7 @@ ceros, no son aditivas y se ocultan cuando la muestra es menor a cinco casos. La
 **Ciclo y fases** reúne la composición del ciclo con la tabla de fases; con una medida robusta se
 convierte en **Perfil de fases**, una gráfica de rango por fase (P25–P75, mediana y P90) que no suma
 cuantiles. La tarjeta **Distribución y atípicos** muestra `n / N` (tiquets con la fase sobre el
-universo), la mediana, el IQR, el P90, el P95, el máximo y el porcentaje fuera de la valla de
+universo), la mediana, el IQR, el P90, el máximo y el porcentaje fuera de la valla de
 1.5×IQR; resalta la columna de la medida activa y no cambia con el selector porque muestra el perfil
 completo. Las fichas informativas explican las definiciones al pasar el cursor o al enfocar cada
 control, tarjeta o columna. En el detalle del tiquet, **Tiempo por fase** es una lista compacta

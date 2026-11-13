@@ -60,7 +60,6 @@ const HEADERS: ProfileHeaderColumn[] = [
   { key: 'median', label: t.median, hint: hints.median },
   { key: 'iqr', label: t.iqr, hint: hints.iqr },
   { key: 'p90', label: t.p90, hint: hints.p90 },
-  { key: 'p95', label: t.p95, hint: hints.p95 },
   { key: 'max', label: t.max, hint: hints.max },
   { key: 'outliers', label: t.outliers, hint: hints.outliers },
   { key: 'mean', label: t.mean, hint: hints.mean },
@@ -154,9 +153,6 @@ function ProfileRowView({
       </td>
       <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'p90'))}>
         <RobustValue enough={enough}>{formatMinutes(row.p90)}</RobustValue>
-      </td>
-      <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'p95'))}>
-        <RobustValue enough={enough}>{formatMinutes(row.p95)}</RobustValue>
       </td>
       <td className={cn('px-2 py-1.5 text-right', cellClass(active === 'max'))}>
         <RobustValue enough={enough}>{formatMinutes(row.max)}</RobustValue>

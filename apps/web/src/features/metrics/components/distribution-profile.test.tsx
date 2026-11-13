@@ -40,11 +40,12 @@ describe('DistributionProfileCard', () => {
     window.localStorage.setItem('axia.time-aggregation', 'median')
   })
 
-  it('muestra la muestra como n / N y la columna P95', () => {
+  it('muestra la muestra como n / N y no incluye la columna P95', () => {
     renderCard()
 
     expect(screen.getByText('n / N')).toBeInTheDocument()
-    expect(screen.getByText('P95')).toBeInTheDocument()
+    expect(screen.getByText('P90')).toBeInTheDocument()
+    expect(screen.queryByText('P95')).not.toBeInTheDocument()
     expect(screen.getByTitle('4 de 10 tiquets')).toHaveTextContent(
       /4\s*\/\s*10/,
     )
