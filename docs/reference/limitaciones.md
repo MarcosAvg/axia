@@ -6,7 +6,7 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 ## Versión y soporte
 
 - Desarrollo pre-1.0. La versión publicada se identifica por el tag `vX.Y.Z`; la última es
-  `v0.27.0` (2026-11-13).
+  `v0.28.0` (2026-11-13).
 - `package.json` conserva `0.0.0` como marcador de desarrollo. La versión de la imagen y del
   paquete de release se toma del tag y del commit, no de ese campo.
 - Solo se atiende la rama `main`. Para vulnerabilidades, seguir [Seguridad](../../SECURITY.md).

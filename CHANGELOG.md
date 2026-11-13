@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-11-13
+
 ### Añadido
 
 - Los valores de **Distribución y atípicos** abren la lista de tiquets del criterio: mediana, IQR,
