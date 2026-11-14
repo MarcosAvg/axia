@@ -40,7 +40,7 @@ async function calendar(name: string, withIntervals: boolean): Promise<string> {
       insert into public.work_calendar_intervals (
         calendar_id, weekday, start_time, end_time
       )
-      select ${id}, day, '00:00'::time, '23:59'::time
+      select ${id}, day, '00:00'::time, '24:00'::time
       from generate_series(0, 6) as day
     `)
   }

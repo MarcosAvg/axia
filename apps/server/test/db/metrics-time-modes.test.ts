@@ -34,7 +34,7 @@ async function calendar(name: string, withInterval: boolean): Promise<string> {
       insert into public.work_calendar_intervals (
         calendar_id, weekday, start_time, end_time
       )
-      select ${id}, day, '00:00'::time, '23:59'::time
+      select ${id}, day, '00:00'::time, '24:00'::time
       from generate_series(0, 6) as day
     `)
   }
@@ -94,6 +94,18 @@ it('devuelve continuo, laboral y extra por fase', async () => {
   expect(body.summary.avgActiveExtra).toBeCloseTo(30, 0)
   expect(body.summary.sumActiveLabor).toBeCloseTo(60, 0)
   expect(body.summary.sumActiveExtra).toBeCloseTo(60, 0)
+})
+
+it('cuenta completa la ventana laboral que cruza la medianoche', async () => {
+  const calendarId = await calendar('Modos con medianoche', true)
+  const result = await context.db.execute(sql`
+    select public.work_calendar_overlap(
+      ${calendarId},
+      '2026-03-02T23:29:00Z'::timestamptz,
+      '2026-03-03T00:30:00Z'::timestamptz
+    ) as overlap
+  `)
+  expect((result.rows[0] as { overlap: string }).overlap).toBe('01:01:00')
 })
 
 it('devuelve dormant y revisión de duplicado como indicadores propios', async () => {
