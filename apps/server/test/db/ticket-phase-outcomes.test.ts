@@ -49,9 +49,10 @@ async function createTicketCopy(sourceId: string) {
 
 async function coverage(ticketId: string) {
   const result = await fixtures.db.execute(sql`
-    select delta from public.v_ticket_phase_coverage where id = ${ticketId}
+    select delta, delta = interval '0' as covered
+    from public.v_ticket_phase_coverage where id = ${ticketId}
   `)
-  return result.rows[0] as { delta: string }
+  return result.rows[0] as { delta: string; covered: boolean }
 }
 
 it('covers a direct assignment without a taken event', async () => {
@@ -72,7 +73,8 @@ it('covers a direct assignment without a taken event', async () => {
   `)
   await db.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
 
-  expect((await coverage(ticketId)).delta).toBe('00:00:00')
+  const { covered, delta } = await coverage(ticketId)
+  expect(covered, `delta ${delta}`).toBe(true)
 })
 
 it('covers the gap between a discard and its reactivation', async () => {
@@ -101,7 +103,8 @@ it('covers the gap between a discard and its reactivation', async () => {
   `)
   await db.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
 
-  expect((await coverage(ticketId)).delta).toBe('00:00:00')
+  const { covered, delta } = await coverage(ticketId)
+  expect(covered, `delta ${delta}`).toBe(true)
 })
 
 it('covers a claim opened after the ticket was closed', async () => {
@@ -132,7 +135,8 @@ it('covers a claim opened after the ticket was closed', async () => {
   `)
   await db.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
 
-  expect((await coverage(ticketId)).delta).toBe('00:00:00')
+  const { covered, delta } = await coverage(ticketId)
+  expect(covered, `delta ${delta}`).toBe(true)
 })
 
 it('extends the last phase when closed_at is later than the last event', async () => {
@@ -156,7 +160,35 @@ it('extends the last phase when closed_at is later than the last event', async (
   `)
   await db.execute(sql`select public.rebuild_ticket_time_spans(${ticketId})`)
 
-  expect((await coverage(ticketId)).delta).toBe('00:00:00')
+  const { covered, delta } = await coverage(ticketId)
+  expect(covered, `delta ${delta}`).toBe(true)
+})
+
+it('cubre el tiquet cuando el delta compensa días y horas', async () => {
+  const { db, ids } = fixtures
+  const ticketId = await createTicketCopy(ids.ticketA2)
+  await db.execute(sql`
+    update public.tickets
+    set reported_at = '2026-07-01T00:00:00Z'
+    where id = ${ticketId}
+  `)
+  await db.execute(sql`
+    insert into public.time_spans (
+      ticket_id, cycle, kind, started_at, ended_at
+    ) values
+      (${ticketId}, 1, 'active_work',
+        '2026-07-01T00:00:00Z'::timestamptz, '2026-07-01T12:30:00Z'::timestamptz),
+      (${ticketId}, 1, 'active_work',
+        '2026-07-01T12:30:00Z'::timestamptz, '2026-07-02T01:00:00Z'::timestamptz)
+  `)
+  await db.execute(sql`
+    update public.tickets
+    set status = 'closed', closed_at = '2026-07-02T01:00:00Z'
+    where id = ${ticketId}
+  `)
+
+  const { covered, delta } = await coverage(ticketId)
+  expect(covered, `delta ${delta}`).toBe(true)
 })
 
 it('mantiene la clasificación del intervalo al reanudar con otro motivo', async () => {
