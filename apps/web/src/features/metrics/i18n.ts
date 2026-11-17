@@ -278,8 +278,6 @@ export const metricsMessages = {
     leader: 'Como líder',
     auxiliary: 'Como auxiliar',
     participation: 'Participación',
-    extra: 'Fuera de horario',
-    assigned: 'Asignados',
   },
   rejectCancel: {
     title: 'Rechazos y cancelaciones',

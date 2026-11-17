@@ -68,25 +68,6 @@ function columns(
         )
       },
     },
-    ...(mode === 'extra'
-      ? []
-      : [
-          {
-            id: 'extra',
-            header: t.extra,
-            hint: hints.extra,
-            cell: (row: TechnicianRow) =>
-              formatMinutes(row.participationExtraMinutes),
-            hideBelow: 'lg' as const,
-          },
-        ]),
-    {
-      id: 'assigned',
-      header: t.assigned,
-      hint: hints.assigned,
-      cell: (row) => row.assignedCount,
-      hideBelow: 'md',
-    },
   ]
 }
 

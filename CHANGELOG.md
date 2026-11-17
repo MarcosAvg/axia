@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- La tabla **Carga por técnico** de Métricas → Equipo muestra tiquets, como líder, como auxiliar y
+  participación. Se retiran las columnas **Fuera de horario** y **Asignados**.
+
 ## [0.30.0] - 2026-11-17
 
 ### Añadido

@@ -79,7 +79,6 @@ export const hintMessages = {
     dimensionTickets: 'Tiquets de la agrupación en el periodo.',
     avgActive: 'Promedio del trabajo activo de la agrupación en el periodo.',
     avgTotal: 'Promedio del tiempo total de la agrupación en el periodo.',
-    extra: 'Trabajo de la agrupación fuera del horario laboral.',
     reassignment:
       'Porcentaje de tiquets de la agrupación con reasignación de supervisor.',
     recapture: 'Porcentaje de tiquets de la agrupación con recaptura.',
@@ -87,7 +86,6 @@ export const hintMessages = {
       'Tiempo total participando, ya sea como líder o como auxiliar.',
     leader: 'Veces que el técnico fue líder de la atención.',
     auxiliary: 'Veces que el técnico participó como auxiliar.',
-    assigned: 'Veces que el tiquet se le asignó como técnico.',
     duplicateRate: 'Duplicados entre los tiquets de la agrupación.',
     age: 'Tiempo transcurrido desde el registro.',
     share: 'Porcentaje de la agrupación sobre el total.',
