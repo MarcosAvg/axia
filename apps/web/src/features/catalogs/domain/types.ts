@@ -19,6 +19,12 @@ export interface ProblemOption extends Option {
   attachmentInstructions: string | null
 }
 
+export interface ProblemSearchOption extends ProblemOption {
+  categoryId: string
+  categoryName: string
+  subcategoryName: string
+}
+
 export interface RequesterOption {
   id: string
   fullName: string

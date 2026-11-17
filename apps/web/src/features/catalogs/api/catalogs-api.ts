@@ -4,6 +4,7 @@ import type {
   LocationOption,
   Option,
   ProblemOption,
+  ProblemSearchOption,
   ReasonOption,
   ReasonUse,
   RequesterOption,
@@ -62,6 +63,9 @@ export function fetchProblems(subcategoryId: string) {
     `/api/catalogs/problems?subcategoryId=${encodeURIComponent(subcategoryId)}`,
   )
 }
+
+export const fetchProblemSearchCatalog = () =>
+  fetchCatalog<ProblemSearchOption>('/api/catalogs/problems')
 
 export function fetchReasons(use: ReasonUse) {
   return fetchCatalog<ReasonOption>(

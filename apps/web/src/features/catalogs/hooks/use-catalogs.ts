@@ -7,6 +7,7 @@ import {
   fetchLocations,
   fetchPriorities,
   fetchProblems,
+  fetchProblemSearchCatalog,
   fetchReasons,
   fetchRequesters,
   fetchServiceTypes,
@@ -29,6 +30,7 @@ const catalogKeys = {
   channels: ['catalogs', 'channels'] as const,
   priorities: ['catalogs', 'priorities'] as const,
   categories: ['catalogs', 'categories'] as const,
+  problemSearch: ['catalogs', 'problems', 'all'] as const,
   requesters: ['catalogs', 'requesters'] as const,
   locations: (buildingId: string, dependencyId: string) =>
     ['catalogs', 'locations', buildingId, dependencyId] as const,
@@ -150,6 +152,14 @@ export function useProblems(subcategoryId: string | undefined) {
     queryFn: () =>
       subcategoryId ? fetchProblems(subcategoryId) : Promise.resolve([]),
     enabled: Boolean(subcategoryId),
+    staleTime,
+  })
+}
+
+export function useProblemSearchCatalog() {
+  return useQuery({
+    queryKey: catalogKeys.problemSearch,
+    queryFn: fetchProblemSearchCatalog,
     staleTime,
   })
 }

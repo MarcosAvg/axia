@@ -38,9 +38,6 @@ export function registerCatalogRoutes(
     if (catalog === 'subcategories') {
       requireParent(query.categoryId, 'Indica la categoría')
     }
-    if (catalog === 'problems') {
-      requireParent(query.subcategoryId, 'Indica la subcategoría')
-    }
     if (catalog === 'reasons') {
       requireParent(query.use, 'Indica el uso del motivo')
     }

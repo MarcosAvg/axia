@@ -9,6 +9,9 @@ type LocationOption = SimpleOption & { buildingId: string }
 type CategoryOption = SimpleOption
 type SubcategoryOption = SimpleOption & { categoryId: string }
 type ProblemOption = SimpleOption & {
+  categoryId: string
+  categoryName: string
+  subcategoryName: string
   subcategoryId: string
   requiredAttachmentTypes: string[]
   attachmentInstructions: string | null
@@ -161,17 +164,22 @@ async function listSubcategories(
 
 async function listProblems(
   db: Database,
-  subcategoryId: string,
+  subcategoryId?: string,
 ): Promise<ProblemOption[]> {
   const result = await db.execute(sql`
     select
-      id, name,
-      subcategory_id as "subcategoryId",
-      attachment_required_types as "requiredAttachmentTypes",
-      attachment_instructions as "attachmentInstructions"
-    from public.problems
-    where active and subcategory_id = ${subcategoryId}
-    order by public.natural_sort_key(name)
+      p.id, p.name,
+      p.subcategory_id as "subcategoryId",
+      c.id as "categoryId", c.name as "categoryName",
+      s.name as "subcategoryName",
+      p.attachment_required_types as "requiredAttachmentTypes",
+      p.attachment_instructions as "attachmentInstructions"
+    from public.problems p
+    join public.subcategories s on s.id = p.subcategory_id and s.active
+    join public.categories c on c.id = s.category_id and c.active
+    where p.active
+      and ${subcategoryId ? sql`p.subcategory_id = ${subcategoryId}` : sql`true`}
+    order by public.natural_sort_key(p.name), p.id
   `)
   return result.rows as ProblemOption[]
 }
@@ -276,7 +284,7 @@ async function listScopedCatalog(
     return query.categoryId ? listSubcategories(db, query.categoryId) : []
   }
   if (name === 'problems') {
-    return query.subcategoryId ? listProblems(db, query.subcategoryId) : []
+    return listProblems(db, query.subcategoryId)
   }
   if (name === 'reasons') {
     return query.use ? listReasons(db, query.use) : []
