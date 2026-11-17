@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-17
+
 ### Añadido
 
 - El registro de tiquets permite buscar problemas en todo el catálogo por fragmentos, sin acentos
