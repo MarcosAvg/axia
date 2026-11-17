@@ -1,4 +1,5 @@
-import { formatMinutes } from '@/features/metrics'
+import { ChartSegment } from '@/components/shared/chart-segment'
+import { formatMinutes, formatPercent } from '@/features/metrics'
 import type { TicketDetailWithTimes } from '../domain/types'
 import { cycleMessages } from '../i18n-cycle'
 import { CYCLE_PHASES } from './ticket-cycle-phases'
@@ -22,14 +23,14 @@ export function TicketCycleChart({ times }: { times: CycleTimes }) {
     .join(', ')}`
   return (
     <div
-      role="img"
+      role="group"
       aria-label={label}
       className="flex h-10 w-full overflow-hidden rounded-lg bg-muted"
     >
       {slices.map((slice) => (
-        <span
+        <ChartSegment
           key={slice.key}
-          className="h-full"
+          label={`${slice.label}: ${formatMinutes(slice.minutes)} (${formatPercent(slice.minutes / times.total)})`}
           style={{
             width: share(slice.minutes, times.total),
             background: slice.color,

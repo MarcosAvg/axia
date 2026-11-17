@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- Las barras de composición del ciclo en el detalle del tiquet y en Métricas → Tiempos muestran
+  fase, duración y porcentaje al pasar el cursor o enfocar cada segmento con teclado.
+
 ### Corregido
 
 - El modo laboral de «Tiempo por fase» en el detalle del tiquet muestra los minutos calculados

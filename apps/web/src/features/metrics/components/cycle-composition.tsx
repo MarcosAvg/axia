@@ -1,3 +1,4 @@
+import { ChartSegment } from '@/components/shared/chart-segment'
 import type { TimeMeasure } from '@/lib/time-measure'
 import { formatMinutes, formatPercent } from '../domain/metrics'
 import type { MetricsSummary } from '../domain/metrics'
@@ -39,14 +40,14 @@ function CompositionBar({
 }) {
   return (
     <div
-      role="img"
+      role="group"
       aria-label={label}
       className="flex h-9 w-full overflow-hidden rounded-lg bg-muted"
     >
       {slices.map((slice) => (
-        <span
+        <ChartSegment
           key={slice.phase}
-          title={segmentLabel(slice.phase, slice.minutes, total)}
+          label={segmentLabel(slice.phase, slice.minutes, total)}
           style={{
             width: `${shareOf(slice.minutes, total) * 100}%`,
             background: COLORS[slice.phase],
@@ -54,12 +55,15 @@ function CompositionBar({
         />
       ))}
       {residual > 0 ? (
-        <span
-          className="h-full bg-muted-foreground/30"
-          title={`${t.unclassified}: ${formatMinutes(residual)} (${formatPercent(
+        <ChartSegment
+          label={`${t.unclassified}: ${formatMinutes(residual)} (${formatPercent(
             shareOf(residual, total),
           )})`}
-          style={{ width: `${shareOf(residual, total) * 100}%` }}
+          style={{
+            width: `${shareOf(residual, total) * 100}%`,
+            background: 'var(--muted-foreground)',
+            opacity: 0.3,
+          }}
         />
       ) : null}
     </div>

@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { TicketDetailWithTimes } from '../domain/types'
 import { TicketCycleChart } from './ticket-cycle-chart'
 
@@ -18,13 +19,29 @@ const times: TicketDetailWithTimes['cycleTimes'] = {
 
 describe('TicketCycleChart', () => {
   it('describe la composición de las fases con tiempo', () => {
-    render(<TicketCycleChart times={times} />)
+    render(
+      <TooltipProvider>
+        <TicketCycleChart times={times} />
+      </TooltipProvider>,
+    )
 
-    const chart = screen.getByRole('img', { name: /Composición del ciclo/ })
+    const chart = screen.getByRole('group', { name: /Composición del ciclo/ })
     expect(chart).toHaveAccessibleName(/Trabajo activo 50 min/)
     expect(chart).toHaveAccessibleName(/Pausa 30 min/)
     expect(chart).toHaveAccessibleName(/Respuesta 20 min/)
     expect(chart).not.toHaveAccessibleName(/Asignación/)
+  })
+
+  it('muestra fase, duración y porcentaje al enfocar un segmento', async () => {
+    render(
+      <TooltipProvider>
+        <TicketCycleChart times={times} />
+      </TooltipProvider>,
+    )
+    fireEvent.focus(screen.getByRole('button', { name: /Trabajo activo/ }))
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Trabajo activo: 50 min (50%)',
+    )
   })
 
   it('no dibuja la barra cuando no hay tiempos', () => {

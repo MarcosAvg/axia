@@ -293,3 +293,19 @@ test('cambia el periodo desde el popover', async ({ page }) => {
     '7 días',
   )
 })
+
+test('la composición en Tiempos muestra el indicador al pasar el cursor', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.admin')
+  await page.goto('/metricas')
+  await page.getByRole('tab', { name: 'Tiempos', exact: true }).click()
+  const segment = page
+    .getByRole('group')
+    .filter({ has: page.getByRole('button', { name: /Trabajo activo:/ }) })
+    .getByRole('button', { name: /Trabajo activo:/ })
+  await segment.hover()
+  await expect(page.getByRole('tooltip')).toHaveText(
+    (await segment.getAttribute('aria-label')) ?? '',
+  )
+})
