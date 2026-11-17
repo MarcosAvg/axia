@@ -10,6 +10,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - La tabla **Carga por técnico** de Métricas → Equipo muestra tiquets, como líder, como auxiliar y
   participación. Se retiran las columnas **Fuera de horario** y **Asignados**.
 
+- En Métricas, Distribución, resultados por desenlace y pausas por subestado siguen el reloj
+  Continuo, Laboral o Extra. Las tablas indican qué duraciones son promedios, qué duraciones
+  se acumulan y cuáles usan reloj continuo fijo.
+- El SLA de Métricas arranca en Continuo y muestra su reloj efectivo. En Extra, presenta el SLA
+  con el reloj configurado en la instancia y usa ese mismo reloj para el desglose.
+
 ## [0.30.0] - 2026-11-17
 
 ### Añadido

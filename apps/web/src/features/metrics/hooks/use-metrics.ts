@@ -127,15 +127,21 @@ export function useSatisfaction(filters: MetricsFilters, enabled = true) {
 }
 
 export function useSla(filters: MetricsFilters, enabled = true) {
-  return {
-    summary: useFilteredQuery(metricsKeys.sla, filters, fetchSla, enabled),
-    byPriority: useFilteredQuery(
-      metricsKeys.slaByPriority,
-      filters,
-      fetchSlaByPriority,
-      enabled,
-    ),
+  const summary = useQuery({
+    queryKey: [...metricsKeys.sla, filters],
+    queryFn: () => fetchSla(filters),
+    enabled,
+  })
+  const priorityFilters = {
+    ...filters,
+    clock: summary.data?.clock ?? filters.clock,
   }
+  const byPriority = useQuery({
+    queryKey: [...metricsKeys.slaByPriority, priorityFilters],
+    queryFn: () => fetchSlaByPriority(priorityFilters),
+    enabled: enabled && (Boolean(filters.clock) || summary.isSuccess),
+  })
+  return { summary, byPriority }
 }
 
 export function useByTechnician(filters: MetricsFilters) {

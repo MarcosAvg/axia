@@ -93,6 +93,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
     <>
       <TabsContent value="summary">
         <SummaryTab
+          mode={props.mode}
           volume={props.volume}
           aging={props.aging}
           agingBuckets={props.agingBuckets}
@@ -106,7 +107,7 @@ export function MetricsTabs(props: MetricsTabsProps) {
         />
       </TabsContent>
       <TabsContent value="distribution">
-        <DistributionTab groups={props.groups} />
+        <DistributionTab groups={props.groups} mode={props.mode} />
       </TabsContent>
       <TabsContent value="times">
         <TimesTab

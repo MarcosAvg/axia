@@ -122,8 +122,13 @@ function boardResult(args: {
   data: ReturnType<typeof useMetricsData>
 }) {
   const { data } = args
+  const sla = or(data.sla.summary.data, EMPTY_SLA)
   return {
     filters: args.filters,
+    drillDownFilters: {
+      ...args.filters,
+      clock: sla.clock ?? args.filters.clock,
+    },
     setFilters: args.setFilters,
     mode: args.mode,
     changeMode: args.changeMode,
@@ -150,8 +155,8 @@ function boardResult(args: {
       rows: or(data.duplicates.byDimension.data, []),
     },
     satisfaction: or(data.satisfaction.data, EMPTY_SATISFACTION),
-    sla: or(data.sla.summary.data, EMPTY_SLA),
-    slaRows: or(data.sla.byPriority.data, []),
+    sla,
+    slaRows: data.sla.summary.data ? or(data.sla.byPriority.data, []) : [],
     technicians: or(data.technicians.data, []),
     auxiliaryByCategory: or(data.auxiliaryByCategory.data, []),
     technicianTimes: or(data.technicianTimes.data, []),
@@ -165,8 +170,9 @@ function boardResult(args: {
 
 /** Estado y datos del tablero de métricas. */
 export function useMetricsBoard() {
-  const [filters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
-  const { mode, changeMode } = useTimeMode(filters, setFilters)
+  const [selectedFilters, setFilters] = useState<MetricsFilters>(EMPTY_FILTERS)
+  const { mode, changeMode, clock } = useTimeMode()
+  const filters = { ...selectedFilters, clock }
   const { measure } = useTimeMeasure()
   const data = useMetricsData(filters, mode, measure)
   const buildings = useBuildings()

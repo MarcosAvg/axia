@@ -1,16 +1,8 @@
-import { useState, type Dispatch, type SetStateAction } from 'react'
-import type { MetricsFilters } from '../domain/metrics'
+import { useState } from 'react'
 import type { TimeMode } from '../domain/time-mode'
 
-/** Modo de tiempo activo y sincronización con el reloj del SLA. */
-export function useTimeMode(
-  filters: MetricsFilters,
-  setFilters: Dispatch<SetStateAction<MetricsFilters>>,
-) {
-  const [mode, setMode] = useState<TimeMode>('calendar')
-  const changeMode = (next: TimeMode) => {
-    setMode(next)
-    setFilters({ ...filters, clock: next === 'extra' ? undefined : next })
-  }
-  return { mode, changeMode }
+/** El reloj de SLA se deriva del selector, incluso después de limpiar filtros. */
+export function useTimeMode() {
+  const [mode, changeMode] = useState<TimeMode>('calendar')
+  return { mode, changeMode, clock: mode === 'extra' ? undefined : mode }
 }

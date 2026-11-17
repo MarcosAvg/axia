@@ -171,6 +171,7 @@ export async function fetchSatisfaction(
 }
 
 interface SlaRow {
+  clock?: MetricsFilters['clock']
   with_target: number | null
   met: number | null
   compliance_rate: number | null
@@ -189,6 +190,7 @@ const EMPTY_SLA_ROW: SlaRow = {
 function toSla(row: SlaRow | undefined): SlaSummary {
   const data = row ?? EMPTY_SLA_ROW
   return {
+    clock: data.clock,
     withTarget: toNumber(data.with_target),
     met: toNumber(data.met),
     complianceRate: toNullableNumber(data.compliance_rate),

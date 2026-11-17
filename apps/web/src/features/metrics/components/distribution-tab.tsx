@@ -16,6 +16,7 @@ import type {
   DimensionGroup,
   DimensionRow,
 } from '../domain/dimensions'
+import { averageInMode, type TimeMode } from '../domain/time-mode'
 import { formatMinutes, formatPercent } from '../domain/metrics'
 import { dimensionTicketFilters } from '../domain/drill-down'
 import { shareOf } from '../domain/visuals'
@@ -141,21 +142,21 @@ function shareColumns({
   ]
 }
 
-function timeColumns(): DataTableColumn<DimensionRow>[] {
+function timeColumns(mode: TimeMode): DataTableColumn<DimensionRow>[] {
   return [
     {
       id: 'active',
-      header: metricsMessages.table.avgActive,
+      header: metricsMessages.table.activeAverage,
       hint: metricsMessages.tableHints.avgActive,
       hideBelow: 'lg',
-      cell: (row) => formatMinutes(row.avgActive),
+      cell: (row) => formatMinutes(averageInMode(row, 'active', mode)),
     },
     {
       id: 'total',
-      header: metricsMessages.table.avgTotal,
+      header: metricsMessages.table.totalAverage,
       hint: metricsMessages.tableHints.avgTotal,
       hideBelow: 'xl',
-      cell: (row) => formatMinutes(row.avgTotal),
+      cell: (row) => formatMinutes(averageInMode(row, 'total', mode)),
     },
   ]
 }
@@ -191,11 +192,13 @@ function DistributionTable({
   dimension,
   parentTotals,
   parentNames,
+  mode,
 }: {
   rows: DimensionRow[]
   dimension: Dimension
   parentTotals: Map<string, number>
   parentNames: Map<string, string>
+  mode: TimeMode
 }) {
   const total = rows.reduce((sum, row) => sum + row.tickets, 0)
   const parent = parentDimension(dimension)
@@ -214,7 +217,7 @@ function DistributionTable({
       parentTotals,
       parentNames,
     }),
-    ...timeColumns(),
+    ...timeColumns(mode),
     ...qualityColumns(),
   ]
   return (
@@ -226,8 +229,30 @@ function DistributionTable({
   )
 }
 
+function DistributionHeading({ total }: { total: number }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <CardTitle as="h2" className="text-base">
+        <HintLabel
+          label={t.title}
+          hint={metricsMessages.chartHints.distribution}
+        />
+      </CardTitle>
+      <p className="text-xs text-muted-foreground">
+        {t.subtitle} {total} tiquets.
+      </p>
+    </div>
+  )
+}
+
 /** Distribución por dimensión con jerarquía, ranking y detalle. */
-export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
+export function DistributionTab({
+  groups,
+  mode,
+}: {
+  groups: DimensionGroup[]
+  mode: TimeMode
+}) {
   const [dimension, setDimension] = useState<Dimension>('category')
   const rows = rowsByDimension(groups, dimension)
   const total = rows.reduce((sum, row) => sum + row.tickets, 0)
@@ -254,17 +279,7 @@ export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
   return (
     <Card>
       <CardHeader className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5">
-          <CardTitle as="h2" className="text-base">
-            <HintLabel
-              label={t.title}
-              hint={metricsMessages.chartHints.distribution}
-            />
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            {t.subtitle} {total} tiquets.
-          </p>
-        </div>
+        <DistributionHeading total={total} />
         <DimensionPicker value={dimension} onChange={setDimension} />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -277,6 +292,7 @@ export function DistributionTab({ groups }: { groups: DimensionGroup[] }) {
           total={total}
         />
         <DistributionTable
+          mode={mode}
           rows={rows}
           dimension={dimension}
           parentTotals={parentTotals}

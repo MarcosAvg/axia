@@ -230,6 +230,7 @@ export function QualityTab({
       </section>
       <QualityDiagnosis groups={groups} mode={mode} />
       <QualityReasons
+        mode={mode}
         summary={summary}
         pauses={pauses}
         pauseSubstates={pauseSubstates}

@@ -80,12 +80,14 @@ export async function fetchPauseSubstates(
     substate_name: string
     pauses: number
     pause_minutes: number
+    pause_labor_minutes: number
   }>('/api/metrics/pause-substates', filters)
   return items.map((row) => ({
     id: row.substate_id,
     name: row.substate_name,
     pauses: toNumber(row.pauses),
     pauseMinutes: toNumber(row.pause_minutes),
+    pauseLaborMinutes: toNumber(row.pause_labor_minutes),
   }))
 }
 

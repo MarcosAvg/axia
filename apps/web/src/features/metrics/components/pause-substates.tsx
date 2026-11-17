@@ -1,6 +1,7 @@
 import { DataTable } from '@/components/shared/data-table'
 import type { DataTableColumn } from '@/components/shared/data-table'
 import type { PauseSubstateRow } from '../domain/indicators'
+import { totalInMode, type TimeMode } from '../domain/time-mode'
 import { formatMinutes } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { MetricCount } from './metric-count'
@@ -35,20 +36,33 @@ const columns: DataTableColumn<PauseSubstateRow>[] = [
       </MetricCount>
     ),
   },
-  {
-    id: 'minutes',
-    header: metricsMessages.quality.pauseTime,
-    hint: metricsMessages.tableHints.pauseTime,
-    cell: (row) => formatMinutes(row.pauseMinutes),
-  },
 ]
 
 /** Detalle de pausas por subestado. */
-export function PauseSubstates({ rows }: { rows: PauseSubstateRow[] }) {
+export function PauseSubstates({
+  rows,
+  mode,
+}: {
+  rows: PauseSubstateRow[]
+  mode: TimeMode
+}) {
   if (rows.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">{metricsMessages.empty}</p>
     )
   }
-  return <DataTable columns={columns} rows={rows} getRowId={(row) => row.id} />
+  const timeColumn: DataTableColumn<PauseSubstateRow> = {
+    id: 'minutes',
+    header: metricsMessages.quality.pauseTime,
+    hint: metricsMessages.tableHints.pauseTime,
+    cell: (row) =>
+      formatMinutes(totalInMode(row.pauseMinutes, row.pauseLaborMinutes, mode)),
+  }
+  return (
+    <DataTable
+      columns={[...columns, timeColumn]}
+      rows={rows}
+      getRowId={(row) => row.id}
+    />
+  )
 }

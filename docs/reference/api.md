@@ -301,6 +301,19 @@ robusta devuelve, por cada fase, `stat<Tipo>` y `n<Tipo>` (por ejemplo `statTota
 `coverage` es `n / total`. Las vallas son Q1−1.5·IQR y Q3+1.5·IQR y los ceros de cada fase quedan
 fuera.
 
+El selector del tablero aplica a los promedios de trabajo activo y tiempo total en Distribución y
+Resumen por equipo, al tiempo total promedio por desenlace y a los tiempos acumulados de
+participación, apoyo auxiliar y pausas por subestado. En subestados, `pause_minutes` es la suma
+continua de todas las estancias y `pause_labor_minutes` es su parte dentro del calendario guardado
+en la pausa. Extra usa la diferencia entre esos valores. Una pausa que entra varias veces al
+subestado se cuenta una vez por subestado.
+
+Antigüedad, tiempo de oferta a toma por supervisor, tiempo de registro a primera toma en Ruteo
+y tiempo hasta marcar un duplicado usan reloj continuo. `GET /api/metrics/sla` incluye `clock`
+con el reloj efectivo. El tablero envía Continuo desde la primera carga, usa Laboral al elegirlo
+y, en Extra, muestra el reloj configurado para el SLA en la instancia. El desglose por prioridad
+y la lista de tiquets usan el mismo reloj efectivo.
+
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
 `closed`, `rejected`, `cancelled`, `duplicate`, `avgTotalAll` y `sumTotalAll` (todos los tiquets
 del filtro), `avgTotalClosed` y `sumTotalClosed` (solo cerrados) y `avgResolution` (alias de

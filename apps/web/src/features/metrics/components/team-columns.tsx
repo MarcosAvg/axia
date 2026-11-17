@@ -1,7 +1,7 @@
 import type { DataTableColumn } from '@/components/shared/data-table'
 import type { DimensionRow } from '../domain/dimensions'
 import { formatMinutes, formatPercent } from '../domain/metrics'
-import { measureValue, type TimeMode } from '../domain/time-mode'
+import { averageInMode, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { StackedBarCell } from './bar-cell'
 
@@ -50,15 +50,11 @@ function timeColumn(
     id: key,
     header,
     hideBelow,
-    cell: (row) =>
-      formatMinutes(
-        measureValue(
-          row as unknown as Record<string, number>,
-          key,
-          mode,
-          'average',
-        ),
-      ),
+    hint:
+      key === 'active'
+        ? metricsMessages.tableHints.avgActive
+        : metricsMessages.tableHints.avgTotal,
+    cell: (row) => formatMinutes(averageInMode(row, key, mode)),
   }
 }
 
@@ -91,8 +87,8 @@ export function teamColumns(mode: TimeMode): DataTableColumn<DimensionRow>[] {
     nameColumn(),
     ticketsColumn(),
     statusColumn(),
-    timeColumn('active', metricsMessages.table.avgActive, 'lg', mode),
-    timeColumn('total', metricsMessages.table.avgTotal, 'xl', mode),
+    timeColumn('active', metricsMessages.table.activeAverage, 'lg', mode),
+    timeColumn('total', metricsMessages.table.totalAverage, 'xl', mode),
     ...qualityColumns(),
   ]
 }

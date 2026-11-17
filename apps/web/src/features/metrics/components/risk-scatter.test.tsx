@@ -22,6 +22,7 @@ function row(
     reassigned: 0,
     avgActive: 30,
     avgActiveLabor: 20,
+    avgActiveExtra: 0,
   } as unknown as DimensionRow
 }
 

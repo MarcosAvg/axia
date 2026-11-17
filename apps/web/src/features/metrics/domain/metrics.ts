@@ -128,6 +128,7 @@ export function formatScore(average: number | null): string {
 }
 
 export interface SlaSummary {
+  clock?: MetricsFilters['clock']
   withTarget: number
   met: number
   complianceRate: number | null

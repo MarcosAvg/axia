@@ -1,3 +1,4 @@
+import type { DimensionRow } from './dimensions'
 import { isRobustMeasure, type TimeMeasure } from '@/lib/time-measure'
 
 export type TimeMode = 'calendar' | 'laboral' | 'extra'
@@ -8,6 +9,28 @@ const FIELD_SUFFIX: Record<TimeMode, string> = {
   calendar: '',
   laboral: 'Labor',
   extra: 'Extra',
+}
+
+const AVERAGE_FIELDS = {
+  active: {
+    calendar: 'avgActive',
+    laboral: 'avgActiveLabor',
+    extra: 'avgActiveExtra',
+  },
+  total: {
+    calendar: 'avgTotal',
+    laboral: 'avgTotalLabor',
+    extra: 'avgTotalExtra',
+  },
+} as const
+
+/** Promedio por tiquet de la agrupación para el reloj activo. */
+export function averageInMode(
+  row: DimensionRow,
+  key: keyof typeof AVERAGE_FIELDS,
+  mode: TimeMode,
+): number {
+  return row[AVERAGE_FIELDS[key][mode]]
 }
 
 function camel(value: string): string {

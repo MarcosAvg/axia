@@ -35,7 +35,7 @@ export function MetricsDashboard() {
           </p>
         ) : null}
         {board.summary.tickets > 0 ? (
-          <MetricsDrillDownProvider filters={board.filters}>
+          <MetricsDrillDownProvider filters={board.drillDownFilters}>
             <MetricsTabs
               mode={board.mode}
               volume={board.volume}

@@ -11,6 +11,7 @@ import type {
 } from '../domain/metrics'
 import type { Comparison } from '../domain/period'
 import { formatMinutes, formatPercent } from '../domain/metrics'
+import { averageInMode, type TimeMode } from '../domain/time-mode'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { AgingList } from './aging-list'
@@ -54,13 +55,22 @@ function TopCategories({ groups }: { groups: DimensionGroup[] }) {
   )
 }
 
-function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
+function OutcomeBreakdown({
+  groups,
+  mode,
+}: {
+  groups: DimensionGroup[]
+  mode: TimeMode
+}) {
   const t = metricsMessages.outcomes
   const rows = rowsByDimension(groups, 'outcome')
   const total = rows.reduce((sum, row) => sum + row.tickets, 0)
   if (rows.length === 0) return null
   return (
     <ChartCard title={t.title} hint={metricsMessages.chartHints.outcomes}>
+      <p className="text-xs text-muted-foreground">
+        {metricsMessages.table.totalAverage}
+      </p>
       <div className="flex flex-col gap-2 sm:min-h-52 sm:justify-center">
         {rows.map((row) => (
           <div
@@ -79,7 +89,7 @@ function OutcomeBreakdown({ groups }: { groups: DimensionGroup[] }) {
                 {row.tickets}
               </MetricCount>{' '}
               · {formatPercent(shareOf(row.tickets, total))} ·{' '}
-              {formatMinutes(row.avgTotal)}
+              {formatMinutes(averageInMode(row, 'total', mode))}
             </span>
           </div>
         ))}
@@ -153,12 +163,12 @@ function categoriesItem(groups: DimensionGroup[]): BentoItem {
   }
 }
 
-function outcomesItem(groups: DimensionGroup[]): BentoItem {
+function outcomesItem(groups: DimensionGroup[], mode: TimeMode): BentoItem {
   return {
     key: 'outcomes',
     className: 'md:col-span-3 xl:col-span-4',
     rowGroup: 'secondary',
-    content: <OutcomeBreakdown groups={groups} />,
+    content: <OutcomeBreakdown groups={groups} mode={mode} />,
   }
 }
 
@@ -179,15 +189,20 @@ function satisfactionItem(
   }
 }
 
-function slaItem(sla: SlaSummary, rows: SlaPriorityRow[]): BentoItem {
+function slaItem(
+  sla: SlaSummary,
+  rows: SlaPriorityRow[],
+  mode: TimeMode,
+): BentoItem {
   return {
     key: 'sla',
     className: 'md:col-span-6 xl:col-span-12',
-    content: <SlaPanel sla={sla} rows={rows} />,
+    content: <SlaPanel sla={sla} rows={rows} mode={mode} />,
   }
 }
 
 function SummaryBento({
+  mode,
   volume,
   groups,
   satisfaction,
@@ -195,6 +210,7 @@ function SummaryBento({
   sla,
   slaRows,
 }: {
+  mode: TimeMode
   volume: VolumePoint[]
   groups: DimensionGroup[]
   satisfaction: SatisfactionSummary
@@ -208,9 +224,9 @@ function SummaryBento({
         volumeItem(volume),
         statusItem(groups),
         categoriesItem(groups),
-        outcomesItem(groups),
+        outcomesItem(groups, mode),
         satisfactionItem(satisfaction, satisfactionDistribution),
-        slaItem(sla, slaRows),
+        slaItem(sla, slaRows, mode),
       ]}
     />
   )
@@ -218,6 +234,7 @@ function SummaryBento({
 
 /** Resumen: salud, bento de indicadores y antigüedad. */
 export function SummaryTab({
+  mode,
   volume,
   aging,
   agingBuckets,
@@ -229,6 +246,7 @@ export function SummaryTab({
   sla,
   slaRows,
 }: {
+  mode: TimeMode
   volume: VolumePoint[]
   aging: AgingRow[]
   agingBuckets: Array<{ bucket: string; tickets: number }>
@@ -250,6 +268,7 @@ export function SummaryTab({
         sla={sla}
       />
       <SummaryBento
+        mode={mode}
         volume={volume}
         groups={groups}
         satisfaction={satisfaction}

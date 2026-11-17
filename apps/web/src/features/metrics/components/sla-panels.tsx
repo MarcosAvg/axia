@@ -6,6 +6,7 @@ import type {
   SlaSummary,
 } from '../domain/metrics'
 import { formatMinutes, formatRate, formatScore } from '../domain/metrics'
+import type { TimeMode } from '../domain/time-mode'
 import { shareOf } from '../domain/visuals'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
@@ -70,17 +71,36 @@ function BulletRows({ rows }: { rows: SlaPriorityRow[] }) {
   )
 }
 
+function SlaClockLabel({
+  clock,
+  mode,
+}: {
+  clock: SlaSummary['clock']
+  mode: TimeMode
+}) {
+  if (!clock) return null
+  return (
+    <p className="text-xs text-muted-foreground">
+      {t.clock} · {metricsMessages.timeMode[clock]}
+      {mode === 'extra' ? ` (${t.instanceClock})` : null}
+    </p>
+  )
+}
+
 /** Cumplimiento de SLA por prioridad. */
 export function SlaPanel({
   sla,
   rows,
+  mode,
 }: {
   sla: SlaSummary
   rows: SlaPriorityRow[]
+  mode: TimeMode
 }) {
   return (
     <ChartCard title={t.title} hint={metricsMessages.chartHints.sla}>
       <div className="flex flex-col gap-3">
+        <SlaClockLabel clock={sla.clock} mode={mode} />
         <BulletRows rows={rows} />
         <dl className="flex flex-wrap gap-x-6 gap-y-1 border-t pt-2 text-xs">
           <div className="flex items-baseline gap-1.5">

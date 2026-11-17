@@ -186,3 +186,90 @@ it('expone las variantes laborales por técnico y de cierre', async () => {
   expect(category).toBeTruthy()
   expect(typeof category?.row.avgTotalClosedLabor).toBe('number')
 })
+
+async function seedRepeatedSubstate(calendarId: string, ticketId: string) {
+  await context.db.execute(sql`
+    insert into public.work_calendar_intervals (calendar_id, weekday, start_time, end_time)
+    values (${calendarId}, 1, '08:00', '08:55')
+  `)
+  await context.db.execute(sql`
+    with root as (
+      insert into public.reasons (use, name)
+      values ('pause', 'Raíz de reloj de pausa') returning id
+    ), step as (
+      insert into public.reasons (use, name, parent_id)
+      select 'pause', 'Subestado de reloj de pausa', id from root returning id, parent_id
+    ), pause as (
+      insert into public.ticket_pauses (
+        ticket_id, cycle, reason_id, root_reason_id, opened_at, closed_at, work_calendar_id
+      )
+      select ${ticketId}, 1, id, parent_id, '2026-03-02 08:00Z',
+        '2026-03-02 10:10Z', ${calendarId} from step
+      returning id, reason_id
+    )
+    insert into public.ticket_pause_steps (pause_id, reason_id, entered_at, exited_at)
+    select id, reason_id, bounds.start_at, bounds.end_at
+    from pause cross join (values
+      ('2026-03-02 08:00Z'::timestamptz, '2026-03-02 08:10Z'::timestamptz),
+      ('2026-03-02 08:20Z'::timestamptz, '2026-03-02 10:10Z'::timestamptz)
+    ) as bounds(start_at, end_at)
+  `)
+}
+
+it('suma estancias repetidas por subestado con el calendario guardado en la pausa', async () => {
+  const calendarId = await calendar('Turno de la pausa', false)
+  const ticketId = await createTicket(context, refs)
+  await seedRepeatedSubstate(calendarId, ticketId)
+  const initial = await substateDuration()
+  expect(initial?.pauses).toBe(1)
+  expect(Number(initial?.pause_minutes)).toBe(120)
+  expect(Number(initial?.pause_labor_minutes)).toBe(45)
+
+  await context.db.execute(sql`
+    insert into public.work_calendar_holidays (calendar_id, holiday)
+    values (${calendarId}, '2026-03-02')
+  `)
+  expect(Number((await substateDuration())?.pause_labor_minutes)).toBe(0)
+
+  await context.db.execute(sql`
+    update public.work_calendars set active = false where id = ${calendarId}
+  `)
+  await context.db.execute(sql`
+    with open_pause as (
+      insert into public.ticket_pauses (
+        ticket_id, cycle, reason_id, root_reason_id, opened_at, work_calendar_id
+      )
+      select ticket_id, cycle, reason_id, root_reason_id,
+        now() - interval '10 min', work_calendar_id
+      from public.ticket_pauses where ticket_id = ${ticketId}
+      returning id, reason_id, opened_at
+    )
+    insert into public.ticket_pause_steps (pause_id, reason_id, entered_at)
+    select id, reason_id, opened_at from open_pause
+  `)
+  const withOpenPause = await substateDuration()
+  expect(withOpenPause?.pauses).toBe(2)
+  expect(Number(withOpenPause?.pause_minutes)).toBeCloseTo(130, 0)
+  expect(Number(withOpenPause?.pause_labor_minutes)).toBe(
+    Number(withOpenPause?.pause_minutes),
+  )
+})
+
+async function substateDuration() {
+  const response = await context.app.inject({
+    method: 'GET',
+    url: '/api/metrics/pause-substates',
+    headers: authHeaders(context.cookies.admin),
+  })
+  expect(response.statusCode).toBe(200)
+  return (
+    response.json() as {
+      items: Array<{
+        substate_name: string
+        pauses: number
+        pause_minutes: string
+        pause_labor_minutes: string
+      }>
+    }
+  ).items.find((item) => item.substate_name === 'Subestado de reloj de pausa')
+}

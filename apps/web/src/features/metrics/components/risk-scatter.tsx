@@ -82,7 +82,8 @@ function DumbbellRow({
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{row.name}</p>
         <p className="text-[11px] text-muted-foreground">
-          {row.tickets} tiquets · {formatMinutes(row.active)}
+          {row.tickets} tiquets · {metricsMessages.table.activeAverage} ·{' '}
+          {formatMinutes(row.active)}
         </p>
       </div>
       <div className="relative h-6" aria-hidden>

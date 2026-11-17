@@ -96,6 +96,7 @@ export interface PauseSubstateRow {
   name: string
   pauses: number
   pauseMinutes: number
+  pauseLaborMinutes: number
 }
 
 export interface AuxiliaryCategoryRow {

@@ -68,7 +68,7 @@ describe('TechnicianTable', () => {
       'Tiquets',
       'Como líder',
       'Como auxiliar',
-      'Participación',
+      'Participación acumulada',
     ])
   })
 })

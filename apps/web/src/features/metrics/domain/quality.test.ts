@@ -8,6 +8,7 @@ const row = {
   reassignmentRate: 0.3,
   avgActive: 100,
   avgActiveLabor: 60,
+  avgActiveExtra: 40,
 } as unknown as DimensionRow
 
 describe('riskRate', () => {

@@ -19,7 +19,7 @@ function slaMetric(clock: 'calendar' | 'laboral') {
         from public.v_ticket_sla s
         join visible_tickets t on t.id = s.id
     )
-    select * from metric
+    select metric.*, ${clock}::text as clock from metric
   `
 }
 
@@ -72,7 +72,10 @@ export const qualityQueries = {
         from public.v_ticket_sla s
         join visible_tickets t on t.id = s.id
     )
-    select * from metric
+    select metric.*, coalesce(
+      (select sla_clock_mode from public.instance_settings limit 1),
+      'calendar'
+    ) as clock from metric
   `,
   metrics_sla_calendar: slaMetric('calendar'),
   metrics_sla_labor: slaMetric('laboral'),

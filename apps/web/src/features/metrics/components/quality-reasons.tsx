@@ -10,6 +10,7 @@ import type {
   MetricsSummary,
   PauseReasonRow,
 } from '../domain/metrics'
+import type { TimeMode } from '../domain/time-mode'
 import { averageOf, formatMinutes, formatPercent } from '../domain/metrics'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
@@ -59,11 +60,13 @@ function ViewSwitch({
 }
 
 function PausesContent({
+  mode,
   pauses,
   pauseSubstates,
 }: {
   pauses: PauseReasonRow[]
   pauseSubstates: PauseSubstateRow[]
+  mode: TimeMode
 }) {
   return (
     <ChartCard
@@ -77,7 +80,7 @@ function PausesContent({
           <h3 className="text-xs font-medium text-muted-foreground">
             {t.substates}
           </h3>
-          <PauseSubstates rows={pauseSubstates} />
+          <PauseSubstates rows={pauseSubstates} mode={mode} />
         </div>
       </div>
     </ChartCard>
@@ -154,6 +157,7 @@ function RejectCancelContent({ rows }: { rows: RejectCancelRow[] }) {
 
 /** Motivos y salidas: pausas, duplicados y descartes. */
 export function QualityReasons({
+  mode,
   summary,
   pauses,
   pauseSubstates,
@@ -163,6 +167,7 @@ export function QualityReasons({
   summary: MetricsSummary
   pauses: PauseReasonRow[]
   pauseSubstates: PauseSubstateRow[]
+  mode: TimeMode
   duplicates: {
     tickets: DuplicateTicket[]
     alerts: DuplicateAlert[]
@@ -178,7 +183,11 @@ export function QualityReasons({
         <ViewSwitch view={view} onChange={setView} />
       </div>
       {view === 'pauses' ? (
-        <PausesContent pauses={pauses} pauseSubstates={pauseSubstates} />
+        <PausesContent
+          pauses={pauses}
+          pauseSubstates={pauseSubstates}
+          mode={mode}
+        />
       ) : null}
       {view === 'duplicates' ? (
         <DuplicatesContent summary={summary} duplicates={duplicates} />

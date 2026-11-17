@@ -77,8 +77,10 @@ export const hintMessages = {
   },
   tableHints: {
     dimensionTickets: 'Tiquets de la agrupación en el periodo.',
-    avgActive: 'Promedio del trabajo activo de la agrupación en el periodo.',
-    avgTotal: 'Promedio del tiempo total de la agrupación en el periodo.',
+    avgActive:
+      'Promedio por tiquet del trabajo activo. Excluye duplicados y tiquets con hora sin verificar.',
+    avgTotal:
+      'Promedio por tiquet desde el registro hasta el cierre o hasta ahora si sigue abierto.',
     reassignment:
       'Porcentaje de tiquets de la agrupación con reasignación de supervisor.',
     recapture: 'Porcentaje de tiquets de la agrupación con recaptura.',
@@ -87,14 +89,14 @@ export const hintMessages = {
     leader: 'Veces que el técnico fue líder de la atención.',
     auxiliary: 'Veces que el técnico participó como auxiliar.',
     duplicateRate: 'Duplicados entre los tiquets de la agrupación.',
-    age: 'Tiempo transcurrido desde el registro.',
+    age: 'Tiempo continuo desde el registro hasta ahora para cada tiquet.',
     share: 'Porcentaje de la agrupación sobre el total.',
     cumulative:
       'Porcentaje acumulado de las filas anteriores en el orden actual.',
     parent: 'Agrupación padre en la jerarquía.',
     parentShare: 'Porcentaje de la agrupación sobre su dimensión padre.',
     pauseCount: 'Pausas registradas en el subestado.',
-    pauseTime: 'Tiempo total en pausa en el subestado, en reloj continuo.',
+    pauseTime: 'Suma de las estancias en el subestado según el reloj elegido.',
   },
   duplicateHints: {
     timeToMark: 'Tiempo medio desde el registro hasta marcar el duplicado.',
@@ -144,7 +146,7 @@ export const hintMessages = {
     filters:
       'Filtros de catálogo y desenlace. Nunca amplían el alcance de lo que puedes ver.',
     timeMode:
-      'Continuo corre 24 horas; laboral solo dentro del calendario del equipo; extra es el trabajo fuera de ese horario.',
+      'Continuo cuenta las 24 horas. Laboral cuenta la parte dentro del calendario aplicable y Extra la parte fuera de ese horario.',
     dimension: 'Agrupación que usan las tablas y gráficas.',
     export:
       'Exporta las agrupaciones por dimensión con la medida y el reloj activos.',

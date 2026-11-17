@@ -205,7 +205,10 @@ export async function pauseSubstates(
       coalesce(
         sum(extract(epoch from (coalesce(s.exited_at, now()) - s.entered_at)) / 60),
         0
-      ) as pause_minutes
+      ) as pause_minutes,
+      coalesce(sum(extract(epoch from public.work_calendar_overlap(
+        p.work_calendar_id, s.entered_at, coalesce(s.exited_at, now())
+      )) / 60), 0) as pause_labor_minutes
     from base b
     join public.ticket_pauses p on p.ticket_id = b.id
     join public.ticket_pause_steps s on s.pause_id = p.id

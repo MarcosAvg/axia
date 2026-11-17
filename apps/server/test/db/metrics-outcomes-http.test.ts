@@ -157,3 +157,22 @@ describe('outcome metrics', () => {
     expect(duplicates).toBeGreaterThanOrEqual(1)
   })
 })
+
+it('reports the SLA clock and respects an explicit continuous override', async () => {
+  await context.db.execute(sql`
+    update public.instance_settings set sla_clock_mode = 'laboral'
+  `)
+  expect(await items('sla')).toEqual([
+    expect.objectContaining({ clock: 'laboral', with_target: 1 }),
+  ])
+  expect(await items('sla?clock=calendar')).toEqual([
+    expect.objectContaining({
+      clock: 'calendar',
+      with_target: 1,
+      avg_resolution_minutes: 600,
+    }),
+  ])
+  expect(await items('sla-by-priority?clock=calendar')).toEqual([
+    expect.objectContaining({ with_target: 1, met: 1 }),
+  ])
+})

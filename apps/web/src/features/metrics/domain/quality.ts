@@ -1,5 +1,5 @@
 import type { DimensionRow } from './dimensions'
-import { totalInMode, type TimeMode } from './time-mode'
+import { averageInMode, type TimeMode } from './time-mode'
 
 export type RiskMeasure = 'reopen' | 'recapture' | 'reassignment'
 
@@ -12,7 +12,7 @@ export function riskRate(row: DimensionRow, measure: RiskMeasure): number {
 
 /** Tiempo activo de la dimensión en el reloj elegido. */
 export function activeMinutesInMode(row: DimensionRow, mode: TimeMode): number {
-  return totalInMode(row.avgActive, row.avgActiveLabor, mode)
+  return averageInMode(row, 'active', mode)
 }
 
 /** Tasa global de la señal, con el denominador que le corresponde. */
