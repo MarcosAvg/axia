@@ -37,35 +37,36 @@ y el formulario actual para seleccionar explícitamente los tres identificadores
 `categoryName` y `subcategoryName`; `useProblemSearchCatalog()` consulta
 `GET /api/catalogs/problems` sin filtro. Los selectores conservan las consultas filtradas.
 
-- [ ] Añadir pruebas de catálogo global con ambas categorías, adjuntos y clasificación;
+- [x] Añadir pruebas de catálogo global con ambas categorías, adjuntos y clasificación;
       prohibición sin permiso/sesión y exclusión de problemas o padres inactivos.
-- [ ] Ejecutar integración y observar el fallo por filtro obligatorio.
-- [ ] Hacer opcional el filtro de problemas y devolver su clasificación con joins;
+- [x] Ejecutar integración y observar el fallo por filtro obligatorio.
+- [x] Hacer opcional el filtro de problemas y devolver su clasificación con joins;
       añadir DTO, cliente y hook públicos con clave independiente.
-- [ ] Ejecutar integración afectada hasta verde y guardar un commit.
+- [x] Ejecutar integración afectada hasta verde y guardar un commit.
 
 ### Task 2: Búsqueda y selección accesible
 
 **Files:** nuevos `apps/web/src/features/tickets/domain/problem-search{,.test}.ts`
-y `components/ticket-problem-search{,.test}.tsx`; modificar clasificación, captura,
+y `components/ticket-problem-search.tsx`, `hooks/use-problem-search.ts` y
+`components/ticket-classification-fields.test.tsx`; modificar clasificación, captura,
 formulario y diccionario del feature.
 
 **Interfaces:** `searchProblems<T extends { name: string }>(items: T[], query: string): T[]`
 devuelve hasta 10 sugerencias; el componente recibe problemas, carga/error/reintento
 y `onSelect(problem: ProblemSearchOption)`. La clasificación recibe el formulario.
 
-- [ ] Probar normalización, fragmentos, palabras en distinto orden, transposición,
+- [x] Probar normalización, fragmentos, palabras en distinto orden, transposición,
       sustitución, ruido, consultas vacías y prioridad de coincidencias exactas.
-- [ ] Ejecutar Vitest y observar el fallo antes de implementar la función pura.
-- [ ] Implementar normalización y distancia de edición acotada por palabra (un error
+- [x] Ejecutar Vitest y observar el fallo antes de implementar la función pura.
+- [x] Implementar normalización y distancia de edición acotada por palabra (un error
       desde cuatro letras, dos desde ocho; las letras transpuestas cuentan como uno).
-- [ ] Probar selección por teclado y clic, nombres repetidos, carga/error/reintento,
+- [x] Probar selección por teclado y clic, nombres repetidos, carga/error/reintento,
       ausencia de mutaciones al escribir y selección con opciones retrasadas.
-- [ ] Implementar sugerencias como lista de botones accesibles; Enter en el campo
+- [x] Implementar sugerencias como lista de botones accesibles; Enter en el campo
       elige la primera sugerencia, flechas mueven el foco y Escape oculta resultados.
       Completar los tres campos, marcar cambios y validar; controlar selectores para
       conservar valores y usar la clasificación del resultado mientras llegan opciones.
-- [ ] Ejecutar Vitest afectado hasta verde y guardar un commit.
+- [x] Ejecutar Vitest afectado hasta verde y guardar un commit.
 
 ### Task 3: Flujo y cierre
 
@@ -74,9 +75,23 @@ y `onSelect(problem: ProblemSearchOption)`. La clasificación recibe el formular
 
 **Interfaces:** flujo actual de registro y nueva lectura global.
 
-- [ ] Añadir flujo smoke que busque con error tipográfico, seleccione y registre;
+- [x] Añadir flujo smoke que busque con error tipográfico, seleccione y registre;
       comprobar categoría, subcategoría, problema y cambio posterior manual.
-- [ ] Actualizar API, changelog y estado del diseño sin incluir cambios ajenos.
-- [ ] Ejecutar `pnpm check:fast`, `pnpm test:affected`, integración afectada y
+- [x] Actualizar API, changelog y estado del diseño sin incluir cambios ajenos.
+- [x] Ejecutar `pnpm check:fast`, `pnpm test:affected`, integración afectada y
       `pnpm test:e2e:smoke`; revisar la rama y guardar el commit de cierre.
-- [ ] Ejecutar `pnpm check` antes de cualquier integración a `main`.
+- [x] Ejecutar `pnpm check` antes de cualquier integración a `main`.
+
+## Resultado de ejecución
+
+- `pnpm check:fast`: lint y tipos verdes; 68 pruebas de servidor y 580 de web.
+- `pnpm test:e2e:smoke`: 24 flujos aprobados, incluido el registro con búsqueda aproximada.
+- `pnpm test:affected` activó la compuerta completa. La primera ejecución falló en
+  `ui-quality.spec.ts` («el título de la pestaña cambia por ruta») durante el login,
+  con el campo Usuario vacío. Pasó al repetirse aislada sin modificar la prueba.
+- `pnpm check` final: aprobado; 79 E2E, 557 pruebas PostgreSQL, React Compiler,
+  chequeos estáticos y build. No se debilitaron pruebas ni reglas.
+- Revisión independiente: corregido el respaldo de categoría cuando su consulta tarda,
+  con regresión que se observó fallar antes de la corrección.
+- Vista de escritorio y móvil de 390 px inspeccionada, sin desbordamiento horizontal.
+- Se conserva la rama `feat/ticket-problem-search`; no se integra a `main` ni se publica.

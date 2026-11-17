@@ -54,4 +54,5 @@ No modifica la recaptura, los permisos ni las reglas de negocio del registro.
 
 ## Estado
 
-Diseño aprobado por quien mantiene el proyecto el 2026-11-17.
+Diseño aprobado por quien mantiene el proyecto el 2026-11-17. Implementado y verificado
+con la compuerta completa en la rama `feat/ticket-problem-search`.
