@@ -10,6 +10,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Las barras de composición del ciclo en el detalle del tiquet y en Métricas → Tiempos muestran
   fase, duración y porcentaje al pasar el cursor o enfocar cada segmento con teclado.
 
+### Cambiado
+
+- Los iconos de Axia usan una A más esbelta y geométrica, con variantes coherentes para
+  navegador, Apple y la PWA instalada. El original vectorial se conserva en `apps/web/public/logo.svg`.
+
 ### Corregido
 
 - El modo laboral de «Tiempo por fase» en el detalle del tiquet muestra los minutos calculados

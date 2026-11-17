@@ -75,6 +75,11 @@ Formularios con React Hook Form y Zod, errores junto al campo, etiquetas, teclad
 contraste, texto alternativo y objetivos táctiles de 44 px. Los componentes shadcn regenerables
 solo se modifican con una necesidad justificada.
 
+El original de la marca vive en `apps/web/public/logo.svg`. Los iconos PNG se derivan de ese
+vector: Apple a 180 px y PWA a 192 y 512 px. La A queda dentro del círculo central de radio
+40 % del lado para admitir recortes del icono `maskable`. El favicon incluye 16, 32, 48 y
+64 px, con la A ampliada 1.5 veces respecto del centro para mejorar su lectura en tamaños pequeños.
+
 ## 8. Cliente HTTP
 
 Las lecturas y mutaciones tienen contratos explícitos. Los cambios de flujo se envían como acciones
