@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- El modo laboral de «Tiempo por fase» en el detalle del tiquet muestra los minutos calculados
+  según el calendario laboral, en lugar de convertirlos siempre en cero.
+
 ## [0.29.1] - 2026-11-17
 
 ### Corregido

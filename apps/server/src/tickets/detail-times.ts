@@ -18,7 +18,8 @@ export function toCycleTimes(
   row: Record<string, unknown>,
   mode: 'calendar' | 'laboral' | 'extra' = 'calendar',
 ): TicketCycleTimes {
-  const suffix = mode === 'calendar' ? '' : `_${mode}`
+  const suffix =
+    mode === 'calendar' ? '' : mode === 'laboral' ? '_labor' : '_extra'
   const value = (key: string) => Number(row[`${key}_minutes${suffix}`] ?? 0)
   return {
     total: value('total'),
