@@ -5,6 +5,14 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.29.1] - 2026-11-17
+
+### Corregido
+
+- Las pruebas de cobertura de fases y de calendarios laborales dejan de depender de la hora del
+  día: comparaban el texto de un intervalo y dejaban un minuto sin cubrir antes de la medianoche.
+  La compuerta ya no falla cuando corre pasada la medianoche UTC. Sin cambios en la aplicación.
+
 ## [0.29.0] - 2026-11-13
 
 ### Añadido
