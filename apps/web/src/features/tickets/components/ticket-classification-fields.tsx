@@ -51,7 +51,15 @@ function classificationOptions(
     {
       id: 'categoryId',
       label: fields.category,
-      options: toOptions(props.categories),
+      options: toOptions(
+        props.categories,
+        selected
+          ? {
+              id: selected.categoryId,
+              name: selected.categoryName,
+            }
+          : undefined,
+      ),
     },
     {
       id: 'subcategoryId',

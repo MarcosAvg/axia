@@ -32,7 +32,13 @@ const problems: ProblemSearchOption[] = [
   },
 ]
 
-function Harness({ loaded = false }: { loaded?: boolean }) {
+function Harness({
+  loaded = false,
+  hasCategories = true,
+}: {
+  loaded?: boolean
+  hasCategories?: boolean
+}) {
   const form = useForm<CreateTicketInput>({
     defaultValues: {
       categoryId: '',
@@ -46,10 +52,14 @@ function Harness({ loaded = false }: { loaded?: boolean }) {
     <form onSubmit={(event) => event.preventDefault()}>
       <TicketClassificationFields
         form={form}
-        categories={[
-          { id: 'c1', name: 'Eléctrico' },
-          { id: 'c2', name: 'Mobiliario' },
-        ]}
+        categories={
+          hasCategories
+            ? [
+                { id: 'c1', name: 'Eléctrico' },
+                { id: 'c2', name: 'Mobiliario' },
+              ]
+            : []
+        }
         subcategories={
           loaded ? [{ id: 's2', name: 'Escritorios', categoryId: 'c2' }] : []
         }
@@ -63,13 +73,13 @@ function Harness({ loaded = false }: { loaded?: boolean }) {
   )
 }
 
-function setup() {
+function setup(hasCategories = true) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
   const view = render(
     <QueryClientProvider client={client}>
-      <Harness />
+      <Harness hasCategories={hasCategories} />
     </QueryClientProvider>,
   )
   return { ...view, client }
@@ -159,4 +169,17 @@ it('muestra carga y permite reintentar un error de lectura', async () => {
       screen.getAllByRole('button', { name: /Lámpara apagada/ }),
     ).toHaveLength(2),
   )
+})
+
+it('completa la categoría aunque su catálogo todavía no esté disponible', async () => {
+  setup(false)
+  fireEvent.change(screen.getByLabelText('Buscar problema'), {
+    target: { value: 'lampara' },
+  })
+  fireEvent.click(
+    await screen.findByRole('button', { name: /Lámpara apagada Eléctrico/ }),
+  )
+  expect(screen.getByLabelText('Categoría', { exact: true })).toHaveValue('c1')
+  expect(screen.getByLabelText('Subcategoría')).toHaveValue('s1')
+  expect(screen.getByLabelText('Problema', { exact: true })).toHaveValue('p1')
 })

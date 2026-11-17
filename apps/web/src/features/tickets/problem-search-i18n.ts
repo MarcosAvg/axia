@@ -8,5 +8,6 @@ export const problemSearchMessages = {
   retry: 'Reintentar',
   empty: 'No se encontraron problemas.',
   resultsLabel: 'Problemas encontrados',
-  results: (count: number) => `Mostrando ${count} sugerencias.`,
+  results: (count: number) =>
+    count === 1 ? 'Mostrando 1 sugerencia.' : `Mostrando ${count} sugerencias.`,
 }
