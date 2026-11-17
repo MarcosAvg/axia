@@ -7,6 +7,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Añadido
 
+- El registro de tiquets permite buscar problemas en todo el catálogo por fragmentos, sin acentos
+  y con pequeños errores de escritura. Elegir una sugerencia completa categoría, subcategoría y
+  problema; los selectores manuales siguen disponibles.
 - Las barras de composición del ciclo en el detalle del tiquet y en Métricas → Tiempos muestran
   fase, duración y porcentaje al pasar el cursor o enfocar cada segmento con teclado.
 

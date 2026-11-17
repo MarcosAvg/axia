@@ -14,7 +14,22 @@ vi.mock('@/features/catalogs', () => ({
   useDependencies: vi.fn(() => ({ data: [], isLoading: false })),
   useCategories: vi.fn(() => ({ data: [], isLoading: false })),
   useSubcategories: vi.fn(() => ({ data: [], isLoading: false })),
-  useProblems: vi.fn(() => ({ data: [], isLoading: false })),
+  useProblems: vi.fn(() => ({ data: undefined, isLoading: true })),
+  useProblemSearchCatalog: vi.fn(() => ({
+    data: [
+      {
+        id: 'p-1',
+        name: 'Lámpara',
+        subcategoryId: 's-1',
+        categoryId: 'c-1',
+        categoryName: 'Eléctrico',
+        subcategoryName: 'Iluminación',
+        requiredAttachmentTypes: ['application/pdf'],
+        attachmentInstructions: 'Adjunta PDF',
+      },
+    ],
+    isLoading: false,
+  })),
   useServiceTypes: vi.fn(() => ({ data: [], isLoading: false })),
   usePriorities: vi.fn(() => ({ data: [], isLoading: false })),
   useChannels: vi.fn(() => ({ data: [], isLoading: false })),
@@ -22,6 +37,18 @@ vi.mock('@/features/catalogs', () => ({
 }))
 
 describe('useCreateTicketCatalogs', () => {
+  it('mantiene requisitos de adjuntos mientras carga el catálogo dependiente', () => {
+    const { result } = renderHook(() =>
+      useCreateTicketCatalogs({ subcategoryId: 's-1' }),
+    )
+    expect(result.current.problems).toEqual([
+      expect.objectContaining({
+        id: 'p-1',
+        requiredAttachmentTypes: ['application/pdf'],
+        attachmentInstructions: 'Adjunta PDF',
+      }),
+    ])
+  })
   it('pasa la dependencia a edificios y ubicaciones', () => {
     renderHook(() =>
       useCreateTicketCatalogs({

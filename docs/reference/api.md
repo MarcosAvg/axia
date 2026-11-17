@@ -163,6 +163,8 @@ históricos.
 | Método | Ruta | Uso |
 |---|---|---|
 | `GET` | `/api/catalogs/:catalog` | Catálogos de lectura |
+| `GET` | `/api/catalogs/problems` | Problemas activos con categoría y subcategoría activas; incluye sus identificadores y nombres para la búsqueda global |
+| `GET` | `/api/catalogs/problems?subcategoryId=…` | Problemas de una subcategoría, con la misma clasificación y requisitos de adjuntos |
 | `GET` | `/api/catalogs/buildings?dependencyId=…` | Edificios con ubicaciones de la dependencia |
 | `GET` | `/api/catalogs/locations?buildingId=…&dependencyId=…` | Ubicaciones del edificio vinculadas a la dependencia |
 | `GET` | `/api/catalogs/dependencies?locationId=…` | Dependencias vinculadas a la ubicación |

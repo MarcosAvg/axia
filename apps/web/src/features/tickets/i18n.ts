@@ -3,6 +3,7 @@
 import type { EvidenceType } from './domain/types'
 import { listMessages } from './list-i18n'
 import { proxyMessages } from './proxy-i18n'
+import { problemSearchMessages } from './problem-search-i18n'
 
 export { statusLabels } from './status-i18n'
 export { eventLabels } from './events-i18n'
@@ -151,6 +152,7 @@ export const ticketMessages = {
       subcategory: 'misma subcategoría',
     } as Record<string, string>,
     created: 'El tiquet se registró correctamente.',
+    problemSearch: problemSearchMessages,
     fields: {
       building: 'Edificio',
       location: 'Ubicación',

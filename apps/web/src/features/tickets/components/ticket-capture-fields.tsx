@@ -1,5 +1,9 @@
 import { FormSection } from '@/components/shared/form-section'
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormReturn,
+} from 'react-hook-form'
 import type { CreateTicketInput } from '../schemas'
 import type { CreateTicketCatalogs } from '../hooks/use-create-ticket-catalogs'
 import { ticketMessages } from '../i18n'
@@ -8,6 +12,7 @@ import { TicketLocationFields } from './ticket-location-fields'
 import { TicketRequesterFields } from './ticket-requester-fields'
 
 interface TicketCaptureFieldsProps {
+  form: UseFormReturn<CreateTicketInput>
   register: UseFormRegister<CreateTicketInput>
   errors: FieldErrors<CreateTicketInput>
   catalogs: CreateTicketCatalogs
@@ -21,6 +26,7 @@ interface TicketCaptureFieldsProps {
 
 /** Secciones de la captura del tiquet: solicitante, ubicación, clasificación y descripción. */
 export function TicketCaptureFields({
+  form,
   register,
   errors,
   catalogs,
@@ -68,8 +74,7 @@ export function TicketCaptureFields({
         description={sections.classificationHelp}
       >
         <TicketClassificationFields
-          register={register}
-          errors={errors}
+          form={form}
           categories={catalogs.categories}
           subcategories={catalogs.subcategories}
           problems={catalogs.problems}

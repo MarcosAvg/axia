@@ -27,6 +27,14 @@ de todos sus roles, no solo las del rol principal.
 Conserva el folio para encontrar la solicitud. Si falla la foto después del registro, el tiquet
 ya existe: revisa el aviso antes de intentar registrarlo otra vez.
 
+En **Clasificación**, **Buscar problema** busca en todo el catálogo disponible, aunque ya hayas
+elegido otra categoría. Admite fragmentos, acentos omitidos y pequeños errores de escritura, como
+«lamapra» para «Lámpara». Muestra hasta diez sugerencias, con su categoría y subcategoría; al elegir
+una, completa los tres campos. También puedes seguir usando los selectores manuales.
+Con teclado, baja a los resultados con la flecha abajo y elige con Enter; Escape los oculta.
+Escribir sin elegir un resultado conserva la clasificación actual. La búsqueda no interpreta
+sinónimos ni crea problemas nuevos.
+
 ## Encontrar y consultar un tiquet
 
 En **Tiquets**, busca por folio o descripción y usa los filtros de estado, edificio y categoría.

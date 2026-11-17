@@ -6,6 +6,7 @@ import {
   useLocations,
   usePriorities,
   useProblems,
+  useProblemSearchCatalog,
   useRequesters,
   useServiceTypes,
   useSubcategories,
@@ -37,6 +38,7 @@ export function useCreateTicketCatalogs({
   const categories = useCategories()
   const subcategories = useSubcategories(categoryId)
   const problems = useProblems(subcategoryId)
+  const problemSearch = useProblemSearchCatalog()
   const serviceTypes = useServiceTypes()
   const priorities = usePriorities()
   const channels = useChannels()
@@ -58,7 +60,11 @@ export function useCreateTicketCatalogs({
     dependencies: dataOf(dependencies),
     categories: dataOf(categories),
     subcategories: dataOf(subcategories),
-    problems: dataOf(problems),
+    problems:
+      problems.data ??
+      dataOf(problemSearch).filter(
+        (problem) => problem.subcategoryId === subcategoryId,
+      ),
     serviceTypes: dataOf(serviceTypes),
     priorities: dataOf(priorities),
     channels: dataOf(channels),

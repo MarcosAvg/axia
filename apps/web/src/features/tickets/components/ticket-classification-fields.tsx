@@ -1,21 +1,29 @@
+import { useWatch } from 'react-hook-form'
+import type { UseFormReturn } from 'react-hook-form'
 import { SelectField } from '@/components/shared/form-fields'
 import type { SelectOption } from '@/components/shared/form-fields'
+import { useProblemSearchCatalog } from '@/features/catalogs'
 import type {
   CategoryOption,
   Option,
   ProblemOption,
+  ProblemSearchOption,
   SubcategoryOption,
 } from '@/features/catalogs'
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import type { CreateTicketInput } from '../schemas'
 import { ticketMessages } from '../i18n'
+import { TicketProblemSearch } from './ticket-problem-search'
 
 type ClassificationField =
   'categoryId' | 'subcategoryId' | 'problemId' | 'channelId'
+type ClassificationSelect = {
+  id: ClassificationField
+  label: string
+  options: SelectOption[]
+}
 
 interface TicketClassificationFieldsProps {
-  register: UseFormRegister<CreateTicketInput>
-  errors: FieldErrors<CreateTicketInput>
+  form: UseFormReturn<CreateTicketInput>
   categories: CategoryOption[]
   subcategories: SubcategoryOption[]
   problems: ProblemOption[]
@@ -23,59 +31,120 @@ interface TicketClassificationFieldsProps {
   showChannel: boolean
 }
 
-/** Clasificación del alta: categoría, subcategoría y problema. La prioridad se
- * deriva del problema y el tipo de servicio se captura en la atención. */
-export function TicketClassificationFields({
-  register,
-  errors,
-  categories,
-  subcategories,
-  problems,
-  channels,
-  showChannel,
-}: TicketClassificationFieldsProps) {
-  const { fields } = ticketMessages.create
-  const toOptions = (items: Option[]): SelectOption[] =>
-    items.map((item) => ({ value: item.id, label: item.name }))
+function toOptions(items: Option[], selected?: Option): SelectOption[] {
+  const options = items.map((item) => ({ value: item.id, label: item.name }))
+  if (selected && !items.some(({ id }) => id === selected.id)) {
+    options.push({ value: selected.id, label: selected.name })
+  }
+  return options
+}
 
-  const selects: {
-    id: ClassificationField
-    label: string
-    options: SelectOption[]
-  }[] = [
+function classificationOptions(
+  props: TicketClassificationFieldsProps,
+  selected?: ProblemSearchOption,
+): ClassificationSelect[] {
+  const { fields } = ticketMessages.create
+  const subcategory = selected
+    ? { id: selected.subcategoryId, name: selected.subcategoryName }
+    : undefined
+  const selects: ClassificationSelect[] = [
     {
       id: 'categoryId',
       label: fields.category,
-      options: toOptions(categories),
+      options: toOptions(props.categories),
     },
     {
       id: 'subcategoryId',
       label: fields.subcategory,
-      options: toOptions(subcategories),
+      options: toOptions(props.subcategories, subcategory),
     },
-    { id: 'problemId', label: fields.problem, options: toOptions(problems) },
+    {
+      id: 'problemId',
+      label: fields.problem,
+      options: toOptions(props.problems, selected),
+    },
   ]
-  if (showChannel) {
+  if (props.showChannel)
     selects.push({
       id: 'channelId',
       label: fields.channel,
-      options: toOptions(channels),
+      options: toOptions(props.channels),
     })
+  return selects
+}
+
+function ClassificationSelectField({
+  select,
+  form,
+  value,
+}: {
+  select: ClassificationSelect
+  form: UseFormReturn<CreateTicketInput>
+  value: string
+}) {
+  const registration = form.register(select.id)
+  return (
+    <SelectField
+      id={select.id}
+      label={select.label}
+      placeholder={ticketMessages.create.fields.selectPlaceholder}
+      options={select.options}
+      error={form.formState.errors[select.id]?.message}
+      {...registration}
+      value={value}
+      onChange={(event) => {
+        void registration.onChange(event)
+        if (select.id === 'categoryId')
+          form.setValue('subcategoryId', '', { shouldDirty: true })
+        if (select.id === 'categoryId' || select.id === 'subcategoryId') {
+          form.setValue('problemId', '', { shouldDirty: true })
+        }
+      }}
+    />
+  )
+}
+
+/** Clasificación manual y búsqueda global del problema durante el alta. */
+export function TicketClassificationFields(
+  props: TicketClassificationFieldsProps,
+) {
+  const { form } = props
+  const values = useWatch({ control: form.control })
+  const search = useProblemSearchCatalog()
+  const selected = search.data?.find(
+    (problem) => problem.id === values.problemId,
+  )
+  const selects = classificationOptions(props, selected)
+
+  function selectProblem(problem: ProblemSearchOption) {
+    const options = { shouldDirty: true, shouldTouch: true }
+    form.setValue('categoryId', problem.categoryId, options)
+    form.setValue('subcategoryId', problem.subcategoryId, options)
+    form.setValue('problemId', problem.id, options)
+    void form.trigger(['categoryId', 'subcategoryId', 'problemId'])
   }
 
   return (
-    <fieldset className="grid gap-4 sm:grid-cols-3">
-      {selects.map((select) => (
-        <SelectField
-          key={select.id}
-          id={select.id}
-          label={select.label}
-          placeholder={fields.selectPlaceholder}
-          options={select.options}
-          error={errors[select.id]?.message}
-          {...register(select.id)}
-        />
-      ))}
-    </fieldset>
+    <div className="space-y-4">
+      <TicketProblemSearch
+        problems={search.data ?? []}
+        isLoading={search.isPending}
+        isError={search.isError}
+        onRetry={() => {
+          void search.refetch()
+        }}
+        onSelect={selectProblem}
+      />
+      <fieldset className="grid gap-4 sm:grid-cols-3">
+        {selects.map((select) => (
+          <ClassificationSelectField
+            key={select.id}
+            select={select}
+            form={form}
+            value={values[select.id] ?? ''}
+          />
+        ))}
+      </fieldset>
+    </div>
   )
 }

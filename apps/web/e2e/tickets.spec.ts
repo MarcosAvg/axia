@@ -123,3 +123,40 @@ test('@smoke un solicitante registra un tiquet y lo ve en la lista y el detalle'
   await page.getByRole('link', { name: 'Volver a la lista' }).click()
   await expect(page.getByText(description)).toBeVisible()
 })
+
+test('@smoke registra un tiquet buscando un problema aproximado en todo el catálogo', async ({
+  page,
+}) => {
+  await signIn(page, 'demo.requester')
+  await page.goto('/tickets/nuevo')
+  await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
+  await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
+  const category = page.getByLabel('Categoría', { exact: true })
+  const subcategory = page.getByLabel('Subcategoría', { exact: true })
+  const problem = page.getByLabel('Problema', { exact: true })
+  const search = page.getByLabel('Buscar problema')
+  await category.selectOption({ label: 'Plomería' })
+  await search.fill('lamapra')
+  await page.getByRole('button', { name: /Lámpara fundida Eléctrico/ }).click()
+  await expect(category.locator('option:checked')).toHaveText('Eléctrico')
+  await expect(subcategory.locator('option:checked')).toHaveText('Iluminación')
+  await expect(problem.locator('option:checked')).toHaveText('Lámpara fundida')
+
+  await category.selectOption({ label: 'Plomería' })
+  await expect(subcategory).toHaveValue('')
+  await expect(problem).toHaveValue('')
+  await search.fill('chisap corto')
+  await expect(
+    page.getByRole('button', { name: /Chispa o corto Eléctrico/ }),
+  ).toBeVisible()
+  await search.press('ArrowDown')
+  await page
+    .getByRole('button', { name: /Chispa o corto Eléctrico/ })
+    .press('Enter')
+  await expect(subcategory.locator('option:checked')).toHaveText('Contacto')
+  await expect(problem.locator('option:checked')).toHaveText('Chispa o corto')
+  const description = `Búsqueda aproximada E2E ${crypto.randomUUID()}`
+  await page.getByLabel('Descripción del problema').fill(description)
+  await submitTicketForm(page)
+  await expect(page.getByText(description)).toBeVisible()
+})

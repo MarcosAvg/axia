@@ -1,5 +1,5 @@
 import type {
-  InputHTMLAttributes,
+  ComponentProps,
   ReactNode,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
@@ -38,7 +38,7 @@ function FieldShell({
   )
 }
 
-interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface TextFieldProps extends ComponentProps<'input'> {
   id: string
   label: string
   error?: string

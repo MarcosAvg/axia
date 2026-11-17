@@ -1,5 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormReturn,
+} from 'react-hook-form'
 import { FormActionsBar } from '@/components/shared/form-actions-bar'
 import { FileField } from '@/components/shared/file-field'
 import { FormSection } from '@/components/shared/form-section'
@@ -18,6 +22,7 @@ import { TicketCaptureFields } from './ticket-capture-fields'
 import { TicketFormAside } from './ticket-form-aside'
 
 interface TicketFormFieldsProps {
+  form: UseFormReturn<CreateTicketInput>
   register: UseFormRegister<CreateTicketInput>
   errors: FieldErrors<CreateTicketInput>
   catalogs: CreateTicketCatalogs
@@ -116,6 +121,7 @@ function TicketDescriptionFields({
 }
 
 function TicketFormFields({
+  form,
   register,
   errors,
   catalogs,
@@ -130,6 +136,7 @@ function TicketFormFields({
   return (
     <div className="flex flex-col gap-4">
       <TicketCaptureFields
+        form={form}
         register={register}
         errors={errors}
         catalogs={catalogs}
@@ -185,6 +192,7 @@ function TicketFormContent({ create }: { create: CreateTicketFormState }) {
     <form onSubmit={create.onSubmit} noValidate className="flex flex-col gap-6">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <TicketFormFields
+          form={create.form}
           register={register}
           errors={formState.errors}
           catalogs={create.catalogs}

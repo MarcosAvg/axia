@@ -54,4 +54,4 @@ No modifica la recaptura, los permisos ni las reglas de negocio del registro.
 
 ## Estado
 
-Diseño propuesto, pendiente de aprobación antes de implementar.
+Diseño aprobado por quien mantiene el proyecto el 2026-11-17.
