@@ -44,7 +44,7 @@ export interface RoutingSummary {
 export interface TechnicianTimeRow {
   technicianId: string
   name: string
-  tickets: number
+  ledTickets: number
   avgActive: number
   avgActiveLabor: number
   avgTotal: number
@@ -60,7 +60,7 @@ export interface TechnicianTimeRow {
 export interface TechnicianSubjectTimeRow {
   technicianId: string
   name: string
-  tickets: number
+  attributedTickets: number
   activeMinutes: number
   activeLaborMinutes: number
   pauseMinutes: number

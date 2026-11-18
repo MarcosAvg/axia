@@ -18,7 +18,13 @@ const LABELS: Record<TimeMeasure, string> = {
 }
 
 /** Selector de la medida de tiempos del tablero. */
-export function MeasureSelect({ className }: { className?: string }) {
+export function MeasureSelect({
+  className,
+  hint = t.hint,
+}: {
+  className?: string
+  hint?: string
+}) {
   const id = useId()
   const { measure, setMeasure } = useTimeMeasure()
   return (
@@ -29,7 +35,7 @@ export function MeasureSelect({ className }: { className?: string }) {
       )}
     >
       <label htmlFor={id}>{t.label}</label>
-      <HintIcon hint={t.hint} label={t.label} />
+      <HintIcon hint={hint} label={t.label} />
       <select
         id={id}
         value={measure}

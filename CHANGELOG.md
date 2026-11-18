@@ -16,6 +16,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - El SLA de Métricas arranca en Continuo y muestra su reloj efectivo. En Extra, presenta el SLA
   con el reloj configurado en la instancia y usa ese mismo reloj para el desglose.
 
+- En **Tiempos → Personas**, los promedios de Técnicos cuentan una vez cada tiquet liderado con
+  hora verificada y muestran su muestra junto a los tiquets con participación. Los tiempos atribuidos
+  y los de Solicitantes se identifican como acumulados. Solicitantes cuenta los tiquets con
+  validación o reclamación atribuida.
+
 ## [0.30.0] - 2026-11-17
 
 ### Añadido

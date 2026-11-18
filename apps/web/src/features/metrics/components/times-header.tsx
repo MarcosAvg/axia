@@ -13,7 +13,9 @@ export function TimesHeader() {
           <HintLabel label={t.title} hint={metricsMessages.timesHints.header} />
         </h2>
       </div>
-      <MeasureSelect />
+      <MeasureSelect
+        hint={`${metricsMessages.measure.hint} ${metricsMessages.timesHints.measure}`}
+      />
     </div>
   )
 }

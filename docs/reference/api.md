@@ -314,6 +314,18 @@ con el reloj efectivo. El tablero envía Continuo desde la primera carga, usa La
 y, en Extra, muestra el reloj configurado para el SLA en la instancia. El desglose por prioridad
 y la lista de tiquets usan el mismo reloj efectivo.
 
+En **Tiempos → Personas**, el reloj elegido aplica a todas las duraciones. El selector **Medida**
+deja fijas sus agregaciones. `/api/metrics/by-technician` cuenta tiquets distintos con participación
+y suma sus tramos como líder o auxiliar. `/api/metrics/technician-times` devuelve en `tickets`
+el tamaño de la muestra de los promedios, con una fila de cálculo por técnico y tiquet liderado.
+Quedan fuera los duplicados y los tiquets con hora sin verificar. Una fase ausente aporta cero
+cuando el tiquet está en la muestra. `/api/metrics/technician-subject-times` acumula por separado
+el trabajo activo, la pausa y la espera atribuidos al técnico sujeto.
+
+`/api/metrics/requester-times` suma los tramos vigentes de validación y reclamación atribuidos al
+solicitante y cuenta una vez cada tiquet que tenga al menos un tramo de cualquiera de esas fases,
+aunque el tiquet aporte a las dos.
+
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
 `closed`, `rejected`, `cancelled`, `duplicate`, `avgTotalAll` y `sumTotalAll` (todos los tiquets
 del filtro), `avgTotalClosed` y `sumTotalClosed` (solo cerrados) y `avgResolution` (alias de

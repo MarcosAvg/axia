@@ -16,6 +16,7 @@ import {
 } from '../../src/metrics/service.js'
 import {
   pauseSubstates,
+  requesterTimes,
   supervisors,
   technicianTimes,
 } from '../../src/metrics/people.js'
@@ -39,6 +40,13 @@ beforeAll(async () => {
   `)
   await context.db.execute(sql`
     update public.ticket_participants set ended_at = started_at + interval '90 minutes'
+  `)
+  await context.db.execute(sql`
+    insert into public.time_spans (
+      ticket_id, cycle, kind, subject_requester_id, started_at, ended_at
+    )
+    select id, 1, 'validation', requester_id, reported_at, closed_at
+    from public.tickets where id in (${context.ids.ticketA1}, ${context.ids.ticketB1})
   `)
   const users = await context.db.execute(sql`
     select id from public.users where username = 'supervisor-access'
@@ -150,6 +158,7 @@ it.each([
   ['reject-cancel', rejectCancel],
   ['routing', routing],
   ['technician-times', technicianTimes],
+  ['requester-times', requesterTimes],
   ['supervisors', supervisors],
   ['pause-substates', pauseSubstates],
 ] as const)(

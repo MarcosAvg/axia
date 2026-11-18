@@ -67,9 +67,9 @@ export const hintMessages = {
     phaseProfile:
       'Distribución por fase: caja P25–P75, mediana y P90. La escala es compartida, se redondea por encima del P90 más alto y solo se muestran fases con muestra.',
     technicianTimes:
-      'Tiempos de los tiquets que lideró cada técnico. Estas tablas usan promedios y no cambian con el selector Medida.',
+      'Los promedios miden el tiquet completo de la muestra de liderazgo. La participación y los tramos atribuidos son acumulados.',
     requesterTimes:
-      'Tiempos de validación y reclamación atribuidos al solicitante. Usan promedios y no cambian con el selector Medida.',
+      'Suma de los tramos de validación y reclamación atribuidos al solicitante según el reloj elegido.',
     qualityHeatmap:
       'Tasas de reasignación, recaptura, reapertura y primera resolución por agrupación. La intensidad es relativa a la columna.',
     distribution:
@@ -105,9 +105,8 @@ export const hintMessages = {
   },
   timesHints: {
     header:
-      'El reloj aplica a toda la pestaña. La medida afecta a las vistas de una sola medida; la distribución muestra varias a la vez.',
-    measure:
-      'Promedio y acumulado usan todos los tiquets. Mediana, P90, P95 y máximo excluyen los tiquets sin la fase y no son aditivos.',
+      'El reloj aplica a toda la pestaña. La distribución muestra varias medidas a la vez.',
+    measure: 'Personas conserva sus promedios y acumulados al cambiar Medida.',
     phaseValue:
       'Valor de la fase con la medida activa. Las medidas robustas excluyen los tiquets sin la fase.',
     share: 'Porcentaje de la fase sobre el tiempo total acumulado del periodo.',
@@ -167,11 +166,14 @@ export const hintMessages = {
     reassigned: 'Tiquets que reasignó como supervisor.',
     validated: 'Tiquets que validó como supervisor.',
     technicianTickets: 'Tiquets en los que participó el técnico.',
+    ledTickets:
+      'Tiquets únicos que lideró y tienen hora verificada. Si un tiquet carece de una fase, aporta cero al promedio de esa fase.',
     attributedActive:
       'Trabajo activo atribuido al técnico sujeto, no a quien registró la acción.',
     attributedPause: 'Tiempo en pausa atribuido al técnico sujeto.',
     attributedWait: 'Tiempo de espera de inicio atribuido al técnico sujeto.',
-    requesterTickets: 'Tiquets del solicitante en el periodo.',
+    requesterTickets:
+      'Tiquets únicos con validación o reclamación atribuida al solicitante.',
     requesterValidation:
       'Tiempo de validación atribuido al solicitante sujeto.',
     requesterClaim: 'Tiempo de reclamación atribuido al solicitante sujeto.',

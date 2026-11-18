@@ -11,6 +11,7 @@ import type {
   TechnicianTimeRow,
 } from '../domain/indicators'
 import { formatMinutes } from '../domain/metrics'
+import { technicianParticipation } from '../domain/team'
 import { totalInMode, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
@@ -49,8 +50,11 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
     return <p className="text-sm text-muted-foreground">{t.noTimes}</p>
   }
   const config = {
-    active: { label: t.phases.active, color: 'var(--chart-1)' },
-    tickets: { label: metricsMessages.table.tickets, color: 'var(--chart-1)' },
+    active: {
+      label: metricsMessages.table.activeAverage,
+      color: 'var(--chart-1)',
+    },
+    tickets: { label: t.ledTickets, color: 'var(--chart-1)' },
   }
   return (
     <ChartContainer config={config} className="aspect-auto h-64">
@@ -58,7 +62,7 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
         <XAxis
           type="number"
           dataKey="tickets"
-          name={metricsMessages.table.tickets}
+          name={t.ledTickets}
           tickLine={false}
           axisLine={false}
           fontSize={11}
@@ -66,7 +70,7 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
         <YAxis
           type="number"
           dataKey="active"
-          name={t.phases.active}
+          name={metricsMessages.table.activeAverage}
           width={42}
           tickLine={false}
           axisLine={false}
@@ -79,7 +83,7 @@ function ScatterBox({ points }: { points: ScatterPoint[] }) {
           type="number"
           dataKey="participation"
           range={[60, 320]}
-          name={t.participation}
+          name={metricsMessages.technicians.participation}
         />
         <ChartTooltip
           content={
@@ -108,47 +112,30 @@ function buildRows(
     subjectTimes.map((time) => [time.technicianId, time]),
   )
   return technicians.map((technician) => ({
-    ...technician,
     ...timeById.get(technician.technicianId),
     ...subjectById.get(technician.technicianId),
+    ...technician,
   }))
 }
 
 function maxParticipationOf(rows: TechnicianView[], mode: TimeMode) {
-  return Math.max(
-    1,
-    ...rows.map((row) =>
-      totalInMode(
-        row.participationMinutes,
-        row.participationLaborMinutes,
-        mode,
-      ),
-    ),
-  )
+  return Math.max(1, ...rows.map((row) => technicianParticipation(row, mode)))
 }
 
 function pointsOf(rows: TechnicianView[], mode: TimeMode) {
   return rows
-    .filter((row) => row.avgActive !== undefined)
+    .filter((row) => row.ledTickets !== undefined)
     .map((row) => ({
       name: row.name,
-      tickets: row.tickets,
+      tickets: row.ledTickets ?? 0,
       active: totalInMode(row.avgActive ?? 0, row.avgActiveLabor ?? 0, mode),
-      participation: totalInMode(
-        row.participationMinutes,
-        row.participationLaborMinutes,
-        mode,
-      ),
+      participation: technicianParticipation(row, mode),
     }))
 }
 
 function participationOf(rows: TechnicianView[], mode: TimeMode) {
   return rows.map((row) => {
-    const value = totalInMode(
-      row.participationMinutes,
-      row.participationLaborMinutes,
-      mode,
-    )
+    const value = technicianParticipation(row, mode)
     return {
       id: row.technicianId,
       name: row.name,
@@ -185,7 +172,7 @@ export function TechnicianTimes({
         ) : participationRows.length > 1 ? (
           <RankingBars
             rows={participationRows}
-            label={t.participation}
+            label={metricsMessages.technicians.participation}
             height={160}
           />
         ) : rows.length === 0 ? (

@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm'
 import type { Actor } from '../auth/authorization.js'
 import type { Database } from '../db/client.js'
 import type { MetricsFilters } from './filters.js'
+import { performancePredicate } from './phase-columns.js'
 import { metricsBase } from './summary-sql.js'
 
 /** Tiempos del tiquet que cada técnico lideró. */
@@ -16,23 +17,27 @@ export async function technicianTimes(
     select
       tech.id as technician_id,
       tech.full_name as technician_name,
-      count(distinct p.ticket_id)::int as tickets,
-      coalesce(avg(extract(epoch from b.active_work_time) / 60), 0) as avg_active,
-      coalesce(avg(extract(epoch from b.active_work_time_labor) / 60), 0) as avg_active_labor,
-      coalesce(avg(extract(epoch from b.total_time) / 60), 0) as avg_total,
-      coalesce(avg(extract(epoch from b.total_time_labor) / 60), 0) as avg_total_labor,
-      coalesce(avg(extract(epoch from b.response_time) / 60), 0) as avg_response,
-      coalesce(avg(extract(epoch from b.response_time_labor) / 60), 0) as avg_response_labor,
-      coalesce(avg(extract(epoch from b.assignment_time) / 60), 0) as avg_assignment,
-      coalesce(avg(extract(epoch from b.assignment_time_labor) / 60), 0) as avg_assignment_labor,
-      coalesce(avg(extract(epoch from b.validation_time) / 60), 0) as avg_validation,
-      coalesce(avg(extract(epoch from b.validation_time_labor) / 60), 0) as avg_validation_labor
-    from base b
-    join public.ticket_participants p
-      on p.ticket_id = b.id and p.participation_type = 'leader'
-    join public.technicians tech on tech.id = p.technician_id
+      count(*)::int as tickets,
+      coalesce(avg(extract(epoch from v.active_work_time) / 60), 0) as avg_active,
+      coalesce(avg(extract(epoch from v.active_work_time_labor) / 60), 0) as avg_active_labor,
+      coalesce(avg(extract(epoch from v.total_time) / 60), 0) as avg_total,
+      coalesce(avg(extract(epoch from v.total_time_labor) / 60), 0) as avg_total_labor,
+      coalesce(avg(extract(epoch from v.response_time) / 60), 0) as avg_response,
+      coalesce(avg(extract(epoch from v.response_time_labor) / 60), 0) as avg_response_labor,
+      coalesce(avg(extract(epoch from v.assignment_time) / 60), 0) as avg_assignment,
+      coalesce(avg(extract(epoch from v.assignment_time_labor) / 60), 0) as avg_assignment_labor,
+      coalesce(avg(extract(epoch from v.validation_time) / 60), 0) as avg_validation,
+      coalesce(avg(extract(epoch from v.validation_time_labor) / 60), 0) as avg_validation_labor
+    from base v
+    join lateral (
+      select distinct p.technician_id
+      from public.ticket_participants p
+      where p.ticket_id = v.id and p.participation_type = 'leader'
+    ) leader on true
+    join public.technicians tech on tech.id = leader.technician_id
+    where ${performancePredicate()}
     group by tech.id, tech.full_name
-    order by count(distinct p.ticket_id) desc, public.natural_sort_key(tech.full_name)
+    order by count(*) desc, public.natural_sort_key(tech.full_name)
   `)
   return result.rows
 }
@@ -123,7 +128,7 @@ export async function requesterTimes(
     join public.time_spans ts
       on ts.ticket_id = b.id and ts.subject_requester_id is not null
     join public.requesters r on r.id = ts.subject_requester_id
-    where ts.voided_at is null
+    where ts.voided_at is null and ts.kind in ('validation', 'claim')
     group by r.id, r.full_name
     order by validation_time desc, public.natural_sort_key(r.full_name)
   `)

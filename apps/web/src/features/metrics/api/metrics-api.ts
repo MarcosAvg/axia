@@ -266,7 +266,7 @@ export async function fetchTechnicianSubjectTimes(
   return items.map((row) => ({
     technicianId: row.technician_id,
     name: row.technician_name,
-    tickets: toNumber(row.tickets),
+    attributedTickets: toNumber(row.tickets),
     activeMinutes: intervalToMinutes(row.active_time),
     activeLaborMinutes: intervalToMinutes(row.active_time_labor),
     pauseMinutes: intervalToMinutes(row.pause_time),

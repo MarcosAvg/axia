@@ -31,7 +31,7 @@ export async function fetchTechnicianTimes(
   return items.map((row) => ({
     technicianId: row.technician_id,
     name: row.technician_name,
-    tickets: toNumber(row.tickets),
+    ledTickets: toNumber(row.tickets),
     avgActive: toNumber(row.avg_active),
     avgActiveLabor: toNumber(row.avg_active_labor),
     avgTotal: toNumber(row.avg_total),

@@ -3,6 +3,7 @@
 import { messages } from '@/lib/i18n'
 import { distributionMessages } from './i18n-distribution'
 import { outcomeMessages } from './dimension-labels'
+import { peopleTimeMessages } from './i18n-people'
 import { hintMessages } from './i18n-hints'
 import { drillDownMessages } from './i18n-drill-down'
 import { exportMessages } from './i18n-export'
@@ -113,8 +114,7 @@ export const metricsMessages = {
     people: 'Personas',
     dimensionSection: 'Por dimensión',
     heatmap: 'Tiempo por categoría y fase',
-    participation: 'Participación',
-    noTimes: 'Sin tiempos de tiquets liderados.',
+    ...peopleTimeMessages,
   },
   status: {
     title: 'Estado actual',

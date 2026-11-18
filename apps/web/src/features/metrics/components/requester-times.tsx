@@ -17,13 +17,13 @@ function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
     },
     {
       id: 'tickets',
-      header: metricsMessages.table.tickets,
+      header: t.requesterTickets,
       hint: metricsMessages.teamHints.requesterTickets,
       cell: (row) => row.tickets,
     },
     {
       id: 'validation',
-      header: t.phases.validation,
+      header: t.requesterValidation,
       hint: metricsMessages.teamHints.requesterValidation,
       cell: (row) =>
         formatMinutes(
@@ -32,7 +32,7 @@ function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
     },
     {
       id: 'claim',
-      header: t.phases.claim,
+      header: t.requesterClaim,
       hint: metricsMessages.teamHints.requesterClaim,
       hideBelow: 'md',
       cell: (row) =>
