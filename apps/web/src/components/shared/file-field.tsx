@@ -67,7 +67,7 @@ function FileActions({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 lg:hidden"
+          className="min-h-11 grow lg:hidden"
           onClick={onCamera}
         >
           <CameraIcon />
@@ -77,7 +77,7 @@ function FileActions({
       <Button
         type="button"
         variant="outline"
-        className="min-h-11"
+        className="min-h-11 max-lg:grow"
         onClick={onChoose}
       >
         <PaperclipIcon />

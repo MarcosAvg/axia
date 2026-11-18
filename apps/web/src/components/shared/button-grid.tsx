@@ -10,7 +10,7 @@ const COLUMNS: Record<number, string> = {
 
 /**
  * Fila de botones de acción: **rejilla en móvil** (dos columnas por defecto) y fila
- * que se envuelve a partir de `sm`. Un hijo con `col-span-2` ocupa todo el ancho en
+ * que se envuelve a partir de `lg`. Un hijo con `col-span-2` ocupa todo el ancho en
  * móvil (sin efecto en la fila de escritorio).
  */
 export function ButtonGrid({
@@ -25,7 +25,7 @@ export function ButtonGrid({
   return (
     <div
       className={cn(
-        'grid gap-2 sm:flex sm:flex-wrap sm:items-center',
+        'grid gap-2 lg:flex lg:flex-wrap lg:items-center',
         COLUMNS[columns] ?? COLUMNS[2],
         className,
       )}

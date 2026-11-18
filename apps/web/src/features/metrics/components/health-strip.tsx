@@ -42,8 +42,8 @@ function StatItem({
         !startOfRow && 'lg:border-l lg:pl-4',
       )}
     >
-      <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-        <span className="truncate">{stat.label}</span>
+      <span className="flex min-h-8 items-center gap-1 text-xs font-medium text-muted-foreground lg:min-h-0">
+        <span className="min-w-0 wrap-anywhere lg:truncate">{stat.label}</span>
         <HintIcon hint={stat.hint} label={stat.label} />
       </span>
       <span className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">

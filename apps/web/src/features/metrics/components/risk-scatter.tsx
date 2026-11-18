@@ -34,13 +34,13 @@ function RiskMeasurePicker({
   onChange: (measure: RiskMeasure) => void
 }) {
   return (
-    <label className="flex items-center gap-2 text-xs text-muted-foreground">
+    <label className="flex w-full items-center gap-2 text-xs text-muted-foreground lg:w-auto">
       <span>{t.riskMeasure}</span>
       <select
         value={measure}
         aria-label={t.riskMeasure}
         onChange={(event) => onChange(event.target.value as RiskMeasure)}
-        className="h-11 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
+        className="h-11 min-w-0 flex-1 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
       >
         {RISK_MEASURES.map((key) => (
           <option key={key} value={key}>
@@ -77,7 +77,7 @@ function DumbbellRow({
   return (
     <li
       data-risk-row
-      className="grid grid-cols-[minmax(6rem,0.9fr)_minmax(6rem,1.4fr)_auto] items-center gap-x-3 gap-y-1"
+      className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto] items-center gap-x-2 gap-y-1 sm:grid-cols-[minmax(6rem,0.9fr)_minmax(6rem,1.4fr)_auto] sm:gap-x-3"
     >
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{row.name}</p>

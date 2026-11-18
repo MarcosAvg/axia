@@ -27,7 +27,7 @@ export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
       }}
       className="flex flex-wrap items-end gap-4"
     >
-      <div className="w-full max-w-sm">
+      <div className="w-full lg:max-w-sm">
         <TextField
           id="role-edit-label"
           label={roles.label}
@@ -49,7 +49,11 @@ export function RoleEditForm({ role, onSave, isSaving }: RoleEditFormProps) {
           </span>
         ) : null}
       </label>
-      <Button type="submit" className="min-h-11" disabled={isSaving}>
+      <Button
+        type="submit"
+        className="min-h-11 w-full lg:w-auto"
+        disabled={isSaving}
+      >
         {isSaving ? actions.saving : actions.save}
       </Button>
     </form>

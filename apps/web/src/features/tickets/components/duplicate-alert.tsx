@@ -55,7 +55,7 @@ export function DuplicateAlert({
             <CandidateItem key={candidate.id} candidate={candidate} />
           ))}
         </ul>
-        <ButtonGrid>
+        <ButtonGrid columns={1} className="sm:grid-cols-2">
           <Button
             type="button"
             onClick={onConfirm}

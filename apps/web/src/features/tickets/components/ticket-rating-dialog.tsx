@@ -133,7 +133,7 @@ function RatingContent({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 self-start"
+          className="min-h-11 lg:self-start"
           onClick={onClose}
         >
           {t.close}

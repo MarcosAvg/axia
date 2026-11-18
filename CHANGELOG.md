@@ -7,6 +7,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Cambiado
 
+- Las acciones de encabezado, el Panel por rol y las barras de Métricas y Administración
+  aprovechan el ancho móvil. Los controles de archivo y los botones principales de los
+  formularios y tiquets se ajustan al espacio disponible. En **Calidad**, la tabla se desplaza
+  dentro de su tarjeta sin ensanchar la página.
+
 - En móvil, el detalle muestra el motivo y subestado de la pausa junto al encabezado y da acceso
   directo a **Evidencias**. La barra de acciones avisa cuando se pierde la conexión, **Más** tiene
   controles táctiles más amplios y **Volver** está disponible en horizontal.

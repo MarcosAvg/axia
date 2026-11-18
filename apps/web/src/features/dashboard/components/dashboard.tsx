@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { HardHatIcon, PlusIcon } from 'lucide-react'
 import { ErrorAlert } from '@/components/shared/async-state'
 import { PageHeader } from '@/components/shared/page-header'
-import { ButtonGrid } from '@/components/shared/button-grid'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, canAny, useAuth } from '@/features/auth'
@@ -40,9 +39,9 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
   const { identity } = useAuth()
   const isTechnician = Boolean(identity?.technicianId)
   return (
-    <ButtonGrid>
+    <div className="grid w-full gap-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center">
       {canCreate ? (
-        <Button asChild className="col-span-2 min-h-11">
+        <Button asChild className="min-h-11">
           <Link to="/tickets/nuevo">
             <PlusIcon />
             {t.actions.newTicket}
@@ -50,34 +49,36 @@ function QuickActions({ canCreate }: { canCreate: boolean }) {
         </Button>
       ) : null}
       {isTechnician ? (
-        <Button asChild className="col-span-2 min-h-11">
+        <Button asChild className="min-h-11">
           <Link to="/mi-trabajo">
             <HardHatIcon />
             {t.actions.myWork}
           </Link>
         </Button>
       ) : null}
-      {can(identity, 'ticket.take_offer') ? (
+      <div className="grid grid-cols-2 gap-2 max-lg:[&>:last-child:nth-child(odd)]:col-span-2 lg:contents">
+        {can(identity, 'ticket.take_offer') ? (
+          <Button asChild variant="outline" className="min-h-11">
+            <Link to="/inbox">{t.actions.inbox}</Link>
+          </Button>
+        ) : null}
         <Button asChild variant="outline" className="min-h-11">
-          <Link to="/inbox">{t.actions.inbox}</Link>
+          <Link to="/tickets" search={{ page: 1 }}>
+            {t.actions.tickets}
+          </Link>
         </Button>
-      ) : null}
-      <Button asChild variant="outline" className="min-h-11">
-        <Link to="/tickets" search={{ page: 1 }}>
-          {t.actions.tickets}
-        </Link>
-      </Button>
-      {can(identity, 'metrics.view') ? (
-        <Button asChild variant="outline" className="min-h-11">
-          <Link to="/metricas">{t.actions.metrics}</Link>
-        </Button>
-      ) : null}
-      {canAny(identity, ADMIN_PERMISSIONS) ? (
-        <Button asChild variant="outline" className="min-h-11">
-          <Link to="/admin">{t.actions.admin}</Link>
-        </Button>
-      ) : null}
-    </ButtonGrid>
+        {can(identity, 'metrics.view') ? (
+          <Button asChild variant="outline" className="min-h-11">
+            <Link to="/metricas">{t.actions.metrics}</Link>
+          </Button>
+        ) : null}
+        {canAny(identity, ADMIN_PERMISSIONS) ? (
+          <Button asChild variant="outline" className="min-h-11">
+            <Link to="/admin">{t.actions.admin}</Link>
+          </Button>
+        ) : null}
+      </div>
+    </div>
   )
 }
 

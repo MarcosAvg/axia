@@ -132,7 +132,7 @@ function PeriodPicker({
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 lg:min-h-9"
+          className="min-h-11 min-w-0 flex-1 lg:min-h-9 lg:flex-none"
           aria-label={`${t.period}: ${periodLabel(filters)}`}
         >
           <CalendarIcon className="size-4" />
@@ -140,7 +140,10 @@ function PeriodPicker({
           <ChevronDownIcon className="size-4 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80" aria-label={t.period}>
+      <PopoverContent
+        className="max-h-(--radix-popover-content-available-height) w-80 max-w-[calc(100vw-2rem)] overflow-y-auto"
+        aria-label={t.period}
+      >
         <PeriodPanel
           filters={filters}
           onRange={onRange}
@@ -179,8 +182,8 @@ export function MetricsToolbar({
   }
 
   return (
-    <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-background py-3">
-      <div className="flex items-center gap-1">
+    <div className="sticky top-0 z-20 grid grid-cols-2 gap-2 bg-background py-3 lg:flex lg:flex-wrap lg:items-center">
+      <div className="flex min-w-0 items-center gap-1">
         <PeriodPicker
           filters={filters}
           onRange={onRange}
@@ -188,7 +191,7 @@ export function MetricsToolbar({
         />
         <HintIcon hint={metricsMessages.filterHints.period} label={t.period} />
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex min-w-0 items-center gap-1">
         <FiltersPopover
           filters={filters}
           catalogs={catalogs}
@@ -200,7 +203,7 @@ export function MetricsToolbar({
       {mode && onModeChange ? (
         <TimeModeToggle mode={mode} onChange={onModeChange} />
       ) : null}
-      <div className="min-w-0 flex-1">
+      <div className="col-span-2 min-w-0 flex-1 empty:hidden lg:block">
         <FilterChips
           items={buildChips(filters, catalogs, onFiltersChange)}
           removeLabel={t.remove}

@@ -73,7 +73,11 @@ export function FiltersPopover({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="min-h-11 lg:min-h-9">
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 min-w-0 flex-1 max-[359px]:gap-1 max-[359px]:px-1.5 lg:min-h-9 lg:flex-none"
+        >
           <SlidersHorizontalIcon className="size-4" />
           {t.title}
           {activeCount > 0 ? (
@@ -81,12 +85,12 @@ export function FiltersPopover({
               {activeCount}
             </span>
           ) : null}
-          <ChevronDownIcon className="size-4 text-muted-foreground" />
+          <ChevronDownIcon className="size-4 text-muted-foreground max-[359px]:hidden" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         id="metrics-catalog-filters"
-        className="w-80"
+        className="max-h-(--radix-popover-content-available-height) w-80 max-w-[calc(100vw-2rem)] overflow-y-auto"
         aria-label={t.title}
       >
         <FiltersPanel

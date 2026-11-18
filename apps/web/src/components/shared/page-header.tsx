@@ -31,7 +31,7 @@ export function PageHeader({
         ) : null}
       </div>
       {actions ? (
-        <div className="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
+        <div className="grid w-full shrink-0 gap-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center">
           {actions}
         </div>
       ) : null}

@@ -50,11 +50,7 @@ export function TicketHeader({
           <CurrentPause current={pause} />
         </div>
       ) : null}
-      <Button
-        asChild
-        variant="outline"
-        className="mt-1 min-h-11 self-start lg:hidden"
-      >
+      <Button asChild variant="outline" className="mt-1 min-h-11 lg:hidden">
         <Link
           to="/tickets/$ticketId"
           params={{ ticketId: ticket.id }}

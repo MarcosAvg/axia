@@ -13,9 +13,9 @@ export function TimeModeToggle({
   onChange: (mode: TimeMode) => void
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="col-span-2 flex items-center gap-1">
       <div
-        className="flex flex-wrap items-center gap-1 rounded-lg bg-muted/50 p-1"
+        className="grid min-w-0 flex-1 grid-cols-3 items-center gap-1 rounded-lg bg-muted/50 p-1 lg:flex lg:flex-none lg:flex-wrap"
         role="group"
         aria-label={metricsMessages.timeMode.label}
       >
@@ -26,7 +26,10 @@ export function TimeModeToggle({
             size="sm"
             variant={mode === value ? 'secondary' : 'ghost'}
             aria-pressed={mode === value}
-            className={cn('min-h-9 px-3', mode === value && SELECTED_CONTROL)}
+            className={cn(
+              'min-h-11 px-1 lg:min-h-9 lg:px-3',
+              mode === value && SELECTED_CONTROL,
+            )}
             onClick={() => onChange(value)}
           >
             {metricsMessages.timeMode[value]}

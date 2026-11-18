@@ -30,7 +30,7 @@ function ViewSwitch({
   onChange: (view: PeopleView) => void
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1">
+    <div className="flex w-full flex-wrap items-center gap-1 lg:w-auto">
       {VIEWS.map(([value, label]) => (
         <Button
           key={value}
@@ -38,7 +38,7 @@ function ViewSwitch({
           variant={view === value ? 'secondary' : 'ghost'}
           aria-pressed={view === value}
           className={cn(
-            'min-h-11 px-3 lg:min-h-8',
+            'min-h-11 px-2 max-lg:grow lg:min-h-8 lg:px-3',
             view === value && SELECTED_CONTROL,
           )}
           onClick={() => onChange(value)}

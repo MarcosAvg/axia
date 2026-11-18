@@ -52,7 +52,7 @@ function AlertItem({
           type="button"
           variant="outline"
           size="sm"
-          className="mt-2 min-h-11"
+          className="mt-2 min-h-11 max-lg:w-full"
           onClick={onChoose}
         >
           {detail.markThisDuplicate}
@@ -68,7 +68,7 @@ function DismissAlertsButton({ ticketId }: { ticketId: string }) {
     <Button
       type="button"
       variant="ghost"
-      className="min-h-11 self-start"
+      className="min-h-11 lg:self-start"
       disabled={dismiss.isPending}
       onClick={() =>
         dismiss.mutate(undefined, {

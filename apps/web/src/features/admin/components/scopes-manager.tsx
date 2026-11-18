@@ -8,11 +8,17 @@ export function ScopesManager() {
   const { scopes } = adminMessages
   return (
     <Tabs defaultValue="supervisor" className="flex min-w-0 flex-col gap-4">
-      <TabsList className="h-auto w-full flex-wrap sm:w-fit">
-        <TabsTrigger value="supervisor" className="min-h-11">
+      <TabsList className="grid h-auto w-full grid-cols-2 lg:flex lg:w-fit">
+        <TabsTrigger
+          value="supervisor"
+          className="min-h-11 max-lg:whitespace-normal"
+        >
           {scopes.supervisor}
         </TabsTrigger>
-        <TabsTrigger value="technician" className="min-h-11">
+        <TabsTrigger
+          value="technician"
+          className="min-h-11 max-lg:whitespace-normal"
+        >
           {scopes.technician}
         </TabsTrigger>
       </TabsList>

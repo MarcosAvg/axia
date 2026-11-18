@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 test.setTimeout(180_000)
 
@@ -38,6 +38,21 @@ async function expectNoHorizontalOverflow(page: Page) {
     `(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)()`,
   )
   expect(Number(overflow)).toBeLessThanOrEqual(1)
+}
+
+async function expectFullRow(control: Locator) {
+  await expect(control).toBeVisible()
+  const margins = await control.evaluate((element) => {
+    const area = element.closest('main')!
+    const padding = area.ownerDocument.defaultView!.getComputedStyle(area)
+    const { left, right } = area.getBoundingClientRect()
+    const rect = element.getBoundingClientRect()
+    return [
+      rect.left - left - Number.parseFloat(padding.paddingLeft),
+      right - rect.right - Number.parseFloat(padding.paddingRight),
+    ]
+  })
+  for (const margin of margins) expect(Math.abs(margin)).toBeLessThanOrEqual(1)
 }
 
 test('el acceso no desborda en móvil ni tiene un h1 oculto', async ({
@@ -124,4 +139,85 @@ test('el título de la pestaña cambia por ruta', async ({ page }) => {
   await page.goto('/metricas')
   await expect(page.getByRole('heading', { name: 'Métricas' })).toBeVisible()
   await expect(page).toHaveTitle('Métricas · Axia')
+})
+
+test('las acciones principales aprovechan el ancho en móvil', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await signIn(page, 'demo.technician')
+  const main = page.getByRole('main')
+
+  await expectFullRow(
+    main.getByRole('link', { name: 'Mi trabajo', exact: true }),
+  )
+  await expectFullRow(
+    main.getByRole('link', { name: 'Ver tiquets', exact: true }),
+  )
+  await page.goto('/mi-trabajo')
+  await expectFullRow(main.getByRole('link', { name: 'Ver tablero' }))
+})
+
+test('la barra de usuarios ocupa el ancho disponible en móvil', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await signIn(page)
+  await page.goto('/admin/usuarios')
+  await expectFullRow(page.getByRole('button', { name: 'Nuevo usuario' }))
+})
+
+test('el selector de secciones de métricas usa todo el ancho del tablero', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 })
+  await signIn(page)
+  await page.goto('/metricas')
+  await expectFullRow(page.getByRole('tablist'))
+  const exportButton = page.getByRole('button', {
+    name: 'Exportar',
+    exact: true,
+  })
+  expect((await exportButton.boundingBox())?.width).toBeGreaterThanOrEqual(250)
+  const filters = page.getByRole('button', { name: /^Filtros/ })
+  await filters.click()
+  await page.getByLabel('Edificio', { exact: true }).selectOption({
+    label: 'Edificio Central',
+  })
+  await page.keyboard.press('Escape')
+  await expect(filters).toHaveText(/Filtros\s*1/)
+  expect(
+    await filters.evaluate(
+      (element) => element.scrollWidth - element.clientWidth,
+    ),
+  ).toBeLessThanOrEqual(1)
+})
+
+test('la barra de alta reparte el espacio también en horizontal', async ({
+  page,
+}) => {
+  const width = 844
+  await page.setViewportSize({ width, height: 390 })
+  await signIn(page, 'demo.requester')
+  await page.goto('/tickets/nuevo')
+
+  const submit = page.getByRole('button', { name: 'Registrar tiquet' })
+  const cancel = page.getByRole('link', { name: 'Cancelar', exact: true })
+  await expect(submit).toBeVisible()
+  await expect(cancel).toBeVisible()
+  expect((await submit.boundingBox())?.width).toBeGreaterThan(width / 3)
+  expect((await cancel.boundingBox())?.width).toBeGreaterThan(width / 3)
+})
+
+test('la pestaña Calidad mantiene su contenido dentro de 320 px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 })
+  await signIn(page)
+  await page.goto('/metricas')
+  await page.getByRole('tab', { name: 'Calidad', exact: true }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Calidad por dimensión' }),
+  ).toBeVisible()
+  await expectNoHorizontalOverflow(page)
 })

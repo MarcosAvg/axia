@@ -25,7 +25,7 @@ export function QualityDiagnosis({
         <h2 className="text-base font-medium">{t.diagnosis}</h2>
         <DimensionPicker value={dimension} onChange={setDimension} />
       </div>
-      <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start">
         <QualityHeatmap groups={groups} dimension={dimension} />
         <RiskScatter
           groups={groups}

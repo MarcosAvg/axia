@@ -24,7 +24,7 @@ export function AdminToolbar({
   const placeholder = searchPlaceholder ?? adminMessages.list.search
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="relative w-full max-w-xs">
+      <div className="relative w-full lg:max-w-xs">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
@@ -34,7 +34,7 @@ export function AdminToolbar({
           className="min-h-11 pl-9"
         />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex w-full flex-col-reverse gap-2 empty:hidden lg:w-auto lg:flex-row lg:items-center lg:gap-3">
         {countText ? (
           <span className="text-sm text-muted-foreground">{countText}</span>
         ) : null}

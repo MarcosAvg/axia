@@ -36,7 +36,7 @@ function DetectedCandidate({
       <Button
         type="button"
         variant="outline"
-        className="mt-2 min-h-11"
+        className="mt-2 min-h-11 max-lg:w-full"
         disabled={disabled}
         onClick={onPick}
       >
@@ -158,7 +158,7 @@ export function DuplicateForm({
       <Button
         type="button"
         variant="ghost"
-        className="min-h-11 self-start"
+        className="min-h-11 lg:self-start"
         onClick={onClose}
       >
         {ticketMessages.actionFields.cancel}

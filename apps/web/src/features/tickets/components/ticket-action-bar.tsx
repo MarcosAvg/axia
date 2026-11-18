@@ -165,7 +165,7 @@ export function TicketActionBar({
             {messages.offline.disconnected}
           </p>
         )}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center gap-2 [&>button:only-child]:flex-1">
           <BarPrimary panel={panel} takeOffer={takeOffer} primary={primary} />
           <BarMenu panel={panel} actions={others} />
         </div>

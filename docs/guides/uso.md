@@ -3,6 +3,9 @@
 Entra con tu cuenta. Si recibiste una contraseña temporal, cámbiala cuando se solicite.
 El menú muestra las secciones disponibles para tus permisos y perfil.
 
+En móvil, las acciones principales ocupan el ancho disponible. Los controles relacionados,
+como las opciones de foto o las pestañas, comparten el espacio de su fila.
+
 ## Panel
 
 El **Panel** es una bandeja accionable. Arriba muestra las cifras que requieren atención y cada una

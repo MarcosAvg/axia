@@ -8,7 +8,7 @@ export function UsersManager() {
   const { users } = adminMessages
   return (
     <Tabs defaultValue="accounts" className="flex min-w-0 flex-col gap-6">
-      <TabsList className="h-auto w-full flex-wrap sm:w-fit">
+      <TabsList className="grid h-auto w-full grid-cols-2 lg:flex lg:w-fit">
         <TabsTrigger value="accounts" className="min-h-11">
           {users.accountsTab}
         </TabsTrigger>

@@ -173,7 +173,7 @@ export function MetricsExport({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 lg:min-h-9"
+            className="min-h-11 flex-1 lg:min-h-9 lg:flex-none"
             disabled={groups.length === 0}
           >
             <DownloadIcon className="size-4" />

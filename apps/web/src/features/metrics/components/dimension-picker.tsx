@@ -20,7 +20,7 @@ export function DimensionPicker({
 }) {
   const id = useId()
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+    <div className="flex w-full flex-wrap items-center gap-2 text-xs text-muted-foreground lg:w-auto">
       <label htmlFor={id}>{label}</label>
       <HintIcon hint={hint} label={label} />
       <select
@@ -28,7 +28,7 @@ export function DimensionPicker({
         value={value}
         aria-label={label}
         onChange={(event) => onChange(event.target.value as Dimension)}
-        className="h-11 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8"
+        className="h-11 min-w-0 flex-1 rounded-lg border border-input bg-transparent px-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring lg:h-8 lg:flex-none"
       >
         {dimensions.map((dimension) => (
           <option key={dimension} value={dimension}>

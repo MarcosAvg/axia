@@ -124,28 +124,31 @@ export function CatalogTransfer() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        disabled={transfer.busy}
-        onClick={() => void transfer.exportAll()}
-      >
-        {t.export}
-      </Button>
-      <Button asChild variant="outline">
-        <label>
-          {t.import}
-          <input
-            type="file"
-            accept=".xlsx"
-            className="sr-only"
-            onChange={(event) => {
-              const file = event.target.files?.[0] ?? null
-              event.target.value = ''
-              void transfer.choose(file)
-            }}
-          />
-        </label>
-      </Button>
+      <div className="grid grid-cols-2 gap-2 lg:contents">
+        <Button
+          variant="outline"
+          className="max-lg:min-h-11"
+          disabled={transfer.busy}
+          onClick={() => void transfer.exportAll()}
+        >
+          {t.export}
+        </Button>
+        <Button asChild variant="outline" className="max-lg:min-h-11">
+          <label>
+            {t.import}
+            <input
+              type="file"
+              accept=".xlsx"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null
+                event.target.value = ''
+                void transfer.choose(file)
+              }}
+            />
+          </label>
+        </Button>
+      </div>
       <EntityDialog
         open={Boolean(transfer.workbook || transfer.report)}
         onOpenChange={(open) => {

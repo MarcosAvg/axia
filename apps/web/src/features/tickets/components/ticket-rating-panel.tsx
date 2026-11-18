@@ -38,7 +38,7 @@ export function TicketRatingPanel({
       <p className="text-sm text-muted-foreground">
         {subjectRequesterId ? t.proxyNote : t.prompt}
       </p>
-      <Button type="button" className="min-h-11 self-start" onClick={onOpen}>
+      <Button type="button" className="min-h-11 lg:self-start" onClick={onOpen}>
         {t.open}
       </Button>
     </div>

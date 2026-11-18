@@ -93,7 +93,7 @@ export function ChangePasswordForm({ onSuccess }: { onSuccess?: () => void }) {
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="min-h-11 self-start"
+        className="min-h-11 lg:self-start"
       >
         {isSubmitting
           ? authMessages.password.submitting

@@ -179,7 +179,10 @@ export function CycleTimesSection({
               type="button"
               size="sm"
               variant={mode === value ? 'secondary' : 'outline'}
-              className={mode === value ? SELECTED_CONTROL : undefined}
+              className={cn(
+                'max-lg:min-h-11 max-lg:grow',
+                mode === value && SELECTED_CONTROL,
+              )}
               aria-pressed={mode === value}
               onClick={() => setMode(value)}
             >

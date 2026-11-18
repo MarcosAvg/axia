@@ -1,4 +1,5 @@
 import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from 'cn'
 import type { DimensionGroup } from '../domain/dimensions'
 import type {
   AuxiliaryCategoryRow,
@@ -73,12 +74,15 @@ const TAB_VALUES = [
 /** Selector de pestañas del tablero; se muestra junto a los filtros. */
 export function MetricsTabList() {
   return (
-    <TabsList className="h-auto flex-wrap justify-start rounded-lg bg-muted/50 p-1">
-      {TAB_VALUES.map((value) => (
+    <TabsList className="col-span-2 grid h-auto w-full grid-cols-6 rounded-lg bg-muted/50 p-1 sm:grid-cols-5 lg:inline-flex lg:w-fit lg:flex-wrap lg:justify-start">
+      {TAB_VALUES.map((value, index) => (
         <TabsTrigger
           key={value}
           value={value}
-          className="min-h-11 px-1 lg:min-h-9 lg:px-4"
+          className={cn(
+            'min-h-11 px-1 max-sm:text-xs lg:min-h-9 lg:px-4',
+            index < 3 ? 'max-sm:col-span-2' : 'max-sm:col-span-3',
+          )}
         >
           {metricsMessages.tabs[value]}
         </TabsTrigger>

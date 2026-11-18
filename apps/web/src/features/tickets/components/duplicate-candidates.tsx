@@ -21,13 +21,13 @@ export function DuplicateCandidates({
           key={ticket.id}
           className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm"
         >
-          <span>
+          <span className="min-w-0 wrap-anywhere">
             {ticket.folio} · {ticket.description}
           </span>
           <Button
             type="button"
             variant="outline"
-            className="min-h-11"
+            className="min-h-11 max-lg:w-full"
             disabled={isPending}
             onClick={() => onPick(ticket.id)}
           >
