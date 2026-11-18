@@ -65,7 +65,7 @@ function LedDurations({ row, mode }: { row: TechnicianView; mode: TimeMode }) {
       />
       <DurationRow
         label={metricsMessages.table.totalAverage}
-        hint={metricsMessages.tableHints.avgTotal}
+        hint={metricsMessages.teamHints.technicianAvgTotal}
         value={formatTechnicianTime(row.avgTotal, row.avgTotalLabor, mode)}
       />
       <DurationRow

@@ -51,5 +51,18 @@ export function technicianColumns(
         )
       },
     },
+    {
+      id: 'ledTickets',
+      header: t.ledTickets,
+      hint: metricsMessages.teamHints.ledTickets,
+      cell: (row) => row.ledTickets ?? 0,
+    },
+    {
+      id: 'avgTotal',
+      header: metricsMessages.table.totalAverage,
+      hint: metricsMessages.teamHints.technicianAvgTotal,
+      cell: (row) =>
+        formatTechnicianTime(row.avgTotal, row.avgTotalLabor, mode),
+    },
   ]
 }

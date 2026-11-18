@@ -169,6 +169,8 @@ export const hintMessages = {
     technicianTickets: 'Tiquets en los que participó el técnico.',
     ledTickets:
       'Tiquets únicos que lideró y tienen hora verificada. Si un tiquet carece de una fase, aporta cero al promedio de esa fase.',
+    technicianAvgTotal:
+      'Duración promedio del ciclo completo de los tiquets incluidos en la muestra de liderazgo.',
     technicianActive:
       'Suma del trabajo activo del técnico en los tiquets del periodo.',
     requesterTickets:

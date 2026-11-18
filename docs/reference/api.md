@@ -326,9 +326,9 @@ el trabajo activo, la pausa y la espera atribuidos al técnico sujeto.
 solicitante y cuenta una vez cada tiquet que tenga al menos un tramo de cualquiera de esas fases,
 aunque el tiquet aporte a las dos.
 
-La tabla principal de Técnicos muestra participación y trabajo activo acumulado. El detalle
-del técnico conserva la pausa, la espera de inicio y los promedios de los tiquets liderados
-junto a su tamaño de muestra. Las acciones propias y las registradas en nombre de la persona
+La tabla principal de Técnicos muestra participación, trabajo activo acumulado y el tiempo
+total promedio de los tiquets liderados junto a su tamaño de muestra. El detalle del técnico
+conserva la pausa, la espera de inicio y los promedios de los tiquets liderados. Las acciones propias y las registradas en nombre de la persona
 alimentan las mismas cifras.
 
 En `/api/metrics/supervisors`, `reassigned` cuenta tiquets distintos por supervisor destino de una
