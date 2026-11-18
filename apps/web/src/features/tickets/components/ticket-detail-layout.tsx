@@ -8,6 +8,7 @@ import { detailSectionHints } from '../detail-hints'
 import type {
   TicketDetailWithTimes,
   TicketParticipant,
+  TicketPauseState,
   TicketTimelineItem,
 } from '../domain/types'
 import { useTicketProxy } from '../hooks/use-ticket-proxy'
@@ -35,6 +36,7 @@ interface TicketLayoutProps {
   identity: Identity | null
   actions: ActionKey[]
   timeline: TicketTimelineItem[]
+  pause: TicketPauseState | null
   canAttachEvidence: boolean
 }
 
@@ -52,6 +54,7 @@ function TicketContentColumns({
   identity,
   actions,
   timeline,
+  pause,
   canRate,
   canAttachEvidence,
   proxy,
@@ -82,7 +85,7 @@ function TicketContentColumns({
           >
             <TicketSummary ticket={ticket} />
           </Section>
-          <PausePanel ticketId={ticketId} />
+          <PausePanel ticketId={ticketId} current={isDesktop ? pause : null} />
         </div>
         <TicketActivity ticketId={ticketId} timeline={timeline} />
         <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">

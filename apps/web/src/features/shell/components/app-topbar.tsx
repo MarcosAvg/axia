@@ -29,7 +29,7 @@ export function AppTopbar({ onOpenSearch }: AppTopbarProps) {
   const navigate = useNavigate()
 
   function goBack() {
-    if (window.history.length > 1) router.history.back()
+    if (router.history.canGoBack()) router.history.back()
     else void navigate({ to: '/tickets', search: { page: 1 } })
   }
 
@@ -40,7 +40,7 @@ export function AppTopbar({ onOpenSearch }: AppTopbarProps) {
           type="button"
           variant="ghost"
           size="icon"
-          className="size-11 md:hidden"
+          className="size-11 lg:hidden"
           aria-label={shellMessages.tabbar.back}
           onClick={goBack}
         >

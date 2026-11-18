@@ -115,26 +115,28 @@ function MobileFilterForm({
 
   return (
     <form
-      className="flex flex-col gap-3"
+      className="flex min-h-0 flex-col"
       onSubmit={(event) => {
         event.preventDefault()
         onApply(readFilterValues(new FormData(event.currentTarget), 'all'))
         onClose()
       }}
     >
-      <FilterSelectFields selects={selects} />
-      <MobileDateFields value={value} />
-      <FlagField
-        id="filter-unrouted"
-        label={list.filters.unrouted}
-        defaultChecked={value.unrouted === true}
-      />
-      <FlagField
-        id="filter-possible-duplicate"
-        label={list.filters.possibleDuplicate}
-        defaultChecked={value.possibleDuplicate === true}
-      />
-      <div className="mt-1 flex items-center gap-2">
+      <div className="flex min-h-0 flex-col gap-3 overflow-y-auto px-4 pt-1 pb-4">
+        <FilterSelectFields selects={selects} />
+        <MobileDateFields value={value} />
+        <FlagField
+          id="filter-unrouted"
+          label={list.filters.unrouted}
+          defaultChecked={value.unrouted === true}
+        />
+        <FlagField
+          id="filter-possible-duplicate"
+          label={list.filters.possibleDuplicate}
+          defaultChecked={value.possibleDuplicate === true}
+        />
+      </div>
+      <div className="flex shrink-0 items-center gap-2 border-t px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <Button
           type="button"
           variant="ghost"
@@ -168,9 +170,9 @@ function MobileFilterSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[85svh] overflow-y-auto rounded-t-xl p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        className="max-h-[85svh] gap-0 overflow-hidden rounded-t-xl"
       >
-        <SheetHeader className="p-0 pr-8">
+        <SheetHeader className="shrink-0 px-4 pr-12">
           <SheetTitle>{list.filters.more}</SheetTitle>
         </SheetHeader>
         <MobileFilterForm

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AlertTriangleIcon, CloudOffIcon, RefreshCwIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,6 +20,7 @@ import {
   retryOutboxItem,
 } from '@/lib/offline/outbox'
 import { messages } from '@/lib/i18n'
+import { useOnline } from '@/lib/use-online'
 
 function itemLabel(type: string): string {
   if (type === 'evidence_upload') return messages.offline.evidence
@@ -150,24 +150,11 @@ function OfflineStatus({
 
 /** Aviso de "sin conexión", de elementos pendientes y de errores definitivos. */
 export function OfflineIndicator() {
-  const [online, setOnline] = useState(
-    typeof navigator === 'undefined' ? true : navigator.onLine,
-  )
+  const online = useOnline()
   const { session, isOfflineSession } = useAuth()
   const userId = session?.user.id
   const pending = useLiveQuery(() => pendingForCurrentUser(), [userId], 0)
   const failed = useLiveQuery(() => errorsForCurrentUser(), [userId], [])
-
-  useEffect(() => {
-    const goOnline = () => setOnline(true)
-    const goOffline = () => setOnline(false)
-    window.addEventListener('online', goOnline)
-    window.addEventListener('offline', goOffline)
-    return () => {
-      window.removeEventListener('online', goOnline)
-      window.removeEventListener('offline', goOffline)
-    }
-  }, [])
 
   if (failed.length > 0) return <OutboxErrors items={failed} />
   if (online && pending === 0 && !isOfflineSession) return null

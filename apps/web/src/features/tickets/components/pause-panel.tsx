@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDateTime } from '@/lib/format'
 import type { TicketPauseState, TicketPauseStep } from '../domain/types'
-import { useTicketPauseState, useTicketPauseSteps } from '../hooks/use-tickets'
+import { useTicketPauseSteps } from '../hooks/use-tickets'
 import { pauseMessages } from '../pause-i18n'
 
 function StepLine({
@@ -22,9 +22,9 @@ function StepLine({
   )
 }
 
-function CurrentPause({ current }: { current: TicketPauseState }) {
+export function CurrentPause({ current }: { current: TicketPauseState }) {
   return (
-    <div className="flex flex-col gap-1 text-sm">
+    <div className="flex flex-col gap-1 text-sm wrap-anywhere">
       <p>
         <span className="text-muted-foreground">{pauseMessages.motive}: </span>
         <span className="font-medium">{current.motiveName}</span>
@@ -85,11 +85,15 @@ function PauseSteps({ steps }: { steps: TicketPauseStep[] }) {
 }
 
 /** Pausa del tiquet: motivo, subestado actual, salidas e historial de pasos. */
-export function PausePanel({ ticketId }: { ticketId: string }) {
-  const state = useTicketPauseState(ticketId)
+export function PausePanel({
+  ticketId,
+  current,
+}: {
+  ticketId: string
+  current: TicketPauseState | null
+}) {
   const steps = useTicketPauseSteps(ticketId)
   const list = steps.data ?? []
-  const current = state.data
 
   if (!current && list.length === 0) return null
 

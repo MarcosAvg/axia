@@ -16,7 +16,7 @@ function TicketDetailPage() {
         <Button
           asChild
           variant="ghost"
-          className="min-h-11 self-start max-md:hidden"
+          className="min-h-11 self-start max-lg:hidden"
         >
           <Link to="/tickets" search={{ page: 1 }}>
             {ticketMessages.detail.back}

@@ -16,19 +16,27 @@ function TicketMeta({
   ticket: TicketListItem
   showElapsed: boolean
 }) {
+  const place = [ticket.buildingName, ticket.locationName].filter(Boolean)
+  const context = [ticket.categoryName, ticket.requesterName].filter(Boolean)
+
   return (
-    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-      <p className="truncate">
-        {[
-          ticket.buildingName,
-          ticket.locationName,
-          ticket.categoryName,
-          ticket.requesterName,
-        ]
-          .filter(Boolean)
-          .join(' · ')}
+    <div className="flex flex-col gap-1 text-xs text-muted-foreground lg:flex-row lg:items-center lg:justify-between lg:gap-2">
+      <p className="lg:truncate">
+        {place.length > 0 ? (
+          <span className="block wrap-break-word font-medium text-foreground lg:inline lg:font-normal lg:text-inherit">
+            {place.join(' · ')}
+          </span>
+        ) : null}
+        {place.length > 0 && context.length > 0 ? (
+          <span className="hidden lg:inline">{' · '}</span>
+        ) : null}
+        {context.length > 0 ? (
+          <span className="block truncate lg:inline">
+            {context.join(' · ')}
+          </span>
+        ) : null}
       </p>
-      <span className="flex shrink-0 items-center gap-2">
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1 lg:shrink-0 lg:flex-nowrap">
         <span>{formatDateTime(ticket.reportedAt)}</span>
         {showElapsed ? (
           <span

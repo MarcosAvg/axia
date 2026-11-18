@@ -28,13 +28,17 @@ import { TicketRatingPanel } from './ticket-rating-panel'
 import { TicketTimeline } from './ticket-timeline'
 import { ParticipantList } from './ticket-summary'
 
+export const EVIDENCE_SECTION_ID = 'evidencias'
+
 /** Sección del detalle: tarjeta en escritorio y bloque plano en móvil. */
 export function Section({
+  headingId,
   title,
   hint,
   className,
   children,
 }: {
+  headingId?: string
   title: string
   hint?: string
   className?: string
@@ -48,7 +52,12 @@ export function Section({
       )}
     >
       <CardHeader className="px-0 lg:px-(--card-spacing)">
-        <CardTitle as="h2">
+        <CardTitle
+          as="h2"
+          id={headingId}
+          tabIndex={headingId ? -1 : undefined}
+          className={headingId ? 'scroll-mt-20' : undefined}
+        >
           <HintLabel label={title} hint={hint} />
         </CardTitle>
       </CardHeader>
@@ -85,6 +94,7 @@ export function EvidenceSection({
   const evidence = useTicketEvidence(ticketId)
   return (
     <Section
+      headingId={EVIDENCE_SECTION_ID}
       title={ticketMessages.detail.evidence}
       hint={detailSectionHints.evidence}
     >

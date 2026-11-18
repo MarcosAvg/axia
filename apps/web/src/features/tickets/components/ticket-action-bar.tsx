@@ -1,4 +1,4 @@
-import { EllipsisIcon } from 'lucide-react'
+import { CloudOffIcon, EllipsisIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -7,6 +7,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { messages } from '@/lib/i18n'
+import { useOnline } from '@/lib/use-online'
 import { actionEmphasis } from '../domain/action-emphasis'
 import type { ActionKey } from '../domain/actions'
 import { pickPrimaryAction } from '../domain/actions'
@@ -51,7 +53,6 @@ function BarPrimary({
   return (
     <Button
       type="button"
-      variant={actionEmphasis(primary) === 'danger' ? 'destructive' : 'default'}
       className="min-h-12 flex-1"
       disabled={isBlocked(panel, primary)}
       onClick={runAction(panel, primary)}
@@ -91,16 +92,20 @@ function BarMenu({
         {normal.map((action) => (
           <DropdownMenuItem
             key={action}
+            className="min-h-11"
             disabled={isBlocked(panel, action)}
             onSelect={runAction(panel, action)}
           >
             {ticketMessages.actions[action]}
           </DropdownMenuItem>
         ))}
-        {dangerous.length > 0 ? <DropdownMenuSeparator /> : null}
+        {normal.length > 0 && dangerous.length > 0 ? (
+          <DropdownMenuSeparator />
+        ) : null}
         {dangerous.map((action) => (
           <DropdownMenuItem
             key={action}
+            className="min-h-11"
             variant="destructive"
             disabled={isBlocked(panel, action)}
             onSelect={runAction(panel, action)}
@@ -122,6 +127,7 @@ export function TicketActionBar({
   proxy,
   onValidated,
 }: TicketActionsPanelProps) {
+  const online = useOnline()
   const panel = useActionPanel({
     ticket,
     actions,
@@ -132,10 +138,17 @@ export function TicketActionBar({
   })
   if (panel.visible.length === 0 && !proxy.canProxy) return null
 
-  const primary = pickPrimaryAction(panel.visible)
-  const others = panel.visible.filter((action) => action !== primary)
   const takeOffer =
     !proxy.subject && ticket.status === 'registered' && panel.hasOffer
+  const primary = takeOffer
+    ? null
+    : pickPrimaryAction(
+        panel.visible.filter(
+          (action) =>
+            action !== 'comment' && actionEmphasis(action) !== 'danger',
+        ),
+      )
+  const others = panel.visible.filter((action) => action !== primary)
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
@@ -146,7 +159,13 @@ export function TicketActionBar({
           onChange={proxy.setValue}
         />
         <ProxyRequiredHint show={panel.blocked.length > 0} />
-        <div className="flex items-center gap-2">
+        {online ? null : (
+          <p className="flex items-center gap-1.5 text-xs font-medium text-warning-foreground dark:text-warning">
+            <CloudOffIcon className="size-4" aria-hidden />
+            {messages.offline.disconnected}
+          </p>
+        )}
+        <div className="flex items-center justify-end gap-2">
           <BarPrimary panel={panel} takeOffer={takeOffer} primary={primary} />
           <BarMenu panel={panel} actions={others} />
         </div>

@@ -42,6 +42,13 @@ En el detalle verás **Captura**, **Participantes**, **Línea de tiempo**, **Tie
 de composición y resumen) y **Evidencias**. Pulsa una imagen para ampliarla; cierra el visor con
 Escape o el botón de cerrar.
 
+En móvil, las tarjetas muestran el edificio y la ubicación en un renglón propio. En **Filtros**,
+**Aplicar** y **Limpiar filtros** quedan al pie mientras desplazas los campos. En el detalle,
+**Evidencias** te lleva directo a las fotos. Si el tiquet está pausado, consulta el motivo y el
+subestado debajo del folio. Usa **Volver** para regresar a la vista de origen, también con el
+teléfono en horizontal. **Más** reúne acciones secundarias, como **Marcar duplicado**. La barra de
+acciones indica **Sin conexión** cuando el navegador pierde la conexión.
+
 **Mi trabajo** muestra lo asignado a tu perfil de técnico. **Bandeja** separa las ofertas para ti,
 los tiquets sin asignar y el trabajo en atención. Cada oferta se puede tomar directamente desde la
 lista; la campana abre los [avisos](notificaciones.md).

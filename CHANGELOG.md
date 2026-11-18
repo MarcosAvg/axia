@@ -5,6 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- En móvil, el detalle muestra el motivo y subestado de la pausa junto al encabezado y da acceso
+  directo a **Evidencias**. La barra de acciones avisa cuando se pierde la conexión, **Más** tiene
+  controles táctiles más amplios y **Volver** está disponible en horizontal.
+- Las tarjetas móviles dan un renglón propio al edificio y la ubicación. **Aplicar** y **Limpiar
+  filtros** permanecen visibles al desplazar la hoja. Las acciones de descarte, como **Marcar
+  duplicado**, quedan en **Más**.
+
 ## [0.31.0] - 2026-11-18
 
 ### Cambiado
