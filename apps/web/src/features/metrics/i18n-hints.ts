@@ -67,9 +67,9 @@ export const hintMessages = {
     phaseProfile:
       'Distribución por fase: caja P25–P75, mediana y P90. La escala es compartida, se redondea por encima del P90 más alto y solo se muestran fases con muestra.',
     technicianTimes:
-      'Los promedios miden el tiquet completo de la muestra de liderazgo. La participación y los tramos atribuidos son acumulados.',
+      'Abre el detalle de cada técnico para consultar sus pausas, la espera de inicio y los promedios de los tiquets que lideró.',
     requesterTimes:
-      'Suma de los tramos de validación y reclamación atribuidos al solicitante según el reloj elegido.',
+      'Suma de los tiempos de validación y reclamación del solicitante según el reloj elegido.',
     qualityHeatmap:
       'Tasas de reasignación, recaptura, reapertura y primera resolución por agrupación. La intensidad es relativa a la columna.',
     distribution:
@@ -163,19 +163,18 @@ export const hintMessages = {
     pendingRate: 'Ofertas que siguen pendientes sobre el total de ofertas.',
     timeToTake:
       'Tiempo medio desde la oferta hasta la toma, en reloj continuo.',
-    reassigned: 'Tiquets que reasignó como supervisor.',
+    reassigned:
+      'Tiquets distintos que recibió directamente como supervisor por reasignación.',
     validated: 'Tiquets que validó como supervisor.',
     technicianTickets: 'Tiquets en los que participó el técnico.',
     ledTickets:
       'Tiquets únicos que lideró y tienen hora verificada. Si un tiquet carece de una fase, aporta cero al promedio de esa fase.',
-    attributedActive:
-      'Trabajo activo atribuido al técnico sujeto, no a quien registró la acción.',
-    attributedPause: 'Tiempo en pausa atribuido al técnico sujeto.',
-    attributedWait: 'Tiempo de espera de inicio atribuido al técnico sujeto.',
+    technicianActive:
+      'Suma del trabajo activo del técnico en los tiquets del periodo.',
     requesterTickets:
-      'Tiquets únicos con validación o reclamación atribuida al solicitante.',
+      'Tiquets distintos con al menos una fase de validación o reclamación del solicitante.',
     requesterValidation:
-      'Tiempo de validación atribuido al solicitante sujeto.',
-    requesterClaim: 'Tiempo de reclamación atribuido al solicitante sujeto.',
+      'Tiempo acumulado en espera de validación del solicitante.',
+    requesterClaim: 'Tiempo acumulado en reclamaciones del solicitante.',
   },
 }

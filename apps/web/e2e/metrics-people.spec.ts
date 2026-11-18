@@ -27,7 +27,21 @@ test('la participación en Tiempos coincide con la carga del Equipo en cada relo
         has: page.getByRole('cell', { name, exact: true }),
       })
     await expect(row.locator('td').nth(1)).toHaveText(tickets)
-    await expect(row.locator('td').nth(2)).toHaveText(participation)
+    await expect(row.locator('td')).toHaveCount(4)
+    await expect(row.locator('td').nth(3)).toHaveText(participation)
+    await row.getByRole('button', { name, exact: true }).click()
+    const detail = page.getByRole('dialog', { name })
+    await expect(
+      detail.getByRole('heading', {
+        name: 'Tiempos de los tiquets que lideró',
+      }),
+    ).toBeVisible()
+    await expect(detail.getByText(`Modo de tiempo · ${clock}`)).toBeVisible()
+    await expect(
+      detail.getByRole('heading', { name, exact: true }),
+    ).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(detail).toHaveCount(0)
   }
 })
 
@@ -39,10 +53,12 @@ test('Solicitantes conserva sus acumulados al elegir otra Medida', async ({
   await page.getByRole('button', { name: 'Solicitantes', exact: true }).click()
   const table = card(page, 'Tiempos por solicitante').getByRole('table')
   await expect(
-    table.getByRole('columnheader', { name: /Validación acumulada/ }),
+    table.getByRole('columnheader', { name: /Espera de validación acumulada/ }),
   ).toBeVisible()
   await expect(
-    table.getByRole('columnheader', { name: /Reclamación acumulada/ }),
+    table.getByRole('columnheader', {
+      name: /Tiempo en reclamación acumulado/,
+    }),
   ).toBeVisible()
   const firstRow = table.getByRole('row').nth(1)
   const values = await firstRow.innerText()

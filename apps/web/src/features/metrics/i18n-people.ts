@@ -1,18 +1,18 @@
 export const peopleTimeMessages = {
   participatedTickets: 'Tiquets con participación',
   ledTickets: 'Tiquets liderados incluidos',
-  requesterTickets: 'Tiquets con validación o reclamación atribuida',
-  requesterValidation: 'Validación acumulada',
-  requesterClaim: 'Reclamación acumulada',
+  requesterValidation: 'Espera de validación acumulada',
+  requesterClaim: 'Tiempo en reclamación acumulado',
   averages: {
     response: 'Respuesta promedio',
     assignment: 'Asignación promedio',
     validation: 'Validación promedio',
   },
-  attributed: {
-    active: 'Trabajo atribuido acumulado',
-    pause: 'Pausa atribuida acumulada',
-    wait: 'Espera atribuida acumulada',
+  ledTimes: 'Tiempos de los tiquets que lideró',
+  accumulatedTimes: {
+    active: 'Trabajo activo acumulado',
+    pause: 'Pausa acumulada',
+    wait: 'Espera de inicio acumulada',
   },
   noTimes: 'Sin tiempos de tiquets liderados.',
 }

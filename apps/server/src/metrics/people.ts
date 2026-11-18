@@ -160,13 +160,13 @@ export async function supervisors(
       group by o.supervisor_user_id
     ),
     reassignments as (
-      select coalesce(e.subject_user_id, e.actor_id) as supervisor_user_id,
+      select e.subject_user_id as supervisor_user_id,
         count(distinct e.ticket_id)::int as reassigned
       from public.ticket_events e
       join base b on b.id = e.ticket_id
       where e.type = 'reassigned_supervisor'
-        and coalesce(e.subject_user_id, e.actor_id) is not null
-      group by coalesce(e.subject_user_id, e.actor_id)
+        and e.subject_user_id is not null
+      group by e.subject_user_id
     ),
     validations as (
       select v.validator_user_id as supervisor_user_id,
@@ -179,18 +179,18 @@ export async function supervisors(
     select
       u.id as supervisor_id,
       u.full_name as supervisor_name,
-      o.offers,
-      o.taken,
-      o.pending,
-      o.withdrawn,
-      o.avg_time_to_take,
+      coalesce(o.offers, 0) as offers,
+      coalesce(o.taken, 0) as taken,
+      coalesce(o.pending, 0) as pending,
+      coalesce(o.withdrawn, 0) as withdrawn,
+      coalesce(o.avg_time_to_take, 0) as avg_time_to_take,
       coalesce(r.reassigned, 0) as reassigned,
       coalesce(v.validated, 0) as validated
     from offers o
-    join public.users u on u.id = o.supervisor_user_id
-    left join reassignments r on r.supervisor_user_id = u.id
+    full join reassignments r using (supervisor_user_id)
+    join public.users u on u.id = coalesce(o.supervisor_user_id, r.supervisor_user_id)
     left join validations v on v.supervisor_user_id = u.id
-    order by o.offers desc, public.natural_sort_key(u.full_name)
+    order by offers desc, public.natural_sort_key(u.full_name)
   `)
   return result.rows
 }

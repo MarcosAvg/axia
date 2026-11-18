@@ -21,6 +21,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   y los de Solicitantes se identifican como acumulados. Solicitantes cuenta los tiquets con
   validación o reclamación atribuida.
 
+- La tabla **Técnicos** en **Tiempos → Personas** muestra cuatro columnas y abre el detalle
+  de pausas, espera y promedios al seleccionar el nombre. **Solicitantes** usa etiquetas breves
+  para los conteos y los acumulados.
+- **Equipo → Supervisores** cuenta los tiquets recibidos directamente por reasignación, incluso
+  si el supervisor destino no recibió ofertas en el periodo.
+
 ## [0.30.0] - 2026-11-17
 
 ### Añadido

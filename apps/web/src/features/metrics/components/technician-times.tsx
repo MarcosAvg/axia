@@ -16,12 +16,8 @@ import { totalInMode, type TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { ChartCard } from './chart-card'
 import { RankingBars } from './ranking-bars'
-import {
-  identityColumns,
-  subjectColumns,
-  timeColumns,
-} from './technician-columns'
-import type { TechnicianView } from './technician-columns'
+import { technicianColumns } from './technician-columns'
+import type { TechnicianView } from './technician-detail'
 
 const t = metricsMessages.times
 
@@ -182,11 +178,7 @@ export function TechnicianTimes({
         ) : null}
         <div className="max-h-80 overflow-auto">
           <DataTable
-            columns={[
-              ...identityColumns(maxParticipation, mode),
-              ...timeColumns(mode),
-              ...subjectColumns(mode),
-            ]}
+            columns={technicianColumns(maxParticipation, mode)}
             rows={rows}
             getRowId={(row) => row.technicianId}
           />

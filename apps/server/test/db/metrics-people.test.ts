@@ -16,11 +16,14 @@ beforeAll(async () => {
 
 afterAll(async () => closeTicketHttpApp(context))
 
-async function items(metric: string): Promise<Record<string, unknown>[]> {
+async function items(
+  metric: string,
+  cookie = context.cookies.admin,
+): Promise<Record<string, unknown>[]> {
   const response = await context.app.inject({
     method: 'GET',
     url: `/api/metrics/${metric}`,
-    headers: authHeaders(context.cookies.admin),
+    headers: authHeaders(cookie),
   })
   expect(response.statusCode).toBe(200)
   return (response.json() as { items: Record<string, unknown>[] }).items
@@ -103,4 +106,41 @@ it('cuenta solo tiquets que aportan a la validación o reclamación del solicita
       claim_time: '00:40:00',
     }),
   ])
+})
+
+it('cuenta reasignaciones solo para el supervisor destino, incluso si no recibió ofertas', async () => {
+  const { db, ids, people } = context
+  await db.execute(sql`
+    insert into public.ticket_events (
+      ticket_id, cycle, type, actor_id, subject_user_id
+    )
+    select fixture.id, 1, 'reassigned_supervisor', ${people.supervisorUserId}, u.id
+    from public.users u cross join (values
+      (${ids.ticketA1}::uuid), (${ids.ticketA1}::uuid), (${ids.ticketB1}::uuid)
+    ) as fixture(id)
+    where u.username = 'other-supervisor'
+  `)
+  await db.execute(sql`
+    insert into public.ticket_events (ticket_id, cycle, type, actor_id, payload)
+    values (${ids.ticketA2}, 1, 'reassigned_supervisor', ${people.supervisorUserId},
+      jsonb_build_object('toTeam', (select team_id from public.tickets where id = ${ids.ticketA2})))
+  `)
+
+  const rows = await items('supervisors')
+  expect(rows).toEqual([
+    expect.objectContaining({
+      supervisor_id: people.supervisorUserId,
+      offers: 1,
+      reassigned: 0,
+    }),
+    expect.objectContaining({
+      supervisor_name: 'Otro supervisor',
+      offers: 0,
+      reassigned: 2,
+    }),
+  ])
+  const scoped = await items('supervisors', context.cookies.supervisor)
+  expect(
+    scoped.find((row) => row.supervisor_name === 'Otro supervisor'),
+  ).toMatchObject({ offers: 0, reassigned: 1 })
 })

@@ -1,32 +1,18 @@
 import type { DataTableColumn } from '@/components/shared/data-table'
-import type {
-  TechnicianRow,
-  TechnicianSubjectTimeRow,
-  TechnicianTimeRow,
-} from '../domain/indicators'
 import { formatMinutes } from '../domain/metrics'
 import { technicianParticipation } from '../domain/team'
-import { totalInMode, type TimeMode } from '../domain/time-mode'
+import type { TimeMode } from '../domain/time-mode'
 import { metricsMessages } from '../i18n'
 import { BarCell } from './bar-cell'
+import {
+  formatTechnicianTime,
+  TechnicianDetail,
+  type TechnicianView,
+} from './technician-detail'
 
 const t = metricsMessages.times
 
-export type TechnicianView = TechnicianRow &
-  Partial<TechnicianTimeRow> &
-  Partial<TechnicianSubjectTimeRow>
-
-function timeCell(
-  value: number | undefined,
-  labor: number | undefined,
-  mode: TimeMode,
-) {
-  return value === undefined
-    ? '—'
-    : formatMinutes(totalInMode(value, labor ?? 0, mode))
-}
-
-export function identityColumns(
+export function technicianColumns(
   maxParticipation: number,
   mode: TimeMode,
 ): DataTableColumn<TechnicianView>[] {
@@ -34,13 +20,20 @@ export function identityColumns(
     {
       id: 'name',
       header: metricsMessages.technicians.technician,
-      cell: (row) => row.name,
+      cell: (row) => <TechnicianDetail row={row} mode={mode} />,
     },
     {
       id: 'tickets',
       header: t.participatedTickets,
       hint: metricsMessages.teamHints.technicianTickets,
       cell: (row) => row.tickets,
+    },
+    {
+      id: 'active',
+      header: t.accumulatedTimes.active,
+      hint: metricsMessages.teamHints.technicianActive,
+      cell: (row) =>
+        formatTechnicianTime(row.activeMinutes, row.activeLaborMinutes, mode),
     },
     {
       id: 'participation',
@@ -57,79 +50,6 @@ export function identityColumns(
           />
         )
       },
-    },
-  ]
-}
-
-export function timeColumns(mode: TimeMode): DataTableColumn<TechnicianView>[] {
-  return [
-    {
-      id: 'ledTickets',
-      header: t.ledTickets,
-      hint: metricsMessages.teamHints.ledTickets,
-      cell: (row) => row.ledTickets ?? 0,
-    },
-    {
-      id: 'active',
-      header: metricsMessages.table.activeAverage,
-      hint: metricsMessages.kpiHints.active,
-      cell: (row) => timeCell(row.avgActive, row.avgActiveLabor, mode),
-    },
-    {
-      id: 'total',
-      header: metricsMessages.table.totalAverage,
-      hint: metricsMessages.tableHints.avgTotal,
-      hideBelow: 'md',
-      cell: (row) => timeCell(row.avgTotal, row.avgTotalLabor, mode),
-    },
-    {
-      id: 'response',
-      header: t.averages.response,
-      hint: metricsMessages.kpiHints.response,
-      hideBelow: 'xl',
-      cell: (row) => timeCell(row.avgResponse, row.avgResponseLabor, mode),
-    },
-    {
-      id: 'assignment',
-      header: t.averages.assignment,
-      hint: metricsMessages.kpiHints.assignment,
-      hideBelow: 'xl',
-      cell: (row) => timeCell(row.avgAssignment, row.avgAssignmentLabor, mode),
-    },
-    {
-      id: 'validation',
-      header: t.averages.validation,
-      hint: metricsMessages.kpiHints.validation,
-      hideBelow: 'xl',
-      cell: (row) => timeCell(row.avgValidation, row.avgValidationLabor, mode),
-    },
-  ]
-}
-
-export function subjectColumns(
-  mode: TimeMode,
-): DataTableColumn<TechnicianView>[] {
-  return [
-    {
-      id: 'attributedActive',
-      header: t.attributed.active,
-      hint: metricsMessages.teamHints.attributedActive,
-      hideBelow: 'md',
-      cell: (row) => timeCell(row.activeMinutes, row.activeLaborMinutes, mode),
-    },
-    {
-      id: 'attributedPause',
-      header: t.attributed.pause,
-      hint: metricsMessages.teamHints.attributedPause,
-      hideBelow: 'xl',
-      cell: (row) => timeCell(row.pauseMinutes, row.pauseLaborMinutes, mode),
-    },
-    {
-      id: 'attributedWait',
-      header: t.attributed.wait,
-      hint: metricsMessages.teamHints.attributedWait,
-      hideBelow: 'xl',
-      cell: (row) => timeCell(row.waitMinutes, row.waitLaborMinutes, mode),
     },
   ]
 }

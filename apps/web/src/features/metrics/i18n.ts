@@ -202,7 +202,7 @@ export const metricsMessages = {
     takeRate: 'Tasa de toma',
     pendingRate: 'Tasa de pendientes',
     withdrawnRate: 'Retiradas',
-    reassigned: 'Reasignados',
+    reassigned: 'Tiquets recibidos por reasignación',
     validated: 'Validados',
     supervisor: 'Supervisor',
   },

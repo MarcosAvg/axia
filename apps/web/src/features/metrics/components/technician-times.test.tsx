@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { expect, it } from 'vitest'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { TimeMode } from '../domain/time-mode'
@@ -48,8 +48,19 @@ it.each([
 
     const row = within(screen.getByRole('row', { name: /Técnico auxiliar/ }))
     expect(row.getByRole('cell', { name: '4' })).toBeVisible()
-    expect(row.getByRole('cell', { name: '0' })).toBeVisible()
     expect(row.getByRole('cell', { name: duration })).toBeVisible()
-    expect(row.getAllByRole('cell', { name: '—' })).toHaveLength(5)
+    expect(row.getAllByRole('cell')).toHaveLength(4)
+    expect(
+      row.getByRole('cell', {
+        name: mode === 'calendar' ? '30 min' : '15 min',
+      }),
+    ).toBeVisible()
+    fireEvent.click(row.getByRole('button', { name: 'Técnico auxiliar' }))
+    const detail = within(
+      screen.getByRole('dialog', { name: 'Técnico auxiliar' }),
+    )
+    expect(detail.getByText('Pausa acumulada')).toBeVisible()
+    expect(detail.getByText('Espera de inicio acumulada')).toBeVisible()
+    expect(detail.getByText('Sin tiempos de tiquets liderados.')).toBeVisible()
   },
 )

@@ -326,6 +326,15 @@ el trabajo activo, la pausa y la espera atribuidos al técnico sujeto.
 solicitante y cuenta una vez cada tiquet que tenga al menos un tramo de cualquiera de esas fases,
 aunque el tiquet aporte a las dos.
 
+La tabla principal de Técnicos muestra participación y trabajo activo acumulado. El detalle
+del técnico conserva la pausa, la espera de inicio y los promedios de los tiquets liderados
+junto a su tamaño de muestra. Las acciones propias y las registradas en nombre de la persona
+alimentan las mismas cifras.
+
+En `/api/metrics/supervisors`, `reassigned` cuenta tiquets distintos por supervisor destino de una
+reasignación directa, aunque el supervisor no tenga ofertas en el filtro. Las reasignaciones a
+equipo sin supervisor destino quedan fuera de este conteo.
+
 El resumen distingue `tickets` (volumen total), `flowTickets` (sin desenlaces descartados),
 `closed`, `rejected`, `cancelled`, `duplicate`, `avgTotalAll` y `sumTotalAll` (todos los tiquets
 del filtro), `avgTotalClosed` y `sumTotalClosed` (solo cerrados) y `avgResolution` (alias de

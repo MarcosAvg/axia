@@ -50,7 +50,8 @@ const columns: DataTableColumn<SupervisorRow>[] = [
     id: 'time',
     header: t.timeToTakeContinuous,
     hint: metricsMessages.teamHints.timeToTake,
-    cell: (row) => formatMinutes(row.avgTimeToTakeMinutes),
+    cell: (row) =>
+      row.taken > 0 ? formatMinutes(row.avgTimeToTakeMinutes) : '—',
   },
   {
     id: 'reassigned',

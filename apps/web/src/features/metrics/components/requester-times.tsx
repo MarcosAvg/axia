@@ -17,7 +17,7 @@ function columns(mode: TimeMode): DataTableColumn<RequesterTimeRow>[] {
     },
     {
       id: 'tickets',
-      header: t.requesterTickets,
+      header: metricsMessages.table.tickets,
       hint: metricsMessages.teamHints.requesterTickets,
       cell: (row) => row.tickets,
     },
