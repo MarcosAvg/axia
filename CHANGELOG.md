@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-11-18
+
 ### Cambiado
 
 - La tabla **Carga por técnico** de Métricas → Equipo muestra tiquets, como líder, como auxiliar y
