@@ -60,7 +60,7 @@ function LedDurations({ row, mode }: { row: TechnicianView; mode: TimeMode }) {
     <dl className="grid gap-1">
       <DurationRow
         label={metricsMessages.table.activeAverage}
-        hint={hints.active}
+        hint={metricsMessages.teamHints.technicianAvgActive}
         value={formatTechnicianTime(row.avgActive, row.avgActiveLabor, mode)}
       />
       <DurationRow

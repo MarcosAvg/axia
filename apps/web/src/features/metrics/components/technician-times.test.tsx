@@ -49,9 +49,9 @@ it.each([
     const row = within(screen.getByRole('row', { name: /Técnico auxiliar/ }))
     expect(row.getByRole('cell', { name: '4' })).toBeVisible()
     expect(row.getByRole('cell', { name: duration })).toBeVisible()
-    expect(row.getAllByRole('cell')).toHaveLength(6)
+    expect(row.getAllByRole('cell')).toHaveLength(7)
     expect(row.getByRole('cell', { name: '0' })).toBeVisible()
-    expect(row.getByRole('cell', { name: '—' })).toBeVisible()
+    expect(row.getAllByRole('cell', { name: '—' })).toHaveLength(2)
     expect(
       row.getByRole('cell', {
         name: mode === 'calendar' ? '30 min' : '15 min',

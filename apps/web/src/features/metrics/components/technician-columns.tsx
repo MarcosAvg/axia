@@ -12,6 +12,31 @@ import {
 
 const t = metricsMessages.times
 
+function leadershipColumns(mode: TimeMode): DataTableColumn<TechnicianView>[] {
+  return [
+    {
+      id: 'ledTickets',
+      header: t.ledTickets,
+      hint: metricsMessages.teamHints.ledTickets,
+      cell: (row) => row.ledTickets ?? 0,
+    },
+    {
+      id: 'avgActive',
+      header: metricsMessages.table.activeAverage,
+      hint: metricsMessages.teamHints.technicianAvgActive,
+      cell: (row) =>
+        formatTechnicianTime(row.avgActive, row.avgActiveLabor, mode),
+    },
+    {
+      id: 'avgTotal',
+      header: metricsMessages.table.totalAverage,
+      hint: metricsMessages.teamHints.technicianAvgTotal,
+      cell: (row) =>
+        formatTechnicianTime(row.avgTotal, row.avgTotalLabor, mode),
+    },
+  ]
+}
+
 export function technicianColumns(
   maxParticipation: number,
   mode: TimeMode,
@@ -51,18 +76,6 @@ export function technicianColumns(
         )
       },
     },
-    {
-      id: 'ledTickets',
-      header: t.ledTickets,
-      hint: metricsMessages.teamHints.ledTickets,
-      cell: (row) => row.ledTickets ?? 0,
-    },
-    {
-      id: 'avgTotal',
-      header: metricsMessages.table.totalAverage,
-      hint: metricsMessages.teamHints.technicianAvgTotal,
-      cell: (row) =>
-        formatTechnicianTime(row.avgTotal, row.avgTotalLabor, mode),
-    },
+    ...leadershipColumns(mode),
   ]
 }

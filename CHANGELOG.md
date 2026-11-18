@@ -22,9 +22,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   validación o reclamación atribuida.
 
 - La tabla **Técnicos** en **Tiempos → Personas** muestra la carga del técnico, el conteo de
-  tiquets liderados incluidos y su tiempo total promedio. Al seleccionar el nombre se abre el
-  detalle de pausas, espera y promedios. **Solicitantes** usa etiquetas breves para los conteos
-  y los acumulados.
+  tiquets liderados incluidos y sus promedios de trabajo activo y tiempo total. Al seleccionar
+  el nombre se abre el detalle de pausas, espera y promedios. **Solicitantes** usa etiquetas
+  breves para los conteos y los acumulados.
 - **Equipo → Supervisores** cuenta los tiquets recibidos directamente por reasignación, incluso
   si el supervisor destino no recibió ofertas en el periodo.
 

@@ -27,10 +27,13 @@ test('la participación en Tiempos coincide con la carga del Equipo en cada relo
         has: page.getByRole('cell', { name, exact: true }),
       })
     await expect(row.locator('td').nth(1)).toHaveText(tickets)
-    await expect(row.locator('td')).toHaveCount(6)
+    await expect(row.locator('td')).toHaveCount(7)
     await expect(row.locator('td').nth(3)).toHaveText(participation)
     const ledTickets = await row.locator('td').nth(4).innerText()
-    const avgTotal = await row.locator('td').nth(5).innerText()
+    const averages = [
+      ['Trabajo activo promedio', await row.locator('td').nth(5).innerText()],
+      ['Tiempo total promedio', await row.locator('td').nth(6).innerText()],
+    ] as const
     await row.getByRole('button', { name, exact: true }).click()
     const detail = page.getByRole('dialog', { name })
     await expect(
@@ -42,14 +45,16 @@ test('la participación en Tiempos coincide con la carga del Equipo en cada relo
     await expect(
       detail.getByText(`Tiquets liderados incluidos · ${ledTickets}`),
     ).toBeVisible()
-    await expect(
-      detail
-        .locator('dl > div')
-        .filter({
-          has: page.getByText('Tiempo total promedio', { exact: true }),
-        })
-        .locator('dd'),
-    ).toHaveText(avgTotal)
+    for (const [label, value] of averages) {
+      await expect(
+        detail
+          .locator('dl > div')
+          .filter({
+            has: page.getByText(label, { exact: true }),
+          })
+          .locator('dd'),
+      ).toHaveText(value)
+    }
     await expect(
       detail.getByRole('heading', { name, exact: true }),
     ).toBeFocused()
