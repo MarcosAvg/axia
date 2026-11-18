@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-11-18
+
 ### Cambiado
 
 - Las acciones de encabezado, el Panel por rol y las barras de Métricas y Administración
