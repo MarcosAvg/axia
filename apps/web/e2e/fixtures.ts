@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 
 /** Contraseña de las cuentas de la semilla demo (solo entorno local). */
-export const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
+const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 const REQUIRED_FIELD = [
   'Escribe tu usuario.',
