@@ -1,23 +1,9 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { signIn, submitLogin } from './fixtures.js'
 
-const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const NEW_PASSWORD = 'E2eNuevaPassword123!'
 const PROFILE_PASSWORD = 'E2ePerfilPassword123!'
-
-async function submitLogin(page: Page, username: string, password: string) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
-  await page.getByLabel('Contraseña').pressSequentially(password, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-}
-
-async function signIn(page: Page, username: string, password = PASSWORD) {
-  await submitLogin(page, username, password)
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
 
 async function temporaryPasswordFromDialog(page: Page): Promise<string> {
   const password = (

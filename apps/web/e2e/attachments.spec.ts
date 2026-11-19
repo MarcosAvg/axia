@@ -1,20 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
-import { submitTicketForm } from './fixtures.js'
-
-const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
-
-async function signIn(page: Page, user: string) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(user, { delay: 5 })
-  await page
-    .getByLabel('Contraseña')
-    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
+import { submitTicketForm, signIn } from './fixtures.js'
 
 test('@smoke exige y descarga el adjunto del problema', async ({ page }) => {
   await signIn(page, 'demo.requester')

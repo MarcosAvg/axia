@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { signIn } from './metrics-session.js'
+import { signIn } from './fixtures.js'
 
 test('el administrador abre las métricas', async ({ page }) => {
   await signIn(page, 'demo.admin')

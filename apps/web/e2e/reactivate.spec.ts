@@ -1,20 +1,10 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { selectDefaultClassification, submitTicketForm } from './fixtures.js'
-
-const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
-
-async function signIn(page: Page, email: string) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(email, { delay: 5 })
-  await page
-    .getByLabel('Contraseña')
-    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
+import {
+  selectDefaultClassification,
+  submitTicketForm,
+  signIn,
+} from './fixtures.js'
 
 async function clickAndWait(page: Page, name: string, action: string) {
   const expected = action.replace(/^ticket_/, '')

@@ -1,18 +1,8 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { signIn } from './fixtures.js'
 
-const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 const TICKET_ID = 'de000000-0000-4000-8000-000000000004'
-
-async function signIn(page: Page, username = 'demo.admin') {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
-  await page.getByLabel('Contraseña').pressSequentially(PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
 
 async function openTicket(page: Page) {
   await page.goto(`/tickets/${TICKET_ID}`)
@@ -23,7 +13,7 @@ test('el detalle muestra estado, valida acciones y amplía evidencias', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await openTicket(page)
 
   await expect(page.getByText('En proceso', { exact: true })).toBeVisible()

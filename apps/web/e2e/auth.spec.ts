@@ -1,17 +1,7 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import { signIn } from './fixtures.js'
 
 // Usuarios de la semilla demo (solo entorno local).
-const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
-
-async function signIn(page: Page, email: string) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(email, { delay: 5 })
-  await page
-    .getByLabel('Contraseña')
-    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-}
 
 test('sin sesión, la raíz redirige al acceso', async ({ page }) => {
   await page.goto('/')

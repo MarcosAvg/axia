@@ -4,24 +4,13 @@ import {
   selectDefaultClassification,
   submitTicketForm,
   testImage,
+  signIn,
 } from './fixtures.js'
-
-const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 function localInput(date: Date): string {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
     .toISOString()
     .slice(0, 16)
-}
-
-async function signIn(page: Page) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially('demo.admin', { delay: 5 })
-  await page.getByLabel('Contraseña').pressSequentially(PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
 }
 
 /** En móvil la acción puede estar en la barra fija o en su menú "Más". */
@@ -62,7 +51,7 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
 }) => {
   await page.setViewportSize({ width: 390, height: 900 })
   const createdAt = new Date(Date.now() - 24 * 60 * 60_000)
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await createTicketAt(page, createdAt)
 
   // Las acciones directas no ofrecen hora manual.

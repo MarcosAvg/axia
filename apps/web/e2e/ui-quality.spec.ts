@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test'
 import type { Locator, Page } from '@playwright/test'
+import { signIn } from './fixtures.js'
 
 test.setTimeout(180_000)
-
-const DEMO_PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
 
 const AUTHENTICATED_ROUTES = [
   '/',
@@ -20,18 +19,6 @@ const AUTHENTICATED_ROUTES = [
   '/perfil',
   '/tickets/nuevo',
 ]
-
-async function signIn(page: Page, username = 'demo.admin') {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
-  await page
-    .getByLabel('Contraseña')
-    .pressSequentially(DEMO_PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
 
 async function expectNoHorizontalOverflow(page: Page) {
   const overflow = await page.evaluate(
@@ -77,7 +64,7 @@ for (const width of [320, 390, 1440]) {
     // conexiones por cada navegación y el límite del proxy de desarrollo.
     await page.route('**/api/events', (route) => route.abort())
     await page.setViewportSize({ width, height: 1000 })
-    await signIn(page)
+    await signIn(page, 'demo.admin')
 
     for (const route of AUTHENTICATED_ROUTES) {
       await page.goto(route)
@@ -98,7 +85,7 @@ test('mi trabajo de técnico no desborda en móvil', async ({ page }) => {
 test('la barra superior tiene controles táctiles y no desborda', async ({
   page,
 }) => {
-  await signIn(page)
+  await signIn(page, 'demo.admin')
 
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 900 })
@@ -125,7 +112,7 @@ test('la barra superior tiene controles táctiles y no desborda', async ({
 })
 
 test('la búsqueda global muestra un estado vacío', async ({ page }) => {
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await page.getByRole('button', { name: 'Abrir búsqueda' }).click()
   await page.getByRole('textbox').fill('termino-que-no-existe')
   await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible()
@@ -133,7 +120,7 @@ test('la búsqueda global muestra un estado vacío', async ({ page }) => {
 })
 
 test('el título de la pestaña cambia por ruta', async ({ page }) => {
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await expect(page).toHaveTitle('Panel · Axia')
 
   await page.goto('/metricas')
@@ -162,7 +149,7 @@ test('la barra de usuarios ocupa el ancho disponible en móvil', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await page.goto('/admin/usuarios')
   await expectFullRow(page.getByRole('button', { name: 'Nuevo usuario' }))
 })
@@ -171,7 +158,7 @@ test('el selector de secciones de métricas usa todo el ancho del tablero', asyn
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 844 })
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await page.goto('/metricas')
   await expectFullRow(page.getByRole('tablist'))
   const exportButton = page.getByRole('button', {
@@ -213,7 +200,7 @@ test('la pestaña Calidad mantiene su contenido dentro de 320 px', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 844 })
-  await signIn(page)
+  await signIn(page, 'demo.admin')
   await page.goto('/metricas')
   await page.getByRole('tab', { name: 'Calidad', exact: true }).click()
   await expect(

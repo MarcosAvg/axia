@@ -1,18 +1,10 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { selectDefaultClassification, submitTicketForm } from './fixtures.js'
-
-const PASSWORD = process.env.AXIA_DEMO_PASSWORD ?? 'E2ePassword123!'
-
-async function signIn(page: Page, username: string) {
-  await page.goto('/login')
-  await page.getByLabel('Usuario').pressSequentially(username, { delay: 5 })
-  await page.getByLabel('Contraseña').pressSequentially(PASSWORD, { delay: 5 })
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Menú de usuario' }),
-  ).toBeVisible()
-}
+import {
+  selectDefaultClassification,
+  submitTicketForm,
+  signIn,
+} from './fixtures.js'
 
 async function openNotifications(page: Page) {
   await page.getByRole('link', { name: /^Avisos/ }).click()
