@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Los respaldos coordinados de imágenes publicadas conservan el digest necesario para recuperar
+  la versión original aunque la etiqueta `latest` haya cambiado.
+
 ## [0.31.1] - 2026-11-18
 
 ### Cambiado

@@ -33,6 +33,29 @@ require_image() {
   [[ -n "$AXIA_IMAGE" && "$AXIA_IMAGE" == "$configured_image" ]] || fail 'La imagen debe coincidir con la configuración de app.'
   IMAGE_ID="$(docker image inspect --format '{{.Id}}' "$AXIA_IMAGE")"
 }
+image_digests() {
+  docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$IMAGE_ID"
+}
+backup_image_digest() {
+  local repository digests digest
+  if [[ "$AXIA_IMAGE" =~ @sha256:[a-f0-9]{64}$ ]]; then
+    printf '%s\n' "$AXIA_IMAGE"
+    return
+  fi
+  repository="${AXIA_IMAGE##*/}"
+  if [[ "$repository" == *:* ]]; then
+    repository="${AXIA_IMAGE%:*}"
+  else
+    repository="$AXIA_IMAGE"
+  fi
+  digests="$(image_digests)" || return
+  while IFS= read -r digest; do
+    if [[ "$digest" == "$repository@"* && "$digest" =~ @sha256:[a-f0-9]{64}$ ]]; then
+      printf '%s\n' "$digest"
+      return
+    fi
+  done <<< "$digests"
+}
 database() {
   compose exec -T db sh -c 'exec "$@" -U "$POSTGRES_USER" -d "$POSTGRES_DB"' sh "$@"
 }

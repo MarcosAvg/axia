@@ -5,13 +5,15 @@ TEST_DIR="$(mktemp -d)"
 trap 'rm -r "$TEST_DIR"' EXIT
 mkdir "$TEST_DIR/bin"
 export TRACE="$TEST_DIR/trace" PATH="$TEST_DIR/bin:$PATH" AXIA_IMAGE=axia:test
+export FIXTURE_DIGEST="ghcr.io/example/axia@sha256:$(printf '%064d' 1)"
 export AXIA_ENV_FILE=/dev/null AXIA_COMPOSE_FILE=compose.test.yaml COMPOSE_PROJECT_NAME=axia_recovery_test
 cat > "$TEST_DIR/bin/docker" <<'MOCK'
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "$TRACE"
 case "$*" in
-  'image inspect --format {{.Id}} axia:test') echo sha256:test;;
+  'image inspect --format {{.Id}} '*) echo "${SELECTED_ID:-sha256:test}";;
+  'image inspect --format '*RepoDigests*) printf '%s\n' "${AVAILABLE_DIGEST:-}";;
   *'config --images app'*) printf 'axia:test\npostgres:17.11-alpine\n';;
   *'config --format yaml app'*)
     cat <<YAML
@@ -19,7 +21,7 @@ services:
   app:
     environment:
       FAKE_PASSWORD: must-not-escape
-    image: axia:test
+    image: ${AXIA_IMAGE:-axia:test}
   db:
     image: postgres:17.11-alpine
 networks:
@@ -84,6 +86,18 @@ if DB_OBJECTS=3 run_restore "$SET"; then echo 'Aceptó destino con datos'; exit 
 ! grep -Eq 'pg_restore ' "$TRACE"
 if OLD_EVIDENCE=yes run_restore "$SET"; then echo 'Aceptó evidencia vieja'; exit 1; fi
 ! grep -Eq 'pg_restore ' "$TRACE"
+grep -qx 'format=1' "$SET/manifest"
+AXIA_IMAGE=ghcr.io/example/axia:latest AVAILABLE_DIGEST="$FIXTURE_DIGEST" run_backup registry
+REGISTRY_SET="$(find "$TEST_DIR/registry" -name manifest -printf '%h\n')"
+grep -qx 'format=2' "$REGISTRY_SET/manifest"
+grep -Fxq "image_digest=$FIXTURE_DIGEST" "$REGISTRY_SET/manifest"
+AXIA_IMAGE="$FIXTURE_DIGEST" AVAILABLE_DIGEST="$FIXTURE_DIGEST" run_restore "$REGISTRY_SET"
+assert_trace 'pg_restore '
+if AXIA_IMAGE=ghcr.io/example/axia:latest SELECTED_ID=sha256:new run_restore "$REGISTRY_SET"; then
+  echo 'Aceptó latest después de cambiar de imagen'
+  exit 1
+fi
+! grep -Eq 'stop app|pg_restore ' "$TRACE"
 printf corrupt >> "$SET/database.dump"
 if run_restore "$SET"; then echo 'Aceptó checksum corrupto'; exit 1; fi
 ! grep -Eq 'stop app|pg_restore ' "$TRACE"

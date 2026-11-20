@@ -6,9 +6,20 @@ source "$(dirname "${BASH_SOURCE[0]}")/compose-operations.sh"
 SET="${1:?Uso: restore-all.sh <directorio-del-conjunto>}"
 [[ -f "$SET/manifest" && ! -L "$SET/manifest" ]] || fail 'Falta el manifiesto del conjunto.'
 value() { sed -n "s/^$1=//p" "$SET/manifest"; }
-[[ "$(value format)" == 1 ]] || fail 'Formato de respaldo no compatible.'
+FORMAT="$(value format)"
+[[ "$FORMAT" == 1 || "$FORMAT" == 2 ]] || fail 'Formato de respaldo no compatible.'
 require_image
-[[ "$(value image_id)" == "$IMAGE_ID" && "$(value image)" == "$AXIA_IMAGE" ]] || fail 'La imagen debe coincidir con la release del respaldo.'
+[[ "$(value image_id)" == "$IMAGE_ID" ]] || fail 'La imagen debe coincidir con la release del respaldo.'
+if [[ "$FORMAT" == 1 ]]; then
+  [[ "$(value image)" == "$AXIA_IMAGE" ]] || fail 'La referencia debe coincidir con la del respaldo de formato 1.'
+else
+  digest="$(value image_digest)"
+  [[ "$digest" =~ ^[^[:space:]@]+@sha256:[a-f0-9]{64}$ ]] || fail 'Digest de imagen inválido.'
+  if [[ "$AXIA_IMAGE" != "$digest" ]]; then
+    digests="$(image_digests)"
+    grep -Fxq -- "$digest" <<< "$digests" || fail 'La imagen debe corresponder al digest del respaldo.'
+  fi
+fi
 for entry in database evidence; do
   file=database.dump
   [[ "$entry" != evidence ]] || file=evidence.tgz

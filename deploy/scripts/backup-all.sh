@@ -4,6 +4,12 @@ set -euo pipefail
 umask 077
 source "$(dirname "${BASH_SOURCE[0]}")/compose-operations.sh"
 require_image
+IMAGE_DIGEST="$(backup_image_digest)"
+FORMAT=2
+if [[ -z "$IMAGE_DIGEST" ]]; then
+  FORMAT=1
+  echo 'La imagen no tiene un digest descargable. Conserva la imagen para recuperar en otro host.' >&2
+fi
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 mkdir -p "$BACKUP_DIR"
 BACKUP_DIR="$(cd "$BACKUP_DIR" && pwd)"
@@ -26,7 +32,8 @@ compose run --rm --no-deps -T app tar -C /data/evidence -czf - . > "$STAGING/evi
 [[ -s "$STAGING/database.dump" && -s "$STAGING/evidence.tgz" ]] || fail 'El respaldo produjo un archivo vacío.'
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 {
-  printf 'format=1\ncreated_at=%s\nimage=%s\nimage_id=%s\n' "$STAMP" "$AXIA_IMAGE" "$IMAGE_ID"
+  printf 'format=%s\ncreated_at=%s\nimage=%s\nimage_id=%s\n' "$FORMAT" "$STAMP" "$AXIA_IMAGE" "$IMAGE_ID"
+  if [[ "$FORMAT" == 2 ]]; then printf 'image_digest=%s\n' "$IMAGE_DIGEST"; fi
   printf 'database_sha256=%s\n' "$(sha256sum "$STAGING/database.dump" | cut -d' ' -f1)"
   printf 'evidence_sha256=%s\n' "$(sha256sum "$STAGING/evidence.tgz" | cut -d' ' -f1)"
 } > "$STAGING/manifest"

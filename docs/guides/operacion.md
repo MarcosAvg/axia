@@ -40,8 +40,8 @@ migración sin aplicarla. Véase [Datos](../concepts/datos.md).
 
 ### Conjunto consistente
 
-Para respaldos reproducibles, fijar `AXIA_IMAGE` en una etiqueta `vX.Y.Z` o en un digest. Con el
-canal `latest`, el manifiesto conserva la referencia usada y el ID local de la imagen. Mantener la
+Para respaldos reproducibles, fijar `AXIA_IMAGE` al digest de la release. Con el canal `latest`,
+el manifiesto de formato 2 también registra el digest descargable de la imagen respaldada. Mantener la
 referencia durante todo el respaldo. No hace falta exportarla al shell: los scripts obtienen la
 imagen de la configuración de Compose sin imprimir la configuración completa, que contiene secretos.
 
@@ -57,7 +57,9 @@ contenedor auxiliar usa el usuario de la imagen que posee las evidencias; el hos
 `0600`, dentro de un directorio `0700`, sin depender del UID de la imagen.
 
 Cada conjunto contiene `database.dump`, `evidence.tgz` y `manifest`: formato, fecha UTC, referencia e
-ID local inmutable de la imagen y SHA-256 de ambos archivos. El manifiesto detecta corrupción; no es
+ID local de la imagen, digest descargable cuando existe y SHA-256 de ambos archivos. Las imágenes
+locales sin digest conservan el formato 1 y deben guardarse para recuperar en otro host.
+El manifiesto detecta corrupción; no es
 una firma de autenticidad. Restaurar solo conjuntos de Axia conservados bajo control del operador;
 no sustituir sus tar por archivos de terceros. El directorio temporal empieza por
 `.incomplete-`; solo se renombra y recibe manifiesto al completar ambas copias. Ante un fallo se
@@ -76,7 +78,7 @@ base con objetos de usuario o un volumen con cualquier archivo; no mezcla datos 
 anteriores. Conservar la instancia anterior hasta validar la recuperada.
 
 ```bash
-# Configurar los secretos del destino y AXIA_IMAGE con la release o el ID del manifiesto.
+# Configurar los secretos del destino y AXIA_IMAGE con image_digest del manifiesto.
 # Este ejemplo utiliza un archivo de entorno propio, sin leerlo desde el shell.
 export COMPOSE_PROJECT_NAME=axia_recovery
 export AXIA_ENV_FILE=/opt/axia-recovery/instance.env
@@ -84,8 +86,9 @@ export AXIA_ENV_FILE=/opt/axia-recovery/instance.env
 docker compose --env-file "$AXIA_ENV_FILE" up -d app
 ```
 
-La imagen local debe coincidir tanto en referencia como en ID con el manifiesto; descargarla antes
-con Compose si hace falta. `restore-all.sh` valida los archivos y sus hashes antes de detener app.
+Descargar la imagen del manifiesto con Compose si hace falta. El formato 2 comprueba digest e ID,
+incluso si el respaldo original se hizo desde un alias como `latest`. El formato 1 exige la referencia
+original y el mismo ID local. `restore-all.sh` valida los archivos y sus hashes antes de detener app.
 Arranca y espera `db`, valida que ambos destinos estén vacíos y ejecuta la migración de esa misma
 imagen para preparar el rol interno, los esquemas y permisos en un host vacío. Después restaura la
 base con `pg_restore --single-transaction --exit-on-error --clean --if-exists --no-owner`: un error
