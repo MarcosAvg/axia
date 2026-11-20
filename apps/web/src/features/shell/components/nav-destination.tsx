@@ -1,46 +1,20 @@
 import { Link } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import type { NavItem } from './nav-items'
 
-interface NavDestinationProps {
+interface NavDestinationProps extends Omit<ComponentPropsWithRef<'a'>, 'href'> {
   item: NavItem
-  className?: string
-  onNavigate?: () => void
-  ariaLabel?: string
-  children: ReactNode
 }
 
 /** Enlace de un destino de navegación, resuelto según el tipo de ruta. */
-export function NavDestination({
-  item,
-  className,
-  onNavigate,
-  ariaLabel,
-  children,
-}: NavDestinationProps) {
-  const shared = {
-    className,
-    onClick: onNavigate,
-    'aria-label': ariaLabel,
-  }
-
+export function NavDestination({ item, ...props }: NavDestinationProps) {
   if (item.kind === 'tickets') {
-    return (
-      <Link to="/tickets" search={{ page: 1 }} {...shared}>
-        {children}
-      </Link>
-    )
+    return <Link to="/tickets" search={{ page: 1 }} {...props} />
   }
   if (item.kind === 'catalog') {
     return (
-      <Link to="/admin/catalogos" search={{ catalog: 'teams' }} {...shared}>
-        {children}
-      </Link>
+      <Link to="/admin/catalogos" search={{ catalog: 'teams' }} {...props} />
     )
   }
-  return (
-    <Link to={item.to} {...shared}>
-      {children}
-    </Link>
-  )
+  return <Link to={item.to} {...props} />
 }

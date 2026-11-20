@@ -23,6 +23,7 @@ test('la barra inferior navega y deja el resto en Más', async ({ page }) => {
   await more.press('Enter')
   const drawer = page.getByRole('dialog', { name: 'Más' })
   await expect(drawer).toHaveAttribute('data-side', 'bottom')
+  await expect(drawer.getByRole('heading', { name: 'Operación' })).toBeVisible()
   await expect(drawer.getByRole('link', { name: 'Mi perfil' })).toBeVisible()
   await expect(
     drawer.getByRole('button', { name: 'Cambiar tema y modo' }),

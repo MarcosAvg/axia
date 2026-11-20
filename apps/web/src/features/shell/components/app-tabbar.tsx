@@ -40,7 +40,7 @@ export function AppTabbar() {
               key={item.id}
               item={item}
               className={tabClass}
-              ariaLabel={navBadgeLabel(item.label, badge) ?? undefined}
+              aria-label={navBadgeLabel(item.label, badge) ?? undefined}
             >
               <Icon aria-hidden />
               <NavBadge

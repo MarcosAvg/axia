@@ -10,6 +10,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - La barra lateral de escritorio ahora es flotante y conserva la opción de contraerse a iconos.
   El encabezado se alinea con la barra lateral y su separador sigue el margen del área de trabajo.
   En móvil, **Más** abre un panel inferior con esquinas redondeadas y desplazamiento interno.
+- Los grupos del menú lateral y de **Más** usan filas de shadcn/ui con iconos alineados y
+  contadores de pendientes a la derecha. En escritorio, la barra contraída muestra el nombre
+  de cada destino al pasar el cursor o enfocarlo con el teclado.
 
 ## [0.32.0] - 2026-11-20
 
