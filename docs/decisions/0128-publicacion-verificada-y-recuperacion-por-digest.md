@@ -20,6 +20,8 @@ El canal móvil también debe identificar una release cuyo paquete de instalaci�
 - El workflow verifica la instalación y el salto desde una release estable publicada. Publica
   los artefactos por versión y promueve la mayor release estable después de verificar su paquete.
   El trabajo de promoción está serializado y puede reintentarse a partir del artefacto publicado.
+  Si un fork aún carece de una versión estable de origen elegible, la prueba usa la última estable
+  del repositorio del que proviene.
 - El operador fija el digest cuando necesita una versión reproducible y decide cuándo ejecuta la
   actualización. El destino de recuperación es otro proyecto con volúmenes nuevos.
 

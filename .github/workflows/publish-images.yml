@@ -93,13 +93,8 @@ jobs:
           RELEASE_VERSION: ${{ steps.identity.outputs.version }}
           CANDIDATE: ${{ steps.identity.outputs.image }}:${{ github.sha }}
         run: |
-          origin="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' \
-            | node scripts/release-channel.mjs latest-stable "$RELEASE_VERSION")"
-          [[ -n "$origin" ]] || { echo 'Falta una release estable de origen para comprobar la actualización.' >&2; exit 1; }
           bundle="$(mktemp -d)"
-          gh release download "$origin" --repo "$GITHUB_REPOSITORY" --dir "$bundle" \
-            --pattern axia-self-hosted.tar.gz --pattern axia-self-hosted.tar.gz.sha256
+          origin="$(bash scripts/download-upgrade-origin.sh "$bundle" "$RELEASE_VERSION")"
           bash scripts/docker-upgrade-smoke.sh "$bundle/axia-self-hosted.tar.gz" "$CANDIDATE"
           echo "origin=$origin" >> "$GITHUB_OUTPUT"
       - id: publish
