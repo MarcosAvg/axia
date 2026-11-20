@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-11-20
+
 ### Añadido
 
 - El diagnóstico de instancia comprueba HTTPS, PostgreSQL, escritura de evidencias, espacio
