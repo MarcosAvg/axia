@@ -45,7 +45,8 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 
 ## Pendientes operativos
 
-- Probar la instalación en un host limpio y registrar el resultado.
+- Repetir en un host Linux recién preparado el ensayo de instalación, actualización y recuperación.
+  El primer ensayo se ejecutó en proyectos desechables con un proxy HTTPS local.
 - Configurar TLS y el proxy de la instancia real.
 - Programar respaldos y una restauración de prueba periódica.
 - Revisar el digest de la imagen y el canal `latest` antes de cada actualización.
