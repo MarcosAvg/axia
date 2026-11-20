@@ -34,7 +34,7 @@ export function AppTopbar({ onOpenSearch }: AppTopbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1 border-b bg-background/95 px-2 backdrop-blur md:gap-3 md:px-4">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1 border-b bg-background/95 px-2 backdrop-blur md:gap-3 md:px-4 lg:h-17 lg:border-b-0 lg:px-6 lg:pt-3 lg:after:pointer-events-none lg:after:absolute lg:after:inset-x-6 lg:after:-bottom-px lg:after:border-b lg:after:border-sidebar-border">
       {isDetail ? (
         <Button
           type="button"

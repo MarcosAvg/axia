@@ -54,7 +54,7 @@ export function AppShell() {
         )}
       >
         <AppSidebar
-          className="overflow-hidden rounded-2xl border border-sidebar-border shadow-xs"
+          className="overflow-hidden rounded-2xl border border-sidebar-border bg-sidebar/50 shadow-xs"
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
         />

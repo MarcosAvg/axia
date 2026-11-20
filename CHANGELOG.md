@@ -8,6 +8,7 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 ### Cambiado
 
 - La barra lateral de escritorio ahora es flotante y conserva la opción de contraerse a iconos.
+  El encabezado se alinea con la barra lateral y su separador sigue el margen del área de trabajo.
   En móvil, **Más** abre un panel inferior con esquinas redondeadas y desplazamiento interno.
 
 ## [0.32.0] - 2026-11-20
