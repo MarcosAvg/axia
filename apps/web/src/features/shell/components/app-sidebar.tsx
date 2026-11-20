@@ -28,10 +28,10 @@ interface NavLinkProps {
 }
 
 const expandedClass =
-  'flex min-h-11 items-center gap-2.5 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground lg:min-h-10 aria-[current=page]:bg-primary/10 aria-[current=page]:font-medium aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15 dark:aria-[current=page]:text-primary'
+  'flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset lg:min-h-10 aria-[current=page]:bg-primary/10 aria-[current=page]:font-semibold aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15'
 
 const collapsedClass =
-  'flex size-10 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15 dark:aria-[current=page]:text-primary'
+  'flex size-10 items-center justify-center rounded-xl text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary dark:aria-[current=page]:bg-primary/15'
 
 function NavLink({ item, badge, collapsed, onNavigate }: NavLinkProps) {
   const Icon: LucideIcon = item.icon
@@ -94,7 +94,7 @@ function SectionLinks({
     <div className="flex flex-col gap-0.5">
       <p
         className={cn(
-          'flex items-center gap-2 px-2.5 pt-3 pb-1 text-xs font-medium text-muted-foreground',
+          'flex items-center gap-2 px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground',
           collapsed && 'sr-only',
         )}
       >
@@ -115,6 +115,7 @@ function SectionLinks({
 }
 
 interface AppSidebarProps {
+  className?: string
   collapsed?: boolean
   onToggle?: () => void
   onNavigate?: () => void
@@ -132,8 +133,8 @@ function SidebarHeader({
   return (
     <div
       className={cn(
-        'flex h-14 items-center border-b border-sidebar-border px-3',
-        collapsed ? 'justify-center' : 'justify-between',
+        'mx-3 flex h-14 shrink-0 items-center border-b border-sidebar-border',
+        collapsed ? 'justify-center' : 'justify-between px-1',
       )}
     >
       {!collapsed ? (
@@ -162,6 +163,7 @@ function SidebarHeader({
 
 /** Navegación lateral por áreas. Colapsable en escritorio, embebible en un cajón. */
 export function AppSidebar({
+  className,
   collapsed = false,
   onToggle,
   onNavigate,
@@ -172,11 +174,19 @@ export function AppSidebar({
   const badgeFor = (id: string) => navBadgeCount(id, attention)
 
   return (
-    <div className="flex h-full flex-col gap-1 border-sidebar-border bg-sidebar text-sidebar-foreground">
+    <div
+      className={cn(
+        'flex min-h-0 min-w-0 grow flex-col gap-1 bg-sidebar text-sidebar-foreground',
+        className,
+      )}
+    >
       <SidebarHeader collapsed={collapsed} onToggle={onToggle} />
       <nav
         aria-label={shellMessages.nav.label}
-        className="flex-1 overflow-y-auto px-2 pb-4"
+        className={cn(
+          'min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3',
+          collapsed ? 'px-1 pt-1' : 'space-y-1 px-3',
+        )}
       >
         {NAV_SECTIONS.map((section) => (
           <SectionLinks
@@ -191,7 +201,7 @@ export function AppSidebar({
         ))}
       </nav>
       {mobile ? (
-        <div className="flex items-center gap-1 border-t border-sidebar-border px-2 py-2 text-sm text-sidebar-foreground/70">
+        <div className="flex shrink-0 items-center gap-1 border-t border-sidebar-border px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] text-sm text-sidebar-foreground/70">
           <ThemeToggle />
           <span>{messages.theme.aria}</span>
         </div>

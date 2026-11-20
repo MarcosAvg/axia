@@ -19,12 +19,22 @@ test('la barra inferior navega y deja el resto en Más', async ({ page }) => {
     'page',
   )
 
-  await tabbar.getByRole('button', { name: 'Más', exact: true }).click()
-  const drawer = page.getByRole('dialog')
+  const more = tabbar.getByRole('button', { name: 'Más', exact: true })
+  await more.press('Enter')
+  const drawer = page.getByRole('dialog', { name: 'Más' })
+  await expect(drawer).toHaveAttribute('data-side', 'bottom')
   await expect(drawer.getByRole('link', { name: 'Mi perfil' })).toBeVisible()
   await expect(
     drawer.getByRole('button', { name: 'Cambiar tema y modo' }),
   ).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(drawer).toBeHidden()
+  await expect(more).toBeFocused()
+
+  await more.click()
+  await drawer.getByRole('link', { name: 'Mi perfil' }).click()
+  await expect(drawer).toBeHidden()
 })
 
 test('el administrador cambia Mi trabajo por Métricas', async ({ page }) => {
@@ -34,6 +44,22 @@ test('el administrador cambia Mi trabajo por Métricas', async ({ page }) => {
   const tabbar = page.getByRole('navigation', { name: 'Navegación inferior' })
   await expect(tabbar.getByRole('link', { name: /^Métricas/ })).toBeVisible()
   await expect(tabbar.getByRole('link', { name: /^Mi trabajo/ })).toHaveCount(0)
+})
+
+test('Más mantiene accesible el final del menú en horizontal', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 844, height: 390 })
+  await signIn(page, 'demo.admin')
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
+
+  const sheet = page.getByRole('dialog', { name: 'Más' })
+  const profile = sheet.getByRole('link', { name: 'Mi perfil' })
+  await profile.scrollIntoViewIfNeeded()
+  await expect(profile).toBeInViewport({ ratio: 1 })
+  await expect(
+    sheet.getByRole('button', { name: 'Cambiar tema y modo' }),
+  ).toBeInViewport({ ratio: 1 })
 })
 
 test('el detalle cambia la barra inferior por la acción fija', async ({

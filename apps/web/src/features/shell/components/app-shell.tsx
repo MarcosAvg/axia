@@ -1,12 +1,6 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { cn } from 'cn'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import { useServerEvents } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppSidebar } from './app-sidebar'
@@ -38,7 +32,6 @@ function useSearchShortcut(
 export function AppShell() {
   useServerEvents()
   const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -56,24 +49,16 @@ export function AppShell() {
       </a>
       <aside
         className={cn(
-          'sticky top-0 hidden h-svh shrink-0 border-r transition-[width] duration-200 lg:block',
+          'sticky top-0 hidden h-svh shrink-0 py-3 pl-3 transition-[width] duration-200 motion-reduce:transition-none lg:flex',
           collapsed ? 'w-16' : 'w-64',
         )}
       >
         <AppSidebar
+          className="overflow-hidden rounded-2xl border border-sidebar-border shadow-xs"
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
         />
       </aside>
-
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-72 p-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>{shellMessages.brand}</SheetTitle>
-          </SheetHeader>
-          <AppSidebar mobile onNavigate={() => setMobileOpen(false)} />
-        </SheetContent>
-      </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppTopbar onOpenSearch={() => setSearchOpen(true)} />
@@ -88,7 +73,7 @@ export function AppShell() {
         </main>
       </div>
 
-      {tabbar ? <AppTabbar onOpenMore={() => setMobileOpen(true)} /> : null}
+      {tabbar ? <AppTabbar /> : null}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   )
