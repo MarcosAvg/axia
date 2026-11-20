@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PageHeader } from '@/components/shared/page-header'
-import { Button } from '@/components/ui/button'
 import { RequirePermission, RequireTechnician, useAuth } from '@/features/auth'
-import { TicketBoardPanel, ticketMessages, useMyWork } from '@/features/tickets'
+import {
+  QueueViewSwitch,
+  TicketBoardPanel,
+  ticketMessages,
+  useMyWork,
+} from '@/features/tickets'
 
 const board = ticketMessages.board
 
@@ -25,14 +29,14 @@ function MyWorkBoardContent() {
   const query = useMyWork(identity?.userId)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 lg:gap-6">
       <PageHeader
-        title={board.title}
+        title={ticketMessages.myWork.title}
         description={board.myWorkSubtitle}
         actions={
-          <Button variant="outline" asChild className="min-h-11">
+          <QueueViewSwitch view="board">
             <Link to="/mi-trabajo">{board.backToList}</Link>
-          </Button>
+          </QueueViewSwitch>
         }
       />
       <TicketBoardPanel

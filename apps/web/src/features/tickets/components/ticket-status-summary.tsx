@@ -1,6 +1,6 @@
 import type { TicketListItem } from '../domain/types'
 import { TICKET_STATUSES } from '../domain/types'
-import { statusLabels } from '../i18n'
+import { StatusBadge } from './status-badge'
 
 /** Conteo de tiquets por estado, para encabezar una bandeja. */
 export function TicketStatusSummary({ items }: { items: TicketListItem[] }) {
@@ -12,16 +12,12 @@ export function TicketStatusSummary({ items }: { items: TicketListItem[] }) {
   if (counts.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-2">
       {counts.map(({ status, count }) => (
-        <span
-          key={status}
-          className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs"
-        >
-          <span className="text-muted-foreground">{statusLabels[status]}</span>
-          <span className="font-medium">{count}</span>
-        </span>
+        <li key={status}>
+          <StatusBadge status={status} count={count} />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

@@ -7,6 +7,7 @@ import { ticketMessages } from '../i18n'
 import { PendingSyncBadge } from './pending-sync-badge'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { StatusBadge } from './status-badge'
+import { TicketCardHeading } from './ticket-card-heading'
 import { UnroutedBadge } from './unrouted-badge'
 
 function TicketMeta({
@@ -71,14 +72,10 @@ function TicketCard({
         params={{ ticketId: ticket.id }}
         className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       >
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-xs font-semibold text-primary tabular-nums">
-            {ticket.folio}
-          </span>
-          <p className="line-clamp-2 text-sm font-medium wrap-anywhere">
-            {ticket.description}
-          </p>
-        </div>
+        <TicketCardHeading
+          folio={ticket.folio}
+          description={ticket.description}
+        />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <StatusBadge status={ticket.status} />
           {ticket.pendingSync ? <PendingSyncBadge /> : null}

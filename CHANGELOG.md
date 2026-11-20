@@ -17,6 +17,9 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   El listado y el detalle de Tiquets dan prioridad al folio, la descripción y el estado.
   El detalle agrupa la información en tarjetas y ofrece un acceso directo a **Evidencias**
   en escritorio y móvil.
+- **Bandeja** y **Mi trabajo** muestran la vista activa en un selector de Lista y Tablero.
+  Sus tarjetas y conteos usan la misma jerarquía y colores de estado que Tiquets. En móvil,
+  el tablero indica que se puede desplazar entre columnas y admite el recorrido por teclado.
 
 ## [0.32.0] - 2026-11-20
 

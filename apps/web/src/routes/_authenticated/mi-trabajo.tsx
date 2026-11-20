@@ -3,9 +3,9 @@ import { HardHatIcon } from 'lucide-react'
 import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
-import { Button } from '@/components/ui/button'
 import { RequirePermission, RequireTechnician, useAuth } from '@/features/auth'
 import {
+  QueueViewSwitch,
   TicketList,
   TicketStatusSummary,
   ticketMessages,
@@ -32,14 +32,14 @@ function MyWorkContent() {
   const { myWork } = ticketMessages
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 lg:gap-6">
       <PageHeader
         title={myWork.title}
         description={myWork.subtitle}
         actions={
-          <Button variant="outline" asChild className="min-h-11">
+          <QueueViewSwitch view="list">
             <Link to="/mi-trabajo/tablero">{ticketMessages.board.open}</Link>
-          </Button>
+          </QueueViewSwitch>
         }
       />
       {query.isLoading ? <LoadingList rows={4} /> : null}
@@ -50,10 +50,10 @@ function MyWorkContent() {
         <EmptyState icon={HardHatIcon} title={myWork.empty} />
       ) : null}
       {query.data && query.data.length > 0 ? (
-        <>
+        <section aria-label={myWork.subtitle} className="flex flex-col gap-3">
           <TicketStatusSummary items={query.data} />
           <TicketList items={query.data} />
-        </>
+        </section>
       ) : null}
     </div>
   )

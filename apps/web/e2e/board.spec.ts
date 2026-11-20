@@ -50,3 +50,35 @@ test('@smoke los tableros respetan los permisos de cada bandeja', async ({
   await page.goto('/mi-trabajo/tablero')
   await expect(page.getByText('Sin acceso')).toBeVisible()
 })
+
+test('en móvil la vista se identifica y el tablero se recorre con el teclado', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  await signIn(page, 'demo.technician')
+  await page.goto('/mi-trabajo')
+
+  const view = page.getByRole('navigation', { name: 'Vista de tiquets' })
+  await expect(view.getByText('Lista', { exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+  await view.getByRole('link', { name: 'Ver tablero' }).click()
+  await expect(view.getByText('Tablero', { exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+
+  const columns = page.getByRole('region', { name: 'Columnas por estado' })
+  await page
+    .getByRole('button', { name: 'Ver estados siguientes' })
+    .press('Enter')
+  await expect
+    .poll(() => columns.evaluate((node) => node.scrollLeft))
+    .toBeGreaterThan(0)
+  await page
+    .getByRole('button', { name: 'Ver estados anteriores' })
+    .press('Enter')
+  await expect.poll(() => columns.evaluate((node) => node.scrollLeft)).toBe(0)
+  expect(await page.evaluate('document.documentElement.scrollWidth')).toBe(320)
+})

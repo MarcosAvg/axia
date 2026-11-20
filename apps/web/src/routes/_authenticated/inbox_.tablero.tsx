@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { PageHeader } from '@/components/shared/page-header'
-import { Button } from '@/components/ui/button'
 import { RequirePermission, useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
+  QueueViewSwitch,
   TicketBoardPanel,
   TicketFilters,
   ticketFiltersFromSearch,
@@ -50,14 +50,14 @@ function InboxBoardContent() {
   )
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 lg:gap-6">
       <PageHeader
-        title={board.title}
+        title={ticketMessages.inbox.title}
         description={board.inboxSubtitle}
         actions={
-          <Button variant="outline" asChild className="min-h-11">
+          <QueueViewSwitch view="board">
             <Link to="/inbox">{board.backToList}</Link>
-          </Button>
+          </QueueViewSwitch>
         }
       />
       <TicketFilters

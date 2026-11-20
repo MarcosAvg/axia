@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { RequirePermission, useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
+  QueueViewSwitch,
   TakeOfferButton,
   TicketList,
   TicketStatusSummary,
@@ -31,7 +32,7 @@ function InboxPage() {
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-sm font-medium">{children}</h2>
+  return <h2 className="text-base font-semibold tracking-tight">{children}</h2>
 }
 
 function OffersSection({
@@ -88,7 +89,7 @@ function QueueList({
   if (items.length === 0) return null
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
+      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
       <TicketList items={items} showElapsed />
     </div>
   )
@@ -105,7 +106,7 @@ function TeamSection({
 }) {
   const { inbox } = ticketMessages
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4 border-t pt-5 lg:pt-6">
       <SectionTitle>{inbox.teamCount(items.length)}</SectionTitle>
       {team.isLoading ? <LoadingList rows={3} /> : null}
       {team.isError ? (
@@ -142,16 +143,16 @@ function InboxContent() {
   const queue = splitTeamQueue(teamItems)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 lg:gap-6">
       <PageHeader
         title={inbox.title}
         description={inbox.subtitle}
         actions={
-          <Button variant="outline" asChild className="min-h-11">
+          <QueueViewSwitch view="list">
             <Link to="/inbox/tablero" search={{ page: 1 }}>
               {ticketMessages.board.open}
             </Link>
-          </Button>
+          </QueueViewSwitch>
         }
       />
       <OffersSection offers={offers} items={offerItems} />

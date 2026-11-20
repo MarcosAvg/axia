@@ -286,6 +286,12 @@ export const ticketMessages = {
   },
   board: {
     title: 'Tablero',
+    listView: 'Lista',
+    viewLabel: 'Vista de tiquets',
+    columnsLabel: 'Columnas por estado',
+    scrollHint: 'Desliza el tablero para ver más estados.',
+    previousColumns: 'Ver estados anteriores',
+    nextColumns: 'Ver estados siguientes',
     open: 'Ver tablero',
     backToList: 'Ver lista',
     inboxSubtitle: 'Tiquets de tu equipo por estado.',

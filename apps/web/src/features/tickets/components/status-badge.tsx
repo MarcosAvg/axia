@@ -15,13 +15,22 @@ const toneClasses: Record<StatusTone, string> = {
 }
 
 /** Insignia del estado del tiquet. */
-export function StatusBadge({ status }: { status: TicketStatus }) {
+export function StatusBadge({
+  status,
+  count,
+}: {
+  status: TicketStatus
+  count?: number
+}) {
   return (
     <Badge
       variant="secondary"
       className={cn('rounded-full', toneClasses[statusTone(status)])}
     >
       {statusLabels[status]}
+      {count === undefined ? null : (
+        <span className="ml-0.5 font-semibold tabular-nums">{count}</span>
+      )}
     </Badge>
   )
 }

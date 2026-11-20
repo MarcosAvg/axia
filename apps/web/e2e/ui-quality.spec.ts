@@ -142,7 +142,15 @@ test('las acciones principales aprovechan el ancho en móvil', async ({
     main.getByRole('link', { name: 'Ver tiquets', exact: true }),
   )
   await page.goto('/mi-trabajo')
-  await expectFullRow(main.getByRole('link', { name: 'Ver tablero' }))
+  const views = main.getByRole('navigation', { name: 'Vista de tiquets' })
+  await expectFullRow(views)
+  await expect
+    .poll(
+      async () =>
+        (await views.getByRole('link', { name: 'Ver tablero' }).boundingBox())
+          ?.height ?? 0,
+    )
+    .toBeGreaterThanOrEqual(44)
 })
 
 test('la barra de usuarios ocupa el ancho disponible en móvil', async ({

@@ -1,6 +1,7 @@
 // Punto de entrada público del feature de tiquets.
 
 export { TicketBoardPanel } from './components/ticket-board-panel'
+export { QueueViewSwitch } from './components/queue-view-switch'
 export { TicketForm } from './components/ticket-form'
 export { TicketDetailView } from './components/ticket-detail'
 export { TicketFilters } from './components/ticket-filters'
