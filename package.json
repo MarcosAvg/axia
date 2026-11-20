@@ -10,7 +10,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "test:visual": "pnpm --filter @axia/web test:visual",
-    "test:scripts": "bash scripts/install.test.sh && bash scripts/dev-api.test.sh && bash deploy/scripts/recovery.test.sh && bash deploy/scripts/compose-image.test.sh && node --test scripts/*.test.mjs",
+    "test:scripts": "bash scripts/install.test.sh && bash scripts/dev-api.test.sh && bash scripts/docker-upgrade-smoke.test.sh && bash scripts/promote-stable.test.sh && bash deploy/scripts/recovery.test.sh && bash deploy/scripts/compose-image.test.sh && bash deploy/scripts/check-instance.test.sh && node --test scripts/*.test.mjs",
     "format": "prettier --write .",
     "check:boundaries": "depcruise apps/web/src --config .dependency-cruiser.cjs",
     "knip": "knip",

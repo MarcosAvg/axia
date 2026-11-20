@@ -55,6 +55,9 @@ aplicación que migra al arrancar y actualización con `docker compose pull` y
 
 ## Referencias
 
+El [ADR 0128](0128-publicacion-verificada-y-recuperacion-por-digest.md) define cómo promover el
+canal estable y qué identidad conserva el respaldo para una recuperación en otro host.
+
 Sustituye parcialmente la decisión de imagen exacta y servicio migrador de
 [0099](0099-consolidacion-self-hosted.md), y la de actualización explícita de
 [operación](../guides/operacion.md).

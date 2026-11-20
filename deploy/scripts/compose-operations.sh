@@ -8,6 +8,18 @@ compose() {
   (cd "$ROOT_DIR" && docker compose "${args[@]}" "$@")
 }
 fail() { echo "$*" >&2; exit 1; }
+manifest_value() { sed -n "s/^$2=//p" "$1"; }
+valid_backup_manifest() {
+  local manifest="$1" format
+  [[ -f "$manifest" && ! -L "$manifest" ]] || return 1
+  format="$(manifest_value "$manifest" format)" || return
+  [[ "$format" == 1 || "$format" == 2 ]] || return 1
+  [[ "$(manifest_value "$manifest" image)" =~ ^[^[:space:]]+$ ]] || return 1
+  [[ "$(manifest_value "$manifest" image_id)" =~ ^sha256:[a-f0-9]{64}$ ]] || return 1
+  [[ "$(manifest_value "$manifest" database_sha256)" =~ ^[a-f0-9]{64}$ ]] || return 1
+  [[ "$(manifest_value "$manifest" evidence_sha256)" =~ ^[a-f0-9]{64}$ ]] || return 1
+  [[ "$format" == 1 || "$(manifest_value "$manifest" image_digest)" =~ ^[^[:space:]@]+@sha256:[a-f0-9]{64}$ ]]
+}
 compose_image() {
   # Compose incluye dependencias incluso al filtrar servicios. Consumir todo el flujo
   # evita SIGPIPE y solo deja salir la referencia pública del servicio solicitado.

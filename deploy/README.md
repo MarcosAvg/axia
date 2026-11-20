@@ -1,7 +1,9 @@
 # Instalar Axia
 
 Axia se instala desde el paquete `axia-self-hosted.tar.gz` de una release verificada. El host solo
-necesita Docker Engine y Compose v2, además de un proxy o túnel que publique HTTPS.
+necesita Linux, Docker Engine con el plugin de Compose v2 o posterior, y un proxy o túnel que
+publique HTTPS.
+Las notas de release indican la arquitectura y la ruta de actualización verificadas.
 Los scripts operativos requieren Bash y herramientas del host como `sha256sum`, `tar` y `awk`.
 No se requiere Node.js, pnpm, Git ni compilar código. El paquete incluye `compose.yaml`, `.env.example`, scripts de operación,
 licencia, manual de operación (`OPERATIONS.md`) e identidad de la release en `release.json`.
@@ -15,9 +17,11 @@ conservarlos y seguir [Operación](../docs/guides/operacion.md); no sobrescribir
 entorno ni generar secretos nuevos sobre una base existente.
 
 1. Descargar y extraer el paquete de una release concreta en un directorio nuevo y vacío de la instancia.
+   Antes de extraerlo, descargar también su archivo `.sha256` y ejecutar
+   `sha256sum -c axia-self-hosted.tar.gz.sha256` en el directorio de descarga.
 2. Crear el archivo de entorno y completar los dos secretos con valores aleatorios. La plantilla
-   usa `:latest` por defecto; para fijar una release, descomentar `AXIA_IMAGE` con una etiqueta
-   `vX.Y.Z` o el digest de `release.json`. Las demás opciones están en
+   usa el canal estable `:latest` por defecto. Para una instancia con datos reales, descomentar
+   `AXIA_IMAGE` con el digest de `release.json`. Las demás opciones están en
    [Configuración](../docs/reference/configuracion.md).
 3. Preparar la red del proxy y arrancar los servicios.
 
@@ -64,7 +68,10 @@ docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready')
 ```
 
 Abrir `/login` desde el dominio HTTPS: si la instancia está vacía, permite crear el primer
-administrador. Después, comprobar login y un tiquet con evidencia. Producción no carga demo.
+administrador. Mantener el acceso restringido al operador en el proxy hasta que se cree esa cuenta.
+Antes de habilitar el acceso a usuarios, comprobar login, SSE y subida y descarga de una evidencia
+y un adjunto a través de HTTPS. El proxy debe permitir las cargas de adjuntos de hasta 25 MiB y
+las de evidencias de hasta 20 MiB con los límites predeterminados de Axia. Producción no carga demo.
 La política de contraseña se consulta en [Configuración](../docs/reference/configuracion.md).
 
 ## Actualizar y recuperar

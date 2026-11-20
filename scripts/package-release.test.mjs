@@ -33,6 +33,7 @@ test('release package contains only runtime files and immutable identity, never 
     assert.equal(release.revision, revision)
     assert.equal(release.image, image)
     assert.ok(existsSync(join(output, 'deploy/scripts/compose-operations.sh')))
+    assert.ok(existsSync(join(output, 'deploy/scripts/check-instance.sh')))
     assert.ok(existsSync(join(output, 'OPERATIONS.md')))
     assert.ok(!existsSync(join(output, '.env')))
     assert.ok(!existsSync(join(output, 'package.json')))

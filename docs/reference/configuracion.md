@@ -201,6 +201,9 @@ de la instalación. `BACKUP_DIR` es relativo al directorio desde el que se invoc
 | `COMPOSE_FILE` | `compose.yaml` | Selección nativa de Compose; permite varios archivos |
 | `COMPOSE_PROJECT_NAME` | `axia` en producción | Proyecto; determina contenedores y volúmenes |
 | `BACKUP_DIR` | `./backups` | Destino de respaldos individuales y conjuntos |
+| `AXIA_PUBLIC_URL` | obligatorio para `check-instance.sh` | Origen público HTTPS, por ejemplo `https://axia.example.org` |
+| `BACKUP_MAX_AGE_HOURS` | `26` | Edad máxima del último conjunto completo para el diagnóstico |
+| `DEPLOY_MIN_FREE_KIB` | `1048576` | Espacio libre mínimo en cada destino de datos, evidencias y respaldos |
 | `RETENTION_DAYS` | `14` | Solo respaldos individuales: borra archivos antiguos después de copiar correctamente |
 | `DB_CONTAINER` | servicio `db` si no hay `DATABASE_URL` | Contenedor de base para `backup.sh` / `restore.sh` |
 | `PGUSER` | `axia_owner` | Rol para scripts individuales con contenedor |

@@ -6,8 +6,9 @@ Indicar cómo reportar una vulnerabilidad y qué prácticas debe respetar una in
 
 ## Versiones soportadas
 
-El proyecto está en desarrollo pre-1.0. La última release publicada es `v0.20.0`; la versión de
-cada release se identifica por el tag de Git. Se atienden los reportes sobre la rama `main`.
+El proyecto está en desarrollo pre-1.0. La versión de cada release se identifica por el tag de Git.
+La [referencia de límites](docs/reference/limitaciones.md) documenta la versión publicada. Se
+atienden los reportes sobre la rama `main`.
 
 | Versión | Soporte |
 |---|---|
@@ -37,7 +38,7 @@ Entran en alcance, entre otros:
 
 ## Buenas prácticas de despliegue
 
-- La base de datos no se expone a internet. Solo la API queda detrás del reverse proxy TLS.
+- La base de datos no se expone a internet. La PWA y su API se publican mediante el proxy HTTPS.
 - `POSTGRES_OWNER_PASSWORD` y `AXIA_APP_PASSWORD` se generan de forma aleatoria y se guardan fuera
   del repositorio.
 - El rol de aplicación no tiene permisos de DDL. Las migraciones usan el rol dueño.

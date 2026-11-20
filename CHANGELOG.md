@@ -5,8 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- El diagnóstico de instancia comprueba HTTPS, PostgreSQL, escritura de evidencias, espacio
+  disponible y antigüedad de los respaldos.
+
 ### Corregido
 
+- El canal de instalación `latest` solo avanza a releases estables con un paquete disponible
+  y verificado.
 - Los respaldos coordinados de imágenes publicadas conservan el digest necesario para recuperar
   la versión original aunque la etiqueta `latest` haya cambiado.
 

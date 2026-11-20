@@ -55,6 +55,11 @@ if ACTIVE_JOB=yes run_backup job; then echo 'Aceptó trabajo activo'; exit 1; fi
 ! grep -Eq ' stop app|pg_dump ' "$TRACE"
 if APP_IMAGE_ID=sha256:other run_backup mismatch; then echo 'Aceptó release diferente'; exit 1; fi
 ! grep -Eq 'pg_dump ' "$TRACE"
+if APP_RUNNING=no APP_IMAGE_ID=sha256:other run_backup stopped_mismatch; then
+  echo 'Aceptó una etiqueta movida mientras la aplicación estaba detenida'
+  exit 1
+fi
+! grep -Eq 'pg_dump ' "$TRACE"
 if FAIL_DUMP=yes run_backup dump_failure; then echo 'Aceptó dump fallido'; exit 1; fi
 [[ -z "$(find "$TEST_DIR/dump_failure" -name manifest)" ]]
 assert_trace 'start app'

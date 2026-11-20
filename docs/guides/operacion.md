@@ -7,24 +7,37 @@ desde su directorio. Para instalar, configurar TLS y crear el primer administrad
 
 ## Actualización
 
-1. Revisar las notas de la release destino y reservar una ventana sin escritores ni tareas
-   operativas concurrentes. Conservar el paquete y la configuración de la instancia.
-2. Ejecutar un conjunto de respaldo sobre la imagen instalada.
-3. Guardar el conjunto fuera del host. Con el canal `latest` no hace falta editar `.env`; para
-   fijar una release, definir `AXIA_IMAGE` con una etiqueta `vX.Y.Z` o el digest de `release.json`.
-4. Descargar la imagen y arrancar. Compose detiene y recrea `app`; el contenedor aplica las
-   migraciones pendientes antes de escuchar en `3100`.
-5. Verificar salud, login y una evidencia antes de terminar el mantenimiento.
+1. Revisar las notas y la versión de origen probada para la release destino. Verificar el checksum
+   de su paquete y conservar el paquete anterior y la configuración privada. Anotar el proyecto
+   Compose, los volúmenes y el digest instalado.
+2. Hacer el diagnóstico de la instancia y comprobar que haya espacio suficiente para la nueva
+   imagen y el respaldo. Bloquear el acceso de usuarios en el proxy y pausar tareas escritoras
+   externas. Mantenerlos bloqueados durante toda la ventana, incluso cuando el respaldo reinicie la app.
+3. Ejecutar un respaldo coordinado sobre la imagen **instalada**. Guardar el conjunto fuera del host
+   y verificar allí sus dos hashes contra el manifiesto. Para obtener el nuevo formato en la
+   primera actualización, usar los scripts de respaldo del paquete descargado, con el archivo
+   Compose y el archivo de entorno de la instancia instalados seleccionados por rutas absolutas
+   en `AXIA_COMPOSE_FILE` y `AXIA_ENV_FILE`. Ejecutarlo desde el directorio de la instancia y
+   conservar el nombre del proyecto.
+4. Revisar los cambios del Compose y de la plantilla del paquete destino. Aplicar esos cambios
+   conservando el proyecto, los volúmenes y los secretos. Fijar `AXIA_IMAGE` al digest
+   destino para instancias con datos reales. Descargar la imagen y arrancar. Compose recrea
+   `app` y las migraciones se aplican antes de que escuche en `3100`.
+5. Con acceso de mantenimiento, verificar salud desde HTTPS, login, un tiquet existente y su
+   evidencia. Reabrir el tráfico y reanudar las tareas solo al validar esos resultados.
 
 ```bash
 ./deploy/scripts/backup-all.sh
-docker compose pull
+# Copiar el respaldo fuera del host y validarlo antes de cambiar a la release destino.
+docker compose pull app
 docker compose up -d --wait
 docker compose logs --tail=100 app
 ```
 
 Si la migración falla, la app no arranca; conservar los logs y recuperar el conjunto anterior en
 otro destino vacío si corresponde. Cambiar solo la etiqueta no revierte una migración.
+Si la versión nueva ya recibió escrituras, conservar también sus datos y coordinar cómo recuperar
+esos cambios antes de conmutar el proxy a la instancia restaurada.
 
 ### Si una migración se detiene
 
@@ -159,7 +172,30 @@ La retención de conjuntos completos de respaldo se programa por separado: `back
 conjuntos antiguos. Conservar copias fuera del host y verificar una recuperación antes de eliminar
 las anteriores.
 
+Se puede programar una copia coordinada a un directorio montado fuera del host. Confirmar el montaje
+antes de escribir para evitar respaldar por accidente en el disco local. Este ejemplo supone que
+`/mnt/backups` es un montaje administrado por el operador. Programar la copia en una ventana
+distinta a la limpieza y comprobar el resultado del trabajo.
+
+```cron
+0 2 * * * mountpoint -q /mnt/backups && cd /opt/axia && BACKUP_DIR=/mnt/backups/axia ./deploy/scripts/backup-all.sh
+```
+
 ## Salud y diagnóstico
+
+Desde el directorio de la instancia, ejecutar el diagnóstico con el dominio y el destino de
+respaldos del operador. Requiere `curl` y GNU `date`. Devuelve código distinto de cero si falla el
+HTTPS público, la preparación interna de la app, la escritura de una sonda temporal como usuario de
+la app, el espacio libre o la presencia de un conjunto reciente. El diagnóstico de antigüedad
+comprueba que estén el manifiesto y ambos archivos. El simulacro de restauración verifica su integridad.
+
+```bash
+AXIA_PUBLIC_URL=https://axia.example.org BACKUP_DIR=/mnt/backups/axia ./deploy/scripts/check-instance.sh
+```
+
+Ejecutar el diagnóstico periódicamente desde el host con la cuenta de operación y enviar un
+resultado distinto de cero al sistema de alertas del operador. Ajustar los umbrales en la
+[referencia de configuración](../reference/configuracion.md#herramientas-operativas).
 
 ```bash
 docker compose ps
@@ -171,6 +207,14 @@ Revisar salud, logs y espacio tanto en los volúmenes como en el destino de resp
 migración de arranque, conservar la salida de `docker compose logs app`; el contenedor no llega a
 escuchar en `3100`. Para lentitud o saturación de conexiones, consultar
 [Rendimiento de PostgreSQL](../reference/rendimiento-postgres.md).
+
+## Registro del simulacro
+
+En un host Linux de laboratorio, registrar versiones de origen y destino, digest, versión de Compose
+y destino elegido. Medir por separado la ventana entre retirar el tráfico y volver a habilitarlo,
+y el tiempo de restaurar y validar en un proyecto vacío. Anotar login, conteos de tiquets y eventos,
+integridad de evidencias y adjuntos, continuidad de SSE y las alertas provocadas. Repetir el
+simulacro antes de admitir datos reales y después con la periodicidad acordada con el operador.
 
 ## Secretos y rotación
 

@@ -4,6 +4,11 @@ set -euo pipefail
 umask 077
 source "$(dirname "${BASH_SOURCE[0]}")/compose-operations.sh"
 require_image
+APP_CONTAINER="$(compose ps -aq app)"
+if [[ -n "$APP_CONTAINER" ]]; then
+  [[ "$(docker inspect --format '{{.Image}}' "$APP_CONTAINER")" == "$IMAGE_ID" ]] ||
+    fail 'El contenedor de app usa otra imagen; selecciona su misma release antes de respaldar.'
+fi
 IMAGE_DIGEST="$(backup_image_digest)"
 FORMAT=2
 if [[ -z "$IMAGE_DIGEST" ]]; then

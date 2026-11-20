@@ -35,6 +35,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0125](0125-tiempo-autoritativo-instancia.md) | Tiempo de la instancia, confianza offline y corrección manual |
 | [0126](0126-flujo-pausa-avance-y-salida.md) | Flujo de pausa con pasos de avance y salidas |
 | [0127](0127-desglose-metricas-lista.md) | Desglose de métricas con la lista de tiquets |
+| [0128](0128-publicacion-verificada-y-recuperacion-por-digest.md) | Publicación verificada y recuperación por digest |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles
