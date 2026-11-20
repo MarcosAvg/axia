@@ -90,7 +90,7 @@ test('el detalle pausado muestra el motivo y enlaza a evidencias', async ({
   await page.setViewportSize({ width: 390, height: 844 })
   await signIn(page, 'demo.technician')
   await page.goto('/mi-trabajo')
-  await page.getByRole('link', { name: /^AX-2026-64 Pausado/ }).click()
+  await page.getByRole('link', { name: /^AX-2026-64\b.*Pausado/ }).click()
 
   await expect(page.getByText('Motivo:', { exact: true })).toBeInViewport()
   await expect(
@@ -131,7 +131,7 @@ test('volver desde el detalle horizontal conserva Mi trabajo', async ({
   await page.setViewportSize({ width: 844, height: 390 })
   await signIn(page, 'demo.technician')
   await page.goto('/mi-trabajo')
-  const ticket = page.getByRole('link', { name: /^AX-2026-4 En proceso/ })
+  const ticket = page.getByRole('link', { name: /^AX-2026-4\b.*En proceso/ })
   await ticket.click()
   await page.getByRole('button', { name: 'Volver', exact: true }).click()
   await expect(page).toHaveURL(/\/mi-trabajo$/)
@@ -143,7 +143,8 @@ test('las tarjetas conservan edificio y ubicación a 320 px', async ({
   await page.setViewportSize({ width: 320, height: 650 })
   await signIn(page, 'demo.admin')
   await page.goto('/tickets')
-  const card = page.getByRole('link', { name: /^AX-2026-1 Registrado/ })
+  const card = page.getByRole('link', { name: /^AX-2026-1\b.*Registrado/ })
+  await expect(card).toHaveAccessibleName(/^AX-2026-1\s+.+\s+Registrado\b/)
   const place = card.getByText('Edificio Central · Planta baja', {
     exact: true,
   })

@@ -151,7 +151,7 @@ export function TicketActionBar({
   const others = panel.visible.filter((action) => action !== primary)
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+    <div className="shell-surface fixed inset-x-4 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 p-2 lg:hidden">
       <div className="mx-auto flex max-w-[1800px] flex-col gap-2">
         <ProxySelector
           options={proxy.options}

@@ -30,7 +30,7 @@ import { ParticipantList } from './ticket-summary'
 
 export const EVIDENCE_SECTION_ID = 'evidencias'
 
-/** Sección del detalle: tarjeta en escritorio y bloque plano en móvil. */
+/** Superficie de sección del detalle para móvil y escritorio. */
 export function Section({
   headingId,
   title,
@@ -45,25 +45,22 @@ export function Section({
   children: React.ReactNode
 }) {
   return (
-    <Card
-      className={cn(
-        'gap-2 rounded-none border-0 bg-transparent py-4 lg:gap-4 lg:rounded-xl lg:border lg:bg-card',
-        className,
-      )}
-    >
-      <CardHeader className="px-0 lg:px-(--card-spacing)">
+    <Card className={cn('gap-3 lg:gap-4', className)}>
+      <CardHeader>
         <CardTitle
           as="h2"
           id={headingId}
           tabIndex={headingId ? -1 : undefined}
-          className={headingId ? 'scroll-mt-20' : undefined}
+          className={
+            headingId
+              ? 'scroll-mt-[calc(5rem+env(safe-area-inset-top))] lg:scroll-mt-24'
+              : undefined
+          }
         >
           <HintLabel label={title} hint={hint} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-0 lg:px-(--card-spacing)">
-        {children}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   )
 }
@@ -165,7 +162,7 @@ export function CycleTimesSection({
     <Section
       title={ticketMessages.detail.cycleTimes}
       hint={detailSectionHints.cycleTimes}
-      className={cn(!canSee && 'hidden lg:block')}
+      className={cn(!canSee && 'hidden lg:flex')}
     >
       <div className="flex flex-col gap-3">
         <div

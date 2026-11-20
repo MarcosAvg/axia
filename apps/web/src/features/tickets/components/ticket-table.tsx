@@ -24,7 +24,7 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
       <Link
         to="/tickets/$ticketId"
         params={{ ticketId: ticket.id }}
-        className="text-primary hover:underline"
+        className="rounded-sm text-primary tabular-nums hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         onClick={(event) => event.stopPropagation()}
       >
         {ticket.folio}
@@ -36,7 +36,7 @@ const DEFS: DataTableColumn<TicketListItem>[] = [
     header: columns.description,
     cell: (ticket) => (
       <span className="flex max-w-64 flex-col">
-        <span className="truncate">{ticket.description}</span>
+        <span className="truncate font-medium">{ticket.description}</span>
         <span className="truncate text-xs text-muted-foreground">
           {ticket.categoryName ?? placeholder}
         </span>

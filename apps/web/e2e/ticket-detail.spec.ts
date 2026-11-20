@@ -84,6 +84,10 @@ test('el técnico tiene sus acciones fijas y no ve el tiempo por fase en móvil'
   expect(page.getByRole('button', { name: 'Más', exact: true })).toBeVisible()
 
   await page.setViewportSize({ width: 1280, height: 900 })
+  const shortcut = page.getByRole('link', { name: 'Evidencias', exact: true })
+  await expect(shortcut).toBeVisible()
+  await shortcut.press('Enter')
+  await expect(page.getByRole('heading', { name: /^Evidencias/ })).toBeFocused()
   await expect(
     page.getByRole('heading', { name: 'Tiempo por fase' }),
   ).toBeVisible()

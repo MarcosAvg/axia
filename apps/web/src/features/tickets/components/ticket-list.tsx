@@ -69,21 +69,23 @@ function TicketCard({
       <Link
         to="/tickets/$ticketId"
         params={{ ticketId: ticket.id }}
-        className="flex flex-col gap-1 p-4 hover:bg-muted/50"
+        className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       >
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-medium">{ticket.folio}</span>
-          <span className="flex items-center gap-1.5">
-            <StatusBadge status={ticket.status} />
-            {ticket.pendingSync ? <PendingSyncBadge /> : null}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-xs font-semibold text-primary tabular-nums">
+            {ticket.folio}
           </span>
+          <p className="line-clamp-2 text-sm font-medium wrap-anywhere">
+            {ticket.description}
+          </p>
         </div>
-        <p className="line-clamp-2 text-sm text-muted-foreground">
-          {ticket.description}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">
-          {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <StatusBadge status={ticket.status} />
+          {ticket.pendingSync ? <PendingSyncBadge /> : null}
+          <p className="truncate text-xs text-muted-foreground">
+            {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
+          </p>
+        </div>
         <TicketMeta ticket={ticket} showElapsed={showElapsed} />
       </Link>
       {action ? (

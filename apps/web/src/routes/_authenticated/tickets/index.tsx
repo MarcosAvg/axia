@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { PlusIcon } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { can, RequirePermission, useAuth } from '@/features/auth'
@@ -24,6 +25,17 @@ export const Route = createFileRoute('/_authenticated/tickets/')({
   component: TicketsPage,
 })
 
+function NewTicketLink() {
+  return (
+    <Button asChild className="min-h-11">
+      <Link to="/tickets/nuevo">
+        <PlusIcon aria-hidden />
+        {ticketMessages.list.newAction}
+      </Link>
+    </Button>
+  )
+}
+
 function TicketsPage() {
   const { identity } = useAuth()
   const search = Route.useSearch()
@@ -37,42 +49,45 @@ function TicketsPage() {
 
   return (
     <RequirePermission permission="ticket.view">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 lg:gap-6">
         <PageHeader
           title={ticketMessages.list.title}
           description={ticketMessages.list.subtitle}
           actions={
-            can(identity, 'ticket.create') ? (
-              <Button asChild className="min-h-11">
-                <Link to="/tickets/nuevo">{ticketMessages.list.newAction}</Link>
-              </Button>
-            ) : undefined
+            can(identity, 'ticket.create') ? <NewTicketLink /> : undefined
           }
         />
-        <TicketFilters
-          value={search}
-          onChange={applySearch}
-          catalogs={catalogs}
-        />
-        <InheritedFiltersNotice
-          search={search}
-          onClear={(next) => applySearch({ ...next, page: 1 })}
-        />
-        {query.data ? (
-          <p className="text-sm text-muted-foreground">
-            {ticketMessages.list.count(page.total)}
-          </p>
-        ) : null}
-        <TicketListPanel
-          isLoading={query.isLoading}
-          isError={query.isError}
-          items={page.items}
-          page={search.page}
-          pageSize={page.pageSize}
-          total={page.total}
-          totalPages={page.totalPages}
-          onPage={(next) => applySearch({ ...search, page: next })}
-        />
+        <div className="space-y-3">
+          <TicketFilters
+            value={search}
+            onChange={applySearch}
+            catalogs={catalogs}
+          />
+          <InheritedFiltersNotice
+            search={search}
+            onClear={(next) => applySearch({ ...next, page: 1 })}
+          />
+        </div>
+        <section aria-label={ticketMessages.list.results} className="space-y-3">
+          {query.data ? (
+            <p
+              role="status"
+              className="text-sm text-muted-foreground tabular-nums"
+            >
+              {ticketMessages.list.count(page.total)}
+            </p>
+          ) : null}
+          <TicketListPanel
+            isLoading={query.isLoading}
+            isError={query.isError}
+            items={page.items}
+            page={search.page}
+            pageSize={page.pageSize}
+            total={page.total}
+            totalPages={page.totalPages}
+            onPage={(next) => applySearch({ ...search, page: next })}
+          />
+        </section>
       </div>
     </RequirePermission>
   )

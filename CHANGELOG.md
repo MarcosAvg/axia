@@ -13,6 +13,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - Los grupos del menú lateral y de **Más** usan filas de shadcn/ui con iconos alineados y
   contadores de pendientes a la derecha. En escritorio, la barra contraída muestra el nombre
   de cada destino al pasar el cursor o enfocarlo con el teclado.
+- En móvil, el encabezado y las barras inferiores comparten márgenes y esquinas redondeadas.
+  El listado y el detalle de Tiquets dan prioridad al folio, la descripción y el estado.
+  El detalle agrupa la información en tarjetas y ofrece un acceso directo a **Evidencias**
+  en escritorio y móvil.
 
 ## [0.32.0] - 2026-11-20
 

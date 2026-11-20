@@ -34,31 +34,29 @@ export function AppTopbar({ onOpenSearch }: AppTopbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1 border-b bg-background/95 px-2 backdrop-blur md:gap-3 md:px-4 lg:h-17 lg:border-b-0 lg:px-6 lg:pt-3 lg:after:pointer-events-none lg:after:absolute lg:after:inset-x-6 lg:after:-bottom-px lg:after:border-b lg:after:border-sidebar-border">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1 bg-background/95 px-2 backdrop-blur max-lg:shell-surface max-lg:top-[max(0.5rem,env(safe-area-inset-top))] max-lg:mx-4 max-lg:mt-[max(0.5rem,env(safe-area-inset-top))] md:gap-3 md:px-4 lg:h-17 lg:px-6 lg:pt-3 lg:after:pointer-events-none lg:after:absolute lg:after:inset-x-6 lg:after:-bottom-px lg:after:border-b lg:after:border-sidebar-border">
       {isDetail ? (
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="size-11 lg:hidden"
+          className="size-11 rounded-xl lg:hidden"
           aria-label={shellMessages.tabbar.back}
           onClick={goBack}
         >
           <ArrowLeftIcon />
         </Button>
       ) : null}
-      {isDetail ? (
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold md:hidden">
-          {title}
-        </p>
-      ) : null}
+      <p className="min-w-0 flex-1 truncate px-1 text-sm font-semibold md:hidden">
+        {isDetail ? title : shellMessages.brand}
+      </p>
       <AppBreadcrumbs />
       <div className="ml-auto flex items-center gap-1.5">
         <Button
           type="button"
           variant="outline"
           size="lg"
-          className="size-11 gap-2 px-0 text-muted-foreground md:h-9 md:w-auto md:px-2.5"
+          className="size-11 gap-2 px-0 text-muted-foreground max-lg:rounded-xl md:w-auto md:px-2.5 lg:h-9"
           aria-label={shellMessages.search.aria}
           onClick={onOpenSearch}
         >

@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ImagesIcon } from 'lucide-react'
 import type { MouseEvent } from 'react'
+import { PageHeading } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { useMediaQuery } from '@/lib/use-media-query'
 import type { TicketDetail, TicketPauseState } from '../domain/types'
@@ -8,6 +9,7 @@ import { ticketMessages } from '../i18n'
 import { CurrentPause } from './pause-panel'
 import { PendingSyncBadge } from './pending-sync-badge'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
+import { PriorityBadge } from './priority-badge'
 import { StatusBadge } from './status-badge'
 import { EVIDENCE_SECTION_ID } from './ticket-detail-sections'
 import { UnroutedBadge } from './unrouted-badge'
@@ -30,39 +32,45 @@ export function TicketHeader({
   const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {ticket.folio}
-        </h1>
-        <StatusBadge status={ticket.status} />
-        {pendingSync ? <PendingSyncBadge /> : null}
-        {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
-        {ticket.isUnrouted ? <UnroutedBadge /> : null}
-        {ticket.priorityName ? (
-          <span className="text-sm text-muted-foreground">
-            {ticket.priorityName}
-          </span>
-        ) : null}
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeading
+        title={ticket.folio}
+        actions={
+          <Button asChild variant="outline" className="min-h-11">
+            <Link
+              to="/tickets/$ticketId"
+              params={{ ticketId: ticket.id }}
+              hash={EVIDENCE_SECTION_ID}
+              replace
+              onClick={focusEvidence}
+            >
+              <ImagesIcon aria-hidden />
+              {ticketMessages.detail.evidence}
+            </Link>
+          </Button>
+        }
+      >
+        <p className="max-w-3xl text-sm leading-relaxed wrap-anywhere">
+          {ticket.description}
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <StatusBadge status={ticket.status} />
+          {ticket.priorityName ? (
+            <PriorityBadge
+              name={ticket.priorityName}
+              position={ticket.priorityPosition}
+            />
+          ) : null}
+          {pendingSync ? <PendingSyncBadge /> : null}
+          {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
+          {ticket.isUnrouted ? <UnroutedBadge /> : null}
+        </div>
+      </PageHeading>
       {!isDesktop && pause ? (
-        <div className="mt-1 rounded-lg border bg-card p-3 lg:hidden">
+        <div className="rounded-xl border bg-card p-4 lg:hidden">
           <CurrentPause current={pause} />
         </div>
       ) : null}
-      <Button asChild variant="outline" className="mt-1 min-h-11 lg:hidden">
-        <Link
-          to="/tickets/$ticketId"
-          params={{ ticketId: ticket.id }}
-          hash={EVIDENCE_SECTION_ID}
-          replace
-          onClick={focusEvidence}
-        >
-          <ImagesIcon aria-hidden />
-          {ticketMessages.detail.evidence}
-        </Link>
-      </Button>
-      <p className="max-w-3xl text-sm wrap-anywhere">{ticket.description}</p>
     </div>
   )
 }

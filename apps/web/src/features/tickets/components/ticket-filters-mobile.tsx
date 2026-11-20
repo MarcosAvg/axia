@@ -202,7 +202,7 @@ export function MobileFilterFields({
     ).length
 
   return (
-    <div className="flex items-end gap-2">
+    <div className="flex items-end gap-2 rounded-xl border bg-card p-3">
       <MobileSearchForm value={value} onApply={onApply} />
       <Button
         type="button"

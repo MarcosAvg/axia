@@ -16,7 +16,7 @@ import { NavDestination } from './nav-destination'
 import { mobileTabs } from './nav-items'
 
 const tabClass =
-  'relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1 text-xs font-medium text-muted-foreground transition-colors aria-[current=page]:text-foreground aria-[current=page]:[&>svg]:text-primary [&>svg]:size-5'
+  'relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1 text-xs font-medium text-sidebar-foreground/80 transition-colors focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-inset aria-[current=page]:bg-primary/10 aria-[current=page]:font-semibold aria-[current=page]:text-primary [&>svg]:size-5'
 
 /** Barra inferior de la aplicación: tres destinos por rol y acceso al resto. */
 export function AppTabbar() {
@@ -30,7 +30,7 @@ export function AppTabbar() {
     <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
       <nav
         aria-label={shellMessages.tabbar.label}
-        className="fixed inset-x-0 bottom-0 z-40 flex items-stretch border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        className="shell-surface fixed inset-x-4 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 flex items-stretch gap-1 p-1 lg:hidden"
       >
         {tabs.map((item) => {
           const Icon = item.icon
@@ -59,7 +59,7 @@ export function AppTabbar() {
       <SheetContent
         side="bottom"
         aria-describedby={undefined}
-        className="max-h-[85dvh] gap-0 overflow-hidden rounded-t-3xl border-sidebar-border p-0 motion-reduce:animate-none motion-reduce:transition-none"
+        className="max-h-[85dvh] gap-0 overflow-hidden rounded-2xl border border-sidebar-border p-0 data-[side=bottom]:inset-x-4 data-[side=bottom]:bottom-[calc(0.5rem+env(safe-area-inset-bottom))] motion-reduce:animate-none motion-reduce:transition-none"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{shellMessages.tabbar.more}</SheetTitle>
