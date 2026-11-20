@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ClockIcon } from 'lucide-react'
 import { formatDateTime, formatElapsed } from '@/lib/format'
@@ -59,38 +58,29 @@ function TicketMeta({
 function TicketCard({
   ticket,
   showElapsed,
-  action,
 }: {
   ticket: TicketListItem
   showElapsed: boolean
-  action?: (ticket: TicketListItem) => ReactNode
 }) {
   return (
-    <div className="flex flex-col">
-      <Link
-        to="/tickets/$ticketId"
-        params={{ ticketId: ticket.id }}
-        className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-      >
-        <TicketCardHeading
-          folio={ticket.folio}
-          description={ticket.description}
-        />
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <StatusBadge status={ticket.status} />
-          {ticket.pendingSync ? <PendingSyncBadge /> : null}
-          <p className="truncate text-xs text-muted-foreground">
-            {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
-          </p>
-        </div>
-        <TicketMeta ticket={ticket} showElapsed={showElapsed} />
-      </Link>
-      {action ? (
-        <div className="grid border-t px-4 py-2 lg:flex lg:justify-end">
-          {action(ticket)}
-        </div>
-      ) : null}
-    </div>
+    <Link
+      to="/tickets/$ticketId"
+      params={{ ticketId: ticket.id }}
+      className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+    >
+      <TicketCardHeading
+        folio={ticket.folio}
+        description={ticket.description}
+      />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <StatusBadge status={ticket.status} />
+        {ticket.pendingSync ? <PendingSyncBadge /> : null}
+        <p className="truncate text-xs text-muted-foreground">
+          {ticket.technicianName ?? ticketMessages.list.unassignedTechnician}
+        </p>
+      </div>
+      <TicketMeta ticket={ticket} showElapsed={showElapsed} />
+    </Link>
   )
 }
 
@@ -98,21 +88,15 @@ function TicketCard({
 export function TicketList({
   items,
   showElapsed = false,
-  action,
 }: {
   items: TicketListItem[]
   showElapsed?: boolean
-  action?: (ticket: TicketListItem) => ReactNode
 }) {
   return (
     <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card">
       {items.map((ticket) => (
         <li key={ticket.id}>
-          <TicketCard
-            ticket={ticket}
-            showElapsed={showElapsed}
-            action={action}
-          />
+          <TicketCard ticket={ticket} showElapsed={showElapsed} />
         </li>
       ))}
     </ul>

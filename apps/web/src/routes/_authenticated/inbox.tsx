@@ -8,7 +8,6 @@ import { RequirePermission, useAuth } from '@/features/auth'
 import {
   ACTIVE_STATUSES,
   QueueViewSwitch,
-  TakeOfferButton,
   TicketList,
   TicketStatusSummary,
   splitTeamQueue,
@@ -68,11 +67,7 @@ function OffersSection({
       {items.length > 0 ? (
         <>
           <TicketStatusSummary items={items} />
-          <TicketList
-            items={items}
-            showElapsed
-            action={(ticket) => <TakeOfferButton ticketId={ticket.id} />}
-          />
+          <TicketList items={items} showElapsed />
         </>
       ) : null}
     </section>

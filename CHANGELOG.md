@@ -20,6 +20,7 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 - **Bandeja** y **Mi trabajo** muestran la vista activa en un selector de Lista y Tablero.
   Sus tarjetas y conteos usan la misma jerarquía y colores de estado que Tiquets. En móvil,
   el tablero indica que se puede desplazar entre columnas y admite el recorrido por teclado.
+- Las ofertas de **Bandeja** se toman desde el detalle del tiquet.
 
 ## [0.32.0] - 2026-11-20
 

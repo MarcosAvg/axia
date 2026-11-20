@@ -9,7 +9,6 @@ export { InheritedFiltersNotice } from './components/inherited-filters'
 export { TicketList } from './components/ticket-list'
 export { TicketListPanel } from './components/ticket-list-panel'
 export { TicketStatusSummary } from './components/ticket-status-summary'
-export { TakeOfferButton } from './components/take-offer-button'
 export {
   OutboxTimeCorrection,
   isTimeError,

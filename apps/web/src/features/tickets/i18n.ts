@@ -279,9 +279,6 @@ export const ticketMessages = {
     unassignedCount: (count: number) => `Sin asignar (${count})`,
     inAttentionCount: (count: number) => `En atención (${count})`,
     empty: 'No hay tiquets en tu bandeja.',
-    taking: 'Tomando…',
-    takeSuccess: 'Tiquet tomado.',
-    takeError: 'No se pudo tomar el tiquet.',
     retry: 'Reintentar',
   },
   board: {
