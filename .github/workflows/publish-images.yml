@@ -6,8 +6,11 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: release-${{ github.ref }}
@@ -20,6 +23,11 @@ jobs:
   publish:
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      channel: ${{ steps.identity.outputs.channel }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,14 +42,26 @@ jobs:
           image="ghcr.io/$repo/axia-app"
           version="$GITHUB_SHA"
           tags="$image:$GITHUB_SHA"
-          if [[ "$RELEASE_TYPE" == tag ]]; then
-            [[ "$RELEASE_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9.-]+)?$ ]]
+          channel="$(node scripts/release-channel.mjs channel "$RELEASE_TYPE" "$RELEASE_REF")"
+          if [[ "$channel" != commit ]]; then
             version="$RELEASE_REF"
-            tags="$tags,$image:$version,$image:latest"
+            tags="$tags,$image:$version"
           fi
           echo "image=$image" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          echo "channel=$channel" >> "$GITHUB_OUTPUT"
+      - name: Proteger las versiones publicadas
+        if: steps.identity.outputs.channel != 'commit'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+        run: |
+          published="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')"
+          if grep -Fxq "$RELEASE_VERSION" <<< "$published"; then
+            echo 'La release ya existe. Para completar una promoción fallida, reintentar solo el trabajo de promoción.' >&2
+            exit 1
+          fi
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -65,6 +85,23 @@ jobs:
         env:
           AXIA_IMAGE: ${{ steps.identity.outputs.image }}:${{ github.sha }}
         run: bash scripts/docker-smoke.sh
+      - id: upgrade
+        name: Actualizar y recuperar desde la release estable anterior
+        if: steps.identity.outputs.channel != 'commit'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+          CANDIDATE: ${{ steps.identity.outputs.image }}:${{ github.sha }}
+        run: |
+          origin="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' \
+            | node scripts/release-channel.mjs latest-stable "$RELEASE_VERSION")"
+          [[ -n "$origin" ]] || { echo 'Falta una release estable de origen para comprobar la actualización.' >&2; exit 1; }
+          bundle="$(mktemp -d)"
+          gh release download "$origin" --repo "$GITHUB_REPOSITORY" --dir "$bundle" \
+            --pattern axia-self-hosted.tar.gz --pattern axia-self-hosted.tar.gz.sha256
+          bash scripts/docker-upgrade-smoke.sh "$bundle/axia-self-hosted.tar.gz" "$CANDIDATE"
+          echo "origin=$origin" >> "$GITHUB_OUTPUT"
       - id: publish
         name: Publicar el artefacto probado
         env:
@@ -74,7 +111,6 @@ jobs:
           docker push "$RELEASE_IMAGE:$GITHUB_SHA"
           if [[ "$RELEASE_VERSION" != "$GITHUB_SHA" ]]; then
             docker push "$RELEASE_IMAGE:$RELEASE_VERSION"
-            docker push "$RELEASE_IMAGE:latest"
           fi
           reference="$(docker image inspect --format '{{index .RepoDigests 0}}' "$RELEASE_IMAGE:$GITHUB_SHA")"
           [[ "$reference" == "$RELEASE_IMAGE@sha256:"* ]]
@@ -99,5 +135,37 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+          RELEASE_CHANNEL: ${{ steps.identity.outputs.channel }}
+          RELEASE_ORIGIN: ${{ steps.upgrade.outputs.origin }}
         run: |
-          gh release create "$RELEASE_VERSION" .release/axia-self-hosted.tar.gz .release/axia-self-hosted.tar.gz.sha256 --verify-tag --generate-notes
+          flags=(--latest=false --verify-tag --generate-notes)
+          if [[ "$RELEASE_CHANNEL" == prerelease ]]; then flags+=(--prerelease); fi
+          flags+=(--notes "Probado en Linux amd64 con Docker Engine y Compose v2. Actualización y recuperación verificadas desde $RELEASE_ORIGIN. Antes de actualizar, revisa los cambios de configuración y reserva una ventana de mantenimiento.")
+          gh release create "$RELEASE_VERSION" .release/axia-self-hosted.tar.gz .release/axia-self-hosted.tar.gz.sha256 "${flags[@]}"
+
+  promote-stable:
+    needs: publish
+    if: needs.publish.outputs.channel == 'stable'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    concurrency:
+      group: axia-stable-channel
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Promover la mayor release estable con paquete verificable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_CHANNEL: ${{ needs.publish.outputs.channel }}
+        run: bash scripts/promote-stable.sh "$RELEASE_CHANNEL"

@@ -57,6 +57,9 @@ jobs:
       AXIA_APP_PASSWORD: compose-test
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - name: Validar Compose
         run: |
           docker compose -f compose.yaml config -q
@@ -71,7 +74,9 @@ jobs:
           target: app
           push: false
           load: true
-          tags: axia-app:ci
+          tags: |
+            axia-app:ci
+            axia-app:${{ github.sha }}
           build-args: |
             AXIA_VERSION=${{ github.sha }}
             AXIA_REVISION=${{ github.sha }}
@@ -79,3 +84,18 @@ jobs:
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
       - name: Instalación, actualización y recuperación reales
         run: bash scripts/docker-smoke.sh
+      - name: Actualización desde un paquete publicado sin publicar la candidata
+        if: github.ref_type != 'tag'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CANDIDATE: axia-app:${{ github.sha }}
+        run: |
+          origin="$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' \
+            | node scripts/release-channel.mjs latest-stable)"
+          [[ -n "$origin" ]] || { echo 'Falta una release estable de origen.' >&2; exit 1; }
+          bundle="$(mktemp -d)"
+          gh release download "$origin" --repo "$GITHUB_REPOSITORY" --dir "$bundle" \
+            --pattern axia-self-hosted.tar.gz --pattern axia-self-hosted.tar.gz.sha256
+          bash scripts/docker-upgrade-smoke.sh "$bundle/axia-self-hosted.tar.gz" "$CANDIDATE"
