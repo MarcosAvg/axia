@@ -26,8 +26,8 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 
 | Método | Ruta | Uso |
 |---|---|---|
-| `GET` | `/api/health/live` | Proceso vivo |
-| `GET` | `/api/health/ready` | Base disponible |
+| `GET` | `/api/health/live` | `200` y `{"status":"ok"}` si el proceso atiende peticiones |
+| `GET` | `/api/health/ready` | `200` y `{"status":"ready"}` si PostgreSQL responde. Devuelve `503` y `{"status":"not_ready"}` si falla la comprobación |
 | `GET` | `/api/setup/status` | Indica si falta el primer administrador |
 | `POST` | `/api/setup` | Crea el primer administrador |
 

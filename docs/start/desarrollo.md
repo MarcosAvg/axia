@@ -5,8 +5,11 @@ usa imágenes publicadas y tiene otro procedimiento.
 
 ## Requisitos
 
-Node.js 24, pnpm 12 (versión fijada en `package.json`), Git, Docker Engine con Compose v2 y
-`openssl`. Ejecutar los comandos desde la raíz del repositorio.
+- Node.js 24 y la versión de pnpm fijada en el campo `packageManager` de `package.json`.
+- Git, Docker Engine con el plugin de Docker Compose v2 o posterior y `openssl`.
+- Chromium de Playwright para las pruebas de navegador.
+
+Ejecutar los comandos desde la raíz del repositorio.
 
 ## Preparar y arrancar
 
@@ -67,19 +70,23 @@ volver a sembrar; no reiniciar una base con trabajo que deba conservarse.
 ## Pruebas
 
 ```bash
-pnpm test:db:start
 pnpm check:fast
+pnpm --filter @axia/web exec playwright install chromium
+pnpm test:db:start
 pnpm test:affected
 # Antes de integrar:
 pnpm check
 pnpm test:db:stop
 ```
 
-Las pruebas no descubren archivos dotenv privados. Usan valores locales ficticios y destinos
-validados: loopback, bases `_test`/`_e2e` y sin opciones que puedan sustituir el host. CI puede
-exportar los valores de `.env.test.example`. Playwright prepara su base y sus evidencias; no
-reutiliza la base de desarrollo. Ejecutar suites de navegador y regresión visual por separado.
-Evitar crear o retirar redes Docker mientras se ejecutan flujos de navegador.
+Las pruebas usan valores ficticios y destinos de loopback validados. Playwright prepara
+`axia_e2e` y su propio almacenamiento de evidencias. Las pruebas de integración usan
+`axia_test`. `check:fast` se ejecuta sin contenedor. `test:affected` puede seleccionar suites
+de navegador o la compuerta completa, que requieren el PostgreSQL de pruebas.
+
+Si Chromium reporta bibliotecas de sistema faltantes en Linux, preparar las dependencias del
+host. CI usa `pnpm --filter @axia/web exec playwright install chromium --with-deps`.
+Ejecutar Playwright y la regresión visual por separado para aislar sus datos y puertos.
 
 El [catálogo de comandos](../reference/comandos.md) explica los subconjuntos y el smoke de imagen.
 Las pruebas deben cubrir cambios reales; no se añaden pruebas de texto para documentación.
@@ -132,7 +139,7 @@ históricos se reportan, no se ocultan ni se reescriben.
 | `db:test` no conecta | Iniciar `pnpm test:db:start`; revisar las conexiones ficticias si cambió el puerto |
 | Playwright no encuentra Chromium | Ejecutar `pnpm --filter @axia/web exec playwright install chromium` |
 | La demo no admite la contraseña esperada | Reaplicarla con `AXIA_DEMO_PASSWORD` y la semilla; revisar bloqueo de login |
-| Un puerto HTTP está ocupado | `pnpm dev` lo detecta antes de arrancar y nombra el puerto. Detener el proceso anterior o configurar `PORT`/`AXIA_DEV_WEB_PORT`; la API se comunica al proxy de Vite. Si el proceso viejo no responde a `SIGTERM`, terminarlo con el gestor de procesos o `kill -9` |
+| Un puerto HTTP está ocupado | Identificar el servicio que usa el puerto y detenerlo mediante su gestor de procesos, o cambiar `PORT` para la API o `AXIA_DEV_WEB_PORT` para Vite |
 
 Las bases y los archivos privados no viajan por Git. Conservarlos fuera del repositorio con
 permisos restrictivos. Un entorno anterior que use `.env` no se convierte automáticamente en

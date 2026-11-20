@@ -12,25 +12,44 @@ desde su directorio. Para instalar, configurar TLS y crear el primer administrad
    Compose, los volúmenes y el digest instalado.
 2. Hacer el diagnóstico de la instancia y comprobar que haya espacio suficiente para la nueva
    imagen y el respaldo. Bloquear el acceso de usuarios en el proxy y pausar tareas escritoras
-   externas. Mantenerlos bloqueados durante toda la ventana, incluso cuando el respaldo reinicie la app.
-3. Ejecutar un respaldo coordinado sobre la imagen **instalada**. Guardar el conjunto fuera del host
-   y verificar allí sus dos hashes contra el manifiesto. Para obtener el nuevo formato en la
-   primera actualización, usar los scripts de respaldo del paquete descargado, con el archivo
-   Compose y el archivo de entorno de la instancia instalados seleccionados por rutas absolutas
-   en `AXIA_COMPOSE_FILE` y `AXIA_ENV_FILE`. Ejecutarlo desde el directorio de la instancia y
-   conservar el nombre del proyecto.
+   externas. Mantener la pausa durante toda la ventana, incluso cuando el respaldo reinicie la app.
+3. Ejecutar un respaldo coordinado sobre la imagen **instalada**, antes de descargar la imagen
+   destino. Guardar el conjunto fuera del host y verificar allí los dos hashes del manifiesto.
 4. Revisar los cambios del Compose y de la plantilla del paquete destino. Aplicar esos cambios
    conservando el proyecto, los volúmenes y los secretos. Fijar `AXIA_IMAGE` al digest
    destino para instancias con datos reales. Descargar la imagen y arrancar. Compose recrea
    `app` y las migraciones se aplican antes de que escuche en `3100`.
-5. Con acceso de mantenimiento, verificar salud desde HTTPS, login, un tiquet existente y su
-   evidencia. Reabrir el tráfico y reanudar las tareas solo al validar esos resultados.
+5. Con acceso de mantenimiento, verificar salud desde HTTPS, inicio de sesión, un tiquet existente
+   y su evidencia. Reabrir el tráfico y reanudar las tareas después de validar esos resultados.
+
+### Respaldar la versión instalada
+
+Ejecutar desde el directorio de la instancia, con su configuración actual.
 
 ```bash
 ./deploy/scripts/backup-all.sh
-# Copiar el respaldo fuera del host y validarlo antes de cambiar a la release destino.
-docker compose pull app
-docker compose up -d --wait
+```
+
+Si la versión instalada es anterior a `v0.32.0`, usar el script del paquete nuevo para obtener
+el manifiesto con digest. En este ejemplo, el paquete nuevo está en `/opt/axia-nueva` y la
+instancia usa la configuración predeterminada del paquete en `/opt/axia`. Si se eligió un
+nombre de proyecto distinto, conservarlo en `COMPOSE_PROJECT_NAME`.
+
+```bash
+cd /opt/axia
+AXIA_COMPOSE_FILE=/opt/axia/compose.yaml \
+  AXIA_ENV_FILE=/opt/axia/.env \
+  /opt/axia-nueva/deploy/scripts/backup-all.sh
+```
+
+### Aplicar la versión destino
+
+Después de verificar el respaldo fuera del host y aplicar la configuración de la versión destino,
+ejecutar desde el directorio de la instancia.
+
+```bash
+docker compose pull app &&
+  docker compose up -d --wait
 docker compose logs --tail=100 app
 ```
 
@@ -53,10 +72,9 @@ migración sin aplicarla. Véase [Datos](../concepts/datos.md).
 
 ### Conjunto consistente
 
-Para respaldos reproducibles, fijar `AXIA_IMAGE` al digest de la release. Con el canal `latest`,
-el manifiesto de formato 2 también registra el digest descargable de la imagen respaldada. Mantener la
-referencia durante todo el respaldo. No hace falta exportarla al shell: los scripts obtienen la
-imagen de la configuración de Compose sin imprimir la configuración completa, que contiene secretos.
+Para respaldos reproducibles, fijar `AXIA_IMAGE` al digest de la release. El manifiesto de
+formato 2 conserva el digest descargable incluso si la instancia usa el canal `latest`. Mantener
+la referencia durante todo el respaldo. El script la obtiene de la configuración de Compose.
 
 ```bash
 # AXIA_IMAGE en el archivo de entorno ya selecciona la release instalada.
@@ -69,16 +87,19 @@ Con la aplicación detenida, copia PostgreSQL con `pg_dump -Fc` y el volumen de 
 contenedor auxiliar usa el usuario de la imagen que posee las evidencias; el host escribe archivos
 `0600`, dentro de un directorio `0700`, sin depender del UID de la imagen.
 
-Cada conjunto contiene `database.dump`, `evidence.tgz` y `manifest`: formato, fecha UTC, referencia e
-ID local de la imagen, digest descargable cuando existe y SHA-256 de ambos archivos. Las imágenes
-locales sin digest conservan el formato 1 y deben guardarse para recuperar en otro host.
-El manifiesto detecta corrupción; no es
-una firma de autenticidad. Restaurar solo conjuntos de Axia conservados bajo control del operador;
-no sustituir sus tar por archivos de terceros. El directorio temporal empieza por
-`.incomplete-`; solo se renombra y recibe manifiesto al completar ambas copias. Ante un fallo se
-elimina exclusivamente ese temporal. El script vuelve a arrancar `app` solo si estaba activa al
-iniciar, tanto en éxito como en fallo. No borra conjuntos anteriores automáticamente: programar la
-retención sobre conjuntos completos después de verificar una recuperación.
+| Archivo | Contenido |
+|---|---|
+| `database.dump` | Volcado de PostgreSQL en formato personalizado |
+| `evidence.tgz` | Volumen de evidencias y adjuntos |
+| `manifest` | Formato, fecha UTC, referencia e ID local de la imagen, digest descargable si existe y hashes SHA-256 de ambos archivos |
+
+Los conjuntos de imágenes locales sin digest usan el formato 1. Conservar también esas imágenes
+para recuperar en otro host. Los hashes permiten detectar corrupción. Restaurar solo conjuntos
+que hayan permanecido bajo control del operador.
+
+El script publica el conjunto completo al terminar ambas copias y elimina el directorio
+`.incomplete-` si hay un fallo. Vuelve a arrancar `app` si estaba activa al iniciar. La retención
+de conjuntos completos se programa por separado, después de probar una recuperación.
 
 Excluir otros trabajos, escritores externos y operaciones de Docker sobre esa instancia
 mientras se respalda o restaura. Los scripts rechazan trabajos one-off que ya están activos; la
@@ -90,36 +111,38 @@ Recuperar en otro proyecto Compose, con base y volumen de evidencias nuevos. El 
 base con objetos de usuario o un volumen con cualquier archivo; no mezcla datos ni elimina datos
 anteriores. Conservar la instancia anterior hasta validar la recuperada.
 
+Desde el directorio del paquete del destino, preparar un archivo de entorno propio. Configurar los
+secretos, el alias del proxy y `AXIA_IMAGE`. Usar `image_digest` del manifiesto para un respaldo
+de formato 2. Para el formato 1, seleccionar la referencia original y el mismo ID local.
+
 ```bash
-# Configurar los secretos del destino y AXIA_IMAGE con image_digest del manifiesto.
-# Este ejemplo utiliza un archivo de entorno propio, sin leerlo desde el shell.
 export COMPOSE_PROJECT_NAME=axia_recovery
 export AXIA_ENV_FILE=/opt/axia-recovery/instance.env
-./deploy/scripts/restore-all.sh /var/backups/axia/axia-<fecha>-<id>
-docker compose --env-file "$AXIA_ENV_FILE" up -d app
+backup_set=/var/backups/axia/axia-20261120T151931Z-ejemplo
+
+# Sustituir backup_set por el conjunto real. Descargar app si procede de un registro.
+docker compose --env-file "$AXIA_ENV_FILE" pull app &&
+  ./deploy/scripts/restore-all.sh "$backup_set" &&
+  docker compose --env-file "$AXIA_ENV_FILE" up -d --wait app
 ```
 
-Descargar la imagen del manifiesto con Compose si hace falta. El formato 2 comprueba digest e ID,
-incluso si el respaldo original se hizo desde un alias como `latest`. El formato 1 exige la referencia
-original y el mismo ID local. `restore-all.sh` valida los archivos y sus hashes antes de detener app.
-Arranca y espera `db`, valida que ambos destinos estén vacíos y ejecuta la migración de esa misma
-imagen para preparar el rol interno, los esquemas y permisos en un host vacío. Después restaura la
-base con `pg_restore --single-transaction --exit-on-error --clean --if-exists --no-owner`: un error
-revierte toda la transacción de restauración. El esquema inicial de la migración puede permanecer,
-pero no una carga parcial del dump.
+Para una imagen local, cargar la imagen conservada y comenzar la secuencia en
+`./deploy/scripts/restore-all.sh`, manteniendo el `&&` antes del arranque.
+
+`restore-all.sh` valida la imagen y los hashes antes de detener `app`. Luego
+espera a `db`, comprueba que los destinos estén vacíos y ejecuta las migraciones de la imagen
+original para preparar roles, esquemas y permisos. Un error de `pg_restore` revierte la
+restauración del volcado. El esquema creado por las migraciones puede permanecer.
 
 Por último extrae las evidencias como el usuario de la imagen, con `--no-same-owner`: los archivos
 quedan bajo el propietario efectivo de la aplicación sin requerir root ni capacidades adicionales.
-La base y los archivos no forman una transacción distribuida: si falla cualquier paso, **app queda
-detenida**. No se debe publicar ese
-destino. Conservar el conjunto y reintentar en un proyecto con volúmenes nuevos; el script no limpia
-automáticamente un intento fallido. En éxito solo reinicia una app que estaba activa originalmente;
-en un host vacío arrancarla explícitamente con el comando anterior.
+Si falla la recuperación de base o archivos, mantener el destino fuera del proxy y la aplicación
+detenida. Conservar el conjunto y reintentar en otro proyecto con volúmenes nuevos. En un destino
+vacío, arrancar `app` con el último comando del ejemplo únicamente si termina la restauración.
 
-Verificar salud, login, conteos de tiquets, eventos y evidencias, y abrir un archivo de evidencia antes
-de cambiar el proxy al destino recuperado. Esta ruta también sirve para volver a una versión
-anterior: restaurar su conjunto y su imagen en un proyecto nuevo, validar y después cambiar el
-proxy. Cambiar únicamente el tag no revierte una migración.
+Verificar salud, inicio de sesión, conteos de tiquets, eventos y evidencias, y abrir un archivo de
+evidencia antes de cambiar el proxy al destino recuperado. Usar este mismo procedimiento para
+volver a la versión anterior después de una actualización fallida.
 
 El Compose de producción comparte por defecto la red/alias del proxy; al probar otra instancia en
 el mismo host, configurar red y alias propios antes de arrancarla para evitar colisiones. La prueba

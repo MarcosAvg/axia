@@ -1,83 +1,91 @@
 # Instalar Axia
 
-Axia se instala desde el paquete `axia-self-hosted.tar.gz` de una release verificada. El host solo
-necesita Linux, Docker Engine con el plugin de Compose v2 o posterior, y un proxy o túnel que
-publique HTTPS.
+Este procedimiento prepara una instancia nueva con datos persistentes. Para actualizar una
+instancia existente, conservar su configuración y sus volúmenes y seguir la
+[guía de operación](../docs/guides/operacion.md).
+
+## Requisitos
+
+- Linux, Docker Engine y el plugin de Docker Compose v2 o posterior.
+- Un proxy inverso o túnel para publicar HTTPS. Tener a mano el dominio y la red Docker del proxy.
+- Bash y herramientas del host como `tar`, `sha256sum` y `openssl`.
+
 Las notas de release indican la arquitectura y la ruta de actualización verificadas.
-Los scripts operativos requieren Bash y herramientas del host como `sha256sum`, `tar` y `awk`.
-No se requiere Node.js, pnpm, Git ni compilar código. El paquete incluye `compose.yaml`, `.env.example`, scripts de operación,
-licencia, manual de operación (`OPERATIONS.md`) e identidad de la release en `release.json`.
-Esta guía instala una instancia con datos persistentes. Para trabajar en el código, consultar
-[Desarrollo](../docs/start/desarrollo.md).
+Para trabajar con el código fuente, consultar [desarrollo](../docs/start/desarrollo.md).
 
-## Instalar
+## 1. Descargar y verificar
 
-Estos pasos son para una instancia nueva. Si ya existen configuración o volúmenes de Axia,
-conservarlos y seguir [Operación](../docs/guides/operacion.md); no sobrescribir el archivo de
-entorno ni generar secretos nuevos sobre una base existente.
-
-1. Descargar y extraer el paquete de una release concreta en un directorio nuevo y vacío de la instancia.
-   Antes de extraerlo, descargar también su archivo `.sha256` y ejecutar
-   `sha256sum -c axia-self-hosted.tar.gz.sha256` en el directorio de descarga.
-2. Crear el archivo de entorno y completar los dos secretos con valores aleatorios. La plantilla
-   usa el canal estable `:latest` por defecto. Para una instancia con datos reales, descomentar
-   `AXIA_IMAGE` con el digest de `release.json`. Las demás opciones están en
-   [Configuración](../docs/reference/configuracion.md).
-3. Preparar la red del proxy y arrancar los servicios.
+Descargar `axia-self-hosted.tar.gz` y `axia-self-hosted.tar.gz.sha256` de la
+[versión estable](https://github.com/MarcosAvg/axia/releases/latest). Desde el directorio de
+descarga, verificar el archivo comprimido con su checksum y extraerlo en un directorio nuevo.
 
 ```bash
-cp .env.example .env
-# Generar cada secreto con openssl rand -hex 32 (solo hexadecimal).
-# No usar caracteres como /, #, ? o %: rompen las URLs de conexión.
-# Completar POSTGRES_OWNER_PASSWORD y AXIA_APP_PASSWORD.
-chmod 600 .env
+sha256sum -c axia-self-hosted.tar.gz.sha256 &&
+  mkdir axia &&
+  tar -xzf axia-self-hosted.tar.gz -C axia
+```
+
+El paquete contiene `compose.yaml`, `.env.example`, los scripts operativos, la licencia,
+el manual `OPERATIONS.md` y la identidad de la release en `release.json`.
+
+## 2. Guardar la configuración
+
+Desde el directorio nuevo de Axia, crear el archivo de entorno con permisos privados.
+
+```bash
+cd axia
+(umask 077 && cp .env.example .env)
+```
+
+Generar dos valores distintos con `openssl rand -hex 32` y guardarlos en
+`POSTGRES_OWNER_PASSWORD` y `AXIA_APP_PASSWORD`. Usar valores hexadecimales para que puedan
+insertarse en las URLs de PostgreSQL. Para una instancia con datos reales, fijar `AXIA_IMAGE`
+al valor de `image` de `release.json`. Si se omite, Compose usa el canal estable `latest`.
+Consultar las opciones en [configuración](../docs/reference/configuracion.md).
+
+## 3. Preparar el proxy y arrancar
+
+Crear la red externa predeterminada si aún no existe.
+
+```bash
 docker network inspect proxy >/dev/null 2>&1 || docker network create proxy
-docker compose up -d --wait
 ```
 
-Se arrancan dos servicios: PostgreSQL (`db`) y el servidor (`app`). La app aplica las migraciones
-pendientes antes de escuchar en `3100`; los datos y evidencias viven en volúmenes separados. El rol
-de la app es `axia_app` fijo.
+Si el proxy ya usa otra red, definir `AXIA_PROXY_NETWORK` con su nombre. Conectar el proxy a esa
+red y configurar el destino HTTP `axia:3100`. Para alojar varias instancias, usar un proyecto
+Compose y un `AXIA_PROXY_ALIAS` distintos por instancia. Usar el alias correspondiente como
+destino del proxy.
 
-No ejecutar `scripts/install.sh`: prepara desarrollo, no una instancia de producción.
+| Ajuste del proxy | Requisito |
+|---|---|
+| Acceso inicial | Restringir el dominio al operador antes de arrancar Axia |
+| TLS | Publicar HTTPS y redirigir HTTP a HTTPS |
+| Encabezados | Conservar `Host` y reenviar `X-Forwarded-For` y `X-Forwarded-Proto` |
+| Cargas | Permitir hasta 20 MiB por evidencia y 25 MiB por adjunto con los límites predeterminados |
+| Eventos en vivo | Mantener la conexión SSE abierta más allá del heartbeat y desactivar el buffering de ese flujo |
 
-## Conectar el proxy
-
-La app no publica puertos del host; solo se alcanza en la red Docker externa `proxy`, mediante
-`axia:3100`. Conectar a esa red el proxy o túnel del operador. Si ya tiene otra red, definir
-`AXIA_PROXY_NETWORK` en `.env`. Para varias instancias en una red, elegir distintos proyectos
-Compose y `AXIA_PROXY_ALIAS` para evitar colisiones.
-
-Configurar el proxy elegido con destino HTTP `axia:3100` (o el alias configurado), dominio público
-y TLS con redirección HTTPS. Debe conservar `Host`, reenviar `X-Forwarded-For` y
-`X-Forwarded-Proto`, admitir evidencias de 20 MiB con la configuración predeterminada de Axia y
-mantener conexiones SSE abiertas más allá de su heartbeat. Desactivar buffering para SSE si el
-proxy lo aplica. No se necesitan WebSockets. Comprobar estos requisitos en la configuración del
-proxy; sus límites y valores predeterminados dependen de la herramienta elegida.
-
-Los tokens de un proxy o túnel pertenecen a su configuración y no al archivo de entorno de Axia.
-
-El contenedor confía en el proxy de esta red. No conectar contenedores ajenos o no confiables.
-
-## Crear el primer administrador y comprobar
+Axia confía en los encabezados del proxy. Conectar a esa red solo servicios de confianza y guardar
+los tokens del proxy en la configuración del propio proxy.
 
 ```bash
+docker compose up -d --wait
 docker compose ps
-docker compose logs --tail=100 app
-docker compose exec app node -e "fetch('http://127.0.0.1:3100/api/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 ```
 
-Abrir `/login` desde el dominio HTTPS: si la instancia está vacía, permite crear el primer
-administrador. Mantener el acceso restringido al operador en el proxy hasta que se cree esa cuenta.
-Antes de habilitar el acceso a usuarios, comprobar login, SSE y subida y descarga de una evidencia
-y un adjunto a través de HTTPS. El proxy debe permitir las cargas de adjuntos de hasta 25 MiB y
-las de evidencias de hasta 20 MiB con los límites predeterminados de Axia. Producción no carga demo.
-La política de contraseña se consulta en [Configuración](../docs/reference/configuracion.md).
+Compose inicia PostgreSQL (`db`) y la aplicación (`app`) sin publicar puertos del host.
+La app aplica las migraciones antes de escuchar en el puerto `3100`. PostgreSQL y los archivos
+persisten en volúmenes separados.
 
-## Actualizar y recuperar
+## 4. Crear el administrador y validar
 
-La [guía de operación](../docs/guides/operacion.md) contiene la secuencia de actualización,
-respaldos, recuperación, retención y diagnóstico. Actualizar es `docker compose pull` seguido de
-`docker compose up -d --wait`; la app aplica las migraciones antes de arrancar. Preparar y probar un
-respaldo antes de utilizar la instancia con datos reales. Cambiar a una imagen anterior no revierte
-migraciones: se recupera su conjunto de respaldo y su imagen en un destino vacío.
+1. Abrir `/login` desde el dominio HTTPS restringido y crear el primer administrador.
+2. Configurar los [catálogos mínimos](../docs/guides/administracion.md#catálogos). Para la prueba
+   de archivos, habilitar un tipo de adjunto obligatorio en el problema de prueba.
+3. Iniciar sesión y comprobar un tiquet de prueba con una evidencia y un adjunto. Subir y abrir
+   ambos archivos a través de HTTPS y verificar que los avisos en vivo llegan por SSE.
+4. Preparar un respaldo coordinado y ensayar su restauración antes de usar datos reales.
+5. Habilitar el acceso a usuarios una vez completada la validación.
+
+Si falla el arranque, revisar `docker compose ps` y `docker compose logs --tail=100 app`.
+La [guía de operación](../docs/guides/operacion.md) cubre el diagnóstico, los respaldos, las
+actualizaciones y la recuperación después de una migración fallida.

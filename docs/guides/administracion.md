@@ -38,7 +38,8 @@ En `/admin/catalogos` se administran equipos, edificios, ubicaciones, dependenci
 subcategorías, problemas (con su equipo), tipos de servicio, prioridades, canales, solicitantes,
 técnicos y motivos.
 
-- Los catálogos se desactivan; no se borran.
+- El servidor permite **Eliminar** registros sin referencias. Desactivar los registros que ya se
+  usaron para conservar el historial. [ADR 0104](../decisions/0104-borrado-catalogos-sin-uso.md)
 - En **Dependencias**, el formulario de alta/edición incluye las ubicaciones. Hay que marcar al
   menos una; la dependencia solo aparece en esas ubicaciones del alta de tiquets. Si el solicitante
   tiene dependencia, el alta se limita a sus edificios y ubicaciones; si no tiene, no hay
@@ -49,6 +50,9 @@ técnicos y motivos.
   vacías. Categorías, subcategorías y problemas llevan cada nivel en su propia columna
   (`Categoría`, `Subcategoría`, `Problema`) y el problema incluye su `Equipo`.
 - Cada tiquet conserva una instantánea de los valores usados.
+- En **Problemas**, elegir uno o más tipos en **Adjuntos obligatorios** para exigir un archivo
+  al registrar un tiquet con ese problema. En **Instrucción del adjunto**, explicar qué documento
+  debe proporcionar el solicitante. El catálogo admite PDF, JPEG, PNG, WebP, DOCX y XLSX.
 - Los motivos son jerárquicos y se agrupan por uso: pausa, rechazo, cancelación, reasignación,
   recaptura, reclamación, reactivación y apoyo auxiliar.
 

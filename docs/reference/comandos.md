@@ -50,13 +50,14 @@ no requieren ese contenedor. No ejecutar varias suites que reconstruyan la misma
 | `pnpm check:docs` | Enlaces relativos en documentación fuente |
 | `pnpm check:boundaries` | Fronteras entre capas y ausencia de ciclos |
 | `pnpm knip` | Código y dependencias sin uso |
-| `pnpm test:scripts` | Instalación, entornos, Compose, paquete de release y recuperación simulada |
+| `pnpm test:scripts` | Instalación, Compose, empaquetado, promoción del canal estable, respaldo, recuperación y diagnóstico |
 
 ## Imagen y operación
 
-Los comandos de instalación, actualización, backup y recuperación tienen un único procedimiento
-en [instalación](../../deploy/README.md) y [operación](../guides/operacion.md). Para copias completas
-se usa `backup-all.sh` / `restore-all.sh`; las utilidades individuales no coordinan base y fotos.
+Los comandos para una instancia instalada están en [instalación](../../deploy/README.md) y
+[operación](../guides/operacion.md). El respaldo coordinado usa `backup-all.sh` y la recuperación
+completa usa `restore-all.sh`. `check-instance.sh` revisa HTTPS, PostgreSQL, el volumen de
+archivos, el espacio disponible y la antigüedad del último respaldo.
 
 El smoke local requiere una imagen construida del checkout y crea únicamente sus proyectos
 Docker desechables. En CI se construye antes de ejecutarlo:
@@ -68,3 +69,16 @@ AXIA_IMAGE=axia-app:local bash scripts/docker-smoke.sh
 
 `AXIA_IMAGE=axia-app:local bash deploy/scripts/evidence-volume.test.sh` comprueba permisos de
 archivos con la imagen. Estas pruebas Docker se ejecutan por separado de las suites de navegador.
+
+Para ensayar la actualización, descargar el paquete y el archivo `.sha256` de una release
+estable y guardarlos en el mismo directorio. El siguiente comando usa una imagen candidata
+etiquetada con el SHA del checkout actual.
+
+```bash
+candidate="axia-app:$(git rev-parse HEAD)"
+docker build -f apps/server/Dockerfile --target app -t "$candidate" . &&
+  bash scripts/docker-upgrade-smoke.sh /tmp/axia-release/axia-self-hosted.tar.gz "$candidate"
+```
+
+El ensayo parte del paquete publicado, verifica un tiquet con evidencia y adjunto después de
+actualizar, y recupera la versión anterior en otro proyecto desechable.

@@ -8,7 +8,8 @@ las variables y las reglas no se repiten en varios manuales.
 | Tarea | Documento |
 |---|---|
 | Instalar, conectar HTTPS y crear el primer administrador | [Instalación](../deploy/README.md) |
-| Actualizar, respaldar, recuperar y mantener | [Operación](guides/operacion.md) |
+| Actualizar, respaldar y recuperar una instancia | [Operación](guides/operacion.md) |
+| Verificar HTTPS, PostgreSQL, almacenamiento y respaldos | [Salud y diagnóstico](guides/operacion.md#salud-y-diagnóstico) |
 | Consultar variables y valores predeterminados | [Configuración](reference/configuracion.md) |
 | Diagnosticar PostgreSQL | [Rendimiento](reference/rendimiento-postgres.md) |
 

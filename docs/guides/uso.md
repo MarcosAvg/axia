@@ -17,15 +17,15 @@ de todos sus roles, no solo las del rol principal.
 ## Registrar una solicitud
 
 1. Abre **Tiquets → Nuevo tiquet**.
-2. Revisa el solicitante. Si tiene dependencia, la dependencia queda fija y solo aparecen los
-   edificios y ubicaciones vinculados a ella. Si no tiene, selecciona edificio, ubicación y
-   dependencia; las dependencias disponibles dependen de la ubicación. Elige categoría,
-   subcategoría y problema; el problema determina el equipo que atiende.
-3. Revisa el solicitante y su contacto. Con permiso puedes elegir **A nombre de otra persona**
+2. Revisa el solicitante y su contacto. Con permiso puedes elegir **A nombre de otra persona**
    y un solicitante del catálogo, aunque no tenga cuenta.
-4. Describe el problema y adjunta, si puedes, una **Foto de la solicitud**.
-5. Pulsa **Registrar tiquet**. Si aparecen posibles duplicados, revísalos; puedes volver a la
-   captura o elegir **Registrar de todas formas**.
+3. Elige el edificio y la ubicación. Si el solicitante tiene dependencia, queda fija y se muestran
+   sus ubicaciones vinculadas. Si puede elegirse, el formulario ofrece las dependencias de esa ubicación.
+4. Selecciona categoría, subcategoría y problema. El problema determina qué equipo atiende el tiquet.
+5. Describe la falla. Si aparece **Adjunto obligatorio**, sube un archivo del tipo indicado antes
+   de registrar. Puedes incluir también una **Foto de la solicitud** como evidencia.
+6. Pulsa **Registrar tiquet**. Si aparecen posibles duplicados, revísalos y elige **Revisar captura**
+   o **Registrar de todas formas**.
 
 Conserva el folio para encontrar la solicitud. Si falla la foto después del registro, el tiquet
 ya existe: revisa el aviso antes de intentar registrarlo otra vez.

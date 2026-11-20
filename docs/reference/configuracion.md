@@ -20,11 +20,11 @@ Pruebas usa `compose.test.yaml` y valores ficticios: no descubre archivos privad
 
 ## Producción mínima
 
-`compose.yaml` necesita dos secretos. La imagen es opcional y usa `:latest` por defecto:
+`compose.yaml` requiere dos secretos y usa la imagen del canal estable por defecto.
 
 | Variable | Uso |
 |---|---|
-| `AXIA_IMAGE` | Opcional; `latest` por defecto. Fijar `vX.Y.Z` o un digest para producción reproducible |
+| `AXIA_IMAGE` | Opcional. Usa `latest` por defecto. Fijar el digest de `release.json` para una instancia reproducible |
 | `POSTGRES_OWNER_PASSWORD` | Contraseña del rol dueño; obligatoria |
 | `AXIA_APP_PASSWORD` | Contraseña del rol de la aplicación; obligatoria |
 
@@ -35,9 +35,9 @@ El resto de variables tiene valores por defecto en `compose.yaml` o en el servid
 `.env` solo cuando se necesita cambiar el comportamiento. El paquete usa `latest` por defecto y
 `release.json` conserva el digest de la release. La versión publicada se identifica por el tag de
 Git (`vX.Y.Z`); el campo `version` de `package.json` es un marcador de desarrollo. Para producción
-reproducible, fijar `AXIA_IMAGE` con una etiqueta `vX.Y.Z` o el digest; `latest` es el canal de
-actualización continua. El rol interno `axia_app` es fijo; `AXIA_APP_USER` no es una opción de
-despliegue.
+reproducible, fijar `AXIA_IMAGE` al digest de `release.json`. `latest` sigue el canal estable y
+adopta la imagen nueva cuando el operador actualiza la instancia. Compose usa el rol interno fijo
+`axia_app`.
 
 ## Base de datos
 

@@ -180,13 +180,18 @@ migraciones aportan referencia necesaria; la demo ficticia requiere activación 
 Vitest prueba reglas puras y PostgreSQL real para permisos, transacciones y concurrencia;
 Playwright verifica flujos de la PWA. Un mock de base no sustituye esas garantías.
 
-La release contiene una imagen de app que aplica las migraciones al arrancar, con credenciales
-separadas y digest registrado en `release.json`; `latest` es el canal por defecto. La app solo es
-accesible tras el proxy elegido por el operador. El respaldo
-coordinado detiene escrituras; la restauración exige destino vacío y conserva la app detenida si
-falla. Procedimientos en [instalación](../../deploy/README.md), [operación](../guides/operacion.md)
-y [desarrollo](../start/desarrollo.md); justificación operativa en
-[0099](../decisions/0099-consolidacion-self-hosted.md).
+El contenedor de la aplicación ejecuta el migrador al arrancar con el rol dueño de PostgreSQL.
+Fastify atiende peticiones con el rol restringido `axia_app`. La instancia se publica mediante
+el proxy HTTPS del operador.
+Cada release registra su digest en `release.json`. CI comprueba la actualización y la recuperación
+desde una release estable anterior antes de publicar. El canal `latest` se actualiza después de
+verificar el paquete de instalación. [ADR 0110](../decisions/0110-latest-y-migracion-en-arranque.md) ·
+[ADR 0128](../decisions/0128-publicacion-verificada-y-recuperacion-por-digest.md)
+
+El respaldo coordinado detiene la aplicación mientras copia PostgreSQL y el volumen de archivos.
+El manifiesto identifica la imagen y los hashes del conjunto. La recuperación prepara un destino
+vacío y lo deja detenido si falla la carga. [Instalación](../../deploy/README.md) ·
+[Operación](../guides/operacion.md)
 
 El pool de peticiones está limitado a diez conexiones. No se añaden PgBouncer, particiones ni
 índices indiscriminados: se justifican con consultas y medición del

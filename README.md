@@ -1,45 +1,48 @@
 # Axia
 
-[![CI](https://github.com/MarcosAvg/axia/actions/workflows/ci.yml/badge.svg)](https://github.com/MarcosAvg/axia/actions/workflows/ci.yml)
+[![CI de main](https://github.com/MarcosAvg/axia/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MarcosAvg/axia/actions/workflows/ci.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 
-Axia permite seguir tiquets de mantenimiento: quién los atiende, en qué estado están y por qué
-se detienen, con evidencias y tiempos. Es multiusuario, autoalojable y de código abierto, con
-interfaz web para escritorio y móvil y trabajo sin conexión para técnicos.
+Axia es una aplicación de código abierto y autoalojable para gestionar tiquets de mantenimiento.
+Muestra quién atiende cada tiquet, qué lo detiene y cuánto tiempo lleva en cada etapa, con un
+historial de acciones y evidencias.
 
-## Empezar
+**Para instalar**, descargar el paquete de la [última versión estable][release] y seguir la
+[guía de instalación](deploy/README.md). El paquete incluye la configuración de Docker Compose,
+los scripts operativos y el manual para actualizar y recuperar una instancia.
 
-| Necesidad | Guía |
+## Guías por tarea
+
+| Tarea | Guía |
 |---|---|
-| Instalar una instancia | [Instalación con Docker](deploy/README.md) |
-| Usar Axia | [Guía de uso](docs/guides/uso.md) |
-| Configurar usuarios y catálogos | [Administración](docs/guides/administracion.md) |
-| Actualizar, respaldar o recuperar | [Operación](docs/guides/operacion.md) |
-| Preparar el desarrollo local o la demo | [Desarrollo](docs/start/desarrollo.md) |
-| Consultar documentación técnica | [Índice](docs/README.md) |
+| Registrar y atender tiquets | [Uso](docs/guides/uso.md) |
+| Gestionar usuarios, permisos y catálogos | [Administración](docs/guides/administracion.md) |
+| Actualizar, respaldar o recuperar una instancia | [Operación](docs/guides/operacion.md) |
+| Probar la demo o preparar el entorno local | [Desarrollo](docs/start/desarrollo.md) |
+| Consultar la arquitectura, la API y las reglas de negocio | [Índice de documentación](docs/README.md) |
 
 ## Qué incluye
 
-- Registro, asignación, ejecución, pausas, validación y reclamaciones de tiquets.
-- Roles y permisos, historial de cambios y evidencias privadas.
-- Cola offline de acciones y fotografías, con sincronización al recuperar la conexión.
-- Panel, indicadores, notificaciones dentro de la aplicación y catálogos XLSX.
+- Ciclo de atención desde el registro hasta la validación, con asignaciones, pausas y reclamaciones.
+- Acceso por roles y permisos, bitácora de acciones, evidencias privadas y adjuntos.
+- Aplicación web instalable en escritorio y móvil. Los técnicos pueden guardar acciones y
+  evidencias sin conexión para sincronizarlas al volver a estar en línea.
+- Panel por rol, métricas de atención, avisos dentro de la aplicación y catálogos en XLSX.
 
-Web Push y escalamiento automático no están implementados. Los límites conocidos y el trabajo
-pendiente están en [límites y pendientes](docs/reference/limitaciones.md).
+Las capacidades pendientes están en [límites y pendientes](docs/reference/limitaciones.md).
 
 ## Cómo se aloja
 
-Un servidor Fastify sirve la API y la web; PostgreSQL 17 conserva los datos y otro volumen las
-fotos. Compose separa base y aplicación; la app aplica las migraciones pendientes antes de
-arrancar. La instalación usa `latest` por defecto o una versión fijada, y un proxy HTTPS del
-operador; no requiere Node.js ni compilar en el servidor.
-
-El núcleo funciona de forma autónoma. La [arquitectura](docs/concepts/arquitectura.md)
-explica el stack, la autorización y las decisiones técnicas.
+Docker Compose ejecuta Fastify y PostgreSQL 17 en un host Linux. Fastify sirve la web y la API,
+PostgreSQL conserva los datos y un volumen separado guarda las evidencias y los adjuntos.
+El operador publica la instancia mediante un proxy HTTPS. La imagen publicada incluye la web
+compilada y aplica las migraciones al arrancar. El paquete permite usar el canal estable
+`latest` o fijar una imagen por digest. [Arquitectura](docs/concepts/arquitectura.md)
 
 ## Contribuir
 
 El entorno y las pruebas están en [desarrollo](docs/start/desarrollo.md); el flujo de cambios,
 en [CONTRIBUTING](CONTRIBUTING.md). También aplican el [código de conducta](CODE_OF_CONDUCT.md),
 la [política de seguridad](SECURITY.md) y la licencia [MIT](LICENSE).
+
+[release]: https://github.com/MarcosAvg/axia/releases/latest
