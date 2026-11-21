@@ -74,3 +74,77 @@ describe('persistencia de React Query', () => {
     ).toBe(false)
   })
 })
+
+it('solo considera disponibles detalles vigentes y persistidos para el usuario', async () => {
+  const { readyTicketDetails } = await import('./query-persister')
+  const { QueryClient, dehydrate } = await import('@tanstack/react-query')
+  const { QUERY_CACHE_BUSTER, OFFLINE_CACHE_TTL_MS } =
+    await import('@/lib/offline/cache-policy')
+  const queryClient = new QueryClient()
+  const now = Date.now()
+  queryClient.setQueryData(
+    ['tickets', 'detail', 'ready'],
+    { id: 'ready' },
+    { updatedAt: now },
+  )
+  queryClient.setQueryData(
+    ['tickets', 'detail', 'old'],
+    { id: 'old' },
+    { updatedAt: now - OFFLINE_CACHE_TTL_MS - 1 },
+  )
+  queryClient.setQueryData(['tickets', 'detail', 'missing'], null)
+  expect(await readyTicketDetails('user-a', now)).toEqual(new Map())
+  await queryPersister.persistClient({
+    buster: QUERY_CACHE_BUSTER,
+    timestamp: now,
+    clientState: dehydrate(queryClient),
+  })
+  expect(await readyTicketDetails('user-a', now)).toEqual(
+    new Map([['ready', now]]),
+  )
+  window.localStorage.setItem('axia.offline.queryCacheUser', 'user-b')
+  expect(await readyTicketDetails('user-b', now)).toEqual(new Map())
+  expect(await queryPersister.restoreClient()).toBeUndefined()
+  window.localStorage.setItem('axia.offline.queryCacheUser', 'user-a')
+  expect(
+    await readyTicketDetails('user-a', now + OFFLINE_CACHE_TTL_MS + 1),
+  ).toEqual(new Map())
+  const pauseReasonsKey = ['catalogs', 'reasons', 'pause']
+  const required = [pauseReasonsKey]
+  expect(await readyTicketDetails('user-a', now, required)).toEqual(new Map())
+  queryClient.setQueryData(pauseReasonsKey, [])
+  await queryPersister.persistClient({
+    buster: QUERY_CACHE_BUSTER,
+    timestamp: now,
+    clientState: dehydrate(queryClient),
+  })
+  expect(await readyTicketDetails('user-a', now, required)).toEqual(
+    new Map([['ready', now]]),
+  )
+  queryClient.clear()
+})
+
+it('rechaza un guardado de la pestaña anterior después de cambiar de cuenta', async () => {
+  await queryPersister.persistClient(client)
+  localStorage.setItem('axia.offline.userId', 'user-b')
+  await queryPersister.persistClient({ ...client, timestamp: 2 })
+  expect(queryCacheOwner()).toBe('user-a')
+  expect(await queryPersister.restoreClient()).toEqual(client)
+})
+
+it('conserva la última copia únicamente ante un error transitorio', () => {
+  const queryKey = ['tickets', 'detail', 'ticket']
+  const data = { description: 'Detalle guardado' }
+  expect(
+    shouldPersistQuery({
+      queryKey,
+      state: { status: 'error', data, error: new TypeError('Failed to fetch') },
+    }),
+  ).toBe(true)
+  expect(
+    shouldPersistQuery({
+      queryKey,
+      state: { status: 'error', data, error: { status: 403 } },
+    }),
+  ).toBe(false)
+})

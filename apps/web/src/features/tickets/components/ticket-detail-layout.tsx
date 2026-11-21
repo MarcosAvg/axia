@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { can } from '@/features/auth'
 import type { Identity } from '@/features/auth'
 import { useMediaQuery } from '@/lib/use-media-query'
+import type { PendingTicketAction } from '../domain/pending-actions'
 import type { ActionKey } from '../domain/actions'
 import { canRateTicket } from '../domain/rating'
 import { detailSectionHints } from '../detail-hints'
@@ -27,6 +28,7 @@ import {
   TicketExtras,
 } from './ticket-detail-sections'
 import { TicketRatingDialog } from './ticket-rating-dialog'
+import { UnavailableActionDrafts } from './unavailable-action-drafts'
 import { TicketSummary } from './ticket-summary'
 
 interface TicketLayoutProps {
@@ -35,7 +37,10 @@ interface TicketLayoutProps {
   participants: TicketParticipant[]
   identity: Identity | null
   actions: ActionKey[]
-  timeline: TicketTimelineItem[]
+  activity: {
+    pendingActions: PendingTicketAction[]
+    timeline: TicketTimelineItem[]
+  }
   pause: TicketPauseState | null
   canAttachEvidence: boolean
 }
@@ -53,7 +58,7 @@ function TicketContentColumns({
   participants,
   identity,
   actions,
-  timeline,
+  activity,
   pause,
   canRate,
   canAttachEvidence,
@@ -87,7 +92,7 @@ function TicketContentColumns({
           </Section>
           <PausePanel ticketId={ticketId} current={isDesktop ? pause : null} />
         </div>
-        <TicketActivity ticketId={ticketId} timeline={timeline} />
+        <TicketActivity ticketId={ticketId} {...activity} />
         <div className="contents lg:col-start-1 lg:flex lg:flex-col lg:gap-6">
           <AttachmentsSection ticketId={ticketId} />
           <EvidenceSection
@@ -164,6 +169,11 @@ export function TicketLayout(props: TicketLayoutProps) {
 
   return (
     <>
+      <UnavailableActionDrafts
+        ticketId={props.ticketId}
+        cycle={props.ticket.cycle}
+        actions={props.actions}
+      />
       <TicketLayoutContent
         {...props}
         proxy={proxy}

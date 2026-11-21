@@ -5,6 +5,18 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Añadido
+
+- **Mi trabajo** permite preparar el detalle de tiquets seleccionados para consultarlos sin
+  conexión, ver cuándo se guardaron y filtrar los que tienen una copia local vigente.
+- Las acciones de inicio y pausa conservan borradores locales. La actividad del tiquet muestra
+  los cambios y fotos pendientes, y da acceso a revisar los rechazos de sincronización.
+
+### Corregido
+
+- Guardar una foto capturada sin conexión guarda también su entrada de envío en la misma escritura.
+- La sincronización reconoce un reenvío de la misma cuenta aunque el historial ya haya avanzado.
+
 ## [0.33.0] - 2026-11-20
 
 ### Cambiado

@@ -20,6 +20,7 @@ export interface OutboxItem {
   lastError: string | null
   /** Código de dominio del último fallo; permite ofrecer la corrección adecuada. */
   lastErrorCode?: string | null
+  lastServerState?: string | null
   /** Marca de tiempo del último intento, para recuperar envíos interrumpidos. */
   sendingAt?: number | null
   createdAt: number
@@ -53,10 +54,18 @@ export interface Evidence {
 /** Caché serializada de React Query para abrir datos ya vistos sin conexión. */
 export interface QueryCacheEntry {
   key: string
+  owner?: string | null
   value: unknown
 }
 
+interface ActionDraftEntry {
+  key: string
+  values: unknown
+  photo: { blob: Blob; name: string } | null
+}
+
 export const db = new Dexie('axia') as Dexie & {
+  actionDrafts: EntityTable<ActionDraftEntry, 'key'>
   outbox: EntityTable<OutboxItem, 'id'>
   evidences: EntityTable<Evidence, 'id'>
   queryCache: EntityTable<QueryCacheEntry, 'key'>
@@ -72,3 +81,5 @@ db.version(2).stores({
   evidences: 'id, ticketId, state',
   queryCache: 'key',
 })
+
+db.version(3).stores({ actionDrafts: 'key' })

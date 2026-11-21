@@ -1,7 +1,33 @@
+import { useEffect, useMemo } from 'react'
+import type { Evidence } from '@/lib/offline/db'
 import { Progress } from '@/components/ui/progress'
 import { EVIDENCE_TYPES } from '../domain/types'
 import { useLocalEvidence } from '../hooks/use-evidence'
 import { evidenceTypeLabels, ticketMessages } from '../i18n'
+
+function LocalEvidencePreview({ item }: { item: Evidence }) {
+  const url = useMemo(() => {
+    if (
+      !item.mimeType.startsWith('image/') ||
+      typeof URL.createObjectURL !== 'function'
+    )
+      return null
+    return URL.createObjectURL(item.blob)
+  }, [item.blob, item.mimeType])
+  useEffect(
+    () => () => {
+      if (url) URL.revokeObjectURL(url)
+    },
+    [url],
+  )
+  return url ? (
+    <img
+      src={url}
+      alt={item.fileName}
+      className="size-20 rounded-md object-cover"
+    />
+  ) : null
+}
 
 /** Evidencias guardadas en el dispositivo que aún no se han subido. */
 export function PendingEvidence({ ticketId }: { ticketId: string }) {
@@ -29,6 +55,7 @@ export function PendingEvidence({ ticketId }: { ticketId: string }) {
                   : ticketMessages.evidence.pending}
               </span>
             </div>
+            <LocalEvidencePreview item={item} />
             {uploading ? (
               <Progress value={item.progress} className="h-2" />
             ) : null}

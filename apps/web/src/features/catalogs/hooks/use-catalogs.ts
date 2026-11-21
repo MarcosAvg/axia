@@ -49,20 +49,37 @@ export function useTeams() {
   })
 }
 
-export function useTechnicians() {
-  return useQuery({
+function techniciansOptions() {
+  return {
     queryKey: catalogKeys.technicians,
     queryFn: fetchTechnicians,
     staleTime,
-  })
+  }
 }
 
-export function useReasons(use: ReasonUse) {
-  return useQuery({
+export function useTechnicians() {
+  return useQuery(techniciansOptions())
+}
+
+function reasonsOptions(use: ReasonUse) {
+  return {
     queryKey: catalogKeys.reasons(use),
     queryFn: () => fetchReasons(use),
     staleTime,
-  })
+  }
+}
+
+export function useReasons(use: ReasonUse) {
+  return useQuery(reasonsOptions(use))
+}
+
+export function fieldWorkCatalogOptions() {
+  return [
+    techniciansOptions(),
+    serviceTypesOptions(),
+    prioritiesOptions(),
+    reasonsOptions('pause'),
+  ] as const
 }
 
 export function useBuildings(dependencyId?: string) {
@@ -81,12 +98,16 @@ export function useDependencies(locationId?: string) {
   })
 }
 
-export function useServiceTypes() {
-  return useQuery({
+function serviceTypesOptions() {
+  return {
     queryKey: catalogKeys.serviceTypes,
     queryFn: fetchServiceTypes,
     staleTime,
-  })
+  }
+}
+
+export function useServiceTypes() {
+  return useQuery(serviceTypesOptions())
 }
 
 export function useChannels() {
@@ -97,12 +118,16 @@ export function useChannels() {
   })
 }
 
-export function usePriorities() {
-  return useQuery({
+function prioritiesOptions() {
+  return {
     queryKey: catalogKeys.priorities,
     queryFn: fetchPriorities,
     staleTime,
-  })
+  }
+}
+
+export function usePriorities() {
+  return useQuery(prioritiesOptions())
 }
 
 export function useCategories() {

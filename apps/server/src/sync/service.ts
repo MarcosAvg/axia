@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import { replayPreviouslyApplied } from './replay.js'
 
 import type { Actor } from '../auth/authorization.js'
 import type { AppConfig } from '../config.js'
@@ -247,6 +248,13 @@ async function executeItem(context: ExecuteContext): Promise<SyncResult> {
   }
 
   try {
+    const replay = await replayPreviouslyApplied(
+      db,
+      context.actor,
+      item.ticketId,
+      parsed.data,
+    )
+    if (replay) return appliedResult(context, replay, {})
     return item.manualTime
       ? await executeManualItem(context, parsed.data)
       : await executeDeviceItem(context, parsed.data)
@@ -257,7 +265,10 @@ async function executeItem(context: ExecuteContext): Promise<SyncResult> {
         status: error.statusCode === 409 ? 'conflict' : 'rejected',
         code: error.code,
         message: error.message,
-        currentState: await currentState(db, item.ticketId),
+        currentState:
+          error.statusCode === 409
+            ? await currentState(db, item.ticketId)
+            : undefined,
       }
     }
     return rejected(item, 'internal_error', 'No se pudo aplicar la acción')

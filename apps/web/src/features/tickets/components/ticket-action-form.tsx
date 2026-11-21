@@ -1,168 +1,21 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { FileField } from '@/components/shared/file-field'
-import { TextField } from '@/components/shared/form-fields'
-import type { ReasonOption, TechnicianOption } from '@/features/catalogs'
+import { Button } from '@/components/ui/button'
 import { EMPTY_ACTION_VALUES, type ActionValues } from '../domain/action-values'
-import type { ActionField } from '../domain/action-validation'
 import type { ActionKey, ProxySubject } from '../domain/actions'
 import { isProxyAction } from '../domain/actions'
-import type {
-  EvidenceType,
-  TicketDetail,
-  TicketPauseOption,
-} from '../domain/types'
-import { evidenceTypeLabels, ticketMessages } from '../i18n'
+import type { TicketDetail } from '../domain/types'
 import { useActionCatalogs } from '../hooks/use-action-catalogs'
 import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
 import { useTicketPauseState } from '../hooks/use-tickets'
-import { ActionFormFooter } from './action-form-footer'
-import { TicketActionFields } from './ticket-action-fields'
 import {
   actionFormState,
   mutationFor,
   reasonUseFor,
 } from './ticket-action-handlers'
+import { ActionFormView } from './action-form-view'
 import { useActionSubmission } from './use-action-submission'
-
-function EvidenceBlock({
-  evidenceType,
-  evidenceError,
-  evidenceFile,
-  onEvidenceChange,
-}: {
-  evidenceType: EvidenceType | undefined
-  evidenceError: string | null
-  evidenceFile: File | null
-  onEvidenceChange: (file: File | null) => void
-}) {
-  if (!evidenceType) return null
-  return (
-    <div className="flex flex-col gap-1">
-      <FileField
-        id="action-evidence"
-        label={`${ticketMessages.actionFields.evidence}: ${evidenceTypeLabels[evidenceType]}`}
-        file={evidenceFile}
-        onChange={onEvidenceChange}
-        accept="image/*,application/pdf"
-        camera
-      />
-      {evidenceError ? (
-        <p className="text-sm text-destructive">{evidenceError}</p>
-      ) : null}
-    </div>
-  )
-}
-
-interface ActionFormViewProps {
-  evidenceType: EvidenceType | undefined
-  evidenceError: string | null
-  evidenceFile: File | null
-  onEvidenceChange: (file: File | null) => void
-  action: ActionKey
-  technicians: TechnicianOption[]
-  reasons: ReasonOption[]
-  priorities: { id: string; name: string }[]
-  serviceTypes: { id: string; name: string }[]
-  pauseOptions: {
-    advance: TicketPauseOption[]
-    exit: TicketPauseOption[]
-  }
-  categoryId: string
-  reasonRequired: boolean
-  values: ActionValues
-  validationErrors: Partial<Record<ActionField, string>>
-  occurredLocal: string
-  timezone: string | null
-  showOccurredAt: boolean
-  onOccurredAtChange: (value: string) => void
-  onChange: (patch: Partial<ActionValues>) => void
-  error: unknown
-  isPending: boolean
-  onSubmit: (event: FormEvent) => void
-  onClose: () => void
-}
-
-function ActionTimeField({
-  value,
-  timezone,
-  show,
-  onChange,
-}: {
-  value: string
-  timezone: string | null
-  show: boolean
-  onChange: (value: string) => void
-}) {
-  if (!show) return null
-  return (
-    <TextField
-      id="action-occurred-at"
-      label={ticketMessages.actionFields.realTime(timezone ?? 'instancia')}
-      type="datetime-local"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
-  )
-}
-
-function ActionFormView({
-  evidenceType,
-  evidenceError,
-  evidenceFile,
-  onEvidenceChange,
-  action,
-  technicians,
-  reasons,
-  priorities,
-  serviceTypes,
-  pauseOptions,
-  categoryId,
-  reasonRequired,
-  values,
-  validationErrors,
-  occurredLocal,
-  timezone,
-  showOccurredAt,
-  onOccurredAtChange,
-  onChange,
-  error,
-  isPending,
-  onSubmit,
-  onClose,
-}: ActionFormViewProps) {
-  return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <ActionTimeField
-        value={occurredLocal}
-        timezone={timezone}
-        show={showOccurredAt}
-        onChange={onOccurredAtChange}
-      />
-      <EvidenceBlock
-        evidenceType={evidenceType}
-        evidenceError={evidenceError}
-        evidenceFile={evidenceFile}
-        onEvidenceChange={onEvidenceChange}
-      />
-      <TicketActionFields
-        action={action}
-        technicians={technicians}
-        reasons={reasons}
-        priorities={priorities}
-        serviceTypes={serviceTypes}
-        pauseOptions={pauseOptions}
-        categoryId={categoryId}
-        reasonRequired={reasonRequired}
-        values={values}
-        errors={validationErrors}
-        onChange={onChange}
-      />
-      <ActionFormFooter error={error} isPending={isPending} onClose={onClose} />
-    </form>
-  )
-}
+import { useFieldDraft } from './use-field-draft'
 
 /** Opciones de avance y salida del subestado actual de la pausa. */
 function usePauseOptions(action: ActionKey, ticketId: string) {
@@ -184,14 +37,29 @@ interface TicketActionFormProps {
   onClose: () => void
 }
 
-function makeOnChange(
-  clearValidation: () => void,
-  setValues: (update: (current: ActionValues) => ActionValues) => void,
+function draftHandlersFor(
+  values: ActionValues,
+  setValues: (values: ActionValues) => void,
+  draft: ReturnType<typeof useFieldDraft>,
+  submission: ReturnType<typeof useActionSubmission>,
 ) {
-  return (patch: Partial<ActionValues>) => {
-    clearValidation()
-    setValues((current) => ({ ...current, ...patch }))
+  function onChange(patch: Partial<ActionValues>) {
+    submission.clearValidation()
+    const next = { ...values, ...patch }
+    setValues(next)
+    draft.save(next, submission.file)
   }
+  function onEvidenceChange(file: File | null) {
+    submission.setFile(file)
+    draft.save(values, file)
+  }
+  function resumeDraft() {
+    if (!draft.saved) return
+    setValues(draft.saved.values)
+    submission.setFile(draft.saved.photo)
+    draft.resume()
+  }
+  return { onChange, onEvidenceChange, resumeDraft }
 }
 
 function useTicketActionForm({
@@ -211,6 +79,7 @@ function useTicketActionForm({
   const actions = useTicketActions(ticketId, subject, time.local)
   const pauseOptions = usePauseOptions(action, ticketId)
   const [values, setValues] = useState<ActionValues>(EMPTY_ACTION_VALUES)
+  const draft = useFieldDraft(ticketId, cycle, action, subject)
   const catalogs = useActionCatalogs({
     action,
     reasonUse: reasonUseFor(action),
@@ -227,9 +96,10 @@ function useTicketActionForm({
     occurredLocal: time.local,
     subjectTechnicianId,
     reasonRequired: catalogs.reasonRequired,
-    onClose,
+    onClose: () => {
+      void draft.clear().then(onClose)
+    },
   })
-  const onChange = makeOnChange(submission.clearValidation, setValues)
   return {
     state: actionFormState(
       action,
@@ -237,8 +107,9 @@ function useTicketActionForm({
       submission.uploading,
     ),
     submission,
+    draft,
+    ...draftHandlersFor(values, setValues, draft, submission),
     values,
-    onChange,
     occurredLocal: time.value,
     timezone: time.timezone,
     showOccurredAt: time.show,
@@ -252,38 +123,76 @@ function useTicketActionForm({
   }
 }
 
+function DraftPrompt({
+  form,
+}: {
+  form: ReturnType<typeof useTicketActionForm>
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <p className="w-full text-sm">
+        Tienes un borrador guardado en este dispositivo.
+      </p>
+      <Button type="button" size="sm" onClick={form.resumeDraft}>
+        Retomar borrador
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => void form.draft.clear()}
+      >
+        Descartar borrador
+      </Button>
+      {form.draft.error ? (
+        <p role="alert">No se pudo actualizar el borrador local.</p>
+      ) : null}
+    </div>
+  )
+}
+
 /** Formulario de una acción del tiquet; incluye la evidencia cuando la acción la exige. */
 export function TicketActionForm(props: TicketActionFormProps) {
   const form = useTicketActionForm(props)
   if (!form.state.render) return null
+  if (form.draft.loading)
+    return <p role="status">Buscando un borrador guardado…</p>
 
+  if (form.draft.saved) return <DraftPrompt form={form} />
   return (
-    <ActionFormView
-      evidenceType={form.submission.evidenceType}
-      evidenceError={form.submission.evidenceError}
-      evidenceFile={form.submission.file}
-      onEvidenceChange={form.submission.setFile}
-      action={props.action}
-      technicians={form.technicians}
-      reasons={form.reasons}
-      priorities={form.priorities}
-      serviceTypes={form.serviceTypes}
-      pauseOptions={form.pauseOptions}
-      categoryId={props.ticket.categoryId}
-      reasonRequired={form.reasonRequired}
-      values={form.values}
-      validationErrors={form.submission.validationErrors}
-      occurredLocal={form.occurredLocal}
-      timezone={form.timezone}
-      showOccurredAt={form.showOccurredAt}
-      onOccurredAtChange={form.onOccurredAtChange}
-      onChange={form.onChange}
-      error={form.state.error}
-      isPending={form.state.isPending}
-      onSubmit={(event) => {
-        void form.submission.submit(event)
-      }}
-      onClose={props.onClose}
-    />
+    <>
+      {form.draft.error ? (
+        <p role="alert" className="text-sm text-destructive">
+          No se pudo guardar el borrador en este dispositivo.
+        </p>
+      ) : null}
+      <ActionFormView
+        evidenceType={form.submission.evidenceType}
+        evidenceError={form.submission.evidenceError}
+        evidenceFile={form.submission.file}
+        onEvidenceChange={form.onEvidenceChange}
+        action={props.action}
+        technicians={form.technicians}
+        reasons={form.reasons}
+        priorities={form.priorities}
+        serviceTypes={form.serviceTypes}
+        pauseOptions={form.pauseOptions}
+        categoryId={props.ticket.categoryId}
+        reasonRequired={form.reasonRequired}
+        values={form.values}
+        validationErrors={form.submission.validationErrors}
+        occurredLocal={form.occurredLocal}
+        timezone={form.timezone}
+        showOccurredAt={form.showOccurredAt}
+        onOccurredAtChange={form.onOccurredAtChange}
+        onChange={form.onChange}
+        error={form.state.error}
+        isPending={form.state.isPending}
+        onSubmit={(event) => {
+          void form.submission.submit(event)
+        }}
+        onClose={props.onClose}
+      />
+    </>
   )
 }

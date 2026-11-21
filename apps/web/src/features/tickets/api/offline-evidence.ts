@@ -3,7 +3,7 @@
 
 import { apiBaseUrl, apiFetch } from '@/lib/api-client'
 import { db, type Evidence } from '@/lib/offline/db'
-import { isNetworkError } from '@/lib/offline/errors'
+import { isRetryableOutboxError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
 import {
   enqueue,
@@ -11,7 +11,7 @@ import {
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { uploadResumable } from '@/lib/offline/tus'
-import { currentOfflineUserId } from '@/lib/offline/user'
+import { currentOfflineUserId, offlineUserForTab } from '@/lib/offline/user'
 import { EVIDENCE_TYPES } from '../domain/types'
 import type { EvidenceType } from '../domain/types'
 
@@ -28,13 +28,15 @@ interface EvidenceInput {
 }
 
 /** Comprime el archivo y lo guarda en el dispositivo, sin subirlo todavía. */
-async function saveEvidence(params: EvidenceInput): Promise<string> {
+async function prepareEvidence(
+  params: EvidenceInput,
+  owner: string | null,
+): Promise<Evidence> {
   const id = crypto.randomUUID()
   const blob = await compressImage(params.file)
-  const offline = typeof navigator !== 'undefined' && navigator.onLine === false
-  await db.evidences.add({
+  return {
     id,
-    userId: currentOfflineUserId() ?? undefined,
+    userId: owner ?? undefined,
     ticketId: params.ticketId,
     cycle: params.cycle,
     type: params.type,
@@ -43,13 +45,11 @@ async function saveEvidence(params: EvidenceInput): Promise<string> {
     fileName: params.file.name,
     note: params.note ?? null,
     occurredLocal: params.occurredLocal || undefined,
-    clientCapturedAt: offline ? new Date().toISOString() : undefined,
     subjectTechnicianId: params.subjectTechnicianId,
     state: 'pending',
     progress: 0,
     createdAt: Date.now(),
-  })
-  return id
+  }
 }
 
 /** Cuerpo de reserva de la evidencia; la hora de dispositivo solo viaja si se capturó sin conexión. */
@@ -79,6 +79,11 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     await db.evidences.delete(evidenceId)
     return
   }
+  await uploadEvidence(evidence)
+}
+
+async function uploadEvidence(evidence: Evidence): Promise<void> {
+  const evidenceId = evidence.id
   if (evidence.userId && evidence.userId !== currentOfflineUserId()) {
     throw new Error('La evidencia pertenece a otro usuario')
   }
@@ -93,6 +98,7 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     },
   )
   const serverId = created.evidence.id
+  if (evidence.userId) assertCaptureOwner(evidence.userId)
 
   await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
   let reported = -1
@@ -113,6 +119,12 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
   await db.evidences.delete(evidenceId)
 }
 
+function assertCaptureOwner(owner: string | null) {
+  if (owner !== currentOfflineUserId()) {
+    throw new Error('La sesión cambió durante la captura')
+  }
+}
+
 /**
  * Guarda la evidencia y la sube de inmediato si hay red; si no hay conexión (o falla la red a
  * medio camino), la encola. Se espera a que termine cuando hay red, para que la acción de flujo
@@ -121,22 +133,25 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
 export async function saveAndUploadEvidence(
   params: EvidenceInput,
 ): Promise<string> {
-  const id = await saveEvidence(params)
-  const online = typeof navigator === 'undefined' || navigator.onLine === true
-  if (online) {
+  const capturedAt = new Date().toISOString()
+  const owner = offlineUserForTab()
+  assertCaptureOwner(owner)
+  const evidence = await prepareEvidence(params, owner)
+  assertCaptureOwner(owner)
+
+  const { id } = evidence
+  if (typeof navigator === 'undefined' || navigator.onLine) {
     try {
-      await uploadEvidenceItem({ evidenceId: id })
+      await uploadEvidence(evidence)
       return id
     } catch (error) {
-      if (!isNetworkError(error)) {
-        // Un error de dominio no se resuelve reintentando: se descarta la fila
-        // local para no dejar una evidencia pendiente que nunca se subirá.
-        await db.evidences.delete(id)
-        throw error
-      }
+      if (!isRetryableOutboxError(error)) throw error
     }
   }
-  await enqueue(EVIDENCE_UPLOAD, { evidenceId: id }, params.ticketId)
+  await db.transaction('rw', db.evidences, db.outbox, async () => {
+    await db.evidences.add({ ...evidence, clientCapturedAt: capturedAt })
+    await enqueue(EVIDENCE_UPLOAD, { evidenceId: id }, params.ticketId, owner)
+  })
   void processOutbox()
   return id
 }

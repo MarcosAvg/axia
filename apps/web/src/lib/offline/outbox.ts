@@ -1,6 +1,6 @@
 import { db } from './db'
 import type { OutboxItem } from './db'
-import { isNetworkError, OutboxError } from './errors'
+import { isRetryableOutboxError, OutboxError } from './errors'
 import { currentOfflineUserId } from './user'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
@@ -33,8 +33,7 @@ function nextSeq(): number {
   return Date.now() * 1000 + (seqCounter % 1000)
 }
 
-// Serializa las operaciones sobre IndexedDB para que encolar y procesar no se pisen
-// (procesar puede tardar en subir la evidencia y bloquearía una escritura concurrente).
+// Serializa el procesamiento con los cambios sobre entradas existentes.
 let chain: Promise<unknown> = Promise.resolve()
 function exclusive<T>(task: () => Promise<T>): Promise<T> {
   const run = chain.then(task, task)
@@ -50,20 +49,19 @@ export async function enqueue(
   type: string,
   payload: unknown,
   orderingKey?: string,
+  owner: string | null = currentOfflineUserId(),
 ): Promise<void> {
-  await exclusive(async () => {
-    await db.outbox.add({
-      id: crypto.randomUUID(),
-      seq: nextSeq(),
-      type,
-      userId: currentOfflineUserId() ?? undefined,
-      payload,
-      orderingKey,
-      state: 'pending',
-      attempts: 0,
-      lastError: null,
-      createdAt: Date.now(),
-    })
+  await db.outbox.add({
+    id: crypto.randomUUID(),
+    seq: nextSeq(),
+    type,
+    userId: owner ?? undefined,
+    payload,
+    orderingKey,
+    state: 'pending',
+    attempts: 0,
+    lastError: null,
+    createdAt: Date.now(),
   })
 }
 
@@ -126,7 +124,10 @@ async function processReadyItem(item: OutboxItem): Promise<boolean> {
 export async function pendingForCurrentUser(): Promise<number> {
   const userId = currentOfflineUserId()
   if (!userId) return 0
-  const items = await db.outbox.where('state').equals('pending').toArray()
+  const items = await db.outbox
+    .where('state')
+    .anyOf('pending', 'sending')
+    .toArray()
   return items.filter((item) => item.userId === userId).length
 }
 
@@ -150,6 +151,7 @@ export async function retryOutboxItem(id: string): Promise<void> {
       attempts: 0,
       lastError: null,
       lastErrorCode: null,
+      lastServerState: null,
       sendingAt: null,
     })
   })
@@ -173,6 +175,7 @@ export async function retryOutboxItemWithManualTime(
       attempts: 0,
       lastError: null,
       lastErrorCode: null,
+      lastServerState: null,
       sendingAt: null,
     })
   })
@@ -211,13 +214,14 @@ async function processItem(item: OutboxItem): Promise<boolean> {
     return true
   } catch (error) {
     const attempts = item.attempts + 1
-    const permanent = !isNetworkError(error)
+    const permanent = !isRetryableOutboxError(error)
     await db.outbox.update(item.id, {
       state: permanent || attempts >= MAX_ATTEMPTS ? 'error' : 'pending',
       attempts,
       sendingAt: null,
       lastError: error instanceof Error ? error.message : String(error),
       lastErrorCode: error instanceof OutboxError ? error.code : null,
+      lastServerState: error instanceof OutboxError ? error.serverState : null,
     })
     return false
   }

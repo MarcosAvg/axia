@@ -51,10 +51,14 @@ export async function fetchTickets(
 
 export async function fetchTicket(
   id: string,
+  signal?: AbortSignal,
 ): Promise<TicketDetailWithTimes | null> {
   try {
     const body = ticketDetailResponseSchema.parse(
-      await apiFetch<unknown>(`/api/tickets/${id}`),
+      await apiFetch<unknown>(
+        `/api/tickets/${id}`,
+        signal ? { signal } : undefined,
+      ),
     )
     return body.ticket
   } catch (error) {

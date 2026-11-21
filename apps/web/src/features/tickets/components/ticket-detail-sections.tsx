@@ -25,6 +25,9 @@ import { TicketCycleChart } from './ticket-cycle-chart'
 import { TicketCycleSummary } from './ticket-cycle-summary'
 import { TicketEvidenceList } from './ticket-evidence-list'
 import { TicketRatingPanel } from './ticket-rating-panel'
+import type { PendingTicketAction } from '../domain/pending-actions'
+import { PendingActions } from './pending-actions'
+import { TicketSyncIssues } from './ticket-sync-issues'
 import { TicketTimeline } from './ticket-timeline'
 import { ParticipantList } from './ticket-summary'
 
@@ -96,7 +99,6 @@ export function EvidenceSection({
       hint={detailSectionHints.evidence}
     >
       <div className="flex flex-col gap-4">
-        <PendingEvidence ticketId={ticketId} />
         <TicketEvidenceList items={evidence.data ?? []} />
         {canAttach ? (
           <EvidenceUploader ticketId={ticketId} cycle={cycle} status={status} />
@@ -197,13 +199,18 @@ export function CycleTimesSection({
 export function TicketActivity({
   ticketId,
   timeline,
+  pendingActions,
 }: {
   ticketId: string
   timeline: TicketTimelineItem[]
+  pendingActions: PendingTicketAction[]
 }) {
   return (
     <div className="flex flex-col gap-6 lg:sticky lg:top-20 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
       <Section title={ticketMessages.detail.timeline}>
+        <PendingActions actions={pendingActions} />
+        <PendingEvidence ticketId={ticketId} />
+        <TicketSyncIssues ticketId={ticketId} />
         <TicketTimeline ticketId={ticketId} items={timeline} />
       </Section>
     </div>

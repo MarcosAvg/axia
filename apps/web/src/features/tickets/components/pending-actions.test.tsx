@@ -52,3 +52,10 @@ describe('PendingActions', () => {
     expect(container).toBeEmptyDOMElement()
   })
 })
+
+it('distingue las operaciones que ya se están enviando', () => {
+  render(
+    <PendingActions actions={[{ ...action('start', 1), sending: true }]} />,
+  )
+  expect(screen.getByText('Enviando')).toBeInTheDocument()
+})

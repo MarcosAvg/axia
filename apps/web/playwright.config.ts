@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const testPwa = process.env.AXIA_E2E_PWA === '1'
 const apiUrl = 'http://127.0.0.1:3101'
 
 // Pruebas de extremo a extremo: pocas y bien elegidas (convenciones, §13).
@@ -37,7 +38,10 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'pnpm dev --port 5174 --strictPort',
+      command: testPwa
+        ? 'pnpm build && pnpm preview --port 5174 --strictPort'
+        : 'pnpm dev --port 5174 --strictPort',
+      timeout: testPwa ? 120_000 : undefined,
       env: { AXIA_API_URL: apiUrl, AXIA_ENV_FILE: '/dev/null' },
       url: 'http://localhost:5174',
       reuseExistingServer: false,

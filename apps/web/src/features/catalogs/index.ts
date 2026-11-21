@@ -28,3 +28,5 @@ export type {
   TechnicianOption,
 } from './domain/types'
 export { indentReasons, resumablePauseRoots } from './domain/reasons'
+
+export { fieldWorkCatalogOptions } from './hooks/use-catalogs'

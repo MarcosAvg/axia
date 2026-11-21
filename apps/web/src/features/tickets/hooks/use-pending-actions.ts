@@ -25,6 +25,7 @@ function toPendingAction(item: OutboxItem): PendingTicketAction | null {
     id: item.id,
     ticketId: payload.ticketId,
     seq: item.seq,
+    ...(item.state === 'sending' ? { sending: true } : {}),
     operation: command.data.operation,
     args: { ...command.data.args },
     occurredAt:

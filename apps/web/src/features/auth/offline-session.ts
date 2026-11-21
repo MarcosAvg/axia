@@ -77,3 +77,9 @@ export function clearCachedAuth(): void {
     // Sin almacenamiento no hay nada que borrar.
   }
 }
+
+export function offlineSessionExpiresAt(userId: string): number | undefined {
+  const cached = readCachedAuth()
+  if (cached?.session.user.id === userId)
+    return cached.cachedAt + OFFLINE_AUTH_TTL_MS
+}

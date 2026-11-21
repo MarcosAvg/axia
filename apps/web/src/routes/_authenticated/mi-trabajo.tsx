@@ -4,13 +4,9 @@ import { ErrorAlert, LoadingList } from '@/components/shared/async-state'
 import { EmptyState } from '@/components/shared/empty-state'
 import { PageHeader } from '@/components/shared/page-header'
 import { RequirePermission, RequireTechnician, useAuth } from '@/features/auth'
-import {
-  QueueViewSwitch,
-  TicketList,
-  TicketStatusSummary,
-  ticketMessages,
-  useMyWork,
-} from '@/features/tickets'
+import { QueueViewSwitch, ticketMessages, useMyWork } from '@/features/tickets'
+
+import { OfflineWork } from './-offline-work'
 
 export const Route = createFileRoute('/_authenticated/mi-trabajo')({
   component: MyWorkPage,
@@ -49,10 +45,13 @@ function MyWorkContent() {
       {query.data && query.data.length === 0 ? (
         <EmptyState icon={HardHatIcon} title={myWork.empty} />
       ) : null}
-      {query.data && query.data.length > 0 ? (
+      {identity && query.data && query.data.length > 0 ? (
         <section aria-label={myWork.subtitle} className="flex flex-col gap-3">
-          <TicketStatusSummary items={query.data} />
-          <TicketList items={query.data} />
+          <OfflineWork
+            key={identity.userId}
+            userId={identity.userId}
+            items={query.data}
+          />
         </section>
       ) : null}
     </div>

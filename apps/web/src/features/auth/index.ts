@@ -18,3 +18,5 @@ export { LoadingScreen } from './components/loading-screen'
 export { authMessages, roleLabel } from './i18n'
 export { can, canAny } from './domain/identity'
 export type { Identity } from './domain/identity'
+
+export { offlineSessionExpiresAt } from './offline-session'

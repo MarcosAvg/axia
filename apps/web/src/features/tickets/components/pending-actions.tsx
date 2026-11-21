@@ -49,7 +49,10 @@ export function PendingActions({
           >
             <span>{operationLabel(action)}</span>
             <span className="text-xs text-muted-foreground">
-              {formatDateTime(action.occurredAt)}
+              {formatDateTime(action.occurredAt)} ·{' '}
+              <span>
+                {action.sending ? 'Enviando' : 'Guardado en este dispositivo'}
+              </span>
             </span>
           </li>
         ))}

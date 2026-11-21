@@ -30,6 +30,7 @@ export interface PendingTicketAction {
   operation: PendingOperation
   args: Record<string, unknown>
   occurredAt: string
+  sending?: boolean
 }
 
 export interface PendingTicketProjection<

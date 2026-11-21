@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { can, useAuth } from '@/features/auth'
 import type { Identity } from '@/features/auth'
+import { isRetryableOutboxError } from '@/lib/offline/errors'
 import { useDocumentTitle } from '@/lib/use-document-title'
 import { allowedActions, isSupervisorIdentity } from '../domain/actions'
 import { projectPendingTicket } from '../domain/pending-actions'
@@ -24,7 +25,6 @@ import {
 } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
 import { DuplicateAlertsPanel } from './duplicate-alerts-panel'
-import { PendingActions } from './pending-actions'
 import { TicketHeader } from './ticket-header'
 import { TicketLayout } from './ticket-detail-layout'
 
@@ -43,6 +43,20 @@ function TicketLoading() {
         <Skeleton className="h-48 w-full" />
       </div>
     </div>
+  )
+}
+
+function TicketUnavailable() {
+  return (
+    <EmptyState
+      icon={TicketIcon}
+      title="Este tiquet no está disponible sin conexión"
+      action={
+        <Button asChild variant="outline">
+          <Link to="/mi-trabajo">Volver a Mi trabajo</Link>
+        </Button>
+      }
+    />
   )
 }
 
@@ -103,23 +117,28 @@ function TicketDetailContent({
         pendingSync={projection.pending.length > 0}
         pause={pause ?? null}
       />
-      <PendingActions actions={projection.pending} />
       <DuplicateAlertsPanel
         ticketId={ticketId}
         possibleDuplicate={projection.ticket.possibleDuplicate}
         canResolve={actions.includes('mark_duplicate')}
       />
       <TicketLayout
+        activity={{ timeline, pendingActions: projection.pending }}
         ticketId={ticketId}
         ticket={projection.ticket}
         participants={participants}
         identity={identity}
         actions={actions}
-        timeline={timeline}
         pause={pause ?? null}
         canAttachEvidence={can(identity, 'evidence.attach')}
       />
     </div>
+  )
+}
+
+function blocksTicketRead(ticket: ReturnType<typeof useTicket>): boolean {
+  return (
+    ticket.isError && (!ticket.data || !isRetryableOutboxError(ticket.error))
   )
 }
 
@@ -132,8 +151,10 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const pending = usePendingTicketActions(ticketId)
   useDocumentTitle(ticket.data?.folio ?? ticketMessages.detail.title)
 
+  if (ticket.fetchStatus === 'paused' && !ticket.data)
+    return <TicketUnavailable />
   if (ticket.isLoading) return <TicketLoading />
-  if (ticket.isError) {
+  if (blocksTicketRead(ticket)) {
     return (
       <ErrorAlert
         message={ticketMessages.errors.load}

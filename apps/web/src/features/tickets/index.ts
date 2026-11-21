@@ -32,3 +32,5 @@ export { splitTeamQueue, withoutOffers } from './domain/inbox'
 export { ticketFiltersFromSearch } from './domain/list-filters'
 export type { TicketListSearch } from './schemas'
 export { useTicketFilterCatalogs } from './hooks/use-ticket-filter-catalogs'
+
+export { ticketDetailOptions } from './hooks/use-tickets'

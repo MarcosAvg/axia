@@ -135,3 +135,31 @@ describe('offline sync validation', () => {
     ).toBe('rejected')
   })
 })
+
+describe('offline replay', () => {
+  it('recognizes a replay after a later event and rejects a different actor', async () => {
+    const original = item({
+      ticketId: context.ids.ticketA2,
+      clientReportedAt: new Date(Date.now() - 120_000).toISOString(),
+    })
+    const later = item({
+      ticketId: context.ids.ticketA2,
+      clientReportedAt: new Date(Date.now() - 60_000).toISOString(),
+    })
+    expect(
+      (await sync(context.cookies.requester, [original])).json().results[0]
+        .status,
+    ).toBe('applied')
+    expect(
+      (await sync(context.cookies.requester, [later])).json().results[0].status,
+    ).toBe('applied')
+    expect(
+      (await sync(context.cookies.requester, [original])).json().results[0]
+        .status,
+    ).toBe('duplicate')
+    expect(
+      (await sync(context.cookies.outsider, [original])).json().results[0]
+        .status,
+    ).toBe('rejected')
+  })
+})

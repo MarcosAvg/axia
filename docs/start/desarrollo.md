@@ -129,6 +129,15 @@ hasta que una persona con permiso corrija la hora. La corrección se hace desde 
 tiquet y queda auditada. Después de corregir, vuelve a ejecutar la auditoría: los desfases
 históricos se reportan, no se ocultan ni se reescriben.
 
+## Reapertura de la PWA sin conexión
+
+Con el PostgreSQL local de pruebas iniciado mediante `pnpm test:db:start`, ejecuta el escenario
+offline con la compilación de producción y el service worker activado.
+
+```bash
+AXIA_E2E_PWA=1 pnpm --filter @axia/web exec playwright test e2e/offline.spec.ts
+```
+
 ## Resolver problemas locales
 
 | Síntoma | Acción |

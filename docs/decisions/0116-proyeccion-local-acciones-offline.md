@@ -24,7 +24,9 @@ muestra en el indicador de la cola y no se descarta en silencio.
 
 Las operaciones cuyo resultado depende del ruteo del servidor (`assign_technician` líder/auxiliar,
 `recapture`, `reactivate` y `resolve_claim` con tiquet nuevo) se muestran como pendientes pero no
-adelantan el estado. La línea de tiempo y el panel de pausa siguen siendo datos del servidor.
+adelantan el estado. La línea de tiempo confirmada y el panel de pausa siguen siendo datos del servidor. Junto a
+los eventos confirmados se muestran las acciones y evidencias locales y sus errores de envío.
+Ver [captura local en campo](0129-captura-local-trabajo-en-campo.md).
 
 ## Alternativas y consecuencias
 

@@ -64,6 +64,7 @@ export function registerTicketActionHandler() {
       throw new OutboxError(
         result.message ?? result.code ?? result.status,
         result.code,
+        result.currentState,
       )
     },
     undefined,

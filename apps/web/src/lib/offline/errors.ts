@@ -2,10 +2,13 @@
 export class OutboxError extends Error {
   readonly code?: string
 
-  constructor(message: string, code?: string) {
+  readonly serverState?: string
+
+  constructor(message: string, code?: string, serverState?: string) {
     super(message)
     this.name = 'OutboxError'
     this.code = code
+    this.serverState = serverState
   }
 }
 
@@ -23,5 +26,16 @@ export function isNetworkError(error: unknown): boolean {
   if (error instanceof TypeError) return true
   return /failed to fetch|networkerror|network request failed|load failed|fetch failed/i.test(
     messageOf(error),
+  )
+}
+
+export function isRetryableOutboxError(error: unknown): boolean {
+  if (isNetworkError(error)) return true
+  if (error instanceof OutboxError) return error.code === 'internal_error'
+  if (typeof error !== 'object' || error === null) return false
+  const status = Reflect.get(error, 'status')
+  return (
+    typeof status === 'number' &&
+    (status === 429 || [500, 502, 503, 504].includes(status))
   )
 }

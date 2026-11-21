@@ -68,12 +68,15 @@ export function useTicketsList(
   return { ...query, data }
 }
 
+export function ticketDetailOptions(id: string) {
+  return {
+    queryKey: ticketKeys.detail(id),
+    queryFn: ({ signal }: { signal: AbortSignal }) => fetchTicket(id, signal),
+  }
+}
+
 export function useTicket(id: string | undefined) {
-  return useQuery({
-    queryKey: ticketKeys.detail(id ?? ''),
-    queryFn: () => (id ? fetchTicket(id) : Promise.resolve(null)),
-    enabled: Boolean(id),
-  })
+  return useQuery({ ...ticketDetailOptions(id ?? ''), enabled: Boolean(id) })
 }
 
 export function useTicketPauseSteps(id: string | undefined) {

@@ -18,3 +18,12 @@ describe('isNetworkError', () => {
     expect(isNetworkError(new Error('Permiso insuficiente'))).toBe(false)
   })
 })
+
+it('distingue indisponibilidad del servidor de un conflicto de negocio', async () => {
+  const { isRetryableOutboxError, OutboxError } = await import('./errors')
+  expect(isRetryableOutboxError({ status: 503 })).toBe(true)
+  expect(
+    isRetryableOutboxError(new OutboxError('Error interno', 'internal_error')),
+  ).toBe(true)
+  expect(isRetryableOutboxError({ status: 409 })).toBe(false)
+})

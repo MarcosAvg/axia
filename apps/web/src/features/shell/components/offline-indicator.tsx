@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AlertTriangleIcon, CloudOffIcon, RefreshCwIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,21 @@ function itemLabel(type: string): string {
 
 function OutboxErrorItem({ item }: { item: OutboxItem }) {
   const timeError = isTimeError(item)
+  if (item.orderingKey) {
+    return (
+      <li className="space-y-1 rounded-md border p-2 text-sm">
+        <p className="font-medium">{itemLabel(item.type)}</p>
+        <p className="break-words text-xs text-destructive">{item.lastError}</p>
+        <Link
+          className="underline"
+          to="/tickets/$ticketId"
+          params={{ ticketId: item.orderingKey }}
+        >
+          Revisar en el tiquet
+        </Link>
+      </li>
+    )
+  }
   return (
     <li className="space-y-1 rounded-md border p-2 text-sm">
       <p className="font-medium">{itemLabel(item.type)}</p>
@@ -156,15 +172,20 @@ export function OfflineIndicator() {
   const pending = useLiveQuery(() => pendingForCurrentUser(), [userId], 0)
   const failed = useLiveQuery(() => errorsForCurrentUser(), [userId], [])
 
-  if (failed.length > 0) return <OutboxErrors items={failed} />
-  if (online && pending === 0 && !isOfflineSession) return null
+  const showStatus = !online || pending > 0 || isOfflineSession
+  if (!showStatus && failed.length === 0) return null
 
   return (
-    <OfflineStatus
-      online={online}
-      pending={pending}
-      isOfflineSession={isOfflineSession}
-      onSync={() => void processOutbox()}
-    />
+    <div className="flex items-center gap-2">
+      {failed.length > 0 ? <OutboxErrors items={failed} /> : null}
+      {showStatus ? (
+        <OfflineStatus
+          online={online}
+          pending={pending}
+          isOfflineSession={isOfflineSession}
+          onSync={() => void processOutbox()}
+        />
+      ) : null}
+    </div>
   )
 }
