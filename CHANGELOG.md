@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-11-20
+
 ### Cambiado
 
 - La barra lateral de escritorio ahora es flotante y conserva la opción de contraerse a iconos.
