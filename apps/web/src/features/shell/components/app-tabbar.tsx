@@ -30,7 +30,7 @@ export function AppTabbar() {
     <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
       <nav
         aria-label={shellMessages.tabbar.label}
-        className="shell-surface fixed inset-x-4 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 flex items-stretch gap-1 p-1 lg:hidden"
+        className="shell-surface fixed inset-x-4 bottom-[calc(0.5rem+var(--app-safe-bottom))] z-40 flex items-stretch gap-1 p-1 lg:hidden"
       >
         {tabs.map((item) => {
           const Icon = item.icon
@@ -59,7 +59,7 @@ export function AppTabbar() {
       <SheetContent
         side="bottom"
         aria-describedby={undefined}
-        className="max-h-[85dvh] gap-0 overflow-hidden rounded-2xl border border-sidebar-border p-0 data-[side=bottom]:inset-x-4 data-[side=bottom]:bottom-[calc(0.5rem+env(safe-area-inset-bottom))] motion-reduce:animate-none motion-reduce:transition-none"
+        className="max-h-[85dvh] gap-0 overflow-hidden rounded-2xl border border-sidebar-border p-0 data-[side=bottom]:inset-x-4 data-[side=bottom]:bottom-[calc(0.5rem+var(--app-safe-bottom))] motion-reduce:animate-none motion-reduce:transition-none"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>{shellMessages.tabbar.more}</SheetTitle>

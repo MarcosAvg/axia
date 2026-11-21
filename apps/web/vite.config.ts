@@ -31,8 +31,8 @@ const pluginsAfterCompiler = [
       start_url: '/',
       scope: '/',
       categories: ['business', 'productivity'],
-      theme_color: '#2563eb',
-      background_color: '#ffffff',
+      theme_color: '#f5f6f8',
+      background_color: '#f5f6f8',
       icons: [
         {
           src: 'pwa-192.png',

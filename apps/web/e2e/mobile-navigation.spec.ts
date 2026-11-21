@@ -190,3 +190,46 @@ test('la barra de acciones avisa cuando se pierde la conexión', async ({
   await page.context().setOffline(false)
   await expect(offline).toBeHidden()
 })
+
+test('@smoke el contenido se desplaza detrás de los controles y termina por encima', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 700 })
+  await signIn(page, 'demo.technician')
+  await page.goto('/tickets')
+  await page.addStyleTag({ content: ':root { --app-safe-bottom: 24px; }' })
+
+  const tabbar = page.getByRole('navigation', { name: 'Navegación inferior' })
+  const lastTicket = page
+    .getByRole('main')
+    .getByRole('link', { name: /^AX-/ })
+    .last()
+  await expect(lastTicket).toBeAttached()
+  const top = await tabbar.evaluate((node) => node.getBoundingClientRect().top)
+  expect(
+    await tabbar.evaluate((node) => node.getBoundingClientRect().bottom),
+  ).toBe(668)
+
+  const ticketBox = (await lastTicket.boundingBox())!
+  const scrollY = (await page.evaluate('window.scrollY')) as number
+  await page.evaluate(`window.scrollTo(0, ${ticketBox.y + scrollY - 680})`)
+  await expect(lastTicket).toBeInViewport()
+  expect(
+    await lastTicket.evaluate((node) => node.getBoundingClientRect().top),
+  ).toBeGreaterThan(676)
+  await page.evaluate(
+    'window.scrollTo(0, document.documentElement.scrollHeight)',
+  )
+  expect(
+    await lastTicket.evaluate((node) => node.getBoundingClientRect().bottom),
+  ).toBeLessThan(top)
+  await lastTicket.click({ trial: true })
+
+  await page.goto(`/tickets/${TICKET_ID}`)
+  await page.addStyleTag({ content: ':root { --app-safe-bottom: 24px; }' })
+  const action = page.getByRole('button', { name: 'Marcar atendido' })
+  await expect(action).toBeVisible()
+  expect(
+    await action.evaluate((node) => node.getBoundingClientRect().bottom),
+  ).toBeLessThan(668)
+})

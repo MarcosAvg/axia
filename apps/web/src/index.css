@@ -74,6 +74,7 @@
     @apply bg-background text-foreground;
   }
   html {
+    --app-safe-bottom: env(safe-area-inset-bottom, 0px);
     @apply font-sans;
   }
 }

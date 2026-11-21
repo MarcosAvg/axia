@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import type { ReactNode } from 'react'
 import {
   COLOR_MODE_STORAGE_KEY,
-  THEME_COLOR,
   THEME_STORAGE_KEY,
   applyTheme,
   readPreference,
@@ -11,7 +16,7 @@ import {
   resolveTheme,
   writePreference,
 } from '@/lib/theme'
-import type { ColorMode, EffectiveMode, ThemeName } from '@/lib/theme'
+import type { ColorMode, ThemeName } from '@/lib/theme'
 import { ThemeContext } from './theme-context'
 import type { ThemeContextValue } from './theme-context'
 
@@ -22,10 +27,24 @@ function systemPrefersDark(): boolean {
   )
 }
 
-function updateThemeColorMeta(effectiveMode: EffectiveMode): void {
-  const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) {
-    meta.setAttribute('content', THEME_COLOR[effectiveMode])
+function updateThemeColorMeta(): void {
+  const meta = document.querySelector<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  )
+  const background = getComputedStyle(document.body).backgroundColor
+  if (!meta || !background) return
+
+  // El metadato usa sRGB opaco aunque el tema esté definido en OKLCH.
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = 1
+  const context = canvas.getContext('2d')
+  if (!context) return
+  context.fillStyle = 'transparent'
+  context.fillStyle = background
+  context.fillRect(0, 0, 1, 1)
+  const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+  if (alpha === 255) {
+    meta.content = `rgb(${red}, ${green}, ${blue})`
   }
 }
 
@@ -50,9 +69,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const effectiveMode = resolveEffectiveMode(mode, systemDark)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     applyTheme(theme, effectiveMode, document.documentElement)
-    updateThemeColorMeta(effectiveMode)
+    updateThemeColorMeta()
   }, [theme, effectiveMode])
 
   const setTheme = useCallback((next: ThemeName) => {

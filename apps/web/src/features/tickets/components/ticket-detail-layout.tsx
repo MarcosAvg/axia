@@ -125,7 +125,7 @@ function TicketLayoutContent(props: TicketLayoutContentProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-44 lg:pb-0">
+    <div className="flex flex-col gap-6 pb-[calc(11rem+var(--app-safe-bottom))] lg:pb-0">
       <CycleTimesSection
         times={props.ticket.cycleTimes}
         timesLabor={props.ticket.cycleTimesLabor}

@@ -136,7 +136,7 @@ function MobileFilterForm({
           defaultChecked={value.possibleDuplicate === true}
         />
       </div>
-      <div className="flex shrink-0 items-center gap-2 border-t px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      <div className="flex shrink-0 items-center gap-2 border-t px-4 pt-3 pb-[calc(0.75rem+var(--app-safe-bottom))]">
         <Button
           type="button"
           variant="ghost"

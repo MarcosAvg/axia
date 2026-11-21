@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- En la PWA móvil, la barra de estado adopta el color del fondo cuando el sistema lo admite.
+  Donde se permite dibujar detrás del indicador de gestos, el contenido se desplaza hasta el
+  borde inferior y las botoneras se mantienen por encima del área segura.
+
 ### Añadido
 
 - **Mi trabajo** permite preparar el detalle de tiquets seleccionados para consultarlos sin

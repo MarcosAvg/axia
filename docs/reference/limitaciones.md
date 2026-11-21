@@ -13,6 +13,10 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 
 ## Límites conocidos
 
+- En la PWA instalada, el navegador y el sistema deciden si aplican el color de la barra de
+  estado y si permiten ver contenido detrás del indicador de gestos. Si el sistema reserva
+  una barra inferior opaca, la aplicación se desplaza hasta el borde del área disponible.
+
 - **RN-27.** La confianza de la hora offline, las alertas por desfase y el bloqueo de los
   desenlaces finales hasta corregir están implementados. Una acción offline que llega tarde y es
   rechazada o entra en conflicto se registra sin efecto y la interfaz informa el conflicto; el

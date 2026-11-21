@@ -66,7 +66,7 @@ export function AppShell() {
           id="main-content"
           className={cn(
             'mx-auto w-full max-w-[1800px] flex-1 p-4 lg:p-6',
-            tabbar && 'pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-6',
+            tabbar && 'pb-[calc(5rem+var(--app-safe-bottom))] lg:pb-6',
           )}
         >
           <Outlet />

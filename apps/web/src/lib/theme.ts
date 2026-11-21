@@ -27,12 +27,6 @@ export type EffectiveMode = 'light' | 'dark'
 export const THEME_STORAGE_KEY = 'axia.theme'
 export const COLOR_MODE_STORAGE_KEY = 'axia.color-mode'
 
-/** Color de la barra del navegador por modo efectivo. */
-export const THEME_COLOR: Record<EffectiveMode, string> = {
-  light: '#ffffff',
-  dark: '#0e1524',
-}
-
 export function isThemeName(value: unknown): value is ThemeName {
   return (
     typeof value === 'string' && (THEMES as readonly string[]).includes(value)

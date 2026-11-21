@@ -194,7 +194,7 @@ export function AppSidebar({
         ))}
       </nav>
       {mobile ? (
-        <div className="flex shrink-0 items-center gap-1 border-t border-sidebar-border px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] text-sm text-sidebar-foreground/70">
+        <div className="flex shrink-0 items-center gap-1 border-t border-sidebar-border px-3 pt-2 pb-[calc(0.5rem+var(--app-safe-bottom))] text-sm text-sidebar-foreground/70">
           <ThemeToggle />
           <span>{messages.theme.aria}</span>
         </div>
