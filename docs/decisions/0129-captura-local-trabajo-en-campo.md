@@ -27,3 +27,6 @@ Se eligió la misma IndexedDB para conservar el archivo y los valores entre reap
 las consultas observables. Una copia adicional en localStorage duplicaría el estado, tendría menos
 capacidad para fotos y requeriría codificarlas. Si el navegador borra los datos de la aplicación,
 se pierden los borradores y las copias locales que todavía no estaban en el servidor.
+
+El smoke de hora manual espera el estado confirmado después de asignar. La compilación PWA
+puede cerrar el diálogo antes de que se actualicen las acciones del tiquet.

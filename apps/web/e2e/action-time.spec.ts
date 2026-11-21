@@ -66,6 +66,9 @@ test('@smoke la hora manual solo aparece al actuar a nombre de un técnico', asy
     .selectOption({ label: 'Luis Gómez · Líder' })
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(
+    page.getByText('Asignado', { exact: true }).first(),
+  ).toBeVisible()
 
   await clickAction(page, 'Iniciar')
   await expect(page.locator('#action-occurred-at')).toHaveCount(0)
