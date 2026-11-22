@@ -66,7 +66,7 @@ async function prepareWork(
         retry: false,
         queryFn: async (context) => {
           const detail = await options.queryFn(context)
-          if (!active() || !fitsBudget(detail))
+          if (currentOfflineUserId() !== userId || !fitsBudget(detail))
             throw new Error('Copia local no disponible')
           return detail
         },

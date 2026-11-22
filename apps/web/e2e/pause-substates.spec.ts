@@ -42,6 +42,23 @@ async function createTicket(page: Page, description: string) {
   await expect(page.getByText(description)).toBeVisible()
 }
 
+async function openWhilePreparing(
+  page: Page,
+  description: string,
+  path: string,
+) {
+  await page.route(`**/api${path}`, async (route) => {
+    await page.waitForURL(path)
+    await route.continue()
+  })
+  const preparing = page.waitForRequest(
+    (request) => new URL(request.url()).pathname === `/api${path}`,
+  )
+  await page.goto('/mi-trabajo')
+  await preparing
+  await page.getByText(description).click()
+}
+
 async function confirmSubstateOffline(page: Page) {
   await page.context().setOffline(true)
   await page.getByRole('button', { name: 'Confirmar' }).click()
@@ -59,10 +76,10 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
     .getByLabel('Técnico', { exact: true })
     .selectOption({ label: 'Luis Gómez · Líder' })
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
+  const ticketPath = new URL(page.url()).pathname
   await signOut(page)
   await signIn(page, 'demo.technician')
-  await page.goto('/mi-trabajo')
-  await page.getByText(description).click()
+  await openWhilePreparing(page, description, ticketPath)
 
   await page.getByRole('button', { name: 'Iniciar' }).click()
   await page.getByLabel('Evidencia: Antes').setInputFiles({

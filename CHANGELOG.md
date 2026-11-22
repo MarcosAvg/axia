@@ -8,6 +8,7 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 - Al confirmar una acción sin conexión, el diálogo se cierra después de guardar en el
   dispositivo. Los borradores se limpian al confirmar correctamente.
+- Se puede abrir un tiquet mientras su detalle se prepara para uso sin conexión.
 
 ## [0.35.0] - 2026-11-21
 
