@@ -33,8 +33,8 @@ export function UnavailableActionDrafts({
         Borradores para revisar ({unavailable.length})
       </summary>
       <p className="my-2 text-muted-foreground">
-        La acción o el ciclo cambió. Revisa la captura antes de usarla en otra
-        acción.
+        Estas capturas siguen en este dispositivo y están fuera de la cola de
+        envío. La acción ya no está disponible o cambió el ciclo del tiquet.
       </p>
       <ul className="space-y-2">
         {unavailable.map(

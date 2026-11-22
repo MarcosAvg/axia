@@ -23,7 +23,7 @@ async function clickAndWait(page: Page, name: string, action: string) {
 
 async function localCount(
   page: Page,
-  table: 'outbox' | 'actionDrafts',
+  table: 'outbox' | 'actionDrafts' | 'retryableEvidence',
 ): Promise<number> {
   const result = await page.evaluate(`(async () => {
     const open = indexedDB.open('axia')
@@ -31,7 +31,8 @@ async function localCount(
       open.onsuccess = () => resolve(open.result)
       open.onerror = () => reject(open.error)
     })
-    const table = ${JSON.stringify(table)}
+    const kind = ${JSON.stringify(table)}
+    const table = kind === "retryableEvidence" ? "outbox" : kind
     if (!db.objectStoreNames.contains(table)) {
       db.close()
       return 0
@@ -43,6 +44,9 @@ async function localCount(
       request.onerror = () => reject(request.error)
     })
     db.close()
+    if (kind === 'retryableEvidence') {
+      return all.filter((item) => item.type === 'evidence_upload' && item.state === 'pending' && item.attempts > 0).length
+    }
     return table === 'outbox' ? all.filter((item) => item.type === 'ticket_action').length : all.length
   })()`)
   return Number(result)
@@ -116,6 +120,32 @@ async function verifyUnpreparedTicket(page: Page, description: string) {
   await page.getByRole('link', { name: 'Volver a Mi trabajo' }).click()
 }
 
+async function pauseOffline(page: Page) {
+  await page.getByRole('button', { name: 'Pausar' }).click()
+  await page.getByLabel('Motivo').selectOption({ label: 'Falta de material' })
+  await page.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect.poll(() => localCount(page, 'outbox')).toBe(2)
+  await expect.poll(() => localCount(page, 'actionDrafts')).toBe(0)
+}
+
+async function reconnectWithInterruptedUpload(page: Page) {
+  const upload = '**/api/uploads'
+  await page.route(upload, (route) => route.abort('internetdisconnected'))
+  await page.context().setOffline(false)
+  await expect.poll(() => localCount(page, 'retryableEvidence')).toBe(1)
+  await page.context().setOffline(true)
+  await page.unroute(upload)
+  await page.context().setOffline(false)
+}
+
+async function verifySyncedPause(page: Page, description: string) {
+  await page.getByRole('link').filter({ hasText: description }).click()
+  await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Iniciar' })).toHaveCount(0)
+  await expect(page.getByText(/Borradores para revisar/)).toHaveCount(0)
+}
+
 test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   page,
 }) => {
@@ -161,22 +191,25 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   await expect.poll(() => localCount(page, 'outbox')).toBe(1)
   await expect.poll(() => localCount(page, 'actionDrafts')).toBe(0)
 
+  await pauseOffline(page)
+
   // La lista también refleja el estado proyectado y su marca de pendiente.
   await page
     .getByRole('link', { name: /^Mi trabajo/ })
     .first()
     .click()
   const card = page.getByRole('listitem').filter({ hasText: description })
-  await expect(card.getByText('En proceso', { exact: true })).toBeVisible()
+  await expect(card.getByText('Pausado', { exact: true })).toBeVisible()
   await expect(card.getByText('Sin sincronizar')).toBeVisible()
 
-  // Vuelve la conexión: el evento 'online' sincroniza la evidencia y el inicio.
-  await page.context().setOffline(false)
-  await expect(card.getByText('En proceso', { exact: true })).toBeVisible({
+  // Vuelve la conexión: el evento 'online' sincroniza la evidencia, el inicio y la pausa.
+  await reconnectWithInterruptedUpload(page)
+  await expect(card.getByText('Pausado', { exact: true })).toBeVisible({
     timeout: 20000,
   })
   await expect(card.getByText('Sin sincronizar')).toHaveCount(0, {
     timeout: 20000,
   })
   await expect.poll(() => localCount(page, 'outbox')).toBe(0)
+  await verifySyncedPause(page, description)
 })

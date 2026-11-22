@@ -4,6 +4,7 @@ import {
   enqueue,
   errorsForCurrentUser,
   processOutbox,
+  registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { setOfflineUserId } from '@/lib/offline/user'
 import { apiFetch } from '@/lib/api-client'
@@ -153,3 +154,22 @@ it.each(offlineCommands)(
     ])
   },
 )
+
+it('reintenta evidencias que una versión anterior bloqueó por un fallo TUS sin respuesta', async () => {
+  const upload = vi.fn(async () => {})
+  const action = vi.fn(async () => {})
+  registerOutboxHandler('evidence_upload', upload)
+  registerOutboxHandler('legacy_action', action)
+  await enqueue('evidence_upload', {}, 'ticket-legacy')
+  await enqueue('legacy_action', {}, 'ticket-legacy')
+  const item = await db.outbox.where('type').equals('evidence_upload').first()
+  await db.outbox.update(item!.id, {
+    state: 'error',
+    lastError:
+      'tus: failed to create upload, response code: n/a, response text: n/a',
+  })
+  await processOutbox()
+  expect(upload).toHaveBeenCalledOnce()
+  expect(action).toHaveBeenCalledOnce()
+  expect(await db.outbox.count()).toBe(0)
+})

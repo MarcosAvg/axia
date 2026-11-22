@@ -1,4 +1,4 @@
-import { Upload } from 'tus-js-client'
+import { DetailedError, Upload } from 'tus-js-client'
 
 export interface ResumableUploadParams {
   endpoint: string
@@ -52,6 +52,22 @@ export function uploadAttachmentResumable(
   })
 }
 
+function evidenceUploadError(error: Error): Error {
+  if (!(error instanceof DetailedError) || !error.originalRequest) return error
+  const status = error.originalResponse?.getStatus()
+  if (!status) {
+    return new TypeError('Se interrumpió la conexión al enviar la evidencia', {
+      cause: error,
+    })
+  }
+  return Object.assign(
+    new Error(`No se pudo subir la evidencia (HTTP ${status})`, {
+      cause: error,
+    }),
+    { status },
+  )
+}
+
 /** Subida reanudable (TUS) al servidor de Axia; la sesión viaja en la cookie. */
 export function uploadResumable(params: ResumableUploadParams): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -71,7 +87,7 @@ export function uploadResumable(params: ResumableUploadParams): Promise<void> {
         contentType: params.mimeType,
       },
       onProgress: progressHandler(params.onProgress),
-      onError: (error) => reject(error),
+      onError: (error) => reject(evidenceUploadError(error)),
       onSuccess: () => resolve(),
     })
     upload.start()

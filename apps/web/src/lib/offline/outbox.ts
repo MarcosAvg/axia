@@ -110,7 +110,15 @@ async function processOrderedItems(items: OutboxItem[], userId: string) {
 }
 
 async function processReadyItem(item: OutboxItem): Promise<boolean> {
-  if (item.state === 'error') return false
+  if (item.state === 'error') {
+    // Versiones anteriores guardaban el fallo de transporte TUS como definitivo.
+    const legacyEvidenceFailure =
+      item.type === 'evidence_upload' &&
+      /^tus: .*response code: (?:n\/a|0|429|500|502|503|504),/.test(
+        item.lastError ?? '',
+      )
+    return legacyEvidenceFailure ? processItem({ ...item, attempts: 0 }) : false
+  }
   if (
     item.state === 'sending' &&
     item.sendingAt &&

@@ -50,3 +50,7 @@ Axia presenta al servidor la captura con su UUID y ciclo de origen para que vali
 Cuando el navegador detecta que está sin conexión, confirmar una acción escribe directamente
 en la cola local. El formulario espera esa escritura para cerrar y limpiar el borrador.
 La sincronización con el servidor se realiza después.
+
+Las interrupciones de transporte en TUS conservan la foto en la cola para reintentar.
+La sincronización también recupera los fallos transitorios de TUS que versiones anteriores
+guardaron como definitivos. El inicio y la pausa siguen esperando la foto del mismo tiquet.
