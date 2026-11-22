@@ -75,14 +75,14 @@ async function createAssignedTicket(page: Page, description: string) {
   await clickAndWait(page, 'Confirmar', 'ticket_assign_technician')
 }
 
-async function reconnectOfflinePage(page: Page) {
+async function reconnectOfflinePage(page: Page, destination = page.url()) {
   await page.waitForFunction('Boolean(navigator.serviceWorker?.controller)')
   const context = page.context()
-  const url = page.url()
   await page.close()
   await context.setOffline(true)
   const reopened = await context.newPage()
-  await reopened.goto(url)
+  const response = await reopened.goto(destination)
+  expect(response?.fromServiceWorker()).toBe(true)
   return reopened
 }
 
@@ -216,7 +216,8 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
       .getByText('Disponible sin conexión', { exact: true }),
   ).toBeVisible()
   if (testPwa) {
-    page = await reconnectOfflinePage(page)
+    page = await reconnectOfflinePage(page, '/')
+    await expect(page).toHaveURL(/\/mi-trabajo$/)
     await verifyUnpreparedTicket(page, unprepared)
   }
   await page

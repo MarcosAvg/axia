@@ -9,6 +9,7 @@ import { fieldWorkCatalogOptions } from '@/features/catalogs'
 import {
   recoverRejectedEvidence,
   ticketDetailOptions,
+  ticketPauseStateOptions,
   TicketList,
   TicketStatusSummary,
 } from '@/features/tickets'
@@ -61,7 +62,7 @@ async function prepareWork(
     if (ready.has(id)) continue
     const options = ticketDetailOptions(id)
     try {
-      await client.fetchQuery({
+      const detail = await client.fetchQuery({
         ...options,
         retry: false,
         queryFn: async (context) => {
@@ -71,6 +72,12 @@ async function prepareWork(
           return detail
         },
       })
+      if (detail?.status === 'paused' && active()) {
+        await client.fetchQuery({
+          ...ticketPauseStateOptions(id),
+          retry: false,
+        })
+      }
     } catch {
       // El indicador se deriva de la copia persistida y permite reintentar.
     }

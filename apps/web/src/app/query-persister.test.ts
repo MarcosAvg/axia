@@ -124,6 +124,35 @@ it('solo considera disponibles detalles vigentes y persistidos para el usuario',
   queryClient.clear()
 })
 
+it('requiere el subestado vigente para preparar un tiquet pausado', async () => {
+  const { readyTicketDetails } = await import('./query-persister')
+  const { QueryClient, dehydrate } = await import('@tanstack/react-query')
+  const { QUERY_CACHE_BUSTER } = await import('@/lib/offline/cache-policy')
+  const queryClient = new QueryClient()
+  const now = Date.now()
+  queryClient.setQueryData(
+    ['tickets', 'detail', 'paused'],
+    { status: 'paused' },
+    { updatedAt: now },
+  )
+  const persist = () =>
+    queryPersister.persistClient({
+      buster: QUERY_CACHE_BUSTER,
+      timestamp: now,
+      clientState: dehydrate(queryClient),
+    })
+  await persist()
+  expect(await readyTicketDetails('user-a', now)).toEqual(new Map())
+  queryClient.setQueryData(['tickets', 'pause-state', 'paused'], {
+    currentId: 'step',
+  })
+  await persist()
+  expect(await readyTicketDetails('user-a', now)).toEqual(
+    new Map([['paused', now]]),
+  )
+  queryClient.clear()
+})
+
 it('rechaza un guardado de la pestaña anterior después de cambiar de cuenta', async () => {
   await queryPersister.persistClient(client)
   localStorage.setItem('axia.offline.userId', 'user-b')

@@ -38,7 +38,10 @@ const catalogKeys = {
     ['catalogs', 'subcategories', categoryId] as const,
   problems: (subcategoryId: string) =>
     ['catalogs', 'problems', subcategoryId] as const,
-  reasons: (use: ReasonUse) => ['catalogs', 'reasons', use] as const,
+  reasons: (use: ReasonUse) =>
+    use === 'pause'
+      ? (['catalogs', 'reasons', use, 'transitions'] as const)
+      : (['catalogs', 'reasons', use] as const),
 }
 
 export function useTeams() {

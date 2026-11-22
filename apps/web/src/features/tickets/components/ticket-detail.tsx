@@ -16,11 +16,11 @@ import type {
   TicketParticipant,
   TicketTimelineItem,
 } from '../domain/types'
+import { useProjectedPause } from '../hooks/use-projected-pause'
 import { usePendingTicketActions } from '../hooks/use-pending-actions'
 import {
   useTicket,
   useTicketParticipants,
-  useTicketPauseState,
   useTicketTimeline,
 } from '../hooks/use-tickets'
 import { ticketMessages } from '../i18n'
@@ -92,8 +92,9 @@ function TicketDetailContent({
   pending: PendingTicketAction[]
 }) {
   const projection = projectPendingTicket(ticket, pending)
-  const { data: pause } = useTicketPauseState(
+  const pause = useProjectedPause(
     projection.ticket.status === 'paused' ? ticketId : undefined,
+    projection.pending,
   )
   const actions = allowedActions({
     identity,
@@ -106,8 +107,8 @@ function TicketDetailContent({
     validationPolicy: projection.ticket.validationPolicy,
     isSupervisorRole: isSupervisorIdentity(identity),
     hasTaken: projection.ticket.hasTaken,
-    pauseHasAdvance: pause ? pause.advanceOptions.length > 0 : undefined,
-    pauseHasExit: pause ? pause.exitOptions.length > 0 : undefined,
+    pauseHasAdvance: Boolean(pause?.advanceOptions.length),
+    pauseHasExit: Boolean(pause?.exitOptions.length),
   })
 
   return (
@@ -115,7 +116,7 @@ function TicketDetailContent({
       <TicketHeader
         ticket={projection.ticket}
         pendingSync={projection.pending.length > 0}
-        pause={pause ?? null}
+        pause={pause}
       />
       <DuplicateAlertsPanel
         ticketId={ticketId}
@@ -129,7 +130,7 @@ function TicketDetailContent({
         participants={participants}
         identity={identity}
         actions={actions}
-        pause={pause ?? null}
+        pause={pause}
         canAttachEvidence={can(identity, 'evidence.attach')}
       />
     </div>

@@ -87,10 +87,16 @@ export function useTicketPauseSteps(id: string | undefined) {
   })
 }
 
+export function ticketPauseStateOptions(id: string) {
+  return {
+    queryKey: ticketKeys.pauseState(id),
+    queryFn: () => fetchPauseState(id),
+  }
+}
+
 export function useTicketPauseState(id: string | undefined) {
   return useQuery({
-    queryKey: ticketKeys.pauseState(id ?? ''),
-    queryFn: () => (id ? fetchPauseState(id) : Promise.resolve(null)),
+    ...ticketPauseStateOptions(id ?? ''),
     enabled: Boolean(id),
   })
 }

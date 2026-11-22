@@ -150,7 +150,10 @@ identidad. Notificaciones, métricas, administración y URLs de evidencia quedan
 worker precachea el shell y los módulos de las rutas. Tras la primera instalación, toma control
 de la pestaña abierta y puede servir el detalle de un tiquet preparado en su primera visita sin
 red. **Mi trabajo** comprueba ese control antes de marcar los tiquets como disponibles sin
-conexión. Las respuestas `/api` se guardan por medio de la caché de consultas de la app.
+conexión. La preparación incluye el catálogo de conexiones de pausa y el subestado de los tiquets
+ya pausados. Al abrir la PWA desde el icono sin red, una sesión técnica vigente entra a **Mi
+trabajo** desde la copia local. Las respuestas `/api` se guardan por medio de la caché de
+consultas de la app.
 
 La cola une evidencia y acciones por ID de tiquet. Un error o envío anterior bloquea sus pasos
 posteriores incluso entre procesamientos; los otros tiquets avanzan. Las filas antiguas sin clave

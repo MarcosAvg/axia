@@ -24,7 +24,10 @@ muestra en el indicador de la cola y no se descarta en silencio.
 
 Las operaciones cuyo resultado depende del ruteo del servidor (`assign_technician` líder/auxiliar,
 `recapture`, `reactivate` y `resolve_claim` con tiquet nuevo) se muestran como pendientes pero no
-adelantan el estado. La línea de tiempo confirmada y el panel de pausa siguen siendo datos del servidor. Junto a
+adelantan el estado. La línea de tiempo confirmada conserva los datos del servidor. El panel de pausa usa el motivo
+y el subestado confirmados como punto de partida. Los comandos locales de pausa y avance
+proyectan el último paso con las conexiones activas guardadas en el catálogo. Los botones
+y los formularios de avance y reanudación consultan esa misma proyección. Junto a
 los eventos confirmados se muestran las acciones y evidencias locales y sus errores de envío.
 Ver [captura local en campo](0129-captura-local-trabajo-en-campo.md).
 

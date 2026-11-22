@@ -123,21 +123,22 @@ export async function readyTicketDetails(
     return ready
 
   const saved = client.clientState.queries
-  if (!hasRequiredQueries(saved, requiredKeys, now)) return ready
+  const validKeys = validQueryKeys(saved, now)
+  if (!requiredKeys.every((key) => validKeys.has(JSON.stringify(key))))
+    return ready
 
   for (const query of saved) {
-    const id = readyTicketId(query, now)
+    const id = readyTicketId(query, now, validKeys)
     if (id !== undefined) ready.set(id, query.state.dataUpdatedAt)
   }
   return ready
 }
 
-function hasRequiredQueries(
+function validQueryKeys(
   saved: PersistedClient['clientState']['queries'],
-  requiredKeys: (readonly unknown[])[],
   now: number,
-): boolean {
-  const validKeys = new Set(
+) {
+  return new Set(
     saved
       .filter(
         ({ state }) =>
@@ -147,16 +148,22 @@ function hasRequiredQueries(
       )
       .map(({ queryKey }) => JSON.stringify(queryKey)),
   )
-  return requiredKeys.every((key) => validKeys.has(JSON.stringify(key)))
 }
 
 function readyTicketId(
   { queryKey, state }: PersistedClient['clientState']['queries'][number],
   now: number,
+  validKeys: Set<string>,
 ): string | undefined {
   const [root, section, id] = queryKey
   if (root !== 'tickets' || section !== 'detail' || typeof id !== 'string')
     return
   if (state.status !== 'success' || !state.data) return
+  const detail = state.data as { status?: string }
+  if (
+    detail.status === 'paused' &&
+    !validKeys.has(JSON.stringify(['tickets', 'pause-state', id]))
+  )
+    return
   if (now - state.dataUpdatedAt <= OFFLINE_CACHE_TTL_MS) return id
 }

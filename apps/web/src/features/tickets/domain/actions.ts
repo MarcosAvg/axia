@@ -200,11 +200,11 @@ const checks: Record<ActionKey, (context: ActionContext) => boolean> = {
     c.status === 'in_progress' && technicianAction(c, 'ticket.pause'),
   advance_pause: (c) =>
     c.status === 'paused' &&
-    c.pauseHasAdvance !== false &&
+    c.pauseHasAdvance === true &&
     technicianAction(c, 'ticket.pause'),
   resume: (c) =>
     c.status === 'paused' &&
-    c.pauseHasExit !== false &&
+    c.pauseHasExit === true &&
     technicianAction(c, 'ticket.resume'),
   attend: (c) =>
     c.status === 'in_progress' && technicianAction(c, 'ticket.attend'),

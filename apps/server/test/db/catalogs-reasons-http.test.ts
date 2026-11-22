@@ -127,6 +127,37 @@ describe('tipo de subestado de pausa', () => {
   })
 })
 
+it('entrega al técnico solo las conexiones activas del catálogo de pausa', async () => {
+  const root = await create('Motivo para trabajo offline')
+  const enabled = await create('Avance activo offline', { parent_id: root })
+  const disabled = await create('Avance inactivo offline', {
+    parent_id: root,
+    active: false,
+  })
+  await context.db.execute(sql`
+    insert into public.pause_transitions (from_reason_id, to_reason_id)
+    values (${root}, ${enabled}), (${root}, ${disabled})
+  `)
+  const url = '/api/catalogs/reasons?use=pause'
+  const read = await context.app.inject({
+    method: 'GET',
+    url,
+    headers: authHeaders(context.cookies.technician),
+  })
+  expect(read.statusCode).toBe(200)
+  expect(read.json()).toMatchObject({
+    items: expect.arrayContaining([
+      expect.objectContaining({ id: root, transitionIds: [enabled] }),
+    ]),
+  })
+  const forbidden = await context.app.inject({
+    method: 'GET',
+    url,
+    headers: authHeaders(context.cookies.noAccess),
+  })
+  expect(forbidden.statusCode).toBe(403)
+})
+
 describe('integridad del árbol de motivos', () => {
   it('rechaza padre inexistente, padre de otro uso y ciclos', async () => {
     const root = await create('Raíz para ciclos')

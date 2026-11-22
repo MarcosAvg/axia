@@ -50,7 +50,10 @@ describe('allowedActions', () => {
 
   it('el técnico avanza el subestado cuando el tiquet está pausado', () => {
     const actions = allowedActions(
-      context(['ticket.pause', 'ticket.resume'], 'paused'),
+      context(['ticket.pause', 'ticket.resume'], 'paused', {
+        pauseHasAdvance: true,
+        pauseHasExit: true,
+      }),
     )
     expect(actions).toContain('advance_pause')
     expect(actions).toContain('resume')
@@ -58,6 +61,14 @@ describe('allowedActions', () => {
 })
 
 describe('opciones de pausa', () => {
+  it('oculta avance y reanudación mientras no se conocen las conexiones', () => {
+    const actions = allowedActions(
+      context(['ticket.pause', 'ticket.resume'], 'paused'),
+    )
+    expect(actions).not.toContain('advance_pause')
+    expect(actions).not.toContain('resume')
+  })
+
   it('oculta avance y reanudación cuando el subestado actual no los habilita', () => {
     const actions = allowedActions(
       context(['ticket.pause', 'ticket.resume'], 'paused', {

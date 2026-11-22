@@ -7,7 +7,8 @@ import type { TicketDetail } from '../domain/types'
 import { useActionCatalogs } from '../hooks/use-action-catalogs'
 import { useActionTime } from '../hooks/use-action-time'
 import { useTicketActions } from '../hooks/use-ticket-actions'
-import { useTicketPauseState } from '../hooks/use-tickets'
+import { usePendingTicketActions } from '../hooks/use-pending-actions'
+import { useProjectedPause } from '../hooks/use-projected-pause'
 import {
   actionFormState,
   mutationFor,
@@ -20,10 +21,12 @@ import { useFieldDraft } from './use-field-draft'
 /** Opciones de avance y salida del subestado actual de la pausa. */
 function usePauseOptions(action: ActionKey, ticketId: string) {
   const needed = action === 'resume' || action === 'advance_pause'
-  const state = useTicketPauseState(needed ? ticketId : undefined)
+  const pauseTicket = needed ? ticketId : undefined
+  const pending = usePendingTicketActions(pauseTicket)
+  const state = useProjectedPause(pauseTicket, pending)
   return {
-    advance: state.data?.advanceOptions ?? [],
-    exit: state.data?.exitOptions ?? [],
+    advance: state?.advanceOptions ?? [],
+    exit: state?.exitOptions ?? [],
   }
 }
 

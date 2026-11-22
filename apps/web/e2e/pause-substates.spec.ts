@@ -60,11 +60,16 @@ async function openWhilePreparing(
 }
 
 async function confirmSubstateOffline(page: Page) {
-  await page.context().setOffline(true)
   await page.getByRole('button', { name: 'Confirmar' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByText('Sin sincronizar').first()).toBeVisible()
-  await page.context().setOffline(false)
+}
+
+async function beginOfflinePause(page: Page) {
+  await page.context().setOffline(true)
+  await page.getByRole('button', { name: 'Pausar' }).click()
+  await page.getByLabel('Motivo').selectOption({ label: 'Falta de material' })
+  await confirmSubstateOffline(page)
 }
 
 test('@smoke pausa, subestado y reanudación', async ({ page }) => {
@@ -91,10 +96,8 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   const header = page.locator('h1').locator('..')
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
 
-  // Pausa con un motivo (nodo raíz).
-  await page.getByRole('button', { name: 'Pausar' }).click()
-  await page.getByLabel('Motivo').selectOption({ label: 'Falta de material' })
-  await clickAndWait(page, 'Confirmar', 'ticket_pause')
+  // Toda la cadena se captura sin conexión, desde el motivo hasta la salida.
+  await beginOfflinePause(page)
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Subestado actual').first()).toBeVisible()
   await expect(page.getByText('Sin subestado').first()).toBeVisible()
@@ -114,11 +117,12 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await page
     .getByLabel('Siguiente subestado')
     .selectOption({ label: 'En compra externa o cotización' })
-  await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
+  await confirmSubstateOffline(page)
   await expect(page.getByText('Salidas disponibles').first()).toBeVisible()
   await page.getByRole('button', { name: 'Reanudar' }).click()
   await page.getByLabel('Salida').selectOption({ label: 'Recibido' })
-  await clickAndWait(page, 'Confirmar', 'ticket_resume')
+  await confirmSubstateOffline(page)
+  await page.context().setOffline(false)
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
   await expect(page.getByText('Cerrada con: Recibido').first()).toBeVisible()
 

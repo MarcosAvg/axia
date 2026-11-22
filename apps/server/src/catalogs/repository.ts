@@ -31,6 +31,7 @@ type TechnicianOption = {
   categoryIds: string[]
 }
 type ReasonOption = {
+  transitionIds: string[]
   id: string
   name: string
   use: string
@@ -222,18 +223,29 @@ async function listTechnicians(db: Database): Promise<TechnicianOption[]> {
 
 async function listReasons(db: Database, use: string): Promise<ReasonOption[]> {
   const result = await db.execute(sql`
-    with recursive reachable(root_id, node_id) as (
+    with recursive transitions as (
+      select t.from_reason_id, target.id, target.position, target.name
+      from public.pause_transitions t
+      join public.reasons target on target.id = t.to_reason_id
+      where target.active and target.use = 'pause'
+        and target.pause_step_kind in ('progress', 'exit')
+    ), reachable(root_id, node_id) as (
       select root.id, root.id
       from public.reasons root
       where root.use = 'pause' and root.parent_id is null and root.active
       union
-      select reachable.root_id, t.to_reason_id
+      select reachable.root_id, t.id
       from reachable
-      join public.pause_transitions t on t.from_reason_id = reachable.node_id
+      join transitions t on t.from_reason_id = reachable.node_id
     )
     select
       r.id, r.name, r.use, r.parent_id as "parentId",
       r.pause_step_kind as "pauseStepKind",
+      array(
+        select t.id from transitions t
+        where t.from_reason_id = r.id and r.use = 'pause'
+        order by t.position, public.natural_sort_key(t.name)
+      ) as "transitionIds",
       (
         r.parent_id is null
         and r.use = 'pause'

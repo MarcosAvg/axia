@@ -6,6 +6,17 @@ import type { AuthSession } from '../api/auth-api'
 import { clearCachedAuth, readCachedAuth } from '../offline-session'
 import type { AuthStatus } from './auth-context'
 
+async function loadSession() {
+  if (navigator.onLine) {
+    try {
+      return { session: await getSession(), offline: false }
+    } catch {
+      // La sesión local sigue disponible durante una interrupción de red.
+    }
+  }
+  return { session: readCachedAuth()?.session ?? null, offline: true }
+}
+
 /** Mantiene la sesión de Axia (cookie opaca en el servidor). */
 export function useAuthSession() {
   const [status, setStatus] = useState<AuthStatus>('loading')
@@ -24,33 +35,16 @@ export function useAuthSession() {
   )
 
   const refresh = useCallback(async () => {
-    try {
-      const next = await getSession()
-      applySession(next)
-      return next
-    } catch {
-      const cached = readCachedAuth()
-      if (cached) {
-        applySession(cached.session, true)
-        return cached.session
-      }
-      applySession(null)
-      return null
-    }
+    const { session, offline } = await loadSession()
+    applySession(session, offline)
+    return session
   }, [applySession])
 
   useEffect(() => {
     let active = true
-    getSession()
-      .then((next) => {
-        if (active) applySession(next)
-      })
-      .catch(() => {
-        if (!active) return
-        const cached = readCachedAuth()
-        if (cached) applySession(cached.session, true)
-        else applySession(null)
-      })
+    void loadSession().then(({ session, offline }) => {
+      if (active) applySession(session, offline)
+    })
     return () => {
       active = false
     }

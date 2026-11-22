@@ -5,6 +5,13 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- **Mi trabajo** guarda las conexiones entre motivos, subestados y salidas. Sin red, las
+  acciones de pausa se ajustan al último paso capturado, incluso antes de sincronizarlo.
+- Al abrir la PWA desde el icono sin red, una sesión técnica vigente entra a **Mi trabajo**
+  y puede recuperar los tiquets preparados.
+
 ## [0.35.2] - 2026-11-22
 
 ### Corregido
