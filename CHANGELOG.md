@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.35.2] - 2026-11-22
+
 ### Corregido
 
 - Al recuperar la conexión, la cola recoge las acciones guardadas durante un envío y sigue
