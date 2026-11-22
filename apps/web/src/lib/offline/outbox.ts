@@ -1,7 +1,7 @@
 import { db } from './db'
 import type { OutboxItem } from './db'
-import { isRetryableOutboxError, OutboxError } from './errors'
-import { currentOfflineUserId } from './user'
+import { isNetworkError, isRetryableOutboxError, OutboxError } from './errors'
+import { currentOfflineUserId, offlineUserForTab } from './user'
 
 export type OutboxHandler = (payload: unknown) => Promise<void>
 export type OutboxDiscardHandler = (payload: unknown) => Promise<void>
@@ -36,7 +36,11 @@ function nextSeq(): number {
 // Serializa el procesamiento con los cambios sobre entradas existentes.
 let chain: Promise<unknown> = Promise.resolve()
 function exclusive<T>(task: () => Promise<T>): Promise<T> {
-  const run = chain.then(task, task)
+  const withLock = () =>
+    typeof navigator !== 'undefined' && navigator.locks
+      ? navigator.locks.request('axia-outbox', task)
+      : task()
+  const run = chain.then(withLock, withLock)
   chain = run.then(
     () => undefined,
     () => undefined,
@@ -80,9 +84,8 @@ export async function hasQueuedWork(ticketId: string): Promise<boolean> {
   return false
 }
 
-const MAX_ATTEMPTS = 5
 const STALE_SENDING_MS = 60_000
-let isProcessing = false
+let pendingDrain: Promise<void> | null = null
 let afterProcess: (() => Promise<void> | void) | null = null
 
 /** Actualiza las vistas antes de retirar las operaciones confirmadas de la cola. */
@@ -90,57 +93,81 @@ export function onOutboxProcessed(callback: () => Promise<void> | void) {
   afterProcess = callback
 }
 
-/** Procesa la cola en orden; reintenta los fallos hasta el límite. */
-export async function processOutbox(): Promise<void> {
-  // Sin conexión no hay nada que enviar; se reintenta al recuperar la red.
-  if (typeof navigator !== 'undefined' && !navigator.onLine) return
-  if (isProcessing) return
-  const userId = currentOfflineUserId()
-  if (!userId) return
-  isProcessing = true
-  try {
-    await exclusive(async () => {
-      if (currentOfflineUserId() !== userId) return
-      // Los errores también son barreras: el bloqueo se conserva entre invocaciones.
-      const items = await db.outbox.toArray()
-      const mine = items.filter((item) => item.userId === userId)
-      mine.sort((a, b) => a.seq - b.seq)
-      const confirmed = await processOrderedItems(mine, userId)
-      // Las vistas siguen proyectando las acciones hasta recibir el estado del servidor.
-      if (confirmed.length === 0) return
-      if (currentOfflineUserId() === userId) await afterProcess?.()
-      await db.outbox.bulkDelete(confirmed)
-    })
-  } finally {
-    isProcessing = false
-  }
+function sendingUser() {
+  const userId = offlineUserForTab()
+  return userId === currentOfflineUserId() ? userId : null
 }
 
-async function processOrderedItems(items: OutboxItem[], userId: string) {
+async function drainOutbox(userId: string, hasLock: boolean) {
+  if (!navigator.onLine || sendingUser() !== userId) return
+  const items = await db.outbox
+    .filter((item) => item.userId === userId)
+    .toArray()
+  items.sort((a, b) => a.seq - b.seq)
+  const confirmed = await processOrderedItems(items, userId, hasLock)
+  if (confirmed.length === 0) return
+  if (sendingUser() === userId) await afterProcess?.()
+  await db.outbox.bulkDelete(confirmed)
+}
+
+/** Procesa la cola en orden y serializa el envío entre pestañas cuando es posible. */
+export async function processOutbox(): Promise<void> {
+  if (typeof navigator === 'undefined' || !navigator.onLine) return
+  if (!sendingUser()) return
+  if (pendingDrain) return pendingDrain
+
+  const scheduled = exclusive(async () => {
+    // A partir de aquí puede llegar trabajo que no esté en esta lectura.
+    pendingDrain = null
+    const userId = sendingUser()
+    if (userId) await drainOutbox(userId, Boolean(navigator.locks))
+  }).finally(() => {
+    if (pendingDrain === scheduled) pendingDrain = null
+  })
+  pendingDrain = scheduled
+  return scheduled
+}
+
+async function processOrderedItems(
+  items: OutboxItem[],
+  userId: string,
+  hasLock: boolean,
+) {
   const blocked = new Set<string>()
   const confirmed: string[] = []
   for (const item of items) {
     const key =
       item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
-    if (currentOfflineUserId() !== userId) break
+    if (sendingUser() !== userId || !navigator.onLine) break
     if (key && blocked.has(key)) continue
-    if (await processReadyItem(item)) confirmed.push(item.id)
+    if (await processReadyItem(item, hasLock)) confirmed.push(item.id)
     else if (key) blocked.add(key)
   }
   return confirmed
 }
 
-async function processReadyItem(item: OutboxItem): Promise<boolean> {
-  if (item.state === 'error') {
-    // Versiones anteriores guardaban el fallo de transporte TUS como definitivo.
-    const legacyEvidenceFailure =
-      item.type === 'evidence_upload' &&
-      /^tus: .*response code: (?:n\/a|0|429|500|502|503|504),/.test(
-        item.lastError ?? '',
-      )
-    return legacyEvidenceFailure ? processItem({ ...item, attempts: 0 }) : false
-  }
+function isRecoverableLegacyError(item: OutboxItem): boolean {
+  if (item.lastErrorCode) return item.lastErrorCode === 'internal_error'
+  const message = item.lastError ?? ''
+  return (
+    isNetworkError(message) ||
+    message === `Sin manejador para ${item.type}` ||
+    (item.type === 'evidence_upload' &&
+      /response code: (?:n\/a|0|409|429|500|502|503|504),|\(HTTP (?:409|429|500|502|503|504)\)|^Se interrumpió la conexión/.test(
+        message,
+      ))
+  )
+}
+
+async function processReadyItem(
+  item: OutboxItem,
+  hasLock: boolean,
+): Promise<boolean> {
+  // Un envío puede coincidir con el arranque diferido de su manejador.
+  if (!handlers.has(item.type)) return false
+  if (item.state === 'error' && !isRecoverableLegacyError(item)) return false
   if (
+    !hasLock &&
     item.state === 'sending' &&
     item.sendingAt &&
     item.sendingAt >= Date.now() - STALE_SENDING_MS
@@ -160,7 +187,7 @@ export async function pendingForCurrentUser(): Promise<number> {
   return items.filter((item) => item.userId === userId).length
 }
 
-/** Elementos que agotaron los reintentos o fallaron de forma definitiva. */
+/** Elementos que requieren revisión o provienen de un error guardado anteriormente. */
 export async function errorsForCurrentUser(): Promise<OutboxItem[]> {
   const userId = currentOfflineUserId()
   if (!userId) return []
@@ -174,7 +201,8 @@ export async function errorsForCurrentUser(): Promise<OutboxItem[]> {
 export async function retryOutboxItem(id: string): Promise<void> {
   await exclusive(async () => {
     const item = await db.outbox.get(id)
-    if (!item || item.userId !== currentOfflineUserId()) return
+    const userId = sendingUser()
+    if (!userId || !item || item.userId !== userId) return
     await db.outbox.update(id, {
       state: 'pending',
       attempts: 0,
@@ -193,7 +221,8 @@ export async function retryOutboxItemWithManualTime(
 ): Promise<void> {
   await exclusive(async () => {
     const item = await db.outbox.get(id)
-    if (!item || item.userId !== currentOfflineUserId()) return
+    const userId = sendingUser()
+    if (!userId || !item || item.userId !== userId) return
     const payload =
       typeof item.payload === 'object' && item.payload !== null
         ? (item.payload as Record<string, unknown>)
@@ -214,7 +243,8 @@ export async function retryOutboxItemWithManualTime(
 export async function discardOutboxItem(id: string): Promise<void> {
   await exclusive(async () => {
     const item = await db.outbox.get(id)
-    if (!item || item.userId !== currentOfflineUserId()) return
+    const userId = sendingUser()
+    if (!userId || !item || item.userId !== userId) return
     await discarders.get(item.type)?.(item.payload)
     await db.outbox.delete(id)
   })
@@ -222,18 +252,12 @@ export async function discardOutboxItem(id: string): Promise<void> {
 
 async function processItem(item: OutboxItem): Promise<boolean> {
   const handler = handlers.get(item.type)
-  if (!handler) {
-    await db.outbox.update(item.id, {
-      state: 'error',
-      lastError: `Sin manejador para ${item.type}`,
-    })
-    return false
-  }
+  if (!handler) return false
   await db.outbox.update(item.id, {
     state: 'sending',
     sendingAt: Date.now(),
   })
-  if (currentOfflineUserId() !== item.userId) {
+  if (sendingUser() !== item.userId) {
     await db.outbox.update(item.id, { state: 'pending', sendingAt: null })
     return false
   }
@@ -244,11 +268,16 @@ async function processItem(item: OutboxItem): Promise<boolean> {
     const attempts = item.attempts + 1
     const permanent = !isRetryableOutboxError(error)
     await db.outbox.update(item.id, {
-      state: permanent || attempts >= MAX_ATTEMPTS ? 'error' : 'pending',
+      state: permanent ? 'error' : 'pending',
       attempts,
       sendingAt: null,
       lastError: error instanceof Error ? error.message : String(error),
-      lastErrorCode: error instanceof OutboxError ? error.code : null,
+      lastErrorCode:
+        error instanceof OutboxError
+          ? error.code
+          : permanent
+            ? 'sync_failed'
+            : null,
       lastServerState: error instanceof OutboxError ? error.serverState : null,
     })
     return false

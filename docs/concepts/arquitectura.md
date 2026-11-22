@@ -147,14 +147,21 @@ sincronización.
 
 El caché de React Query se persiste en Dexie con el mismo plazo y solo incluye tiquets, catálogos e
 identidad. Notificaciones, métricas, administración y URLs de evidencia quedan fuera. El service
-worker solo precachea el shell; no se cachean respuestas `/api`.
+worker precachea el shell y los módulos de las rutas. Tras la primera instalación, toma control
+de la pestaña abierta y puede servir el detalle de un tiquet preparado en su primera visita sin
+red. **Mi trabajo** comprueba ese control antes de marcar los tiquets como disponibles sin
+conexión. Las respuestas `/api` se guardan por medio de la caché de consultas de la app.
 
 La cola une evidencia y acciones por ID de tiquet. Un error o envío anterior bloquea sus pasos
 posteriores incluso entre procesamientos; los otros tiquets avanzan. Las filas antiguas sin clave
 se resuelven con su manejador. Un error definitivo exige reintentar o descartar expresamente.
 Se procesa solo el propietario autenticado y se interrumpe el resto al cambiar de usuario.
-La serialización es de la pestaña actual: no coordina varias pestañas y necesita idempotencia
-en el servidor. Subir una foto y ejecutar una acción no constituye una transacción conjunta.
+Web Locks serializa los envíos entre pestañas en navegadores compatibles y permite retomar un envío
+interrumpido al reabrir. Los demás navegadores recuperan los envíos cuya marca supera un minuto.
+Los fallos transitorios conservan el trabajo pendiente y se reintentan mientras la app está visible
+y hay red. Si se pierde la respuesta de una subida completada, la reserva idempotente confirma que
+la foto ya está lista y la cola sigue con las acciones del tiquet. Ver
+[ADR 0130](../decisions/0130-recuperacion-cola-offline.md).
 
 Mientras una acción sigue en la cola, la interfaz deriva un estado proyectado del tiquet y lo marca
 como «Sin sincronizar». La proyección es de presentación, se calcula en orden de envío, cubre solo

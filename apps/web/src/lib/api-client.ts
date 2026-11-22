@@ -74,6 +74,21 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return (await response.json()) as T
 }
 
+function requestSignal(path: string, init: RequestInit) {
+  // Una red que aparenta estar conectada puede dejar el detalle o la cola esperando.
+  if (
+    (path.startsWith('/api/tickets') ||
+      path === '/api/auth/me' ||
+      path === '/api/sync/actions') &&
+    typeof AbortSignal.timeout === 'function' &&
+    (!init.signal || typeof AbortSignal.any === 'function')
+  ) {
+    const timeout = AbortSignal.timeout(30_000)
+    return init.signal ? AbortSignal.any([init.signal, timeout]) : timeout
+  }
+  return init.signal
+}
+
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
@@ -85,6 +100,7 @@ export async function apiFetch<T>(
 
   const response = await fetch(`${baseUrl()}${path}`, {
     ...init,
+    signal: requestSignal(path, init),
     headers,
     credentials: 'include',
   })

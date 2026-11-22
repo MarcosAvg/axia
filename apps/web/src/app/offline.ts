@@ -17,7 +17,7 @@ export function setupOffline(): () => void {
     queryClient.invalidateQueries({ queryKey: ['tickets'] }),
   )
   return startSync(async () => {
-    await pruneRejectedEvidence().catch(() => undefined)
     await processOutbox()
+    await pruneRejectedEvidence().catch(() => undefined)
   })
 }

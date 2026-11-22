@@ -115,6 +115,39 @@ it('revierte la foto al fallar el encolado después de perder la conexión', asy
   }
 })
 
+it.each([true, false])(
+  'revalida un conflicto TUS con evidencia lista: %s',
+  async (ready) => {
+    const { saveAndUploadEvidence } = await import('./offline-evidence')
+    const api = await import('@/lib/api-client')
+    const tus = await import('@/lib/offline/tus')
+    const { vi } = await import('vitest')
+    const reserve = vi
+      .spyOn(api, 'apiFetch')
+      .mockResolvedValueOnce({ evidence: { id: 'server-photo', ready: false } })
+      .mockResolvedValueOnce({ evidence: { id: 'server-photo', ready } })
+    const conflict = Object.assign(new Error('Conflicto TUS'), { status: 409 })
+    const upload = vi
+      .spyOn(tus, 'uploadResumable')
+      .mockRejectedValueOnce(conflict)
+    try {
+      const result = saveAndUploadEvidence({
+        ticketId: 'ticket-race',
+        cycle: 1,
+        type: 'before',
+        file: new File(['pdf'], 'antes.pdf', { type: 'application/pdf' }),
+      })
+      if (ready) await expect(result).resolves.toEqual(expect.any(String))
+      else await expect(result).rejects.toThrow(conflict)
+      expect(upload).toHaveBeenCalledTimes(1)
+      expect(reserve).toHaveBeenCalledTimes(2)
+      expect(reserve.mock.calls[0]).toEqual(reserve.mock.calls[1])
+    } finally {
+      vi.restoreAllMocks()
+    }
+  },
+)
+
 it('retiene solo hasta siete días las fotos que el servidor rechazó por cierre', async () => {
   const { ApiError } = await import('@/lib/api-client')
   const { db } = await import('@/lib/offline/db')

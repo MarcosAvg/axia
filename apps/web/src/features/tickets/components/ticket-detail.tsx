@@ -142,6 +142,14 @@ function blocksTicketRead(ticket: ReturnType<typeof useTicket>): boolean {
   )
 }
 
+function isUnavailableTicket(ticket: ReturnType<typeof useTicket>): boolean {
+  return (
+    !ticket.data &&
+    (ticket.fetchStatus === 'paused' ||
+      (ticket.isError && isRetryableOutboxError(ticket.error)))
+  )
+}
+
 /** Detalle del tiquet: data principal y actividad como sidebar. */
 export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const { identity } = useAuth()
@@ -151,8 +159,7 @@ export function TicketDetailView({ ticketId }: { ticketId: string }) {
   const pending = usePendingTicketActions(ticketId)
   useDocumentTitle(ticket.data?.folio ?? ticketMessages.detail.title)
 
-  if (ticket.fetchStatus === 'paused' && !ticket.data)
-    return <TicketUnavailable />
+  if (isUnavailableTicket(ticket)) return <TicketUnavailable />
   if (ticket.isLoading) return <TicketLoading />
   if (blocksTicketRead(ticket)) {
     return (

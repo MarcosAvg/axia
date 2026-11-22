@@ -24,6 +24,8 @@ function messageOf(error: unknown): string {
 /** Verdadero si el error parece de red (se reintenta); falso para errores de dominio. */
 export function isNetworkError(error: unknown): boolean {
   if (error instanceof TypeError) return true
+  if (error instanceof DOMException && error.name === 'TimeoutError')
+    return true
   return /failed to fetch|networkerror|network request failed|load failed|fetch failed/i.test(
     messageOf(error),
   )
@@ -36,6 +38,6 @@ export function isRetryableOutboxError(error: unknown): boolean {
   const status = Reflect.get(error, 'status')
   return (
     typeof status === 'number' &&
-    (status === 429 || [500, 502, 503, 504].includes(status))
+    (status === 423 || status === 429 || [500, 502, 503, 504].includes(status))
   )
 }

@@ -37,6 +37,15 @@ describe('disparadores de sincronización', () => {
     stop()
   })
 
+  it('procesa al restaurar una página visible', () => {
+    const process = vi.fn(async () => {})
+    const stop = startSync(process)
+    process.mockClear()
+    window.dispatchEvent(new Event('pageshow'))
+    expect(process).toHaveBeenCalledTimes(1)
+    stop()
+  })
+
   it('deja de procesar al detenerse', async () => {
     const process = vi.fn(async () => {})
     const stop = startSync(process)

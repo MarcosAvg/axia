@@ -85,8 +85,13 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
   try {
     await uploadEvidence(evidence)
   } catch (error) {
-    if (!(error instanceof ApiError) || error.code !== 'evidence_ticket_final')
+    if (
+      !(error instanceof ApiError) ||
+      error.code !== 'evidence_ticket_final'
+    ) {
+      await db.evidences.update(evidenceId, { state: 'pending', progress: 0 })
       throw error
+    }
     await db.transaction('rw', db.evidences, async () => {
       await db.evidences.update(evidenceId, {
         state: 'error',
@@ -148,6 +153,28 @@ export async function recoverRejectedEvidence(
   }
 }
 
+function reserveEvidence(evidence: Evidence, type: EvidenceType) {
+  return apiFetch<{ evidence: { id: string; ready?: boolean } }>(
+    `/api/tickets/${evidence.ticketId}/evidence`,
+    {
+      method: 'POST',
+      body: JSON.stringify(buildEvidenceUploadBody(evidence, type)),
+    },
+  )
+}
+
+async function confirmUploadConflict(
+  error: unknown,
+  evidence: Evidence,
+  type: EvidenceType,
+) {
+  // La primera subida puede terminar entre la reserva y el reintento TUS.
+  if (!(error instanceof Error && 'status' in error && error.status === 409))
+    throw error
+  if (evidence.userId) assertCaptureOwner(evidence.userId)
+  if (!(await reserveEvidence(evidence, type)).evidence.ready) throw error
+}
+
 async function uploadEvidence(evidence: Evidence): Promise<void> {
   const evidenceId = evidence.id
   if (evidence.userId && evidence.userId !== currentOfflineUserId()) {
@@ -156,33 +183,35 @@ async function uploadEvidence(evidence: Evidence): Promise<void> {
   const type = EVIDENCE_TYPES.find((candidate) => candidate === evidence.type)
   if (!type) throw new Error('Tipo de evidencia inválido')
 
-  const created = await apiFetch<{ evidence: { id: string } }>(
-    `/api/tickets/${evidence.ticketId}/evidence`,
-    {
-      method: 'POST',
-      body: JSON.stringify(buildEvidenceUploadBody(evidence, type)),
-    },
-  )
+  const created = await reserveEvidence(evidence, type)
   const serverId = created.evidence.id
   if (evidence.userId) assertCaptureOwner(evidence.userId)
+  if (created.evidence.ready) {
+    await db.evidences.delete(evidenceId)
+    return
+  }
 
   if (evidence.finalRejectedAt === undefined) {
     await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
   }
   let reported = -1
-  await uploadResumable({
-    endpoint: `${apiBaseUrl()}/api/uploads`,
-    evidenceId: serverId,
-    ticketId: evidence.ticketId,
-    blob: evidence.blob,
-    mimeType: evidence.mimeType,
-    onProgress: (percentage) => {
-      if (evidence.finalRejectedAt === undefined && percentage !== reported) {
-        reported = percentage
-        void db.evidences.update(evidenceId, { progress: percentage })
-      }
-    },
-  })
+  try {
+    await uploadResumable({
+      endpoint: `${apiBaseUrl()}/api/uploads`,
+      evidenceId: serverId,
+      ticketId: evidence.ticketId,
+      blob: evidence.blob,
+      mimeType: evidence.mimeType,
+      onProgress: (percentage) => {
+        if (evidence.finalRejectedAt === undefined && percentage !== reported) {
+          reported = percentage
+          void db.evidences.update(evidenceId, { progress: percentage })
+        }
+      },
+    })
+  } catch (error) {
+    await confirmUploadConflict(error, evidence, type)
+  }
   // La foto ya está en el servidor: no hace falta conservar otra copia local.
   await db.evidences.delete(evidenceId)
 }

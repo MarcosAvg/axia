@@ -55,6 +55,9 @@ const pluginsAfterCompiler = [
       ],
     },
     workbox: {
+      // La primera instalación debe controlar la pestaña abierta para servir
+      // rutas diferidas sin conexión. Las actualizaciones siguen bajo confirmación.
+      clientsClaim: true,
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       navigateFallback: '/index.html',
     },

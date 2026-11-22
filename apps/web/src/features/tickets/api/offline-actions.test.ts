@@ -190,6 +190,8 @@ it('encola una pausa confirmada con conexión detrás del inicio pendiente', asy
     args: { reasonId: crypto.randomUUID() },
   })
 
+  await processOutbox()
+
   expect(apiFetch).not.toHaveBeenCalled()
   expect(await db.outbox.toCollection().sortBy('seq')).toMatchObject([
     { id: start.id, state: 'error' },

@@ -37,6 +37,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0127](0127-desglose-metricas-lista.md) | Desglose de métricas con la lista de tiquets |
 | [0128](0128-publicacion-verificada-y-recuperacion-por-digest.md) | Publicación verificada y recuperación por digest |
 | [0129](0129-captura-local-trabajo-en-campo.md) | Preparación de tiquets y captura local para el trabajo en campo |
+| [0130](0130-recuperacion-cola-offline.md) | Recuperación de la cola offline |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

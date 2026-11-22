@@ -77,6 +77,9 @@ export function uploadResumable(params: ResumableUploadParams): Promise<void> {
       onBeforeRequest: (request) => {
         const xhr = request.getUnderlyingObject() as XMLHttpRequest
         xhr.withCredentials = true
+        xhr.timeout = 60_000
+        // El adaptador XHR de TUS solo rechaza la petición a través de onerror.
+        xhr.ontimeout = (event) => xhr.onerror?.(event)
       },
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,

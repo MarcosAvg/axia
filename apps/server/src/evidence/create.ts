@@ -22,6 +22,7 @@ export type CreateEvidenceResult = {
   maxSize: number
   quotaRemaining: number
   replayed: boolean
+  ready: boolean
 }
 
 async function ticketCycle(db: DbExecutor, ticketId: string): Promise<number> {
@@ -67,13 +68,19 @@ async function existingEvidence(
   clientRequestId: string,
 ) {
   const result = await db.execute(sql`
-    select id, ticket_id, uploaded_by
+    select id, ticket_id, uploaded_by, processing_state
     from public.evidence
     where client_request_id = ${clientRequestId}
     limit 1
   `)
   const row = result.rows[0] as
-    { id: string; ticket_id: string; uploaded_by: string | null } | undefined
+    | {
+        id: string
+        ticket_id: string
+        uploaded_by: string | null
+        processing_state: string
+      }
+    | undefined
   if (!row) return null
   if (row.ticket_id !== ticketId || row.uploaded_by !== actor.id) {
     throw new AppError(
@@ -215,6 +222,7 @@ export async function createEvidence(
       maxSize: config.EVIDENCE_MAX_BYTES,
       quotaRemaining: Math.max(0, config.EVIDENCE_QUOTA_BYTES - used),
       replayed: true,
+      ready: existing.processing_state === 'ready',
     }
   }
   const evidenceId = await insertEvidence({
@@ -231,5 +239,6 @@ export async function createEvidence(
     maxSize: config.EVIDENCE_MAX_BYTES,
     quotaRemaining: Math.max(0, config.EVIDENCE_QUOTA_BYTES - used),
     replayed: false,
+    ready: false,
   }
 }

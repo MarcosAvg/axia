@@ -15,27 +15,27 @@ function isOnline(): boolean {
 }
 
 export function startSync(process: () => Promise<void>): () => void {
-  const onOnline = () => {
-    void process()
+  const run = () => {
+    void process().catch((error: unknown) => {
+      console.warn('No se pudo procesar la cola offline', error)
+    })
   }
   const onVisibilityChange = () => {
-    if (isVisible()) {
-      void process()
-    }
+    if (isVisible() && isOnline()) run()
   }
   const timer = setInterval(() => {
-    if (isVisible() && isOnline()) {
-      void process()
-    }
+    onVisibilityChange()
   }, RETRY_INTERVAL_MS)
 
-  window.addEventListener('online', onOnline)
+  window.addEventListener('online', run)
+  window.addEventListener('pageshow', onVisibilityChange)
   document.addEventListener('visibilitychange', onVisibilityChange)
-  void process()
+  run()
 
   return () => {
     clearInterval(timer)
-    window.removeEventListener('online', onOnline)
+    window.removeEventListener('online', run)
+    window.removeEventListener('pageshow', onVisibilityChange)
     document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 }

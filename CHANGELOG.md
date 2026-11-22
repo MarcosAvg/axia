@@ -5,6 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Al recuperar la conexión, la cola recoge las acciones guardadas durante un envío y sigue
+  reintentando los fallos transitorios. Si el servidor ya recibió una foto y se perdió la respuesta,
+  el reenvío confirma la foto y continúa con las acciones pendientes del tiquet.
+- La primera instalación de la PWA habilita las rutas sin conexión en la pestaña abierta.
+  **Mi trabajo** comprueba que la PWA pueda servir la ruta antes de marcar un tiquet como
+  disponible. El detalle sin copia local ofrece volver a **Mi trabajo** si la red cae durante la solicitud.
+
 ## [0.35.1] - 2026-11-22
 ### Corregido
 

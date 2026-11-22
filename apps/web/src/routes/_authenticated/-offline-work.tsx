@@ -1,7 +1,7 @@
 import { useIsRestoring, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { readyTicketDetails } from '@/app/query-persister'
 import { Button } from '@/components/ui/button'
 import { offlineSessionExpiresAt } from '@/features/auth'
@@ -121,7 +121,21 @@ function useWorkPreparation({ items, userId, confirmed }: OfflineWorkProps) {
   }
 }
 
+function subscribeToOfflineShell(onChange: () => void) {
+  navigator.serviceWorker?.addEventListener('controllerchange', onChange)
+  return () =>
+    navigator.serviceWorker?.removeEventListener('controllerchange', onChange)
+}
+
+function offlineShellReady() {
+  return import.meta.env.DEV || Boolean(navigator.serviceWorker?.controller)
+}
+
 function useAvailability(userId: string) {
+  const shellReady = useSyncExternalStore(
+    subscribeToOfflineShell,
+    offlineShellReady,
+  )
   const [now, setNow] = useState(Date.now)
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30_000)
@@ -131,17 +145,19 @@ function useAvailability(userId: string) {
     () => readyTicketDetails(userId, now, catalogKeys),
     [userId, now],
   )
-  return { now, ready }
+  return { now, ready, shellReady }
 }
 
 function WorkAvailability({
   eligibleCount,
   readyCount,
+  shellReady,
   expiresAt,
   work,
 }: {
   eligibleCount: number
   readyCount: number
+  shellReady: boolean
   expiresAt: number | undefined
   work: ReturnType<typeof useWorkPreparation>
 }) {
@@ -154,10 +170,15 @@ function WorkAvailability({
       </p>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <p role="status">
-          {readyCount} de {eligibleCount} tiquets disponibles sin conexión.
+          {shellReady
+            ? `${readyCount} de ${eligibleCount} tiquets disponibles sin conexión.`
+            : 'La aplicación aún no está lista para abrirse sin conexión.'}
           {work.preparing ? ' Preparando tiquets…' : null}
         </p>
-        {work.online && !work.preparing && readyCount < eligibleCount ? (
+        {shellReady &&
+        work.online &&
+        !work.preparing &&
+        readyCount < eligibleCount ? (
           <Button variant="outline" size="sm" onClick={work.retry}>
             Reintentar
           </Button>
@@ -171,11 +192,11 @@ export function OfflineWork(props: OfflineWorkProps) {
   const { items, userId } = props
   const work = useWorkPreparation(props)
   const [onlyReady, setOnlyReady] = useState(false)
-  const { now, ready } = useAvailability(userId)
+  const { now, ready, shellReady } = useAvailability(userId)
   const expiresAt = offlineSessionExpiresAt(userId)
   const eligible = items.slice(0, MAX_TICKETS)
   const readyIds = new Set(
-    expiresAt && expiresAt > now
+    shellReady && expiresAt && expiresAt > now
       ? eligible.filter(({ id }) => ready?.has(id)).map(({ id }) => id)
       : [],
   )
@@ -187,6 +208,7 @@ export function OfflineWork(props: OfflineWorkProps) {
           <WorkAvailability
             eligibleCount={eligible.length}
             readyCount={readyIds.size}
+            shellReady={shellReady}
             expiresAt={expiresAt && expiresAt > now ? expiresAt : undefined}
             work={work}
           />

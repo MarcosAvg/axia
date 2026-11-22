@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import {
   selectDefaultClassification,
   submitTicketForm,
@@ -131,7 +131,15 @@ async function pauseOffline(page: Page) {
 
 async function reconnectWithInterruptedUpload(page: Page) {
   const upload = '**/api/uploads'
-  await page.route(upload, (route) => route.abort('internetdisconnected'))
+  let initialUpload = true
+  await page.route(upload, async (route) => {
+    if (initialUpload && route.request().method() === 'POST') {
+      initialUpload = false
+      const response = await route.fetch()
+      expect(response.ok()).toBe(true)
+    }
+    await route.abort('internetdisconnected')
+  })
   await page.context().setOffline(false)
   await expect.poll(() => localCount(page, 'retryableEvidence')).toBe(1)
   await page.context().setOffline(true)
@@ -139,12 +147,12 @@ async function reconnectWithInterruptedUpload(page: Page) {
   await page.context().setOffline(false)
 }
 
-async function verifyPauseWhileSending(page: Page, card: Locator) {
+async function verifyPauseWhileSending(page: Page) {
   let release = () => {}
   const hold = new Promise<void>((resolve) => {
     release = resolve
   })
-  await page.route('**/api/tickets/mine?*', async (route) => {
+  await page.route(`**/api${new URL(page.url()).pathname}`, async (route) => {
     await hold
     await route.continue()
   })
@@ -165,23 +173,31 @@ async function verifyPauseWhileSending(page: Page, card: Locator) {
     await reconnectWithInterruptedUpload(page)
     await started
     await expect.poll(() => localCount(page, 'outbox')).toBe(2)
-    await expect(card.getByText('Pausado', { exact: true })).toBeVisible()
-    await expect(card.getByText('Sin sincronizar')).toBeVisible()
+    await expect(
+      page.getByText('Pausado', { exact: true }).first(),
+    ).toBeVisible()
+    await expect(page.getByText('Sin sincronizar').first()).toBeVisible()
   } finally {
     release()
   }
 }
 
-async function verifySyncedPause(page: Page, description: string) {
-  await page.getByRole('link').filter({ hasText: description }).click()
+async function verifySyncedPause(page: Page) {
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByRole('button', { name: 'Iniciar' })).toHaveCount(0)
   await expect(page.getByText(/Borradores para revisar/)).toHaveCount(0)
 }
 
+async function verifyFirstInstall(page: Page) {
+  // Una instalación nueva debe controlar la primera pestaña sin recargarla.
+  await page.goto('/login')
+  await page.waitForFunction('Boolean(navigator.serviceWorker?.controller)')
+}
+
 test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', async ({
   page,
 }) => {
+  if (testPwa) await verifyFirstInstall(page)
   const id = crypto.randomUUID()
   const description = `Offline E2E ${id}`
   const unprepared = `Sin preparar ${id}`
@@ -209,7 +225,7 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   await page.getByRole('link').filter({ hasText: description }).click()
   await expect(page.getByLabel('Tipo de evidencia')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Iniciar' })).toBeVisible()
-  await page.context().setOffline(true)
+  if (!testPwa) await page.context().setOffline(true)
   page = await restoreAndSubmitEvidence(page)
   // La vista avanza con el estado proyectado, no espera a recuperar la red.
   await expect(
@@ -235,14 +251,12 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   await expect(card.getByText('Pausado', { exact: true })).toBeVisible()
   await expect(card.getByText('Sin sincronizar')).toBeVisible()
 
-  // Vuelve la conexión: el evento 'online' sincroniza la evidencia, el inicio y la pausa.
-  await verifyPauseWhileSending(page, card)
-  await expect(card.getByText('Pausado', { exact: true })).toBeVisible({
-    timeout: 20000,
-  })
-  await expect(card.getByText('Sin sincronizar')).toHaveCount(0, {
+  // La conexión vuelve con el detalle abierto y sin recargar la página.
+  await card.getByRole('link').click()
+  await verifyPauseWhileSending(page)
+  await expect(page.getByText('Sin sincronizar')).toHaveCount(0, {
     timeout: 20000,
   })
   await expect.poll(() => localCount(page, 'outbox')).toBe(0)
-  await verifySyncedPause(page, description)
+  await verifySyncedPause(page)
 })

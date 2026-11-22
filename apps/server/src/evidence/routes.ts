@@ -53,7 +53,7 @@ export function registerEvidenceRoutes(
       const input = createEvidenceSchema.parse(request.body)
       const result = await evidence.create(currentActor(request), id, input)
       return reply.status(result.replayed ? 200 : 201).send({
-        evidence: { id: result.evidenceId },
+        evidence: { id: result.evidenceId, ready: result.ready },
         uploadUrl: result.uploadUrl,
         maxSize: result.maxSize,
         quotaRemaining: result.quotaRemaining,

@@ -22,12 +22,16 @@ function metadata(values: Record<string, string>) {
     .join(',')
 }
 
-async function createEvidence(cookie: string, type = 'before') {
+async function createEvidence(
+  cookie: string,
+  type = 'before',
+  clientRequestId: string = randomUUID(),
+) {
   return context.app.inject({
     method: 'POST',
     url: `/api/tickets/${context.ids.ticketA1}/evidence`,
     headers: authHeaders(cookie),
-    payload: { type, clientRequestId: randomUUID() },
+    payload: { type, clientRequestId },
   })
 }
 
@@ -95,6 +99,25 @@ async function expectServed(evidenceId: string, cookie: string) {
   expect(thumbnail.headers.get('content-type')).toContain('image/webp')
 }
 
+async function expectReadyReplay(clientRequestId: string, evidenceId: string) {
+  const replay = await createEvidence(
+    context.cookies.technician,
+    'before',
+    clientRequestId,
+  )
+  expect(replay.statusCode).toBe(200)
+  expect(replay.json()).toMatchObject({
+    evidence: { id: evidenceId, ready: true },
+    replayed: true,
+  })
+  const otherActor = await createEvidence(
+    context.cookies.admin,
+    'before',
+    clientRequestId,
+  )
+  expect(otherActor.statusCode).toBe(409)
+}
+
 describe('evidence upload and delivery', () => {
   it('records the evidence event at the captured time', async () => {
     const occurredAt = new Date(Date.now() - 60 * 60_000).toISOString()
@@ -122,8 +145,14 @@ describe('evidence upload and delivery', () => {
   })
 
   it('uploads an image with TUS, processes it and serves file and thumbnail', async () => {
-    const created = await createEvidence(context.cookies.technician)
+    const requestId = randomUUID()
+    const created = await createEvidence(
+      context.cookies.technician,
+      'before',
+      requestId,
+    )
     expect(created.statusCode).toBe(201)
+    expect(created.json()).toMatchObject({ evidence: { ready: false } })
     const evidenceId = (created.json() as { evidence: { id: string } }).evidence
       .id
     const image = await redPng()
@@ -150,6 +179,7 @@ describe('evidence upload and delivery', () => {
     )
 
     await expectServed(evidenceId, context.cookies.technician)
+    await expectReadyReplay(requestId, evidenceId)
   })
 })
 
