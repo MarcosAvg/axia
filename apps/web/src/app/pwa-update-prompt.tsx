@@ -1,21 +1,61 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from '@/components/ui/button'
 import { messages } from '@/lib/i18n'
+import { useOnline } from '@/lib/use-online'
 
-// Aviso de actualización de la PWA (`registerType: 'prompt'`): la nueva versión
-// se aplica solo cuando la persona lo confirma, nunca a mitad de un trabajo.
-export function PwaUpdatePrompt() {
+function usePwaUpdate() {
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration>()
+  const [activated, setActivated] = useState(false)
+  const requested = useRef(false)
   const {
-    needRefresh: [needRefresh],
     offlineReady: [offlineReady],
     updateServiceWorker,
-  } = useRegisterSW()
-  const [dismissed, setDismissed] = useState(false)
+  } = useRegisterSW({
+    onRegisteredSW: (_url, current) => setRegistration(current),
+    // Workbox detecta la descarga. El cambio de control se observa en cada pestaña.
+    onNeedReload: () => undefined,
+  })
 
-  if ((!needRefresh && !offlineReady) || dismissed) {
-    return null
+  useEffect(() => {
+    const workers = navigator.serviceWorker
+    if (!workers) return
+    let previous = workers.controller
+    const onControllerChange = () => {
+      const current = workers.controller
+      if (current && previous !== current) {
+        if (requested.current) window.location.reload()
+        else if (previous) setActivated(true)
+      }
+      previous = current
+    }
+    workers.addEventListener('controllerchange', onControllerChange)
+    return () =>
+      workers.removeEventListener('controllerchange', onControllerChange)
+  }, [])
+
+  const available = activated || Boolean(registration?.waiting)
+
+  function applyUpdate() {
+    if (registration?.waiting) {
+      requested.current = true
+      void updateServiceWorker().catch(() => {
+        requested.current = false
+      })
+    } else if (activated) {
+      window.location.reload()
+    }
   }
+
+  return { available, offlineReady, applyUpdate }
+}
+
+/** Ofrece la nueva versión sin interrumpir las otras pestañas abiertas. */
+export function PwaUpdatePrompt() {
+  const { available, offlineReady, applyUpdate } = usePwaUpdate()
+  const [dismissed, setDismissed] = useState(false)
+  const online = useOnline()
+  if (!available && (!offlineReady || dismissed)) return null
 
   return (
     <div
@@ -24,15 +64,10 @@ export function PwaUpdatePrompt() {
     >
       <div className="mx-auto flex max-w-md items-center gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-lg">
         <p className="flex-1 text-sm">
-          {needRefresh
-            ? messages.pwa.updateAvailable
-            : messages.pwa.offlineReady}
+          {available ? messages.pwa.updateAvailable : messages.pwa.offlineReady}
         </p>
-        {needRefresh ? (
-          <Button
-            className="min-h-11"
-            onClick={() => void updateServiceWorker()}
-          >
+        {available ? (
+          <Button className="min-h-11" onClick={applyUpdate} disabled={!online}>
             {messages.pwa.updateAction}
           </Button>
         ) : (

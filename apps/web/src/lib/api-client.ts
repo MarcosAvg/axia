@@ -99,6 +99,7 @@ export async function apiFetch<T>(
   }
 
   const response = await fetch(`${baseUrl()}${path}`, {
+    cache: 'no-store',
     ...init,
     signal: requestSignal(path, init),
     headers,

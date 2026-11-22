@@ -33,7 +33,9 @@ async function prepareWork(
   ids: Set<string>,
   { active, onStart }: { active: () => boolean; onStart: () => void },
 ) {
-  const ready = await readyTicketDetails(userId, Date.now(), catalogKeys)
+  const ready = await readyTicketDetails(userId, Date.now(), catalogKeys, {
+    fresh: true,
+  })
   if (!active()) return
   onStart()
   const managedKey = ['tickets', 'offline-work', userId] as const

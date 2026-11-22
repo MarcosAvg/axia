@@ -56,6 +56,7 @@ export interface Evidence {
 /** Caché serializada de React Query para abrir datos ya vistos sin conexión. */
 export interface QueryCacheEntry {
   key: string
+  webBuild?: string
   owner?: string | null
   value: unknown
 }

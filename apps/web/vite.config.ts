@@ -58,7 +58,8 @@ const pluginsAfterCompiler = [
       // La primera instalación debe controlar la pestaña abierta para servir
       // rutas diferidas sin conexión. Las actualizaciones siguen bajo confirmación.
       clientsClaim: true,
-      globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      cleanupOutdatedCaches: true,
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2}'],
       navigateFallback: '/index.html',
     },
   }),

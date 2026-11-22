@@ -177,3 +177,33 @@ it('conserva la última copia únicamente ante un error transitorio', () => {
     }),
   ).toBe(false)
 })
+
+it('revalida las copias de una versión anterior y conserva su lectura offline', async () => {
+  const { readyTicketDetails } = await import('./query-persister')
+  const { QueryClient, dehydrate } = await import('@tanstack/react-query')
+  const { QUERY_CACHE_BUSTER } = await import('@/lib/offline/cache-policy')
+  const queryClient = new QueryClient()
+  const now = Date.now()
+  queryClient.setQueryData(
+    ['tickets', 'detail', 't1'],
+    { id: 't1' },
+    { updatedAt: now },
+  )
+  await queryPersister.persistClient({
+    timestamp: now,
+    buster: QUERY_CACHE_BUSTER,
+    clientState: dehydrate(queryClient),
+  })
+  await db.queryCache.update('query-cache', { webBuild: 'previous-build' })
+
+  expect(
+    (await queryPersister.restoreClient())?.clientState.queries[0]?.state,
+  ).toMatchObject({ data: { id: 't1' }, isInvalidated: true })
+  expect(await readyTicketDetails('user-a', now)).toEqual(
+    new Map([['t1', now]]),
+  )
+  expect(await readyTicketDetails('user-a', now, [], { fresh: true })).toEqual(
+    new Map(),
+  )
+  queryClient.clear()
+})

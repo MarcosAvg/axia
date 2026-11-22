@@ -8,10 +8,19 @@ import type {
 } from '@tanstack/react-query-persist-client'
 import { isRetryableOutboxError } from '@/lib/offline/errors'
 import { db } from '@/lib/offline/db'
+import type { QueryCacheEntry } from '@/lib/offline/db'
 import { currentOfflineUserId, offlineUserForTab } from '@/lib/offline/user'
 
 const QUERY_CACHE_KEY = 'query-cache'
 const QUERY_CACHE_OWNER_KEY = 'axia.offline.queryCacheUser'
+
+// Vite enlaza en el HTML los recursos de entrada con huella de contenido.
+const webBuild = Array.from(
+  document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>(
+    'script[type="module"][src], link[rel="stylesheet"], link[rel="modulepreload"]',
+  ),
+  (asset) => asset.getAttribute('src') ?? asset.getAttribute('href'),
+).join('|')
 
 function setOwner(userId: string | null): void {
   try {
@@ -42,6 +51,7 @@ export const queryPersister: Persister = {
     await db.queryCache.put({
       key: QUERY_CACHE_KEY,
       owner,
+      webBuild,
       value: normalizeClient(client),
     })
     if (owner === offlineUserForTab() && owner === currentOfflineUserId())
@@ -55,7 +65,13 @@ export const queryPersister: Persister = {
     const row = await db.queryCache.get(QUERY_CACHE_KEY)
     if (row?.owner !== undefined && row.owner !== queryCacheOwner())
       return undefined
-    return row?.value as PersistedClient | undefined
+    const client = row?.value as PersistedClient | undefined
+    if (!client || row?.webBuild === webBuild) return client
+    const queries = client.clientState.queries.map((query) => ({
+      ...query,
+      state: { ...query.state, isInvalidated: true },
+    }))
+    return { ...client, clientState: { ...client.clientState, queries } }
   },
   removeClient: async () => {
     await db.queryCache.delete(QUERY_CACHE_KEY)
@@ -105,24 +121,18 @@ async function readQueryCacheForUser(userId: string) {
   const row = await db.queryCache.get(QUERY_CACHE_KEY)
   if (!row) return undefined
   const owner = row.owner === undefined ? queryCacheOwner() : row.owner
-  return owner === userId ? (row.value as PersistedClient) : undefined
+  return owner === userId ? row : undefined
 }
 
 export async function readyTicketDetails(
   userId: string,
   now = Date.now(),
   requiredKeys: (readonly unknown[])[] = [],
+  { fresh = false } = {},
 ) {
   const ready = new Map<string, number>()
-  const client = await readQueryCacheForUser(userId)
-  if (
-    !client ||
-    client.buster !== QUERY_CACHE_BUSTER ||
-    now - client.timestamp > OFFLINE_CACHE_TTL_MS
-  )
-    return ready
-
-  const saved = client.clientState.queries
+  const row = await readQueryCacheForUser(userId)
+  const saved = usableQueries(row, now, fresh)
   const validKeys = validQueryKeys(saved, now)
   if (!requiredKeys.every((key) => validKeys.has(JSON.stringify(key))))
     return ready
@@ -132,6 +142,25 @@ export async function readyTicketDetails(
     if (id !== undefined) ready.set(id, query.state.dataUpdatedAt)
   }
   return ready
+}
+
+function usableQueries(
+  row: QueryCacheEntry | undefined,
+  now: number,
+  fresh: boolean,
+) {
+  const client = row?.value as PersistedClient | undefined
+  if (
+    !client ||
+    client.buster !== QUERY_CACHE_BUSTER ||
+    now - client.timestamp > OFFLINE_CACHE_TTL_MS
+  )
+    return []
+
+  if (fresh && row?.webBuild !== webBuild) return []
+  return fresh
+    ? client.clientState.queries.filter(({ state }) => !state.isInvalidated)
+    : client.clientState.queries
 }
 
 function validQueryKeys(

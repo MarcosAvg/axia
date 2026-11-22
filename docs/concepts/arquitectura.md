@@ -155,6 +155,12 @@ ya pausados. Al abrir la PWA desde el icono sin red, una sesión técnica vigent
 trabajo** desde la copia local. Las respuestas `/api` se guardan por medio de la caché de
 consultas de la app.
 
+Al aplicar una actualización, la pestaña espera a que el nuevo service worker tome el control
+antes de recargar. Workbox actualiza la precaché del paquete web. Las consultas de una compilación
+anterior se revalidan al volver a usarlas con conexión. **Mi trabajo** renueva también la preparación
+de los tiquets. Si falta la red, se conserva la última copia compatible. Ver
+[ADR 0131](../decisions/0131-renovacion-pwa.md).
+
 La cola une evidencia y acciones por ID de tiquet. Un error o envío anterior bloquea sus pasos
 posteriores incluso entre procesamientos; los otros tiquets avanzan. Las filas antiguas sin clave
 se resuelven con su manejador. Un error definitivo exige reintentar o descartar expresamente.

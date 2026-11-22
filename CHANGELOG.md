@@ -7,6 +7,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ### Corregido
 
+- La PWA ofrece actualizar cuando el navegador tiene una versión lista o la pestaña sigue
+  abierta con una versión anterior. Al actualizar, se activa el nuevo paquete web y se renuevan
+  las consultas guardadas al volver a usarlas con conexión. Los borradores y la cola se conservan.
+
 - **Mi trabajo** guarda las conexiones entre motivos, subestados y salidas. Sin red, las
   acciones de pausa se ajustan al último paso capturado, incluso antes de sincronizarlo.
 - Al abrir la PWA desde el icono sin red, una sesión técnica vigente entra a **Mi trabajo**
