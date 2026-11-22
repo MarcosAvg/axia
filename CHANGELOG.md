@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.35.3] - 2026-11-22
+
 ### Corregido
 
 - La PWA ofrece actualizar cuando el navegador tiene una versión lista o la pestaña sigue
