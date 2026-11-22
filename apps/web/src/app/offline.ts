@@ -13,9 +13,9 @@ import { startSync } from '@/lib/offline/sync'
 export function setupOffline(): () => void {
   registerEvidenceUploadHandler()
   registerTicketActionHandler()
-  onOutboxProcessed(() => {
-    void queryClient.invalidateQueries({ queryKey: ['tickets'] })
-  })
+  onOutboxProcessed(() =>
+    queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+  )
   return startSync(async () => {
     await pruneRejectedEvidence().catch(() => undefined)
     await processOutbox()

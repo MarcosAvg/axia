@@ -10,6 +10,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
   dispositivo. Los borradores se limpian al confirmar correctamente.
 - La cola vuelve a intentar una foto si se interrumpe la conexión durante la subida, incluso
   si una versión anterior la marcó como error definitivo. El inicio y la pausa esperan su turno.
+- El tiquet conserva el estado local mientras se reconcilia con el servidor. Las capturas
+  nuevas que se hacen al reconectar esperan detrás de las ya encoladas para ese tiquet.
 - Se puede abrir un tiquet mientras su detalle se prepara para uso sin conexión.
 
 ## [0.35.0] - 2026-11-21

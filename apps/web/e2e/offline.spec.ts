@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import {
   selectDefaultClassification,
   submitTicketForm,
@@ -139,6 +139,39 @@ async function reconnectWithInterruptedUpload(page: Page) {
   await page.context().setOffline(false)
 }
 
+async function verifyPauseWhileSending(page: Page, card: Locator) {
+  let release = () => {}
+  const hold = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  await page.route('**/api/tickets/mine?*', async (route) => {
+    await hold
+    await route.continue()
+  })
+  await page.route('**/api/sync/actions', async (route) => {
+    const body = route.request().postDataJSON() as {
+      items?: { type: string }[]
+    }
+    if (body.items?.[0]?.type === 'pause') await hold
+    await route.continue()
+  })
+  const started = page.waitForRequest(
+    (request) =>
+      request.url().endsWith('/api/sync/actions') &&
+      (request.postDataJSON() as { items?: { type: string }[] }).items?.[0]
+        ?.type === 'pause',
+  )
+  try {
+    await reconnectWithInterruptedUpload(page)
+    await started
+    await expect.poll(() => localCount(page, 'outbox')).toBe(2)
+    await expect(card.getByText('Pausado', { exact: true })).toBeVisible()
+    await expect(card.getByText('Sin sincronizar')).toBeVisible()
+  } finally {
+    release()
+  }
+}
+
 async function verifySyncedPause(page: Page, description: string) {
   await page.getByRole('link').filter({ hasText: description }).click()
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
@@ -203,7 +236,7 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   await expect(card.getByText('Sin sincronizar')).toBeVisible()
 
   // Vuelve la conexión: el evento 'online' sincroniza la evidencia, el inicio y la pausa.
-  await reconnectWithInterruptedUpload(page)
+  await verifyPauseWhileSending(page, card)
   await expect(card.getByText('Pausado', { exact: true })).toBeVisible({
     timeout: 20000,
   })

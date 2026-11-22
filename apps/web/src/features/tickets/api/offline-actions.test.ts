@@ -173,3 +173,30 @@ it('reintenta evidencias que una versión anterior bloqueó por un fallo TUS sin
   expect(action).toHaveBeenCalledOnce()
   expect(await db.outbox.count()).toBe(0)
 })
+
+it('encola una pausa confirmada con conexión detrás del inicio pendiente', async () => {
+  await enqueueTicketAction({ ...context, operation: 'start', args: {} })
+  const [start] = await db.outbox.toArray()
+  if (!start) throw new Error('Falta el inicio en la cola')
+  await db.outbox.update(start.id, {
+    state: 'error',
+    lastError: 'Conflicto de inicio',
+  })
+
+  await submitTicketAction({
+    ...context,
+    clientRequestId: crypto.randomUUID(),
+    operation: 'pause',
+    args: { reasonId: crypto.randomUUID() },
+  })
+
+  expect(apiFetch).not.toHaveBeenCalled()
+  expect(await db.outbox.toCollection().sortBy('seq')).toMatchObject([
+    { id: start.id, state: 'error' },
+    {
+      orderingKey: 'ticket-a',
+      state: 'pending',
+      payload: { operation: 'pause' },
+    },
+  ])
+})

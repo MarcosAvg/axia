@@ -65,13 +65,28 @@ export async function enqueue(
   })
 }
 
+/** Mantiene las operaciones nuevas detrás del trabajo ya guardado del tiquet. */
+export async function hasQueuedWork(ticketId: string): Promise<boolean> {
+  const userId = currentOfflineUserId()
+  if (!userId) return false
+  const items = await db.outbox
+    .filter((item) => item.userId === userId)
+    .toArray()
+  for (const item of items) {
+    const key =
+      item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
+    if (key === ticketId) return true
+  }
+  return false
+}
+
 const MAX_ATTEMPTS = 5
 const STALE_SENDING_MS = 60_000
 let isProcessing = false
-let afterProcess: (() => void) | null = null
+let afterProcess: (() => Promise<void> | void) | null = null
 
-/** Registra un aviso que se dispara al terminar de procesar la cola. */
-export function onOutboxProcessed(callback: () => void) {
+/** Actualiza las vistas antes de retirar las operaciones confirmadas de la cola. */
+export function onOutboxProcessed(callback: () => Promise<void> | void) {
   afterProcess = callback
 }
 
@@ -90,23 +105,29 @@ export async function processOutbox(): Promise<void> {
       const items = await db.outbox.toArray()
       const mine = items.filter((item) => item.userId === userId)
       mine.sort((a, b) => a.seq - b.seq)
-      await processOrderedItems(mine, userId)
+      const confirmed = await processOrderedItems(mine, userId)
+      // Las vistas siguen proyectando las acciones hasta recibir el estado del servidor.
+      if (confirmed.length === 0) return
+      if (currentOfflineUserId() === userId) await afterProcess?.()
+      await db.outbox.bulkDelete(confirmed)
     })
   } finally {
     isProcessing = false
-    afterProcess?.()
   }
 }
 
 async function processOrderedItems(items: OutboxItem[], userId: string) {
   const blocked = new Set<string>()
+  const confirmed: string[] = []
   for (const item of items) {
     const key =
       item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
     if (currentOfflineUserId() !== userId) break
     if (key && blocked.has(key)) continue
-    if (!(await processReadyItem(item)) && key) blocked.add(key)
+    if (await processReadyItem(item)) confirmed.push(item.id)
+    else if (key) blocked.add(key)
   }
+  return confirmed
 }
 
 async function processReadyItem(item: OutboxItem): Promise<boolean> {
@@ -218,7 +239,6 @@ async function processItem(item: OutboxItem): Promise<boolean> {
   }
   try {
     await handler(item.payload)
-    await db.outbox.delete(item.id)
     return true
   } catch (error) {
     const attempts = item.attempts + 1

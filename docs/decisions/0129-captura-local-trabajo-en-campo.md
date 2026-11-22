@@ -54,3 +54,8 @@ La sincronización con el servidor se realiza después.
 Las interrupciones de transporte en TUS conservan la foto en la cola para reintentar.
 La sincronización también recupera los fallos transitorios de TUS que versiones anteriores
 guardaron como definitivos. El inicio y la pausa siguen esperando la foto del mismo tiquet.
+
+Al detectar la reconexión, la cola envía la foto, el inicio y la pausa en orden. Las acciones
+confirmadas se retiran después de actualizar las consultas visibles, de modo que la vista pueda
+mantener su proyección local durante el envío. Con conexión, las operaciones nuevas del mismo
+tiquet entran detrás de las que ya esperan en la cola.

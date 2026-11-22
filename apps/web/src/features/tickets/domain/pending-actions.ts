@@ -73,7 +73,9 @@ type TransitionHandler = (
 
 function moveTo(from: TicketStatus[], to: TicketStatus): TransitionHandler {
   return (state) =>
-    from.includes(state.status) ? { ...state, status: to } : 'stop'
+    from.includes(state.status) || state.status === to
+      ? { ...state, status: to }
+      : 'stop'
 }
 
 function keepWhen(from: TicketStatus[]): TransitionHandler {

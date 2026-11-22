@@ -8,6 +8,7 @@ import { isRetryableOutboxError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
 import {
   enqueue,
+  hasQueuedWork,
   processOutbox,
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
@@ -207,7 +208,11 @@ export async function saveAndUploadEvidence(
   assertCaptureOwner(owner)
 
   const { id } = evidence
-  if (typeof navigator === 'undefined' || navigator.onLine) {
+  const immediate =
+    (typeof navigator === 'undefined' || navigator.onLine) &&
+    !(await hasQueuedWork(params.ticketId))
+  assertCaptureOwner(owner)
+  if (immediate) {
     try {
       await uploadEvidence(evidence)
       return id

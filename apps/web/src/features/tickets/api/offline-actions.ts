@@ -4,10 +4,12 @@
 
 import {
   enqueue,
+  hasQueuedWork,
   processOutbox,
   registerOutboxHandler,
 } from '@/lib/offline/outbox'
 import { isNetworkError, OutboxError } from '@/lib/offline/errors'
+import { currentOfflineUserId, offlineUserForTab } from '@/lib/offline/user'
 import { z } from 'zod'
 import { sendSyncBatch } from './sync-api'
 import { sendTicketCommand, ticketCommandSchema } from './ticket-commands'
@@ -28,6 +30,7 @@ const contextSchema = z.object({
 
 export async function enqueueTicketAction(
   input: TicketCommandInput,
+  owner = currentOfflineUserId(),
 ): Promise<void> {
   const command = ticketCommandSchema.parse(input)
   await enqueue(
@@ -40,12 +43,17 @@ export async function enqueueTicketAction(
       }),
     },
     input.ticketId,
+    owner,
   )
 }
 
 /** Confirma al guardar localmente si la red no está disponible. */
 export async function submitTicketAction(input: TicketCommandInput) {
-  if (navigator.onLine) {
+  const owner = offlineUserForTab()
+  const immediate = navigator.onLine && !(await hasQueuedWork(input.ticketId))
+  if (owner !== currentOfflineUserId())
+    throw new Error('La sesión cambió durante la captura')
+  if (immediate) {
     try {
       await sendTicketCommand(input)
       return
@@ -53,7 +61,9 @@ export async function submitTicketAction(input: TicketCommandInput) {
       if (!isNetworkError(error)) throw error
     }
   }
-  await enqueueTicketAction(input)
+  if (owner !== currentOfflineUserId())
+    throw new Error('La sesión cambió durante la captura')
+  await enqueueTicketAction(input, owner)
   void processOutbox()
 }
 
