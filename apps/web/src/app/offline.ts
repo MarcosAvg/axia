@@ -1,7 +1,10 @@
 import { queryClient } from '@/app/query-client'
 // Importaciones directas: el índice de `features/tickets` reexporta toda la
 // interfaz del feature y arrancar la cola no debe cargarla (ADR 0083).
-import { registerEvidenceUploadHandler } from '@/features/tickets/api/offline-evidence'
+import {
+  pruneRejectedEvidence,
+  registerEvidenceUploadHandler,
+} from '@/features/tickets/api/offline-evidence'
 import { registerTicketActionHandler } from '@/features/tickets/api/offline-actions'
 import { onOutboxProcessed, processOutbox } from '@/lib/offline/outbox'
 import { startSync } from '@/lib/offline/sync'
@@ -13,5 +16,8 @@ export function setupOffline(): () => void {
   onOutboxProcessed(() => {
     void queryClient.invalidateQueries({ queryKey: ['tickets'] })
   })
-  return startSync(processOutbox)
+  return startSync(async () => {
+    await pruneRejectedEvidence().catch(() => undefined)
+    await processOutbox()
+  })
 }

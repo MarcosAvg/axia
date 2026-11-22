@@ -34,3 +34,5 @@ export type { TicketListSearch } from './schemas'
 export { useTicketFilterCatalogs } from './hooks/use-ticket-filter-catalogs'
 
 export { ticketDetailOptions } from './hooks/use-tickets'
+
+export { recoverRejectedEvidence } from './api/offline-evidence'

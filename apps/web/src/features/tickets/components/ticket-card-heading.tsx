@@ -4,12 +4,20 @@ import type { TicketListItem } from '../domain/types'
 export function TicketCardHeading({
   folio,
   description,
-}: Pick<TicketListItem, 'folio' | 'description'>) {
+  offlineReady,
+}: Pick<TicketListItem, 'folio' | 'description'> & { offlineReady?: boolean }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="text-xs font-semibold text-primary tabular-nums">
-        {folio}
-      </span>
+      <div className="flex flex-wrap items-center gap-x-2">
+        <span className="text-xs font-semibold text-primary tabular-nums">
+          {folio}
+        </span>
+        {offlineReady ? (
+          <span className="text-xs text-muted-foreground">
+            Disponible sin conexión
+          </span>
+        ) : null}
+      </div>
       <p className="line-clamp-2 text-sm font-medium wrap-anywhere">
         {description}
       </p>

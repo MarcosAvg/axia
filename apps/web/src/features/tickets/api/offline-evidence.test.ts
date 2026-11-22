@@ -114,3 +114,46 @@ it('revierte la foto al fallar el encolado después de perder la conexión', asy
     vi.restoreAllMocks()
   }
 })
+
+it('retiene solo hasta siete días las fotos que el servidor rechazó por cierre', async () => {
+  const { ApiError } = await import('@/lib/api-client')
+  const { db } = await import('@/lib/offline/db')
+  const { enqueue, processOutbox } = await import('@/lib/offline/outbox')
+  const { setOfflineUserId } = await import('@/lib/offline/user')
+  const { OFFLINE_CACHE_TTL_MS } = await import('@/lib/offline/cache-policy')
+  const { pruneRejectedEvidence, registerEvidenceUploadHandler } =
+    await import('./offline-evidence')
+  const { vi } = await import('vitest')
+  const userId = 'retention-test'
+  const photo = evidence({ userId })
+  const pending = evidence({ id: 'pending', userId })
+  setOfflineUserId(userId)
+  registerEvidenceUploadHandler()
+  vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
+  const api = await import('@/lib/api-client')
+  vi.spyOn(api, 'apiFetch').mockRejectedValueOnce(
+    new ApiError({
+      status: 409,
+      code: 'evidence_ticket_final',
+      message: 'Cerrado',
+    }),
+  )
+  try {
+    await db.evidences.bulkAdd([photo, pending])
+    await enqueue('evidence_upload', { evidenceId: photo.id }, photo.ticketId)
+    await processOutbox()
+    expect(await db.outbox.count()).toBe(0)
+    const rejectedAt = (await db.evidences.get(photo.id))?.finalRejectedAt
+    expect(rejectedAt).toBeTypeOf('number')
+    await pruneRejectedEvidence(rejectedAt! + OFFLINE_CACHE_TTL_MS - 1)
+    expect(await db.evidences.get(photo.id)).toBeDefined()
+    await pruneRejectedEvidence(rejectedAt! + OFFLINE_CACHE_TTL_MS)
+    expect(await db.evidences.get(photo.id)).toBeUndefined()
+    expect(await db.evidences.get(pending.id)).toBeDefined()
+  } finally {
+    await db.evidences.clear()
+    await db.outbox.clear()
+    setOfflineUserId(null)
+    vi.restoreAllMocks()
+  }
+})

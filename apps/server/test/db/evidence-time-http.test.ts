@@ -30,11 +30,15 @@ async function assignedTicket(): Promise<string> {
   return ticketId
 }
 
-function addEvidence(ticketId: string, payload: Record<string, unknown>) {
+function addEvidence(
+  ticketId: string,
+  payload: Record<string, unknown>,
+  cookie = context.cookies.technician,
+) {
   return context.app.inject({
     method: 'POST',
     url: `/api/tickets/${ticketId}/evidence`,
-    headers: authHeaders(context.cookies.technician),
+    headers: authHeaders(cookie),
     payload: {
       type: 'before',
       mimeType: 'image/png',
@@ -175,4 +179,53 @@ it('corrige la hora de la evidencia y resuelve la alerta', async () => {
   `)
   expect(alerts.rows).toContainEqual({ status: 'resolved', count: 1 })
   expect(alerts.rows).not.toContainEqual({ status: 'open', count: 1 })
+})
+
+it('rechaza evidencia de trabajo offline si el tiquet visible ya terminó', async () => {
+  const ticketId = await assignedTicket()
+  await context.db.execute(sql`
+    update public.tickets set status = 'cancelled' where id = ${ticketId}
+  `)
+  const now = new Date().toISOString()
+  const response = await addEvidence(ticketId, {
+    clientCapturedAt: now,
+    deviceNow: now,
+  })
+  expect(response.statusCode).toBe(409)
+  expect(response.json().error).toMatchObject({
+    code: 'evidence_ticket_final',
+    details: { status: 'cancelled' },
+  })
+  expect(await evidenceRow(ticketId)).toBeUndefined()
+})
+
+it('confirma el rechazo al técnico del ciclo cerrado sin restaurarle acceso al tiquet', async () => {
+  const ticketId = await assignedTicket()
+  const reason = await context.db.execute(sql`
+    insert into public.reasons (use, name) values ('cancellation', 'Cancelación en campo')
+    returning id
+  `)
+  const cancelled = await context.app.inject({
+    method: 'POST',
+    url: `/api/tickets/${ticketId}/actions`,
+    headers: authHeaders(context.cookies.requester),
+    payload: {
+      action: 'cancel',
+      reasonId: reason.rows[0]?.id,
+      note: 'Ya no se requiere',
+      clientRequestId: randomUUID(),
+    },
+  })
+  expect(cancelled.statusCode).toBe(200)
+
+  const now = new Date().toISOString()
+  const payload = { cycle: 1, clientCapturedAt: now, deviceNow: now }
+  const response = await addEvidence(ticketId, payload)
+  expect(response.statusCode).toBe(409)
+  expect(response.json().error).toMatchObject({ code: 'evidence_ticket_final' })
+  expect(response.json().error).not.toHaveProperty('details')
+
+  const otherCycle = await addEvidence(ticketId, { ...payload, cycle: 2 })
+  expect(otherCycle.statusCode).toBe(404)
+  expect(await evidenceRow(ticketId)).toBeUndefined()
 })

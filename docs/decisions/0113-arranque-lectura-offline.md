@@ -21,9 +21,8 @@ La cola offline reintenta cada 30 segundos mientras la pestaña está visible y 
 indicador de pendientes permite **Sincronizar ahora**. Se mantienen los disparadores existentes
 (apertura, evento `online` y vuelta a primer plano) y no se usa Background Sync.
 
-En **Mi trabajo**, «Preparar para trabajar sin conexión» descarga el detalle de los
-tiquets seleccionados. El filtro de disponibilidad comprueba que exista un detalle
-persistido y vigente del usuario actual.
+La preparación en **Mi trabajo** y la limpieza de copias y fotos se describen en el
+[ADR 0129](0129-captura-local-trabajo-en-campo.md).
 
 El alta de tiquets sigue requiriendo conexión. Es una decisión explícita: un borrador local necesita
 folio provisional, mapeo de ID local a servidor, resolución de evidencias y acciones, y una política

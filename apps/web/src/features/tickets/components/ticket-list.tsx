@@ -58,9 +58,11 @@ function TicketMeta({
 function TicketCard({
   ticket,
   showElapsed,
+  offlineReady,
 }: {
   ticket: TicketListItem
   showElapsed: boolean
+  offlineReady: boolean
 }) {
   return (
     <Link
@@ -71,6 +73,7 @@ function TicketCard({
       <TicketCardHeading
         folio={ticket.folio}
         description={ticket.description}
+        offlineReady={offlineReady}
       />
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <StatusBadge status={ticket.status} />
@@ -88,15 +91,21 @@ function TicketCard({
 export function TicketList({
   items,
   showElapsed = false,
+  offlineReadyIds,
 }: {
   items: TicketListItem[]
   showElapsed?: boolean
+  offlineReadyIds?: ReadonlySet<string>
 }) {
   return (
     <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card">
       {items.map((ticket) => (
         <li key={ticket.id}>
-          <TicketCard ticket={ticket} showElapsed={showElapsed} />
+          <TicketCard
+            ticket={ticket}
+            showElapsed={showElapsed}
+            offlineReady={offlineReadyIds?.has(ticket.id) ?? false}
+          />
         </li>
       ))}
     </ul>

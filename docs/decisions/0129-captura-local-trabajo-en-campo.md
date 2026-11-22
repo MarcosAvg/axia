@@ -4,8 +4,8 @@
 **Estado:** aceptada
 
 Mi trabajo reutiliza las consultas de detalle y los catálogos de los formularios para preparar
-los tiquets seleccionados. La disponibilidad se comprueba contra el detalle y los catálogos persistidos para la cuenta
-de la pestaña. Un fallo transitorio al actualizar conserva la última copia válida. La interfaz muestra la vigencia de la sesión local y la hora del detalle guardado.
+los tiquets. La disponibilidad se comprueba contra el detalle y los catálogos persistidos
+para la cuenta de la pestaña. Un fallo transitorio al actualizar conserva la última copia válida. La interfaz muestra la vigencia de la sesión local y la hora del detalle guardado.
 
 Los borradores de inicio y pausa viven en Dexie. La clave incluye cuenta, tiquet, ciclo, acción
 y sujeto de actuación. Una captura abierta después de cerrar la app requiere elegir si se retoma
@@ -30,3 +30,19 @@ se pierden los borradores y las copias locales que todavía no estaban en el ser
 
 El smoke de hora manual espera el estado confirmado después de asignar. La compilación PWA
 puede cerrar el diálogo antes de que se actualicen las acciones del tiquet.
+
+Con conexión, **Mi trabajo** prepara los primeros 20 tiquets de la lista (los más recientes).
+Reutiliza el detalle vigente, descarga de uno en uno y limita cada detalle precargado a 256 KiB.
+La etiqueta «Disponible sin conexión» requiere el detalle y los catálogos persistidos, además
+de una sesión vigente. Al confirmar la lista con el servidor, se quitan las copias de la
+precarga que salieron de ella o dejaron de estar entre los primeros 20. Una vista de detalle
+abierta conserva temporalmente su consulta.
+
+El servidor rechaza con `evidence_ticket_final` las nuevas evidencias de trabajo capturadas
+sin conexión en un tiquet final visible. Tras terminar la asignación, solo confirma el rechazo
+al técnico cuya participación terminó con el cierre del ciclo de captura. La foto sale de la cola de
+subida y queda en el dispositivo por hasta siete días desde el rechazo, con un presupuesto
+compartido de 32 MiB para estos rechazos. Se eliminan primero las fotos más antiguas al llegar
+al límite. La limpieza corre al abrir la app, volver a primer plano o sincronizar. Las fotos
+pendientes por otros motivos conservan su flujo. Si el tiquet vuelve a aparecer en **Mi trabajo**,
+Axia presenta al servidor la captura con su UUID y ciclo de origen para que valide si procede.

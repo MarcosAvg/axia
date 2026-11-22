@@ -6,9 +6,7 @@ import type { Database } from '../db/client.js'
 import { AppError } from '../http/errors.js'
 import type { DbExecutor } from '../tickets/db.js'
 import { writeEvent } from '../tickets/events.js'
-import { assertTechnicianAction } from '../tickets/proxy.js'
-import { findVisibleTicket } from '../tickets/repository.js'
-import { canAttachEvidence } from './access.js'
+import { evidenceAccess } from './access.js'
 import { evidenceTime, type EvidenceTime } from './evidence-time.js'
 import type { CreateEvidenceInput } from './schemas.js'
 
@@ -24,14 +22,6 @@ export type CreateEvidenceResult = {
   maxSize: number
   quotaRemaining: number
   replayed: boolean
-}
-
-function forbidden(): AppError {
-  return new AppError(
-    403,
-    'forbidden',
-    'No tienes permiso para adjuntar evidencia',
-  )
 }
 
 async function ticketCycle(db: DbExecutor, ticketId: string): Promise<number> {
@@ -192,34 +182,6 @@ async function insertEvidence({
   })
 }
 
-async function assertEvidenceSubject(
-  db: Database,
-  actor: Actor,
-  access: NonNullable<Awaited<ReturnType<typeof findVisibleTicket>>>,
-  input: CreateEvidenceInput,
-) {
-  if (input.subjectTechnicianId) {
-    if (!['before', 'during', 'after'].includes(input.type)) {
-      throw new AppError(
-        400,
-        'validation',
-        'El sujeto técnico solo aplica a evidencia de trabajo',
-      )
-    }
-    await assertTechnicianAction({
-      db,
-      actor,
-      access,
-      permission: 'ticket.record_progress',
-      subjectTechnicianId: input.subjectTechnicianId,
-    })
-    return
-  }
-  if (!canAttachEvidence(actor, access, input.type)) {
-    throw forbidden()
-  }
-}
-
 export async function createEvidence(
   context: CreateContext,
   actor: Actor,
@@ -228,11 +190,7 @@ export async function createEvidence(
 ): Promise<CreateEvidenceResult> {
   const { db, config } = context
   await context.ready
-  const access = await findVisibleTicket(db, actor, ticketId)
-  if (!access) {
-    throw new AppError(404, 'not_found', 'Tiquet no encontrado')
-  }
-  await assertEvidenceSubject(db, actor, access, input)
+  await evidenceAccess(db, actor, ticketId, input)
   const time = await evidenceTime({
     db,
     config,

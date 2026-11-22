@@ -82,17 +82,6 @@ async function reconnectOfflinePage(page: Page) {
   return reopened
 }
 
-async function prepareTicket(page: Page, description: string) {
-  await page
-    .getByText('Preparar para trabajar sin conexión', { exact: true })
-    .click()
-  await page.getByRole('checkbox', { name: new RegExp(description) }).check()
-  await page.getByRole('button', { name: 'Preparar seleccionados' }).click()
-  await expect(
-    page.getByRole('checkbox', { name: new RegExp(description) }),
-  ).toHaveAccessibleName(/Guardado/)
-}
-
 async function restoreAndSubmitEvidence(page: Page) {
   // El técnico puede iniciar trabajo a partir del detalle que preparó.
   await page.getByRole('button', { name: 'Iniciar' }).click()
@@ -112,6 +101,12 @@ async function restoreAndSubmitEvidence(page: Page) {
   return page
 }
 
+async function blockPreparation(page: Page, description: string) {
+  await createAssignedTicket(page, description)
+  const ticketId = new URL(page.url()).pathname.split('/').at(-1)
+  await page.route(`**/api/tickets/${ticketId}`, (route) => route.abort())
+}
+
 async function verifyUnpreparedTicket(page: Page, description: string) {
   await page.getByRole('link').filter({ hasText: description }).click()
   await expect(
@@ -128,13 +123,18 @@ test('@smoke el técnico sube evidencia sin conexión y luego se sincroniza', as
   const unprepared = `Sin preparar ${id}`
   await signIn(page, 'demo.admin')
   await createAssignedTicket(page, description)
-  if (testPwa) await createAssignedTicket(page, unprepared)
+  if (testPwa) await blockPreparation(page, unprepared)
   await page.getByRole('button', { name: 'Menú de usuario' }).click()
   await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
 
   await signIn(page, 'demo.technician')
   await page.goto('/mi-trabajo')
-  await prepareTicket(page, description)
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ hasText: description })
+      .getByText('Disponible sin conexión', { exact: true }),
+  ).toBeVisible()
   if (testPwa) {
     page = await reconnectOfflinePage(page)
     await verifyUnpreparedTicket(page, unprepared)

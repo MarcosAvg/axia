@@ -5,6 +5,15 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-21
+
+### Cambiado
+
+- **Mi trabajo** precarga hasta 20 tiquets por cuenta y dispositivo, marca los disponibles
+  sin conexión y libera las copias al actualizar la lista.
+- Las fotos de trabajo offline rechazadas por un estado final se limpian automáticamente
+  después de siete días o al alcanzar el presupuesto de almacenamiento.
+
 ## [0.34.0] - 2026-11-21
 
 ### Cambiado

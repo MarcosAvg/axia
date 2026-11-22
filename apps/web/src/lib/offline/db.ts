@@ -46,6 +46,8 @@ export interface Evidence {
   /** Técnico proxy al que se atribuye la evidencia. */
   subjectTechnicianId?: string
   state: 'pending' | 'uploading' | 'uploaded' | 'error'
+  /** Momento en que el servidor rechazó esta captura por estado final. */
+  finalRejectedAt?: number
   /** Porcentaje de subida (0–100). */
   progress: number
   createdAt: number

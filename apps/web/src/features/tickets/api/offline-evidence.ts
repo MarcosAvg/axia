@@ -1,7 +1,8 @@
 // Evidencia offline: comprime, guarda en Dexie y reserva la evidencia en el servidor antes
 // de subirla por TUS. La cola garantiza que la evidencia se registre antes que la acción.
 
-import { apiBaseUrl, apiFetch } from '@/lib/api-client'
+import { ApiError, apiBaseUrl, apiFetch } from '@/lib/api-client'
+import { OFFLINE_CACHE_TTL_MS } from '@/lib/offline/cache-policy'
 import { db, type Evidence } from '@/lib/offline/db'
 import { isRetryableOutboxError } from '@/lib/offline/errors'
 import { compressImage } from '@/lib/offline/image'
@@ -79,7 +80,71 @@ async function uploadEvidenceItem(payload: unknown): Promise<void> {
     await db.evidences.delete(evidenceId)
     return
   }
-  await uploadEvidence(evidence)
+  if (evidence.finalRejectedAt !== undefined) return
+  try {
+    await uploadEvidence(evidence)
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.code !== 'evidence_ticket_final')
+      throw error
+    await db.transaction('rw', db.evidences, async () => {
+      await db.evidences.update(evidenceId, {
+        state: 'error',
+        finalRejectedAt: Date.now(),
+      })
+      await pruneRejectedEvidence()
+    })
+  }
+}
+
+const MAX_REJECTED_BYTES = 32 * 1024 * 1024
+
+export async function pruneRejectedEvidence(now = Date.now()) {
+  const rejected = await db.evidences
+    .where('state')
+    .equals('error')
+    .filter((evidence) => evidence.finalRejectedAt !== undefined)
+    .reverse()
+    .sortBy('finalRejectedAt')
+  let bytes = 0
+  const expired: string[] = []
+  for (const evidence of rejected) {
+    if (
+      now - (evidence.finalRejectedAt ?? now) >= OFFLINE_CACHE_TTL_MS ||
+      bytes + evidence.blob.size > MAX_REJECTED_BYTES
+    ) {
+      expired.push(evidence.id)
+    } else {
+      bytes += evidence.blob.size
+    }
+  }
+  await db.evidences.bulkDelete(expired)
+}
+
+// Mi trabajo confirma que el tiquet volvió a estar activo. El servidor
+// vuelve a validar la captura original con su ciclo y UUID intactos.
+export async function recoverRejectedEvidence(
+  userId: string,
+  ids: Set<string>,
+) {
+  const retained = await db.evidences
+    .where('state')
+    .equals('error')
+    .filter(
+      (item) =>
+        item.userId === userId &&
+        ids.has(item.ticketId) &&
+        item.finalRejectedAt !== undefined &&
+        Date.now() - item.finalRejectedAt < OFFLINE_CACHE_TTL_MS,
+    )
+    .toArray()
+  for (const evidence of retained) {
+    if (currentOfflineUserId() !== userId) return
+    try {
+      await uploadEvidence(evidence)
+    } catch {
+      await db.evidences.update(evidence.id, { state: 'error' })
+    }
+  }
 }
 
 async function uploadEvidence(evidence: Evidence): Promise<void> {
@@ -100,7 +165,9 @@ async function uploadEvidence(evidence: Evidence): Promise<void> {
   const serverId = created.evidence.id
   if (evidence.userId) assertCaptureOwner(evidence.userId)
 
-  await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
+  if (evidence.finalRejectedAt === undefined) {
+    await db.evidences.update(evidenceId, { state: 'uploading', progress: 0 })
+  }
   let reported = -1
   await uploadResumable({
     endpoint: `${apiBaseUrl()}/api/uploads`,
@@ -109,7 +176,7 @@ async function uploadEvidence(evidence: Evidence): Promise<void> {
     blob: evidence.blob,
     mimeType: evidence.mimeType,
     onProgress: (percentage) => {
-      if (percentage !== reported) {
+      if (evidence.finalRejectedAt === undefined && percentage !== reported) {
         reported = percentage
         void db.evidences.update(evidenceId, { progress: percentage })
       }

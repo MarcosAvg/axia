@@ -46,7 +46,10 @@ export function useLocalEvidence(ticketId: string | undefined) {
         ? db.evidences
             .where('ticketId')
             .equals(ticketId)
-            .filter((item) => item.userId === userId)
+            .filter(
+              (item) =>
+                item.userId === userId && item.finalRejectedAt === undefined,
+            )
             .toArray()
         : Promise.resolve<Evidence[]>([]),
     [ticketId, userId],

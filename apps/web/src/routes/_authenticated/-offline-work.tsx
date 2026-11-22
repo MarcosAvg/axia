@@ -1,217 +1,215 @@
+import { useIsRestoring, useQueryClient } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
-import { useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useState } from 'react'
-import { formatDateTime } from '@/lib/format'
-import { offlineSessionExpiresAt } from '@/features/auth'
+import { useEffect, useState } from 'react'
 import { readyTicketDetails } from '@/app/query-persister'
-import { fieldWorkCatalogOptions } from '@/features/catalogs'
 import { Button } from '@/components/ui/button'
+import { offlineSessionExpiresAt } from '@/features/auth'
+import { fieldWorkCatalogOptions } from '@/features/catalogs'
 import {
+  recoverRejectedEvidence,
   ticketDetailOptions,
   TicketList,
   TicketStatusSummary,
 } from '@/features/tickets'
 import type { TicketListItem } from '@/features/tickets'
+import { formatDateTime } from '@/lib/format'
 import { currentOfflineUserId } from '@/lib/offline/user'
 import { useOnline } from '@/lib/use-online'
 
-const fetchOptions = { networkMode: 'always', retry: false } as const
+const MAX_TICKETS = 20
+const MAX_DETAIL_BYTES = 256 * 1024
+const catalogOptions = fieldWorkCatalogOptions()
+const catalogKeys = catalogOptions.map(({ queryKey }) => queryKey)
 
-async function prepareCatalogs(client: QueryClient) {
-  const [technicians, services, priorities, pauseReasons] =
-    fieldWorkCatalogOptions()
-  const results = await Promise.allSettled([
-    client.fetchQuery({ ...technicians, ...fetchOptions }),
-    client.fetchQuery({ ...services, ...fetchOptions }),
-    client.fetchQuery({ ...priorities, ...fetchOptions }),
-    client.fetchQuery({ ...pauseReasons, ...fetchOptions }),
-  ])
-  return results.every((result) => result.status === 'fulfilled')
+function fitsBudget(detail: unknown) {
+  return new Blob([JSON.stringify(detail)]).size <= MAX_DETAIL_BYTES
 }
 
-async function prepareTicket(client: QueryClient, id: string) {
-  try {
-    return Boolean(
-      await client.fetchQuery({ ...ticketDetailOptions(id), ...fetchOptions }),
-    )
-  } catch {
-    return false
+async function prepareWork(
+  client: QueryClient,
+  userId: string,
+  ids: Set<string>,
+  { active, onStart }: { active: () => boolean; onStart: () => void },
+) {
+  const ready = await readyTicketDetails(userId, Date.now(), catalogKeys)
+  if (!active()) return
+  onStart()
+  const managedKey = ['tickets', 'offline-work', userId] as const
+  const previous = new Set(client.getQueryData<string[]>(managedKey))
+  const retained = new Set(ids)
+  client.removeQueries({
+    queryKey: ['tickets', 'detail'],
+    predicate: (query) => {
+      const id = String(query.queryKey[2])
+      if (!previous.has(id) || ids.has(id)) return false
+      if (!query.getObserversCount()) return true
+      retained.add(id)
+      return false
+    },
+  })
+  client.setQueryData(managedKey, [...retained])
+  if ([...ids].every((id) => ready.has(id))) return
+
+  await Promise.all(
+    catalogOptions.map((options) =>
+      client.fetchQuery<unknown>({ ...options, retry: false }),
+    ),
+  )
+  for (const id of ids) {
+    if (!active()) return
+    if (ready.has(id)) continue
+    const options = ticketDetailOptions(id)
+    try {
+      await client.fetchQuery({
+        ...options,
+        retry: false,
+        queryFn: async (context) => {
+          const detail = await options.queryFn(context)
+          if (!active() || !fitsBudget(detail))
+            throw new Error('Copia local no disponible')
+          return detail
+        },
+      })
+    } catch {
+      // El indicador se deriva de la copia persistida y permite reintentar.
+    }
   }
 }
 
 interface OfflineWorkProps {
   items: TicketListItem[]
   userId: string
+  confirmed: boolean
 }
 
-function useTicketPreparation(userId: string) {
-  const queryClient = useQueryClient()
-  const [selected, setSelected] = useState<string[]>([])
-  const [preparing, setPreparing] = useState(false)
-  const [failed, setFailed] = useState(0)
-  async function prepare(items: TicketListItem[]) {
-    setPreparing(true)
-    try {
-      const catalogsReady = await prepareCatalogs(queryClient)
-      const failedIds: string[] = []
-      for (const { id } of items) {
-        if (currentOfflineUserId() !== userId) return
-        const prepared = await prepareTicket(queryClient, id)
-        if (!prepared || !catalogsReady) failedIds.push(id)
-      }
-      setSelected(failedIds)
-      setFailed(failedIds.length)
-    } finally {
-      setPreparing(false)
-    }
-  }
-
-  return { selected, setSelected, preparing, failed, setFailed, prepare }
-}
-
-function TicketPicker({
-  items,
-  userId,
-  ready,
-}: OfflineWorkProps & { ready: Map<string, number> | undefined }) {
+function useWorkPreparation({ items, userId, confirmed }: OfflineWorkProps) {
+  const client = useQueryClient()
   const online = useOnline()
-  const [open, setOpen] = useState(false)
-  const { selected, setSelected, preparing, failed, setFailed, prepare } =
-    useTicketPreparation(userId)
-  const selectedItems = items.filter((item) => selected.includes(item.id))
+  const restoring = useIsRestoring()
+  const [retry, setRetry] = useState(0)
+  const [preparing, setPreparing] = useState(false)
+  const roster = JSON.stringify(items.map(({ id }) => id))
 
-  return (
-    <details
-      className="rounded-xl border bg-card p-4"
-      onToggle={(event) => setOpen(event.currentTarget.open)}
-    >
-      <summary className="cursor-pointer font-medium">
-        Preparar para trabajar sin conexión
-      </summary>
-      <p role="status" className="my-2 text-sm text-muted-foreground">
-        {items.filter((item) => ready?.has(item.id)).length} de {items.length}{' '}
-        tiquets disponibles sin conexión.
-        {preparing ? ' Preparando tiquets…' : null}
-        {failed > 0 ? ` ${failed} pendientes de reintentar.` : null}
-      </p>
-      {open ? (
-        <ul className="my-3 space-y-2">
-          {items.map((item) => (
-            <TicketChoice
-              key={item.id}
-              item={item}
-              savedAt={ready?.get(item.id)}
-              checked={selected.includes(item.id)}
-              disabled={!online || preparing}
-              onChange={(checked) => {
-                setSelected((ids) =>
-                  checked
-                    ? [...ids, item.id]
-                    : ids.filter((id) => id !== item.id),
-                )
-                setFailed(0)
-              }}
-            />
-          ))}
-        </ul>
-      ) : null}
-      <Button
-        disabled={!online || preparing || selectedItems.length === 0}
-        onClick={() => void prepare(selectedItems)}
-      >
-        {failed > 0 ? 'Reintentar' : 'Preparar seleccionados'}
-      </Button>
-    </details>
-  )
+  useEffect(() => {
+    if (!online || restoring || !confirmed) return
+    let cancelled = false
+    const active = () => !cancelled && currentOfflineUserId() === userId
+    const ids = JSON.parse(roster) as string[]
+    void prepareWork(client, userId, new Set(ids.slice(0, MAX_TICKETS)), {
+      active,
+      onStart: () => setPreparing(true),
+    })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active()) {
+          setPreparing(false)
+          void recoverRejectedEvidence(userId, new Set(ids)).catch(
+            () => undefined,
+          )
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [client, confirmed, online, restoring, retry, roster, userId])
+
+  return {
+    online,
+    preparing: online && preparing,
+    retry: () => setRetry((value) => value + 1),
+  }
 }
 
-function TicketChoice({
-  item,
-  savedAt,
-  checked,
-  disabled,
-  onChange,
+function useAvailability(userId: string) {
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000)
+    return () => clearInterval(timer)
+  }, [])
+  const ready = useLiveQuery(
+    () => readyTicketDetails(userId, now, catalogKeys),
+    [userId, now],
+  )
+  return { now, ready }
+}
+
+function WorkAvailability({
+  eligibleCount,
+  readyCount,
+  expiresAt,
+  work,
 }: {
-  item: TicketListItem
-  savedAt?: number
-  checked: boolean
-  disabled: boolean
-  onChange: (checked: boolean) => void
+  eligibleCount: number
+  readyCount: number
+  expiresAt: number | undefined
+  work: ReturnType<typeof useWorkPreparation>
 }) {
   return (
-    <li>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => onChange(event.currentTarget.checked)}
-        />
-        {item.folio} · {item.description}
-        {savedAt ? (
-          <span className="text-muted-foreground">
-            Guardado {formatDateTime(new Date(savedAt).toISOString())}
-          </span>
-        ) : null}
-      </label>
-    </li>
-  )
-}
-
-function OfflineSessionExpiry({ userId }: { userId: string }) {
-  const expiresAt = offlineSessionExpiresAt(userId)
-  if (!expiresAt)
-    return (
+    <>
       <p className="text-sm text-muted-foreground">
-        Valida tu sesión con conexión antes de salir.
+        {expiresAt
+          ? `Sesión sin conexión disponible hasta ${formatDateTime(new Date(expiresAt).toISOString())}`
+          : 'Valida tu sesión con conexión antes de salir.'}
       </p>
-    )
-  return (
-    <p className="text-sm text-muted-foreground">
-      Sesión sin conexión disponible hasta{' '}
-      {formatDateTime(new Date(expiresAt).toISOString())}
-    </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <p role="status">
+          {readyCount} de {eligibleCount} tiquets disponibles sin conexión.
+          {work.preparing ? ' Preparando tiquets…' : null}
+        </p>
+        {work.online && !work.preparing && readyCount < eligibleCount ? (
+          <Button variant="outline" size="sm" onClick={work.retry}>
+            Reintentar
+          </Button>
+        ) : null}
+      </div>
+    </>
   )
 }
 
-export function OfflineWork({ items, userId }: OfflineWorkProps) {
-  const ready = useLiveQuery(
-    () =>
-      readyTicketDetails(
-        userId,
-        Date.now(),
-        fieldWorkCatalogOptions().map(({ queryKey }) => queryKey),
-      ),
-    [userId],
-  )
+export function OfflineWork(props: OfflineWorkProps) {
+  const { items, userId } = props
+  const work = useWorkPreparation(props)
   const [onlyReady, setOnlyReady] = useState(false)
-  const visible = onlyReady
-    ? items.filter((item) => ready?.has(item.id))
-    : items
-
+  const { now, ready } = useAvailability(userId)
+  const expiresAt = offlineSessionExpiresAt(userId)
+  const eligible = items.slice(0, MAX_TICKETS)
+  const readyIds = new Set(
+    expiresAt && expiresAt > now
+      ? eligible.filter(({ id }) => ready?.has(id)).map(({ id }) => id)
+      : [],
+  )
+  const visible = onlyReady ? items.filter(({ id }) => readyIds.has(id)) : items
   return (
     <>
-      <OfflineSessionExpiry userId={userId} />
-      <TicketPicker items={items} userId={userId} ready={ready} />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={onlyReady}
-          onChange={(event) => setOnlyReady(event.currentTarget.checked)}
-        />
-        Mostrar solo disponibles sin conexión
-      </label>
-      {visible.length > 0 ? (
+      {items.length > 0 ? (
         <>
-          <TicketStatusSummary items={visible} />
-          <TicketList items={visible} />
+          <WorkAvailability
+            eligibleCount={eligible.length}
+            readyCount={readyIds.size}
+            expiresAt={expiresAt && expiresAt > now ? expiresAt : undefined}
+            work={work}
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={onlyReady}
+              onChange={(event) => setOnlyReady(event.currentTarget.checked)}
+            />
+            Mostrar solo disponibles sin conexión
+          </label>
+          {visible.length > 0 ? (
+            <>
+              <TicketStatusSummary items={visible} />
+              <TicketList items={visible} offlineReadyIds={readyIds} />
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Aún no hay tiquets disponibles sin conexión.
+            </p>
+          )}
         </>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Aún no hay tiquets disponibles sin conexión.
-        </p>
-      )}
+      ) : null}
     </>
   )
 }

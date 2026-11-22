@@ -45,12 +45,15 @@ function MyWorkContent() {
       {query.data && query.data.length === 0 ? (
         <EmptyState icon={HardHatIcon} title={myWork.empty} />
       ) : null}
-      {identity && query.data && query.data.length > 0 ? (
+      {identity && query.data ? (
         <section aria-label={myWork.subtitle} className="flex flex-col gap-3">
           <OfflineWork
             key={identity.userId}
             userId={identity.userId}
             items={query.data}
+            confirmed={
+              query.isSuccess && query.isFetchedAfterMount && !query.isFetching
+            }
           />
         </section>
       ) : null}
