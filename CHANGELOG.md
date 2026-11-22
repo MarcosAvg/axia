@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-11-21
+
 ### Cambiado
 
 - En la PWA móvil, la barra de estado adopta el color del fondo cuando el sistema lo admite.
