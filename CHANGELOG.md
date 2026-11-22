@@ -4,6 +4,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el proyecto usa versionado semántico.
 
 ## [Unreleased]
+
+## [0.35.1] - 2026-11-22
 ### Corregido
 
 - Al confirmar una acción sin conexión, el diálogo se cierra después de guardar en el
