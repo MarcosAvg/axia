@@ -66,9 +66,21 @@ async function confirmSubstateOffline(page: Page) {
 }
 
 async function beginOfflinePause(page: Page) {
-  await page.context().setOffline(true)
   await page.getByRole('button', { name: 'Pausar' }).click()
   await page.getByLabel('Motivo').selectOption({ label: 'Falta de material' })
+  await confirmSubstateOffline(page)
+}
+
+async function startOfflineWithEvidence(page: Page) {
+  const start = page.getByRole('button', { name: 'Iniciar' })
+  await expect(start).toBeVisible()
+  await page.context().setOffline(true)
+  await start.click()
+  await page.getByLabel('Evidencia: Antes').setInputFiles({
+    name: 'antes.png',
+    mimeType: 'image/png',
+    buffer: testImage,
+  })
   await confirmSubstateOffline(page)
 }
 
@@ -86,17 +98,11 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await signIn(page, 'demo.technician')
   await openWhilePreparing(page, description, ticketPath)
 
-  await page.getByRole('button', { name: 'Iniciar' }).click()
-  await page.getByLabel('Evidencia: Antes').setInputFiles({
-    name: 'antes.png',
-    mimeType: 'image/png',
-    buffer: testImage,
-  })
-  await clickAndWait(page, 'Confirmar', 'ticket_start')
+  await startOfflineWithEvidence(page)
   const header = page.locator('h1').locator('..')
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
 
-  // Toda la cadena se captura sin conexión, desde el motivo hasta la salida.
+  // La evidencia y toda la cadena de trabajo quedan en la misma cola.
   await beginOfflinePause(page)
   await expect(page.getByText('Pausado', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Subestado actual').first()).toBeVisible()
@@ -125,6 +131,8 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await page.context().setOffline(false)
   await expect(header.getByText('En proceso', { exact: true })).toBeVisible()
   await expect(page.getByText('Cerrada con: Recibido').first()).toBeVisible()
+  await expect(page.getByText('Actualizando el tiquet')).toHaveCount(0)
+  await expect(page.getByText('Sin sincronizar')).toHaveCount(0)
 
   // Un motivo con salida directa se reanuda sin recorrer pasos.
   await page.getByRole('button', { name: 'Pausar' }).click()

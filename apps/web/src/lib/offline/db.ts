@@ -15,7 +15,7 @@ export interface OutboxItem {
   payload: unknown
   /** Operaciones con la misma clave dependen de las anteriores (un tiquet). */
   orderingKey?: string
-  state: 'pending' | 'sending' | 'error'
+  state: 'pending' | 'sending' | 'confirmed' | 'error'
   attempts: number
   lastError: string | null
   /** Código de dominio del último fallo; permite ofrecer la corrección adecuada. */

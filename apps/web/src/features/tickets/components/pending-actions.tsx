@@ -20,13 +20,23 @@ function operationLabel(action: PendingTicketAction): string {
   return ticketMessages.actions[operation as ActionKey] ?? operation
 }
 
-/** Acciones guardadas en el dispositivo que aún no llegan al servidor. */
+function syncLabel(action: PendingTicketAction): string {
+  if (action.syncStatus === 'confirmed') return 'Aplicado · Actualizando vista'
+  if (action.sending) return 'Enviando'
+  if (action.syncStatus === 'retry') return 'En espera de reintento'
+  return 'Guardado en este dispositivo'
+}
+
+/** Acciones guardadas en el dispositivo mientras se sincroniza la vista. */
 export function PendingActions({
   actions,
 }: {
   actions: PendingTicketAction[]
 }) {
   if (actions.length === 0) return null
+  const allConfirmed = actions.every(
+    (action) => action.syncStatus === 'confirmed',
+  )
   return (
     <section
       role="status"
@@ -35,11 +45,13 @@ export function PendingActions({
     >
       <div className="flex items-center gap-2 text-sm font-medium">
         <CloudOffIcon className="size-4 text-warning-foreground dark:text-warning" />
-        {ticketMessages.pending.title}
+        {allConfirmed ? 'Actualizando el tiquet' : ticketMessages.pending.title}
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {ticketMessages.pending.help}
-      </p>
+      {!allConfirmed ? (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {ticketMessages.pending.help}
+        </p>
+      ) : null}
       <ul className="mt-2 flex flex-col gap-1 text-sm">
         {actions.map((action) => (
           <li
@@ -50,9 +62,7 @@ export function PendingActions({
             <span>{operationLabel(action)}</span>
             <span className="text-xs text-muted-foreground">
               {formatDateTime(action.occurredAt)} ·{' '}
-              <span>
-                {action.sending ? 'Enviando' : 'Guardado en este dispositivo'}
-              </span>
+              <span>{syncLabel(action)}</span>
             </span>
           </li>
         ))}

@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Al volver la conexión, una consulta ajena al tiquet ya no retrasa el retiro de sus acciones
+  confirmadas. El detalle distingue las acciones que esperan un reintento de las que el servidor
+  ya aplicó y cuya vista sigue actualizándose.
+
 ## [0.35.3] - 2026-11-22
 
 ### Corregido

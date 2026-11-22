@@ -26,6 +26,12 @@ function toPendingAction(item: OutboxItem): PendingTicketAction | null {
     ticketId: payload.ticketId,
     seq: item.seq,
     ...(item.state === 'sending' ? { sending: true } : {}),
+    syncStatus:
+      item.state === 'confirmed'
+        ? 'confirmed'
+        : item.state === 'pending' && item.attempts > 0
+          ? 'retry'
+          : undefined,
     operation: command.data.operation,
     args: { ...command.data.args },
     occurredAt:

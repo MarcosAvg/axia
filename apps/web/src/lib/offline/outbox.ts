@@ -13,6 +13,10 @@ const orderingKeys = new Map<
   (payload: unknown) => Promise<string | undefined>
 >()
 
+function orderingKeyFor(item: OutboxItem) {
+  return item.orderingKey ?? orderingKeys.get(item.type)?.(item.payload)
+}
+
 /** Registra el manejador de un tipo de ítem de la cola y su limpieza al descartar. */
 export function registerOutboxHandler(
   type: string,
@@ -77,8 +81,7 @@ export async function hasQueuedWork(ticketId: string): Promise<boolean> {
     .filter((item) => item.userId === userId)
     .toArray()
   for (const item of items) {
-    const key =
-      item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
+    const key = await orderingKeyFor(item)
     if (key === ticketId) return true
   }
   return false
@@ -86,10 +89,13 @@ export async function hasQueuedWork(ticketId: string): Promise<boolean> {
 
 const STALE_SENDING_MS = 60_000
 let pendingDrain: Promise<void> | null = null
-let afterProcess: (() => Promise<void> | void) | null = null
+type RefreshConfirmed = (
+  keys: readonly string[],
+) => ReadonlyMap<string, Promise<void>>
+let afterProcess: RefreshConfirmed | null = null
 
 /** Actualiza las vistas antes de retirar las operaciones confirmadas de la cola. */
-export function onOutboxProcessed(callback: () => Promise<void> | void) {
+export function onOutboxProcessed(callback: RefreshConfirmed) {
   afterProcess = callback
 }
 
@@ -98,16 +104,33 @@ function sendingUser() {
   return userId === currentOfflineUserId() ? userId : null
 }
 
+function canDrain(userId: string) {
+  return navigator.onLine && sendingUser() === userId
+}
+
 async function drainOutbox(userId: string, hasLock: boolean) {
-  if (!navigator.onLine || sendingUser() !== userId) return
+  if (!canDrain(userId)) return
   const items = await db.outbox
     .filter((item) => item.userId === userId)
     .toArray()
   items.sort((a, b) => a.seq - b.seq)
   const confirmed = await processOrderedItems(items, userId, hasLock)
-  if (confirmed.length === 0) return
-  if (sendingUser() === userId) await afterProcess?.()
-  await db.outbox.bulkDelete(confirmed)
+  if (confirmed.size === 0) return
+  const keys = [...confirmed.keys()].filter((key) => key !== undefined)
+  const refreshes = canDrain(userId) ? afterProcess?.(keys) : undefined
+  await Promise.all(
+    [...confirmed].map(async ([key, ids]) => {
+      try {
+        if (key) await refreshes?.get(key)
+      } catch {
+        // El siguiente ciclo solo vuelve a consultar este tiquet.
+        return
+      }
+      if (navigator.onLine || sendingUser() !== userId) {
+        await db.outbox.bulkDelete(ids)
+      }
+    }),
+  )
 }
 
 /** Procesa la cola en orden y serializa el envío entre pestañas cuando es posible. */
@@ -134,16 +157,36 @@ async function processOrderedItems(
   hasLock: boolean,
 ) {
   const blocked = new Set<string>()
-  const confirmed: string[] = []
+  const confirmed = new Map<string | undefined, string[]>()
   for (const item of items) {
-    const key =
-      item.orderingKey ?? (await orderingKeys.get(item.type)?.(item.payload))
-    if (sendingUser() !== userId || !navigator.onLine) break
+    if (!canDrain(userId)) break
+    const key = await orderingKeyFor(item)
+    if (!canDrain(userId)) break
+    if (item.state === 'confirmed') {
+      addConfirmation(confirmed, key, item.id)
+      continue
+    }
     if (key && blocked.has(key)) continue
-    if (await processReadyItem(item, hasLock)) confirmed.push(item.id)
-    else if (key) blocked.add(key)
+    if (await processReadyItem(item, hasLock)) {
+      await db.outbox.update(item.id, {
+        state: 'confirmed',
+        orderingKey: key,
+        sendingAt: null,
+      })
+      addConfirmation(confirmed, key, item.id)
+    } else if (key) blocked.add(key)
   }
   return confirmed
+}
+
+function addConfirmation(
+  confirmed: Map<string | undefined, string[]>,
+  key: string | undefined,
+  id: string,
+) {
+  const ids = confirmed.get(key) ?? []
+  ids.push(id)
+  confirmed.set(key, ids)
 }
 
 function isRecoverableLegacyError(item: OutboxItem): boolean {

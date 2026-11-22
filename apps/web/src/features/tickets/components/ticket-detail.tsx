@@ -115,7 +115,7 @@ function TicketDetailContent({
     <div className="flex flex-col gap-6">
       <TicketHeader
         ticket={projection.ticket}
-        pendingSync={projection.pending.length > 0}
+        pendingActions={projection.pending}
         pause={pause}
       />
       <DuplicateAlertsPanel

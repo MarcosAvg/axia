@@ -8,6 +8,7 @@ import type { TicketDetail, TicketPauseState } from '../domain/types'
 import { ticketMessages } from '../i18n'
 import { CurrentPause } from './pause-panel'
 import { PendingSyncBadge } from './pending-sync-badge'
+import type { PendingTicketAction } from '../domain/pending-actions'
 import { PossibleDuplicateBadge } from './possible-duplicate-badge'
 import { PriorityBadge } from './priority-badge'
 import { StatusBadge } from './status-badge'
@@ -22,11 +23,11 @@ function focusEvidence(event: MouseEvent<HTMLAnchorElement>) {
 /** Encabezado del detalle: folio, estado, prioridad y descripción. */
 export function TicketHeader({
   ticket,
-  pendingSync = false,
+  pendingActions = [],
   pause,
 }: {
   ticket: TicketDetail
-  pendingSync?: boolean
+  pendingActions?: PendingTicketAction[]
   pause: TicketPauseState | null
 }) {
   const isDesktop = useMediaQuery('(min-width: 1024px)')
@@ -61,7 +62,13 @@ export function TicketHeader({
               position={ticket.priorityPosition}
             />
           ) : null}
-          {pendingSync ? <PendingSyncBadge /> : null}
+          {pendingActions.length > 0 ? (
+            <PendingSyncBadge
+              confirmed={pendingActions.every(
+                (action) => action.syncStatus === 'confirmed',
+              )}
+            />
+          ) : null}
           {ticket.possibleDuplicate ? <PossibleDuplicateBadge /> : null}
           {ticket.isUnrouted ? <UnroutedBadge /> : null}
         </div>

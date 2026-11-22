@@ -179,6 +179,12 @@ sigue siendo la autoridad: al sincronizar se refresca su estado y, si rechaza el
 proyección se retira y el error queda visible. Decisión en el
 [ADR 0116](../decisions/0116-proyeccion-local-acciones-offline.md).
 
+Al confirmar una operación, la cola guarda la confirmación localmente. El detalle distingue
+«En espera de reintento» de «Aplicado · Actualizando vista». Cada tiquet retira sus operaciones
+confirmadas cuando se actualizan sus consultas activas, incluidos los listados que lo muestran.
+Las demás consultas se refrescan en segundo plano. Si falla el refresco del tiquet, el ciclo
+siguiente vuelve a consultar el servidor y conserva la confirmación del envío.
+
 La sincronización reutiliza `runTicketAction`: revalida permisos, estado y hora funcional; no
 confía en el estado local. Cada resultado distingue aplicado, duplicado, rechazo, conflicto o
 bloqueo. El reenvío conserva el UUID; una clave usada para otra acción se rechaza. Los conflictos

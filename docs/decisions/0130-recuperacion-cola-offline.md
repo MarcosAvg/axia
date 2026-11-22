@@ -20,5 +20,9 @@ puede retirar esa foto de la cola y continuar con las acciones del tiquet. Los f
 se reintentan mientras la PWA está visible y hay conexión. Los rechazos de negocio mantienen su
 tratamiento y requieren revisión.
 
-El cambio es reversible al retirar el bloqueo y el campo de la respuesta. La cola conserva su
-formato y mantiene los UUID existentes. No requiere migración de base de datos.
+La cola registra la confirmación del servidor antes de refrescar las consultas. Si una lectura
+falla, el siguiente ciclo retoma la lectura con la misma confirmación. Cada tiquet retira sus
+operaciones cuando se actualizan las vistas activas que lo muestran.
+
+El mecanismo mantiene los UUID existentes. El estado confirmado se guarda en el campo de estado
+de la cola local y no requiere migración de base de datos.

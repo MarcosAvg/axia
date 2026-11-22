@@ -59,3 +59,16 @@ it('distingue las operaciones que ya se están enviando', () => {
   )
   expect(screen.getByText('Enviando')).toBeInTheDocument()
 })
+
+it('distingue una acción aplicada de una acción que sigue esperando un reintento', () => {
+  render(
+    <PendingActions
+      actions={[
+        { ...action('start', 1), syncStatus: 'confirmed' },
+        { ...action('comment', 2), syncStatus: 'retry' },
+      ]}
+    />,
+  )
+  expect(screen.getByText('Aplicado · Actualizando vista')).toBeInTheDocument()
+  expect(screen.getByText('En espera de reintento')).toBeInTheDocument()
+})

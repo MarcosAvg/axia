@@ -31,6 +31,7 @@ export interface PendingTicketAction {
   args: Record<string, unknown>
   occurredAt: string
   sending?: boolean
+  syncStatus?: 'confirmed' | 'retry'
 }
 
 export interface PendingTicketProjection<
