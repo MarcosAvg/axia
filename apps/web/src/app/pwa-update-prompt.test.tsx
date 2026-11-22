@@ -57,3 +57,30 @@ it('anuncia una actualización aplicada en otra pestaña aunque el aviso inicial
     vi.unstubAllGlobals()
   }
 })
+
+it('muestra la espera y permite reintentar si el worker no toma el control', async () => {
+  vi.useFakeTimers()
+  try {
+    const options = renderPrompt()
+    act(() =>
+      options.onRegisteredSW('/sw.js', {
+        waiting: {},
+      } as ServiceWorkerRegistration),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Actualizar' }))
+    expect(
+      screen.getByRole('dialog', { name: 'Actualizando Axia…' }),
+    ).toBeVisible()
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    expect(screen.getByRole('dialog')).toBeVisible()
+
+    await act(() => vi.advanceTimersByTimeAsync(15_000))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByText('No se completó la actualización.')).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(mock.activate).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole('dialog')).toBeVisible()
+  } finally {
+    vi.useRealTimers()
+  }
+})

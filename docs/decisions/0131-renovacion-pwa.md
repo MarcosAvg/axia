@@ -6,7 +6,9 @@
 
 El aviso sigue la actualización del service worker del origen de Axia. El botón aparece cuando
 hay un worker en espera o cuando otra pestaña ya activó la actualización. Solo recarga la pestaña
-que confirma. Workbox instala la nueva precaché antes de ofrecer la activación y, al activar,
+que confirma. Durante la activación, un diálogo señala que la página se recargará. Si después
+de 15 segundos el worker sigue sin tomar el control, la pestaña vuelve al aviso con un reintento.
+Workbox instala la nueva precaché antes de ofrecer la activación y, al activar,
 retira las entradas anteriores que ya no se utilizan.
 
 Las copias de consultas conservan la identidad del paquete web que las guardó, derivada de los

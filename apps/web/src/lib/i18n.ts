@@ -16,6 +16,9 @@ export const messages = {
   pwa: {
     updateAvailable: 'Hay una nueva versión disponible.',
     updateAction: 'Actualizar',
+    updating: 'Actualizando Axia…',
+    updatingDescription: 'La página se recargará al activar la nueva versión.',
+    updateFailed: 'No se completó la actualización.',
     offlineReady: 'La aplicación está lista para usarse sin conexión.',
     dismissAction: 'Cerrar',
   },
