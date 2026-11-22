@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.35.4] - 2026-11-22
+
 ### Corregido
 
 - Al volver la conexión, una consulta ajena al tiquet ya no retrasa el retiro de sus acciones
