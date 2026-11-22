@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { isNetworkError } from '@/lib/offline/errors'
-import { processOutbox } from '@/lib/offline/outbox'
-import { enqueueTicketAction } from '../api/offline-actions'
-import { sendTicketCommand, ticketCommandSchema } from '../api/ticket-commands'
+import { submitTicketAction } from '../api/offline-actions'
+import { ticketCommandSchema } from '../api/ticket-commands'
 import type { ArgsFor, TicketOperation } from '../api/ticket-commands'
 import type { ProxySubject } from '../domain/actions'
 
@@ -65,16 +63,7 @@ function useTicketMutation<Operation extends TicketOperation>(
         occurredLocal,
         manualTime: Boolean(occurredLocal),
       }
-      try {
-        await sendTicketCommand(input)
-      } catch (error) {
-        if (isNetworkError(error)) {
-          await enqueueTicketAction(input)
-          void processOutbox()
-          return
-        }
-        throw error
-      }
+      await submitTicketAction(input)
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['tickets'] })

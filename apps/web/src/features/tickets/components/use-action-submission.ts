@@ -92,14 +92,20 @@ async function submitAction(context: SubmitContext) {
   )
   if (missing.length > 0) return
 
-  const handler = buildSubmitHandlers(context.actions, context.values, {
-    onSuccess: context.onClose,
-  })[context.action]
+  const handler = buildSubmitHandlers(context.actions, context.values)[
+    context.action
+  ]
   const isProgress = context.action === 'record_progress'
   if (!handler && !isProgress) return
   if (!(await uploadEvidenceForAction(context))) return
-  if (isProgress) context.onClose()
-  else handler?.()
+  try {
+    const submission = isProgress ? Promise.resolve() : handler?.()
+    if (!submission) return
+    await submission
+    context.onClose()
+  } catch {
+    // La mutación muestra el error en el formulario y conserva el borrador.
+  }
 }
 
 /** Estado y envío de una acción: valida, sube la evidencia y luego ejecuta. */

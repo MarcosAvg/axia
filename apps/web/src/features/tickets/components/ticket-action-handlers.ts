@@ -4,8 +4,9 @@ import type { ActionKey } from '../domain/actions'
 import type { useTicketActions } from '../hooks/use-ticket-actions'
 
 export type Mutations = ReturnType<typeof useTicketActions>
-export type MutateOptions = { onSuccess: () => void }
-export type Handlers = Partial<Record<ActionKey, () => void>>
+export type Handlers = Partial<
+  Record<ActionKey, () => Promise<void> | undefined>
+>
 
 /** Acciones que tienen su propio formulario dedicado. */
 export const DEDICATED: ActionKey[] = [
@@ -63,128 +64,106 @@ export function mutationFor(action: ActionKey, actions: Mutations) {
   return map[action]
 }
 
-function pauseHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
+function pauseHandlers(actions: Mutations, values: ActionValues): Handlers {
   const note = values.note || undefined
   return {
     pause: () => {
       if (values.reasonId) {
-        actions.pause.mutate({ reasonId: values.reasonId, note }, options)
+        return actions.pause.mutateAsync({ reasonId: values.reasonId, note })
       }
     },
     advance_pause: () => {
       if (values.reasonId) {
-        actions.advancePause.mutate(
-          { reasonId: values.reasonId, note },
-          options,
-        )
+        return actions.advancePause.mutateAsync({
+          reasonId: values.reasonId,
+          note,
+        })
       }
     },
     resume: () => {
       if (values.reasonId) {
-        actions.resume.mutate({ reasonId: values.reasonId }, options)
+        return actions.resume.mutateAsync({ reasonId: values.reasonId })
       }
     },
   }
 }
 
-function simpleHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
+function simpleHandlers(actions: Mutations, values: ActionValues): Handlers {
   const note = values.note || undefined
   const text = values.text.trim()
   return {
-    ...pauseHandlers(actions, values, options),
+    ...pauseHandlers(actions, values),
     assign_technician: () => {
       if (values.technicianId) {
-        actions.assignTechnician.mutate(
-          {
-            technicianId: values.technicianId,
-            reasonId: values.reasonId || undefined,
-          },
-          options,
-        )
+        return actions.assignTechnician.mutateAsync({
+          technicianId: values.technicianId,
+          reasonId: values.reasonId || undefined,
+        })
       }
     },
-    start: () => actions.start.mutate({}, options),
+    start: () => actions.start.mutateAsync({}),
     attend: () => {
       if (text && values.serviceTypeId) {
-        actions.attend.mutate(
-          { workDescription: text, serviceTypeId: values.serviceTypeId },
-          options,
-        )
+        return actions.attend.mutateAsync({
+          workDescription: text,
+          serviceTypeId: values.serviceTypeId,
+        })
       }
     },
     change_priority: () => {
       if (values.priorityId) {
-        actions.changePriority.mutate(
-          { priorityId: values.priorityId },
-          options,
-        )
+        return actions.changePriority.mutateAsync({
+          priorityId: values.priorityId,
+        })
       }
     },
     comment: () => {
-      if (text) actions.comment.mutate({ text }, options)
+      if (text) return actions.comment.mutateAsync({ text })
     },
     reject: () => {
       if (values.reasonId) {
-        actions.reject.mutate({ reasonId: values.reasonId, note }, options)
+        return actions.reject.mutateAsync({ reasonId: values.reasonId, note })
       }
     },
     cancel: () => {
       if (values.reasonId) {
-        actions.cancel.mutate({ reasonId: values.reasonId, note }, options)
+        return actions.cancel.mutateAsync({ reasonId: values.reasonId, note })
       }
     },
   }
 }
 
-function claimHandlers(
-  actions: Mutations,
-  values: ActionValues,
-  options: MutateOptions,
-): Handlers {
+function claimHandlers(actions: Mutations, values: ActionValues): Handlers {
   const note = values.note || undefined
   const text = values.text.trim()
   return {
     open_claim: () => {
       if (values.reasonId && text) {
-        actions.openClaim.mutate(
-          { reasonId: values.reasonId, description: text },
-          options,
-        )
+        return actions.openClaim.mutateAsync({
+          reasonId: values.reasonId,
+          description: text,
+        })
       }
     },
     resolve_claim: () => {
-      actions.resolveClaim.mutate(
-        {
-          resolution: values.resolution,
-          resultId: values.reasonId || undefined,
-          note,
-        },
-        options,
-      )
+      return actions.resolveClaim.mutateAsync({
+        resolution: values.resolution,
+        resultId: values.reasonId || undefined,
+        note,
+      })
     },
     reactivate: () => {
       if (values.reasonId) {
-        actions.reactivate.mutate({ reasonId: values.reasonId }, options)
+        return actions.reactivate.mutateAsync({ reasonId: values.reasonId })
       }
     },
     add_auxiliary: () => {
       if (values.technicianId && values.reasonId) {
-        actions.addAuxiliary.mutate(
-          {
-            technicianId: values.technicianId,
-            reasonId: values.reasonId,
-            note,
-          },
-          options,
-        )
+        return actions.addAuxiliary.mutateAsync({
+          technicianId: values.technicianId,
+          reasonId: values.reasonId,
+          note,
+        })
       }
     },
   }
@@ -193,10 +172,9 @@ function claimHandlers(
 export function buildSubmitHandlers(
   actions: Mutations,
   values: ActionValues,
-  options: MutateOptions,
 ): Handlers {
   return {
-    ...simpleHandlers(actions, values, options),
-    ...claimHandlers(actions, values, options),
+    ...simpleHandlers(actions, values),
+    ...claimHandlers(actions, values),
   }
 }

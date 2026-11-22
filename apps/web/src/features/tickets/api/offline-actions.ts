@@ -2,11 +2,15 @@
 // reenvía con el contrato de sincronización, conservando la hora del dispositivo
 // y el UUID. La hora manual de la acción viaja aparte.
 
-import { enqueue, registerOutboxHandler } from '@/lib/offline/outbox'
-import { OutboxError } from '@/lib/offline/errors'
+import {
+  enqueue,
+  processOutbox,
+  registerOutboxHandler,
+} from '@/lib/offline/outbox'
+import { isNetworkError, OutboxError } from '@/lib/offline/errors'
 import { z } from 'zod'
 import { sendSyncBatch } from './sync-api'
-import { ticketCommandSchema } from './ticket-commands'
+import { sendTicketCommand, ticketCommandSchema } from './ticket-commands'
 import type { TicketCommandInput } from './ticket-commands'
 
 const TICKET_ACTION = 'ticket_action'
@@ -37,6 +41,20 @@ export async function enqueueTicketAction(
     },
     input.ticketId,
   )
+}
+
+/** Confirma al guardar localmente si la red no está disponible. */
+export async function submitTicketAction(input: TicketCommandInput) {
+  if (navigator.onLine) {
+    try {
+      await sendTicketCommand(input)
+      return
+    } catch (error) {
+      if (!isNetworkError(error)) throw error
+    }
+  }
+  await enqueueTicketAction(input)
+  void processOutbox()
 }
 
 /** Registra el reenvío de acciones del tiquet en la cola de salida. */

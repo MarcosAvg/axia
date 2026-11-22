@@ -4,6 +4,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el proyecto usa versionado semántico.
 
 ## [Unreleased]
+### Corregido
+
+- Al confirmar una acción sin conexión, el diálogo se cierra después de guardar en el
+  dispositivo. Los borradores se limpian al confirmar correctamente.
 
 ## [0.35.0] - 2026-11-21
 

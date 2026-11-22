@@ -97,6 +97,7 @@ async function restoreAndSubmitEvidence(page: Page) {
   await page.getByRole('button', { name: 'Retomar borrador' }).click()
   await expect(page.getByText('antes.png', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByText('Pendiente de subir')).toBeVisible()
   return page
 }

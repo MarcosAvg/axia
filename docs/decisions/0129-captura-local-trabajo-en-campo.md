@@ -46,3 +46,7 @@ compartido de 32 MiB para estos rechazos. Se eliminan primero las fotos más ant
 al límite. La limpieza corre al abrir la app, volver a primer plano o sincronizar. Las fotos
 pendientes por otros motivos conservan su flujo. Si el tiquet vuelve a aparecer en **Mi trabajo**,
 Axia presenta al servidor la captura con su UUID y ciclo de origen para que valide si procede.
+
+Cuando el navegador detecta que está sin conexión, confirmar una acción escribe directamente
+en la cola local. El formulario espera esa escritura para cerrar y limpiar el borrador.
+La sincronización con el servidor se realiza después.

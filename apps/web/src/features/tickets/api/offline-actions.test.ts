@@ -8,9 +8,11 @@ import {
 import { setOfflineUserId } from '@/lib/offline/user'
 import { apiFetch } from '@/lib/api-client'
 import { sendSyncBatch } from './sync-api'
+import type { TicketCommand } from './ticket-commands'
 import {
   enqueueTicketAction,
   registerTicketActionHandler,
+  submitTicketAction,
 } from './offline-actions'
 import {
   registerEvidenceUploadHandler,
@@ -133,3 +135,21 @@ it('guarda la clave del tiquet también para evidencia nueva sin conexión', asy
   })
   expect(apiFetch).not.toHaveBeenCalled()
 })
+
+const offlineCommands: TicketCommand[] = [
+  { operation: 'start', args: {} },
+  { operation: 'advance_pause', args: { reasonId: crypto.randomUUID() } },
+]
+
+it.each(offlineCommands)(
+  'confirma $operation en el dispositivo sin esperar una solicitud HTTP',
+  async (command) => {
+    vi.stubGlobal('navigator', { onLine: false })
+    await submitTicketAction({ ...context, ...command })
+    expect(apiFetch).not.toHaveBeenCalled()
+    expect(sendSyncBatch).not.toHaveBeenCalled()
+    expect(await db.outbox.toArray()).toMatchObject([
+      { state: 'pending', payload: command },
+    ])
+  },
+)

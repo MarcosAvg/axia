@@ -42,6 +42,14 @@ async function createTicket(page: Page, description: string) {
   await expect(page.getByText(description)).toBeVisible()
 }
 
+async function confirmSubstateOffline(page: Page) {
+  await page.context().setOffline(true)
+  await page.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByText('Sin sincronizar').first()).toBeVisible()
+  await page.context().setOffline(false)
+}
+
 test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   const description = `Pausa E2E ${crypto.randomUUID()}`
   await signIn(page, 'demo.admin')
@@ -80,7 +88,7 @@ test('@smoke pausa, subestado y reanudación', async ({ page }) => {
   await page
     .getByLabel('Siguiente subestado')
     .selectOption({ label: 'Solicitado' })
-  await clickAndWait(page, 'Confirmar', 'ticket_advance_pause')
+  await confirmSubstateOffline(page)
   await expect(page.getByText('Solicitado').first()).toBeVisible()
   await expect(page.getByRole('button', { name: 'Reanudar' })).toHaveCount(0)
 
