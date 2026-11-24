@@ -17,9 +17,8 @@ las variables y las reglas no se repiten en varios manuales.
 
 | Tarea | Documento |
 |---|---|
-| Registrar y atender tiquets, adjuntar evidencia y trabajar offline | [Uso](guides/uso.md) |
+| Registrar y atender tiquets, adjuntar evidencia, trabajar offline y recibir avisos | [Uso](guides/uso.md) |
 | Gestionar usuarios, permisos, catálogos y calendarios | [Administración](guides/administracion.md) |
-| Consultar avisos y recibirlos con Axia cerrada | [Notificaciones](guides/notificaciones.md) |
 
 ## Desarrollar y contribuir
 

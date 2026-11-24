@@ -39,9 +39,7 @@ contiene los scripts ejecutables; esta referencia explica sus efectos.
 | `pnpm db:duplicates` | Recalcula las alertas de posible duplicado de los tiquets abiertos |
 | `pnpm db:audit:time` | Reporte de solo lectura sobre cobertura, duraciones negativas, desfase y alertas de tiempo; no corrige datos |
 
-`check`, `db:test` y las suites de navegador requieren el PostgreSQL de pruebas iniciado. Usan
-valores locales ficticios por defecto, sin descubrir dotenv privados. `test:unit` y `check:fast`
-no requieren ese contenedor. No ejecutar varias suites que reconstruyan la misma base a la vez.
+Para preparar y ejecutar las suites en orden, consultar [Pruebas locales](../start/desarrollo.md#pruebas).
 
 ## Comprobaciones individuales
 

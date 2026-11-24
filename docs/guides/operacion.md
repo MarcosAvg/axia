@@ -238,6 +238,8 @@ y destino elegido. Medir por separado la ventana entre retirar el tráfico y vol
 y el tiempo de restaurar y validar en un proyecto vacío. Anotar login, conteos de tiquets y eventos,
 integridad de evidencias y adjuntos, continuidad de SSE y las alertas provocadas. Repetir el
 simulacro antes de admitir datos reales y después con la periodicidad acordada con el operador.
+El registro del primer ensayo local se puede recuperar desde el
+[índice histórico](../history/README.md).
 
 ## Secretos y rotación
 

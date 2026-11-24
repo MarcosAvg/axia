@@ -82,7 +82,9 @@ pnpm test:db:stop
 Las pruebas usan valores ficticios y destinos de loopback validados. Playwright prepara
 `axia_e2e` y su propio almacenamiento de evidencias. Las pruebas de integración usan
 `axia_test`. `check:fast` se ejecuta sin contenedor. `test:affected` puede seleccionar suites
-de navegador o la compuerta completa, que requieren el PostgreSQL de pruebas.
+de navegador o la compuerta completa, que requieren el PostgreSQL de pruebas. Ejecutar en
+secuencia las suites que reconstruyen la misma base. Para consultar el efecto de cada script,
+ver [Comandos](../reference/comandos.md).
 
 Si Chromium reporta bibliotecas de sistema faltantes en Linux, preparar las dependencias del
 host. CI usa `pnpm --filter @axia/web exec playwright install chromium --with-deps`.

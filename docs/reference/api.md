@@ -201,6 +201,8 @@ exige.
 | `GET` | `/api/notifications/unread-count` | No leídas |
 | `POST` | `/api/notifications/:id/read` | Marcar una |
 | `POST` | `/api/notifications/read-all` | Marcar todas |
+| `GET` | `/api/notifications/push` | Consultar la clave pública VAPID |
+| `PUT` | `/api/notifications/push` | Registrar o actualizar la suscripción del navegador |
 | `POST` | `/api/sync/actions` | Lote de acciones offline |
 
 `GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`,
@@ -211,7 +213,13 @@ compone el texto legible; el servidor no envía el aviso al actor de la acción.
 Las reglas cubren oferta, toma, asignación y reasignación de técnico, reasignación de supervisor,
 apoyo auxiliar, recaptura, prioridad, atendido pendiente de validación, validación, reclamación
 abierta y resuelta, reapertura, reactivación, rechazo, cancelación, duplicado marcado, sin ruteo y
-calificación.
+calificación y alerta de hora pendiente de corrección.
+
+Las rutas de Web Push exigen una sesión activa, contraseña al día y el permiso `ticket.view`.
+`GET` devuelve `{ publicKey }`, con `null` si la instancia no configuró Web Push. `PUT` recibe
+`{ endpoint, keys: { p256dh, auth } }` de la suscripción del navegador, la vincula a la cuenta y
+sesión autenticadas y responde `204`. Si Web Push está deshabilitado o no se pudo guardar la
+suscripción, responde `503` con el código `push_unavailable`.
 
 `GET /api/events/changes` recibe `since` (ID numérico del último evento, por defecto 0) y `limit`
 (1–200, por defecto 100); devuelve `{ items }` en orden por ID. SSE y recuperación respetan alcance

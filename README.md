@@ -27,7 +27,7 @@ los scripts operativos y el manual para actualizar y recuperar una instancia.
 - Acceso por roles y permisos, bitácora de acciones, evidencias privadas y adjuntos.
 - Aplicación web instalable en escritorio y móvil. Los técnicos pueden guardar acciones y
   evidencias sin conexión para sincronizarlas al volver a estar en línea.
-- Panel por rol, métricas de atención, catálogos en XLSX y [avisos](docs/guides/notificaciones.md) en la bandeja y por Web Push.
+- Panel por rol, métricas de atención, catálogos en XLSX y [avisos](docs/guides/uso.md#avisos) en la bandeja y por Web Push.
 
 Las capacidades pendientes están en [límites y pendientes](docs/reference/limitaciones.md).
 
