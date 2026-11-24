@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
+import { loadConfig } from '../apps/server/src/config.ts'
 
 function compose(overrides = {}) {
   const result = spawnSync(
@@ -77,6 +78,41 @@ test('session, access and cleanup settings reach the runtime explicitly', () => 
   const { services } = compose(settings)
   for (const [key, value] of Object.entries(settings)) {
     assert.equal(services.app.environment[key], value, key)
+  }
+})
+
+test('shared runtime defaults match the server configuration', () => {
+  const { services } = compose()
+  const defaults = loadConfig({
+    DATABASE_URL: 'postgres://localhost/axia_test',
+  })
+  // Compose configures these values for the container and its proxy.
+  const containerSettings = new Set([
+    'DATABASE_URL',
+    'NODE_ENV',
+    'TRUST_PROXY',
+    'STATIC_DIR',
+    'STORAGE_DIR',
+  ])
+  for (const [key, value] of Object.entries(defaults)) {
+    if (value === undefined || containerSettings.has(key)) continue
+    if (key in services.app.environment) {
+      assert.equal(services.app.environment[key], String(value), key)
+    }
+  }
+})
+
+test('Web Push settings reach app and stay out of the database container', () => {
+  const settings = {
+    WEB_PUSH_PRIVATE_KEY: 'test-placeholder-only',
+    WEB_PUSH_CONTACT: 'mailto:axia@example.test',
+  }
+  const { services } = compose(settings)
+  const defaults = compose()
+  for (const [key, value] of Object.entries(settings)) {
+    assert.equal(services.app.environment[key], value, key)
+    assert.equal(services.db.environment[key], undefined, key)
+    assert.equal(defaults.services.app.environment[key], '', key)
   }
 })
 

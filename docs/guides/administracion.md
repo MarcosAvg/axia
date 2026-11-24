@@ -92,8 +92,8 @@ En `/admin/configuracion` se ajustan:
 - el modo de reloj de SLA y los eventos visibles para el solicitante.
 
 Los cambios no reescriben el historial. Aunque se puede guardar un número de días para validación
-automática, actualmente no hay un planificador que la ejecute. Tampoco se ejecutan escalamiento
-ni entregas Web Push: consulta [Notificaciones](notificaciones.md).
+automática, su ejecución y el escalamiento siguen entre los
+[límites y pendientes](../reference/limitaciones.md).
 
 ## Duplicados
 

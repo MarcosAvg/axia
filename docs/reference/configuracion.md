@@ -1,9 +1,12 @@
 # Configuración
 
-Variables de entorno del servidor y del compose. Los valores reales viven en `.env`, con permisos
-`0600` y fuera del repositorio. La plantilla de producción es `.env.example`; la de desarrollo es
-`.env.dev.example` y los valores ficticios de pruebas están en `.env.test.example`. Los comandos de
-pruebas no descubren archivos privados.
+| Entorno | Compose | Archivo de entorno |
+|---|---|---|
+| Producción | `compose.yaml` | Copiar `.env.example` a `.env` |
+| Desarrollo | `compose.dev.yaml` | El instalador genera `.env.dev` desde `.env.dev.example` |
+| Pruebas | `compose.test.yaml` | Valores ficticios integrados. `.env.test.example` documenta opciones y se carga manualmente si se necesitan |
+
+Los archivos con valores reales se guardan fuera del repositorio con permisos `0600`.
 
 ## Cómo se aplica
 
@@ -12,9 +15,8 @@ La sección «Servidor» muestra valores al ejecutar el proceso directamente. Co
 construye algunos valores y solo entrega a los contenedores las variables declaradas en
 `compose.yaml`: añadir una variable arbitraria al archivo `.env` no la entrega automáticamente.
 
-Desarrollo usa `.env.dev` (o `AXIA_ENV_FILE`) y `compose.dev.yaml`; API y web se ejecutan en el host.
-Pruebas usa `compose.test.yaml` y valores ficticios: no descubre archivos privados. La plantilla
-`.env.test.example` no se carga automáticamente. Para los procedimientos, consultar
+En desarrollo, API y web se ejecutan en el host. Las pruebas usan su propia base. Para los
+procedimientos, consultar
 [Instalación](../../deploy/README.md), [Operación](../guides/operacion.md) y
 [Desarrollo](../start/desarrollo.md).
 
@@ -31,13 +33,8 @@ Pruebas usa `compose.test.yaml` y valores ficticios: no descubre archivos privad
 Generar ambos secretos con `openssl rand -hex 32`. Compose los inserta en las URLs de conexión;
 usar solo hexadecimal evita que caracteres como `/`, `#`, `?` o `%` rompan la cadena.
 
-El resto de variables tiene valores por defecto en `compose.yaml` o en el servidor. Se añaden a
-`.env` solo cuando se necesita cambiar el comportamiento. El paquete usa `latest` por defecto y
-`release.json` conserva el digest de la release. La versión publicada se identifica por el tag de
-Git (`vX.Y.Z`); el campo `version` de `package.json` es un marcador de desarrollo. Para producción
-reproducible, fijar `AXIA_IMAGE` al digest de `release.json`. `latest` sigue el canal estable y
-adopta la imagen nueva cuando el operador actualiza la instancia. Compose usa el rol interno fijo
-`axia_app`.
+Añadir otras variables solo para cambiar el comportamiento predeterminado. Para elegir una imagen
+concreta o seguir el canal estable, consultar [Instalación](../../deploy/README.md#2-guardar-la-configuración).
 
 ## Base de datos
 
@@ -139,6 +136,17 @@ evidencias, pero se guardan y se cuentan aparte.
 |---|---|---|
 | `AXIA_PROXY_NETWORK` | `proxy` | Red externa del proxy que debe existir antes del arranque |
 | `AXIA_PROXY_ALIAS` | `axia` | Alias de la app; usar uno distinto entre instancias en la misma red |
+
+## Web Push
+
+| Variable | Uso |
+|---|---|
+| `WEB_PUSH_PRIVATE_KEY` | Clave privada VAPID P-256 en formato PKCS#8 DER codificado en Base64 |
+| `WEB_PUSH_CONTACT` | Contacto de la instancia como `mailto:` o URL HTTPS |
+
+Dejar ambas vacías para usar solo los avisos dentro de Axia. Para habilitar el envío, completar
+ambas y preparar HTTPS y la salida al servicio del navegador. Consultar
+[Instalación](../../deploy/README.md#avisos-web-push) para generar y guardar la clave.
 
 ## Limpieza
 

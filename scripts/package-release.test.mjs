@@ -27,6 +27,8 @@ test('release package contains only runtime files and immutable identity, never 
     const env = readFileSync(join(output, '.env.example'), 'utf8')
     assert.ok(env.includes(`# AXIA_IMAGE=${image}`))
     assert.ok(env.includes(':latest'))
+    assert.match(env, /^WEB_PUSH_PRIVATE_KEY=$/m)
+    assert.match(env, /^WEB_PUSH_CONTACT=$/m)
     const release = JSON.parse(
       readFileSync(join(output, 'release.json'), 'utf8'),
     )

@@ -130,8 +130,9 @@ SSE invalida consultas; no reemplaza la lectura autorizada. El cliente reconecta
 cambios posteriores al último ID mediante `/api/events/changes`, con los mismos filtros. El
 stream envía heartbeat y desactiva el buffering del proxy. Logout, revocación, cambio de acceso
 y vencimiento cierran las conexiones afectadas; al reconectar se carga el actor vigente.
-La bandeja contiene avisos del actor sobre tiquets visibles. Web Push y escalamiento automático
-siguen [pendientes](../guides/notificaciones.md); no se presentan como servicios activos.
+La bandeja contiene avisos del actor sobre tiquets visibles. Para Web Push, PostgreSQL encola
+las entregas y Fastify valida sesión y alcance antes de enviarlas. El navegador muestra un
+mensaje genérico y abre la bandeja. [Decisión de Web Push](../decisions/0132-web-push.md)
 
 ## Trabajo sin conexión
 

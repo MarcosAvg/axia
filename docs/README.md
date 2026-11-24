@@ -10,7 +10,7 @@ las variables y las reglas no se repiten en varios manuales.
 | Instalar, conectar HTTPS y crear el primer administrador | [Instalación](../deploy/README.md) |
 | Actualizar, respaldar y recuperar una instancia | [Operación](guides/operacion.md) |
 | Verificar HTTPS, PostgreSQL, almacenamiento y respaldos | [Salud y diagnóstico](guides/operacion.md#salud-y-diagnóstico) |
-| Consultar variables y valores predeterminados | [Configuración](reference/configuracion.md) |
+| Distinguir producción, desarrollo y pruebas y consultar sus variables | [Configuración](reference/configuracion.md) |
 | Diagnosticar PostgreSQL | [Rendimiento](reference/rendimiento-postgres.md) |
 
 ## Usar y administrar
@@ -19,7 +19,7 @@ las variables y las reglas no se repiten en varios manuales.
 |---|---|
 | Registrar y atender tiquets, adjuntar evidencia y trabajar offline | [Uso](guides/uso.md) |
 | Gestionar usuarios, permisos, catálogos y calendarios | [Administración](guides/administracion.md) |
-| Consultar avisos y capacidades de notificación | [Notificaciones](guides/notificaciones.md) |
+| Consultar avisos y recibirlos con Axia cerrada | [Notificaciones](guides/notificaciones.md) |
 
 ## Desarrollar y contribuir
 
