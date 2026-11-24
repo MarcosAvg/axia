@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-24
+
 ### Cambiado
 
 - En Ámbitos se pueden elegir varios edificios al dar de alta a un supervisor y administrar
