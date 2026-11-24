@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- En Ámbitos se pueden elegir varios edificios al dar de alta a un supervisor y administrar
+  varias categorías por técnico. Ambos formularios permiten buscar, revisar la selección y guardar
+  todos los cambios juntos.
+
 ## [0.35.4] - 2026-11-22
 
 ### Corregido

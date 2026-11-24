@@ -1,112 +1,124 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm, useWatch } from 'react-hook-form'
+import { z } from 'zod'
 import { SelectField } from '@/components/shared/form-fields'
 import type { AdminRow } from '../api/admin-api'
-import type { Profile } from '../domain/access'
+import type { Profile, SupervisorScope } from '../domain/access'
 import { adminMessages } from '../i18n'
-import { EntityDialog } from './entity-dialog'
-import { EntityForm } from './entity-form'
-import { FormGroup } from './form-group'
+import { AssignmentDialog } from './assignment-dialog'
+import { AssignmentOptions } from './assignment-options'
 
-interface ScopeFieldsProps {
+const { scopes: t, actions } = adminMessages
+const schema = z.object({
+  userId: z.uuid(t.selectSupervisor),
+  teamId: z.uuid(t.selectTeam),
+  buildingIds: z.array(z.uuid()),
+})
+
+interface SupervisorScopeDialogProps {
   profiles: Profile[]
   teams: AdminRow[]
-  userId: string
-  teamId: string
-  onChange: (patch: { userId?: string; teamId?: string }) => void
+  buildings: AdminRow[]
+  scopes: SupervisorScope[]
+  editing?: SupervisorScope
+  description: string
+  isSaving: boolean
+  onSave: (values: z.infer<typeof schema>) => void
+  onClose: () => void
 }
 
+type ScopeForm = ReturnType<typeof useForm<z.infer<typeof schema>>>
+
 function ScopeFields({
-  profiles,
-  teams,
-  userId,
-  teamId,
-  onChange,
-}: ScopeFieldsProps) {
-  const { scopes: t, actions } = adminMessages
-  if (profiles.length === 0) {
-    return <p className="text-sm text-muted-foreground">{t.noSupervisors}</p>
+  form,
+  model,
+}: {
+  form: ScopeForm
+  model: SupervisorScopeDialogProps
+}) {
+  const userId = useWatch({ control: form.control, name: 'userId' })
+  const teamId = useWatch({ control: form.control, name: 'teamId' })
+  const { errors } = form.formState
+
+  function select(nextUserId: string, nextTeamId: string) {
+    const existing = model.scopes.find(
+      (scope) => scope.userId === nextUserId && scope.teamId === nextTeamId,
+    )
+    form.setValue('userId', nextUserId, {
+      shouldValidate: Boolean(errors.userId),
+    })
+    form.setValue('teamId', nextTeamId, {
+      shouldValidate: Boolean(errors.teamId),
+    })
+    form.setValue('buildingIds', existing?.buildingIds ?? [])
   }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <SelectField
         id="scope-user"
         label={t.user}
-        placeholder={actions.selectPlaceholder}
-        options={profiles.map((profile) => ({
+        placeholder={
+          model.profiles.length ? actions.selectPlaceholder : t.noSupervisors
+        }
+        options={model.profiles.map((profile) => ({
           value: profile.id,
           label: profile.fullName,
         }))}
         value={userId}
-        onChange={(event) => onChange({ userId: event.target.value })}
+        disabled={model.isSaving}
+        error={errors.userId?.message}
+        onChange={(event) => select(event.target.value, teamId)}
       />
       <SelectField
         id="scope-team"
         label={t.team}
         placeholder={actions.selectPlaceholder}
-        options={teams.map((team) => ({
+        options={model.teams.map((team) => ({
           value: String(team.id),
           label: String(team.name),
         }))}
         value={teamId}
-        onChange={(event) => onChange({ teamId: event.target.value })}
+        disabled={model.isSaving}
+        error={errors.teamId?.message}
+        onChange={(event) => select(userId, event.target.value)}
       />
     </div>
   )
 }
 
-interface SupervisorScopeDialogProps {
-  profiles: Profile[]
-  teams: AdminRow[]
-  isSaving: boolean
-  onCreate: (userId: string, teamId: string) => void
-  onClose: () => void
-}
-
-/** Alta de un ámbito de supervisor (usuario y equipo). */
-export function SupervisorScopeDialog({
-  profiles,
-  teams,
-  isSaving,
-  onCreate,
-  onClose,
-}: SupervisorScopeDialogProps) {
-  const [values, setValues] = useState({ userId: '', teamId: '' })
-  const { scopes: t, actions } = adminMessages
-
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    if (!values.userId || !values.teamId) return
-    onCreate(values.userId, values.teamId)
-  }
+export function SupervisorScopeDialog(model: SupervisorScopeDialogProps) {
+  const { editing, buildings, description, isSaving, onSave, onClose } = model
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: editing
+      ? {
+          userId: editing.userId,
+          teamId: editing.teamId,
+          buildingIds: editing.buildingIds,
+        }
+      : { userId: '', teamId: '', buildingIds: [] },
+  })
+  const buildingIds = useWatch({ control: form.control, name: 'buildingIds' })
+  const userId = useWatch({ control: form.control, name: 'userId' })
+  const teamId = useWatch({ control: form.control, name: 'teamId' })
 
   return (
-    <EntityDialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose()
-      }}
-      title={t.addSupervisor}
-      description={t.addSupervisorHelp}
+    <AssignmentDialog
+      title={editing ? t.editBuildings : t.addSupervisor}
+      description={description}
+      isSaving={isSaving}
+      onSave={form.handleSubmit(onSave)}
+      onClose={onClose}
     >
-      <EntityForm
-        onSubmit={submit}
-        onCancel={onClose}
-        isSaving={isSaving}
-        submitLabel={actions.add}
-      >
-        <FormGroup title={t.supervisor}>
-          <ScopeFields
-            profiles={profiles}
-            teams={teams}
-            userId={values.userId}
-            teamId={values.teamId}
-            onChange={(patch) =>
-              setValues((current) => ({ ...current, ...patch }))
-            }
-          />
-        </FormGroup>
-      </EntityForm>
-    </EntityDialog>
+      {editing ? null : <ScopeFields form={form} model={model} />}
+      <AssignmentOptions
+        kind="buildings"
+        rows={buildings}
+        value={buildingIds}
+        onChange={(ids) => form.setValue('buildingIds', ids)}
+        disabled={isSaving || !userId || !teamId}
+      />
+    </AssignmentDialog>
   )
 }

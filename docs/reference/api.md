@@ -243,7 +243,9 @@ rechazada sigue [pendiente](estados-y-transiciones.md).
 | `POST` | `/api/admin/access/user-roles` y `/remove` | Conceder y retirar roles |
 | `PATCH` | `/api/admin/access/profiles/:id` | Actualizar perfil |
 | `PATCH` | `/api/admin/access/requesters/:id`, `/api/admin/access/technicians/:id` | Vincular cuenta y persona del catálogo |
-| `POST/DELETE` | `/api/admin/access/scopes` y `/:id` | Ámbitos de supervisor |
+| `POST/DELETE` | `/api/admin/access/scopes` y `/:id` | Ámbitos de supervisor. El alta acepta `buildingIds` opcional |
+| `PATCH` | `/api/admin/access/scopes/:id` | Sustituye los edificios del ámbito con `{ buildingIds }` |
+| `PATCH` | `/api/admin/access/technician-categories/:id` | Sustituye las categorías del técnico con `{ categoryIds }` |
 | `POST/DELETE` | `/api/admin/access/scope-buildings` y `/:scopeId/:buildingId` | Edificios del ámbito |
 | `POST/DELETE` | `/api/admin/access/technician-categories` y `/:technicianId/:categoryId` | Designaciones |
 | `GET` | `/api/admin/catalogs/:table?orderBy=…` | Catálogos con datos derivados: conteos, ruta de motivos y cuenta vinculada |

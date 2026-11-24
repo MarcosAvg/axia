@@ -8,19 +8,17 @@ import { nameById } from '../domain/lookups'
 import { filterSupervisorScopes } from '../domain/scope-list'
 import { profilesWithRole } from '../domain/user-list'
 import {
-  useAddScopeBuilding,
   useCreateSupervisorScope,
   useDeleteSupervisorScope,
   useProfiles,
-  useRemoveScopeBuilding,
   useRoles,
+  useSetScopeBuildings,
   useSupervisorScopes,
   useUserRoles,
 } from '../hooks/use-access'
 import { useAdminRows } from '../hooks/use-admin-catalog'
 import { adminMessages } from '../i18n'
 import { AdminToolbar } from './admin-toolbar'
-import { ScopeBuildingsDialog } from './scope-buildings-dialog'
 import { ScopeRemoveDialog } from './scope-remove-dialog'
 import { ScopeActions, ScopeCards } from './supervisor-scope-cards'
 import type { ScopeLabels } from './supervisor-scope-cards'
@@ -73,7 +71,6 @@ function buildScopeColumns(
       id: 'actions',
       header: '',
       align: 'right',
-      className: 'w-24',
       cell: (scope) => (
         <ScopeActions
           name={labels.supervisor(scope.userId)}
@@ -85,53 +82,6 @@ function buildScopeColumns(
   ]
 }
 
-interface ScopesDialogsModel {
-  creating: boolean
-  onCloseCreating: () => void
-  profiles: Profile[]
-  teams: AdminRow[]
-  isCreating: boolean
-  onCreate: (userId: string, teamId: string) => void
-  editing: SupervisorScope | null
-  onCloseEditing: () => void
-  supervisor: (id: string) => string
-  team: (id: string) => string
-  buildings: AdminRow[]
-  onAddBuilding: (scopeId: string, buildingId: string) => void
-  onRemoveBuilding: (scopeId: string, buildingId: string) => void
-}
-
-function ScopesDialogs({ model }: { model: ScopesDialogsModel }) {
-  const editing = model.editing
-  return (
-    <>
-      {model.creating ? (
-        <SupervisorScopeDialog
-          profiles={model.profiles}
-          teams={model.teams}
-          isSaving={model.isCreating}
-          onCreate={model.onCreate}
-          onClose={model.onCloseCreating}
-        />
-      ) : null}
-      {editing ? (
-        <ScopeBuildingsDialog
-          scope={editing}
-          userName={model.supervisor(editing.userId)}
-          teamName={model.team(editing.teamId)}
-          buildings={model.buildings}
-          onToggle={(buildingId, checked) =>
-            checked
-              ? model.onAddBuilding(editing.id, buildingId)
-              : model.onRemoveBuilding(editing.id, buildingId)
-          }
-          onClose={model.onCloseEditing}
-        />
-      ) : null}
-    </>
-  )
-}
-
 function useScopesController() {
   const scopes = useSupervisorScopes()
   const profiles = useProfiles()
@@ -141,17 +91,19 @@ function useScopesController() {
   const buildings = useAdminRows('buildings')
   const create = useCreateSupervisorScope()
   const removeScope = useDeleteSupervisorScope()
-  const addBuilding = useAddScopeBuilding()
-  const removeBuilding = useRemoveScopeBuilding()
+  const saveBuildings = useSetScopeBuildings()
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<SupervisorScope | null>(null)
   const [query, setQuery] = useState('')
 
   const profileRows = orEmpty(profiles.data)
-  const supervisorProfiles =
-    roles.data && userRoles.data
-      ? profilesWithRole(profileRows, roles.data, userRoles.data, 'supervisor')
-      : profileRows
+  const supervisorProfiles = profilesWithRole(
+    profileRows,
+    orEmpty(roles.data),
+    orEmpty(userRoles.data),
+    'supervisor',
+  )
+  const queries = [scopes, profiles, roles, userRoles, teams, buildings]
   const supervisor = (id: string) => supervisorName(profileRows, id)
   const team = (id: string) => nameById(teams.data, id)
   const visible = filterSupervisorScopes(
@@ -162,14 +114,15 @@ function useScopesController() {
 
   return {
     scopes,
-    profiles: profileRows,
+    isLoading: queries.some((query) => query.isLoading),
+    isError: queries.some((query) => query.isError),
+    ready: queries.every((query) => query.isSuccess),
     supervisorProfiles,
     teams: orEmpty(teams.data),
     buildings: orEmpty(buildings.data),
     create,
     removeScope,
-    addBuilding,
-    removeBuilding,
+    saveBuildings,
     creating,
     setCreating,
     editing,
@@ -182,30 +135,46 @@ function useScopesController() {
   }
 }
 
-function dialogsModel(
-  c: ReturnType<typeof useScopesController>,
-): ScopesDialogsModel {
-  return {
-    creating: c.creating,
-    onCloseCreating: () => c.setCreating(false),
-    profiles: c.supervisorProfiles,
-    teams: c.teams,
-    isCreating: c.create.isPending,
-    onCreate: (userId, teamId) =>
-      c.create.mutate(
-        { userId, teamId },
-        { onSuccess: () => c.setCreating(false) },
-      ),
-    editing: c.editing,
-    onCloseEditing: () => c.setEditing(null),
-    supervisor: c.supervisor,
-    team: c.team,
-    buildings: c.buildings,
-    onAddBuilding: (scopeId, buildingId) =>
-      c.addBuilding.mutate({ scopeId, buildingId }),
-    onRemoveBuilding: (scopeId, buildingId) =>
-      c.removeBuilding.mutate({ scopeId, buildingId }),
+function ScopeEditor({
+  controller: c,
+}: {
+  controller: ReturnType<typeof useScopesController>
+}) {
+  const editing = c.editing
+  const { scopes: t } = adminMessages
+  if (!editing && !c.creating) return null
+
+  function close() {
+    c.setCreating(false)
+    c.setEditing(null)
   }
+
+  return (
+    <SupervisorScopeDialog
+      profiles={c.supervisorProfiles}
+      teams={c.teams}
+      buildings={c.buildings}
+      scopes={c.scopes.data ?? []}
+      editing={editing ?? undefined}
+      description={
+        editing
+          ? `${c.supervisor(editing.userId)} · ${c.team(editing.teamId)}`
+          : t.addSupervisorHelp
+      }
+      isSaving={c.create.isPending || c.saveBuildings.isPending}
+      onClose={close}
+      onSave={(values) => {
+        if (editing) {
+          c.saveBuildings.mutate(
+            { id: editing.id, buildingIds: values.buildingIds },
+            { onSuccess: close },
+          )
+        } else {
+          c.create.mutate(values, { onSuccess: close })
+        }
+      }}
+    />
+  )
 }
 
 /** Ámbitos de supervisor: equipo y edificios cubiertos. */
@@ -229,11 +198,11 @@ export function SupervisorScopes() {
         searchPlaceholder={t.searchScopes}
         countText={`${c.visible.length} ${list.results}`}
         addLabel={t.addSupervisor}
-        onAdd={() => c.setCreating(true)}
+        onAdd={c.ready ? () => c.setCreating(true) : undefined}
       />
-      {c.scopes.isLoading ? <LoadingList rows={3} /> : null}
-      {c.scopes.isError ? <ErrorAlert message={list.error} /> : null}
-      {c.scopes.data ? (
+      {c.isLoading ? <LoadingList rows={3} /> : null}
+      {c.isError ? <ErrorAlert message={list.error} /> : null}
+      {c.ready ? (
         <>
           <ScopeCards scopes={c.visible} labels={labels} />
           <div className="hidden lg:block">
@@ -245,7 +214,7 @@ export function SupervisorScopes() {
           </div>
         </>
       ) : null}
-      <ScopesDialogs model={dialogsModel(c)} />
+      <ScopeEditor controller={c} />
       <ScopeRemoveDialog
         scope={removing}
         supervisor={c.supervisor}

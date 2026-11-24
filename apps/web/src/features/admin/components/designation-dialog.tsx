@@ -1,109 +1,88 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm, useWatch } from 'react-hook-form'
+import { z } from 'zod'
 import { SelectField } from '@/components/shared/form-fields'
 import type { AdminRow } from '../api/admin-api'
 import type { LinkablePerson } from '../domain/access'
+import type { TechnicianDesignation } from '../domain/scope-list'
 import { adminMessages } from '../i18n'
-import { EntityDialog } from './entity-dialog'
-import { EntityForm } from './entity-form'
-import { FormGroup } from './form-group'
+import { AssignmentDialog } from './assignment-dialog'
+import { AssignmentOptions } from './assignment-options'
 
-interface DesignationFieldsProps {
-  technicians: LinkablePerson[]
-  categories: AdminRow[]
-  technicianId: string
-  categoryId: string
-  onChange: (patch: { technicianId?: string; categoryId?: string }) => void
-}
-
-function DesignationFields({
-  technicians,
-  categories,
-  technicianId,
-  categoryId,
-  onChange,
-}: DesignationFieldsProps) {
-  const { scopes: t, actions } = adminMessages
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <SelectField
-        id="designation-technician"
-        label={t.technicianName}
-        placeholder={actions.selectPlaceholder}
-        options={technicians.map((person) => ({
-          value: person.id,
-          label: person.fullName,
-        }))}
-        value={technicianId}
-        onChange={(event) => onChange({ technicianId: event.target.value })}
-      />
-      <SelectField
-        id="designation-category"
-        label={t.category}
-        placeholder={actions.selectPlaceholder}
-        options={categories.map((category) => ({
-          value: String(category.id),
-          label: String(category.name),
-        }))}
-        value={categoryId}
-        onChange={(event) => onChange({ categoryId: event.target.value })}
-      />
-    </div>
-  )
-}
+const { scopes: t, actions } = adminMessages
+const schema = z.object({
+  technicianId: z.uuid(t.selectTechnician),
+  categoryIds: z.array(z.uuid()),
+})
 
 interface DesignationDialogProps {
   technicians: LinkablePerson[]
   categories: AdminRow[]
+  designations: TechnicianDesignation[]
+  editing?: TechnicianDesignation
+  description: string
   isSaving: boolean
-  onCreate: (technicianId: string, categoryId: string) => void
+  onSave: (values: z.infer<typeof schema>) => void
   onClose: () => void
 }
 
-/** Alta de una designación de técnico a categoría. */
 export function DesignationDialog({
   technicians,
   categories,
+  designations,
+  editing,
+  description,
   isSaving,
-  onCreate,
+  onSave,
   onClose,
 }: DesignationDialogProps) {
-  const [values, setValues] = useState({ technicianId: '', categoryId: '' })
-  const { scopes: t, actions } = adminMessages
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      technicianId: editing?.technicianId ?? '',
+      categoryIds: editing?.categoryIds ?? [],
+    },
+  })
+  const technicianId = useWatch({ control: form.control, name: 'technicianId' })
+  const categoryIds = useWatch({ control: form.control, name: 'categoryIds' })
+  const error = form.formState.errors.technicianId?.message
 
-  function submit(event: FormEvent) {
-    event.preventDefault()
-    if (!values.technicianId || !values.categoryId) return
-    onCreate(values.technicianId, values.categoryId)
+  function selectTechnician(id: string) {
+    const existing = designations.find((item) => item.technicianId === id)
+    form.setValue('technicianId', id, { shouldValidate: Boolean(error) })
+    form.setValue('categoryIds', existing?.categoryIds ?? [])
   }
 
   return (
-    <EntityDialog
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose()
-      }}
-      title={t.addDesignation}
-      description={t.addDesignationHelp}
+    <AssignmentDialog
+      title={editing ? t.editCategories : t.addDesignation}
+      description={description}
+      isSaving={isSaving}
+      onSave={form.handleSubmit(onSave)}
+      onClose={onClose}
     >
-      <EntityForm
-        onSubmit={submit}
-        onCancel={onClose}
-        isSaving={isSaving}
-        submitLabel={actions.add}
-      >
-        <FormGroup title={t.technician}>
-          <DesignationFields
-            technicians={technicians}
-            categories={categories}
-            technicianId={values.technicianId}
-            categoryId={values.categoryId}
-            onChange={(patch) =>
-              setValues((current) => ({ ...current, ...patch }))
-            }
-          />
-        </FormGroup>
-      </EntityForm>
-    </EntityDialog>
+      {editing ? null : (
+        <SelectField
+          id="designation-technician"
+          label={t.technicianName}
+          placeholder={actions.selectPlaceholder}
+          options={technicians.map((person) => ({
+            value: person.id,
+            label: person.fullName,
+          }))}
+          value={technicianId}
+          disabled={isSaving}
+          error={error}
+          onChange={(event) => selectTechnician(event.target.value)}
+        />
+      )}
+      <AssignmentOptions
+        kind="categories"
+        rows={categories}
+        value={categoryIds}
+        onChange={(ids) => form.setValue('categoryIds', ids)}
+        disabled={isSaving || !technicianId}
+      />
+    </AssignmentDialog>
   )
 }

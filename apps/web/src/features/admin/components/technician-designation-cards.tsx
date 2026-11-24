@@ -1,40 +1,66 @@
-import { XIcon } from 'lucide-react'
+import { PencilIcon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { TechnicianDesignation } from '../domain/scope-list'
 import { adminMessages } from '../i18n'
 
-export function CategoryChip({
-  label,
-  onRemove,
+export interface DesignationLabels {
+  technician: (id: string) => string
+  category: (id: string) => string
+  onEdit: (designation: TechnicianDesignation) => void
+}
+
+export function DesignationCategories({
+  designation,
+  category,
 }: {
-  label: string
-  onRemove: () => void
+  designation: TechnicianDesignation
+  category: DesignationLabels['category']
 }) {
-  const { scopes: t } = adminMessages
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-      {label}
-      <button
-        type="button"
-        aria-label={`${t.remove}: ${label}`}
-        className="relative inline-flex size-6 items-center justify-center rounded-full outline-none after:absolute after:-inset-2.5 after:content-[''] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        onClick={onRemove}
-      >
-        <XIcon className="size-3.5" />
-      </button>
-    </span>
+    <div className="flex flex-wrap gap-1">
+      {designation.categoryIds.map((id) => (
+        <Badge
+          key={id}
+          variant="secondary"
+          className="h-auto whitespace-normal"
+        >
+          {category(id)}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+export function EditCategories({
+  designation,
+  labels,
+}: {
+  designation: TechnicianDesignation
+  labels: DesignationLabels
+}) {
+  const title = adminMessages.scopes.editCategories
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className="min-h-11"
+      aria-label={`${title}: ${labels.technician(designation.technicianId)}`}
+      onClick={() => labels.onEdit(designation)}
+    >
+      <PencilIcon />
+      {title}
+    </Button>
   )
 }
 
 export function DesignationCards({
   rows,
-  technician,
-  category,
-  onRemove,
+  labels,
 }: {
   rows: TechnicianDesignation[]
-  technician: (id: string) => string
-  category: (id: string) => string
-  onRemove: (technicianId: string, categoryId: string) => void
+  labels: DesignationLabels
 }) {
   return (
     <ul className="flex flex-col gap-2 lg:hidden">
@@ -43,21 +69,15 @@ export function DesignationCards({
           key={designation.technicianId}
           className="flex flex-col gap-3 rounded-xl border bg-card p-3"
         >
-          <p className="font-medium">{technician(designation.technicianId)}</p>
-          <div className="flex flex-wrap gap-1">
-            {designation.categoryIds.length === 0 ? (
-              <span className="text-sm text-muted-foreground">—</span>
-            ) : (
-              designation.categoryIds.map((categoryId) => (
-                <CategoryChip
-                  key={categoryId}
-                  label={category(categoryId)}
-                  onRemove={() =>
-                    onRemove(designation.technicianId, categoryId)
-                  }
-                />
-              ))
-            )}
+          <p className="font-medium">
+            {labels.technician(designation.technicianId)}
+          </p>
+          <DesignationCategories
+            designation={designation}
+            category={labels.category}
+          />
+          <div className="flex justify-end">
+            <EditCategories designation={designation} labels={labels} />
           </div>
         </li>
       ))}

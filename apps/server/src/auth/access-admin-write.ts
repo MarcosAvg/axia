@@ -178,18 +178,6 @@ export async function linkTechnicianUser(
   if (!result.rows[0]) notFound('Técnico')
 }
 
-export async function createScope(
-  db: Database,
-  userId: string,
-  teamId: string,
-) {
-  await db.execute(sql`
-    insert into public.supervisor_scopes (user_id, team_id)
-    values (${userId}, ${teamId})
-    on conflict (user_id, team_id) do update set active = true
-  `)
-}
-
 export async function deleteScope(db: Database, id: string) {
   await db.execute(sql`delete from public.supervisor_scopes where id = ${id}`)
 }

@@ -139,46 +139,23 @@ export function useLinkTechnicianUser() {
   )
 }
 export function useCreateSupervisorScope() {
-  return useAccessMutation(
-    (variables: { userId: string; teamId: string }) =>
-      api.createSupervisorScope(variables.userId, variables.teamId),
-    actions.scopeCreated,
-  )
+  return useAccessMutation(api.createSupervisorScope, actions.scopeCreated)
 }
+
 export function useDeleteSupervisorScope() {
   return useAccessMutation(
     (variables: { id: string }) => api.deleteSupervisorScope(variables.id),
     actions.scopeRemoved,
   )
 }
-export function useAddScopeBuilding() {
-  return useAccessMutation(
-    (variables: { scopeId: string; buildingId: string }) =>
-      api.addScopeBuilding(variables.scopeId, variables.buildingId),
-    actions.buildingsUpdated,
-  )
+
+export function useSetScopeBuildings() {
+  return useAccessMutation(api.setScopeBuildings, actions.buildingsUpdated)
 }
-export function useRemoveScopeBuilding() {
+
+export function useSetTechnicianCategories() {
   return useAccessMutation(
-    (variables: { scopeId: string; buildingId: string }) =>
-      api.removeScopeBuilding(variables.scopeId, variables.buildingId),
-    actions.buildingsUpdated,
-  )
-}
-export function useAddTechnicianCategory() {
-  return useAccessMutation(
-    (variables: { technicianId: string; categoryId: string }) =>
-      api.addTechnicianCategory(variables.technicianId, variables.categoryId),
-    actions.designationCreated,
-  )
-}
-export function useRemoveTechnicianCategory() {
-  return useAccessMutation(
-    (variables: { technicianId: string; categoryId: string }) =>
-      api.removeTechnicianCategory(
-        variables.technicianId,
-        variables.categoryId,
-      ),
-    actions.designationRemoved,
+    api.setTechnicianCategories,
+    actions.categoriesUpdated,
   )
 }

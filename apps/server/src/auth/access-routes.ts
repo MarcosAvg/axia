@@ -12,32 +12,21 @@ import type { AuthService } from './service.js'
 import type { AppConfig } from '../config.js'
 import { listAccess } from './access-admin.js'
 import {
-  addScopeBuilding,
-  addTechnicianCategory,
+  registerScopeRoutes,
+  registerTechnicianCategories,
+} from './access-assignment-routes.js'
+import {
   assignUserRole,
   createRole,
-  createScope,
-  deleteScope,
   linkRequesterUser,
   linkTechnicianUser,
   removeRolePermission,
-  removeScopeBuilding,
-  removeTechnicianCategory,
   removeUserRole,
   setRolePermission,
   updateRole,
 } from './access-admin-write.js'
 
 const idParams = z.object({ id: z.string().uuid() })
-const scopeParams = z.object({
-  scopeId: z.string().uuid(),
-  buildingId: z.string().uuid(),
-})
-const techCategoryParams = z.object({
-  technicianId: z.string().uuid(),
-  categoryId: z.string().uuid(),
-})
-
 function registerRoleRoutes(
   app: FastifyInstance,
   db: Database,
@@ -186,87 +175,6 @@ function registerLinkRoutes(
       },
     )
   }
-}
-
-function registerScopeRoutes(
-  app: FastifyInstance,
-  db: Database,
-  guard: Guard[],
-) {
-  app.post(
-    '/api/admin/access/scopes',
-    { preHandler: guard },
-    async (request, reply) => {
-      const body = z
-        .object({ userId: z.string().uuid(), teamId: z.string().uuid() })
-        .parse(request.body)
-      await createScope(db, body.userId, body.teamId)
-      return reply.status(204).send()
-    },
-  )
-
-  app.delete(
-    '/api/admin/access/scopes/:id',
-    { preHandler: guard },
-    async (request, reply) => {
-      const { id } = idParams.parse(request.params)
-      await deleteScope(db, id)
-      return reply.status(204).send()
-    },
-  )
-
-  app.post(
-    '/api/admin/access/scope-buildings',
-    { preHandler: guard },
-    async (request, reply) => {
-      const body = z
-        .object({ scopeId: z.string().uuid(), buildingId: z.string().uuid() })
-        .parse(request.body)
-      await addScopeBuilding(db, body.scopeId, body.buildingId)
-      return reply.status(204).send()
-    },
-  )
-
-  app.delete(
-    '/api/admin/access/scope-buildings/:scopeId/:buildingId',
-    { preHandler: guard },
-    async (request, reply) => {
-      const params = scopeParams.parse(request.params)
-      await removeScopeBuilding(db, params.scopeId, params.buildingId)
-      return reply.status(204).send()
-    },
-  )
-}
-
-function registerTechnicianCategories(
-  app: FastifyInstance,
-  db: Database,
-  guard: Guard[],
-) {
-  app.post(
-    '/api/admin/access/technician-categories',
-    { preHandler: guard },
-    async (request, reply) => {
-      const body = z
-        .object({
-          technicianId: z.string().uuid(),
-          categoryId: z.string().uuid(),
-        })
-        .parse(request.body)
-      await addTechnicianCategory(db, body.technicianId, body.categoryId)
-      return reply.status(204).send()
-    },
-  )
-
-  app.delete(
-    '/api/admin/access/technician-categories/:technicianId/:categoryId',
-    { preHandler: guard },
-    async (request, reply) => {
-      const params = techCategoryParams.parse(request.params)
-      await removeTechnicianCategory(db, params.technicianId, params.categoryId)
-      return reply.status(204).send()
-    },
-  )
 }
 
 export function registerAdminAccessRoutes(

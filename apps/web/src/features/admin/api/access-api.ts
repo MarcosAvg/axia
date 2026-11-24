@@ -150,35 +150,25 @@ export async function listSupervisorScopes(): Promise<SupervisorScope[]> {
   return (await fetchAccess()).scopes
 }
 
-export async function createSupervisorScope(
-  userId: string,
-  teamId: string,
-): Promise<void> {
-  await mutate('/api/admin/access/scopes', 'POST', { userId, teamId })
+export async function createSupervisorScope(values: {
+  userId: string
+  teamId: string
+  buildingIds: string[]
+}): Promise<void> {
+  await mutate('/api/admin/access/scopes', 'POST', values)
 }
 
 export async function deleteSupervisorScope(id: string): Promise<void> {
   await mutate(`/api/admin/access/scopes/${id}`, 'DELETE')
 }
 
-export async function addScopeBuilding(
-  scopeId: string,
-  buildingId: string,
-): Promise<void> {
-  await mutate('/api/admin/access/scope-buildings', 'POST', {
-    scopeId,
-    buildingId,
+export async function setScopeBuildings(values: {
+  id: string
+  buildingIds: string[]
+}): Promise<void> {
+  await mutate(`/api/admin/access/scopes/${values.id}`, 'PATCH', {
+    buildingIds: values.buildingIds,
   })
-}
-
-export async function removeScopeBuilding(
-  scopeId: string,
-  buildingId: string,
-): Promise<void> {
-  await mutate(
-    `/api/admin/access/scope-buildings/${scopeId}/${buildingId}`,
-    'DELETE',
-  )
 }
 
 export async function listTechnicianCategories(): Promise<
@@ -187,22 +177,15 @@ export async function listTechnicianCategories(): Promise<
   return (await fetchAccess()).technicianCategories
 }
 
-export async function addTechnicianCategory(
-  technicianId: string,
-  categoryId: string,
-): Promise<void> {
-  await mutate('/api/admin/access/technician-categories', 'POST', {
-    technicianId,
-    categoryId,
-  })
-}
-
-export async function removeTechnicianCategory(
-  technicianId: string,
-  categoryId: string,
-): Promise<void> {
+export async function setTechnicianCategories(values: {
+  technicianId: string
+  categoryIds: string[]
+}): Promise<void> {
   await mutate(
-    `/api/admin/access/technician-categories/${technicianId}/${categoryId}`,
-    'DELETE',
+    `/api/admin/access/technician-categories/${values.technicianId}`,
+    'PATCH',
+    {
+      categoryIds: values.categoryIds,
+    },
   )
 }
