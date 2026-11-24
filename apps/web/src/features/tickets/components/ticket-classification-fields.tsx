@@ -1,6 +1,6 @@
 import { useWatch } from 'react-hook-form'
 import type { UseFormReturn } from 'react-hook-form'
-import { SelectField } from '@/components/shared/form-fields'
+import { SelectField, TextField } from '@/components/shared/form-fields'
 import type { SelectOption } from '@/components/shared/form-fields'
 import { useProblemSearchCatalog } from '@/features/catalogs'
 import type {
@@ -29,6 +29,7 @@ interface TicketClassificationFieldsProps {
   problems: ProblemOption[]
   channels: Option[]
   showChannel: boolean
+  platformChannelName?: string | null
 }
 
 function toOptions(items: Option[], selected?: Option): SelectOption[] {
@@ -116,7 +117,8 @@ function ClassificationSelectField({
 export function TicketClassificationFields(
   props: TicketClassificationFieldsProps,
 ) {
-  const { form } = props
+  const { form, platformChannelName } = props
+  const { fields, platformChannelConfiguration } = ticketMessages.create
   const values = useWatch({ control: form.control })
   const search = useProblemSearchCatalog()
   const selected = search.data?.find(
@@ -152,6 +154,19 @@ export function TicketClassificationFields(
             value={values[select.id] ?? ''}
           />
         ))}
+        {platformChannelName !== undefined ? (
+          <TextField
+            id="platform-channel"
+            label={fields.channel}
+            value={platformChannelName ?? ''}
+            error={
+              platformChannelName === null
+                ? platformChannelConfiguration
+                : undefined
+            }
+            readOnly
+          />
+        ) : null}
       </fieldset>
     </div>
   )

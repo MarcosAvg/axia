@@ -31,6 +31,11 @@ export function toTicketError(error: unknown): TicketError {
       }
     case '23505':
       return { kind: 'conflict', message: ticketMessages.errors.conflict }
+    case 'platform_channel_configuration':
+      return {
+        kind: 'validation',
+        message: ticketMessages.create.platformChannelConfiguration,
+      }
     case '22023':
       return { kind: 'validation', message: ticketMessages.errors.validation }
     case 'P0002':

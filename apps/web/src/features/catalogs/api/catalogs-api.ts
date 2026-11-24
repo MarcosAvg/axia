@@ -1,6 +1,7 @@
 import { apiFetch } from '@/lib/api-client'
 import type {
   CategoryOption,
+  ChannelOption,
   LocationOption,
   Option,
   ProblemOption,
@@ -33,7 +34,7 @@ export function fetchDependencies(locationId?: string) {
 export const fetchServiceTypes = () =>
   fetchCatalog<Option>('/api/catalogs/service-types')
 export const fetchChannels = () =>
-  fetchCatalog<Option>('/api/catalogs/channels')
+  fetchCatalog<ChannelOption>('/api/catalogs/channels')
 export const fetchPriorities = () =>
   fetchCatalog<Option>('/api/catalogs/priorities')
 export const fetchCategories = () =>

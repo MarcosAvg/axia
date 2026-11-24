@@ -92,6 +92,9 @@ test('@smoke un solicitante registra un tiquet y lo ve en la lista y el detalle'
   await signIn(page, 'demo.requester')
 
   await page.goto('/tickets/nuevo')
+  const channel = page.getByRole('textbox', { name: 'Canal' })
+  await expect(channel).toHaveValue('Web')
+  await expect(channel).toHaveAttribute('readonly', '')
   await page.getByLabel('Edificio').selectOption({ label: 'Edificio Central' })
   await page.getByLabel('Ubicación').selectOption({ label: 'Planta baja' })
   await expect(page.getByLabel('Dependencia solicitante')).toHaveCount(0)

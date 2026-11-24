@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- Al registrar un tiquet a nombre propio, Axia muestra y asigna el canal marcado como vía de la
+  plataforma. El registro a nombre de otra persona permite elegir el canal de origen.
+
 ## [0.36.0] - 2026-11-24
 
 ### Cambiado

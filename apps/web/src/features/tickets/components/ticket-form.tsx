@@ -28,6 +28,7 @@ interface TicketFormFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  ownRegistration: boolean
   fixedDependencyId?: string
   fixedDependencyName?: string | null
   placeDisabled: boolean
@@ -127,6 +128,7 @@ function TicketFormFields({
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  ownRegistration,
   fixedDependencyId,
   fixedDependencyName,
   placeDisabled,
@@ -142,6 +144,7 @@ function TicketFormFields({
         catalogs={catalogs}
         canChooseRequester={canChooseRequester}
         ownRequesterName={ownRequesterName}
+        ownRegistration={ownRegistration}
         fixedDependencyId={fixedDependencyId}
         fixedDependencyName={fixedDependencyName}
         placeDisabled={placeDisabled}
@@ -199,6 +202,7 @@ function TicketFormContent({ create }: { create: CreateTicketFormState }) {
           canChooseRequester={create.canChooseRequester}
           showOccurredAt={create.showOccurredAt}
           ownRequesterName={create.ownRequester?.fullName ?? null}
+          ownRegistration={create.ownRegistration}
           fixedDependencyId={create.fixedDependencyId}
           fixedDependencyName={create.fixedDependencyName}
           placeDisabled={create.placeDisabled}

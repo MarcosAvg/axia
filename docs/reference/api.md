@@ -46,7 +46,7 @@ de origen para escrituras; no expone una clave de base de datos al cliente. Las 
 | Método | Ruta | Uso |
 |---|---|---|
 | `GET` | `/api/tickets` | Lista paginada con filtros |
-| `POST` | `/api/tickets` | Alta idempotente |
+| `POST` | `/api/tickets` | Alta idempotente. En el registro propio, el servidor asigna el único canal activo de la plataforma. En el registro a nombre de otra persona admite `channelId` |
 | `POST` | `/api/tickets/duplicates` | Aviso previo de posibles duplicados (`buildingId`, `locationId`, `dependencyId` y `categoryId` obligatorios) |
 | `GET` | `/api/tickets/:id/duplicate-alerts` | Alertas de duplicado con su decisión |
 | `POST` | `/api/tickets/:id/duplicate-alerts/dismiss` | Descartar las alertas pendientes |

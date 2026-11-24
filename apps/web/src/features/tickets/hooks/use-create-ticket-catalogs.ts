@@ -43,6 +43,9 @@ export function useCreateTicketCatalogs({
   const priorities = usePriorities()
   const channels = useChannels()
   const requesters = useRequesters()
+  const platformChannels = channels.data?.filter(
+    (channel) => channel.isPlatform,
+  )
 
   const queries = [
     buildings,
@@ -68,6 +71,11 @@ export function useCreateTicketCatalogs({
     serviceTypes: dataOf(serviceTypes),
     priorities: dataOf(priorities),
     channels: dataOf(channels),
+    platformChannelName: channels.isSuccess
+      ? platformChannels?.length === 1
+        ? platformChannels[0]?.name
+        : null
+      : undefined,
     requesters: dataOf(requesters),
     isLoading: queries.some((query) => query.isLoading),
   }

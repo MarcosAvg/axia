@@ -3,6 +3,10 @@ export interface Option {
   name: string
 }
 
+export interface ChannelOption extends Option {
+  isPlatform: boolean
+}
+
 export interface LocationOption extends Option {
   buildingId: string
 }

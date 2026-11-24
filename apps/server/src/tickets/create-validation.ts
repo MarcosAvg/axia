@@ -200,15 +200,32 @@ async function resolvePriorityId(
   )
 }
 
+async function platformChannelId(tx: DbExecutor): Promise<string> {
+  const { rows } = await tx.execute<DefaultRow>(sql`
+    select id from public.channels where active and is_platform limit 2
+  `)
+  const channel = rows[0]
+  if (!channel || rows.length !== 1) {
+    throw new AppError(
+      400,
+      'platform_channel_configuration',
+      'Debe haber un solo canal activo marcado como Canal de la plataforma en el catálogo.',
+    )
+  }
+  return channel.id
+}
+
 export async function resolveCreateDefaults(
   tx: DbExecutor,
   input: CreateTicketInput,
+  onBehalf: boolean,
 ): Promise<ResolvedCreateInput> {
   const serviceTypeId =
     input.serviceTypeId ??
     (await firstActive(tx, 'service_types', 'Correctivo'))
-  const channelId =
-    input.channelId ?? (await firstActive(tx, 'channels', 'Web'))
+  const channelId = onBehalf
+    ? (input.channelId ?? (await firstActive(tx, 'channels', 'Web')))
+    : await platformChannelId(tx)
   const priorityId = await resolvePriorityId(tx, input)
   if (!serviceTypeId || !priorityId || !channelId) {
     throw invalid('Faltan catálogos obligatorios para registrar el tiquet')

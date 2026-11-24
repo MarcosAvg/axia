@@ -32,6 +32,7 @@ const defaultValues: CreateTicketInput = {
 type PlaceSelection = {
   ownRequester: RequesterOption | undefined
   selectedRequesterId: string | undefined
+  ownRegistration: boolean
   fixedDependencyId: string
   fixedDependencyName: string | null
   placeDisabled: boolean
@@ -68,6 +69,8 @@ function usePlaceSelection(
   return {
     ownRequester,
     selectedRequesterId: selectedRequester?.id,
+    ownRegistration:
+      Boolean(ownRequester) && selectedRequester === ownRequester,
     fixedDependencyId,
     fixedDependencyName,
     placeDisabled,

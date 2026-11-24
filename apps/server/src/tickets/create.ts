@@ -208,8 +208,8 @@ async function createInTransaction(
   const handled = await findHandledEvent(tx, input.clientRequestId)
   if (handled) return replayedCreate(tx, handled)
 
-  const resolved = await resolveCreateDefaults(tx, input)
-  const { requester, onBehalf } = await authorizeRequester(tx, actor, resolved)
+  const { requester, onBehalf } = await authorizeRequester(tx, actor, input)
+  const resolved = await resolveCreateDefaults(tx, input, onBehalf)
   if ((input.occurredLocal || input.occurredAt) && !onBehalf) {
     throw new AppError(
       400,

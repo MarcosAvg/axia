@@ -335,6 +335,9 @@ catálogo cambie después.
 
 - **Maestros:** edificios, ubicaciones, equipos, dependencias, categorías, subcategorías,
   problemas (con equipo), tipos de servicio, prioridades, canales de registro.
+  Un registro propio usa automáticamente el único canal activo marcado como canal de la
+  plataforma. Si no hay uno o hay varios, se pide corregir el catálogo antes de guardar.
+  Al registrar a nombre de otra persona se puede elegir el canal de origen.
 - **Motivos jerárquicos (profundidad ilimitada, por tipo de uso):** pausa, rechazo, cancelación,
   reasignación de supervisor, reasignación de técnico, recaptura, reclamación, resultado de
   reclamación, reactivación y tipo de apoyo auxiliar. Cada nodo puede tener: activo, orden,

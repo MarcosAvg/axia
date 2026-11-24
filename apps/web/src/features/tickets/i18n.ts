@@ -100,6 +100,8 @@ export const ticketMessages = {
     },
   },
   create: {
+    platformChannelConfiguration:
+      'Pide a un administrador que marque un solo canal activo como Canal de la plataforma en el catálogo.',
     title: 'Nuevo tiquet',
     subtitle:
       'Llena todos los campos. La foto es opcional pero muy recomendada.',

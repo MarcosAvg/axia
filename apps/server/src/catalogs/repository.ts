@@ -57,7 +57,7 @@ async function listOptions(
   table: OptionTable,
 ): Promise<SimpleOption[]> {
   const result = await db.execute(sql`
-    select id, name
+    select id, name ${table === 'channels' ? sql`, is_platform as "isPlatform"` : sql``}
     from ${sql.raw(`public.${table}`)}
     where active
     order by public.natural_sort_key(name)

@@ -18,10 +18,41 @@ interface TicketCaptureFieldsProps {
   catalogs: CreateTicketCatalogs
   canChooseRequester: boolean
   ownRequesterName: string | null
+  ownRegistration: boolean
   fixedDependencyId?: string
   fixedDependencyName?: string | null
   placeDisabled: boolean
   needsRequester: boolean
+}
+
+function CaptureClassification({
+  form,
+  catalogs,
+  canChooseRequester,
+  ownRegistration,
+}: Pick<
+  TicketCaptureFieldsProps,
+  'form' | 'catalogs' | 'canChooseRequester' | 'ownRegistration'
+>) {
+  const { sections } = ticketMessages.create
+  return (
+    <FormSection
+      title={sections.classification}
+      description={sections.classificationHelp}
+    >
+      <TicketClassificationFields
+        form={form}
+        categories={catalogs.categories}
+        subcategories={catalogs.subcategories}
+        problems={catalogs.problems}
+        channels={catalogs.channels}
+        showChannel={canChooseRequester && !ownRegistration}
+        platformChannelName={
+          ownRegistration ? catalogs.platformChannelName : undefined
+        }
+      />
+    </FormSection>
+  )
 }
 
 /** Secciones de la captura del tiquet: solicitante, ubicación, clasificación y descripción. */
@@ -32,6 +63,7 @@ export function TicketCaptureFields({
   catalogs,
   canChooseRequester,
   ownRequesterName,
+  ownRegistration,
   fixedDependencyId,
   fixedDependencyName,
   placeDisabled,
@@ -69,19 +101,12 @@ export function TicketCaptureFields({
           needsRequester={needsRequester}
         />
       </FormSection>
-      <FormSection
-        title={sections.classification}
-        description={sections.classificationHelp}
-      >
-        <TicketClassificationFields
-          form={form}
-          categories={catalogs.categories}
-          subcategories={catalogs.subcategories}
-          problems={catalogs.problems}
-          channels={catalogs.channels}
-          showChannel={canChooseRequester}
-        />
-      </FormSection>
+      <CaptureClassification
+        form={form}
+        catalogs={catalogs}
+        canChooseRequester={canChooseRequester}
+        ownRegistration={ownRegistration}
+      />
     </>
   )
 }
