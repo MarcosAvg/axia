@@ -39,6 +39,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0129](0129-captura-local-trabajo-en-campo.md) | Preparación de tiquets y captura local para el trabajo en campo |
 | [0130](0130-recuperacion-cola-offline.md) | Recuperación de la cola offline |
 | [0131](0131-renovacion-pwa.md) | Activación y renovación de la PWA |
+| [0132](0132-web-push.md) | Entrega de avisos por Web Push |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

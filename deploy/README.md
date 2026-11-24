@@ -89,3 +89,23 @@ persisten en volúmenes separados.
 Si falla el arranque, revisar `docker compose ps` y `docker compose logs --tail=100 app`.
 La [guía de operación](../docs/guides/operacion.md) cubre el diagnóstico, los respaldos, las
 actualizaciones y la recuperación después de una migración fallida.
+
+## Avisos Web Push
+
+Configura Axia en HTTPS. Genera una clave P-256 **una vez por instancia** y guarda su salida
+como secreto `WEB_PUSH_PRIVATE_KEY` en el entorno de Compose o del servidor, fuera del repositorio.
+Define también `WEB_PUSH_CONTACT` con un contacto real en formato `mailto:` o con una URL HTTPS.
+
+```bash
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -outform PEM | openssl pkcs8 -topk8 -nocrypt -outform DER | openssl base64 -A
+```
+
+Conserva esa clave entre reinicios y respaldos. Si cambia, los dispositivos deben volver a
+registrar sus suscripciones al abrir Axia. Permite la salida HTTPS a
+`fcm.googleapis.com`, `*.push.services.mozilla.com`, `*.push.apple.com` y `*.notify.windows.com`.
+Cada navegador elige su servicio push. La clave queda en el servidor y la web recibe solo
+su parte pública.
+
+El navegador concede el permiso por dispositivo. En iPhone y iPad, abre Axia desde el acceso
+añadido a la pantalla de inicio. Los avisos previos al registro del dispositivo quedan en la
+bandeja.

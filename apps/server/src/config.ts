@@ -58,6 +58,12 @@ const environmentSchema = z.object({
     .positive()
     .default(500 * 1024 * 1024),
   ATTACHMENT_CLEANUP_HOURS: z.coerce.number().int().min(1).default(24),
+  WEB_PUSH_PRIVATE_KEY: z.string().optional(),
+  WEB_PUSH_CONTACT: z
+    .string()
+    .regex(/^(mailto:|https:\/\/).+/)
+    .or(z.literal(''))
+    .optional(),
   SSE_HEARTBEAT_MS: z.coerce
     .number()
     .int()

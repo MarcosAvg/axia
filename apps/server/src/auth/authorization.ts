@@ -62,7 +62,7 @@ function groupSupervisorScopes(rows: ScopeRow[]): SupervisorScope[] {
 }
 
 async function loadActorRow(
-  db: Database,
+  db: Pick<Database, 'execute'>,
   userId: string,
 ): Promise<ActorRow | null> {
   const result = await db.execute(sql`
@@ -145,7 +145,7 @@ function toActor(row: ActorRow): Actor {
 }
 
 export async function loadActor(
-  db: Database,
+  db: Pick<Database, 'execute'>,
   userId: string,
 ): Promise<Actor | null> {
   const row = await loadActorRow(db, userId)

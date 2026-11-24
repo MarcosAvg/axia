@@ -454,8 +454,9 @@ con reapertura y duplicado.
 
 ## 9. Notificaciones
 
-Son obligatorias. En esta fase solo se diseña y registra la base de datos; el envío (push, correo) se
-construye después. Debe soportar: notificaciones por destinatario con lectura, reglas configurables
+Son obligatorias. La bandeja conserva los avisos y su lectura por destinatario. Web Push entrega
+los avisos nuevos a dispositivos suscritos de personas con cuenta y acceso vigente al tiquet.
+El sistema debe soportar: notificaciones por destinatario con lectura, reglas configurables
 (tipo de evento → quién recibe → por qué canal), alertas de escalamiento, seguidores de un tiquet, y
 los avisos que menciona la especificación (oferta a supervisores, reasignación, recaptura propuesta,
 posible duplicado y duplicado marcado, atendido pendiente de validación, reclamación, reapertura,
@@ -514,7 +515,7 @@ posible duplicado ignoradas frente a atendidas, y volumen con y sin duplicados.
 
 ## 13. Fuera de alcance actual
 
-Envío real de notificaciones (push o correo); mantenimiento preventivo recurrente; control de
+Envío de notificaciones por correo; mantenimiento preventivo recurrente; control de
 materiales, inventario y costos (solo importa el estado de lo solicitado, que ya cubren los
 subestados de pausa); equipos o activos. La interfaz de usuario y la detección de duplicados ya
 están implementadas; la detección no bloquea y no fusiona tiquets.

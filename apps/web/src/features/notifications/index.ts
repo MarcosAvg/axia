@@ -10,3 +10,4 @@ export {
   useUnreadCount,
 } from './hooks/use-notifications'
 export { notificationMessages } from './i18n'
+export { PushPermission } from './components/push-permission'

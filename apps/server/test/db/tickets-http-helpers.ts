@@ -11,6 +11,7 @@ import { createEventHub, type EventHub } from '../../src/realtime/hub.js'
 import { hashPassword } from '../../src/auth/password.js'
 import type { Database } from '../../src/db/client.js'
 import { createDb } from '../../src/db/client.js'
+import type { AppConfig } from '../../src/config.js'
 import { checkDatabase } from '../../src/db/health.js'
 import { createTicketService } from '../../src/tickets/service.js'
 import { cookieFrom, headers, login } from '../db/auth-helpers.js'
@@ -53,6 +54,7 @@ export type TicketHttpContext = {
 }
 
 type BuildTicketHttpAppOptions = {
+  config?: AppConfig
   runtimeConnectionString?: string
 }
 
@@ -118,7 +120,7 @@ export async function buildTicketHttpApp(
   const attachments = createAttachmentService(runtime.db, testConfig)
   const events = createEventHub(runtime.db)
   const app = await buildApp({
-    config: testConfig,
+    config: options.config ?? testConfig,
     auth,
     db: runtime.db,
     tickets,

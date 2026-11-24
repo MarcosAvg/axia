@@ -31,8 +31,9 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
 - El alta de tiquets requiere conexión. La cola offline cubre acciones y evidencias, no el alta.
 - `auto_validation_days` se configura, pero no existe una tarea programada que valide
   automáticamente.
-- Web Push y el escalamiento automático no están implementados. Las notificaciones actuales se
-  consultan dentro de la aplicación.
+- El escalamiento automático y el correo siguen pendientes. Web Push requiere HTTPS, salida al
+  servicio push del navegador y permiso en cada dispositivo. En iPhone y iPad requiere abrir
+  Axia desde la pantalla de inicio. La bandeja conserva el detalle de todos los avisos.
 - La interfaz calcula los botones con el permiso; el servidor aplica además ámbito, participación y
   ventana de reclamación. Por eso puede mostrar una acción que luego rechaza.
 - La recaptura se limita a los estados registrado, con supervisor y asignado, y no exige motivo.

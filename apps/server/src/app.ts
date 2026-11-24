@@ -20,6 +20,7 @@ import { registerEvidenceRoutes } from './evidence/routes.js'
 import type { EvidenceService } from './evidence/service.js'
 import { createTusServer } from './evidence/tus.js'
 import { registerNotificationRoutes } from './realtime/notifications.js'
+import { registerPushRoutes } from './realtime/push-routes.js'
 import { registerRealtimeRoutes } from './realtime/routes.js'
 import { registerSyncRoutes } from './sync/routes.js'
 import type { EventHub } from './realtime/hub.js'
@@ -109,6 +110,7 @@ async function registerExtraRoutes(
   if (auth && realtime) {
     registerRealtimeRoutes(app, { auth, config, ...realtime })
     registerNotificationRoutes(app, { auth, config, db: realtime.db })
+    registerPushRoutes(app, { auth, config, db: realtime.db })
   }
   if (auth && sync) {
     registerSyncRoutes(app, { auth, config, db: sync.db })

@@ -79,9 +79,10 @@ no se mantiene una segunda definición de tablas en TypeScript ([ADR 0100](../de
 - Las vistas de métricas no aplican autorización por sí mismas: la API aplica el alcance.
 
 Las migraciones `0017_remove_retired_objects.sql` y `0031_remove_external_refs.sql` retiraron
-objetos sin consumidores; ya no se conservan referencias externas genéricas. `push_subscriptions` y
-`escalation_rules` siguen reservadas para funciones futuras; su presencia no implica Web Push ni
-planificador activos.
+objetos sin consumidores y retiraron las referencias externas genéricas. La migración
+`0053_web_push.sql` vincula `push_subscriptions` a la sesión del dispositivo y registra una fila
+en `notification_deliveries` por aviso y suscripción. `escalation_rules` sigue reservada para
+el escalamiento automático.
 
 El [índice histórico](../history/README.md) explica cómo consultar el diseño de la primera fase
 en Git sin confundirlo con el esquema actual.

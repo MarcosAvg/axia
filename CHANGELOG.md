@@ -5,6 +5,12 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Agregado
+
+- Axia solicita permiso de Web Push al abrir con sesión iniciada y suscribe automáticamente
+  el dispositivo al concederlo. Incluye los avisos existentes, con texto genérico en la
+  pantalla bloqueada y acceso a la bandeja al pulsar el aviso.
+
 ## [0.36.1] - 2026-11-24
 
 ### Cambiado

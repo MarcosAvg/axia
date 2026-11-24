@@ -44,3 +44,20 @@ export async function fetchChanges(since: number): Promise<TicketChange[]> {
   )
   return body.items
 }
+
+export function getPushConfig(signal: AbortSignal) {
+  return apiFetch<{ publicKey: string | null }>('/api/notifications/push', {
+    signal,
+  })
+}
+
+export function registerPushSubscription(
+  subscription: PushSubscription,
+  signal: AbortSignal,
+) {
+  return apiFetch<void>('/api/notifications/push', {
+    method: 'PUT',
+    body: JSON.stringify(subscription),
+    signal,
+  })
+}

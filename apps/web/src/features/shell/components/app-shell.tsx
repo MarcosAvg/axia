@@ -1,7 +1,7 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { cn } from 'cn'
-import { useServerEvents } from '@/features/notifications'
+import { PushPermission, useServerEvents } from '@/features/notifications'
 import { shellMessages } from '../i18n'
 import { AppSidebar } from './app-sidebar'
 import { AppTabbar } from './app-tabbar'
@@ -62,6 +62,7 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AppTopbar onOpenSearch={() => setSearchOpen(true)} />
+        <PushPermission />
         <main
           id="main-content"
           className={cn(

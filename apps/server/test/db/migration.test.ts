@@ -48,7 +48,7 @@ describe('base schema objects', () => {
         owner,
         "select count(*)::text as value from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'",
       ),
-    ).toBe(40)
+    ).toBe(41)
     expect(
       await scalar(
         owner,
@@ -79,7 +79,7 @@ describe('base schema account tables', () => {
       select table_name, column_name
       from information_schema.columns
       where table_schema = 'public'
-        and table_name in ('users', 'sessions', 'login_attempts', 'notification_deliveries', 'evidence', 'idempotency_keys')
+        and table_name in ('users', 'sessions', 'login_attempts', 'notification_deliveries', 'push_subscriptions', 'evidence', 'idempotency_keys')
       order by table_name, column_name
     `)
     const names = new Set(
@@ -94,6 +94,8 @@ describe('base schema account tables', () => {
     expect(names.has('login_attempts.successful')).toBe(true)
     expect(names.has('notification_deliveries.next_attempt_at')).toBe(true)
     expect(names.has('notification_deliveries.last_error')).toBe(true)
+    expect(names.has('notification_deliveries.push_subscription_id')).toBe(true)
+    expect(names.has('push_subscriptions.session_id')).toBe(true)
     expect(names.has('evidence.processing_state')).toBe(true)
     expect(names.has('evidence.sha256')).toBe(true)
     expect(names.has('idempotency_keys.status')).toBe(true)
@@ -168,6 +170,7 @@ describe('base schema views and triggers', () => {
     expect(names.has('evidence_no_delete')).toBe(true)
     expect(names.has('ticket_events_record_spans')).toBe(true)
     expect(names.has('ticket_events_notify')).toBe(true)
+    expect(names.has('notifications_enqueue_web_push')).toBe(true)
     expect(names.has('ticket_events_broadcast')).toBe(true)
     expect(names.has('users_set_updated_at')).toBe(true)
     expect(names.has('tickets_set_folio')).toBe(true)
@@ -286,7 +289,7 @@ describe('migration runner', () => {
     const result = await owner.query(
       'select checksum from axia_migrations.schema_migrations',
     )
-    expect(result.rows).toHaveLength(54)
+    expect(result.rows).toHaveLength(55)
     expect(
       result.rows.every((row) => /^[a-f0-9]{64}$/.test(row.checksum)),
     ).toBe(true)
@@ -299,7 +302,7 @@ describe('migration runner', () => {
         owner,
         'select count(*)::text as value from axia_migrations.schema_migrations',
       ),
-    ).toBe(54)
+    ).toBe(55)
   })
 
   it('enforces username normalization and uniqueness', async () => {
