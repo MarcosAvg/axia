@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.36.1] - 2026-11-24
+
 ### Cambiado
 
 - Al registrar un tiquet a nombre propio, Axia muestra y asigna el canal marcado como vía de la
