@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-25
+
 ### Cambiado
 
 - Los avisos push muestran qué ocurrió y se conservan por separado. Los folios, nombres y
