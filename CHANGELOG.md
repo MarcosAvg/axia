@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.38.2] - 2026-11-25
+
 ### Corregido
 
 - La notificación del sistema muestra el folio y el detalle del aviso. El service worker lo
