@@ -81,6 +81,35 @@ describe('notifications', () => {
   })
 })
 
+describe('notification detail', () => {
+  it('returns a single notification only to its recipient', async () => {
+    const list = await get('/api/notifications', context.cookies.technician)
+    const body = (await list.json()) as {
+      items: Array<{ id: string; type: string; ticketFolio: string | null }>
+    }
+    const notification = body.items.find(
+      (entry) => entry.type === 'assigned_technician',
+    )
+    expect(notification).toBeDefined()
+    const url = `/api/notifications/${notification?.id}`
+
+    const own = await get(url, context.cookies.technician)
+    expect(own.status).toBe(200)
+    expect(await own.json()).toMatchObject({
+      id: notification?.id,
+      type: 'assigned_technician',
+      ticketFolio: notification?.ticketFolio,
+    })
+
+    expect((await get(url, context.cookies.supervisor)).status).toBe(404)
+    expect((await get(url, context.cookies.noAccess)).status).toBe(403)
+    expect(
+      (await get('/api/notifications/not-an-id', context.cookies.technician))
+        .status,
+    ).toBe(400)
+  })
+})
+
 describe('notification enrichment', () => {
   it('describes the aviso with actor, reason and ticket context', async () => {
     const reasons = await context.db.execute(sql`

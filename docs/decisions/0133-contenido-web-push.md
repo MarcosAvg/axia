@@ -2,7 +2,8 @@
 
 **Fecha:** 2026-11-25
 
-**Estado:** aceptada
+**Estado:** aceptada. El detalle mostrado cambió en
+[0134](0134-detalle-web-push.md).
 
 Cada notificación contiene el tipo de evento y el identificador del aviso. Fastify cifra esos
 datos con las claves de la suscripción mediante RFC 8291. El service worker comparte con la

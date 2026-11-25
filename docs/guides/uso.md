@@ -75,9 +75,11 @@ invitación. El permiso se concede por dispositivo. En iPhone y iPad, abrir Axia
 acceso añadido a la pantalla de inicio. Si Axia ofrece **Actualizar**, aplicar la actualización
 para que la PWA pueda mostrar los avisos del sistema.
 
-Cada aviso del sistema muestra qué ocurrió, por ejemplo «Te asignaron un tiquet». La pantalla
-bloqueada no muestra folios, nombres ni detalles. Al pulsar un aviso se abre la bandeja, donde
-se aplican los permisos de la cuenta. La bandeja sigue disponible sin permiso de notificaciones.
+Cada aviso del sistema muestra el folio y el detalle del aviso, por ejemplo «AX-001 · Ana te lo
+asignó. Electricidad Edificio A1». El detalle se consulta con la sesión del dispositivo, no se
+transmite al proveedor push; aparece también en la pantalla bloqueada. Al pulsar un aviso se abre
+la bandeja, donde se aplican los permisos de la cuenta. La bandeja sigue disponible sin permiso de
+notificaciones.
 Los solicitantes sin cuenta reciben el seguimiento por el medio que use su organización.
 
 La configuración de la instancia está en [Instalación](../../deploy/README.md#avisos-web-push).

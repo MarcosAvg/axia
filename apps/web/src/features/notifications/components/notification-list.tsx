@@ -3,7 +3,8 @@ import { CheckIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
 import type { NotificationItem } from '../domain/notification'
-import { notificationCopy, notificationLabel } from '../domain/notification'
+import { notificationCopy } from '../domain/notification'
+import { notificationLabel } from '../domain/notification-label'
 import { notificationMessages } from '../i18n'
 
 function NotificationBody({ item }: { item: NotificationItem }) {

@@ -80,6 +80,7 @@ async function listNotifications(
   db: Database,
   actor: Actor,
   query: z.infer<typeof listQuerySchema>,
+  notificationId?: string,
 ) {
   const unread = query.unread === 'true'
   const result = await db.execute(sql`
@@ -120,6 +121,7 @@ async function listNotifications(
     end
     where n.recipient_user_id = ${actor.id}
       and ${unread ? sql`n.read_at is null` : sql`true`}
+      and ${notificationId ? sql`n.id = ${notificationId}` : sql`true`}
       and ${scope(actor)}
     order by n.created_at desc, n.id
     limit ${query.limit}
@@ -160,6 +162,24 @@ function registerListRoutes(
     async (request) => ({
       count: await unreadCount(db, currentActor(request)),
     }),
+  )
+
+  app.get(
+    '/api/notifications/:id',
+    { preHandler: canView },
+    async (request) => {
+      const { id } = idParamsSchema.parse(request.params)
+      const [item] = await listNotifications(
+        db,
+        currentActor(request),
+        { unread: 'false', limit: 1 },
+        id,
+      )
+      if (!item) {
+        throw new AppError(404, 'not_found', 'Notificación no encontrada')
+      }
+      return item
+    },
   )
 }
 

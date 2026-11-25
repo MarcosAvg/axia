@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- La notificación del sistema muestra el folio y el detalle del aviso. El service worker lo
+  consulta con la sesión del dispositivo; si no puede, muestra el tipo de evento.
+
 ## [0.38.1] - 2026-11-25
 
 - Publicación estable de los avisos push individuales de v0.38.0 con su paquete de instalación.

@@ -2,8 +2,6 @@
   "$schema": "https://knip.dev/schemas/knip-schema.json",
   "workspaces": {
     "apps/web": {
-      // Workbox carga este script mediante importScripts en el worker generado.
-      "entry": ["public/push-worker.js"],
       "ignore": [
         // Componentes de shadcn/ui: el CLI los regenera con `shadcn add`.
         "src/components/ui/**"

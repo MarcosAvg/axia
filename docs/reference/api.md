@@ -198,6 +198,7 @@ exige.
 | `GET` | `/api/events` | SSE de eventos |
 | `GET` | `/api/events/changes` | Eventos perdidos desde `since` |
 | `GET` | `/api/notifications` | Bandeja |
+| `GET` | `/api/notifications/:id` | Un aviso del actor |
 | `GET` | `/api/notifications/unread-count` | No leídas |
 | `POST` | `/api/notifications/:id/read` | Marcar una |
 | `POST` | `/api/notifications/read-all` | Marcar todas |
@@ -208,7 +209,9 @@ exige.
 `GET /api/notifications` devuelve, por aviso, `ticketId`, `ticketFolio`, `type`, `payload`, `readAt`,
 `createdAt`, `actorName`, `reasonName` y `context` (`teamName`, `buildingName`, `categoryName`,
 `priorityName`, `duplicateFolio`, `derivedFolio`, `fromPriorityName`, `toPriorityName`). El cliente
-compone el texto legible; el servidor no envía el aviso al actor de la acción.
+compone el texto legible; el servidor no envía el aviso al actor de la acción. `GET
+/api/notifications/:id` devuelve ese mismo objeto para el aviso y el actor, o `404` si no le
+pertenece o queda fuera de su alcance; el service worker lo usa para el detalle del aviso push.
 
 Las reglas cubren oferta, toma, asignación y reasignación de técnico, reasignación de supervisor,
 apoyo auxiliar, recaptura, prioridad, atendido pendiente de validación, validación, reclamación

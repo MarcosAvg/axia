@@ -1,9 +1,10 @@
 import type { NotificationItem } from './notification'
 import {
   notificationCopy,
-  notificationLabel,
+  pushNotificationCopy,
   unreadBadge,
 } from './notification'
+import { notificationLabel } from './notification-label'
 
 const base: NotificationItem = {
   id: 'n1',
@@ -157,5 +158,33 @@ describe('notificationCopy fallback', () => {
     )
     expect(copy.title).toBe('evento_nuevo')
     expect(copy.detail).toBe('Detalle libre')
+  })
+})
+
+describe('pushNotificationCopy', () => {
+  it('usa el título del aviso y antepone el folio al detalle', () => {
+    expect(
+      pushNotificationCopy('assigned_technician', item({ actorName: 'Ana' })),
+    ).toEqual({
+      title: 'Te asignaron un tiquet',
+      body: 'AX-001 · Ana te lo asignó. Categoría A Edificio A1',
+    })
+  })
+
+  it('sin aviso recuperado muestra el tipo como cuerpo', () => {
+    expect(pushNotificationCopy('offered', null)).toEqual({
+      title: 'Axia',
+      body: 'Nueva oferta de tiquet',
+    })
+  })
+
+  it('sin aviso ni tipo conocido muestra un respaldo genérico', () => {
+    expect(pushNotificationCopy(null, null)).toEqual({
+      title: 'Axia',
+      body: 'Tienes una nueva notificación en Axia.',
+    })
+    expect(pushNotificationCopy('evento_nuevo', null).body).toBe(
+      'Tienes una nueva notificación en Axia.',
+    )
   })
 })

@@ -33,7 +33,9 @@ decisiones técnicas, en las [ADR](../decisions/README.md).
   automáticamente.
 - El escalamiento automático y el correo siguen pendientes. Web Push requiere HTTPS, salida al
   servicio push del navegador y permiso en cada dispositivo. En iPhone y iPad requiere abrir
-  Axia desde la pantalla de inicio. La bandeja conserva el detalle de todos los avisos.
+  Axia desde la pantalla de inicio. La bandeja conserva el detalle de todos los avisos. El detalle
+  en la notificación del sistema se consulta con la sesión del dispositivo: si venció o no hay red,
+  el aviso muestra solo el tipo de evento.
 - La interfaz calcula los botones con el permiso; el servidor aplica además ámbito, participación y
   ventana de reclamación. Por eso puede mostrar una acción que luego rechaza.
 - La recaptura se limita a los estados registrado, con supervisor y asignado, y no exige motivo.

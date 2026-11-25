@@ -1,4 +1,3 @@
-import { eventLabels } from '@/features/tickets'
 import { notificationTitles } from './notification-titles'
 
 interface NotificationContext {
@@ -23,11 +22,6 @@ export interface NotificationItem {
   actorName: string | null
   reasonName: string | null
   context: NotificationContext
-}
-
-/** Etiqueta legible del evento, con el identificador como respaldo. */
-export function notificationLabel(type: string): string {
-  return (eventLabels as Record<string, string>)[type] ?? type
 }
 
 /** Número compacto para la campana. */
@@ -249,7 +243,29 @@ export function notificationCopy(item: NotificationItem): {
   detail: string | null
 } {
   return {
-    title: notificationTitles[item.type] ?? notificationLabel(item.type),
+    title: notificationTitles[item.type] ?? item.type,
     detail: detailBuilders[item.type]?.(item) ?? defaultDetail(item),
   }
+}
+
+/** Texto de la notificación del sistema; el folio antecede al detalle. */
+export function pushNotificationCopy(
+  type: string | null,
+  item: NotificationItem | null,
+): { title: string; body: string } {
+  if (!item) {
+    const label =
+      type && Object.hasOwn(notificationTitles, type)
+        ? notificationTitles[type]
+        : null
+    return label
+      ? { title: 'Axia', body: label }
+      : { title: 'Axia', body: 'Tienes una nueva notificación en Axia.' }
+  }
+
+  const copy = notificationCopy(item)
+  const parts = [item.ticketFolio, copy.detail].filter((part): part is string =>
+    Boolean(part),
+  )
+  return { title: copy.title, body: parts.join(' · ') || copy.title }
 }
