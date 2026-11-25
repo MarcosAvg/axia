@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Cambiado
+
+- Los avisos push muestran qué ocurrió y se conservan por separado. Los folios, nombres y
+  detalles del tiquet se consultan dentro de Axia.
+
 ## [0.37.1] - 2026-11-25
 
 ### Corregido

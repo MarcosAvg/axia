@@ -75,7 +75,8 @@ invitación. El permiso se concede por dispositivo. En iPhone y iPad, abrir Axia
 acceso añadido a la pantalla de inicio. Si Axia ofrece **Actualizar**, aplicar la actualización
 para que la PWA pueda mostrar los avisos del sistema.
 
-La notificación del sistema muestra un mensaje genérico. Al pulsarla se abre la bandeja, donde
+Cada aviso del sistema muestra qué ocurrió, por ejemplo «Te asignaron un tiquet». La pantalla
+bloqueada no muestra folios, nombres ni detalles. Al pulsar un aviso se abre la bandeja, donde
 se aplican los permisos de la cuenta. La bandeja sigue disponible sin permiso de notificaciones.
 Los solicitantes sin cuenta reciben el seguimiento por el medio que use su organización.
 

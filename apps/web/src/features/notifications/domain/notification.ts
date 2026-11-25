@@ -1,4 +1,5 @@
 import { eventLabels } from '@/features/tickets'
+import { notificationTitles } from './notification-titles'
 
 interface NotificationContext {
   teamName: string | null
@@ -32,29 +33,6 @@ export function notificationLabel(type: string): string {
 /** Número compacto para la campana. */
 export function unreadBadge(count: number): string {
   return count > 9 ? '9+' : String(count)
-}
-
-const titles: Record<string, string> = {
-  offered: 'Nueva oferta de tiquet',
-  taken: 'Tomaron tu tiquet',
-  assigned_technician: 'Te asignaron un tiquet',
-  reassigned_supervisor: 'Te reasignaron un tiquet',
-  reassigned_technician: 'Te reasignaron un tiquet',
-  auxiliary_added: 'Te agregaron como apoyo',
-  capture_recaptured: 'Cambiaron los datos del tiquet',
-  attended: 'Atendido, pendiente de validación',
-  validated: 'Validación registrada',
-  claim_opened: 'Reclamación abierta',
-  claim_resolved: 'Reclamación resuelta',
-  reopened: 'Tiquet reabierto',
-  rejected: 'Tiquet rechazado',
-  cancelled: 'Tiquet cancelado',
-  duplicate_marked: 'Tiquet marcado como duplicado',
-  reactivated: 'Tiquet reactivado',
-  priority_changed: 'Prioridad ajustada',
-  time_alert: 'Hora pendiente de corrección',
-  unrouted: 'Tiquet sin supervisores',
-  rated: 'Calificación recibida',
 }
 
 const recaptureFields: Record<string, string> = {
@@ -271,7 +249,7 @@ export function notificationCopy(item: NotificationItem): {
   detail: string | null
 } {
   return {
-    title: titles[item.type] ?? notificationLabel(item.type),
+    title: notificationTitles[item.type] ?? notificationLabel(item.type),
     detail: detailBuilders[item.type]?.(item) ?? defaultDetail(item),
   }
 }

@@ -3,8 +3,10 @@ import babel from '@rolldown/plugin-babel'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
+import { notificationTitles } from './src/features/notifications/domain/notification-titles.ts'
 
 // El plugin de rutas debe ir antes que el de React.
 // Ver: https://tanstack.com/router/latest/docs/framework/react/installation/with-vite
@@ -17,6 +19,16 @@ const pluginsBeforeCompiler = [
 // la persona la confirma, nunca a mitad de un trabajo (sección 9).
 const pluginsAfterCompiler = [
   tailwindcss(),
+  {
+    name: 'axia-push-titles',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'push-titles.js',
+        source: `self.axiaPushTitles = ${JSON.stringify(notificationTitles)};\n`,
+      })
+    },
+  } satisfies Plugin,
   VitePWA({
     registerType: 'prompt',
     includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
@@ -58,7 +70,7 @@ const pluginsAfterCompiler = [
       // La primera instalación debe controlar la pestaña abierta para servir
       // rutas diferidas sin conexión. Las actualizaciones siguen bajo confirmación.
       clientsClaim: true,
-      importScripts: ['push-worker.js'],
+      importScripts: ['push-titles.js', 'push-worker.js'],
       cleanupOutdatedCaches: true,
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2}'],
       navigateFallback: '/index.html',

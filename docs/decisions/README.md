@@ -40,6 +40,7 @@ Este índice conserva las decisiones de consolidación que justifican sus límit
 | [0130](0130-recuperacion-cola-offline.md) | Recuperación de la cola offline |
 | [0131](0131-renovacion-pwa.md) | Activación y renovación de la PWA |
 | [0132](0132-web-push.md) | Entrega de avisos por Web Push |
+| [0133](0133-contenido-web-push.md) | Contenido de los avisos Web Push |
 
 Los textos originales de 0001–0098 están en [Git](../history/README.md); sus números no se
 reutilizan. Las referencias actuales incorporan sus criterios conservados y sustituyen detalles

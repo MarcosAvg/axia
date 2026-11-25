@@ -1,4 +1,4 @@
-import { generateKeyPairSync } from 'node:crypto'
+import { createECDH, generateKeyPairSync } from 'node:crypto'
 
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it, vi } from 'vitest'
@@ -15,7 +15,10 @@ let context: TicketHttpContext
 const endpoint = 'https://fcm.googleapis.com/fcm/send/axia-test'
 const subscription = {
   endpoint,
-  keys: { p256dh: 'A'.repeat(87), auth: 'A'.repeat(22) },
+  keys: {
+    p256dh: createECDH('prime256v1').generateKeys().toString('base64url'),
+    auth: 'A'.repeat(22),
+  },
 }
 const origin = 'http://localhost'
 

@@ -10,6 +10,10 @@ type Delivery = {
   id: string
   subscription_id: string
   endpoint: string
+  p256dh: string
+  auth: string
+  notification_id: string
+  notification_type: string
   recipient_user_id: string
   subscription_user_id: string
   ticket_id: string | null
@@ -51,7 +55,8 @@ function deliveryStatus(code: number | null, attempts: number) {
 async function deliverOne(db: Database, vapid: Vapid) {
   return db.transaction(async (tx) => {
     const result = await tx.execute<Delivery>(sql`
-      select d.id, d.attempts, p.id as subscription_id, p.endpoint,
+      select d.id, d.attempts, p.id as subscription_id, p.endpoint, p.p256dh, p.auth,
+             n.id as notification_id, n.type as notification_type,
              p.user_id as subscription_user_id, n.recipient_user_id, n.ticket_id,
              coalesce(s.revoked_at is null and s.expires_at > now() and s.idle_expires_at > now()
                and s.user_id = p.user_id, false) as active_session,
@@ -69,7 +74,10 @@ async function deliverOne(db: Database, vapid: Vapid) {
     if (!delivery) return false
 
     const code = (await canDeliver(tx, delivery))
-      ? await sendWebPush(vapid, delivery.endpoint).catch(() => 503)
+      ? await sendWebPush(vapid, delivery, {
+          id: delivery.notification_id,
+          type: delivery.notification_type,
+        }).catch(() => 503)
       : null
     if (code === 404 || code === 410) {
       await tx.execute(sql`delete from public.push_subscriptions

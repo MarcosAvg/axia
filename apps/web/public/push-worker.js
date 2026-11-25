@@ -3,12 +3,31 @@ self.addEventListener('message', (event) => {
   if (event.data === 'AXIA_PUSH_READY') event.ports[0]?.postMessage(true)
 })
 
+function noticeFromPush(data) {
+  try {
+    return data?.json() ?? {}
+  } catch {
+    return {}
+  }
+}
+
 self.addEventListener('push', (event) => {
+  const notice = noticeFromPush(event.data)
+  const titles = self.axiaPushTitles
+  const body =
+    typeof notice?.type === 'string' && Object.hasOwn(titles, notice.type)
+      ? titles[notice.type]
+      : 'Tienes una nueva notificación en Axia.'
+  const tag =
+    typeof notice?.id === 'string' && /^[a-f0-9-]{36}$/i.test(notice.id)
+      ? `axia-aviso-${notice.id}`
+      : 'axia-avisos'
+
   event.waitUntil(
     self.registration.showNotification('Axia', {
-      body: 'Tienes una nueva notificación en Axia.',
+      body,
       icon: '/pwa-192.png',
-      tag: 'axia-avisos',
+      tag,
     }),
   )
 })

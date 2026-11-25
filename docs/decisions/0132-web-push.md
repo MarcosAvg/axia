@@ -2,7 +2,8 @@
 
 **Fecha:** 2026-11-24
 
-**Estado:** aceptada
+**Estado:** aceptada. El formato y el agrupamiento del aviso cambiaron en
+[0133](0133-contenido-web-push.md).
 
 Cada aviso nuevo para una cuenta encola una entrega por suscripción en PostgreSQL en la misma
 transacción. Se reutilizan las tablas `push_subscriptions` y `notification_deliveries`. El servidor

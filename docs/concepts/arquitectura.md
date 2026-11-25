@@ -132,7 +132,7 @@ stream envía heartbeat y desactiva el buffering del proxy. Logout, revocación,
 y vencimiento cierran las conexiones afectadas; al reconectar se carga el actor vigente.
 La bandeja contiene avisos del actor sobre tiquets visibles. Para Web Push, PostgreSQL encola
 las entregas y Fastify valida sesión y alcance antes de enviarlas. El navegador muestra un
-mensaje genérico y abre la bandeja. [Decisión de Web Push](../decisions/0132-web-push.md)
+aviso por tipo de evento y abre la bandeja. [Contenido de Web Push](../decisions/0133-contenido-web-push.md)
 
 ## Trabajo sin conexión
 
