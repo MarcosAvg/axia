@@ -9,6 +9,7 @@ const mock = vi.hoisted(() => ({
 vi.mock('virtual:pwa-register/react', () => ({ useRegisterSW: mock.register }))
 
 type RegistrationOptions = {
+  onNeedReload: () => void
   onRegisteredSW: (url: string, registration: ServiceWorkerRegistration) => void
 }
 
@@ -83,4 +84,19 @@ it('muestra la espera y permite reintentar si el worker no toma el control', asy
   } finally {
     vi.useRealTimers()
   }
+})
+
+it('shows the update when the registered worker enters waiting later', () => {
+  const options = renderPrompt()
+  const registration: { waiting: object | null } = { waiting: null }
+  act(() =>
+    options.onRegisteredSW('/sw.js', registration as ServiceWorkerRegistration),
+  )
+  expect(screen.queryByRole('button', { name: 'Actualizar' })).toBeNull()
+
+  act(() => {
+    registration.waiting = {}
+    options.onNeedReload()
+  })
+  expect(screen.getByRole('button', { name: 'Actualizar' })).toBeVisible()
 })

@@ -85,11 +85,34 @@ async function initializePush(
   await syncSubscription(publicKey, signal)
 }
 
+function workerHandlesPush(worker: ServiceWorker) {
+  return new Promise<boolean>((resolve) => {
+    const { port1, port2 } = new MessageChannel()
+    const finish = (supported: boolean) => {
+      clearTimeout(timer)
+      port1.close()
+      resolve(supported)
+    }
+    const timer = setTimeout(() => finish(false), 1500)
+    port1.onmessage = (event) => finish(event.data === true)
+    try {
+      worker.postMessage('AXIA_PUSH_READY', [port2])
+    } catch {
+      port2.close()
+      finish(false)
+    }
+  })
+}
+
 async function syncSubscription(publicKey: string, signal: AbortSignal) {
   const registration = await navigator.serviceWorker.ready
-  if (signal.aborted) return
+  const worker = registration.active
+  if (signal.aborted || !worker || !(await workerHandlesPush(worker))) return
+  if (signal.aborted || registration.active !== worker) return
   const subscription = await subscribe(registration, publicKey)
-  if (!signal.aborted) await registerPushSubscription(subscription, signal)
+  if (!signal.aborted && registration.active === worker) {
+    await registerPushSubscription(subscription, signal)
+  }
 }
 
 function usePushInvite(eligible: boolean, userId?: string) {
@@ -107,6 +130,7 @@ function usePushInvite(eligible: boolean, userId?: string) {
       !('serviceWorker' in navigator)
     )
       return
+    const workers = navigator.serviceWorker
     const controller = new AbortController()
     const start = () =>
       void initializePush(controller.signal, setInvite).catch(() => {
@@ -114,9 +138,11 @@ function usePushInvite(eligible: boolean, userId?: string) {
       })
     start()
     window.addEventListener('online', start)
+    workers.addEventListener('controllerchange', start)
     return () => {
       controller.abort()
       window.removeEventListener('online', start)
+      workers.removeEventListener('controllerchange', start)
     }
   }, [dismissed, eligible, permission, userId])
 

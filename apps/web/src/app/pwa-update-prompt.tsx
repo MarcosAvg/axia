@@ -15,6 +15,7 @@ const ACTIVATION_TIMEOUT_MS = 15_000
 
 function usePwaUpdate() {
   const [registration, setRegistration] = useState<ServiceWorkerRegistration>()
+  const [waiting, setWaiting] = useState(false)
   const [activated, setActivated] = useState(false)
   const [phase, setPhase] = useState<'idle' | 'applying' | 'failed'>('idle')
   const requested = useRef<symbol | null>(null)
@@ -24,7 +25,7 @@ function usePwaUpdate() {
   } = useRegisterSW({
     onRegisteredSW: (_url, current) => setRegistration(current),
     // Workbox detecta la descarga. El cambio de control se observa en cada pestaña.
-    onNeedReload: () => undefined,
+    onNeedReload: () => setWaiting(true),
   })
 
   useEffect(() => {
@@ -34,6 +35,7 @@ function usePwaUpdate() {
     const onControllerChange = () => {
       const current = workers.controller
       if (current && previous !== current) {
+        setWaiting(false)
         if (requested.current) window.location.reload()
         else if (previous) setActivated(true)
       }
@@ -53,7 +55,7 @@ function usePwaUpdate() {
     return () => window.clearTimeout(timer)
   }, [phase])
 
-  const available = activated || Boolean(registration?.waiting)
+  const available = activated || waiting || Boolean(registration?.waiting)
 
   function applyUpdate() {
     if (registration?.waiting) {

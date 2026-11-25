@@ -1,4 +1,8 @@
 /* global self */
+self.addEventListener('message', (event) => {
+  if (event.data === 'AXIA_PUSH_READY') event.ports[0]?.postMessage(true)
+})
+
 self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification('Axia', {

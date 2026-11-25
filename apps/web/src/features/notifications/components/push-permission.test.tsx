@@ -19,21 +19,27 @@ vi.mock('../api/notifications-api', () => ({
 
 const publicKey = 'BA'
 const subscription = { endpoint: 'https://web.push.apple.com/example' }
+const workers = new EventTarget()
+const subscribe = vi.fn(async () => subscription)
+const supportingWorker = {
+  postMessage: (_message: unknown, [port]: MessagePort[]) =>
+    port?.postMessage(true),
+}
+const registration = {
+  active: supportingWorker,
+  pushManager: { getSubscription: async () => null, subscribe },
+}
 
 beforeEach(() => {
+  registration.active = supportingWorker
   vi.stubGlobal('isSecureContext', true)
   vi.stubGlobal('PushManager', function () {})
   vi.stubGlobal('matchMedia', () => ({ matches: true }))
   vi.stubGlobal('navigator', {
     userAgent: 'Desktop',
-    serviceWorker: {
-      ready: Promise.resolve({
-        pushManager: {
-          getSubscription: async () => null,
-          subscribe: async () => subscription,
-        },
-      }),
-    },
+    serviceWorker: Object.assign(workers, {
+      ready: Promise.resolve(registration),
+    }),
   })
   vi.mocked(getPushConfig).mockResolvedValue({ publicKey })
 })
@@ -88,4 +94,19 @@ it('registers a device with a previously granted permission on open', async () =
     ),
   )
   expect(requestPermission).not.toHaveBeenCalled()
+})
+
+it('waits for the worker that handles push before registering the device', async () => {
+  const legacy = { postMessage: vi.fn() }
+  registration.active = legacy
+  vi.stubGlobal('Notification', { permission: 'granted' })
+
+  render(<PushPermission />)
+  await waitFor(() => expect(legacy.postMessage).toHaveBeenCalled())
+  expect(subscribe).not.toHaveBeenCalled()
+  expect(registerPushSubscription).not.toHaveBeenCalled()
+
+  registration.active = supportingWorker
+  workers.dispatchEvent(new Event('controllerchange'))
+  await waitFor(() => expect(registerPushSubscription).toHaveBeenCalledOnce())
 })

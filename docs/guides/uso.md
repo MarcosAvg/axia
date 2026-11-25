@@ -72,7 +72,8 @@ actualiza en tiempo real y recupera cambios al volver a tener conexión.
 Si la instancia tiene Web Push habilitado, Axia solicita permiso al abrir con sesión iniciada.
 En navegadores que requieren interacción, usar **Permitir avisos** cuando aparezca la
 invitación. El permiso se concede por dispositivo. En iPhone y iPad, abrir Axia desde el
-acceso añadido a la pantalla de inicio.
+acceso añadido a la pantalla de inicio. Si Axia ofrece **Actualizar**, aplicar la actualización
+para que la PWA pueda mostrar los avisos del sistema.
 
 La notificación del sistema muestra un mensaje genérico. Al pulsarla se abre la bandeja, donde
 se aplican los permisos de la cuenta. La bandeja sigue disponible sin permiso de notificaciones.

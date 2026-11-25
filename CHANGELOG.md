@@ -5,6 +5,11 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+### Corregido
+
+- Axia ofrece aplicar una actualización de la PWA cuando esta termina de descargarse. El
+  registro para avisos push espera a que esté activa una versión capaz de mostrarlos.
+
 ## [0.37.0] - 2026-11-24
 
 ### Agregado
