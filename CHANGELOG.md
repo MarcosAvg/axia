@@ -5,6 +5,10 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.38.1] - 2026-11-25
+
+- Publicación estable de los avisos push individuales de v0.38.0 con su paquete de instalación.
+
 ## [0.38.0] - 2026-11-25
 
 ### Cambiado
