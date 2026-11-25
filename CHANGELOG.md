@@ -5,6 +5,8 @@ Todos los cambios relevantes se documentan en este archivo. El formato sigue
 
 ## [Unreleased]
 
+## [0.37.1] - 2026-11-25
+
 ### Corregido
 
 - Axia ofrece aplicar una actualización de la PWA cuando esta termina de descargarse. El
